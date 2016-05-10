@@ -5,8 +5,9 @@
  */
 package org.createnet.raptor.db;
 
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import org.createnet.raptor.db.config.StorageConfiguration;
+
+
 
 /**
  *
@@ -30,13 +31,13 @@ public interface Storage {
     public void disconnect();
     public void connect();
     
-    public void set(String id, String data, int ttlSeconds);
-    public String get(String id);
-    public void delete(String id);
+    public void set(String id, String data, int ttlSeconds) throws StorageException;
+    public String get(String id) throws StorageException;
+    public void delete(String id) throws StorageException;
 
   }
 
-  public void initialize(Map<String, Object> configuration);  
+  public void initialize(StorageConfiguration configuration);  
   public void setup(boolean forceSetup);  
   public void connect();
   public void disconnect();

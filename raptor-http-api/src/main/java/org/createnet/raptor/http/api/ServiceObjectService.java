@@ -15,10 +15,19 @@
  */
 package org.createnet.raptor.http.api;
 
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.createnet.raptor.http.service.StorageService;
+import org.createnet.raptor.models.objects.RaptorComponent;
+import org.createnet.raptor.models.objects.ServiceObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.createnet.raptor.db.Storage;
 
 /**
  *
@@ -27,12 +36,26 @@ import javax.ws.rs.core.MediaType;
 @Path("/")
 public class ServiceObjectService {
   
-    public static final String CLICHED_MESSAGE = "Hello World!";
+  final private Logger logger = LoggerFactory.getLogger(ServiceObjectService.class);
+  
+  @Inject StorageService storage;
 
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String getHello() {
-        return CLICHED_MESSAGE;
-    }
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  public ServiceObject loadObjects() {
+    ServiceObject obj = new ServiceObject();
+    return obj;
+  }
+
+  @GET @Path("{id}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public ServiceObject loadObject(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException {
+    
+    logger.debug("Load object {}", id);
+    
+    ServiceObject obj = storage.getObject(id);
+    
+    return obj;
+  }
 
 }

@@ -11,7 +11,12 @@
     <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 
-  <dependencies>
+  <dependencies>   
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+    </dependency>    
     <dependency>
       <groupId>org.glassfish.jersey.containers</groupId>
       <artifactId>jersey-container-jdk-http</artifactId>
@@ -38,6 +43,26 @@
       <artifactId>jersey-all</artifactId>
       <version>2.22.2</version>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>raptor-models</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>raptor-db</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>raptor-auth</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>2.5.4</version>
+    </dependency>     
   </dependencies>
 
   <build>

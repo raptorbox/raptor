@@ -10,7 +10,7 @@
         <module>../raptor-dispatcher</module>
         <module>../raptor-models</module>
         <module>../raptor-search</module>
-        <module>../raptor-configmanager</module>
+        <module>../raptor-http-api</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

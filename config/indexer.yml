@@ -1,0 +1,9 @@
+type: elasticsearch
+elasticsearch:
+  type: transport
+  clientConfig:
+    cluster.name: raptor
+  transport:
+    server: 127.0.0.1
+    port: 9300
+  indices_source: /etc/raptor/indices.json

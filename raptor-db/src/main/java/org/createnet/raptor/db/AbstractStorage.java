@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import org.createnet.raptor.db.config.StorageConfiguration;
 
 /**
  *
@@ -16,7 +17,7 @@ import java.util.UUID;
  */
 abstract public class AbstractStorage implements Storage {
   
-  protected Map<String, Object> config;
+  protected StorageConfiguration config;
   final protected Map<String, Connection> connections = new HashMap<>();
 
   static  public String generateId() {
@@ -46,23 +47,23 @@ abstract public class AbstractStorage implements Storage {
   }
 
   @Override
-  public void initialize(Map<String, Object> configuration) {
+  public void initialize(StorageConfiguration configuration) {
     this.config = configuration;
   }
   
-  protected Map<String, Object> getConfiguration() {
+  protected StorageConfiguration getConfiguration() {
     return config;
   }
 
-  public void set(String connectionId, String id, String data, int ttl) {
+  public void set(String connectionId, String id, String data, int ttl) throws StorageException {
     getConnection(connectionId).set(id, data, ttl);
   }
 
-  public String get(String connectionId, String id) {
+  public String get(String connectionId, String id) throws StorageException {
     return getConnection(connectionId).get(id);
   }
 
-  public void delete(String connectionId, String id) {
+  public void delete(String connectionId, String id) throws StorageException {
     getConnection(connectionId).delete(id);
   }  
   

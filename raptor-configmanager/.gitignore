@@ -1,7 +1,0 @@
-target/*
-.classpath
-.settings
-.project
-nb-configuration.xml
-/nbproject/
-nb*

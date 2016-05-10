@@ -1,0 +1,4 @@
+# define the type of auth: token, allow_all
+type: allow_all
+token:
+  url: http://raptorbox.eu/api/token/check

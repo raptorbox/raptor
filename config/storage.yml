@@ -1,0 +1,16 @@
+
+type: couchbase
+couchbase:
+  nodes:
+    - 127.0.0.1
+
+  username: admin
+  password: password
+
+  buckets:
+    # Configure couchbase bucket name
+    so_bucket: serviceobjects
+    updates_bucket: soupdates
+    subscriptions_bucket: subscriptions
+    actuations_bucket: actuations
+    private_bucket: privatebucket

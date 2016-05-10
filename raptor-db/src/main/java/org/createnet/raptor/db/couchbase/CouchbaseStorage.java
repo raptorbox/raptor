@@ -12,14 +12,9 @@ import com.couchbase.client.java.bucket.BucketType;
 import com.couchbase.client.java.cluster.BucketSettings;
 import com.couchbase.client.java.cluster.ClusterManager;
 import com.couchbase.client.java.cluster.DefaultBucketSettings;
-import com.couchbase.client.java.document.json.JsonObject;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import org.createnet.raptor.db.AbstractStorage;
-import org.createnet.raptor.db.Storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +41,7 @@ public class CouchbaseStorage extends AbstractStorage {
     if (cluster == null) {
       // Connect to localhost
       logger.debug("Connecting to couchbase cluster");
-      cluster = CouchbaseCluster.create((List<String>) getConfiguration().get("nodes"));
+      cluster = CouchbaseCluster.create(getConfiguration().couchbase.nodes);
     }
 
     return cluster;
@@ -57,7 +52,7 @@ public class CouchbaseStorage extends AbstractStorage {
 
     connectCluster();
 
-    Map<String, String> buckets = (Map<String, String>) getConfiguration().get("buckets");
+    Map<String, String> buckets = getConfiguration().couchbase.buckets;
 
     Iterator<Map.Entry<String, String>> it = buckets.entrySet().iterator();
     while (it.hasNext()) {
@@ -97,10 +92,10 @@ public class CouchbaseStorage extends AbstractStorage {
 
     connectCluster();
 
-    Map<String, String> buckets = (Map<String, String>) getConfiguration().get("buckets");
+    Map<String, String> buckets = getConfiguration().couchbase.buckets;
 
-    String adminUsername = (String) getConfiguration().get("username");
-    String adminPassword = (String) getConfiguration().get("password");
+    String adminUsername = getConfiguration().couchbase.username;
+    String adminPassword = getConfiguration().couchbase.password;
 
     ClusterManager clusterManager = cluster.clusterManager(adminUsername, adminPassword);
     for (Map.Entry<String, String> el : buckets.entrySet()) {
@@ -134,50 +129,5 @@ public class CouchbaseStorage extends AbstractStorage {
     logger.debug("Setup completed");
   }
 
-  public static void main(String[] argv) {
-    
-    final Logger mainLogger = LoggerFactory.getLogger("mainLogger");
-    
-    Map<String, Object> config = new HashMap<>();
-
-    config.put("username", "Administrator");
-    config.put("password", "password");
-
-    List<String> nodes = new ArrayList();
-    nodes.add("servioticy.local");
-    config.put("nodes", nodes);
-
-    Map<String, String> buckets = new HashMap<>();
-    buckets.put("so", "serviceobjects");
-    buckets.put("data", "soupdates");
-    buckets.put("subscriptions", "sosubscriptions");
-
-    config.put("buckets", buckets);
-
-    Storage storage = new CouchbaseStorage();
-
-    storage.initialize(config);
-
-    storage.setup(false);
-    storage.connect();
-
-    for(int i = 0; i < 500; i++) {
-      
-      mainLogger.debug("Inserting {}", i);
-      
-      String id = AbstractStorage.generateId();
-      JsonObject obj = JsonObject
-              .empty()
-              .put("id", id)
-              .put("name", "something")
-              .put("customFields", JsonObject.jo());
-      ;
-      
-      storage.getConnection("so").set(id, obj.toString(), 0);      
-    }
-
-    storage.disconnect();
-
-  }
 
 }

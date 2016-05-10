@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.http.api;
+package org.createnet.raptor.http;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -49,7 +49,7 @@ public class Launcher {
     
     // default to port 8080
     server = HttpServer.create(new InetSocketAddress(serviceURI.getHost(), serviceURI.getPort()), 0);
-    HttpHandler handler = RuntimeDelegate.getInstance().createEndpoint(new RaptorApplication(), HttpHandler.class);
+    HttpHandler handler = RuntimeDelegate.getInstance().createEndpoint(new ApplicationConfig(), HttpHandler.class);
     
     server.createContext(serviceURI.getPath(), handler);
     server.start();
