@@ -17,6 +17,7 @@ package org.createnet.raptor.auth.authentication;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
+import org.createnet.raptor.auth.AuthConfiguration;
 
 /**
  *
@@ -81,7 +82,7 @@ public interface Authentication {
     
   }
   
-  public void initialize(Map<String, Object> configuration);
+  public void initialize(AuthConfiguration configuration);
   public UserInfo getUser(String accessToken) throws AutenticationException;
   
 }

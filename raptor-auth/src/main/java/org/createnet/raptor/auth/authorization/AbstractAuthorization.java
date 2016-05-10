@@ -16,6 +16,7 @@
 package org.createnet.raptor.auth.authorization;
 
 import java.util.Map;
+import org.createnet.raptor.auth.AuthConfiguration;
 
 /**
  *
@@ -25,7 +26,7 @@ abstract public class AbstractAuthorization implements Authorization {
 
   protected String accessToken;
   protected String userId;
-  protected Map<String, Object> configuration;
+  protected AuthConfiguration configuration;
   
   @Override
   public String getAccessToken() {
@@ -38,7 +39,7 @@ abstract public class AbstractAuthorization implements Authorization {
   }
   
   @Override
-  public void initialize(Map<String, Object> configuration) {
+  public void initialize(AuthConfiguration configuration) {
     this.configuration = configuration;
   }
 

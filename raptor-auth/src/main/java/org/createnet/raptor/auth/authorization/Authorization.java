@@ -16,6 +16,7 @@
 package org.createnet.raptor.auth.authorization;
 
 import java.util.Map;
+import org.createnet.raptor.auth.AuthConfiguration;
 
 /**
  *
@@ -55,7 +56,7 @@ public interface Authorization {
 
   public String getUserId();
 
-  public void initialize(Map<String, Object> configuration);
+  public void initialize(AuthConfiguration configuration);
 
   public boolean isAuthorized(String id, Permission op) throws AuthorizationException;
 

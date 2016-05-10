@@ -26,9 +26,9 @@ abstract public class AbstractIndexer implements Indexer {
 
   final long defaultTimeout = 500;
   
-  protected Map<String, Object> configuration;
+  protected IndexerConfiguration configuration;
 
-  public Map<String, Object> getConfiguration() {
+  public IndexerConfiguration getConfiguration() {
     return configuration;
   }
 

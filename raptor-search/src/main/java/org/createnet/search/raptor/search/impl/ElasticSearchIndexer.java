@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import org.createnet.search.raptor.search.AbstractIndexer;
 import org.createnet.search.raptor.search.Indexer;
 import org.createnet.search.raptor.search.Indexer.IndexerException;
+import org.createnet.search.raptor.search.IndexerConfiguration;
 import org.createnet.search.raptor.search.impl.es.ElasticSearchIndexAdmin;
 import org.elasticsearch.action.bulk.BackoffPolicy;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -61,75 +62,12 @@ import org.slf4j.LoggerFactory;
  */
 public class ElasticSearchIndexer extends AbstractIndexer {
 
-  public static void main(String[] argv) throws IndexerException, IOException {
-
-    // enable ES logging
-    ESLoggerFactory.getRootLogger().setLevel("DEBUG");
-
-    final Logger mainLogger = LoggerFactory.getLogger("main");
-
-    Map<String, Object> configuration = new HashMap();
-
-    configuration.put("port", 9300);
-    configuration.put("host", "servioticy.local");
-
-    String indexFile = "indices.json";
-    String dataFile = "data.json";
-    ClassLoader classLoader = ElasticSearchIndexer.class.getClassLoader();
-
-    String filepath = classLoader.getResource(indexFile).getPath();
-    Map<String, JsonNode> indices = ElasticSearchIndexer.loadIndicesFromFile(filepath);
-
-    configuration.put("indices", indices);
-
-    Map<String, String> clientConfig = new HashMap();
-
-    clientConfig.put("cluster.name", "raptor");
-
-    configuration.put("clientConfig", clientConfig);
-
-    Indexer indexer = new ElasticSearchIndexer(configuration);
-
-    indexer.open();
-    indexer.setup(true);
-
-    String dataFilepath = classLoader.getResource(dataFile).getPath();
-    String data = new String(Files.readAllBytes(Paths.get(dataFilepath)));
-
-//    for (int i = 0; i < 100; i++) {
-//      mainLogger.debug("Push {}", i);
-//      try {
-//        UUID uuid = UUID.randomUUID();
-//        IndexRecord record = new IndexRecord("soupdates", "update", uuid.toString(), data);
-//        ops.add(new IndexOperation(IndexOperation.Type.SAVE, record));
-//        indexer.save(record);
-//      } catch (IndexerException ex) {
-//        mainLogger.error("Error indexing", ex);
-//      } finally {
-//        mainLogger.debug("Completed");
-//      }
-//    }
-
-    List<Indexer.IndexOperation> ops = new ArrayList();
-    for (int i = 0; i < 10000; i++) {
-      mainLogger.debug("Push {}", i);
-      UUID uuid = UUID.randomUUID();
-      IndexRecord record = new IndexRecord("soupdates", "update", uuid.toString(), data);
-      ops.add(new IndexOperation(IndexOperation.Type.CREATE, record));
-    }
-
-    indexer.batch(ops);
-
-//    indexer.close();
-
-  }
-
   final protected ObjectMapper mapper = new ObjectMapper();
   protected Client client;
   final protected Logger logger = LoggerFactory.getLogger(ElasticSearchIndexer.class);
   final private ElasticSearchIndexAdmin indexAdmin = new ElasticSearchIndexAdmin();
 
-  public ElasticSearchIndexer(Map<String, Object> configuration) {
+  public ElasticSearchIndexer(IndexerConfiguration configuration) {
     this.configuration = configuration;
   }
 
@@ -139,9 +77,9 @@ public class ElasticSearchIndexer extends AbstractIndexer {
    * @return
    * @throws IOException
    */
-  public static Map<String, JsonNode> loadIndicesFromFile(String file) throws IOException {
+  public static Map<String, String> loadIndicesFromFile(String file) throws IOException {
     // Load indices.json to configuration
-    Map<String, JsonNode> indices = new HashMap();
+    Map<String, String> indices = new HashMap();
 
     ObjectMapper mapper = new ObjectMapper();
     JsonNode json = mapper.readTree(Files.readAllBytes(Paths.get(file)));
@@ -149,7 +87,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
     Iterator<String> it = json.fieldNames();
     while (it.hasNext()) {
       String indexName = it.next();
-      indices.put(indexName, json.get(indexName));
+      indices.put(indexName, json.get(indexName).toString());
     }
 
     return indices;
@@ -367,15 +305,15 @@ public class ElasticSearchIndexer extends AbstractIndexer {
   @Override
   public void open() throws IndexerException {
 
-    String host = (String) configuration.get("host");
-    int port = (Integer) configuration.get("port");
+    String host = configuration.elasticsearch.transport.host;
+    int port = configuration.elasticsearch.transport.port;
 
     try {
 
       logger.debug("Connecting to ElasticSearch instance {}:{}", host, port);
 
       Settings settings = Settings.settingsBuilder()
-              .put((Map<String, String>) configuration.get("clientConfig"))
+              .put(configuration.elasticsearch.clientConfig)
               .build();
 
       TransportAddress transportAddress = new InetSocketTransportAddress(InetAddress.getByName(host), port);
@@ -401,16 +339,16 @@ public class ElasticSearchIndexer extends AbstractIndexer {
 
     logger.debug("Setup client");
 
-    Map<String, JsonNode> indices = (Map<String, JsonNode>) configuration.get("indices");
+    Map<String, String> indices = configuration.elasticsearch.indices;
 
-    for (Map.Entry<String, JsonNode> el : indices.entrySet()) {
+    for (Map.Entry<String, String> el : indices.entrySet()) {
 
       String indexName = el.getKey();
-      String indexDefinition = el.getValue().toString();
+      String indexDefinition = el.getValue();
 
       try {
 
-        boolean indexExists = indexAdmin.exists(el.getKey());
+        boolean indexExists = indexAdmin.exists(indexName);
 
         if (indexExists) {
           if (forceSetup) {
@@ -451,4 +389,75 @@ public class ElasticSearchIndexer extends AbstractIndexer {
 
   }
 
+
+  public static void main(String[] argv) throws IndexerException, IOException {
+
+    // enable ES logging
+    ESLoggerFactory.getRootLogger().setLevel("DEBUG");
+
+    final Logger mainLogger = LoggerFactory.getLogger("main");
+
+    IndexerConfiguration configuration = new IndexerConfiguration();
+    
+    configuration.type = "elasticsearch";
+    
+    configuration.elasticsearch.type = "transport";
+    
+    configuration.elasticsearch.transport.host = "127.0.0.1";
+    configuration.elasticsearch.transport.port = 9300;
+    
+    configuration.elasticsearch.indicesSource = "/etc/raptor/indices.json";
+    
+    
+//    String indexFile = "indices.json";
+    String dataFile = "data.json";
+    ClassLoader classLoader = ElasticSearchIndexer.class.getClassLoader();
+
+//    String filepath = classLoader.getResource(indexFile).getPath();
+    String filepath = configuration.elasticsearch.indicesSource;
+    Map<String, String> indices = ElasticSearchIndexer.loadIndicesFromFile(filepath);
+
+    configuration.elasticsearch.indices.putAll(indices);
+    
+    Map<String, String> clientConfig = new HashMap();
+    clientConfig.put("cluster.name", "raptor");
+
+    configuration.elasticsearch.clientConfig.putAll(clientConfig);
+            
+    Indexer indexer = new ElasticSearchIndexer(configuration);
+
+    indexer.open();
+    indexer.setup(true);
+
+    String dataFilepath = classLoader.getResource(dataFile).getPath();
+    String data = new String(Files.readAllBytes(Paths.get(dataFilepath)));
+
+//    for (int i = 0; i < 100; i++) {
+//      mainLogger.debug("Push {}", i);
+//      try {
+//        UUID uuid = UUID.randomUUID();
+//        IndexRecord record = new IndexRecord("soupdates", "update", uuid.toString(), data);
+//        ops.add(new IndexOperation(IndexOperation.Type.SAVE, record));
+//        indexer.save(record);
+//      } catch (IndexerException ex) {
+//        mainLogger.error("Error indexing", ex);
+//      } finally {
+//        mainLogger.debug("Completed");
+//      }
+//    }
+
+    List<Indexer.IndexOperation> ops = new ArrayList();
+    for (int i = 0; i < 10000; i++) {
+      mainLogger.debug("Push {}", i);
+      UUID uuid = UUID.randomUUID();
+      IndexRecord record = new IndexRecord("soupdates", "update", uuid.toString(), data);
+      ops.add(new IndexOperation(IndexOperation.Type.CREATE, record));
+    }
+
+    indexer.batch(ops);
+
+//    indexer.close();
+
+  }  
+  
 }

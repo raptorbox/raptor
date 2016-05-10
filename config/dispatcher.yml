@@ -1,6 +1,5 @@
-broker:
-  protocol: mqtt
-  username: compose
-  password: shines
-  host: 127.0.0.1
-  port: 1883
+protocol: mqtt
+username: compose
+password: shines
+host: raptor.local
+port: 1883

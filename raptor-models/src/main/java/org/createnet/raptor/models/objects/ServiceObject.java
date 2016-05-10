@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,102 +34,134 @@ import org.slf4j.LoggerFactory;
  */
 @JsonSerialize(using = ServiceObjectSerializer.class)
 @JsonDeserialize(using = ServiceObjectDeserializer.class)
-public class ServiceObject extends ServiceObjectContainer
-{
-    
-    Logger logger = LoggerFactory.getLogger(ServiceObject.class);
-    
-    @JsonBackReference
-    private boolean isNew = true;
-    
-    public String id;
-    
-    public String name;
-    public String description = "";
-    
-    public Long createdAt;
-    public Long updatedAt;
-    
-    public Map<String, Object> customFields;
-    public Map<String, String> properties;
+public class ServiceObject extends ServiceObjectContainer {
 
-    public Map<String, Stream> streams;
-    public Map<String, Subscription> subscriptions;
-    public Map<String, Action> actions;
-    
+  Logger logger = LoggerFactory.getLogger(ServiceObject.class);
 
-    public ServiceObject() {
-        initialize();
-    }
-    
-    public ServiceObject(String soid) {
-        initialize();
-        this.id = soid;
-    }
+  @JsonBackReference
+  private boolean isNew = true;
 
-    private void initialize() {
+  public String userId;
+  public String id;
 
-        this.customFields = new HashMap<>();
-        this.properties = new HashMap<>();
-        
-        this.streams = new HashMap<>();
-        this.subscriptions = new HashMap<>();
-        this.actions = new HashMap<>();
-        
-        createdAt = System.currentTimeMillis();
-        updatedAt = System.currentTimeMillis();
-        
-        addExtra("public", true);
-    }
-         
-    @Override
-    public String toString() {
-        return "ServiceObject<"+ this.id +">";
-    }
-    
-    public String getId() {
-        return id;
-    }
+  public String name;
+  public String description = "";
 
-    @Override
-    public void validate() throws ValidationException {
-        
-        if(this.name == null)
-            throw new ValidationException("name field missing");
-        
-        if(!this.isNew())
-            throw new ValidationException("id field missing");
-    }
+  public Long createdAt;
+  public Long updatedAt;
 
-    @Override
-    public void parse(String json) throws ParserException {
-        
-        ServiceObject serviceObject;
-        try {
-            serviceObject = mapper.readValue(json, ServiceObject.class);
-        } catch (IOException ex) {
-            throw new ParserException(ex);
-        }
-        
-        id = serviceObject.id;
-        name = serviceObject.name;
-        description = serviceObject.description;
-        customFields = serviceObject.customFields;
-        properties = serviceObject.properties;
-        createdAt = serviceObject.createdAt;
-        updatedAt = serviceObject.updatedAt;
-        streams = serviceObject.streams;
-        subscriptions = serviceObject.subscriptions;
-        actions = serviceObject.actions;
-        
-        isNew = (id == null);
-        
-        serviceObject = null;
-                
+  public Map<String, Object> customFields;
+  public Map<String, String> properties;
+
+  public Map<String, Stream> streams;
+  public Map<String, Subscription> subscriptions;
+  public Map<String, Action> actions;
+
+  public static String generateUUID() {
+    return UUID.randomUUID().toString();
+  }
+
+  public ServiceObject() {
+    initialize();
+  }
+
+  public ServiceObject(String soid) {
+    initialize();
+    this.id = soid;
+  }
+
+  private void initialize() {
+
+    customFields = new HashMap<>();
+    properties = new HashMap<>();
+
+    streams = new HashMap<>();
+    subscriptions = new HashMap<>();
+    actions = new HashMap<>();
+
+    createdAt = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+    updatedAt = createdAt;
+
+    addExtra("public", true);
+  }
+
+  @Override
+  public String toString() {
+    return "ServiceObject<" + this.id + ">";
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public String getUserId() {
+    return userId;
+  }
+  
+  public void setUpdateTime() {
+    updatedAt = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+  }
+  
+  @Override
+  public void validate() throws ValidationException {
+
+    if (this.name == null) {
+      throw new ValidationException("name field missing");
     }
 
-    public boolean isNew() {
-        return isNew;
+    if (!this.isNew() && this.id == null) {
+      throw new ValidationException("id field missing");
     }
-    
+
+    if (!this.streams.isEmpty()) {
+      for (Map.Entry<String, Stream> item : this.streams.entrySet()) {
+        item.getValue().validate();
+      }
+    }
+
+    if (!this.actions.isEmpty()) {
+      for (Map.Entry<String, Action> item : this.actions.entrySet()) {
+        item.getValue().validate();
+      }
+    }
+
+    if (!this.subscriptions.isEmpty()) {
+      for (Map.Entry<String, Subscription> item : this.subscriptions.entrySet()) {
+        item.getValue().validate();
+      }
+    }
+
+  }
+
+  @Override
+  public void parse(String json) throws ParserException {
+
+    ServiceObject serviceObject;
+    try {
+      serviceObject = mapper.readValue(json, ServiceObject.class);
+    } catch (IOException ex) {
+      throw new ParserException(ex);
+    }
+
+    id = serviceObject.id;
+    name = serviceObject.name;
+    description = serviceObject.description;
+    customFields = serviceObject.customFields;
+    properties = serviceObject.properties;
+    createdAt = serviceObject.createdAt;
+    updatedAt = serviceObject.updatedAt;
+    streams = serviceObject.streams;
+    subscriptions = serviceObject.subscriptions;
+    actions = serviceObject.actions;
+
+    isNew = (id == null);
+
+    serviceObject = null;
+
+  }
+
+  public boolean isNew() {
+    return isNew;
+  }
+
 }

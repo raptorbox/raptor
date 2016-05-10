@@ -13,24 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.authentication;
+package org.createnet.search.raptor.search;
 
+import java.util.HashMap;
 import java.util.Map;
-import org.createnet.raptor.auth.AuthConfiguration;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-abstract public class AbstractAuthentication implements Authentication {
+public class IndexerConfiguration {
   
-  protected AuthConfiguration configuration;
+  public String type;
+  public ElasticSearch elasticsearch;
+  
+  public class ElasticSearch {
 
-  @Override
-  public void initialize(AuthConfiguration configuration) {
-    this.configuration = configuration;
+    public ElasticSearch() {
+      transport = new Transport();
+    }
+    
+    public String type;
+    public Map<String, String> clientConfig = new HashMap();
+    public Transport transport;
+    public String indicesSource;
+    public Map<String, String> indices = new HashMap();
+    
+    public class Transport {
+      public String host;
+      public int port;
+    }
+    
   }
-  
-  
   
 }

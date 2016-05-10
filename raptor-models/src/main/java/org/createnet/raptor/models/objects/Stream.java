@@ -141,7 +141,17 @@ public class Stream extends StreamContainer {
     
     @Override
     public void validate() throws ValidationException {
-        throw new ValidationException("Not implemented yet."); 
+        if(this.name == null || this.name.isEmpty()) {
+          throw new ValidationException("Stream name is required");
+        }
+        if(this.channels.isEmpty()) {
+          throw new ValidationException("Stream must have at least a channel");
+        }
+        else {
+          for(Map.Entry<String, Channel> item : this.channels.entrySet()) {
+            item.getValue().validate();
+          }
+        }
     }
     
 }

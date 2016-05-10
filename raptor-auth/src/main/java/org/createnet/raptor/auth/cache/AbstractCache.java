@@ -16,6 +16,7 @@
 package org.createnet.raptor.auth.cache;
 
 import java.util.Map;
+import org.createnet.raptor.auth.AuthConfiguration;
 
 /**
  *
@@ -23,7 +24,7 @@ import java.util.Map;
  */
 abstract public class AbstractCache implements AuthCache {
 
-  private Map<String, Object> configuration;
+  private AuthConfiguration configuration;
 
   @Override
   public void clear() {
@@ -34,7 +35,7 @@ abstract public class AbstractCache implements AuthCache {
   }
 
   @Override
-  public void initialize(Map<String, Object> configuration) {
+  public void initialize(AuthConfiguration configuration) {
     this.configuration = configuration;
   }
   

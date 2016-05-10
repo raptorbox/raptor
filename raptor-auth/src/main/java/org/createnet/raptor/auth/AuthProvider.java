@@ -15,9 +15,6 @@
  */
 package org.createnet.raptor.auth;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authentication.impl.AllowAllAuthentication;
 import org.createnet.raptor.auth.authentication.impl.TokenAuthentication;
@@ -34,9 +31,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class RaptorAuth implements Authorization, Authentication {
+public class AuthProvider implements Authorization, Authentication {
 
-  protected final Logger logger = LoggerFactory.getLogger(RaptorAuth.class);
+  protected final Logger logger = LoggerFactory.getLogger(AuthProvider.class);
 
   protected String accessToken;
   protected String userId;
@@ -46,14 +43,14 @@ public class RaptorAuth implements Authorization, Authentication {
 
   protected AuthCache cache;
 
-  protected Map<String, Object> configuration;
+  protected AuthConfiguration configuration;
 
   @Override
-  public void initialize(Map<String, Object> configuration) {
+  public void initialize(AuthConfiguration configuration) {
 
     this.configuration = configuration;
-
-    String cacheType = (String) configuration.getOrDefault("cache_type", "no_cache");
+    
+    String cacheType = (String) configuration.cache;
     switch (cacheType) {
 //      case "redis":
 //        break;
@@ -66,7 +63,7 @@ public class RaptorAuth implements Authorization, Authentication {
         break;
     }
 
-    String authType = (String) configuration.getOrDefault("type", "allow_all");
+    String authType = (String) configuration.type;
     switch (authType) {
       case "token":
         authenticationInstance = new TokenAuthentication();
@@ -89,10 +86,13 @@ public class RaptorAuth implements Authorization, Authentication {
 
   @Override
   public boolean isAuthorized(String id, Permission op) throws AuthorizationException {
+    
+    if(id == null) id = "x";
+    
     try {
       
-      try {
-        
+      try {       
+                
         Boolean cachedValue = cache.get(getUserId(), id, op);
         if(cachedValue != null) {
           logger.debug("Reusing permission cache for {}.{}.{}", getUserId(), id, op.name());
@@ -164,13 +164,12 @@ public class RaptorAuth implements Authorization, Authentication {
   
   public static void main(String[] argv) throws AuthorizationException, AutenticationException {
     
-    Map<String, Object> config = new HashMap();
+    AuthConfiguration config = new AuthConfiguration();
+    config.type = "token";
+    config.cache = "memory";
+    config.token.url = "http://raptorbox.eu/api/token/check";
     
-    config.put("type", "token");
-    config.put("token_url", "http://raptorbox.eu/api/token/check");
-    config.put("cache_type", "memory");
-    
-    RaptorAuth auth = new RaptorAuth();
+    AuthProvider auth = new AuthProvider();
     auth.initialize(config);
     
     UserInfo user = auth.getUser("Bearer TEST");

@@ -15,6 +15,7 @@ import com.couchbase.client.java.cluster.DefaultBucketSettings;
 import java.util.Iterator;
 import java.util.Map;
 import org.createnet.raptor.db.AbstractStorage;
+import org.createnet.raptor.db.config.StorageConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,14 +26,6 @@ import org.slf4j.LoggerFactory;
 public class CouchbaseStorage extends AbstractStorage {
 
   final Logger logger = LoggerFactory.getLogger(CouchbaseStorage.class);
-
-  final String clusterDefaultPassword = "";
-  final String bucketDefaultPassword = "";
-
-  final int bucketDefaultQuota = 240;
-  final int bucketDefaultReplica = 0;
-  final boolean bucketDefaultIndexReplica = false;
-  final boolean bucketDefaultEnableFlush = false;
 
   protected Cluster cluster;
 
@@ -65,7 +58,7 @@ public class CouchbaseStorage extends AbstractStorage {
 
       logger.debug("Connecting bucket {}", item.getValue());
 
-      Bucket bucket = cluster.openBucket(item.getValue(), clusterDefaultPassword);
+      Bucket bucket = cluster.openBucket(item.getValue(), getConfiguration().couchbase.bucketDefaults.password);
       Connection conn = new CouchbaseConnection(item.getKey(), bucket);
 
       conn.connect();
@@ -110,16 +103,18 @@ public class CouchbaseStorage extends AbstractStorage {
       }
 
       if (!exists) {
-
+        
+        StorageConfiguration.Couchbase.BucketDefaults bucketDef = getConfiguration().couchbase.bucketDefaults;
+        
         logger.debug("Creating bucket {}", bucketName);
         BucketSettings bucketSettings = new DefaultBucketSettings.Builder()
                 .type(BucketType.COUCHBASE)
                 .name(bucketName)
-                .password(bucketDefaultPassword)
-                .quota(bucketDefaultQuota) // megabytes
-                .replicas(bucketDefaultReplica)
-                .indexReplicas(bucketDefaultIndexReplica)
-                .enableFlush(bucketDefaultEnableFlush)
+                .password(bucketDef.password)
+                .quota(bucketDef.quota) // megabytes
+                .replicas(bucketDef.replica)
+                .indexReplicas(bucketDef.indexReplica)
+                .enableFlush(bucketDef.enableFlush)
                 .build();
 
         clusterManager.insertBucket(bucketSettings);

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.AuthHttpClient;
 import org.createnet.raptor.auth.authentication.AbstractAuthentication;
 import org.createnet.raptor.auth.authentication.Authentication;
@@ -65,9 +66,9 @@ public class TokenAuthentication extends AbstractAuthentication {
   }
 
   @Override
-  public void initialize(Map<String, Object> configuration) {
+  public void initialize(AuthConfiguration configuration) {
     super.initialize(configuration);
-    client.setUrl((String) configuration.get("token_url"));
+    client.setUrl(configuration.token.url);
   }
 
   protected String request(String accessToken) throws IOException, AuthHttpClient.ClientException {

@@ -17,7 +17,6 @@ package org.createnet.search.raptor.search.impl.es;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import org.createnet.search.raptor.search.Indexer;
 import org.createnet.search.raptor.search.impl.ElasticSearchIndexer;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;

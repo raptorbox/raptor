@@ -46,6 +46,7 @@ public class CouchbaseConnection extends AbstractConnection {
   @Override
   public String get(String id) {
     JsonDocument doc = bucket.get(id);
+    if(doc == null) return null;
     return doc.content().toString();
   }
 

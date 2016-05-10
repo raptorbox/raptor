@@ -37,7 +37,7 @@ public interface Storage {
 
   }
 
-  public void initialize(StorageConfiguration configuration);  
+  public void initialize(StorageConfiguration configuration) throws StorageException;  
   public void setup(boolean forceSetup);  
   public void connect();
   public void disconnect();

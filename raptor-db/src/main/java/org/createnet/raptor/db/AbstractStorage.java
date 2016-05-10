@@ -47,7 +47,7 @@ abstract public class AbstractStorage implements Storage {
   }
 
   @Override
-  public void initialize(StorageConfiguration configuration) {
+  public void initialize(StorageConfiguration configuration) throws StorageException {
     this.config = configuration;
   }
   

@@ -16,10 +16,12 @@
 package org.createnet.raptor.http;
 
 import javax.inject.Singleton;
+import org.createnet.raptor.http.exception.ExceptionMapper;
+import org.createnet.raptor.http.filter.AuthorizationRequestFilter;
+import org.createnet.raptor.http.service.AuthService;
 import org.createnet.raptor.http.service.ConfigurationService;
 import org.createnet.raptor.http.service.StorageService;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
-import org.glassfish.jersey.process.internal.RequestScoped;
 import org.glassfish.jersey.server.ResourceConfig;
 
 /**
@@ -30,14 +32,18 @@ public class ApplicationConfig extends ResourceConfig {
 
   public ApplicationConfig() {
 
+    register(AuthorizationRequestFilter.class);
+    register(ExceptionMapper.class);
+    
     register(new AbstractBinder() {
       @Override
       protected void configure() {
         bind(ConfigurationService.class).to(ConfigurationService.class).in(Singleton.class);
-        bind(StorageService.class).to(StorageService.class).in(RequestScoped.class);
+        bind(StorageService.class).to(StorageService.class).in(Singleton.class);
+        bind(AuthService.class).to(AuthService.class).in(Singleton.class);
       }
     });
-
+    
     packages(true, "org.createnet.raptor.http.api");
 
   }

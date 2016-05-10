@@ -16,6 +16,7 @@
 package org.createnet.raptor.auth.cache;
 
 import java.util.Map;
+import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 
@@ -52,7 +53,7 @@ public interface AuthCache {
   }
 
   
-  public void initialize(Map<String, Object> configuration);
+  public void initialize(AuthConfiguration configuration);
   public void setup();
   public void clear();
   

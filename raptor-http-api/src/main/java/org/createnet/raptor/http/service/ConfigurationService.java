@@ -17,10 +17,13 @@ package org.createnet.raptor.http.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 import javax.inject.Singleton;
+import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.db.config.StorageConfiguration;
+import org.createnet.raptor.dispatcher.DispatcherConfiguration;
+import org.createnet.search.raptor.search.IndexerConfiguration;
 import org.jvnet.hk2.annotations.Service;
 
 /**
@@ -35,12 +38,24 @@ public class ConfigurationService {
   final private String basePath = "/etc/raptor/";
   final private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
   
-  protected String getPath(String filename) {
-    return basePath + filename + ".yml";
+  protected File getFile(String filename) {
+    return new File(basePath + filename + ".yml");
   }
   
   public StorageConfiguration getStorage() throws IOException {
-    return mapper.readValue(getPath("storage"), StorageConfiguration.class);
+    return mapper.readValue(getFile("storage"), StorageConfiguration.class);
+  }
+  
+  public AuthConfiguration getAuth() throws IOException {
+    return mapper.readValue(getFile("auth"), AuthConfiguration.class);
+  }
+  
+  public IndexerConfiguration getIndexer() throws IOException {
+    return mapper.readValue(getFile("indexer"), IndexerConfiguration.class);
+  }
+  
+  public DispatcherConfiguration getDispatcher() throws IOException {
+    return mapper.readValue(getFile("dispatcher"), DispatcherConfiguration.class);
   }
   
 }

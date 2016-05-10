@@ -13,29 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.http.exception;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package org.createnet.raptor.auth;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class ThrowableExceptionMapper implements ExceptionMapper<Throwable> {
+public class AuthConfiguration {
 
-  final private Logger logger = LoggerFactory.getLogger(ThrowableExceptionMapper.class);
-
-  @Override
-  public Response toResponse(Throwable exception) {
-
-    logger.error("Throwing unhandled exception", exception);
-    return Response
-            .status(500)
-            .entity("{ \"code\": 500, \"reason\": \"Internal exception occured\"}")
-            .type("application/json")
-            .build();
+  public AuthConfiguration() {
+    token = new Token();
   }
+  
+  public String type;
+  public String cache;
+  public Token token;
+  
+  public class Token {
+    public String url;
+  }
+  
 }

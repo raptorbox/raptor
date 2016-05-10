@@ -15,11 +15,15 @@
  */
 package org.createnet.raptor.http.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Inject;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.db.Storage;
+import org.createnet.raptor.db.StorageProvider;
 
 /**
  *
@@ -32,20 +36,50 @@ public class StorageService {
   @Inject ConfigurationService configuration;
   
   Storage storage;
+
+  private enum ConnectionId {
+    objects, data, subscriptions, actuations
+  }
   
-  protected Storage getStorage() {
+  protected Storage getStorage() throws IOException, Storage.StorageException {
+    
     if(storage == null) {
-//      configuration.get("storage").get("")
+      storage = new StorageProvider();
+      storage.initialize(configuration.getStorage());
+      storage.setup(false);
+      storage.connect();
     }
+
     return storage;
   }
   
-  public ServiceObject getObject(String id) throws Storage.StorageException, RaptorComponent.ParserException {
-    String json = storage.getConnection("so_bucket").get(id);
+  protected Storage.Connection getObjectConnection() throws IOException, Storage.StorageException {
+    return getStorage().getConnection(ConnectionId.objects.name());
+  }
+  
+  public ServiceObject getObject(String id) throws Storage.StorageException, RaptorComponent.ParserException, IOException {
+    String json = getObjectConnection().get(id);
+    if(json == null) {
+      return null;
+    }
     ServiceObject obj = new ServiceObject();
     obj.parse(json);
     return obj;
+  }
+  
+  public List<ServiceObject> listObjects(String userId) throws Storage.StorageException, RaptorComponent.ParserException, IOException {
+    return new ArrayList();
+  }
+
+  public String saveObject(ServiceObject obj) throws IOException, Storage.StorageException, RaptorComponent.ParserException, RaptorComponent.ValidationException {
     
+    obj.validate();
+    
+    obj.id = ServiceObject.generateUUID();
+    
+    getObjectConnection().set(obj.id, obj.toJSON(), 0);
+    
+    return obj.id;
   }
   
 }

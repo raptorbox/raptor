@@ -62,7 +62,17 @@
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
       <version>2.5.4</version>
-    </dependency>     
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>raptor-search</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>raptor-dispatcher</artifactId>
+      <version>0.1</version>
+    </dependency>
   </dependencies>
 
   <build>

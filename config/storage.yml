@@ -2,15 +2,20 @@
 type: couchbase
 couchbase:
   nodes:
-    - 127.0.0.1
+    - raptor.local
 
-  username: admin
+  username: Administrator
   password: password
+
+  bucketDefaults:
+    password: ""
+    quota: 120
+    replica: 0
+    indexReplica: false
+    enableFlush: false
 
   buckets:
     # Configure couchbase bucket name
-    so_bucket: serviceobjects
-    updates_bucket: soupdates
-    subscriptions_bucket: subscriptions
-    actuations_bucket: actuations
-    private_bucket: privatebucket
+    objects: serviceobjects
+    data: soupdates
+    actuations: actuations
