@@ -1,0 +1,168 @@
+{
+  "soupdates": {
+    "mappings": {
+      "update": {
+        
+        "_ttl": {
+          "enabled": true,
+          "default": "3M"
+        },
+        
+        "_all": {
+          "enabled": false
+        },
+        
+        "dynamic": true,
+        
+        "_source": {
+          "includes": [
+            "meta.*"
+          ]
+        },
+        "dynamic_templates": [
+          {
+            "lastUpdates_are_date": {
+              "path_match": "doc.lastUpdate",
+              "mapping": {
+                "index": "not_analyzed",
+                "type": "date"
+              }
+            }
+          },
+          {
+            "locations_are_geojson": {
+              "path_match": "doc.channels.location.current-value",
+              "mapping": {
+                "store": "no",
+                "index": "not_analyzed",
+                "type": "geo_point"
+              }
+            }
+          },
+          {
+            "current-value_are_strings": {
+              "path_match": "doc.channels.*.current-value",
+              "match_mapping_type": "string",
+              "mapping": {
+                "store": "no",
+                "index": "not_analyzed",
+                "type": "string",
+                "ignore_malformed": true
+              }
+            }
+          }
+        ],
+        "properties": {
+          "meta": {
+            "properties": {
+              "id": {
+                "type": "string",
+                "analyzer": "whitespace"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "subscriptions": {
+    "mappings": {
+      "subscription": {
+        "_all": {
+          "enabled": false
+        },
+        "dynamic": true,
+        "_source": {
+          "includes": [
+            "meta.*"
+          ]
+        },
+        "dynamic_templates": [
+          {
+            "all_strings_to_avoid_collisions": {
+              "match": "*",
+              "mapping": {
+                "store": "no",
+                "index": "not_analyzed",
+                "include_in_all": false,
+                "type": "string",
+                "analyzer": "whitespace"
+              }
+            }
+          }
+        ],
+        "properties": {
+          "doc": {
+            "properties": {
+              "callback": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "destination": {
+                "type": "string"
+              },
+              "stream": {
+                "type": "string"
+              },
+              "customFields": {
+                "enabled": false
+              }
+            }
+          },
+          "meta": {
+            "properties": {
+              "id": {
+                "type": "string",
+                "analyzer": "whitespace"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "sodescriptions": {
+    "mappings": {
+      "serviceobject": {
+        "_all": {
+          "enabled": false
+        },
+        "dynamic": false,
+        "_source": {
+          "includes": [
+            "meta.*"
+          ]
+        },
+        "properties": {
+          "doc": {
+            "properties": {
+              "public": {
+                "type": "boolean"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "customFields": {
+                "type": "object"
+              }
+            }
+          },
+          "meta": {
+            "properties": {
+              "id": {
+                "type": "string",
+                "analyzer": "whitespace"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
