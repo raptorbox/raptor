@@ -23,10 +23,10 @@
  */
 package org.createnet.raptor.dispatcher;
 
-import java.util.Map;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
+import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -41,8 +41,8 @@ public class BrokerClient {
     
   Logger logger = LoggerFactory.getLogger(BrokerClient.class);
   
-  private static MqttAsyncClient connection = null;
-  final private Map<String, String> configuration;
+  private static MqttClient connection = null;
+  private DispatcherConfiguration configuration;
     
   private final String clientName = "raptor-dispatcher";
   private final int connectionTimeout = 10;
@@ -51,31 +51,7 @@ public class BrokerClient {
   private final int qos = 2;
   private final boolean retain = false;
 
-  
-  public interface BrokerClientListener {
-    
-    public void onConnectSuccess();
-    public void onConnectError(Throwable t);
-    
-    public void onPublishSuccess();    
-    public void onPublishError(Throwable t);
-  }
-  
-  private BrokerClientListener bclistener;
-
-  public BrokerClientListener getListener() {
-    return bclistener;
-  }
-
-  public boolean hasListener() {
-    return getListener() != null;
-  }
-
-  public void setListener(BrokerClientListener bclistener) {
-    this.bclistener = bclistener;
-  }
-  
-  public BrokerClient(Map<String, String> config) {
+  public void initialize(DispatcherConfiguration config) {
     configuration = config;  
   }
 
@@ -90,14 +66,13 @@ public class BrokerClient {
     
     try {
 
-      String uri = configuration.get("uri");      
-      String username = configuration.get("username");
-      String password = configuration.get("password");
+      String uri = configuration.uri;
+      String username = configuration.username;
+      String password = configuration.password;
       
       logger.debug("Connecting to broker {}", uri);
-
       
-      connection = new MqttAsyncClient(uri, clientName, clientPersistence);
+      connection = new MqttClient(uri, clientName, clientPersistence);
       
       MqttConnectOptions connOpts = new MqttConnectOptions();
       
@@ -109,20 +84,7 @@ public class BrokerClient {
         connOpts.setPassword(password.toCharArray());
       }
       
-      connection.connect(connOpts, null, new IMqttActionListener() {
-        @Override
-        public void onSuccess(IMqttToken imt) {
-          logger.debug("Connected");          
-          if(hasListener()) {
-            getListener().onConnectSuccess();
-          }
-        }
-
-        @Override
-        public void onFailure(IMqttToken imt, Throwable thrwbl) {
-          getListener().onConnectError(thrwbl);
-        }
-      });
+      connection.connect(connOpts);
       
     } catch (MqttException me) {
 //      logger.error("Failed to connect to broker", me);
@@ -131,41 +93,23 @@ public class BrokerClient {
     }
   }
   
-  public MqttAsyncClient getConnection() throws MqttException {
+  public MqttClient getConnection() throws MqttException {
     connect();
     return connection;
   }
 
-  public void sendMessage(String topic, String message, IMqttActionListener listener) throws DispatchException {
+  public void sendMessage(String topic, String message) throws DispatchException {
     try {
       
-      MqttAsyncClient conn = getConnection();
+      MqttClient conn = getConnection();
       if(conn == null || !conn.isConnected() ) {
-        return;
+        throw new DispatchException("Connection is not available");
       }
       
-      getConnection().publish(topic, message.getBytes(), qos, retain, new Object(), new IMqttActionListener() {
-        @Override
-        public void onSuccess(IMqttToken imt) {
-          listener.onSuccess(imt);
-          if(hasListener()) {
-            getListener().onPublishSuccess();
-          }
-        }
-
-        @Override
-        public void onFailure(IMqttToken imt, Throwable thrwbl) {
-          listener.onFailure(imt, thrwbl);
-          getListener().onPublishError(thrwbl);
-        }
-      });
+      getConnection().publish(topic, message.getBytes(), qos, retain);
     }
     catch(MqttException e) {
       logger.error("MQTT exception", e);
-      throw new DispatchException();
-    }
-    catch(Exception e) {
-      logger.error("Error sending MQTT message", e);
       throw new DispatchException();
     }
   }

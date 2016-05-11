@@ -36,12 +36,24 @@ public class IndexerConfiguration {
     public String type;
     public Map<String, String> clientConfig = new HashMap();
     public Transport transport;
-    public String indicesSource;
-    public Map<String, String> indices = new HashMap();
-    
+    public Indices indices;
+        
     public class Transport {
       public String host;
       public int port;
+    }
+    
+    public class Indices {
+            
+      public String source;
+      public Map<String, String> definitions = new HashMap();      
+      public Map<String, IndexDescriptor> names = new HashMap();      
+      
+      public class IndexDescriptor {
+        public String index; 
+        public String type; 
+      }      
+      
     }
     
   }

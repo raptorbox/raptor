@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
@@ -29,6 +31,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.http.service.StorageService;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -37,6 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.http.service.AuthService;
+import org.createnet.raptor.http.service.IndexerService;
+import org.createnet.search.raptor.search.Indexer;
 
 /**
  *
@@ -49,33 +54,50 @@ public class ServiceObjectService {
 
   @Inject
   StorageService storage;
+  
+  @Inject
+  IndexerService indexerService;
+  
   @Inject
   AuthService auth;
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public List<ServiceObject> listObjects() throws Storage.StorageException, RaptorComponent.ParserException, IOException, Authorization.AuthorizationException {
+  public List<ServiceObject> listObjects() throws Storage.StorageException, RaptorComponent.ParserException, IOException, Authorization.AuthorizationException, Authentication.AutenticationException {
 
     if (!auth.isAllowed(Authorization.Permission.Read)) {
       throw new NotAllowedException("Cannot list objects");
     }
 
-    List<ServiceObject> list = storage.listObjects(auth.getUserId());
+    List<ServiceObject> list = storage.listObjects(auth.getUser().getUserId());
     return list;
   }
 
   @POST
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response createObject(ServiceObject obj) throws RaptorComponent.ParserException, IOException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException {
+  public Response createObject(ServiceObject obj) throws RaptorComponent.ParserException, IOException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException {
 
     if (!auth.isAllowed(Authorization.Permission.Create)) {
-      throw new NotAllowedException("Cannot create object");
+      throw new ForbiddenException("Cannot create object");
     }
 
     storage.saveObject(obj);
 
-    logger.debug("Created new object {} for {}", obj.id, auth.getUserId());
+
+    try {
+      indexerService.indexObject(obj, true);
+    } catch (Indexer.IndexerException ex) {
+      
+      logger.error("Indexing error occured", ex);
+      logger.warn("Removing object {} from storage", obj.id);
+      storage.deleteObject(obj.id);
+      
+      throw new InternalServerErrorException();
+    }    
+    
+    logger.debug("Created new object {} for {}", obj.id, auth.getUser().getUserId());
+    
     return Response.ok("{ \"id\": \"" + obj.id + "\" }").build();
   }
 
@@ -83,7 +105,7 @@ public class ServiceObjectService {
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateObject(ServiceObject obj) throws RaptorComponent.ParserException, IOException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException {
+  public Response updateObject(ServiceObject obj) throws RaptorComponent.ParserException, IOException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, Indexer.IndexerException {
 
     ServiceObject storedObj = storage.getObject(obj.id);
 
@@ -92,17 +114,18 @@ public class ServiceObjectService {
     }
 
     if(!auth.isAllowed(obj.id, Authorization.Permission.Update)) {
-      throw new NotAllowedException("Cannot update object");
+      throw new ForbiddenException();
     }
     
     if (!storedObj.userId.equals(obj.userId)) {
-      logger.warn("User {} tried to update object {} owned by {}", auth.getUserId(), storedObj.id, storedObj.userId);
+      logger.warn("User {} tried to update object {} owned by {}", auth.getUser().getUserId(), storedObj.id, storedObj.userId);
       throw new NotFoundException();
     }
     
     storage.saveObject(obj);
-
-    logger.debug("Updated object {} for {}", obj.id, auth.getUserId());
+    indexerService.indexObject(obj, false);
+    
+    logger.debug("Updated object {} for {}", obj.id, auth.getUser().getUserId());
     return Response.ok("{ \"id\": \"" + obj.id + "\" }").build();
   }
 

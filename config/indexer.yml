@@ -6,4 +6,15 @@ elasticsearch:
   transport:
     host: raptor.local
     port: 9300
-  indices_source: /etc/raptor/indices.json
+  indices:
+    source: /etc/raptor/indices.json
+    names:
+      object:
+        index: sodescriptions
+        type: serviceobject
+      data:
+        index: soupdates
+        type: update
+      subscriptions:
+        index: subscriptions
+        type: subscription

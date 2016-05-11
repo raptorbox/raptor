@@ -28,5 +28,20 @@ package org.createnet.raptor.dispatcher;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class DispatchException extends Exception {
+
+  public DispatchException() {
+  }
   
+  public DispatchException(String message) {
+    super(message);
+  }
+
+  public DispatchException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public DispatchException(Throwable cause) {
+    super(cause);
+  }
+   
 }

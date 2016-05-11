@@ -1,5 +1,4 @@
 protocol: mqtt
 username: compose
 password: shines
-host: raptor.local
-port: 1883
+uri: mqtt://raptor.local:1883

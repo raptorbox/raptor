@@ -13,20 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth;
+package org.createnet.raptor.http.configuration;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class AuthConfiguration {
-
-  public String type;
-  public String cache;
-  public Token token = new Token();
-  
-  static public class Token {
-    public String url;
-  }
+public class IndexerConfiguration extends org.createnet.search.raptor.search.IndexerConfiguration implements Configuration{
   
 }

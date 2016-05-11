@@ -36,7 +36,7 @@ public class Queue {
   public static class QueueMessage {
 
     public int tries = 0;
-    final public int maxRetries = 1;
+    final public int maxRetries = 5;
 
     public String message;
     public String topic;

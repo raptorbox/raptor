@@ -19,11 +19,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import javax.inject.Singleton;
-import org.createnet.raptor.auth.AuthConfiguration;
-import org.createnet.raptor.db.config.StorageConfiguration;
-import org.createnet.raptor.dispatcher.DispatcherConfiguration;
-import org.createnet.search.raptor.search.IndexerConfiguration;
+import org.createnet.raptor.http.configuration.AuthConfiguration;
+import org.createnet.raptor.http.configuration.Configuration;
+import org.createnet.raptor.http.configuration.DispatcherConfiguration;
+import org.createnet.raptor.http.configuration.IndexerConfiguration;
+import org.createnet.raptor.http.configuration.StorageConfiguration;
 import org.jvnet.hk2.annotations.Service;
 
 /**
@@ -38,24 +41,37 @@ public class ConfigurationService {
   final private String basePath = "/etc/raptor/";
   final private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
   
+  final private Map<String, Configuration> cache = new HashMap();
+  
   protected File getFile(String filename) {
     return new File(basePath + filename + ".yml");
   }
   
+  protected Configuration getInstance(String name, Class<? extends Configuration> clazz) throws IOException {
+    
+    Configuration config = cache.get(name);
+    if(config == null) {
+      Configuration instance = mapper.readValue(getFile(name), clazz);
+      config = cache.put(name, instance);
+    }
+    
+    return config;
+  }
+  
   public StorageConfiguration getStorage() throws IOException {
-    return mapper.readValue(getFile("storage"), StorageConfiguration.class);
+    return (StorageConfiguration) getInstance("storage", StorageConfiguration.class);
   }
   
   public AuthConfiguration getAuth() throws IOException {
-    return mapper.readValue(getFile("auth"), AuthConfiguration.class);
+    return (AuthConfiguration) getInstance("auth", AuthConfiguration.class);
   }
   
   public IndexerConfiguration getIndexer() throws IOException {
-    return mapper.readValue(getFile("indexer"), IndexerConfiguration.class);
+    return (IndexerConfiguration) getInstance("indexer", IndexerConfiguration.class);
   }
   
   public DispatcherConfiguration getDispatcher() throws IOException {
-    return mapper.readValue(getFile("dispatcher"), DispatcherConfiguration.class);
+    return (DispatcherConfiguration) getInstance("dispatcher", DispatcherConfiguration.class);
   }
   
 }

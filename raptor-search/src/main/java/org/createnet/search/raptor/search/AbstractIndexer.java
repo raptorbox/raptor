@@ -15,7 +15,6 @@
  */
 package org.createnet.search.raptor.search;
 
-import java.util.Map;
 import org.elasticsearch.common.unit.TimeValue;
 
 /**
@@ -34,6 +33,11 @@ abstract public class AbstractIndexer implements Indexer {
 
   protected TimeValue getTimeout() {
     return TimeValue.timeValueMillis(defaultTimeout);
+  }
+
+  @Override
+  public void initialize(IndexerConfiguration configuration) throws IndexerException {
+    this.configuration = configuration;
   }
   
 }

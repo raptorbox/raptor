@@ -20,8 +20,10 @@ import org.createnet.raptor.http.exception.ExceptionMapper;
 import org.createnet.raptor.http.filter.AuthorizationRequestFilter;
 import org.createnet.raptor.http.service.AuthService;
 import org.createnet.raptor.http.service.ConfigurationService;
+import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.StorageService;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.process.internal.RequestScoped;
 import org.glassfish.jersey.server.ResourceConfig;
 
 /**
@@ -34,16 +36,36 @@ public class ApplicationConfig extends ResourceConfig {
 
     register(AuthorizationRequestFilter.class);
     register(ExceptionMapper.class);
-    
+
     register(new AbstractBinder() {
       @Override
       protected void configure() {
-        bind(ConfigurationService.class).to(ConfigurationService.class).in(Singleton.class);
-        bind(StorageService.class).to(StorageService.class).in(Singleton.class);
-        bind(AuthService.class).to(AuthService.class).in(Singleton.class);
+
+        bind(ConfigurationService.class)
+                .to(ConfigurationService.class)
+                .in(Singleton.class);
+        
+        bind(StorageService.class)
+                .to(StorageService.class)
+                .in(Singleton.class);
+        
+        bind(IndexerService.class)
+                .to(IndexerService.class)
+                .in(Singleton.class);
+
+        bind(AuthService.class)
+                .to(AuthService.class)
+                .in(Singleton.class);
+
+//        bind(AuthService.class)
+//                .proxy(true)
+//                .proxyForSameScope(false)
+//                .to(AuthService.class)
+//                .in(RequestScoped.class);
+
       }
     });
-    
+
     packages(true, "org.createnet.raptor.http.api");
 
   }

@@ -23,15 +23,15 @@
  */
 package org.createnet.raptor.dispatcher;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import org.eclipse.paho.client.mqttv3.IMqttActionListener;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,158 +44,122 @@ public class Dispatcher {
 
   final protected Logger logger = LoggerFactory.getLogger(Dispatcher.class);
 
-  final protected int poolSize = 20;
-  
-  final protected int maxParallelTask = 8;
-  final private AtomicInteger concurrentTasksCount = new AtomicInteger(0);  
-  
-  final protected int maxQueueLength = 1000000;
+  protected BlockingQueue<Runnable> queue;
+  protected Queue messageQueue = new Queue();
 
-  final protected Map<String, String> config;
-  final protected ExecutorService executorService;
-  final protected Queue queue;
-  final protected BrokerClient client;
+  protected DispatcherConfiguration config;
+  protected BrokerClient client = new BrokerClient();
 
   final ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
 
-  public Dispatcher(Map<String, String> config) {
+  protected ThreadPoolExecutor executorService;
+
+  class MessageDispatcher implements Runnable {
+
+    final protected Queue.QueueMessage qm;
+    final protected BrokerClient client;
+
+    public MessageDispatcher(Queue.QueueMessage qm, BrokerClient client) {
+      this.qm = qm;
+      this.client = client;
+    }
+
+    public Queue.QueueMessage getQm() {
+      return qm;
+    }
+
+    @Override
+    public void run() {
+      try {
+        client.sendMessage(qm.topic, qm.message);
+        logger.debug("Message sent to {}", qm.topic);
+      } catch (DispatchException ex) {
+        add(qm);
+        logger.error("Error sending message", ex);
+      }
+    }
+
+  }
+
+  public void initialize(DispatcherConfiguration config) {
 
     this.config = config;
-    
-    executorService = Executors.newFixedThreadPool(poolSize);
 
-    queue = new Queue();
+    queue = new LinkedBlockingQueue(100);
 
-    client = new BrokerClient(config);
+    executorService = new ThreadPoolExecutor(5, 15, 1000, TimeUnit.MILLISECONDS, queue, new ThreadPoolExecutor.CallerRunsPolicy());
+    executorService.setRejectedExecutionHandler(new RejectedExecutionHandler() {
+      @Override
+      public void rejectedExecution(Runnable r, ThreadPoolExecutor executor1) {
+        try {
+          logger.warn("Message delivery failed, add back to queue");
+          Thread.sleep(1000);
+          requeue(((MessageDispatcher) r).getQm());
+        } catch (InterruptedException e) {
+          
+        }
+      }
+    });
+
+    client.initialize(config);
+
     try {
       client.getConnection();
     } catch (MqttException ex) {
       logger.error("Cannot connect to the broker", ex);
     }
 
-//
-//    client.setListener(new BrokerClient.BrokerClientListener() {
-//      @Override
-//      public void onConnectSuccess() {
-//      }
-//
-//      @Override
-//      public void onConnectError(Throwable t) {
-//        logger.debug("Error connecting", t);
-//      }
-//
-//      @Override
-//      public void onPublishSuccess() {
-//        logger.debug("Message published");
-//      }
-//
-//      @Override
-//      public void onPublishError(Throwable t) {
-//        logger.error("Error while publishing message", t);
-//      }
-//    });
+    executorService.prestartAllCoreThreads();
 
     scheduledExecutor.scheduleAtFixedRate(() -> {
       dispatch();
-//      logger.debug("Running timer, queue length {}", queue.size());
     }, 0, 100, TimeUnit.MILLISECONDS);
 
   }
 
   public void add(String topic, String message) {
-    queue.add(new Queue.QueueMessage(topic, message));
+    Queue.QueueMessage qm = new Queue.QueueMessage(topic, message);
+    add(qm);
+  }
+
+  public void add(Queue.QueueMessage qm) {
+    if (messageQueue.size() > config.queueLength) {
+      logger.warn("Message queue limit reached ({})", config.queueLength);
+    }
+    messageQueue.add(qm);
     dispatch();
   }
 
   public int size() {
-    dispatch();
-    return queue.size();
+    return messageQueue.size();
   }
 
   protected void requeue(Queue.QueueMessage qm) {
     qm.tries++;
     if (qm.valid()) {
       logger.debug("Message added back to queue due to dispatcher error: {}/{}", qm.tries, qm.maxRetries);
-      add(qm.topic, qm.message);
+      add(qm);
     } else {
       logger.debug("Message dropped");
     }
-
   }
 
   public void dispatch() {
 
-    if (queue.size() == 0) {
-//      logger.debug("Queue is empty");
+    if (messageQueue.size() == 0) {
       return;
     }
 
-    if (!client.isConnected()) {
-      logger.debug("Client not connected");
-      if (queue.size() > maxQueueLength) {
-        logger.error("Reached maximum queue length, flushin list");
-        queue.clear();
-      }
+    Queue.QueueMessage qm = messageQueue.pop();
+
+    if (qm == null) {
       return;
     }
-    
-    if(concurrentTasksCount.get() >= maxParallelTask) {
-      logger.debug("Concurrent task limit reached {} of {}", concurrentTasksCount.get(), maxParallelTask);
-      return;
-    }
-    
-    logger.debug("Dispatching, {} items", queue.size());
 
-    // pop out the list and send
-    Queue.QueueMessage qm = queue.pop();
-
-    try {
-      
-      poolAdd();
-
-      executorService.execute(() -> {
-
-        try {
-          if (qm != null) {
-            client.sendMessage(qm.topic, qm.message, new IMqttActionListener() {
-
-              @Override
-              public void onSuccess(IMqttToken imt) {
-                poolRemove();
-              }
-
-              @Override
-              public void onFailure(IMqttToken imt, Throwable thrwbl) {
-                poolRemove();
-                requeue(qm);
-              }
-            });
-          }
-        } catch (DispatchException ex) {
-          poolRemove();
-          requeue(qm);
-        } finally {
-          dispatch();
-        }
-
-      });
-
-    } catch (Exception e) {
-      logger.error("Executor exception", e);
-    } finally {
-      dispatch();
-    }
-
+    executorService.execute(new MessageDispatcher(qm, client));
+    dispatch();
   }
-  
-  private void poolAdd() {
-    concurrentTasksCount.getAndIncrement();
-  }
-  
-  private void poolRemove() {
-    concurrentTasksCount.getAndDecrement();
-  }
-  
+
   protected void shutdown(ExecutorService executor) {
     try {
       logger.debug("Attempt to shutdown executor");
@@ -219,7 +183,6 @@ public class Dispatcher {
     logger.debug("Closed dispatcher");
   }
 
-  
   static public void main(String[] args) throws Exception {
 
     String topic = "foo/bar";
@@ -228,18 +191,27 @@ public class Dispatcher {
 
     ExecutorService exec = Executors.newFixedThreadPool(5);
 
-    Map<String, String> config = new HashMap();
-    config.put("uri", "tcp://servioticy.local:1883");
-    config.put("username", "compose");
-    config.put("password", "shines");
+    DispatcherConfiguration config = new DispatcherConfiguration();
+    config.uri = "tcp://raptor.local:1883";
+    config.username = "compose";
+    config.password = "shines";
 
-    Dispatcher instance = new Dispatcher(config);
+    config.queueLength = 10000;
+    config.poolSize = 15;
+
+    Dispatcher instance = new Dispatcher();
+    instance.initialize(config);
 
     for (int i = 0; i < times; i++) {
       final String msg = message + i;
-      exec.execute(() -> {
-        instance.add(topic, msg);
-      });
+      try {
+        System.out.println("org.createnet.raptor.dispatcher.Dispatcher.main() Send msg " + i);
+        exec.execute(() -> {
+          instance.add(topic, msg);
+        });
+      } catch (Exception e) {
+        System.out.println("org.createnet.raptor.dispatcher.Dispatcher.main()" + e.getMessage());
+      }
     }
 
 //    exec.shutdown();

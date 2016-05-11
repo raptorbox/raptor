@@ -67,10 +67,6 @@ public class ElasticSearchIndexer extends AbstractIndexer {
   final protected Logger logger = LoggerFactory.getLogger(ElasticSearchIndexer.class);
   final private ElasticSearchIndexAdmin indexAdmin = new ElasticSearchIndexAdmin();
 
-  public ElasticSearchIndexer(IndexerConfiguration configuration) {
-    this.configuration = configuration;
-  }
-
   /**
    *
    * @param file
@@ -339,7 +335,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
 
     logger.debug("Setup client");
 
-    Map<String, String> indices = configuration.elasticsearch.indices;
+    Map<String, String> indices = configuration.elasticsearch.indices.definitions;
 
     for (Map.Entry<String, String> el : indices.entrySet()) {
 
@@ -406,7 +402,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
     configuration.elasticsearch.transport.host = "127.0.0.1";
     configuration.elasticsearch.transport.port = 9300;
     
-    configuration.elasticsearch.indicesSource = "/etc/raptor/indices.json";
+    configuration.elasticsearch.indices.source = "/etc/raptor/indices.json";
     
     
 //    String indexFile = "indices.json";
@@ -414,18 +410,19 @@ public class ElasticSearchIndexer extends AbstractIndexer {
     ClassLoader classLoader = ElasticSearchIndexer.class.getClassLoader();
 
 //    String filepath = classLoader.getResource(indexFile).getPath();
-    String filepath = configuration.elasticsearch.indicesSource;
+    String filepath = configuration.elasticsearch.indices.source;
     Map<String, String> indices = ElasticSearchIndexer.loadIndicesFromFile(filepath);
 
-    configuration.elasticsearch.indices.putAll(indices);
+    configuration.elasticsearch.indices.definitions.putAll(indices);
     
     Map<String, String> clientConfig = new HashMap();
     clientConfig.put("cluster.name", "raptor");
 
     configuration.elasticsearch.clientConfig.putAll(clientConfig);
             
-    Indexer indexer = new ElasticSearchIndexer(configuration);
-
+    Indexer indexer = new ElasticSearchIndexer();
+    indexer.initialize(configuration);
+    
     indexer.open();
     indexer.setup(true);
 

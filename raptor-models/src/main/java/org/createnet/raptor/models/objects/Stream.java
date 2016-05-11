@@ -24,12 +24,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import org.createnet.raptor.models.data.IRecord;
-import org.createnet.raptor.models.data.RecordSet;
-import org.createnet.raptor.models.data.ResultSet;
-import org.createnet.raptor.models.events.StreamEvent;
-import org.createnet.raptor.models.exception.ClientException;
-import org.createnet.raptor.models.exception.RecordsetException;
 import org.slf4j.LoggerFactory;
 
 /**

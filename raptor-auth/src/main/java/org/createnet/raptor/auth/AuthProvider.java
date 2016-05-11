@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.auth;
 
+import java.util.logging.Level;
+import javax.naming.AuthenticationException;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authentication.impl.AllowAllAuthentication;
 import org.createnet.raptor.auth.authentication.impl.TokenAuthentication;
@@ -85,33 +87,29 @@ public class AuthProvider implements Authorization, Authentication {
   }
 
   @Override
-  public boolean isAuthorized(String id, Permission op) throws AuthorizationException {
+  public boolean isAuthorized(String accessToken, String id, Permission op) throws AuthorizationException {
     
     if(id == null) id = "x";
     
     try {
+    
+      UserInfo user = getUser(accessToken);
       
-      try {       
-                
-        Boolean cachedValue = cache.get(getUserId(), id, op);
-        if(cachedValue != null) {
-          logger.debug("Reusing permission cache for {}.{}.{}", getUserId(), id, op.name());
-          return cachedValue;
-        }
-
-      } catch (AuthCache.PermissionCacheException e) {
-        logger.warn("Exception loading permission cache for {}, query source auth system", getUserId());
+      Boolean cachedValue = cache.get(user.getUserId(), id, op);
+      if(cachedValue != null) {
+        logger.debug("Reusing permission cache for {}.{}.{}", user.getUserId(), id, op.name());
+        return cachedValue;
       }
       
       logger.debug("Requesting {} permission for {}", op, id);
       
-      boolean isauthorized = authorizationInstance.isAuthorized(id, op);
+      boolean isauthorized = authorizationInstance.isAuthorized(accessToken, id, op);
       
-      cache.set(getUserId(), id, op, isauthorized);
+      cache.set(user.getUserId(), id, op, isauthorized);
       
       return isauthorized;
       
-    } catch (AuthCache.PermissionCacheException ex) {
+    } catch (AuthCache.PermissionCacheException | AutenticationException ex) {
       throw new AuthorizationException(ex);
     }
   }
@@ -123,43 +121,26 @@ public class AuthProvider implements Authorization, Authentication {
 
       UserInfo cachedValue = cache.get(accessToken);
       if(cachedValue != null) {
-        logger.debug("Reusing cached user details for {}", getUserId());
+        logger.debug("Reusing cached user details for {}", cachedValue.getUserId());
         return cachedValue;
       }
       
     } catch (AuthCache.PermissionCacheException e) {
-      logger.warn("Exception loading user cache for {}, query source auth system", getUserId());
+      logger.warn("Exception loading user cache for {}, query source auth system", accessToken);
     }
       
-    logger.debug("Loading user details for token {}", getAccessToken());
+    logger.debug("Loading user details for token {}", accessToken);
     UserInfo user = authenticationInstance.getUser(accessToken);
-
-    setAccessToken(accessToken);
-    setUserId(user.getUserId());
     
     logger.debug("token ok, loaded user {}", user.getUserId());
     
+    try {
+      cache.set(user);
+    } catch (AuthCache.PermissionCacheException ex) {
+      logger.warn("Error storing cache for user {}", user.getUserId());
+    }
+    
     return user;
-  }
-
-  @Override
-  public String getAccessToken() {
-    return accessToken;
-  }
-
-  @Override
-  public String getUserId() {
-    return userId;
-  }
-
-  @Override
-  public void setAccessToken(String accessToken) {
-    this.accessToken = accessToken;
-  }
-
-  @Override
-  public void setUserId(String userId) {
-    this.userId = userId;
   }
   
   public static void main(String[] argv) throws AuthorizationException, AutenticationException {
@@ -176,8 +157,12 @@ public class AuthProvider implements Authorization, Authentication {
     
     System.out.println("UserInfo: " +user.toString() );
     
-    auth.isAuthorized("myObjectId", Permission.Read);
+    auth.isAuthorized(user.getAccessToken(), "myObjectId", Permission.Read);
     
+  }
+
+  public UserInfo getUserById(String userId) {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
   
 }

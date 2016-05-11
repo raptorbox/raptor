@@ -24,26 +24,30 @@ import org.createnet.raptor.models.objects.ServiceObject;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.StorageProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-
 @Service
 public class StorageService {
-    
-  @Inject ConfigurationService configuration;
   
-  Storage storage;
+  private final Logger logger = LoggerFactory.getLogger(StorageService.class);
+  
+  @Inject
+  ConfigurationService configuration;
+  
+  private Storage storage;
 
   private enum ConnectionId {
     objects, data, subscriptions, actuations
   }
-  
+
   protected Storage getStorage() throws IOException, Storage.StorageException {
-    
-    if(storage == null) {
+
+    if (storage == null) {
       storage = new StorageProvider();
       storage.initialize(configuration.getStorage());
       storage.setup(false);
@@ -52,34 +56,34 @@ public class StorageService {
 
     return storage;
   }
-  
+
   protected Storage.Connection getObjectConnection() throws IOException, Storage.StorageException {
     return getStorage().getConnection(ConnectionId.objects.name());
   }
-  
+
   public ServiceObject getObject(String id) throws Storage.StorageException, RaptorComponent.ParserException, IOException {
     String json = getObjectConnection().get(id);
-    if(json == null) {
+    if (json == null) {
       return null;
     }
     ServiceObject obj = new ServiceObject();
     obj.parse(json);
     return obj;
   }
-  
+
   public List<ServiceObject> listObjects(String userId) throws Storage.StorageException, RaptorComponent.ParserException, IOException {
     return new ArrayList();
   }
 
   public String saveObject(ServiceObject obj) throws IOException, Storage.StorageException, RaptorComponent.ParserException, RaptorComponent.ValidationException {
-    
     obj.validate();
-    
     obj.id = ServiceObject.generateUUID();
-    
-    getObjectConnection().set(obj.id, obj.toJSON(), 0);
-    
+    getObjectConnection().set(obj.id, obj.toJSON(), 0);    
     return obj.id;
   }
+
+  public void deleteObject(String id) throws IOException, Storage.StorageException {
+    getObjectConnection().delete(id);
+  }  
   
 }

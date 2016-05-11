@@ -12,8 +12,13 @@ package org.createnet.raptor.dispatcher;
 public class DispatcherConfiguration {
 
   public String protocol;
+  
   public String username;
   public String password;
-  public String host;
-  public int port;
+  
+  public String uri;
+  public int queueLength;
+  public int poolSize;
+  
+  
 }

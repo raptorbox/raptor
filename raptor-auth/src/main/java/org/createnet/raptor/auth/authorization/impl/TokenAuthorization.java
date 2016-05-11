@@ -39,13 +39,13 @@ public class TokenAuthorization extends AbstractAuthorization {
   final private AuthHttpClient client = new AuthHttpClient();
 
   @Override
-  public boolean isAuthorized(String id, Permission op) throws AuthorizationException {
+  public boolean isAuthorized(String accessToken, String id, Permission op) throws AuthorizationException {
 
     try {
 
       logger.debug("Check authorization of user {} for permission {}", id, op.name());
 
-      String response = request(id, op.name());
+      String response = request(accessToken, id, op.name());
 
       ObjectMapper mapper = new ObjectMapper();
       JsonNode node = mapper.readTree(response);
@@ -68,7 +68,7 @@ public class TokenAuthorization extends AbstractAuthorization {
     client.setUrl(configuration.token.url);
   }
 
-  protected String request(String id, String permission) throws IOException, AuthHttpClient.ClientException {
+  protected String request(String accessToken, String id, String permission) throws IOException, AuthHttpClient.ClientException {
 
     List<NameValuePair> args = new ArrayList();
 
@@ -76,7 +76,7 @@ public class TokenAuthorization extends AbstractAuthorization {
     args.add(new BasicNameValuePair("permission", permission));
     args.add(new BasicNameValuePair("soid", id));
 
-    return client.request(getAccessToken(), args);
+    return client.request(accessToken, args);
   }
 
 }

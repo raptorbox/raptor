@@ -79,6 +79,11 @@ public interface Indexer {
       this.id = id;
     }
     
+    public IndexRecord(String index, String type) {
+      this.index = index;
+      this.type = type;
+    }
+    
     public boolean isNew() {
       return isNew;
     }
@@ -92,6 +97,8 @@ public interface Indexer {
   
   public void open() throws IndexerException;
     
+  public void initialize(IndexerConfiguration configuration) throws IndexerException;
+  
   public void setup(boolean forceSetup) throws IndexerException;
   
   public void close() throws IndexerException;

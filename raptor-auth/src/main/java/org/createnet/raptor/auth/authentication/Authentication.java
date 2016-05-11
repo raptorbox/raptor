@@ -16,7 +16,8 @@
 package org.createnet.raptor.auth.authentication;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import org.createnet.raptor.auth.AuthConfiguration;
 
 /**
@@ -39,20 +40,25 @@ public interface Authentication {
   
   public class UserInfo {
     
+    final protected List<String> roles = new ArrayList();
     protected String userId;
     protected String accessToken;
     
     protected JsonNode details;
     
     public UserInfo() {
+      // set default
+      roles.add("USER");
     }
     
     public UserInfo(String userId, String accessToken) {
+      this();
       this.userId = userId;
       this.accessToken = accessToken;
     }
     
     public UserInfo(String userId, String accessToken, JsonNode details) {
+      this();
       this.userId = userId;
       this.accessToken = accessToken;
       this.details = details;
@@ -77,8 +83,18 @@ public interface Authentication {
                 ", details = " + getDetails().toString() +
               "]";
     }
+
+    public List<String> getRoles() {
+      return roles;
+    }
     
+    public void setRoles(List<String> newRoles) {
+      roles.addAll(newRoles);
+    }
     
+    public void addRole(String newRole) {
+      roles.add(newRole);
+    }
     
   }
   

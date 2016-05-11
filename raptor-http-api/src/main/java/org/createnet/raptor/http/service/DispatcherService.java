@@ -13,20 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth;
+package org.createnet.raptor.http.service;
+
+import javax.inject.Inject;
+import org.jvnet.hk2.annotations.Service;
+import org.createnet.raptor.dispatcher.Dispatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class AuthConfiguration {
-
-  public String type;
-  public String cache;
-  public Token token = new Token();
+@Service
+public class DispatcherService {
   
-  static public class Token {
-    public String url;
-  }
+  private final Logger logger = LoggerFactory.getLogger(DispatcherService.class);
+  
+  @Inject
+  ConfigurationService configuration;
+  
+  private final Dispatcher dispatcher = new Dispatcher();
   
 }

@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Exception> {
 
-  private static Logger logger = LoggerFactory.getLogger(ExceptionMapper.class);
+  private static final Logger logger = LoggerFactory.getLogger(ExceptionMapper.class);
 
   @Override
   public Response toResponse(Exception e) {
