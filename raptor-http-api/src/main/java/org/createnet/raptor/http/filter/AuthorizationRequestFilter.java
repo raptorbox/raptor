@@ -15,14 +15,15 @@
  */
 package org.createnet.raptor.http.filter;
 
-import java.io.IOException;
 import java.security.Principal;
+import java.util.logging.Level;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import org.createnet.raptor.auth.authentication.Authentication;
+import org.createnet.raptor.http.exception.ConfigurationException;
 import org.createnet.raptor.http.service.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,16 +40,16 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
   AuthService auth;
 
   @Override
-  public void filter(ContainerRequestContext requestContext) throws IOException {
+  public void filter(ContainerRequestContext requestContext) {
 
     try {
-      
+
       String accessToken = requestContext.getHeaderString("Authorization");
 
       Authentication.UserInfo loggedUser = auth.getUser(accessToken);
-      
+
       logger.debug("User {} authenticated", loggedUser.getUserId());
-      
+
       requestContext.setSecurityContext(new Authorizer(loggedUser));
 
     } catch (Authentication.AutenticationException ex) {
@@ -58,6 +59,13 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
       requestContext.abortWith(
               Response.status(Response.Status.UNAUTHORIZED).build()
       );
+    } catch (ConfigurationException ex) {
+
+      logger.error("Error loading auth configuration", ex);
+
+      requestContext.abortWith(
+              Response.serverError().build()
+      );
     }
 
   }
@@ -66,11 +74,11 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
     final private Authentication.UserInfo user;
     private final Principal principal;
-    
+
     public class AppPrincipal implements Principal {
-      
+
       private Authentication.UserInfo user;
-      
+
       public AppPrincipal(Authentication.UserInfo user) {
         super();
         this.user = user;
@@ -86,12 +94,12 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
       }
 
     }
-    
+
     public Authorizer(final Authentication.UserInfo user) {
       this.user = user;
       this.principal = new AppPrincipal(user);
     }
-    
+
     @Override
     public Principal getUserPrincipal() {
       return this.principal;

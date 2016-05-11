@@ -15,14 +15,16 @@
  */
 package org.createnet.raptor.http.api;
 
-import java.io.IOException;
+
+import java.net.URI;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAllowedException;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -40,8 +42,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.http.service.AuthService;
+import org.createnet.raptor.http.service.DispatcherService;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.search.raptor.search.Indexer;
+import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 
 /**
  *
@@ -56,14 +61,17 @@ public class ServiceObjectService {
   StorageService storage;
   
   @Inject
-  IndexerService indexerService;
+  IndexerService indexer;
+  
+  @Inject
+  DispatcherService dispatcher;
   
   @Inject
   AuthService auth;
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public List<ServiceObject> listObjects() throws Storage.StorageException, RaptorComponent.ParserException, IOException, Authorization.AuthorizationException, Authentication.AutenticationException {
+  public List<ServiceObject> list() throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AutenticationException {
 
     if (!auth.isAllowed(Authorization.Permission.Read)) {
       throw new NotAllowedException("Cannot list objects");
@@ -76,36 +84,39 @@ public class ServiceObjectService {
   @POST
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response createObject(ServiceObject obj) throws RaptorComponent.ParserException, IOException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException {
+  public Response create(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException {
 
     if (!auth.isAllowed(Authorization.Permission.Create)) {
-      throw new ForbiddenException("Cannot create object");
+      throw new NotAuthorizedException("Cannot create object");
     }
 
     storage.saveObject(obj);
 
 
     try {
-      indexerService.indexObject(obj, true);
+      indexer.indexObject(obj, true);
     } catch (Indexer.IndexerException ex) {
       
       logger.error("Indexing error occured", ex);
       logger.warn("Removing object {} from storage", obj.id);
+      
       storage.deleteObject(obj.id);
       
       throw new InternalServerErrorException();
     }    
     
+    dispatcher.notifyObjectEvent(DispatcherService.ObjectOperation.create, obj);
+    
     logger.debug("Created new object {} for {}", obj.id, auth.getUser().getUserId());
     
-    return Response.ok("{ \"id\": \"" + obj.id + "\" }").build();
+    return Response.created(URI.create("/" + obj.id)).entity(obj.toJSON(ServiceObjectView.IdOnly)).build();
   }
 
   @PUT
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateObject(ServiceObject obj) throws RaptorComponent.ParserException, IOException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, Indexer.IndexerException {
+  public ServiceObject update(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, Indexer.IndexerException {
 
     ServiceObject storedObj = storage.getObject(obj.id);
 
@@ -114,25 +125,28 @@ public class ServiceObjectService {
     }
 
     if(!auth.isAllowed(obj.id, Authorization.Permission.Update)) {
-      throw new ForbiddenException();
+      throw new NotAuthorizedException("Cannot update object");
     }
     
-    if (!storedObj.userId.equals(obj.userId)) {
+    if (!storedObj.userId.equals(auth.getUser().getUserId())) {
       logger.warn("User {} tried to update object {} owned by {}", auth.getUser().getUserId(), storedObj.id, storedObj.userId);
       throw new NotFoundException();
     }
     
     storage.saveObject(obj);
-    indexerService.indexObject(obj, false);
+    indexer.indexObject(obj, false);
+    
+    dispatcher.notifyObjectEvent(DispatcherService.ObjectOperation.update, obj);
+    
     
     logger.debug("Updated object {} for {}", obj.id, auth.getUser().getUserId());
-    return Response.ok("{ \"id\": \"" + obj.id + "\" }").build();
+    return obj;
   }
 
   @GET
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
-  public ServiceObject loadObject(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, IOException, Authorization.AuthorizationException {
+  public ServiceObject load(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException {
 
     logger.debug("Load object {}", id);
 
@@ -144,10 +158,36 @@ public class ServiceObjectService {
     }
 
     if(!auth.isAllowed(obj.id, Authorization.Permission.Read)) {
-      throw new NotAllowedException("Cannot update object");
-    }    
+      throw new NotAuthorizedException("Cannot read object");
+    }
     
     return obj;
+  }
+
+  @DELETE
+  @Path("{id}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response delete(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, Authorization.AuthorizationException, ConfigurationException, Indexer.IndexerException, Authentication.AutenticationException  {
+
+    logger.debug("delete object {}", id);
+
+    ServiceObject obj = storage.getObject(id);
+
+    if (obj == null) {
+      logger.debug("Object {} not found", id);
+      throw new NotFoundException();
+    }
+
+    if(!auth.isAllowed(obj.id, Authorization.Permission.Delete)) {
+      throw new NotAuthorizedException("Cannot delete object");
+    }
+
+    storage.deleteObject(id);
+    indexer.deleteObject(id);
+    
+    dispatcher.notifyObjectEvent(DispatcherService.ObjectOperation.delete, obj);
+    
+    return Response.status(Response.Status.OK).build();
   }
 
 }

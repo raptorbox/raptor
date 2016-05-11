@@ -23,33 +23,46 @@ import java.util.Map;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class IndexerConfiguration {
-  
+
+  public IndexerConfiguration() {
+  }
+
   public String type;
-  public ElasticSearch elasticsearch;
+  public ElasticSearch elasticsearch = new ElasticSearch();
   
-  public class ElasticSearch {
+  static public class ElasticSearch {
 
     public ElasticSearch() {
-      transport = new Transport();
     }
     
     public String type;
     public Map<String, String> clientConfig = new HashMap();
-    public Transport transport;
-    public Indices indices;
+    public Transport transport = new Transport();
+    public Indices indices = new Indices();
         
-    public class Transport {
+    static public class Transport {
+
+      public Transport() {
+      }
+      
       public String host;
       public int port;
     }
     
-    public class Indices {
-            
+    static public class Indices {
+
+      public Indices() {
+      }
+      
       public String source;
       public Map<String, String> definitions = new HashMap();      
       public Map<String, IndexDescriptor> names = new HashMap();      
       
-      public class IndexDescriptor {
+      static public class IndexDescriptor {
+
+        public IndexDescriptor() {
+        }
+        
         public String index; 
         public String type; 
       }      

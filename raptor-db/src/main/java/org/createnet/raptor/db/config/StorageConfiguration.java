@@ -1,7 +1,5 @@
 package org.createnet.raptor.db.config;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,10 +9,13 @@ import java.util.Map;
  */
 public class StorageConfiguration {
 
+  public StorageConfiguration() {
+  }
+  
   public String type;
   public Couchbase couchbase;
   
-  public class Couchbase {
+  static public class Couchbase {
 
     public List<String> nodes;
     public String username;
@@ -22,7 +23,11 @@ public class StorageConfiguration {
     public Map<String, String> buckets;
     public BucketDefaults bucketDefaults;
     
-    public class BucketDefaults {
+    static public class BucketDefaults {
+
+      public BucketDefaults() {
+      }
+      
       public String password;
       public int quota;
       public int replica;

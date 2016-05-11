@@ -15,15 +15,20 @@
  */
 package org.createnet.raptor.http.service;
 
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
+import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.StorageProvider;
+import org.createnet.raptor.http.configuration.StorageConfiguration;
+import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,17 +44,22 @@ public class StorageService {
   @Inject
   ConfigurationService configuration;
   
+  @Inject
+  AuthService auth;
+  
   private Storage storage;
 
   private enum ConnectionId {
     objects, data, subscriptions, actuations
   }
 
-  protected Storage getStorage() throws IOException, Storage.StorageException {
+  protected Storage getStorage() throws Storage.StorageException, ConfigurationException {
 
     if (storage == null) {
+      logger.debug("Initializing storage instance");
       storage = new StorageProvider();
-      storage.initialize(configuration.getStorage());
+      StorageConfiguration conf = configuration.getStorage();
+      storage.initialize(conf);
       storage.setup(false);
       storage.connect();
     }
@@ -57,11 +67,11 @@ public class StorageService {
     return storage;
   }
 
-  protected Storage.Connection getObjectConnection() throws IOException, Storage.StorageException {
+  protected Storage.Connection getObjectConnection() throws ConfigurationException, Storage.StorageException {
     return getStorage().getConnection(ConnectionId.objects.name());
   }
 
-  public ServiceObject getObject(String id) throws Storage.StorageException, RaptorComponent.ParserException, IOException {
+  public ServiceObject getObject(String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException {
     String json = getObjectConnection().get(id);
     if (json == null) {
       return null;
@@ -71,18 +81,23 @@ public class StorageService {
     return obj;
   }
 
-  public List<ServiceObject> listObjects(String userId) throws Storage.StorageException, RaptorComponent.ParserException, IOException {
+  public List<ServiceObject> listObjects(String userId) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException {
     return new ArrayList();
   }
 
-  public String saveObject(ServiceObject obj) throws IOException, Storage.StorageException, RaptorComponent.ParserException, RaptorComponent.ValidationException {
+  public String saveObject(ServiceObject obj) throws ConfigurationException, Storage.StorageException, RaptorComponent.ParserException, RaptorComponent.ValidationException, Authentication.AutenticationException {
+    
     obj.validate();
+    
     obj.id = ServiceObject.generateUUID();
-    getObjectConnection().set(obj.id, obj.toJSON(), 0);    
+    obj.userId = auth.getUser().getUserId();
+    
+    String json = obj.toJSON(ServiceObjectView.Internal);
+    getObjectConnection().set(obj.id, json, 0);
     return obj.id;
   }
 
-  public void deleteObject(String id) throws IOException, Storage.StorageException {
+  public void deleteObject(String id) throws ConfigurationException, Storage.StorageException {
     getObjectConnection().delete(id);
   }  
   

@@ -135,10 +135,17 @@ public class ElasticSearchIndexer extends AbstractIndexer {
 
       logger.debug("Update index record to {}.{}", record.index, record.type);
 
-      UpdateRequest updateRequest = new UpdateRequest()
-              .source(record.body.getBytes());
-      UpdateResponse response = client.update(updateRequest)
-              .actionGet(getTimeout());
+      UpdateResponse response = client.prepareUpdate(record.index, record.type, record.id)
+              .setDoc(record.body.getBytes())
+              .get(getTimeout());
+//      
+//      UpdateRequest updateRequest = new UpdateRequest(record.index, record.type, record.id)
+//              .source(record.body.getBytes())
+//              .doc(record.body);
+//
+//      UpdateResponse response = client.update(updateRequest)
+//              .actionGet(getTimeout());
+
       if (!response.isCreated()) {
         throw new Exception("Record update failed");
       }
@@ -206,35 +213,35 @@ public class ElasticSearchIndexer extends AbstractIndexer {
       logger.debug("Executing batch on {} items", list.size());
 
       BulkProcessor bulkProcessor = BulkProcessor.builder(
-        client,  
-        new BulkProcessor.Listener() {
-            @Override
-            public void beforeBulk(long executionId,
-                                   BulkRequest request) {
-              logger.debug("Starting bulk operation");
-            } 
+              client,
+              new BulkProcessor.Listener() {
+        @Override
+        public void beforeBulk(long executionId,
+                BulkRequest request) {
+          logger.debug("Starting bulk operation");
+        }
 
-            @Override
-            public void afterBulk(long executionId,
-                                  BulkRequest request,
-                                  BulkResponse response) {
-              logger.debug("Bulk operation completed");
-            } 
+        @Override
+        public void afterBulk(long executionId,
+                BulkRequest request,
+                BulkResponse response) {
+          logger.debug("Bulk operation completed");
+        }
 
-            @Override
-            public void afterBulk(long executionId,
-                                  BulkRequest request,
-                                  Throwable failure) {
-              logger.error("Bulk failed", failure);
-            } 
-        })
-        .setBulkActions(5000) 
-        .setBulkSize(new ByteSizeValue(1, ByteSizeUnit.MB)) 
-        .setFlushInterval(TimeValue.timeValueSeconds(1)) 
-        .setConcurrentRequests(2) 
-        .setBackoffPolicy(
-            BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3))
-        .build();      
+        @Override
+        public void afterBulk(long executionId,
+                BulkRequest request,
+                Throwable failure) {
+          logger.error("Bulk failed", failure);
+        }
+      })
+              .setBulkActions(5000)
+              .setBulkSize(new ByteSizeValue(1, ByteSizeUnit.MB))
+              .setFlushInterval(TimeValue.timeValueSeconds(1))
+              .setConcurrentRequests(2)
+              .setBackoffPolicy(
+                      BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3))
+              .build();
 
       Iterator<IndexOperation> it = list.iterator();
       while (it.hasNext()) {
@@ -281,9 +288,9 @@ public class ElasticSearchIndexer extends AbstractIndexer {
             );
             break;
         }
-        
+
       }
-      
+
       boolean res = bulkProcessor.awaitClose(10, TimeUnit.MINUTES);
       logger.debug("Completed batch: result {}", res);
 
@@ -385,7 +392,6 @@ public class ElasticSearchIndexer extends AbstractIndexer {
 
   }
 
-
   public static void main(String[] argv) throws IndexerException, IOException {
 
     // enable ES logging
@@ -394,17 +400,16 @@ public class ElasticSearchIndexer extends AbstractIndexer {
     final Logger mainLogger = LoggerFactory.getLogger("main");
 
     IndexerConfiguration configuration = new IndexerConfiguration();
-    
+
     configuration.type = "elasticsearch";
-    
+
     configuration.elasticsearch.type = "transport";
-    
+
     configuration.elasticsearch.transport.host = "127.0.0.1";
     configuration.elasticsearch.transport.port = 9300;
-    
+
     configuration.elasticsearch.indices.source = "/etc/raptor/indices.json";
-    
-    
+
 //    String indexFile = "indices.json";
     String dataFile = "data.json";
     ClassLoader classLoader = ElasticSearchIndexer.class.getClassLoader();
@@ -414,15 +419,15 @@ public class ElasticSearchIndexer extends AbstractIndexer {
     Map<String, String> indices = ElasticSearchIndexer.loadIndicesFromFile(filepath);
 
     configuration.elasticsearch.indices.definitions.putAll(indices);
-    
+
     Map<String, String> clientConfig = new HashMap();
     clientConfig.put("cluster.name", "raptor");
 
     configuration.elasticsearch.clientConfig.putAll(clientConfig);
-            
+
     Indexer indexer = new ElasticSearchIndexer();
     indexer.initialize(configuration);
-    
+
     indexer.open();
     indexer.setup(true);
 
@@ -442,7 +447,6 @@ public class ElasticSearchIndexer extends AbstractIndexer {
 //        mainLogger.debug("Completed");
 //      }
 //    }
-
     List<Indexer.IndexOperation> ops = new ArrayList();
     for (int i = 0; i < 10000; i++) {
       mainLogger.debug("Push {}", i);
@@ -454,7 +458,6 @@ public class ElasticSearchIndexer extends AbstractIndexer {
     indexer.batch(ops);
 
 //    indexer.close();
+  }
 
-  }  
-  
 }

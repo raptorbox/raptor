@@ -16,6 +16,7 @@
 package org.createnet.raptor.models.objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectSerializer;
 import org.createnet.raptor.models.objects.deserializer.ServiceObjectDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 @JsonSerialize(using = ServiceObjectSerializer.class)
 @JsonDeserialize(using = ServiceObjectDeserializer.class)
+@JsonFilter("publicFieldsFilter")
 public class ServiceObject extends ServiceObjectContainer {
 
   Logger logger = LoggerFactory.getLogger(ServiceObject.class);
@@ -42,6 +44,7 @@ public class ServiceObject extends ServiceObjectContainer {
   private boolean isNew = true;
 
   public String userId;
+  
   public String id;
 
   public String name;
@@ -144,6 +147,7 @@ public class ServiceObject extends ServiceObjectContainer {
     }
 
     id = serviceObject.id;
+    userId = serviceObject.userId;
     name = serviceObject.name;
     description = serviceObject.description;
     customFields = serviceObject.customFields;

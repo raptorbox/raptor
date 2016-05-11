@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.http.service;
 
-import java.io.IOException;
 import javax.inject.Inject;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
@@ -23,6 +22,7 @@ import org.createnet.raptor.auth.AuthProvider;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authentication.Authentication.UserInfo;
 import org.createnet.raptor.auth.authorization.Authorization;
+import org.createnet.raptor.http.exception.ConfigurationException;
 
 /**
  *
@@ -39,7 +39,7 @@ public class AuthService {
   
   private AuthProvider auth;
   
-  protected AuthProvider getProvider() throws IOException {
+  protected AuthProvider getProvider() throws ConfigurationException {
     if(auth == null) {
      auth = new AuthProvider();
      auth.initialize(config.getAuth());
@@ -48,19 +48,23 @@ public class AuthService {
   }
   
   public boolean isAllowed(String id, Authorization.Permission op) throws Authorization.AuthorizationException {
-    return auth.isAuthorized(securityContext.getUserPrincipal().getName(), id, op);
+    return auth.isAuthorized(getAccessToken(), id, op);
   }
   
   public boolean isAllowed(Authorization.Permission op) throws Authorization.AuthorizationException {
     return isAllowed(null, op);
   }
 
-  public UserInfo getUser() throws IOException, Authentication.AutenticationException {
-    return getProvider().getUser(securityContext.getUserPrincipal().getName());
+  public UserInfo getUser() throws ConfigurationException, Authentication.AutenticationException {
+    return getProvider().getUser(getAccessToken());
   }
   
-  public UserInfo getUser(String accessToken) throws IOException, Authentication.AutenticationException {
+  public UserInfo getUser(String accessToken) throws ConfigurationException, Authentication.AutenticationException {
     return getProvider().getUser(accessToken);
+  }
+  
+  public String getAccessToken() {
+    return securityContext.getUserPrincipal().getName();
   }
 
 }

@@ -15,9 +15,15 @@
  */
 package org.createnet.raptor.http.service;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import javax.inject.Inject;
+import org.createnet.raptor.auth.authentication.Authentication;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.dispatcher.Dispatcher;
+import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.models.objects.RaptorComponent;
+import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,11 +34,41 @@ import org.slf4j.LoggerFactory;
 @Service
 public class DispatcherService {
   
+  final JsonNodeFactory jsonFactory = JsonNodeFactory.instance;
   private final Logger logger = LoggerFactory.getLogger(DispatcherService.class);
   
   @Inject
   ConfigurationService configuration;
   
-  private final Dispatcher dispatcher = new Dispatcher();
+  @Inject
+  AuthService auth;
+  
+  public enum ObjectOperation {
+    create, update, delete
+  }
+  
+  private Dispatcher dispatcher;
+  
+  public Dispatcher getDispatcher() throws ConfigurationException {
+    if(dispatcher == null) {
+      dispatcher = new Dispatcher();
+      dispatcher.initialize(configuration.getDispatcher());
+    }
+    return dispatcher;
+  }
+  
+  public void notifyObjectEvent(ObjectOperation op, ServiceObject obj) throws ConfigurationException, RaptorComponent.ParserException, Authentication.AutenticationException {
+    
+    String topic = "events";
+    
+    ObjectNode message = jsonFactory.objectNode();
+    
+    message.put("op", op.name());
+    message.put("userId", auth.getUser().getUserId());
+    
+    message.putPOJO("object", obj);
+    
+    getDispatcher().add(topic, message.toString());
+  }
   
 }

@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.http.service;
 
+import org.createnet.raptor.http.exception.ConfigurationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.File;
@@ -28,6 +29,8 @@ import org.createnet.raptor.http.configuration.DispatcherConfiguration;
 import org.createnet.raptor.http.configuration.IndexerConfiguration;
 import org.createnet.raptor.http.configuration.StorageConfiguration;
 import org.jvnet.hk2.annotations.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -38,6 +41,8 @@ import org.jvnet.hk2.annotations.Service;
 @Singleton
 public class ConfigurationService {
   
+  final private Logger logger = LoggerFactory.getLogger(ConfigurationService.class);
+  
   final private String basePath = "/etc/raptor/";
   final private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
   
@@ -47,30 +52,36 @@ public class ConfigurationService {
     return new File(basePath + filename + ".yml");
   }
   
-  protected Configuration getInstance(String name, Class<? extends Configuration> clazz) throws IOException {
+  protected Configuration getInstance(String name, Class<? extends Configuration> clazz) throws ConfigurationException {
     
     Configuration config = cache.get(name);
     if(config == null) {
-      Configuration instance = mapper.readValue(getFile(name), clazz);
-      config = cache.put(name, instance);
+      try {
+        config = mapper.readValue(getFile(name), clazz);
+      }
+      catch(IOException ex) {
+        logger.error("Failed to read configuration", ex);
+        throw new RuntimeException(ex);
+      }
+      cache.put(name, config);
     }
     
     return config;
   }
   
-  public StorageConfiguration getStorage() throws IOException {
+  public StorageConfiguration getStorage() throws ConfigurationException {
     return (StorageConfiguration) getInstance("storage", StorageConfiguration.class);
   }
   
-  public AuthConfiguration getAuth() throws IOException {
+  public AuthConfiguration getAuth() throws ConfigurationException {
     return (AuthConfiguration) getInstance("auth", AuthConfiguration.class);
   }
   
-  public IndexerConfiguration getIndexer() throws IOException {
+  public IndexerConfiguration getIndexer() throws ConfigurationException {
     return (IndexerConfiguration) getInstance("indexer", IndexerConfiguration.class);
   }
   
-  public DispatcherConfiguration getDispatcher() throws IOException {
+  public DispatcherConfiguration getDispatcher() throws ConfigurationException {
     return (DispatcherConfiguration) getInstance("dispatcher", DispatcherConfiguration.class);
   }
   

@@ -43,6 +43,10 @@ public class ServiceObjectDeserializer extends JsonDeserializer<ServiceObject> {
       serviceObject.id = tree.get("id").asText();
     }
 
+    if (tree.has("userId")) {
+      serviceObject.userId = tree.get("userId").asText();
+    }
+
     if (tree.has("name")) {
       serviceObject.name = tree.get("name").asText();
     }

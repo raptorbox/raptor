@@ -16,9 +16,7 @@
 package org.createnet.raptor.models.objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.createnet.raptor.models.data.BooleanRecord;
 import org.createnet.raptor.models.data.GeoPointRecord;

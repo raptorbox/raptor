@@ -27,9 +27,6 @@ public class StorageProvider extends AbstractStorage {
 
   private Storage instance;
 
-  public StorageProvider() {
-  }
-
   @Override
   public void initialize(StorageConfiguration configuration) throws StorageException {
 

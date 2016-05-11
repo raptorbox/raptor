@@ -20,10 +20,10 @@ import org.createnet.raptor.http.exception.ExceptionMapper;
 import org.createnet.raptor.http.filter.AuthorizationRequestFilter;
 import org.createnet.raptor.http.service.AuthService;
 import org.createnet.raptor.http.service.ConfigurationService;
+import org.createnet.raptor.http.service.DispatcherService;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.StorageService;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
-import org.glassfish.jersey.process.internal.RequestScoped;
 import org.glassfish.jersey.server.ResourceConfig;
 
 /**
@@ -55,6 +55,10 @@ public class ApplicationConfig extends ResourceConfig {
 
         bind(AuthService.class)
                 .to(AuthService.class)
+                .in(Singleton.class);
+        
+        bind(DispatcherService.class)
+                .to(DispatcherService.class)
                 .in(Singleton.class);
 
 //        bind(AuthService.class)

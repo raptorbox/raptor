@@ -36,6 +36,9 @@ public class ServiceObjectSerializer extends JsonSerializer<ServiceObject> {
         if(t.id != null)
           jg.writeStringField("id", t.id);
         
+        if(t.userId != null)
+          jg.writeStringField("userId", t.userId);
+        
         if(t.name != null)
           jg.writeStringField("name", t.name);
         

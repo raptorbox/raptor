@@ -15,8 +15,8 @@
  */
 package org.createnet.raptor.http.service;
 
-import java.io.IOException;
 import javax.inject.Inject;
+import org.createnet.raptor.http.exception.ConfigurationException;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.jvnet.hk2.annotations.Service;
@@ -40,24 +40,24 @@ public class IndexerService {
     object, data, subscriptions
   }
   
-  protected Indexer getIndexer() throws Indexer.IndexerException, IOException {
+  protected Indexer getIndexer() throws Indexer.IndexerException, ConfigurationException {
 
     if (indexer == null) {
       indexer = new IndexerProvider();
-      indexer.open();
       indexer.initialize(configuration.getIndexer());
+      indexer.open();      
       indexer.setup(false);
     }
 
     return indexer;
   }
   
-  protected Indexer.IndexRecord getIndexRecord(IndexNames name) throws IOException {
+  protected Indexer.IndexRecord getIndexRecord(IndexNames name) throws ConfigurationException {
     IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = configuration.getIndexer().elasticsearch.indices.names.get(name.name());
     return new Indexer.IndexRecord(desc.index, desc.type);
   }
   
-  public void indexObject(ServiceObject obj, boolean isNew) throws IOException, Indexer.IndexerException, RaptorComponent.ParserException {
+  public void indexObject(ServiceObject obj, boolean isNew) throws ConfigurationException, Indexer.IndexerException, RaptorComponent.ParserException {
     
     Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
     record.id = obj.id;
@@ -66,7 +66,15 @@ public class IndexerService {
     // force creation
     record.isNew(isNew);
     
-    indexer.save(record);
+    getIndexer().save(record);
+  }
+  
+  public void deleteObject(String id) throws ConfigurationException, Indexer.IndexerException{
+    
+    Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
+    record.id = id;
+    
+    getIndexer().delete(record);
   }
   
 }
