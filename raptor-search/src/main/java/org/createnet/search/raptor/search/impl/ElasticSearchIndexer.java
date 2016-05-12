@@ -30,11 +30,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import org.createnet.search.raptor.search.AbstractIndexer;
 import org.createnet.search.raptor.search.Indexer;
 import org.createnet.search.raptor.search.Indexer.IndexerException;
 import org.createnet.search.raptor.search.IndexerConfiguration;
 import org.createnet.search.raptor.search.impl.es.ElasticSearchIndexAdmin;
+import org.createnet.search.raptor.search.query.Query;
 import org.elasticsearch.action.bulk.BackoffPolicy;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -42,6 +44,8 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
@@ -53,6 +57,7 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,17 +143,6 @@ public class ElasticSearchIndexer extends AbstractIndexer {
       UpdateResponse response = client.prepareUpdate(record.index, record.type, record.id)
               .setDoc(record.body.getBytes())
               .get(getTimeout());
-//      
-//      UpdateRequest updateRequest = new UpdateRequest(record.index, record.type, record.id)
-//              .source(record.body.getBytes())
-//              .doc(record.body);
-//
-//      UpdateResponse response = client.update(updateRequest)
-//              .actionGet(getTimeout());
-
-      if (!response.isCreated()) {
-        throw new Exception("Record update failed");
-      }
 
     } catch (Exception ex) {
       logger.warn("Record update failed on {}.{}.{}", record.index, record.type, record.id);
@@ -172,12 +166,8 @@ public class ElasticSearchIndexer extends AbstractIndexer {
               .setTimeout(getTimeout())
               .get();
 
-      if (!response.isCreated()) {
-        logger.warn("Record creation failed on {}.{}", record.index, record.type);
-        throw new Exception("Record creation failed");
-      }
-
     } catch (Exception e) {
+      logger.warn("Record creation failed on {}.{}.{}", record.index, record.type, record.id);
       throw new IndexerException(e);
     }
   }
@@ -392,6 +382,36 @@ public class ElasticSearchIndexer extends AbstractIndexer {
 
   }
 
+  @Override
+  public List<String> search(Query query) throws SearchException {
+
+    try {
+
+      SearchResponse response = client.prepareSearch(query.getIndex())
+              .setTypes(query.getType())
+              .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
+              .setQuery(query.format())
+              //        .setFrom(0)
+              //        .setSize(60)
+              //        .setExplain(true)
+              .execute()
+              .actionGet();
+
+      SearchHit[] results = response.getHits().getHits();
+
+      List<String> list = new ArrayList();
+      for (SearchHit hit : results) {
+        list.add(hit.getSourceAsString());
+      }
+      
+      return list;
+
+    } catch (Query.QueryException ex) {
+      throw new SearchException(ex);
+    }
+
+  }
+
   public static void main(String[] argv) throws IndexerException, IOException {
 
     // enable ES logging
@@ -405,7 +425,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
 
     configuration.elasticsearch.type = "transport";
 
-    configuration.elasticsearch.transport.host = "127.0.0.1";
+    configuration.elasticsearch.transport.host = "raptor.local";
     configuration.elasticsearch.transport.port = 9300;
 
     configuration.elasticsearch.indices.source = "/etc/raptor/indices.json";
@@ -447,16 +467,14 @@ public class ElasticSearchIndexer extends AbstractIndexer {
 //        mainLogger.debug("Completed");
 //      }
 //    }
-    List<Indexer.IndexOperation> ops = new ArrayList();
-    for (int i = 0; i < 10000; i++) {
-      mainLogger.debug("Push {}", i);
-      UUID uuid = UUID.randomUUID();
-      IndexRecord record = new IndexRecord("soupdates", "update", uuid.toString(), data);
-      ops.add(new IndexOperation(IndexOperation.Type.CREATE, record));
-    }
-
-    indexer.batch(ops);
-
+//    List<Indexer.IndexOperation> ops = new ArrayList();
+//    for (int i = 0; i < 10000; i++) {
+//      mainLogger.debug("Push {}", i);
+//      UUID uuid = UUID.randomUUID();
+//      IndexRecord record = new IndexRecord("soupdates", "update", uuid.toString(), data);
+//      ops.add(new IndexOperation(IndexOperation.Type.CREATE, record));
+//    }
+//    indexer.batch(ops);
 //    indexer.close();
   }
 

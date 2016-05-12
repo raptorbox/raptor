@@ -37,10 +37,14 @@ abstract class RaptorContainer implements RaptorComponent {
 
   abstract public void parse(String json) throws ParserException;
 
-  protected final ObjectMapper mapper = new ObjectMapper();
+  static protected final ObjectMapper mapper = new ObjectMapper();
 
   protected IEventListener listener;
 
+  public static ObjectMapper getMapper() {
+    return mapper;
+  }
+  
   @JsonBackReference
   protected Map<String, Object> extras = new HashMap<>();
 

@@ -12,6 +12,8 @@ import com.couchbase.client.java.bucket.BucketType;
 import com.couchbase.client.java.cluster.BucketSettings;
 import com.couchbase.client.java.cluster.ClusterManager;
 import com.couchbase.client.java.cluster.DefaultBucketSettings;
+import com.couchbase.client.java.query.Index;
+import com.couchbase.client.java.query.dsl.Expression;
 import java.util.Iterator;
 import java.util.Map;
 import org.createnet.raptor.db.AbstractStorage;
@@ -60,9 +62,11 @@ public class CouchbaseStorage extends AbstractStorage {
 
       Bucket bucket = cluster.openBucket(item.getValue(), getConfiguration().couchbase.bucketDefaults.password);
       Connection conn = new CouchbaseConnection(item.getKey(), bucket);
-
+      
+      conn.initialize(getConfiguration());
       conn.connect();
-
+      conn.setup(false);
+      
       addConnection(conn);
     }
 
@@ -118,6 +122,7 @@ public class CouchbaseStorage extends AbstractStorage {
                 .build();
 
         clusterManager.insertBucket(bucketSettings);
+        
       }
     }
 

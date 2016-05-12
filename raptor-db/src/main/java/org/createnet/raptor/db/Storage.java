@@ -5,6 +5,7 @@
  */
 package org.createnet.raptor.db;
 
+import java.util.List;
 import org.createnet.raptor.db.config.StorageConfiguration;
 
 
@@ -30,9 +31,12 @@ public interface Storage {
     
     public void disconnect();
     public void connect();
+    public void setup(boolean forceSetup);
+    public void initialize(StorageConfiguration configuration);
     
     public void set(String id, String data, int ttlSeconds) throws StorageException;
     public String get(String id) throws StorageException;
+    public List<String> list(String key, String value) throws StorageException;
     public void delete(String id) throws StorageException;
 
   }

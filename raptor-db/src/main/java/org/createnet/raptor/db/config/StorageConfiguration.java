@@ -13,14 +13,18 @@ public class StorageConfiguration {
   }
   
   public String type;
-  public Couchbase couchbase;
+  public Couchbase couchbase = new Couchbase();
   
   static public class Couchbase {
 
+    public Couchbase() {
+    }
+    
     public List<String> nodes;
     public String username;
     public String password;
     public Map<String, String> buckets;
+    public Map<String, List<String>> bucketsIndex;
     public BucketDefaults bucketDefaults;
     
     static public class BucketDefaults {

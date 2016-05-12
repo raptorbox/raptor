@@ -24,6 +24,7 @@ import org.createnet.raptor.dispatcher.Dispatcher;
 import org.createnet.raptor.http.exception.ConfigurationException;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +67,7 @@ public class DispatcherService {
     message.put("op", op.name());
     message.put("userId", auth.getUser().getUserId());
     
-    message.putPOJO("object", obj);
+    message.set("object", obj.toJsonNode());
     
     getDispatcher().add(topic, message.toString());
   }

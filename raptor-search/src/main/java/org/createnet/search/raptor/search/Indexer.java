@@ -16,6 +16,7 @@
 package org.createnet.search.raptor.search;
 
 import java.util.List;
+import org.createnet.search.raptor.search.query.Query;
 
 /**
  *
@@ -36,6 +37,13 @@ public interface Indexer {
     public IndexerException() {}
   }
 
+  public class SearchException extends IndexerException {
+
+    public SearchException(Query.QueryException ex) {
+      super(ex);
+    }
+  };
+  
   public class IndexOperationException extends IndexerException {
     public IndexOperationException(Exception ex) {
       super(ex);
@@ -108,5 +116,7 @@ public interface Indexer {
   public void delete(IndexRecord record) throws IndexerException;
 
   public void batch(List<IndexOperation> list) throws IndexerException;
+  
+  public List<String> search(Query query) throws SearchException;
 
 }

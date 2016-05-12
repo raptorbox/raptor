@@ -15,6 +15,9 @@
  */
 package org.createnet.raptor.http.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Inject;
 import org.createnet.raptor.http.exception.ConfigurationException;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -23,6 +26,7 @@ import org.jvnet.hk2.annotations.Service;
 import org.createnet.search.raptor.search.Indexer;
 import org.createnet.search.raptor.search.IndexerConfiguration;
 import org.createnet.search.raptor.search.IndexerProvider;
+import org.createnet.search.raptor.search.query.impl.ObjectQuery;
 
 /**
  *
@@ -35,7 +39,7 @@ public class IndexerService {
   ConfigurationService configuration;
 
   private Indexer indexer;
-
+  
   protected enum IndexNames {
     object, data, subscriptions
   }
@@ -52,8 +56,12 @@ public class IndexerService {
     return indexer;
   }
   
+  protected IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor getIndexDescriptor(IndexNames name) throws ConfigurationException {
+    return configuration.getIndexer().elasticsearch.indices.names.get(name.name());
+  }
+  
   protected Indexer.IndexRecord getIndexRecord(IndexNames name) throws ConfigurationException {
-    IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = configuration.getIndexer().elasticsearch.indices.names.get(name.name());
+    IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = getIndexDescriptor(name);
     return new Indexer.IndexRecord(desc.index, desc.type);
   }
   
@@ -76,5 +84,23 @@ public class IndexerService {
     
     getIndexer().delete(record);
   }
+
+  public List<ServiceObject> searchObject(ObjectQuery query) throws Indexer.SearchException, IOException, ConfigurationException {
+    
+    IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = getIndexDescriptor(IndexNames.object);        
+    query.setIndex(desc.index);
+    query.setType(desc.type);
+
+    
+    List<String> results = indexer.search(query);
+    List<ServiceObject> list = new ArrayList();
+    
+    for(String result : results) {
+      list.add(ServiceObject.fromJSON(result));
+    }
+    
+    return list;
+  }
+
   
 }

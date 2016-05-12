@@ -163,7 +163,11 @@ public class ServiceObject extends ServiceObjectContainer {
     serviceObject = null;
 
   }
-
+  
+  public static ServiceObject fromJSON(String json) throws IOException {
+    return mapper.readValue(json, ServiceObject.class);
+  }
+  
   public boolean isNew() {
     return isNew;
   }

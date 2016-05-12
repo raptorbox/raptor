@@ -5,12 +5,15 @@
  */
 package org.createnet.raptor.db;
 
+import org.createnet.raptor.db.config.StorageConfiguration;
+
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
 abstract public class AbstractConnection implements Storage.Connection {
   
+  protected StorageConfiguration configuration;
   protected String id;
   
   @Override
@@ -21,5 +24,13 @@ abstract public class AbstractConnection implements Storage.Connection {
   public void setId(String id) {
     this.id = id;
   }
-  
+
+  @Override
+  public void initialize(StorageConfiguration configuration) {
+    this.configuration = configuration;
+  }
+
+  public StorageConfiguration getConfiguration() {
+    return configuration;
+  }
 }

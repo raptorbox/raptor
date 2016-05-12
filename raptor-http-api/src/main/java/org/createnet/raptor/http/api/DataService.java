@@ -55,10 +55,10 @@ import org.createnet.search.raptor.search.query.impl.ObjectQuery;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-@Path("/")
-public class ServiceObjectService {
+@Path("/{id}")
+public class DataService {
 
-  final private Logger logger = LoggerFactory.getLogger(ServiceObjectService.class);
+  final private Logger logger = LoggerFactory.getLogger(DataService.class);
 
   @Inject
   StorageService storage;
@@ -73,6 +73,7 @@ public class ServiceObjectService {
   AuthService auth;
 
   @GET
+  @Path("/streams")
   @Produces(MediaType.APPLICATION_JSON)
   public List<String> list() throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AutenticationException, IOException {
 

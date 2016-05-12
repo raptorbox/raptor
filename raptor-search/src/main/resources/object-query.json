@@ -1,0 +1,16 @@
+{
+  "search": "free text search",
+  "name": "object name",
+  "description": "Search in description text",
+  "customFields": {
+    "stringfield": "key/value matching customFields",
+    "truth": true,
+    "respone": 42.1,
+    "complex": {
+      "iscomplex": true,
+      "morecomplex": {
+        "iscomplex": false
+      }
+    }
+  }
+}

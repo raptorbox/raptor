@@ -16,6 +16,7 @@
 package org.createnet.raptor.http.service;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -81,15 +82,14 @@ public class StorageService {
     return obj;
   }
 
-  public List<ServiceObject> listObjects(String userId) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException {
-    return new ArrayList();
-  }
-
   public String saveObject(ServiceObject obj) throws ConfigurationException, Storage.StorageException, RaptorComponent.ParserException, RaptorComponent.ValidationException, Authentication.AutenticationException {
     
     obj.validate();
     
-    obj.id = ServiceObject.generateUUID();
+    if(obj.id == null) {
+      obj.id = ServiceObject.generateUUID();
+    }
+
     obj.userId = auth.getUser().getUserId();
     
     String json = obj.toJSON(ServiceObjectView.Internal);
@@ -99,6 +99,18 @@ public class StorageService {
 
   public void deleteObject(String id) throws ConfigurationException, Storage.StorageException {
     getObjectConnection().delete(id);
-  }  
+  }
+  
+  public List<ServiceObject> listObjects() throws ConfigurationException, Storage.StorageException, Authentication.AutenticationException, IOException {
+    
+    List<String> results = getObjectConnection().list("userId", auth.getUser().getUserId());
+    
+    List<ServiceObject> list = new ArrayList();
+    for(String raw : results) {
+      list.add(ServiceObject.fromJSON(raw));
+    }
+    
+    return list;
+  }
   
 }

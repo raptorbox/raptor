@@ -14,6 +14,14 @@ couchbase:
     indexReplica: false
     enableFlush: false
 
+  bucketsIndex:
+    objects:
+      - userId
+    data:
+      - userId
+    actuations:
+      - userId
+
   buckets:
     # Configure couchbase bucket name
     objects: serviceobjects

@@ -17,6 +17,7 @@ package org.createnet.search.raptor.search;
 
 import java.util.List;
 import org.createnet.search.raptor.search.impl.ElasticSearchIndexer;
+import org.createnet.search.raptor.search.query.Query;
 
 /**
  *
@@ -70,6 +71,11 @@ public class IndexerProvider extends AbstractIndexer {
   @Override
   public void batch(List<IndexOperation> list) throws IndexerException {
     indexer.batch(list);
+  }
+
+  @Override
+  public List<String> search(Query query) throws SearchException {
+    return indexer.search(query);
   }
 
 }
