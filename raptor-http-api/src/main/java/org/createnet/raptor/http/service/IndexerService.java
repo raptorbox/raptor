@@ -15,7 +15,11 @@
  */
 package org.createnet.raptor.http.service;
 
+import com.couchbase.client.java.document.json.JsonObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -123,6 +127,21 @@ public class IndexerService {
     }
     
     return new RecordSet(stream, results.get(0));
+  }
+  
+  public void indexData(Stream stream, RecordSet recordSet) throws ConfigurationException, Indexer.SearchException, RecordsetException, JsonProcessingException, Indexer.IndexerException, IOException {
+    
+    Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
+    record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getLastUpdate().getTime();
+    
+    ObjectNode data = (ObjectNode) recordSet.toJsonNode();
+    
+    data.put("stream", stream.name);
+    data.put("objectId", stream.getServiceObject().getId());
+    
+    record.body = data.toString();
+    
+    indexer.save(record);
   }
   
 }

@@ -150,7 +150,7 @@ public class RecordSet {
     return record;
   }
 
-  public String toJsonNode() throws JsonProcessingException {
+  public JsonNode toJsonNode() throws JsonProcessingException, IOException {
 
     Map<String, Object> channels = new HashMap<>();
     for (IRecord record : records) {
@@ -167,11 +167,12 @@ public class RecordSet {
     obj.put("lastUpdate", getLastUpdateTime());
 
     ObjectMapper mapper = ServiceObject.getMapper();
-    return mapper.writeValueAsString(obj);
+    // TODO: fix this! :O
+    return mapper.readTree(mapper.writeValueAsString(obj));
   }
 
-  public String toJson() throws JsonProcessingException {
-    return toJsonNode();
+  public String toJson() throws JsonProcessingException, IOException {
+    return toJsonNode().toString();
   }
   
   public Date getLastUpdate() {

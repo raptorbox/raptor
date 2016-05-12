@@ -131,7 +131,7 @@ public class DataService {
   public Response fetchLastUpdate(
           @PathParam("id") String id,
           @PathParam("stream") String streamName
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException {
+  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException, IOException {
 
     ServiceObject obj = loadObject(id);
 
@@ -154,6 +154,38 @@ public class DataService {
     }
 
     return Response.ok(data.toJson()).build();
+  }
+
+  @PUT
+  @Path("{stream}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response save(
+          @PathParam("id") String id,
+          @PathParam("stream") String streamName,
+          RecordSet record
+          
+  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException, Indexer.IndexerException, IOException {
+
+    ServiceObject obj = loadObject(id);
+
+    Stream stream = obj.streams.get(streamName);
+
+    if (stream == null) {
+      throw new NotFoundException("Stream " + streamName + " not found");
+    }
+
+    if (!auth.isAllowed(Authorization.Permission.Push)) {
+      throw new NotAuthorizedException("Cannot push data");
+    }
+    
+    // save data
+    storage.saveData(stream, record);
+    
+    // index data (with objectId and stream props)
+    indexer.indexData(stream, record);
+    // notify onData & data topic
+    
+    return Response.ok().build();
   }
 
 }

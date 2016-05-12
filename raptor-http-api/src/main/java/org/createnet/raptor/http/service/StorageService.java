@@ -16,9 +16,11 @@
 package org.createnet.raptor.http.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -28,6 +30,7 @@ import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.StorageProvider;
 import org.createnet.raptor.http.configuration.StorageConfiguration;
 import org.createnet.raptor.http.exception.ConfigurationException;
+import static org.createnet.raptor.http.service.IndexerService.IndexNames.data;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.exception.RecordsetException;
@@ -44,6 +47,7 @@ import org.slf4j.LoggerFactory;
 @Service
 public class StorageService {
   
+  private int defaultDataTTL = 3 * 30 * 24 * 60 * 60; // 3 months
   private final Logger logger = LoggerFactory.getLogger(StorageService.class);
   
   @Inject
@@ -131,6 +135,14 @@ public class StorageService {
     }
     
     return resultset;
+  }
+
+  public void saveData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException, JsonProcessingException, IOException {
+    
+    ServiceObject obj = stream.getServiceObject();
+    String uniqKey = obj.id + "-" + stream.name + "-" + record.getLastUpdate().getTime();
+    
+    getDataConnection().set(uniqKey, record.toJson(), defaultDataTTL);
   }
 
   
