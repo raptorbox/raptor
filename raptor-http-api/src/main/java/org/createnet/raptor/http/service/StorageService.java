@@ -28,6 +28,10 @@ import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.StorageProvider;
 import org.createnet.raptor.http.configuration.StorageConfiguration;
 import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.models.data.RecordSet;
+import org.createnet.raptor.models.data.ResultSet;
+import org.createnet.raptor.models.exception.RecordsetException;
+import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 
 import org.slf4j.Logger;
@@ -71,6 +75,10 @@ public class StorageService {
   protected Storage.Connection getObjectConnection() throws ConfigurationException, Storage.StorageException {
     return getStorage().getConnection(ConnectionId.objects.name());
   }
+  
+  protected Storage.Connection getDataConnection() throws ConfigurationException, Storage.StorageException {
+    return getStorage().getConnection(ConnectionId.data.name());
+  }
 
   public ServiceObject getObject(String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException {
     String json = getObjectConnection().get(id);
@@ -112,5 +120,18 @@ public class StorageService {
     
     return list;
   }
+
+  public ResultSet fetchData(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AutenticationException {
+    
+    ResultSet resultset = new ResultSet(stream);
+
+    List<String> results = getDataConnection().list("userId", auth.getUser().getUserId());
+    for(String raw : results) {
+      resultset.add(raw);
+    }
+    
+    return resultset;
+  }
+
   
 }

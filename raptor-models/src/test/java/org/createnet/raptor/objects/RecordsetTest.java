@@ -63,7 +63,7 @@ public class RecordsetTest extends TestUtils {
     assertTrue(records.getByChannelName("happy") instanceof BooleanRecord);
     assertTrue(records.getByChannelName("happy").getValue().equals(true));
     
-    System.out.println("org.createnet.raptor.objects.RecordsetTest.testParseRecord() "  + records.toJSON()); 
+    System.out.println("org.createnet.raptor.objects.RecordsetTest.testParseRecord() "  + records.toJson()); 
     
   }
 

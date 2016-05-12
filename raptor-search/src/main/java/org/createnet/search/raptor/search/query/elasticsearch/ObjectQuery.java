@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Luca Capra <lcapra@create-net.org>.
+ * Copyright 2016 CREATE-NET
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.search.raptor.search.query.impl;
+package org.createnet.search.raptor.search.query.elasticsearch;
 
+import org.createnet.search.raptor.search.query.AbstractQuery;
 import java.util.Iterator;
 import java.util.Map;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -25,7 +26,7 @@ import org.elasticsearch.index.query.QueryBuilders;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class ObjectQuery extends ElasticsearchQuery {
+public class ObjectQuery extends AbstractQuery {
 
   public String search;
 

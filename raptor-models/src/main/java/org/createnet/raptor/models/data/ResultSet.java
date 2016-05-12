@@ -15,11 +15,18 @@
  */
 package org.createnet.raptor.models.data;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import org.createnet.raptor.models.exception.RecordsetException;
+import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,48 +36,75 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <luca.capra@gmail.com>
  */
 public class ResultSet extends ArrayList<RecordSet> {
-   
-    Logger logger = LoggerFactory.getLogger(ResultSet.class);
 
-    protected Stream stream;
+  private final Logger logger = LoggerFactory.getLogger(ResultSet.class);
 
-    public Stream getStream() {
-        return stream;
+  protected Stream stream;
+
+  public Stream getStream() {
+    return stream;
+  }
+
+  public void setStream(Stream stream) {
+    this.stream = stream;
+  }
+
+  public ResultSet(Stream stream, String jsonString) throws RecordsetException {
+    this.stream = stream;
+    if (jsonString != null) {
+      parse(jsonString);
+    }
+  }
+
+  public ResultSet(Stream stream) throws RecordsetException {
+    this(stream, null);
+  }
+
+  private void parse(String jsonString) throws RecordsetException {
+
+    ObjectMapper mapper = ServiceObject.getMapper();
+    JsonNode json;
+
+    try {
+      json = mapper.readTree(jsonString);
+    } catch (IOException ex) {
+      logger.error("Error parsing: " + jsonString, ex);
+      return;
     }
 
-    public void setStream(Stream stream) {
-        this.stream = stream;
+    JsonNode list = json.get("data");
+
+    if (list.isArray()) {
+      for (JsonNode row : list) {
+        this.add(jsonString);
+      }
+    }
+
+  }
+
+  public RecordSet add(String raw) throws RecordsetException {
+    RecordSet recordset = new RecordSet(stream, raw);
+    this.add(recordset);
+    return recordset;
+  }
+  
+  public String toJson() throws JsonProcessingException {
+    return toJsonNode().toString();
+  }
+  
+  public JsonNode toJsonNode() throws JsonProcessingException {
+    
+    ObjectNode node = ServiceObject.getMapper().createObjectNode();
+    
+    Iterator<RecordSet> it = this.iterator();
+    
+    ArrayNode dataNode = node.putArray("data");
+    while (it.hasNext()) {
+      RecordSet next = it.next();
+      dataNode.add(next.toJsonNode());
     }
     
-    public ResultSet(Stream stream, String jsonString) throws RecordsetException {
-        this.stream = stream;
-        if(jsonString != null) {
-            parse(jsonString);
-        }
-    }
+    return (JsonNode) node;
+  }
 
-    private void parse(String jsonString) throws RecordsetException {
-        
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode json;
-        try {
-            json = mapper.readTree(jsonString);
-        } catch (IOException ex) {
-            logger.error("Error parsing " + jsonString, ex);
-            return;
-        }
-
-        JsonNode list = json.get("data");
-        
-        if (list.isArray()) {
-
-            for (JsonNode row : list) {
-                RecordSet recordset = new RecordSet(stream, row);
-                this.add(recordset);
-            }
-
-        }
-        
-    }
-    
 }

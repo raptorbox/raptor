@@ -24,17 +24,33 @@ import org.createnet.search.raptor.search.query.Query;
  */
 public interface Indexer {
 
+  public enum Sort {
+    ASC, DESC
+  }
+  
+  public class SortBy {
+
+    public SortBy(String field, Sort sort) {
+      this.sort = sort;
+      this.field = field;
+    }
+    
+    public Sort sort;
+    public String field;
+  }
+  
   public class IndexerException extends Exception {
 
     public IndexerException(Exception ex) {
-        super("IndexerException", ex);
+      super("IndexerException", ex);
     }
-    
-    public IndexerException(String reason) {
-        super(reason);
-    }    
 
-    public IndexerException() {}
+    public IndexerException(String reason) {
+      super(reason);
+    }
+
+    public IndexerException() {
+    }
   }
 
   public class SearchException extends IndexerException {
@@ -43,8 +59,9 @@ public interface Indexer {
       super(ex);
     }
   };
-  
+
   public class IndexOperationException extends IndexerException {
+
     public IndexOperationException(Exception ex) {
       super(ex);
     }
@@ -56,7 +73,7 @@ public interface Indexer {
       this.type = type;
       this.record = record;
     }
-    
+
     public enum Type {
       CREATE, UPDATE, UPSERT, SAVE, DELETE
     }
@@ -64,14 +81,14 @@ public interface Indexer {
     public Type type;
     public IndexRecord record;
   }
-  
+
   public class IndexRecord {
-    
+
     private boolean isNew = false;
-    
+
     public String index;
     public String type;
-    public String id ;
+    public String id;
     public String body = null;
 
     public IndexRecord(String index, String type, String id, String body) {
@@ -80,43 +97,44 @@ public interface Indexer {
       this.id = id;
       this.body = body;
     }
-    
+
     public IndexRecord(String index, String type, String id) {
       this.index = index;
       this.type = type;
       this.id = id;
     }
-    
+
     public IndexRecord(String index, String type) {
       this.index = index;
       this.type = type;
     }
-    
+
     public boolean isNew() {
       return isNew;
     }
-    
+
     public boolean isNew(boolean isNew) {
       this.isNew = isNew;
       return isNew;
     }
-    
+
   }
-  
+
   public void open() throws IndexerException;
-    
+
   public void initialize(IndexerConfiguration configuration) throws IndexerException;
-  
+
   public void setup(boolean forceSetup) throws IndexerException;
-  
+
   public void close() throws IndexerException;
-  
+
   public void save(IndexRecord record) throws IndexerException;
 
   public void delete(IndexRecord record) throws IndexerException;
 
   public void batch(List<IndexOperation> list) throws IndexerException;
-  
-  public List<String> search(Query query) throws SearchException;
 
+  public List<String> search(Query query) throws SearchException;
+  public List<String> search(Query query, int limit, int offset, SortBy sort) throws SearchException;
+  
 }

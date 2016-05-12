@@ -39,13 +39,13 @@ public class Action extends ServiceObjectContainer {
   public String description;
 
   public Action(String json) throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper = ServiceObject.getMapper();
     JsonNode tree = mapper.readTree(json);
     parse(tree, null);
   }
 
   public Action(String json, ServiceObject object) throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper = ServiceObject.getMapper();
     JsonNode tree = mapper.readTree(json);
     parse(tree, object);
   }

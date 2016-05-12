@@ -15,10 +15,11 @@
  */
 package org.createnet.raptor.http.api;
 
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -48,169 +49,111 @@ import org.createnet.raptor.http.service.DispatcherService;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.search.raptor.search.Indexer;
 import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.models.data.RecordSet;
+import org.createnet.raptor.models.data.ResultSet;
+import org.createnet.raptor.models.exception.RecordsetException;
+import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
-import org.createnet.search.raptor.search.query.impl.ObjectQuery;
+import org.createnet.search.raptor.search.query.elasticsearch.ObjectQuery;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-@Path("/{id}")
+@Path("/{id}/streams")
 public class DataService {
 
   final private Logger logger = LoggerFactory.getLogger(DataService.class);
 
   @Inject
   StorageService storage;
-  
+
   @Inject
   IndexerService indexer;
-  
+
   @Inject
   DispatcherService dispatcher;
-  
+
   @Inject
   AuthService auth;
 
-  @GET
-  @Path("/streams")
-  @Produces(MediaType.APPLICATION_JSON)
-  public List<String> list() throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AutenticationException, IOException {
+  protected ServiceObject loadObject(String id) throws Authorization.AuthorizationException, Storage.StorageException, RaptorComponent.ParserException, ConfigurationException {
 
-    if (!auth.isAllowed(Authorization.Permission.Read)) {
-      throw new NotAllowedException("Cannot list objects");
+    if (!auth.isAllowed(id, Authorization.Permission.Read)) {
+      throw new NotAllowedException("Cannot access object");
     }
 
-    List<ServiceObject> list = storage.listObjects();
-    List<String> idList = new ArrayList();
-    for (ServiceObject obj : list) {
-      idList.add(obj.id);
-    }
-    
-    return idList;
-  }
-
-  @POST
-  @Produces(MediaType.APPLICATION_JSON)
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response create(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException {
-
-    if (!auth.isAllowed(Authorization.Permission.Create)) {
-      throw new NotAuthorizedException("Cannot create object");
-    }
-
-    storage.saveObject(obj);
-
-
-    try {
-      indexer.indexObject(obj, true);
-    } catch (Indexer.IndexerException ex) {
-      
-      logger.error("Indexing error occured", ex);
-      logger.warn("Removing object {} from storage", obj.id);
-      
-      storage.deleteObject(obj.id);
-      
-      throw new InternalServerErrorException();
-    }    
-    
-    dispatcher.notifyObjectEvent(DispatcherService.ObjectOperation.create, obj);
-    
-    logger.debug("Created new object {} for {}", obj.id, auth.getUser().getUserId());
-    
-    return Response.created(URI.create("/" + obj.id)).entity(obj.toJSON(ServiceObjectView.IdOnly)).build();
-  }
-
-  @PUT
-  @Path("{id}")
-  @Produces(MediaType.APPLICATION_JSON)
-  @Consumes(MediaType.APPLICATION_JSON)
-  public ServiceObject update(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, Indexer.IndexerException {
-
-    ServiceObject storedObj = storage.getObject(obj.id);
-
-    if (storedObj == null) {
-      throw new NotFoundException();
-    }
-
-    if(!auth.isAllowed(obj.id, Authorization.Permission.Update)) {
-      throw new NotAuthorizedException("Cannot update object");
-    }
-    
-    if (!storedObj.userId.equals(auth.getUser().getUserId())) {
-      logger.warn("User {} tried to update object {} owned by {}", auth.getUser().getUserId(), storedObj.id, storedObj.userId);
-      throw new NotFoundException();
-    }
-
-    logger.debug("Updating object {}", obj.id);
-    storage.saveObject(obj);
-    indexer.indexObject(obj, false);
-    
-    dispatcher.notifyObjectEvent(DispatcherService.ObjectOperation.update, obj);
-    
-    logger.debug("Updated object {} for {}", obj.id, auth.getUser().getUserId());
-    return obj;
+    return storage.getObject(id);
   }
 
   @GET
-  @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
-  public ServiceObject load(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException {
+  public Collection<Stream> list(@PathParam("id") String id)
+          throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AutenticationException, IOException {
 
-    logger.debug("Load object {}", id);
+    ServiceObject obj = loadObject(id);
 
-    ServiceObject obj = storage.getObject(id);
+    logger.debug("Load streams for object {}", obj.id);
 
-    if (obj == null) {
-      logger.debug("Object {} not found", id);
-      throw new NotFoundException();
-    }
-
-    if(!auth.isAllowed(obj.id, Authorization.Permission.Read)) {
-      throw new NotAuthorizedException("Cannot read object");
-    }
-    
-    return obj;
+    return obj.streams.values();
   }
 
-  @DELETE
-  @Path("{id}")
+  @GET
+  @Path("{stream}")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response delete(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, Authorization.AuthorizationException, ConfigurationException, Indexer.IndexerException, Authentication.AutenticationException  {
+  public ResultSet fetch(
+          @PathParam("id") String id,
+          @PathParam("stream") String streamName
+  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, JsonProcessingException, RecordsetException {
 
-    logger.debug("delete object {}", id);
+    ServiceObject obj = loadObject(id);
 
-    ServiceObject obj = storage.getObject(id);
+    Stream stream = obj.streams.get(streamName);
 
-    if (obj == null) {
-      logger.debug("Object {} not found", id);
-      throw new NotFoundException();
+    if (stream == null) {
+      throw new NotFoundException("Stream " + streamName + " not found");
     }
 
-    if(!auth.isAllowed(obj.id, Authorization.Permission.Delete)) {
-      throw new NotAuthorizedException("Cannot delete object");
+    if (!auth.isAllowed(Authorization.Permission.Pull)) {
+      throw new NotAuthorizedException("Cannot fetch data");
     }
 
-    storage.deleteObject(id);
-    indexer.deleteObject(id);
-    
-    dispatcher.notifyObjectEvent(DispatcherService.ObjectOperation.delete, obj);
-    
-    return Response.status(Response.Status.OK).build();
+    ResultSet data = storage.fetchData(stream);
+
+    logger.debug("Fetched {} records for stream {} in object {}", data.size(), streamName, obj.id);
+
+    return data;
   }
 
-  @POST
-  @Path("/search")
-  @Consumes(MediaType.APPLICATION_JSON)
+  @GET
+  @Path("{stream}/lastUpdate")
   @Produces(MediaType.APPLICATION_JSON)
-  public List<ServiceObject> search(ObjectQuery query) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AutenticationException, Indexer.SearchException, IOException {
+  public Response fetchLastUpdate(
+          @PathParam("id") String id,
+          @PathParam("stream") String streamName
+  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException {
 
-    if (!auth.isAllowed(Authorization.Permission.Read)) {
-      throw new NotAllowedException("Cannot search for objects");
+    ServiceObject obj = loadObject(id);
+
+    Stream stream = obj.streams.get(streamName);
+
+    if (stream == null) {
+      throw new NotFoundException("Stream " + streamName + " not found");
     }
-    
-    List<ServiceObject> list = indexer.searchObject(query);
-    return list;
-  }  
-  
+
+    if (!auth.isAllowed(Authorization.Permission.Pull)) {
+      throw new NotAuthorizedException("Cannot fetch data");
+    }
+
+    RecordSet data = indexer.searchLastUpdate(stream);
+
+    logger.debug("Fetched lastUpdate record for stream {} in object {}", streamName, obj.id);
+
+    if (data == null) {
+      return Response.noContent().build();
+    }
+
+    return Response.ok(data.toJson()).build();
+  }
+
 }

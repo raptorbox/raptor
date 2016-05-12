@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Luca Capra <lcapra@create-net.org>.
+ * Copyright 2016 CREATE-NET
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.search.raptor.search.query.impl;
+package org.createnet.search.raptor.search.query.elasticsearch;
 
+import org.createnet.search.raptor.search.query.AbstractQuery;
 import java.util.ArrayList;
 import java.util.List;
+import org.createnet.search.raptor.search.query.Query;
 import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.index.query.AndQueryBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -31,7 +33,7 @@ import org.elasticsearch.index.query.TermQueryBuilder;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class DataQuery extends ElasticsearchQuery {
+public class DataQuery extends AbstractQuery {
 
   public DataQuery() {}
   
@@ -71,7 +73,7 @@ public class DataQuery extends ElasticsearchQuery {
   public String matchstring;
 
   @Override
-  public void validate() throws QueryException {
+  public void validate() throws Query.QueryException {
 
     if (timerange) {
       return;
@@ -94,7 +96,7 @@ public class DataQuery extends ElasticsearchQuery {
       return;
     }
 
-    throw new QueryException("Query is empty");
+    throw new Query.QueryException("Query is empty");
   }
 
   protected List<QueryBuilder> buildQuery() {

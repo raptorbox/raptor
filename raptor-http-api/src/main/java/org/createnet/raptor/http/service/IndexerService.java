@@ -20,13 +20,19 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.models.data.RecordSet;
+import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Stream;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.search.raptor.search.Indexer;
 import org.createnet.search.raptor.search.IndexerConfiguration;
 import org.createnet.search.raptor.search.IndexerProvider;
-import org.createnet.search.raptor.search.query.impl.ObjectQuery;
+import org.createnet.search.raptor.search.query.AbstractQuery;
+import org.createnet.search.raptor.search.query.Query;
+import org.createnet.search.raptor.search.query.elasticsearch.LastUpdateQuery;
+import org.createnet.search.raptor.search.query.elasticsearch.ObjectQuery;
 
 /**
  *
@@ -64,6 +70,12 @@ public class IndexerService {
     IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = getIndexDescriptor(name);
     return new Indexer.IndexRecord(desc.index, desc.type);
   }
+
+  private void setQueryIndex(AbstractQuery query, IndexNames name) throws ConfigurationException {
+    IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = getIndexDescriptor(name);
+    query.setIndex(desc.index);
+    query.setType(desc.type);
+  }
   
   public void indexObject(ServiceObject obj, boolean isNew) throws ConfigurationException, Indexer.IndexerException, RaptorComponent.ParserException {
     
@@ -87,10 +99,7 @@ public class IndexerService {
 
   public List<ServiceObject> searchObject(ObjectQuery query) throws Indexer.SearchException, IOException, ConfigurationException {
     
-    IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = getIndexDescriptor(IndexNames.object);        
-    query.setIndex(desc.index);
-    query.setType(desc.type);
-
+    setQueryIndex(query, IndexNames.object);
     
     List<String> results = indexer.search(query);
     List<ServiceObject> list = new ArrayList();
@@ -102,5 +111,18 @@ public class IndexerService {
     return list;
   }
 
+  public RecordSet searchLastUpdate(Stream stream) throws ConfigurationException, Indexer.SearchException, RecordsetException {
+    
+    LastUpdateQuery lastUpdateQuery = new LastUpdateQuery(stream.getServiceObject().id, stream.name);
+    setQueryIndex(lastUpdateQuery, IndexNames.data);
+
+    List<String> results = indexer.search(lastUpdateQuery, 1, 0, new Indexer.SortBy("lastUpdate", Indexer.Sort.DESC));
+    
+    if(results.isEmpty()) {
+      return null; 
+    }
+    
+    return new RecordSet(stream, results.get(0));
+  }
   
 }

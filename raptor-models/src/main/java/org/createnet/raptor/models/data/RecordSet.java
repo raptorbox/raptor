@@ -29,6 +29,7 @@ import java.util.Map;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Channel;
 import org.createnet.raptor.models.objects.RaptorComponent;
+import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
 
 /**
@@ -38,22 +39,22 @@ import org.createnet.raptor.models.objects.Stream;
 public class RecordSet {
 
   private Date lastUpdate;
-  private ArrayList<IRecord> records;
-
-  public RecordSet(Stream stream, JsonNode row) throws RecordsetException {
-
-    this.records = new ArrayList<>();
+  final private ArrayList<IRecord> records = new ArrayList();
+  
+  public RecordSet() {
     this.lastUpdate = new Date();
-
+  }
+  
+  public RecordSet(Stream stream, JsonNode row) throws RecordsetException {
+    this();
     parseJson(stream, row);
   }
 
   public RecordSet(Stream stream, String body) throws RecordsetException {
 
-    this.records = new ArrayList<>();
     this.lastUpdate = new Date();
 
-    ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper = ServiceObject.getMapper();
     try {
       parseJson(stream, mapper.readTree(body));
     } catch (IOException ex) {
@@ -62,12 +63,12 @@ public class RecordSet {
   }
 
   public RecordSet(ArrayList<IRecord> records) {
-    this.records = records;
+    this.records.addAll(records);
     this.lastUpdate = new Date();
   }
 
   public RecordSet(ArrayList<IRecord> records, Date date) {
-    this.records = records;
+    this.records.addAll(records);
     this.lastUpdate = date;
   }
 
@@ -149,11 +150,7 @@ public class RecordSet {
     return record;
   }
 
-  public String toJSON() throws JsonProcessingException {
-
-    if (records == null) {
-      return null;
-    }
+  public String toJsonNode() throws JsonProcessingException {
 
     Map<String, Object> channels = new HashMap<>();
     for (IRecord record : records) {
@@ -169,10 +166,14 @@ public class RecordSet {
 
     obj.put("lastUpdate", getLastUpdateTime());
 
-    ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper = ServiceObject.getMapper();
     return mapper.writeValueAsString(obj);
   }
 
+  public String toJson() throws JsonProcessingException {
+    return toJsonNode();
+  }
+  
   public Date getLastUpdate() {
     if (lastUpdate == null) {
       setLastUpdate(new Date());
@@ -193,7 +194,8 @@ public class RecordSet {
   }
 
   public void setRecords(ArrayList<IRecord> records) {
-    this.records = records;
+    this.records.clear(); 
+    this.records.addAll(records);
   }
 
   private void parseJson(Stream stream, JsonNode row) throws RecordsetException {
