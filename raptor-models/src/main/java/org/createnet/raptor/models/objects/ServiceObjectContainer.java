@@ -16,6 +16,7 @@
 package org.createnet.raptor.models.objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Map;
 import org.createnet.raptor.models.data.Record;
 import org.createnet.raptor.models.data.types.TypesManager;
@@ -27,10 +28,10 @@ import org.createnet.raptor.models.events.ServiceObjectEventListener;
  */
 abstract class ServiceObjectContainer extends RaptorContainer {
 
-    @JsonBackReference
+    @JsonIgnore
     protected ServiceObjectEventListener listener;
     
-    @JsonBackReference
+    @JsonIgnore
     protected ServiceObject serviceObject;
     
     protected Map<String, Record> getTypes() {

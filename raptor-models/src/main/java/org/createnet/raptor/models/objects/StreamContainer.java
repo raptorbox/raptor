@@ -16,6 +16,7 @@
 package org.createnet.raptor.models.objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.createnet.raptor.models.events.StreamEventListener;
 
 /**
@@ -25,10 +26,10 @@ import org.createnet.raptor.models.events.StreamEventListener;
 abstract class StreamContainer extends ServiceObjectContainer
 {
     
-    @JsonBackReference
+    @JsonIgnore
     protected StreamEventListener listener;
     
-    @JsonBackReference
+    @JsonIgnore
     protected Stream stream;
 
     @Override

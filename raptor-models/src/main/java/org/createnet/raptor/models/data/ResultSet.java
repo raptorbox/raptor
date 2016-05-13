@@ -15,13 +15,16 @@
  */
 package org.createnet.raptor.models.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
@@ -36,16 +39,19 @@ public class ResultSet {
   
   // json properties
   public final Data data = new Data();
+  
+  @JsonIgnore
   public int lastUpdate;
   
-  private final Logger logger = LoggerFactory.getLogger(ResultSet.class);
-
+  @JsonIgnore
   protected Stream stream;
+    
+  @JsonIgnore
+  private final Logger logger = LoggerFactory.getLogger(ResultSet.class);
   
   static public class Data extends ArrayList<RecordSet>{
     
-    public Data() {
-    }
+    public Data() {}
     
   }
   
@@ -57,6 +63,9 @@ public class ResultSet {
     this.stream = stream;
   }
 
+  public ResultSet() {
+  }
+  
   public ResultSet(Stream stream, String jsonString) throws RecordsetException {
     this.stream = stream;
     if (jsonString != null) {

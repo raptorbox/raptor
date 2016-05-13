@@ -12,6 +12,7 @@ import org.createnet.raptor.models.data.IRecord;
 import org.createnet.raptor.models.data.Record;
 import org.createnet.raptor.models.data.types.BooleanRecord;
 import org.createnet.raptor.models.data.RecordSet;
+import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Stream;
 import org.junit.After;
@@ -48,6 +49,7 @@ public class RecordsetTest extends TestUtils {
     loadObject();
     data = loadData("record");
     data1 = loadData("record1");
+    
   }
   
   @After
@@ -80,6 +82,17 @@ public class RecordsetTest extends TestUtils {
     RecordSet records = mapper.readValue(data1.toString(), RecordSet.class);
     
     System.out.println("org.createnet.raptor.objects.RecordsetTest.testParseRecord() "  + records.toJson()); 
+    
+  }
+  
+  @Test
+  public void testParseResultSet() throws RecordsetException, JsonProcessingException, IOException {
+    
+    
+    JsonNode resultset = loadData("resultset");
+    ResultSet results = mapper.readValue(resultset.toString(), ResultSet.class);
+    
+    System.out.println("org.createnet.raptor.objects.RecordsetTest.testParseRecord() "  + results.toJson()); 
     
   }
 

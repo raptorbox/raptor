@@ -16,6 +16,7 @@
 package org.createnet.raptor.models.objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -45,7 +46,7 @@ abstract class RaptorContainer implements RaptorComponent {
     return mapper;
   }
   
-  @JsonBackReference
+  @JsonIgnore
   protected Map<String, Object> extras = new HashMap<>();
 
   public Map<String, Object> getExtras() {
@@ -56,7 +57,7 @@ abstract class RaptorContainer implements RaptorComponent {
     extras.put(key, val);
   }
 
-  @JsonBackReference
+  @JsonIgnore
   protected RaptorComponent container;
 
   public RaptorComponent getContainer() {
