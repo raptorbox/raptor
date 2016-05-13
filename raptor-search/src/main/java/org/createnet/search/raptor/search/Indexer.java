@@ -23,21 +23,6 @@ import org.createnet.search.raptor.search.query.Query;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public interface Indexer {
-
-  public enum Sort {
-    ASC, DESC
-  }
-  
-  public class SortBy {
-
-    public SortBy(String field, Sort sort) {
-      this.sort = sort;
-      this.field = field;
-    }
-    
-    public Sort sort;
-    public String field;
-  }
   
   public class IndexerException extends Exception {
 
@@ -135,6 +120,5 @@ public interface Indexer {
   public void batch(List<IndexOperation> list) throws IndexerException;
 
   public List<String> search(Query query) throws SearchException;
-  public List<String> search(Query query, int limit, int offset, SortBy sort) throws SearchException;
   
 }

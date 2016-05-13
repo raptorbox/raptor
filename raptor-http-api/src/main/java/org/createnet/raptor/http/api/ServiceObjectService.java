@@ -49,7 +49,7 @@ import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.search.raptor.search.Indexer;
 import org.createnet.raptor.http.exception.ConfigurationException;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
-import org.createnet.search.raptor.search.query.elasticsearch.ObjectQuery;
+import org.createnet.search.raptor.search.query.impl.es.ObjectQuery;
 
 /**
  *

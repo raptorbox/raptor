@@ -24,6 +24,11 @@ public abstract class AbstractQuery implements Query{
   private String index;
   private String type;
 
+  private int limit;
+  private int offset;
+  private Query.SortBy sort;
+    
+  
   @Override
   public String getType() {
     return type;
@@ -34,12 +39,40 @@ public abstract class AbstractQuery implements Query{
     return index;
   }
 
+  @Override
+  public Integer getOffset() {
+    return offset;
+  }
+
+  @Override
+  public Integer getLimit() {
+    return limit;
+  }
+
+  @Override
+  public SortBy getSort() {
+    return sort;
+  }
+
+  
   public void setIndex(String index) {
     this.index = index;
   }
 
   public void setType(String type) {
     this.type = type;
+  }
+
+  public void setLimit(int limit) {
+    this.limit = limit;
+  }
+
+  public void setOffset(int offset) {
+    this.offset = offset;
+  }
+
+  public void setSort(SortBy sort) {
+    this.sort = sort;
   }
   
 }

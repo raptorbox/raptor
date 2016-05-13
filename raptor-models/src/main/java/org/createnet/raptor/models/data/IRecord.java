@@ -29,6 +29,7 @@ public interface IRecord<K> {
     public void setLastUpdate(Date date);
     
     public String getType();
+    public Class<K> getClassType();
     public String getName();
     
     public K getValue();

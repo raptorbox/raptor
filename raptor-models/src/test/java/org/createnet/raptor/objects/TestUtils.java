@@ -30,13 +30,11 @@ import org.createnet.raptor.models.objects.ServiceObject;
 abstract public class TestUtils {
   
   protected String modelFilename = "model.json";
-  protected String dataFilename = "record.json";
   
   protected JsonNode jsonServiceObject = null;
   protected ServiceObject serviceObject;
-  protected JsonNode jsonData;
   
-  ObjectMapper mapper = new ObjectMapper();  
+  protected final ObjectMapper mapper = new ObjectMapper();  
   
   protected void loadObject() throws IOException {
     
@@ -48,12 +46,12 @@ abstract public class TestUtils {
     
   };
   
-  protected void loadData() throws IOException {
+  protected JsonNode loadData(String filename) throws IOException {
     
-    Path path = Paths.get(getClass().getClassLoader().getResource(dataFilename).getPath());
+    Path path = Paths.get(getClass().getClassLoader().getResource(filename + ".json").getPath());
     byte[] content = Files.readAllBytes(path);
     
-    jsonData = mapper.readTree(content);  
+    return mapper.readTree(content);  
   };
   
 }

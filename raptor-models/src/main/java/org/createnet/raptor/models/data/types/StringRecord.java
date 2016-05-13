@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.models.data;
+package org.createnet.raptor.models.data.types;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import org.createnet.raptor.models.data.Record;
 import org.createnet.raptor.models.objects.RaptorComponent;
 
 /**
@@ -43,10 +45,27 @@ public class StringRecord extends Record<String> {
     @Override
     public String parseValue(Object value) throws RaptorComponent.ParserException {
       try {
-        return (String)value;
+        
+        if(value instanceof String) {
+          return (String) value;
+        }
+        
+        if(value instanceof JsonNode) {
+          JsonNode node = (JsonNode) value;
+          if(node.isTextual()) 
+            return node.asText();
+        }
+        
+        return (String) value;
+        
       } catch (Exception e) {
         throw new RaptorComponent.ParserException(e);
       }
     }
+
+  @Override
+  public Class<String> getClassType() {
+    return String.class;
+  }
     
 }

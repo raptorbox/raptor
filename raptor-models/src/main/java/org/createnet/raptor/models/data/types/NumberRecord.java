@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.models.data;
+package org.createnet.raptor.models.data.types;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
+import org.createnet.raptor.models.data.Record;
 import org.createnet.raptor.models.objects.RaptorComponent;
 
 /**
@@ -47,6 +49,25 @@ public class NumberRecord extends Record<Number> {
     public Number parseValue(Object value) throws RaptorComponent.ParserException {
         try {
           
+          if(value instanceof Number) {
+            return (Number) value;
+          }
+          
+          if(value instanceof JsonNode) {
+            JsonNode node = (JsonNode) value;
+            if(node.isNumber()) {
+              
+              if(node.isInt() || node.isShort())
+                return (Number) node.asInt();
+              
+              if(node.isDouble() || node.isFloat())
+                return (Number) node.asDouble();
+              
+              if(node.isLong())
+                return (Number) node.asLong();
+            }
+          }
+          
           NumberFormat formatter = NumberFormat.getInstance();
           ParsePosition pos = new ParsePosition(0);
           Number numVal = formatter.parse((String) value, pos);
@@ -57,6 +78,11 @@ public class NumberRecord extends Record<Number> {
           throw new RaptorComponent.ParserException(e);
         }
     }    
+
+  @Override
+  public Class<Number> getClassType() {
+    return Number.class;
+  }
     
 }
 

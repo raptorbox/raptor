@@ -15,36 +15,55 @@
  */
 package org.createnet.raptor.models.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.createnet.raptor.models.data.types.NumberRecord;
+import org.createnet.raptor.models.data.types.BooleanRecord;
+import org.createnet.raptor.models.data.types.GeoPointRecord;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
-import java.text.NumberFormat;
-import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import org.createnet.raptor.models.data.types.StringRecord;
+import org.createnet.raptor.models.data.types.TypesManager;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Channel;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.models.objects.serializer.RecordSetSerializer;
+import org.createnet.raptor.models.objects.deserializer.RecordSetDeserializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
+@JsonSerialize(using = RecordSetSerializer.class)
+@JsonDeserialize(using = RecordSetDeserializer.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RecordSet {
 
-  private Date lastUpdate;
-  final private ArrayList<IRecord> records = new ArrayList();
+  public Date lastUpdate;
+  final public Map<String, IRecord> channels = new HashMap();
+  
+  @JsonIgnoreProperties
+  private final Logger logger = LoggerFactory.getLogger(RecordSet.class);
   
   public RecordSet() {
     this.lastUpdate = new Date();
   }
-  
+
   public RecordSet(Stream stream, JsonNode row) throws RecordsetException {
     this();
     parseJson(stream, row);
@@ -63,12 +82,20 @@ public class RecordSet {
   }
 
   public RecordSet(ArrayList<IRecord> records) {
-    this.records.addAll(records);
+    
+    for (IRecord record : records) {
+      this.channels.put(record.getName(), record);
+    }
+    
     this.lastUpdate = new Date();
   }
 
   public RecordSet(ArrayList<IRecord> records, Date date) {
-    this.records.addAll(records);
+
+    for (IRecord record : records) {
+      this.channels.put(record.getName(), record);
+    }
+    
     this.lastUpdate = date;
   }
 
@@ -84,53 +111,36 @@ public class RecordSet {
       }
 
       channel = stream.channels.get(key);
-    }
+    } 
+    else {
 
-    if (channel == null) {
+      //try parse value
+      for (Map.Entry<String, Record> item : TypesManager.getTypes().entrySet()) {
 
-      String strVal = value.toString();
-      if (strVal.equals("false") || strVal.equals("true")) {
-        record = new BooleanRecord();
-      } //                else if(
-      //                    // matches [\d.\d,\d.\d]
-      //                    strVal.matches("\\[?\\w*-?\\d+(\\.\\d+)?\\w*\\,\\w*-?\\d+(\\.\\d+)?\\w*\\]?") ||
-      //                    // matches { "lat|lon
-      //                    (strVal.matches("\\w*\\{\\w*\\\"lat") || strVal.matches("\\w*\\{\\w*\\\"lon"))
-      //                    // ! wont match geohashes!
-      //                        
-      //                ) {
-      //                    record = new GeoPointRecord();
-      //                }
-      else {
-        
-        if(strVal.length() > 0) {
+        try {
 
-          NumberFormat formatter = NumberFormat.getInstance();
-          ParsePosition pos = new ParsePosition(0);
-          Number numVal = formatter.parse(strVal, pos);
+          Record recordType = item.getValue();
+          value = recordType.parseValue(value);
 
-          if (strVal.length() == pos.getIndex()) {
-            record = new NumberRecord();
-          } else {
-            // defaults to string
-            record = new StringRecord();
-          }
+          channel = new Channel();
+          channel.name = key;
+          channel.type = recordType.getType();
 
-        }
-        else {
-          record = new StringRecord();
+          break;
+
+        } catch (RaptorComponent.ParserException e) {
+//          int v = 0;
         }
 
       }
 
-      channel = new Channel();
-      channel.setStream(stream);
-      channel.name = key;
+    }
 
-    } else {
+    if (channel != null) {
+
       switch (channel.type) {
         case "string":
-          record = new StringRecord();          
+          record = new StringRecord();
           break;
         case "boolean":
           record = new BooleanRecord();
@@ -141,40 +151,25 @@ public class RecordSet {
         case "geo_point":
           record = new GeoPointRecord();
           break;
+        default:
+          throw new RaptorComponent.ParserException("Data type not supported: " + channel.type);
       }
-    }
 
-    record.setValue(value);
-    record.setChannel(channel);
+      record.setValue(record.getClassType().cast(value));
+      record.setChannel(channel);
+    }
 
     return record;
   }
 
-  public JsonNode toJsonNode() throws JsonProcessingException, IOException {
-
-    Map<String, Object> channels = new HashMap<>();
-    for (IRecord record : records) {
-
-      Map<String, Object> currValue = new HashMap<>();
-      currValue.put("current-value", record.getValue());
-
-      channels.put(record.getName(), currValue);
-    }
-
-    Map<String, Object> obj = new HashMap<>();
-    obj.put("channels", channels);
-
-    obj.put("lastUpdate", getLastUpdateTime());
-
-    ObjectMapper mapper = ServiceObject.getMapper();
-    // TODO: fix this! :O
-    return mapper.readTree(mapper.writeValueAsString(obj));
+  public ObjectNode toJsonNode() throws JsonProcessingException, IOException {
+    return ServiceObject.getMapper().convertValue(this, ObjectNode.class);
   }
 
   public String toJson() throws JsonProcessingException, IOException {
     return toJsonNode().toString();
   }
-  
+
   public Date getLastUpdate() {
     if (lastUpdate == null) {
       setLastUpdate(new Date());
@@ -190,13 +185,16 @@ public class RecordSet {
     this.lastUpdate = lastUpdate;
   }
 
-  public ArrayList<IRecord> getRecords() {
-    return records;
+  public Map getRecords() {
+    return channels;
   }
 
-  public void setRecords(ArrayList<IRecord> records) {
-    this.records.clear(); 
-    this.records.addAll(records);
+  public void setRecords(List<IRecord> records) {
+    this.channels.clear();
+
+    for (IRecord record : records) {
+      this.channels.put(record.getName(), record);
+    }
   }
 
   private void parseJson(Stream stream, JsonNode row) throws RecordsetException {
@@ -227,11 +225,11 @@ public class RecordSet {
       try {
         if (stream != null && (stream.channels != null && !stream.channels.isEmpty())) {
           if (stream.channels.containsKey(channelName)) {
-            this.addRecord(stream, channelName, valObj.toString());
+            this.addRecord(stream, channelName, valObj);
           }
         } else {
           // definition is unknown, add all channels to the record set
-          this.addRecord(stream, channelName, valObj.toString());
+          this.addRecord(stream, channelName, valObj);
         }
       } catch (Exception e) {
         throw new RecordsetException(e);
@@ -246,7 +244,7 @@ public class RecordSet {
     IRecord record = RecordSet.createRecord(stream, channelName, value);
     if (record != null) {
       record.setRecordSet(this);
-      this.records.add(record);
+      this.channels.put(record.getName(), record);
     }
 
     return record;
@@ -257,12 +255,7 @@ public class RecordSet {
    * @return IRecord
    */
   public IRecord getByChannelName(String channelName) {
-    for (IRecord record : records) {
-      if (channelName.equals(record.getName())) {
-        return record;
-      }
-    }
-    return null;
+    return channels.get(channelName);
   }
 
   /**

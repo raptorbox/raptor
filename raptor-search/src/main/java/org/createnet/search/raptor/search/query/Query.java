@@ -20,10 +20,7 @@ package org.createnet.search.raptor.search.query;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public interface Query {
-
-  public String getIndex();
-  public String getType();
-  
+ 
   public class QueryException extends Exception {
 
     public QueryException(String m) {
@@ -31,6 +28,29 @@ public interface Query {
     }
   }
   
+  public enum Sort {
+    ASC, DESC
+  }
+  
+  public class SortBy {
+
+    public SortBy(String field, Sort sort) {
+      this.sort = sort;
+      this.field = field;
+    }
+    
+    public Sort sort;
+    public String field;
+  }  
+    
+  public String getIndex();
+  public String getType();
+  
+  public SortBy getSort();
+  public Integer getLimit();
+  public Integer getOffset();
+  
+
   public void validate() throws QueryException;
   public String format() throws QueryException;
   

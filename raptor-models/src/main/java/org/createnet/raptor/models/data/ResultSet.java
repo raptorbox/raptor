@@ -18,13 +18,10 @@ package org.createnet.raptor.models.data;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
@@ -35,12 +32,23 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-public class ResultSet extends ArrayList<RecordSet> {
-
+public class ResultSet {
+  
+  // json properties
+  public final Data data = new Data();
+  public int lastUpdate;
+  
   private final Logger logger = LoggerFactory.getLogger(ResultSet.class);
 
   protected Stream stream;
-
+  
+  static public class Data extends ArrayList<RecordSet>{
+    
+    public Data() {
+    }
+    
+  }
+  
   public Stream getStream() {
     return stream;
   }
@@ -81,30 +89,32 @@ public class ResultSet extends ArrayList<RecordSet> {
     }
 
   }
-
-  public RecordSet add(String raw) throws RecordsetException {
-    RecordSet recordset = new RecordSet(stream, raw);
-    this.add(recordset);
+  
+  public Iterator<RecordSet> iterator() {
+    return data.iterator();
+  }
+  
+  public int size() {
+    return data.size();
+  }
+  
+  public RecordSet add(RecordSet recordset) {
+    this.data.add(recordset);
     return recordset;
   }
   
-  public String toJson() throws JsonProcessingException {
+  public RecordSet add(String raw) throws RecordsetException {
+    RecordSet recordset = new RecordSet(stream, raw);
+    return this.add(recordset);
+  }
+  
+  public String toJson() throws JsonProcessingException, IOException {
     return toJsonNode().toString();
   }
   
-  public JsonNode toJsonNode() throws JsonProcessingException {
-    
-    ObjectNode node = ServiceObject.getMapper().createObjectNode();
-    
-    Iterator<RecordSet> it = this.iterator();
-    
-    ArrayNode dataNode = node.putArray("data");
-    while (it.hasNext()) {
-      RecordSet next = it.next();
-      dataNode.add(next.toJsonNode());
-    }
-    
-    return (JsonNode) node;
+  public ObjectNode toJsonNode() throws JsonProcessingException, IOException {
+    ObjectMapper mapper = ServiceObject.getMapper();
+    return mapper.convertValue(this, ObjectNode.class);
   }
 
 }

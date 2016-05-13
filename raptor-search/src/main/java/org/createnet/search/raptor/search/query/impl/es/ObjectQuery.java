@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.search.raptor.search.query.elasticsearch;
+package org.createnet.search.raptor.search.query.impl.es;
 
 import org.createnet.search.raptor.search.query.AbstractQuery;
 import java.util.Iterator;

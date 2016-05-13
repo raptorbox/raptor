@@ -24,7 +24,7 @@ import org.elasticsearch.common.unit.TimeValue;
 abstract public class AbstractIndexer implements Indexer {
 
   final long defaultTimeout = 500;
-  
+
   protected IndexerConfiguration configuration;
 
   public IndexerConfiguration getConfiguration() {
@@ -39,5 +39,7 @@ abstract public class AbstractIndexer implements Indexer {
   public void initialize(IndexerConfiguration configuration) throws IndexerException {
     this.configuration = configuration;
   }
+
+  
   
 }

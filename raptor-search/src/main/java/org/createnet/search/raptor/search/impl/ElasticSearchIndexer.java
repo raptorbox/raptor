@@ -384,11 +384,6 @@ public class ElasticSearchIndexer extends AbstractIndexer {
 
   @Override
   public List<String> search(Query query) throws SearchException {
-    return search(query, 0, 0, null);
-  }
-
-  @Override
-  public List<String> search(Query query, int limit, int offset, SortBy sort) throws SearchException {
 
     try {
 
@@ -397,16 +392,16 @@ public class ElasticSearchIndexer extends AbstractIndexer {
               .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
               .setQuery(query.format());
       
-      if(limit > 0) {
-        searchBuilder.setSize(limit);
+      if(query.getLimit() != null) {
+        searchBuilder.setSize(query.getLimit());
       }
       
-      if(offset > 0) {
-        searchBuilder.setFrom(offset);
+      if(query.getOffset() != null) {
+        searchBuilder.setFrom(query.getOffset());
       }
       
-      if(sort != null) {
-        searchBuilder.addSort(sort.field, sort.sort == Sort.ASC ? SortOrder.ASC : SortOrder.DESC);
+      if(query.getSort() != null) {
+        searchBuilder.addSort(query.getSort().field, query.getSort().sort == Query.Sort.ASC ? SortOrder.ASC : SortOrder.DESC);
       }
 
       SearchResponse response = searchBuilder.execute().actionGet();

@@ -35,8 +35,8 @@ import org.createnet.search.raptor.search.IndexerConfiguration;
 import org.createnet.search.raptor.search.IndexerProvider;
 import org.createnet.search.raptor.search.query.AbstractQuery;
 import org.createnet.search.raptor.search.query.Query;
-import org.createnet.search.raptor.search.query.elasticsearch.LastUpdateQuery;
-import org.createnet.search.raptor.search.query.elasticsearch.ObjectQuery;
+import org.createnet.search.raptor.search.query.impl.es.LastUpdateQuery;
+import org.createnet.search.raptor.search.query.impl.es.ObjectQuery;
 
 /**
  *
@@ -119,8 +119,12 @@ public class IndexerService {
     
     LastUpdateQuery lastUpdateQuery = new LastUpdateQuery(stream.getServiceObject().id, stream.name);
     setQueryIndex(lastUpdateQuery, IndexNames.data);
-
-    List<String> results = indexer.search(lastUpdateQuery, 1, 0, new Indexer.SortBy("lastUpdate", Indexer.Sort.DESC));
+    
+    lastUpdateQuery.setOffset(0);
+    lastUpdateQuery.setLimit(1);
+    lastUpdateQuery.setSort(new Query.SortBy("lastUpdate", Query.Sort.DESC));
+    
+    List<String> results = indexer.search(lastUpdateQuery);
     
     if(results.isEmpty()) {
       return null; 

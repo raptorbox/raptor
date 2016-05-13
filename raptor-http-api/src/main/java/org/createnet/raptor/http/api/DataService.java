@@ -54,7 +54,7 @@ import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
-import org.createnet.search.raptor.search.query.elasticsearch.ObjectQuery;
+import org.createnet.search.raptor.search.query.impl.es.ObjectQuery;
 
 /**
  *

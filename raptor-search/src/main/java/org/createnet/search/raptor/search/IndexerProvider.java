@@ -78,9 +78,4 @@ public class IndexerProvider extends AbstractIndexer {
     return indexer.search(query);
   }
 
-  @Override
-  public List<String> search(Query query, int limit, int offset, SortBy sort) throws SearchException {
-    return indexer.search(query, limit, offset, sort);
-  }
-
 }

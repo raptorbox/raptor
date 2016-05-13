@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author Luca Capra <luca.capra@gmail.com>
  */
 @JsonSerialize(using = ServiceObjectSerializer.class)

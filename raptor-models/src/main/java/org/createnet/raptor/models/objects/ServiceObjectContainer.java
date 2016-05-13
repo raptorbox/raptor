@@ -16,13 +16,9 @@
 package org.createnet.raptor.models.objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import java.util.HashMap;
 import java.util.Map;
-import org.createnet.raptor.models.data.BooleanRecord;
-import org.createnet.raptor.models.data.GeoPointRecord;
-import org.createnet.raptor.models.data.NumberRecord;
 import org.createnet.raptor.models.data.Record;
-import org.createnet.raptor.models.data.StringRecord;
+import org.createnet.raptor.models.data.types.TypesManager;
 import org.createnet.raptor.models.events.ServiceObjectEventListener;
 
 /**
@@ -37,33 +33,8 @@ abstract class ServiceObjectContainer extends RaptorContainer {
     @JsonBackReference
     protected ServiceObject serviceObject;
     
-    @JsonBackReference
-    protected Map<String, Record> types = new HashMap();
-    
     protected Map<String, Record> getTypes() {
-      if(types.isEmpty()) {
-        
-        Record instance;
-        
-        // String
-        instance = new StringRecord();
-        types.put(instance.getType(), instance);
-        
-        // Number
-        instance = new NumberRecord();
-        types.put(instance.getType(), instance);
-        
-        // Boolean
-        instance = new BooleanRecord();
-        types.put(instance.getType(), instance);
-        
-        // Boolean
-        instance = new GeoPointRecord();
-        types.put(instance.getType(), instance);
-
-      }
-      
-      return types;
+      return TypesManager.getTypes();
     }
     
     @Override

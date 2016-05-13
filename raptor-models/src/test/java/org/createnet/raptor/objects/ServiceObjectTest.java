@@ -5,6 +5,7 @@
  */
 package org.createnet.raptor.objects;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,6 +25,8 @@ import static org.junit.Assert.*;
  */
 public class ServiceObjectTest extends TestUtils {
   
+  protected JsonNode jsonData;
+  
   public ServiceObjectTest() {
     
   }
@@ -40,7 +43,7 @@ public class ServiceObjectTest extends TestUtils {
   @Before
   public void setUp() throws IOException {   
     loadObject();
-    loadData();
+    jsonData = loadData("record");
   }
   
   @After
