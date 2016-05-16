@@ -106,7 +106,7 @@ public class RecordSet {
 
     IRecord record = null;
     Channel channel = null;
-
+    
     if (stream != null) {
 
       if (!stream.channels.isEmpty() && !stream.channels.containsKey(key)) {
@@ -141,7 +141,7 @@ public class RecordSet {
 
     if (channel != null) {
 
-      switch (channel.type) {
+      switch (channel.type.toLowerCase()) {
         case "string":
           record = new StringRecord();
           break;
@@ -158,7 +158,7 @@ public class RecordSet {
           throw new RaptorComponent.ParserException("Data type not supported: " + channel.type);
       }
 
-      record.setValue(record.getClassType().cast(value));
+      record.setValue(value);
       record.setChannel(channel);
     }
 

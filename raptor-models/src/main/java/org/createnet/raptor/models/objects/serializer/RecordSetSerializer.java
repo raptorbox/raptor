@@ -46,7 +46,7 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
           if(channel.getValue() == null) continue;
           
           jg.writeObjectFieldStart(channelName);
-          jg.writeObjectField("channel-value", channel.getValue());
+          jg.writeObjectField("current-value", channel.getValue());
           jg.writeEndObject();
           
         }
