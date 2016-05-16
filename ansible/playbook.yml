@@ -1,1 +1,37 @@
-# to be done
+---
+- hosts: raptor-api
+  vars:
+    admin_user: Administrator
+    admin_password: password
+    cluster_ram_quota: 512
+  roles:
+    - {
+        role: ansiblebit.oracle-java, 
+        oracle_java_set_as_default: yes
+      }
+  tasks:
+    - name: Installs nginx web server
+      apt: pkg=nginx state=installed update_cache=true
+      notify:
+        - start nginx
+
+    - name: Copy config file
+      copy: src=../config dest=/etc/raptor mode=0644 owner=root group=root
+
+    - name: Download couchbase
+      get_url: url=http://packages.couchbase.com/releases/4.0.0/couchbase-server-community_4.0.0-ubuntu14.04_amd64.deb dest=~/.
+    - name: Install Couchbase
+      shell: dpkg -i ~/couchbase-server-community_4.0.0-ubuntu14.04_amd64.deb
+    - name: Configure main node
+      shell: /opt/couchbase/bin/couchbase-cli cluster-init -c 127.0.0.1:8091  --cluster-init-username=${admin_user} --cluster-init-password=${admin_password} --cluster-init-port=8091 --cluster-init-ramsize=${cluster_ram_quota}
+
+    - name: Download elasticsearch
+      get_url: url=https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.3.2/elasticsearch-2.3.2.deb dest=~/.
+    - name: Install elasticsearch
+      shell: dpkg -i ~/elasticsearch-2.3.2.deb
+
+
+
+  handlers:
+    - name: start nginx
+      service: name=nginx state=started

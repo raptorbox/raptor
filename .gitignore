@@ -1,1 +1,2 @@
-./raptor-*/target/*
+./raptor*/target/*
+.vagrant
