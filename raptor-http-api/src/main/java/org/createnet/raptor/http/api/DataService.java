@@ -67,7 +67,7 @@ public class DataService {
 
   @Inject
   AuthService auth;
-
+  
   protected ServiceObject loadObject(String id) throws Authorization.AuthorizationException, Storage.StorageException, RaptorComponent.ParserException, ConfigurationException {
 
     if (!auth.isAllowed(id, Authorization.Permission.Read)) {
@@ -173,10 +173,22 @@ public class DataService {
     storage.saveData(stream, record);
     
     // index data (with objectId and stream props)
-    indexer.indexData(stream, record);
+    try {
+      indexer.indexData(stream, record);
+    }
+    catch(ConfigurationException | IOException | Indexer.IndexerException ex) {
+      logger.error("Failed to index record for {}", obj.id);
+      storage.deleteData(stream, record);
+      throw ex;
+    }
+    
     // notify onData & data topic
+    dispatcher.notifyDataEvent(stream, record);
+    
+    logger.debug("Stored record for stream {} in object {}", streamName, obj.id);
     
     return Response.ok().build();
   }
-
+  
+  
 }

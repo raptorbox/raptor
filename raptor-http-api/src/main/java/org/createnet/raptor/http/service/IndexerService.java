@@ -15,14 +15,12 @@
  */
 package org.createnet.raptor.http.service;
 
-import com.couchbase.client.java.document.json.JsonObject;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
+import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.http.exception.ConfigurationException;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.exception.RecordsetException;
@@ -48,13 +46,16 @@ public class IndexerService {
   @Inject
   ConfigurationService configuration;
 
+  @Inject
+  AuthService auth;
+
   private Indexer indexer;
   
   protected enum IndexNames {
     object, data, subscriptions
   }
   
-  protected Indexer getIndexer() throws Indexer.IndexerException, ConfigurationException {
+  public Indexer getIndexer() throws Indexer.IndexerException, ConfigurationException {
 
     if (indexer == null) {
       indexer = new IndexerProvider();
@@ -101,15 +102,16 @@ public class IndexerService {
     getIndexer().delete(record);
   }
 
-  public List<ServiceObject> searchObject(ObjectQuery query) throws Indexer.SearchException, IOException, ConfigurationException {
+  public List<String> searchObject(ObjectQuery query) throws Indexer.SearchException, IOException, ConfigurationException, Authentication.AutenticationException, RaptorComponent.ParserException {
     
     setQueryIndex(query, IndexNames.object);
+    query.setUserId(auth.getUser().getUserId());
     
     List<String> results = indexer.search(query);
-    List<ServiceObject> list = new ArrayList();
+    List<String> list = new ArrayList();
     
     for(String result : results) {
-      list.add(ServiceObject.fromJSON(result));
+      list.add(ServiceObject.fromJSON(result).id);
     }
     
     return list;
@@ -133,10 +135,11 @@ public class IndexerService {
     return new RecordSet(stream, results.get(0));
   }
   
-  public void indexData(Stream stream, RecordSet recordSet) throws ConfigurationException, Indexer.SearchException, RecordsetException, JsonProcessingException, Indexer.IndexerException, IOException {
+  public void indexData(Stream stream, RecordSet recordSet) throws ConfigurationException, IOException, Indexer.IndexerException  {
     
     Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
     record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getLastUpdate().getTime();
+    record.isNew(true);
     
     ObjectNode data = (ObjectNode) recordSet.toJsonNode();
     
@@ -145,7 +148,7 @@ public class IndexerService {
     
     record.body = data.toString();
     
-    indexer.save(record);
+    getIndexer().save(record);
   }
   
 }

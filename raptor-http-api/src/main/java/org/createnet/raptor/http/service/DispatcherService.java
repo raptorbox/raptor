@@ -17,14 +17,16 @@ package org.createnet.raptor.http.service;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.IOException;
 import javax.inject.Inject;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.dispatcher.Dispatcher;
 import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
-import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
+import org.createnet.raptor.models.objects.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +47,7 @@ public class DispatcherService {
   AuthService auth;
   
   public enum ObjectOperation {
-    create, update, delete
+    create, update, delete, push
   }
   
   private Dispatcher dispatcher;
@@ -70,6 +72,25 @@ public class DispatcherService {
     message.set("object", obj.toJsonNode());
     
     getDispatcher().add(topic, message.toString());
+  }
+
+  public void notifyDataEvent(Stream stream, RecordSet record) throws IOException, ConfigurationException, Authentication.AutenticationException {
+    
+    String topic = "events";
+    
+    ObjectNode message = jsonFactory.objectNode();
+    
+    message.put("op", "data");
+    message.put("userId", auth.getUser().getUserId());
+    
+    message.put("objectId", stream.getServiceObject().id);
+    message.put("stream", stream.name);
+    
+//    message.set("object", stream.getServiceObject().toJsonNode());
+    
+    message.set("data", record.toJsonNode());
+    
+    getDispatcher().add(topic, message.toString());    
   }
   
 }

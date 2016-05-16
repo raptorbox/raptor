@@ -47,12 +47,12 @@ public class StorageProvider extends AbstractStorage {
   }
 
   @Override
-  public void setup(boolean forceSetup) {
+  public void setup(boolean forceSetup) throws StorageException {
     instance.setup(forceSetup);
   }
 
   @Override
-  public void connect() {
+  public void connect() throws StorageException {
     instance.connect();
   }
 

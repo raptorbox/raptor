@@ -18,9 +18,10 @@ import com.couchbase.client.java.query.Statement;
 import com.couchbase.client.java.query.consistency.ScanConsistency;
 import com.couchbase.client.java.query.dsl.Expression;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.createnet.raptor.db.AbstractConnection;
 import org.createnet.raptor.db.Storage;
 import org.slf4j.Logger;
@@ -31,9 +32,9 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class CouchbaseConnection extends AbstractConnection {
-  
+
   private final Logger logger = LoggerFactory.getLogger(CouchbaseConnection.class);
-  
+
   final String indexPrefix = "by";
   final Bucket bucket;
 
@@ -52,9 +53,19 @@ public class CouchbaseConnection extends AbstractConnection {
   }
 
   @Override
-  public void set(String id, String data, int ttlSeconds) {
+  public void set(String id, String data, int ttlDays) {
+
     JsonObject obj = JsonObject.fromJson(data);
-    JsonDocument doc = JsonDocument.create(id, ttlSeconds, obj);
+    
+    int ttl = ttlDays;
+    if(ttlDays > 0) {
+      Calendar c = Calendar.getInstance();
+      c.setTime(new Date());
+      c.add(Calendar.DATE, ttlDays);
+      ttl = (int) (c.getTime().getTime() / 1000);
+    }
+    
+    JsonDocument doc = JsonDocument.create(id, ttl, obj);
     bucket.upsert(doc);
   }
 
@@ -79,8 +90,8 @@ public class CouchbaseConnection extends AbstractConnection {
   @Override
   public List<String> list(String key, String value) throws Storage.StorageException {
 
-    Statement select = Select.select("*").from(bucket.name())
-            .where(Expression.x(key).eq("`" + value + "`"));
+    Statement select = Select.select("*").from("`" + bucket.name() + "`")
+            .where(Expression.x("`" + key + "`").eq("\"" + value + "\""));
     N1qlParams ryow = N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS);
 
     N1qlQueryResult results = bucket.query(N1qlQuery.simple(select, ryow));
@@ -97,7 +108,7 @@ public class CouchbaseConnection extends AbstractConnection {
     Iterator<N1qlQueryRow> it = results.allRows().iterator();
     while (it.hasNext()) {
       N1qlQueryRow row = it.next();
-      list.add(row.value().toString());
+      list.add(row.value().get(bucket.name()).toString());
     }
 
     return list;
@@ -105,15 +116,17 @@ public class CouchbaseConnection extends AbstractConnection {
 
   @Override
   public void setup(boolean forceSetup) throws Storage.StorageException {
-    
-    logger.debug("Setup connection {}, force {}", this.id , forceSetup);
-    
-    List<List<String>> indexFields = getConfiguration().couchbase.bucketsIndex.getOrDefault(this.id, new ArrayList());
 
+    logger.debug("Setup connection {}, force {}", this.id, forceSetup);
+
+    List<List<String>> indexFields = getConfiguration().couchbase.bucketsIndex.getOrDefault(this.id, new ArrayList());
+    
+    
+    // @TODO: find a way to query N1QL to check if index exists
     if (forceSetup) {
-      
+
       logger.debug("Drop primary index");
-      
+
       bucket.query(N1qlQuery.simple(
               Index.dropPrimaryIndex(bucket.name())
       ));
@@ -125,7 +138,7 @@ public class CouchbaseConnection extends AbstractConnection {
           for (String fieldName : fieldsList) {
             indexName += fieldName;
           }
-          
+
           logger.debug("Drop secondary index {}", indexName);
           bucket.query(N1qlQuery.simple(
                   Index.dropIndex(bucket.name(), indexName)
@@ -134,46 +147,43 @@ public class CouchbaseConnection extends AbstractConnection {
         }
       }
 
-    }
+      logger.debug("Create primary index");
+      bucket.query(N1qlQuery.simple(
+              Index.createPrimaryIndex().on(bucket.name())
+      ));
 
-    logger.debug("Create primary index");
-    bucket.query(N1qlQuery.simple(
-            Index.createPrimaryIndex().on(bucket.name())
-    ));
+      if (!indexFields.isEmpty()) {
+        for (List<String> fieldsList : indexFields) {
 
-    if (!indexFields.isEmpty()) {
-      for (List<String> fieldsList : indexFields) {
-                
-        String fieldsNames = "";
-        String indexName = indexPrefix;
-        for (String fieldName : fieldsList) {
-          indexName += fieldName;
-          fieldsNames += "`" + fieldName + "`,";
+          String fieldsNames = "";
+          String indexName = indexPrefix;
+          for (String fieldName : fieldsList) {
+            indexName += fieldName;
+            fieldsNames += "`" + fieldName + "`,";
+          }
+
+          String indexQuery = "CREATE INDEX `" + indexName
+                  + "` ON `" + bucket.name()
+                  + "` (" + fieldsNames.substring(0, fieldsNames.length() - 1) + ")";
+
+          logger.debug("Create secondary index {}", indexName);
+          logger.debug("N1QL query: {}", indexQuery);
+
+          N1qlQueryResult result = bucket.query(N1qlQuery.simple(indexQuery));
+
+          if (!result.errors().isEmpty()) {
+            String errors = "";
+            for (JsonObject err : result.errors()) {
+              errors += "\n- " + err.toString();
+            }
+
+            throw new Storage.StorageException("Error creating index for " + bucket.name() + ": " + errors);
+          }
+
         }
-        
-        String indexQuery = "CREATE INDEX `"+ indexName 
-                +"` ON `"+ bucket.name()
-                +"` ("+ fieldsNames.substring(0, fieldsNames.length()-1) +")";
-
-        logger.debug("Create secondary index {}", indexName);
-        logger.debug("N1QL query: {}", indexQuery);
-        
-         N1qlQueryResult result = bucket.query(N1qlQuery.simple(indexQuery));
-         
-         if(!result.errors().isEmpty()) {
-           String errors = "";
-           for(JsonObject err : result.errors()) {
-             errors += "\n- " + err.toString();
-           }
-           
-           throw new Storage.StorageException("Error creating index for " + bucket.name() + ": " + errors);
-         }
-         
-         
-         
       }
-    }
 
+    }
   }
 
 }

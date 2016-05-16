@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.cli;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.logging.Level;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -26,6 +28,7 @@ import org.apache.commons.cli.ParseException;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.http.ApplicationConfig;
 import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.search.raptor.search.Indexer;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.ServiceLocatorFactory;
 import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
@@ -37,32 +40,41 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class Cli {
-  
-  final private Logger logger = LoggerFactory.getLogger(Cli.class);
+
+  static final private Logger logger = LoggerFactory.getLogger(Cli.class);
   final private Commands commands = new Commands();
-  
+
   public static class CommandName {
-    
+
     final public static String CLI_NAME = "raptor-cli";
-    
+
     final public static String SETUP = "setup";
     final public static String INDEX = "index";
 
   }
 
   public Cli() {
-    
+
     ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
     ServiceLocator serviceLocator = locatorFactory.create("CliLocator");
     ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());
-    
-    serviceLocator.inject(commands);
+
+    serviceLocator.inject(commands);   
     
   }
-  
+
   public static void main(String[] args) throws ParseException {
 
     final Cli app = new Cli();
+    
+    try {
+      if(!Cli.isRoot()) {
+        logger.warn("Current user is not root");
+      }
+    }
+    catch(Exception e) {
+      logger.error("Cannot get current username", e);
+    }
     
     Options options = new Options();
 
@@ -78,8 +90,8 @@ public class Cli {
     CommandLine cmd = parser.parse(options, args);
 
     HelpFormatter formatter = new HelpFormatter();
-    formatter.printHelp( CommandName.CLI_NAME, options );    
-    
+    formatter.printHelp(CommandName.CLI_NAME, options);
+
     if (cmd.hasOption("setup")) {
       app.setup(cmd.hasOption("force"));
     }
@@ -90,9 +102,35 @@ public class Cli {
     logger.debug("Running setup, force {}", force);
     try {
       commands.setup(force);
-    } catch (Storage.StorageException | ConfigurationException ex) {
+    } catch (Indexer.IndexerException | Storage.StorageException | ConfigurationException ex) {
       logger.error("Error during setup", ex);
     }
   }
-  
+
+  // from http://stackoverflow.com/a/24064448/833499 
+  public static boolean isRoot() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
+
+    String osName = System.getProperty("os.name").toLowerCase();
+    String className = null;
+
+    if (osName.contains("windows")) {
+      className = "com.sun.security.auth.module.NTSystem";
+    } else if (osName.contains("linux")) {
+      className = "com.sun.security.auth.module.UnixSystem";
+    } else if (osName.contains("solaris") || osName.contains("sunos")) {
+      className = "com.sun.security.auth.module.SolarisSystem";
+    }
+
+    if (className != null) {
+      Class<?> c = Class.forName(className);
+      Method method = c.getDeclaredMethod("getUsername");
+      Object o = c.newInstance();
+      String name = (String) method.invoke(o);
+      
+      return name.equals("root") || name.equals("Administrator");
+    }
+    
+    return false;
+  }
+
 }

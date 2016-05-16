@@ -29,10 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import org.createnet.search.raptor.search.AbstractIndexer;
 import org.createnet.search.raptor.search.Indexer;
 import org.createnet.search.raptor.search.Indexer.IndexerException;
-import org.createnet.search.raptor.search.IndexerConfiguration;
 import org.createnet.search.raptor.search.impl.es.ElasticSearchIndexAdmin;
 import org.createnet.search.raptor.search.query.Query;
 import org.elasticsearch.action.bulk.BackoffPolicy;
@@ -49,7 +49,6 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.logging.ESLoggerFactory;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
@@ -330,10 +329,19 @@ public class ElasticSearchIndexer extends AbstractIndexer {
   @Override
   public void setup(boolean forceSetup) throws IndexerException {
 
-    logger.debug("Setup client");
+    logger.debug("Setup client, force {}", forceSetup);
 
     Map<String, String> indices = configuration.elasticsearch.indices.definitions;
-
+    
+    if(indices.isEmpty()) {
+      String filepath = configuration.elasticsearch.indices.source;
+      try {
+        indices.putAll(ElasticSearchIndexer.loadIndicesFromFile(filepath));
+      } catch (IOException ex) {
+        logger.warn("Exception loading indices file {}: {}", filepath, ex.getMessage());
+      }
+    }
+    
     for (Map.Entry<String, String> el : indices.entrySet()) {
 
       String indexName = el.getKey();
@@ -392,7 +400,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
               .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
               .setQuery(query.format());
       
-      if(query.getLimit() != null) {
+      if(query.getLimit() != null && query.getLimit() > 0) {
         searchBuilder.setSize(query.getLimit());
       }
       

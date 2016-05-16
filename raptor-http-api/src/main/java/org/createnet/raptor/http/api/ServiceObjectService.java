@@ -207,13 +207,13 @@ public class ServiceObjectService {
   @Path("/search")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public List<ServiceObject> search(ObjectQuery query) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AutenticationException, Indexer.SearchException, IOException {
+  public List<String> search(ObjectQuery query) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AutenticationException, Indexer.SearchException, IOException {
 
     if (!auth.isAllowed(Authorization.Permission.Read)) {
       throw new NotAllowedException("Cannot search for objects");
     }
     
-    List<ServiceObject> list = indexer.searchObject(query);
+    List<String> list = indexer.searchObject(query);
     return list;
   }  
   

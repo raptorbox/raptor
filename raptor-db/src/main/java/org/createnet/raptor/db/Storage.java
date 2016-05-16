@@ -16,7 +16,7 @@ import org.createnet.raptor.db.config.StorageConfiguration;
  */
 public interface Storage {
 
-  public class StorageException extends Exception {
+  public static class StorageException extends Exception {
     public StorageException(Throwable e) {
       super(e);
     }
@@ -30,11 +30,11 @@ public interface Storage {
     public String getId();
     
     public void disconnect();
-    public void connect();
-    public void setup(boolean forceSetup)  throws StorageException;
+    public void connect() throws StorageException;
+    public void setup(boolean forceSetup) throws StorageException;
     public void initialize(StorageConfiguration configuration);
     
-    public void set(String id, String data, int ttlSeconds) throws StorageException;
+    public void set(String id, String data, int ttlDays) throws StorageException;
     public String get(String id) throws StorageException;
     public List<String> list(String key, String value) throws StorageException;
     public void delete(String id) throws StorageException;
@@ -42,7 +42,7 @@ public interface Storage {
   }
 
   public void initialize(StorageConfiguration configuration) throws StorageException;  
-  public void setup(boolean forceSetup);  
+  public void setup(boolean forceSetup) throws StorageException;
   public void connect() throws StorageException;
   public void disconnect();
   

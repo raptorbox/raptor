@@ -18,7 +18,9 @@ package org.createnet.raptor.cli;
 import javax.inject.Inject;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.StorageService;
+import org.createnet.search.raptor.search.Indexer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +35,11 @@ public class Commands {
   @Inject
   StorageService storage;
   
-  public void setup(boolean force) throws Storage.StorageException, ConfigurationException {
+  @Inject
+  IndexerService indexer;
+  
+  public void setup(boolean force) throws Storage.StorageException, ConfigurationException, Indexer.IndexerException {
+    indexer.getIndexer().setup(force);    
     storage.getStorage().setup(force);
   }
   

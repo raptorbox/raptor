@@ -36,8 +36,7 @@ import org.slf4j.LoggerFactory;
 public class CouchbaseStorage extends AbstractStorage {
 
   final Logger logger = LoggerFactory.getLogger(CouchbaseStorage.class);
-  
-  private boolean forceSetup;
+
   protected Cluster cluster;
 
   protected Cluster connectCluster() {
@@ -51,34 +50,46 @@ public class CouchbaseStorage extends AbstractStorage {
     return cluster;
   }
 
-  @Override
-  public void connect() throws StorageException {
-
-    connectCluster();
+  protected void connectBuckets() throws StorageException {
 
     Map<String, String> buckets = getConfiguration().couchbase.buckets;
+
+    ClusterManager clusterManager = getClusterManager();
 
     Iterator<Map.Entry<String, String>> it = buckets.entrySet().iterator();
     while (it.hasNext()) {
 
       Map.Entry<String, String> item = it.next();
 
-      if (getConnection(item.getKey()) != null) {
+      String bucketId = item.getKey();
+      String bucketName = item.getValue();
+
+      if (getConnection(bucketName) != null) {
         continue;
       }
 
-      logger.debug("Connecting bucket {}", item.getValue());
+      boolean exists = clusterManager.hasBucket(bucketName);
 
-      Bucket bucket = cluster.openBucket(item.getValue(), getConfiguration().couchbase.bucketDefaults.password);
-      Connection conn = new CouchbaseConnection(item.getKey(), bucket);
-      
+      if (!exists) {
+        logger.debug("Skipped connection to non-existan bucket {}", bucketName);
+        continue;
+      }
+
+      logger.debug("Connecting bucket {}", bucketName);
+
+      Bucket bucket = cluster.openBucket(bucketName, getConfiguration().couchbase.bucketDefaults.password);
+      Connection conn = new CouchbaseConnection(bucketId, bucket);
+
       conn.initialize(getConfiguration());
-      conn.connect();
-      conn.setup(this.forceSetup);
-      
+
       addConnection(conn);
     }
+  }
 
+  @Override
+  public void connect() throws StorageException {
+    connectCluster();
+    connectBuckets();
   }
 
   @Override
@@ -92,21 +103,17 @@ public class CouchbaseStorage extends AbstractStorage {
   }
 
   @Override
-  public void setup(boolean forceSetup) {
+  public void setup(boolean forceSetup) throws StorageException {
 
     logger.debug("Setup database");
-    
-    this.forceSetup = forceSetup;
-    
+
     connectCluster();
 
     Map<String, String> buckets = getConfiguration().couchbase.buckets;
 
-    String adminUsername = getConfiguration().couchbase.username;
-    String adminPassword = getConfiguration().couchbase.password;
-
-    ClusterManager clusterManager = cluster.clusterManager(adminUsername, adminPassword);
+    ClusterManager clusterManager = getClusterManager();
     for (Map.Entry<String, String> el : buckets.entrySet()) {
+
       String bucketName = el.getValue();
 
       boolean exists = clusterManager.hasBucket(bucketName);
@@ -118,9 +125,9 @@ public class CouchbaseStorage extends AbstractStorage {
       }
 
       if (!exists) {
-        
+
         StorageConfiguration.Couchbase.BucketDefaults bucketDef = getConfiguration().couchbase.bucketDefaults;
-        
+
         logger.debug("Creating bucket {}", bucketName);
         BucketSettings bucketSettings = new DefaultBucketSettings.Builder()
                 .type(BucketType.COUCHBASE)
@@ -133,12 +140,28 @@ public class CouchbaseStorage extends AbstractStorage {
                 .build();
 
         clusterManager.insertBucket(bucketSettings);
-        
       }
+
+    }
+
+    connectBuckets();
+
+    for (Map.Entry<String, Connection> entry : getConnections().entrySet()) {
+      String bucketId = entry.getKey();
+      Connection conn = entry.getValue();
+      conn.connect();
+      conn.setup(forceSetup);
     }
 
     logger.debug("Setup completed");
   }
 
+  private ClusterManager getClusterManager() {
+    String adminUsername = getConfiguration().couchbase.username;
+    String adminPassword = getConfiguration().couchbase.password;
+
+    ClusterManager clusterManager = cluster.clusterManager(adminUsername, adminPassword);
+    return clusterManager;
+  }
 
 }

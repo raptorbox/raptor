@@ -15,14 +15,11 @@
  */
 package org.createnet.raptor.models.objects.serializer;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 import org.createnet.raptor.models.data.IRecord;
 import org.createnet.raptor.models.data.RecordSet;
@@ -57,6 +54,13 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
         jg.writeEndObject();
         
         jg.writeNumberField("lastUpdate", r.getLastUpdateTime());
+        
+        if(r.userId != null)
+          jg.writeStringField("userId", r.userId);
+        
+        if(r.stream != null)
+          jg.writeStringField("stream", r.stream);
+        
         
         jg.writeEndObject();
 

@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.models.objects;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectSerializer;

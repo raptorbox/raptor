@@ -15,6 +15,7 @@
  */
 package org.createnet.search.raptor.search.query.impl.es;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.createnet.search.raptor.search.query.AbstractQuery;
 import java.util.Iterator;
 import java.util.Map;
@@ -35,9 +36,20 @@ public class ObjectQuery extends AbstractQuery {
 
   public Map<String, Object> customFields;
   
+  @JsonIgnore
+  private String userId;
+
+  public void setUserId(String userId) {
+    this.userId = userId;
+  }
+  
   @Override
   public void validate() throws QueryException {
-
+    
+    if(userId == null) {
+      throw new QueryException("userId not specified");
+    }
+    
     if (search != null && search.length() > 0) {
       return;
     }
@@ -63,18 +75,20 @@ public class ObjectQuery extends AbstractQuery {
   protected QueryBuilder buildQuery() {
 
     BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-
+    
+    boolQuery.must(QueryBuilders.matchQuery("userId", userId));
+    
     if (search != null && search.length() > 0) {
-      boolQuery.must(QueryBuilders.queryStringQuery(search));
+      boolQuery.filter(QueryBuilders.queryStringQuery(search));
       return boolQuery;
     }
 
     if (name != null && name.length() > 0) {
-      boolQuery.must(QueryBuilders.wildcardQuery("name", name.toLowerCase()));
+      boolQuery.filter(QueryBuilders.wildcardQuery("name", name.toLowerCase()));
     }
 
     if (description != null && description.length() > 0) {
-      boolQuery.must(QueryBuilders.wildcardQuery("description", description.toLowerCase()));
+      boolQuery.filter(QueryBuilders.wildcardQuery("description", description.toLowerCase()));
     }
 
     if (customFields != null && !customFields.isEmpty()) {
@@ -85,7 +99,7 @@ public class ObjectQuery extends AbstractQuery {
         String key = (String) keys.next();
         String val = customFields.get(key).toString().toLowerCase();
 
-        boolQuery.must(QueryBuilders.matchQuery("customFields." + key, val));
+        boolQuery.filter(QueryBuilders.matchQuery("customFields." + key, val));
 
       }
 

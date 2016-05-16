@@ -15,8 +15,8 @@
  */
 package org.createnet.raptor.models.data;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.createnet.raptor.models.data.types.NumberRecord;
 import org.createnet.raptor.models.data.types.BooleanRecord;
 import org.createnet.raptor.models.data.types.GeoPointRecord;
@@ -52,10 +52,13 @@ import org.slf4j.LoggerFactory;
 @JsonSerialize(using = RecordSetSerializer.class)
 @JsonDeserialize(using = RecordSetDeserializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFilter("publicFieldsFilter")
 public class RecordSet {
 
   public Date lastUpdate;
   final public Map<String, IRecord> channels = new HashMap();
+  public String userId;
+  public String stream;
   
   @JsonIgnoreProperties
   private final Logger logger = LoggerFactory.getLogger(RecordSet.class);
@@ -165,7 +168,7 @@ public class RecordSet {
   public ObjectNode toJsonNode() throws JsonProcessingException, IOException {
     return ServiceObject.getMapper().convertValue(this, ObjectNode.class);
   }
-
+  
   public String toJson() throws JsonProcessingException, IOException {
     return toJsonNode().toString();
   }
