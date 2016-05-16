@@ -32,43 +32,45 @@ import org.glassfish.jersey.server.ResourceConfig;
  */
 public class ApplicationConfig extends ResourceConfig {
 
-  public ApplicationConfig() {
+  static public class AppBinder extends AbstractBinder {
 
-    register(AuthorizationRequestFilter.class);
-    register(ExceptionMapper.class);
+    @Override
+    protected void configure() {
 
-    register(new AbstractBinder() {
-      @Override
-      protected void configure() {
+      bind(ConfigurationService.class)
+              .to(ConfigurationService.class)
+              .in(Singleton.class);
 
-        bind(ConfigurationService.class)
-                .to(ConfigurationService.class)
-                .in(Singleton.class);
-        
-        bind(StorageService.class)
-                .to(StorageService.class)
-                .in(Singleton.class);
-        
-        bind(IndexerService.class)
-                .to(IndexerService.class)
-                .in(Singleton.class);
+      bind(StorageService.class)
+              .to(StorageService.class)
+              .in(Singleton.class);
 
-        bind(AuthService.class)
-                .to(AuthService.class)
-                .in(Singleton.class);
-        
-        bind(DispatcherService.class)
-                .to(DispatcherService.class)
-                .in(Singleton.class);
+      bind(IndexerService.class)
+              .to(IndexerService.class)
+              .in(Singleton.class);
+
+      bind(AuthService.class)
+              .to(AuthService.class)
+              .in(Singleton.class);
+
+      bind(DispatcherService.class)
+              .to(DispatcherService.class)
+              .in(Singleton.class);
 
 //        bind(AuthService.class)
 //                .proxy(true)
 //                .proxyForSameScope(false)
 //                .to(AuthService.class)
 //                .in(RequestScoped.class);
+    }
+  }
 
-      }
-    });
+  public ApplicationConfig() {
+
+    register(AuthorizationRequestFilter.class);
+    register(ExceptionMapper.class);
+
+    register(new AppBinder());
 
     packages(true, "org.createnet.raptor.http.api");
 

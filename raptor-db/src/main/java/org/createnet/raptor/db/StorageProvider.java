@@ -26,7 +26,7 @@ import org.createnet.raptor.db.none.NoneStorage;
 public class StorageProvider extends AbstractStorage {
 
   private Storage instance;
-
+  
   @Override
   public void initialize(StorageConfiguration configuration) throws StorageException {
 

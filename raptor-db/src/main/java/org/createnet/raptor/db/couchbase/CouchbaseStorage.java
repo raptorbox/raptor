@@ -1,7 +1,17 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2016 CREATE-NET
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.createnet.raptor.db.couchbase;
 
@@ -12,8 +22,6 @@ import com.couchbase.client.java.bucket.BucketType;
 import com.couchbase.client.java.cluster.BucketSettings;
 import com.couchbase.client.java.cluster.ClusterManager;
 import com.couchbase.client.java.cluster.DefaultBucketSettings;
-import com.couchbase.client.java.query.Index;
-import com.couchbase.client.java.query.dsl.Expression;
 import java.util.Iterator;
 import java.util.Map;
 import org.createnet.raptor.db.AbstractStorage;
@@ -28,7 +36,8 @@ import org.slf4j.LoggerFactory;
 public class CouchbaseStorage extends AbstractStorage {
 
   final Logger logger = LoggerFactory.getLogger(CouchbaseStorage.class);
-
+  
+  private boolean forceSetup;
   protected Cluster cluster;
 
   protected Cluster connectCluster() {
@@ -43,7 +52,7 @@ public class CouchbaseStorage extends AbstractStorage {
   }
 
   @Override
-  public void connect() {
+  public void connect() throws StorageException {
 
     connectCluster();
 
@@ -65,7 +74,7 @@ public class CouchbaseStorage extends AbstractStorage {
       
       conn.initialize(getConfiguration());
       conn.connect();
-      conn.setup(false);
+      conn.setup(this.forceSetup);
       
       addConnection(conn);
     }
@@ -86,7 +95,9 @@ public class CouchbaseStorage extends AbstractStorage {
   public void setup(boolean forceSetup) {
 
     logger.debug("Setup database");
-
+    
+    this.forceSetup = forceSetup;
+    
     connectCluster();
 
     Map<String, String> buckets = getConfiguration().couchbase.buckets;

@@ -266,4 +266,8 @@ public class RecordSet {
     return getByChannelName(channel.name);
   }
 
+  public static RecordSet fromJSON(String raw) throws IOException {
+    return ServiceObject.getMapper().readValue(raw, RecordSet.class);
+  }
+  
 }

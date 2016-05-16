@@ -31,7 +31,7 @@ public interface Storage {
     
     public void disconnect();
     public void connect();
-    public void setup(boolean forceSetup);
+    public void setup(boolean forceSetup)  throws StorageException;
     public void initialize(StorageConfiguration configuration);
     
     public void set(String id, String data, int ttlSeconds) throws StorageException;
@@ -43,7 +43,7 @@ public interface Storage {
 
   public void initialize(StorageConfiguration configuration) throws StorageException;  
   public void setup(boolean forceSetup);  
-  public void connect();
+  public void connect() throws StorageException;
   public void disconnect();
   
   public Connection getConnection(String id);

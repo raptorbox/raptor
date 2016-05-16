@@ -90,7 +90,7 @@ public class ServiceObject extends ServiceObjectContainer {
 
   @Override
   public String toString() {
-    return "ServiceObject<" + this.id + ">";
+    return "ServiceObject<" + (this.id == null ? this.id : this.name) + ">";
   }
 
   public String getId() {

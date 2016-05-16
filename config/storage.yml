@@ -16,11 +16,12 @@ couchbase:
 
   bucketsIndex:
     objects:
-      - userId
+      - [userId]
     data:
-      - userId
+      - [userId]
+      - [userId, stream]
     actuations:
-      - userId
+      - [userId]
 
   buckets:
     # Configure couchbase bucket name

@@ -53,7 +53,7 @@ public class Channel extends StreamContainer {
       throw new ValidationException("Channel type is empty");
     }
 
-    if (!this.getTypes().keySet().contains(type)) {
+    if (!this.getTypes().keySet().contains(type.toLowerCase())) {
       throw new ValidationException("Channel type not supported: " + type);
     }
 

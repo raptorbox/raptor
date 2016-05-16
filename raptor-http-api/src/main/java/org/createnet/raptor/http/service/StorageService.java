@@ -62,7 +62,7 @@ public class StorageService {
     objects, data, subscriptions, actuations
   }
 
-  protected Storage getStorage() throws Storage.StorageException, ConfigurationException {
+  public Storage getStorage() throws Storage.StorageException, ConfigurationException {
 
     if (storage == null) {
       logger.debug("Initializing storage instance");
@@ -145,5 +145,16 @@ public class StorageService {
     getDataConnection().set(uniqKey, record.toJson(), defaultDataTTL);
   }
 
+  public List<RecordSet> listData() throws ConfigurationException, Storage.StorageException, Authentication.AutenticationException, IOException  {
+    
+    List<String> results = getDataConnection().list("userId", auth.getUser().getUserId());
+    
+    List<RecordSet> list = new ArrayList();
+    for(String raw : results) {
+      list.add(RecordSet.fromJSON(raw));
+    }
+    
+    return list;
+  }
   
 }

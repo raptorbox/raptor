@@ -24,7 +24,7 @@ public class StorageConfiguration {
     public String username;
     public String password;
     public Map<String, String> buckets;
-    public Map<String, List<String>> bucketsIndex;
+    public Map<String, List<List<String>>> bucketsIndex;
     public BucketDefaults bucketDefaults;
     
     static public class BucketDefaults {

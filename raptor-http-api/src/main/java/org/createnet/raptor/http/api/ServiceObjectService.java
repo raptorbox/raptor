@@ -142,12 +142,17 @@ public class ServiceObjectService {
     }
 
     logger.debug("Updating object {}", obj.id);
-    storage.saveObject(obj);
-    indexer.indexObject(obj, false);
+
+    // @TODO: handle proper object update, ensuring stream data integrity
+    storedObj.customFields.clear();
+    storedObj.customFields.putAll(obj.customFields);
+
+    storage.saveObject(storedObj);
+    indexer.indexObject(storedObj, false);
     
-    dispatcher.notifyObjectEvent(DispatcherService.ObjectOperation.update, obj);
+    dispatcher.notifyObjectEvent(DispatcherService.ObjectOperation.update, storedObj);
     
-    logger.debug("Updated object {} for {}", obj.id, auth.getUser().getUserId());
+    logger.debug("Updated object {} for {}", storedObj.id, auth.getUser().getUserId());
     return obj;
   }
 
