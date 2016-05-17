@@ -58,8 +58,8 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
         if(r.userId != null)
           jg.writeStringField("userId", r.userId);
         
-        if(r.stream != null)
-          jg.writeStringField("stream", r.stream);
+        if(r.streamId != null)
+          jg.writeStringField("stream", r.streamId);
         
         
         jg.writeEndObject();

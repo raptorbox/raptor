@@ -58,7 +58,7 @@ public class RecordSet {
   public Date lastUpdate;
   final public Map<String, IRecord> channels = new HashMap();
   public String userId;
-  public String stream;
+  public String streamId;
   
   @JsonIgnoreProperties
   private final Logger logger = LoggerFactory.getLogger(RecordSet.class);

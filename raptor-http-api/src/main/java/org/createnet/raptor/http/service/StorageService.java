@@ -151,7 +151,7 @@ public class StorageService {
   
   public void saveData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException, JsonProcessingException, IOException, Authentication.AutenticationException {
     record.userId = auth.getUser().getUserId();
-    record.stream = stream.name;
+    record.streamId = stream.name;
     getDataConnection().set(getDataId(stream, record), record.toJson(), defaultDataTTL);
   }
   

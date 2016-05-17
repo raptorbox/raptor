@@ -120,9 +120,9 @@ public class DispatcherService {
     getDispatcher().add(topic, message.toString());    
   }
 
-  public void pushData(Stream stream, RecordSet records) throws ConfigurationException, Authentication.AutenticationException {
+  public void pushData(Stream stream, RecordSet records) throws ConfigurationException, Authentication.AutenticationException, IOException {
     String topic = stream.getServiceObject().id + "/stream/" + stream.name + "/updates";
-    getDispatcher().add(topic, records.toString());
+    getDispatcher().add(topic, records.toJson());
   }
 
   public void actionTrigger(Action action, String status) throws ConfigurationException, Authentication.AutenticationException {
