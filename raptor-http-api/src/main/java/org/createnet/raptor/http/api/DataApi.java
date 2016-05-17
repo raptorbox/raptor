@@ -52,7 +52,7 @@ public class DataApi extends AbstractApi {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Collection<Stream> list(@PathParam("id") String id)
-          throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AutenticationException, IOException {
+          throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException {
 
     ServiceObject obj = loadObject(id);
 
@@ -67,7 +67,7 @@ public class DataApi extends AbstractApi {
   public ResultSet fetch(
           @PathParam("id") String id,
           @PathParam("stream") String streamName
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, JsonProcessingException, RecordsetException {
+  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException {
 
     ServiceObject obj = loadObject(id);
     Stream stream = loadStream(streamName, obj);
@@ -89,7 +89,7 @@ public class DataApi extends AbstractApi {
   public Response fetchLastUpdate(
           @PathParam("id") String id,
           @PathParam("stream") String streamName
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException, IOException {
+  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException, IOException {
 
     ServiceObject obj = loadObject(id);
     Stream stream = loadStream(streamName, obj);
@@ -117,7 +117,7 @@ public class DataApi extends AbstractApi {
           @PathParam("stream") String streamName,
           RecordSet record
           
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException, Indexer.IndexerException, IOException {
+  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException, Indexer.IndexerException, IOException {
 
     ServiceObject obj = loadObject(id);
 

@@ -63,7 +63,7 @@ public class DispatcherService {
     return dispatcher;
   }
   
-  protected ObjectNode createObjectMessage(ServiceObject obj) throws ConfigurationException, Authentication.AutenticationException {
+  protected ObjectNode createObjectMessage(ServiceObject obj) throws ConfigurationException, Authentication.AuthenticationException {
     
     ObjectNode message = ServiceObject.getMapper().createObjectNode();
     
@@ -74,7 +74,7 @@ public class DispatcherService {
     return message;
   }
   
-  public void notifyObjectEvent(ObjectOperation op, ServiceObject obj) throws ConfigurationException, RaptorComponent.ParserException, Authentication.AutenticationException {
+  public void notifyObjectEvent(ObjectOperation op, ServiceObject obj) throws ConfigurationException, RaptorComponent.ParserException, Authentication.AuthenticationException {
     
     String topic = obj.id + "/events";
     
@@ -86,7 +86,7 @@ public class DispatcherService {
     getDispatcher().add(topic, message.toString());
   }
 
-  public void notifyDataEvent(Stream stream, RecordSet record) throws IOException, ConfigurationException, Authentication.AutenticationException {
+  public void notifyDataEvent(Stream stream, RecordSet record) throws IOException, ConfigurationException, Authentication.AuthenticationException {
     
     String topic = stream.getServiceObject().id + "/events";
     
@@ -103,7 +103,7 @@ public class DispatcherService {
     getDispatcher().add(topic, message.toString());    
   }
 
-  public void notifyActionEvent(ActionOperation op, Action action, String status) throws IOException, ConfigurationException, Authentication.AutenticationException {
+  public void notifyActionEvent(ActionOperation op, Action action, String status) throws IOException, ConfigurationException, Authentication.AuthenticationException {
     
     String topic = action.getServiceObject().id + "/events";
     
@@ -120,12 +120,12 @@ public class DispatcherService {
     getDispatcher().add(topic, message.toString());    
   }
 
-  public void pushData(Stream stream, RecordSet records) throws ConfigurationException, Authentication.AutenticationException, IOException {
+  public void pushData(Stream stream, RecordSet records) throws ConfigurationException, Authentication.AuthenticationException, IOException {
     String topic = stream.getServiceObject().id + "/stream/" + stream.name + "/updates";
     getDispatcher().add(topic, records.toJson());
   }
 
-  public void actionTrigger(Action action, String status) throws ConfigurationException, Authentication.AutenticationException {
+  public void actionTrigger(Action action, String status) throws ConfigurationException, Authentication.AuthenticationException {
     String topic = action.getServiceObject().id + "/actuations/" + action.name;
     getDispatcher().add(topic, status);
   }

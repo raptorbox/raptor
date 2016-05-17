@@ -15,8 +15,7 @@
  */
 package org.createnet.raptor.auth;
 
-import java.util.logging.Level;
-import javax.naming.AuthenticationException;
+import org.apache.http.auth.AuthenticationException;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authentication.impl.AllowAllAuthentication;
 import org.createnet.raptor.auth.authentication.impl.TokenAuthentication;
@@ -109,14 +108,18 @@ public class AuthProvider implements Authorization, Authentication {
       
       return isauthorized;
       
-    } catch (AuthCache.PermissionCacheException | AutenticationException ex) {
+    } catch (AuthCache.PermissionCacheException | AuthenticationException ex) {
       throw new AuthorizationException(ex);
     }
   }
 
   @Override
-  public UserInfo getUser(String accessToken) throws AutenticationException {
-
+  public UserInfo getUser(String accessToken) throws AuthenticationException {
+    
+    if(accessToken == null) {
+      throw new AuthenticationException("accessToken is null");
+    }
+    
     try {
 
       UserInfo cachedValue = cache.get(accessToken);
@@ -143,7 +146,7 @@ public class AuthProvider implements Authorization, Authentication {
     return user;
   }
   
-  public static void main(String[] argv) throws AuthorizationException, AutenticationException {
+  public static void main(String[] argv) throws AuthorizationException, AuthenticationException {
     
     AuthConfiguration config = new AuthConfiguration();
     config.type = "token";

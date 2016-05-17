@@ -100,7 +100,7 @@ public class StorageService {
     return obj;
   }
 
-  public String saveObject(ServiceObject obj) throws ConfigurationException, Storage.StorageException, RaptorComponent.ParserException, RaptorComponent.ValidationException, Authentication.AutenticationException {
+  public String saveObject(ServiceObject obj) throws ConfigurationException, Storage.StorageException, RaptorComponent.ParserException, RaptorComponent.ValidationException, Authentication.AuthenticationException {
     
     obj.validate();
     
@@ -119,7 +119,7 @@ public class StorageService {
     getObjectConnection().delete(id);
   }
   
-  public List<ServiceObject> listObjects() throws ConfigurationException, Storage.StorageException, Authentication.AutenticationException, IOException {
+  public List<ServiceObject> listObjects() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
     
     List<String> results = getObjectConnection().list("userId", auth.getUser().getUserId());
     
@@ -137,7 +137,7 @@ public class StorageService {
     return stream.getServiceObject().id + "-" + stream.name + "-" + record.getLastUpdate().getTime();
   }
   
-  public ResultSet fetchData(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AutenticationException {
+  public ResultSet fetchData(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
     
     ResultSet resultset = new ResultSet(stream);
 
@@ -149,7 +149,7 @@ public class StorageService {
     return resultset;
   }
   
-  public void saveData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException, JsonProcessingException, IOException, Authentication.AutenticationException {
+  public void saveData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException, JsonProcessingException, IOException, Authentication.AuthenticationException {
     record.userId = auth.getUser().getUserId();
     record.streamId = stream.name;
     getDataConnection().set(getDataId(stream, record), record.toJson(), defaultDataTTL);
@@ -159,7 +159,7 @@ public class StorageService {
     getDataConnection().delete(getDataId(stream, record));
   }
   
-  public List<RecordSet> listData() throws ConfigurationException, Storage.StorageException, Authentication.AutenticationException, IOException  {
+  public List<RecordSet> listData() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException  {
     
     List<String> results = getDataConnection().list("userId", auth.getUser().getUserId());
     
@@ -181,8 +181,18 @@ public class StorageService {
     return getActionConnection().get(getActionId(action));
   }
   
-  public void saveActionStatus(Action action, String status) throws IOException, ConfigurationException, Storage.StorageException{
-    getActionConnection().set(getActionId(action), status, defaultDataTTL);
+  public String saveActionStatus(Action action, String status) throws IOException, ConfigurationException, Storage.StorageException{
+
+    ObjectNode json = ServiceObject.getMapper().createObjectNode();
+    
+    json.put("id", ServiceObject.generateUUID());
+    json.put("status", status);
+    json.put("actionId", action.name);
+    json.put("objectId", action.getServiceObject().id);
+    
+    getActionConnection().set(getActionId(action), json.toString(), defaultDataTTL);
+    
+    return json.get("id").asText();
   }
   
   public void deleteActionStatus(Action action) throws ConfigurationException, Storage.StorageException {

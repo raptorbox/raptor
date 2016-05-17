@@ -92,7 +92,7 @@ public class ServiceObjectDeserializer extends JsonDeserializer<ServiceObject> {
         Iterator<String> fieldNames = tree.get("actions").fieldNames();
         while(fieldNames.hasNext()) {
           String name = fieldNames.next();
-          Action actuation = new Action(name, tree.get("actions").get(name));
+          Action actuation = new Action(name, tree.get("actions").get(name), serviceObject);
           serviceObject.actions.put(actuation.name, actuation);
         }
       }

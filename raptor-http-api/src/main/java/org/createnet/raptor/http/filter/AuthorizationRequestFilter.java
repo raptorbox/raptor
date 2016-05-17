@@ -52,7 +52,7 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
       requestContext.setSecurityContext(new Authorizer(loggedUser));
 
-    } catch (Authentication.AutenticationException ex) {
+    } catch (Authentication.AuthenticationException ex) {
 
       logger.error("Token is not valid", ex);
 

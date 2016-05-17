@@ -102,7 +102,7 @@ public class IndexerService {
     getIndexer().delete(record);
   }
 
-  public List<String> searchObject(ObjectQuery query) throws Indexer.SearchException, IOException, ConfigurationException, Authentication.AutenticationException, RaptorComponent.ParserException {
+  public List<String> searchObject(ObjectQuery query) throws Indexer.SearchException, IOException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException {
     
     setQueryIndex(query, IndexNames.object);
     query.setUserId(auth.getUser().getUserId());

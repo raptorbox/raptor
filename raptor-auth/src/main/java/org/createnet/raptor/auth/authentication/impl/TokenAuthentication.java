@@ -42,7 +42,7 @@ public class TokenAuthentication extends AbstractAuthentication {
   final private AuthHttpClient client = new AuthHttpClient();
   
   @Override
-  public Authentication.UserInfo getUser(String accessToken) throws AutenticationException {
+  public Authentication.UserInfo getUser(String accessToken) throws AuthenticationException {
 
     try {
       
@@ -52,16 +52,16 @@ public class TokenAuthentication extends AbstractAuthentication {
       JsonNode node = mapper.readTree(response);
       
       if(!node.has("id")) {
-        throw new AutenticationException("User id not found in response");
+        throw new AuthenticationException("User id not found in response");
       }
       
       return new Authentication.UserInfo(node.get("userid").asText(), accessToken, node);
       
     } catch (IOException ex) {
-      throw new AutenticationException(ex);
+      throw new AuthenticationException(ex);
     } catch (AuthHttpClient.ClientException ex) {
       logger.debug("Failed to load user: {} ({})", ex.getReason(), ex.getCode());
-      throw new AutenticationException(ex);
+      throw new AuthenticationException(ex);
     }
   }
 

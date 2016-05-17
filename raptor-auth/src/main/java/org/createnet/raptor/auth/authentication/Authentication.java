@@ -26,14 +26,14 @@ import org.createnet.raptor.auth.AuthConfiguration;
  */
 public interface Authentication {
   
-  public class AutenticationException extends Exception {
-    public AutenticationException(Throwable t) {
+  public class AuthenticationException extends Exception {
+    public AuthenticationException(Throwable t) {
       super(t);
     }
-    public AutenticationException(String m, Throwable t) {
+    public AuthenticationException(String m, Throwable t) {
       super(m, t);
     }  
-    public AutenticationException(String m) {
+    public AuthenticationException(String m) {
       super(m);
     }  
   }
@@ -99,6 +99,6 @@ public interface Authentication {
   }
   
   public void initialize(AuthConfiguration configuration);
-  public UserInfo getUser(String accessToken) throws AutenticationException;
+  public UserInfo getUser(String accessToken) throws AuthenticationException;
   
 }

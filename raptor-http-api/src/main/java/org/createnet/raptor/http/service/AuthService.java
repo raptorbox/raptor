@@ -47,6 +47,10 @@ public class AuthService {
     return auth;
   }
   
+  public boolean isAllowed(String accessToken, String id, Authorization.Permission op) throws Authorization.AuthorizationException {
+    return auth.isAuthorized(accessToken, id, op);
+  }
+  
   public boolean isAllowed(String id, Authorization.Permission op) throws Authorization.AuthorizationException {
     return auth.isAuthorized(getAccessToken(), id, op);
   }
@@ -55,15 +59,16 @@ public class AuthService {
     return isAllowed(null, op);
   }
 
-  public UserInfo getUser() throws ConfigurationException, Authentication.AutenticationException {
+  public UserInfo getUser() throws ConfigurationException, Authentication.AuthenticationException {
     return getProvider().getUser(getAccessToken());
   }
   
-  public UserInfo getUser(String accessToken) throws ConfigurationException, Authentication.AutenticationException {
+  public UserInfo getUser(String accessToken) throws ConfigurationException, Authentication.AuthenticationException {
     return getProvider().getUser(accessToken);
   }
   
   public String getAccessToken() {
+    if(securityContext == null) return null;
     return securityContext.getUserPrincipal().getName();
   }
 

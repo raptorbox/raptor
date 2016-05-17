@@ -58,7 +58,7 @@ public class ObjectApi extends AbstractApi {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public List<String> list() throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AutenticationException, IOException {
+  public List<String> list() throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException {
 
     if (!auth.isAllowed(Authorization.Permission.Read)) {
       throw new NotAllowedException("Cannot list objects");
@@ -76,7 +76,7 @@ public class ObjectApi extends AbstractApi {
   @POST
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response create(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException {
+  public Response create(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException {
 
     if (!auth.isAllowed(Authorization.Permission.Create)) {
       throw new NotAuthorizedException("Cannot create object");
@@ -108,7 +108,7 @@ public class ObjectApi extends AbstractApi {
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public ServiceObject update(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, Indexer.IndexerException {
+  public ServiceObject update(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.IndexerException {
 
     ServiceObject storedObj = loadObject(obj.id);
 
@@ -155,7 +155,7 @@ public class ObjectApi extends AbstractApi {
   @DELETE
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response delete(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, Authorization.AuthorizationException, ConfigurationException, Indexer.IndexerException, Authentication.AutenticationException  {
+  public Response delete(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, Authorization.AuthorizationException, ConfigurationException, Indexer.IndexerException, Authentication.AuthenticationException  {
 
     logger.debug("delete object {}", id);
 
@@ -177,7 +177,7 @@ public class ObjectApi extends AbstractApi {
   @Path("/search")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public List<String> search(ObjectQuery query) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AutenticationException, Indexer.SearchException, IOException {
+  public List<String> search(ObjectQuery query) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.SearchException, IOException {
 
     if (!auth.isAllowed(Authorization.Permission.Read)) {
       throw new NotAllowedException("Cannot search for objects");
