@@ -59,7 +59,7 @@
                         "analyzer": "whitespace",
                         "index": "not_analyzed"
                     },
-                    "stream": {
+                    "streamId": {
                         "type": "string",
                         "analyzer": "whitespace",
                         "index": "not_analyzed"

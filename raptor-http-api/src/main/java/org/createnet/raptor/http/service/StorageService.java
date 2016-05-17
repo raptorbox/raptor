@@ -17,10 +17,12 @@ package org.createnet.raptor.http.service;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -33,6 +35,7 @@ import org.createnet.raptor.http.exception.ConfigurationException;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.exception.RecordsetException;
+import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 
@@ -82,6 +85,10 @@ public class StorageService {
   protected Storage.Connection getDataConnection() throws ConfigurationException, Storage.StorageException {
     return getStorage().getConnection(ConnectionId.data.name());
   }
+  
+  protected Storage.Connection getActionConnection() throws ConfigurationException, Storage.StorageException {
+    return getStorage().getConnection(ConnectionId.actuations.name());
+  }
 
   public ServiceObject getObject(String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException {
     String json = getObjectConnection().get(id);
@@ -124,6 +131,12 @@ public class StorageService {
     return list;
   }
 
+  // Data 
+  
+  protected String getDataId(Stream stream, RecordSet record) {
+    return stream.getServiceObject().id + "-" + stream.name + "-" + record.getLastUpdate().getTime();
+  }
+  
   public ResultSet fetchData(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AutenticationException {
     
     ResultSet resultset = new ResultSet(stream);
@@ -134,10 +147,6 @@ public class StorageService {
     }
     
     return resultset;
-  }
-  
-  protected String getDataId(Stream stream, RecordSet record) {
-    return stream.getServiceObject().id + "-" + stream.name + "-" + record.getLastUpdate().getTime();
   }
   
   public void saveData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException, JsonProcessingException, IOException, Authentication.AutenticationException {
@@ -162,4 +171,22 @@ public class StorageService {
     return list;
   }
   
+  // Actuations
+  
+  protected String getActionId(Action action) {
+    return action.getServiceObject().id + "-" + action.name;
+  }
+  
+  public String getActionStatus(Action action) throws ConfigurationException, Storage.StorageException {
+    return getActionConnection().get(getActionId(action));
+  }
+  
+  public void saveActionStatus(Action action, String status) throws IOException, ConfigurationException, Storage.StorageException{
+    getActionConnection().set(getActionId(action), status, defaultDataTTL);
+  }
+  
+  public void deleteActionStatus(Action action) throws ConfigurationException, Storage.StorageException {
+    getActionConnection().delete(getActionId(action));
+  }
+
 }

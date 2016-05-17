@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.http.service;
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import javax.inject.Inject;
@@ -24,6 +23,7 @@ import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.dispatcher.Dispatcher;
 import org.createnet.raptor.http.exception.ConfigurationException;
 import org.createnet.raptor.models.data.RecordSet;
+import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 @Service
 public class DispatcherService {
   
-  final JsonNodeFactory jsonFactory = JsonNodeFactory.instance;
   private final Logger logger = LoggerFactory.getLogger(DispatcherService.class);
   
   @Inject
@@ -50,6 +49,10 @@ public class DispatcherService {
     create, update, delete, push
   }
   
+  public enum ActionOperation {
+    execute, delete
+  }
+  
   private Dispatcher dispatcher;
   
   public Dispatcher getDispatcher() throws ConfigurationException {
@@ -60,37 +63,71 @@ public class DispatcherService {
     return dispatcher;
   }
   
+  protected ObjectNode createObjectMessage(ServiceObject obj) throws ConfigurationException, Authentication.AutenticationException {
+    
+    ObjectNode message = ServiceObject.getMapper().createObjectNode();
+    
+    message.put("userId", auth.getUser().getUserId());
+   
+    message.set("object", obj.toJsonNode());
+    
+    return message;
+  }
+  
   public void notifyObjectEvent(ObjectOperation op, ServiceObject obj) throws ConfigurationException, RaptorComponent.ParserException, Authentication.AutenticationException {
     
-    String topic = "events";
+    String topic = obj.id + "/events";
     
-    ObjectNode message = jsonFactory.objectNode();
+    ObjectNode message = createObjectMessage(obj);
     
+    message.put("type", "object");
     message.put("op", op.name());
-    message.put("userId", auth.getUser().getUserId());
-    
-    message.set("object", obj.toJsonNode());
     
     getDispatcher().add(topic, message.toString());
   }
 
   public void notifyDataEvent(Stream stream, RecordSet record) throws IOException, ConfigurationException, Authentication.AutenticationException {
     
-    String topic = "events";
+    String topic = stream.getServiceObject().id + "/events";
     
-    ObjectNode message = jsonFactory.objectNode();
+    ObjectNode message = createObjectMessage(stream.getServiceObject());
     
+    
+    message.put("type", "stream");
     message.put("op", "data");
-    message.put("userId", auth.getUser().getUserId());
     
-    message.put("objectId", stream.getServiceObject().id);
-    message.put("stream", stream.name);
-    
-//    message.set("object", stream.getServiceObject().toJsonNode());
+    message.put("streamId", stream.name);
     
     message.set("data", record.toJsonNode());
     
     getDispatcher().add(topic, message.toString());    
+  }
+
+  public void notifyActionEvent(ActionOperation op, Action action, String status) throws IOException, ConfigurationException, Authentication.AutenticationException {
+    
+    String topic = action.getServiceObject().id + "/events";
+    
+    ObjectNode message = createObjectMessage(action.getServiceObject());
+    
+    message.put("type", "actuation");
+    message.put("op", op.name());
+    
+    message.put("actionId", action.name);
+    
+    if(status != null)
+      message.put("data", status);
+    
+    getDispatcher().add(topic, message.toString());    
+  }
+
+  public void pushData(Stream stream, RecordSet records) throws ConfigurationException, Authentication.AutenticationException {
+    String topic = stream.getServiceObject().id + "/stream/" + stream.name + "/updates";
+    getDispatcher().add(topic, records.toString());
+  }
+
+  public void actionTrigger(Action action, String status) throws ConfigurationException, Authentication.AutenticationException {
+    String topic = action.getServiceObject().id + "/actuations/" + action.name;
+    getDispatcher().add(topic, status);
   }
   
 }

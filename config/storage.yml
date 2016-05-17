@@ -19,7 +19,7 @@ couchbase:
       - [userId]
     data:
       - [userId]
-      - [userId, stream]
+      - [userId, streamId]
     actuations:
       - [userId]
 

@@ -18,11 +18,8 @@ package org.createnet.raptor.http.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.util.Collection;
-import javax.inject.Inject;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -31,15 +28,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
-import org.createnet.raptor.http.service.StorageService;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.createnet.raptor.db.Storage;
-import org.createnet.raptor.http.service.AuthService;
-import org.createnet.raptor.http.service.DispatcherService;
-import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.search.raptor.search.Indexer;
 import org.createnet.raptor.http.exception.ConfigurationException;
 import org.createnet.raptor.models.data.RecordSet;
@@ -52,30 +45,9 @@ import org.createnet.raptor.models.objects.Stream;
  * @author Luca Capra <lcapra@create-net.org>
  */
 @Path("/{id}/streams")
-public class DataService {
+public class DataApi extends AbstractApi {
 
-  final private Logger logger = LoggerFactory.getLogger(DataService.class);
-
-  @Inject
-  StorageService storage;
-
-  @Inject
-  IndexerService indexer;
-
-  @Inject
-  DispatcherService dispatcher;
-
-  @Inject
-  AuthService auth;
-  
-  protected ServiceObject loadObject(String id) throws Authorization.AuthorizationException, Storage.StorageException, RaptorComponent.ParserException, ConfigurationException {
-
-    if (!auth.isAllowed(id, Authorization.Permission.Read)) {
-      throw new NotAllowedException("Cannot access object");
-    }
-
-    return storage.getObject(id);
-  }
+  final private Logger logger = LoggerFactory.getLogger(DataApi.class);
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
@@ -98,12 +70,7 @@ public class DataService {
   ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, JsonProcessingException, RecordsetException {
 
     ServiceObject obj = loadObject(id);
-
-    Stream stream = obj.streams.get(streamName);
-
-    if (stream == null) {
-      throw new NotFoundException("Stream " + streamName + " not found");
-    }
+    Stream stream = loadStream(streamName, obj);
 
     if (!auth.isAllowed(Authorization.Permission.Pull)) {
       throw new NotAuthorizedException("Cannot fetch data");
@@ -125,12 +92,7 @@ public class DataService {
   ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException, IOException {
 
     ServiceObject obj = loadObject(id);
-
-    Stream stream = obj.streams.get(streamName);
-
-    if (stream == null) {
-      throw new NotFoundException("Stream " + streamName + " not found");
-    }
+    Stream stream = loadStream(streamName, obj);
 
     if (!auth.isAllowed(Authorization.Permission.Pull)) {
       throw new NotAuthorizedException("Cannot fetch data");
@@ -159,11 +121,7 @@ public class DataService {
 
     ServiceObject obj = loadObject(id);
 
-    Stream stream = obj.streams.get(streamName);
-
-    if (stream == null) {
-      throw new NotFoundException("Stream " + streamName + " not found");
-    }
+    Stream stream = loadStream(streamName, obj);
 
     if (!auth.isAllowed(Authorization.Permission.Push)) {
       throw new NotAuthorizedException("Cannot push data");
@@ -182,8 +140,11 @@ public class DataService {
       throw ex;
     }
     
-    // notify onData & data topic
+    // notify data event
     dispatcher.notifyDataEvent(stream, record);
+    
+    // send update on the data topic
+    dispatcher.pushData(stream, record);
     
     logger.debug("Stored record for stream {} in object {}", streamName, obj.id);
     

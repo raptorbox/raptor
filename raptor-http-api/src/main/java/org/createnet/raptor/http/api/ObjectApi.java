@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -37,15 +36,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
-import org.createnet.raptor.http.service.StorageService;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.createnet.raptor.db.Storage;
-import org.createnet.raptor.http.service.AuthService;
 import org.createnet.raptor.http.service.DispatcherService;
-import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.search.raptor.search.Indexer;
 import org.createnet.raptor.http.exception.ConfigurationException;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
@@ -56,21 +52,9 @@ import org.createnet.search.raptor.search.query.impl.es.ObjectQuery;
  * @author Luca Capra <lcapra@create-net.org>
  */
 @Path("/")
-public class ServiceObjectService {
+public class ObjectApi extends AbstractApi {
 
-  final private Logger logger = LoggerFactory.getLogger(ServiceObjectService.class);
-
-  @Inject
-  StorageService storage;
-  
-  @Inject
-  IndexerService indexer;
-  
-  @Inject
-  DispatcherService dispatcher;
-  
-  @Inject
-  AuthService auth;
+  final private Logger logger = LoggerFactory.getLogger(ObjectApi.class);
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
@@ -126,11 +110,7 @@ public class ServiceObjectService {
   @Consumes(MediaType.APPLICATION_JSON)
   public ServiceObject update(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AutenticationException, Indexer.IndexerException {
 
-    ServiceObject storedObj = storage.getObject(obj.id);
-
-    if (storedObj == null) {
-      throw new NotFoundException();
-    }
+    ServiceObject storedObj = loadObject(obj.id);
 
     if(!auth.isAllowed(obj.id, Authorization.Permission.Update)) {
       throw new NotAuthorizedException("Cannot update object");
@@ -163,12 +143,7 @@ public class ServiceObjectService {
 
     logger.debug("Load object {}", id);
 
-    ServiceObject obj = storage.getObject(id);
-
-    if (obj == null) {
-      logger.debug("Object {} not found", id);
-      throw new NotFoundException();
-    }
+    ServiceObject obj = loadObject(id);
 
     if(!auth.isAllowed(obj.id, Authorization.Permission.Read)) {
       throw new NotAuthorizedException("Cannot read object");
@@ -184,12 +159,7 @@ public class ServiceObjectService {
 
     logger.debug("delete object {}", id);
 
-    ServiceObject obj = storage.getObject(id);
-
-    if (obj == null) {
-      logger.debug("Object {} not found", id);
-      throw new NotFoundException();
-    }
+    ServiceObject obj = loadObject(id);
 
     if(!auth.isAllowed(obj.id, Authorization.Permission.Delete)) {
       throw new NotAuthorizedException("Cannot delete object");
