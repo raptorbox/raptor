@@ -17,10 +17,8 @@ package org.createnet.raptor.http.service;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -186,13 +184,17 @@ public class StorageService {
     ObjectNode json = ServiceObject.getMapper().createObjectNode();
     
     json.put("id", ServiceObject.generateUUID());
+    json.put("createdAt", System.currentTimeMillis()/1000);    
+    
+    String response = json.toString();
+    
     json.put("status", status);
     json.put("actionId", action.name);
     json.put("objectId", action.getServiceObject().id);
     
     getActionConnection().set(getActionId(action), json.toString(), defaultDataTTL);
     
-    return json.get("id").asText();
+    return response;
   }
   
   public void deleteActionStatus(Action action) throws ConfigurationException, Storage.StorageException {

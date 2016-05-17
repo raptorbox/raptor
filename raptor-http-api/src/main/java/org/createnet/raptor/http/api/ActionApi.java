@@ -16,10 +16,7 @@
 package org.createnet.raptor.http.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.Collection;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -108,7 +105,7 @@ public class ActionApi extends AbstractApi {
       throw new NotAuthorizedException("Cannot fetch data");
     }
     
-    storage.saveActionStatus(action, body);
+    String actionResponse = storage.saveActionStatus(action, body);
     
     // notify event
     dispatcher.notifyActionEvent(DispatcherService.ActionOperation.execute, action, body);
@@ -118,7 +115,7 @@ public class ActionApi extends AbstractApi {
     
     logger.debug("Saved action {} status for object {}", action.name, obj.id);
 
-    return Response.accepted().build();
+    return Response.ok(actionResponse).build();
   }
 
   @DELETE
