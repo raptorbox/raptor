@@ -175,12 +175,23 @@ public class StorageService {
     return action.getServiceObject().id + "-" + action.name;
   }
   
-  public String getActionStatus(Action action) throws ConfigurationException, Storage.StorageException {
-    return getActionConnection().get(getActionId(action));
+  public String getActionStatus(Action action) throws ConfigurationException, Storage.StorageException, IOException {
+    
+    String rawStatus = getActionConnection().get(getActionId(action));
+    
+    // @TODO add ActionStatus class for handling de/serialization
+    ObjectNode json = (ObjectNode) ServiceObject.getMapper().readTree(rawStatus);
+    
+    json.remove("actionId");
+    json.remove("objectId");
+    json.remove("status");
+    
+    return json.toString();
   }
   
   public String saveActionStatus(Action action, String status) throws IOException, ConfigurationException, Storage.StorageException{
 
+    // @TODO add ActionStatus class for handling de/serialization
     ObjectNode json = ServiceObject.getMapper().createObjectNode();
     
     json.put("id", ServiceObject.generateUUID());
