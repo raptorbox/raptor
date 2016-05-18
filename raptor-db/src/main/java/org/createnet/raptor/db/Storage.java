@@ -7,6 +7,7 @@ package org.createnet.raptor.db;
 
 import java.util.List;
 import org.createnet.raptor.db.config.StorageConfiguration;
+import org.createnet.raptor.db.query.ListQuery;
 
 
 
@@ -36,7 +37,7 @@ public interface Storage {
     
     public void set(String id, String data, int ttlDays) throws StorageException;
     public String get(String id) throws StorageException;
-    public List<String> list(String key, String value) throws StorageException;
+    public List<String> list(ListQuery query) throws StorageException;
     public void delete(String id) throws StorageException;
 
   }

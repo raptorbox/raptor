@@ -25,16 +25,18 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Exception> {
+public class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Throwable> {
 
   private static final Logger logger = LoggerFactory.getLogger(ExceptionMapper.class);
 
   @Override
-  public Response toResponse(Exception e) {
+  public Response toResponse(Throwable e) {
+    
+    logger.error("API Exception", e);
     
     if(e instanceof WebApplicationException) {
       return ((WebApplicationException) e).getResponse();
-    }
+    }      
     
     if(e instanceof RaptorComponent.ValidationException) {
       return Response
@@ -42,9 +44,7 @@ public class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Exceptio
             .entity("{ \"code\": 500, \"reason\": \""+ e.getMessage() +"\"}")
             .type("application/json")
             .build();
-    }
-    
-    logger.error("Throwing unhandled exception", e);
+    }   
 
     return Response
             .status(Response.Status.INTERNAL_SERVER_ERROR)

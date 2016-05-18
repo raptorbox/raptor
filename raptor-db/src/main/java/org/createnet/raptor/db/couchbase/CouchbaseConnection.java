@@ -13,10 +13,7 @@ import com.couchbase.client.java.query.N1qlParams;
 import com.couchbase.client.java.query.N1qlQuery;
 import com.couchbase.client.java.query.N1qlQueryResult;
 import com.couchbase.client.java.query.N1qlQueryRow;
-import com.couchbase.client.java.query.Select;
-import com.couchbase.client.java.query.Statement;
 import com.couchbase.client.java.query.consistency.ScanConsistency;
-import com.couchbase.client.java.query.dsl.Expression;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -24,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.createnet.raptor.db.AbstractConnection;
 import org.createnet.raptor.db.Storage;
+import org.createnet.raptor.db.query.ListQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,15 +54,15 @@ public class CouchbaseConnection extends AbstractConnection {
   public void set(String id, String data, int ttlDays) {
 
     JsonObject obj = JsonObject.fromJson(data);
-    
+
     int ttl = ttlDays;
-    if(ttlDays > 0) {
+    if (ttlDays > 0) {
       Calendar c = Calendar.getInstance();
       c.setTime(new Date());
       c.add(Calendar.DATE, ttlDays);
       ttl = (int) (c.getTime().getTime() / 1000);
     }
-    
+
     JsonDocument doc = JsonDocument.create(id, ttl, obj);
     bucket.upsert(doc);
   }
@@ -88,15 +86,50 @@ public class CouchbaseConnection extends AbstractConnection {
   }
 
   @Override
-  public List<String> list(String key, String value) throws Storage.StorageException {
+  public List<String> list(ListQuery query) throws Storage.StorageException {
 
-    Statement select = Select.select("*").from("`" + bucket.name() + "`")
-            .where(Expression.x("`" + key + "`").eq("\"" + value + "\""));
+    String selectQuery = "SELECT * FROM `" + bucket.name() + "`";
+
+    if (!query.getParams().isEmpty()) {
+      selectQuery += " WHERE ";
+      for (ListQuery.QueryParam param : query.getParams()) {
+        selectQuery += " `" + param.key + "` " + param.operation + " \"" + param.value + "\" AND";
+      }
+      selectQuery = selectQuery.substring(0, selectQuery.length() - 3);
+    }
+
+    if (query.getSort() != null) {
+      ListQuery.SortBy sort = query.getSort();
+      selectQuery += " ORDER BY " + sort.getField() + " " + sort.getSort();
+    }
+
+    if (query.getLimit() > 0) {
+      selectQuery += " LIMIT " + query.getLimit();
+    }
+    
+    logger.debug("Performing N1QL query: {}", selectQuery);
+    
     N1qlParams ryow = N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS);
-
-    N1qlQueryResult results = bucket.query(N1qlQuery.simple(select, ryow));
+    
+    N1qlQueryResult results = null;
+    int i = 3;
+    while(i > 0) {
+      try {
+        results = bucket.query(N1qlQuery.simple(selectQuery, ryow));
+        break;
+      } catch(RuntimeException ex) {
+        logger.error("Runtime exception on couchbase.list()", ex);
+      }
+      finally {
+        i--;
+      }
+    }
+    
+    if(results == null) {
+      throw new Storage.StorageException("List query cannot be completed");
+    }
+    
     List<String> list = new ArrayList();
-
     if (!results.errors().isEmpty()) {
       String errors = "";
       for (JsonObject err : results.errors()) {
@@ -120,8 +153,7 @@ public class CouchbaseConnection extends AbstractConnection {
     logger.debug("Setup connection {}, force {}", this.id, forceSetup);
 
     List<List<String>> indexFields = getConfiguration().couchbase.bucketsIndex.getOrDefault(this.id, new ArrayList());
-    
-    
+
     // @TODO: find a way to query N1QL to check if index exists
     if (forceSetup) {
 

@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.http.exception.ConfigurationException;
 import org.createnet.raptor.http.service.DispatcherService;
+import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Action;
 
@@ -68,7 +69,7 @@ public class ActionApi extends AbstractApi {
   public Response getStatus(
           @PathParam("id") String id,
           @PathParam("actionId") String actionId
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException {
+  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, IOException {
 
     ServiceObject obj = loadObject(id);
     Action action = loadAction(actionId, obj);
@@ -77,22 +78,22 @@ public class ActionApi extends AbstractApi {
       throw new NotAuthorizedException("Cannot fetch data");
     }
 
-    String status = storage.getActionStatus(action);
+    ActionStatus actionStatus = storage.getActionStatus(action);
     
     logger.debug("Fetched action {} status for object {}", action.name, obj.id);
     
-    if(status == null) {
+    if(actionStatus == null) {
       return Response.noContent().build();
     }
 
-    return Response.ok(status).build();
+    return Response.ok(actionStatus.toString()).build();
   }
 
   @POST
   @Path("{actionId}")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.TEXT_PLAIN)
-  public Response updateStatus(
+  public String updateStatus(
           @PathParam("id") String id,
           @PathParam("actionId") String actionId,
           String body
@@ -105,17 +106,17 @@ public class ActionApi extends AbstractApi {
       throw new NotAuthorizedException("Cannot fetch data");
     }
     
-    String actionResponse = storage.saveActionStatus(action, body);
+    ActionStatus actionStatus = storage.saveActionStatus(action, body);
     
     // notify event
-    dispatcher.notifyActionEvent(DispatcherService.ActionOperation.execute, action, body);
+    dispatcher.notifyActionEvent(DispatcherService.ActionOperation.execute, action, actionStatus.status);
     
     // trigger action over mqtt
-    dispatcher.actionTrigger(action, body);
+    dispatcher.actionTrigger(action, actionStatus.status);
     
     logger.debug("Saved action {} status for object {}", action.name, obj.id);
 
-    return Response.ok(actionResponse).build();
+    return actionStatus.toString();
   }
 
   @DELETE

@@ -32,7 +32,7 @@ public class ServiceObjectSerializer extends JsonSerializer<ServiceObject> {
     public void serialize(ServiceObject t, JsonGenerator jg, SerializerProvider sp) throws IOException, JsonProcessingException {
 
         jg.writeStartObject();
-        
+
         if(t.id != null)
           jg.writeStringField("id", t.id);
         
@@ -45,9 +45,11 @@ public class ServiceObjectSerializer extends JsonSerializer<ServiceObject> {
         if(t.description != null)
           jg.writeStringField("description", t.description);
         
-        jg.writeObjectField("customFields", t.customFields);
         jg.writeObjectField("streams", t.streams);
         jg.writeObjectField("actions", t.actions);
+        
+        jg.writeObjectField("customFields", t.customFields);
+        jg.writeObjectField("settings", t.settings);
         
         jg.writeEndObject();
 

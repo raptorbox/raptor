@@ -20,7 +20,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -28,8 +30,11 @@ import org.createnet.raptor.models.objects.ServiceObject;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.StorageProvider;
+import org.createnet.raptor.db.query.BaseQuery;
+import org.createnet.raptor.db.query.ListQuery;
 import org.createnet.raptor.http.configuration.StorageConfiguration;
 import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.exception.RecordsetException;
@@ -119,7 +124,7 @@ public class StorageService {
   
   public List<ServiceObject> listObjects() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
     
-    List<String> results = getObjectConnection().list("userId", auth.getUser().getUserId());
+    List<String> results = getObjectConnection().list(BaseQuery.queryBy("userId", auth.getUser().getUserId()));
     
     List<ServiceObject> list = new ArrayList();
     for(String raw : results) {
@@ -136,15 +141,35 @@ public class StorageService {
   }
   
   public ResultSet fetchData(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
+    return fetchData(stream, 0);
+  }
+  
+  public ResultSet fetchData(Stream stream, int limit) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
     
     ResultSet resultset = new ResultSet(stream);
+    
+    BaseQuery query = BaseQuery.queryBy(
+        "userId", auth.getUser().getUserId(),
+        "streamId", stream.name
+    );
+    
+    if(limit > 0) {
+      query.limit = limit;
+      query.setSort("lastUpdate", ListQuery.Sort.ASC);
+    }
+    
+    List<String> results = getDataConnection().list(query);
 
-    List<String> results = getDataConnection().list("userId", auth.getUser().getUserId());
     for(String raw : results) {
       resultset.add(raw);
     }
     
     return resultset;
+  }
+  
+  public RecordSet fetchLastUpdate(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
+    ResultSet resultset = fetchData(stream, 1);
+    return resultset.data.isEmpty() ? null : resultset.data.get(0);
   }
   
   public void saveData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException, JsonProcessingException, IOException, Authentication.AuthenticationException {
@@ -159,7 +184,9 @@ public class StorageService {
   
   public List<RecordSet> listData() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException  {
     
-    List<String> results = getDataConnection().list("userId", auth.getUser().getUserId());
+    List<String> results = getDataConnection().list(
+      BaseQuery.queryBy("userId", auth.getUser().getUserId())
+    );
     
     List<RecordSet> list = new ArrayList();
     for(String raw : results) {
@@ -175,37 +202,22 @@ public class StorageService {
     return action.getServiceObject().id + "-" + action.name;
   }
   
-  public String getActionStatus(Action action) throws ConfigurationException, Storage.StorageException, IOException {
-    
+  public ActionStatus getActionStatus(Action action) throws ConfigurationException, Storage.StorageException, IOException, RaptorComponent.ParserException {
+        
     String rawStatus = getActionConnection().get(getActionId(action));
     
-    // @TODO add ActionStatus class for handling de/serialization
-    ObjectNode json = (ObjectNode) ServiceObject.getMapper().readTree(rawStatus);
+    ActionStatus actionStatus = ActionStatus.parseJSON(rawStatus);
     
-    json.remove("actionId");
-    json.remove("objectId");
-    json.remove("status");
-    
-    return json.toString();
+    return actionStatus;
   }
   
-  public String saveActionStatus(Action action, String status) throws IOException, ConfigurationException, Storage.StorageException{
+  public ActionStatus saveActionStatus(Action action, String status) throws IOException, ConfigurationException, Storage.StorageException, RaptorComponent.ParserException{
 
-    // @TODO add ActionStatus class for handling de/serialization
-    ObjectNode json = ServiceObject.getMapper().createObjectNode();
+    ActionStatus actionStatus = new ActionStatus(action, status);
     
-    json.put("id", ServiceObject.generateUUID());
-    json.put("createdAt", System.currentTimeMillis()/1000);    
+    getActionConnection().set(getActionId(action), actionStatus.toJSON(ActionStatus.ViewType.Internal), defaultDataTTL);
     
-    String response = json.toString();
-    
-    json.put("status", status);
-    json.put("actionId", action.name);
-    json.put("objectId", action.getServiceObject().id);
-    
-    getActionConnection().set(getActionId(action), json.toString(), defaultDataTTL);
-    
-    return response;
+    return actionStatus;
   }
   
   public void deleteActionStatus(Action action) throws ConfigurationException, Storage.StorageException {

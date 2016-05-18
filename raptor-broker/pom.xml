@@ -16,36 +16,34 @@
   </properties>
 
   <dependencies>
-<!--    <dependency>
-      <groupId>org.apache.activemq</groupId>
-      <artifactId>artemis-stomp-protocol</artifactId>
-      <version>${artemis.version}</version>
-    </dependency>-->
-<!--    <dependency>
-      <groupId>org.apache.activemq</groupId>
-      <artifactId>artemis-core-client</artifactId>
-      <version>${artemis.version}</version>
-    </dependency>-->
-<!--    <dependency>
-      <groupId>org.apache.activemq</groupId>
-      <artifactId>artemis-mqtt-protocol</artifactId>
-      <version>${artemis.version}</version>
-    </dependency>    -->
-<!--    <dependency>
+
+    <dependency>
       <groupId>org.apache.activemq</groupId>
       <artifactId>artemis-server</artifactId>
       <version>${artemis.version}</version>
-    </dependency>-->
-<!--    <dependency>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.activemq</groupId>
+      <artifactId>artemis-core-client</artifactId>
+      <version>${artemis.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.activemq</groupId>
       <artifactId>artemis-jms-server</artifactId>
       <version>${artemis.version}</version>
-    </dependency>-->
-<!--    <dependency>
+    </dependency>
+    <dependency>
       <groupId>org.apache.activemq</groupId>
-      <artifactId>artemis-jms-client</artifactId>
+      <artifactId>artemis-mqtt-protocol</artifactId>
       <version>${artemis.version}</version>
-    </dependency>-->
+    </dependency>
+    <dependency>
+      <groupId>org.apache.activemq</groupId>
+      <artifactId>artemis-stomp-protocol</artifactId>
+      <version>${artemis.version}</version>
+    </dependency>
+    
+    
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -57,7 +55,7 @@
       <version>1.7.21</version>
     </dependency>
     
-    <dependency>
+    <!--    <dependency>
       <groupId>org.apache.activemq</groupId>
       <artifactId>artemis-server</artifactId>
       <version>1.3.0-SNAPSHOT</version>
@@ -81,7 +79,8 @@
       <groupId>org.apache.activemq</groupId>
       <artifactId>artemis-stomp-protocol</artifactId>
       <version>1.3.0-SNAPSHOT</version>
-    </dependency>
+    </dependency>-->
+    
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>raptor-http-api</artifactId>
@@ -90,7 +89,7 @@
   </dependencies>
 
   <build>
-<!--    <plugins>
+    <!--    <plugins>
       <plugin>
         <groupId>org.apache.activemq</groupId>
         <artifactId>artemis-maven-plugin</artifactId>

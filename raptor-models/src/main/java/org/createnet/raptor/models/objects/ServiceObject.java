@@ -17,24 +17,30 @@ package org.createnet.raptor.models.objects;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.createnet.raptor.models.objects.serializer.ServiceObjectSerializer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.createnet.raptor.models.objects.deserializer.ServiceObjectDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import static org.createnet.raptor.models.objects.RaptorContainer.mapper;
+import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author Luca Capra <luca.capra@gmail.com>
  */
-@JsonSerialize(using = ServiceObjectSerializer.class)
+//@JsonSerialize(using = ServiceObjectSerializer.class)
 @JsonDeserialize(using = ServiceObjectDeserializer.class)
-@JsonFilter("publicFieldsFilter")
+@JsonFilter("objectFieldsFilter")
 public class ServiceObject extends ServiceObjectContainer {
 
   Logger logger = LoggerFactory.getLogger(ServiceObject.class);
@@ -43,48 +49,45 @@ public class ServiceObject extends ServiceObjectContainer {
   private boolean isNew = true;
 
   public String userId;
-  
+
   public String id;
 
   public String name;
   public String description = "";
 
-  public Long createdAt;
-  public Long updatedAt;
+  public Long createdAt = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+  public Long updatedAt = createdAt;
 
-  public Map<String, Object> customFields;
-  public Map<String, String> properties;
+  public Map<String, Object> customFields = new HashMap();
+  public Settings settings = new Settings();
 
-  public Map<String, Stream> streams;
-  public Map<String, Subscription> subscriptions;
-  public Map<String, Action> actions;
+  public Map<String, Stream> streams = new HashMap();
+  public Map<String, Subscription> subscriptions = new HashMap();
+  public Map<String, Action> actions = new HashMap();
+
+  static public class Settings {
+
+    public boolean storeData = true;
+    public boolean eventsEnabled = true;
+
+    public boolean storeEnabled() {
+      return storeData;
+    }
+    
+    public boolean eventsEnabled() {
+      return eventsEnabled;
+    }
+  }
 
   public static String generateUUID() {
     return UUID.randomUUID().toString();
   }
 
   public ServiceObject() {
-    initialize();
   }
 
   public ServiceObject(String soid) {
-    initialize();
     this.id = soid;
-  }
-
-  private void initialize() {
-
-    customFields = new HashMap<>();
-    properties = new HashMap<>();
-
-    streams = new HashMap<>();
-    subscriptions = new HashMap<>();
-    actions = new HashMap<>();
-
-    createdAt = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-    updatedAt = createdAt;
-
-    addExtra("public", true);
   }
 
   @Override
@@ -99,11 +102,11 @@ public class ServiceObject extends ServiceObjectContainer {
   public String getUserId() {
     return userId;
   }
-  
+
   public void setUpdateTime() {
     updatedAt = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
   }
-  
+
   @Override
   public void validate() throws ValidationException {
 
@@ -149,26 +152,95 @@ public class ServiceObject extends ServiceObjectContainer {
     userId = serviceObject.userId;
     name = serviceObject.name;
     description = serviceObject.description;
-    customFields = serviceObject.customFields;
-    properties = serviceObject.properties;
+
     createdAt = serviceObject.createdAt;
     updatedAt = serviceObject.updatedAt;
-    streams = serviceObject.streams;
-    subscriptions = serviceObject.subscriptions;
-    actions = serviceObject.actions;
+
+    customFields.clear();
+    customFields.putAll(serviceObject.customFields);
+
+    streams.clear();
+    for (Map.Entry<String, Stream> el : serviceObject.streams.entrySet()) {
+      el.getValue().setServiceObject(this);
+      streams.put(el.getKey(), el.getValue());
+    }
+
+    subscriptions.clear();
+    for (Map.Entry<String, Subscription> el : serviceObject.subscriptions.entrySet()) {
+      el.getValue().setServiceObject(this);
+      subscriptions.put(el.getKey(), el.getValue());
+    }
+
+    actions.clear();
+    for (Map.Entry<String, Action> el : serviceObject.actions.entrySet()) {
+      el.getValue().setServiceObject(this);
+      actions.put(el.getKey(), el.getValue());
+    }
 
     isNew = (id == null);
-
-    serviceObject = null;
-
   }
-  
+
   public static ServiceObject fromJSON(String json) throws IOException {
     return mapper.readValue(json, ServiceObject.class);
   }
-  
+
   public boolean isNew() {
     return isNew;
+  }
+
+  protected ObjectMapper getMapper(ServiceObjectView type) {
+
+    SimpleBeanPropertyFilter propertyFilter;
+    switch (type) {
+
+      case Internal:
+        // all fields          
+        propertyFilter = SimpleBeanPropertyFilter.serializeAllExcept();
+        break;
+      case IdOnly:
+        // Keep ids only
+        propertyFilter = SimpleBeanPropertyFilter.filterOutAllExcept("id");
+        break;
+      case Public:
+      default:
+        // Hide internal fileds
+        propertyFilter = SimpleBeanPropertyFilter.serializeAllExcept("userId");
+        break;
+    }
+    
+    FilterProvider filter = new SimpleFilterProvider()
+            .addFilter("objectFieldsFilter", propertyFilter);
+    
+    ObjectMapper mapper1 = ServiceObject.getMapper();
+    mapper1.setFilterProvider(filter);
+    
+    return mapper1;
+    
+  }
+
+  public ObjectNode toJsonNode() {
+    return toJsonNode(ServiceObjectView.Public);
+  }
+  
+  public ObjectNode toJsonNode(ServiceObjectView type) {
+    ObjectNode node = getMapper(type).convertValue(this, ObjectNode.class);
+    return node;
+  }
+
+  public String toJSON(ServiceObjectView type) throws ParserException {
+    String json = null;
+    try {
+      json = getMapper(type).writeValueAsString(this);
+      return json;
+
+    } catch (JsonProcessingException ex) {
+      throw new ParserException(ex);
+    }
+
+  }
+ 
+  public String toJSON() throws ParserException {
+    return toJSON(ServiceObjectView.Public);
   }
 
 }

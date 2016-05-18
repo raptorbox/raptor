@@ -6,12 +6,14 @@
 package org.createnet.raptor.objects;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.math.BigDecimal;
+import java.util.UUID;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
+import org.createnet.raptor.utils.TestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -68,7 +70,68 @@ public class ServiceObjectTest extends TestUtils {
     assertTrue(serviceObject.actions.size() == 3);
     assertTrue(serviceObject.actions.get("makeCall") != null);
     
+  }
+  
+  @Test
+  public void testSerializeToJsonNode() throws RaptorComponent.ParserException {
     
+    serviceObject.parse(jsonServiceObject.toString());
+    
+    JsonNode node = serviceObject.toJsonNode();
+    
+    assertTrue(node.has("name"));
+    
+  }
+  
+  @Test
+  public void testSerializeToJsonNodeIdOnly() throws RaptorComponent.ParserException {
+    
+    serviceObject.parse(jsonServiceObject.toString());
+    
+    JsonNode node = serviceObject.toJsonNode(ServiceObjectView.IdOnly);
+    
+    assertFalse(node.has("name"));
+    
+  }
+  
+  
+  @Test
+  public void testSerializeViewPublic() throws RaptorComponent.ParserException, IOException {
+    
+    serviceObject.parse(jsonServiceObject.toString());
+    
+    String strjson = serviceObject.toJSON(ServiceObjectView.Public);
+    JsonNode json = mapper.readTree(strjson);
+    
+    assertFalse(json.has("userId"));
+  }
+  
+  @Test
+  public void testSerializeViewInternal() throws RaptorComponent.ParserException, IOException {
+    
+    serviceObject.parse(jsonServiceObject.toString());
+    
+    String strjson = serviceObject.toJSON(ServiceObjectView.Internal);
+    JsonNode json = mapper.readTree(strjson);
+    
+    assertTrue(json.has("userId"));
+  }
+  
+  @Test
+  public void testSerializeViewIdOnly() throws RaptorComponent.ParserException, IOException {
+    
+    ObjectNode jsonObj = (ObjectNode) jsonServiceObject;
+    jsonObj.put("id", UUID.randomUUID().toString());
+    
+    serviceObject.parse(jsonObj.toString());
+    
+    String strjson = serviceObject.toJSON(ServiceObjectView.IdOnly);
+    JsonNode json = mapper.readTree(strjson);
+
+    assertTrue(json.has("id"));    
+    assertFalse(json.has("userId"));
+    assertFalse(json.has("name"));
+
   }
 
   

@@ -108,7 +108,7 @@ public class ObjectApi extends AbstractApi {
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public ServiceObject update(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.IndexerException {
+  public String update(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.IndexerException {
 
     ServiceObject storedObj = loadObject(obj.id);
 
@@ -133,13 +133,14 @@ public class ObjectApi extends AbstractApi {
     dispatcher.notifyObjectEvent(DispatcherService.ObjectOperation.update, storedObj);
     
     logger.debug("Updated object {} for {}", storedObj.id, auth.getUser().getUserId());
-    return obj;
+    
+    return obj.toJSON();
   }
 
   @GET
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
-  public ServiceObject load(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException {
+  public String load(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException {
 
     logger.debug("Load object {}", id);
 
@@ -149,7 +150,7 @@ public class ObjectApi extends AbstractApi {
       throw new NotAuthorizedException("Cannot read object");
     }
     
-    return obj;
+    return obj.toJSON();
   }
 
   @DELETE

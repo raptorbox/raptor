@@ -9,12 +9,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import org.createnet.raptor.models.data.IRecord;
-import org.createnet.raptor.models.data.Record;
 import org.createnet.raptor.models.data.types.BooleanRecord;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.exception.RecordsetException;
+import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.utils.TestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -27,9 +28,6 @@ import static org.junit.Assert.*;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class RecordsetTest extends TestUtils {
-  
-  JsonNode data;
-  JsonNode data1;
   
   public RecordsetTest() {
     
@@ -46,10 +44,7 @@ public class RecordsetTest extends TestUtils {
   
   @Before
   public void setUp() throws IOException {
-    loadObject();
-    data = loadData("record");
-    data1 = loadData("record1");
-    
+    loadObject();    
   }
   
   @After
@@ -65,6 +60,8 @@ public class RecordsetTest extends TestUtils {
   @Test
   public void testParseRecord() throws RecordsetException, JsonProcessingException, IOException {
     
+    JsonNode data = loadData("record");
+    
     Stream stream = serviceObject.streams.get("mylocation");
     RecordSet records = mapper.readValue(data.toString(), RecordSet.class);
             
@@ -72,27 +69,37 @@ public class RecordsetTest extends TestUtils {
     assertTrue(channel instanceof BooleanRecord);
     assertTrue(channel.getValue().equals(true));
     
-    System.out.println("org.createnet.raptor.objects.RecordsetTest.testParseRecord() "  + records.toJson()); 
+    String strjson = records.toJson();
+    JsonNode json =  mapper.readTree(strjson);
+    
+    assertTrue(json.get("channels").get("happy").get("current-value").isBoolean());
     
   }
   
   @Test
   public void testParseStreamData() throws RecordsetException, JsonProcessingException, IOException {
     
+    JsonNode data1 = loadData("record1");
     RecordSet records = mapper.readValue(data1.toString(), RecordSet.class);
     
-    System.out.println("org.createnet.raptor.objects.RecordsetTest.testParseRecord() "  + records.toJson()); 
+    String strjson = records.toJson();
+    JsonNode json = mapper.readTree(strjson);
+    
+    assertTrue(json.has("channels"));
+    assertTrue(json.has("lastUpdate"));
     
   }
   
   @Test
   public void testParseResultSet() throws RecordsetException, JsonProcessingException, IOException {
-    
-    
+        
     JsonNode resultset = loadData("resultset");
     ResultSet results = mapper.readValue(resultset.toString(), ResultSet.class);
     
-    System.out.println("org.createnet.raptor.objects.RecordsetTest.testParseRecord() "  + results.toJson()); 
+    String strjson = results.toJson();
+    JsonNode json = mapper.readTree(strjson);
+    
+    assertTrue(json.has("data"));
     
   }
 

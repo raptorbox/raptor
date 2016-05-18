@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.util.Collection;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -64,10 +65,10 @@ public class DataApi extends AbstractApi {
   @GET
   @Path("{stream}")
   @Produces(MediaType.APPLICATION_JSON)
-  public ResultSet fetch(
+  public Response fetch(
           @PathParam("id") String id,
           @PathParam("stream") String streamName
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException {
+  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, IOException {
 
     ServiceObject obj = loadObject(id);
     Stream stream = loadStream(streamName, obj);
@@ -75,12 +76,16 @@ public class DataApi extends AbstractApi {
     if (!auth.isAllowed(Authorization.Permission.Pull)) {
       throw new NotAuthorizedException("Cannot fetch data");
     }
-
+    
+    if(!obj.settings.storeEnabled()) {
+      return Response.noContent().build();
+    }
+    
     ResultSet data = storage.fetchData(stream);
 
     logger.debug("Fetched {} records for stream {} in object {}", data.size(), streamName, obj.id);
 
-    return data;
+    return Response.ok(data.toJson()).build();
   }
 
   @GET
@@ -97,8 +102,12 @@ public class DataApi extends AbstractApi {
     if (!auth.isAllowed(Authorization.Permission.Pull)) {
       throw new NotAuthorizedException("Cannot fetch data");
     }
-
-    RecordSet data = indexer.searchLastUpdate(stream);
+    
+    if(!obj.settings.storeEnabled()) {
+      return Response.noContent().build();
+    }
+    
+    RecordSet data = storage.fetchLastUpdate(stream);
 
     logger.debug("Fetched lastUpdate record for stream {} in object {}", streamName, obj.id);
 
@@ -127,19 +136,22 @@ public class DataApi extends AbstractApi {
       throw new NotAuthorizedException("Cannot push data");
     }
     
-    // save data
-    storage.saveData(stream, record);
-    
-    // index data (with objectId and stream props)
-    try {
-      indexer.indexData(stream, record);
+    if(obj.settings.storeEnabled()) {
+
+      // save data
+      storage.saveData(stream, record);
+
+      // index data (with objectId and stream props)
+      try {
+        indexer.indexData(stream, record);
+      }
+      catch(ConfigurationException | IOException | Indexer.IndexerException ex) {
+        logger.error("Failed to index record for {}", obj.id);
+        storage.deleteData(stream, record);
+        throw ex;
+      }
+
     }
-    catch(ConfigurationException | IOException | Indexer.IndexerException ex) {
-      logger.error("Failed to index record for {}", obj.id);
-      storage.deleteData(stream, record);
-      throw ex;
-    }
-    
     // notify data event
     dispatcher.notifyDataEvent(stream, record);
     
@@ -148,7 +160,7 @@ public class DataApi extends AbstractApi {
     
     logger.debug("Stored record for stream {} in object {}", streamName, obj.id);
     
-    return Response.ok().build();
+    return Response.accepted().build();
   }
   
   

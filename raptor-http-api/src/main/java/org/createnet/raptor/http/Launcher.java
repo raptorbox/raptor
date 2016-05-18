@@ -38,7 +38,7 @@ public class Launcher {
   private HttpServer server;
   
   private HttpServer startServer() throws IOException {
-    return startServer(defaultURI);
+    return startServer(getURI());
   }
   
   private HttpServer startServer(String uri) throws IOException {
@@ -72,6 +72,11 @@ public class Launcher {
     
     System.in.read();
     launcher.stopServer(0);
+  }
+
+  private String getURI() {
+    String uri = System.getProperty("uri");
+    return uri == null ? defaultURI : uri;
   }
   
 }
