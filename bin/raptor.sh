@@ -8,4 +8,4 @@ RPATH="$SCRIPTPATH/../raptor-cli"
 
 cd $RPATH
 
-java -jar target/raptor-cli-1.0-jar-with-dependencies.jar
+java -cp -jar target/raptor-cli-1.0-jar-with-dependencies.jar $@
