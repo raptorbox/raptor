@@ -1,5 +1,10 @@
 
-RPATH="../raptor-cli"
+# Absolute path to this script. /home/user/bin/foo.sh
+SCRIPT=$(readlink -f $0)
+# Absolute path this script is in. /home/user/bin
+SCRIPTPATH=`dirname $SCRIPT`
+
+RPATH="$SCRIPTPATH/../raptor-cli"
 
 cd $RPATH
 mvn exec:java -Dexec.args="$1 $2 $3"

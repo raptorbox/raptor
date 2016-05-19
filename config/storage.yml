@@ -8,8 +8,8 @@ couchbase:
   password: password
 
   bucketDefaults:
-    password: ""
-    quota: 120
+    password: mybucket
+    quota: 360
     replica: 0
     indexReplica: false
     enableFlush: false
