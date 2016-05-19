@@ -50,6 +50,11 @@ abstract public class AbstractStorage implements Storage {
   public void initialize(StorageConfiguration configuration) throws StorageException {
     this.config = configuration;
   }
+
+  @Override
+  public void destroy() {
+    // does nothing by default
+  }
   
   protected StorageConfiguration getConfiguration() {
     return config;

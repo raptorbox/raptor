@@ -19,6 +19,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.createnet.raptor.db.AbstractConnection;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.query.ListQuery;
@@ -33,7 +34,6 @@ public class CouchbaseConnection extends AbstractConnection {
 
   private final Logger logger = LoggerFactory.getLogger(CouchbaseConnection.class);
 
-  final String indexPrefix = "by";
   final Bucket bucket;
 
   public CouchbaseConnection(String id, Bucket bucket) {
@@ -44,6 +44,10 @@ public class CouchbaseConnection extends AbstractConnection {
   @Override
   public void disconnect() {
     bucket.close();
+  }
+
+  @Override
+  public void destroy() {
   }
 
   @Override
@@ -106,29 +110,29 @@ public class CouchbaseConnection extends AbstractConnection {
     if (query.getLimit() > 0) {
       selectQuery += " LIMIT " + query.getLimit();
     }
-    
+
     logger.debug("Performing N1QL query: {}", selectQuery);
-    
+
     N1qlParams ryow = N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS);
-    
+
     N1qlQueryResult results = null;
     int i = 3;
-    while(i > 0) {
+    while (i > 0) {
       try {
-        results = bucket.query(N1qlQuery.simple(selectQuery, ryow));
+        // wait 10 seconds then retry, query longer than 
+        results = bucket.query(N1qlQuery.simple(selectQuery, ryow), 10000, TimeUnit.MILLISECONDS);
         break;
-      } catch(RuntimeException ex) {
+      } catch (RuntimeException ex) {
         logger.error("Runtime exception on couchbase.list()", ex);
-      }
-      finally {
+      } finally {
         i--;
       }
     }
-    
-    if(results == null) {
+
+    if (results == null) {
       throw new Storage.StorageException("List query cannot be completed");
     }
-    
+
     List<String> list = new ArrayList();
     if (!results.errors().isEmpty()) {
       String errors = "";
@@ -147,6 +151,14 @@ public class CouchbaseConnection extends AbstractConnection {
     return list;
   }
 
+  protected String getIndexName(List<String> fieldsList) {
+    String indexName = "by";
+    for (String fieldName : fieldsList) {
+      indexName += fieldName.replace("_", "").replace("-", "");
+    }
+    return indexName;
+  }
+
   @Override
   public void setup(boolean forceSetup) throws Storage.StorageException {
 
@@ -159,23 +171,24 @@ public class CouchbaseConnection extends AbstractConnection {
 
       logger.debug("Drop primary index");
 
-      bucket.query(N1qlQuery.simple(
+      N1qlQueryResult result = bucket.query(N1qlQuery.simple(
               Index.dropPrimaryIndex(bucket.name())
       ));
-
+      
+      checkErrors(result, 5000); // ignore {"msg":"GSI index #primary not found.","code":5000}
+      
       if (!indexFields.isEmpty()) {
         for (List<String> fieldsList : indexFields) {
 
-          String indexName = indexPrefix;
-          for (String fieldName : fieldsList) {
-            indexName += fieldName;
-          }
+          String indexName = getIndexName(fieldsList);
 
           logger.debug("Drop secondary index {}", indexName);
-          bucket.query(N1qlQuery.simple(
+          result = bucket.query(N1qlQuery.simple(
                   Index.dropIndex(bucket.name(), indexName)
           ));
-
+          
+          checkErrors(result, 5000); // ignore {"msg":"GSI index #primary not found.","code":5000}
+          
         }
       }
 
@@ -188,9 +201,9 @@ public class CouchbaseConnection extends AbstractConnection {
         for (List<String> fieldsList : indexFields) {
 
           String fieldsNames = "";
-          String indexName = indexPrefix;
+
+          String indexName = getIndexName(fieldsList);
           for (String fieldName : fieldsList) {
-            indexName += fieldName;
             fieldsNames += "`" + fieldName + "`,";
           }
 
@@ -201,20 +214,32 @@ public class CouchbaseConnection extends AbstractConnection {
           logger.debug("Create secondary index {}", indexName);
           logger.debug("N1QL query: {}", indexQuery);
 
-          N1qlQueryResult result = bucket.query(N1qlQuery.simple(indexQuery));
+          result = bucket.query(N1qlQuery.simple(indexQuery));
 
-          if (!result.errors().isEmpty()) {
-            String errors = "";
-            for (JsonObject err : result.errors()) {
-              errors += "\n- " + err.toString();
-            }
-
-            throw new Storage.StorageException("Error creating index for " + bucket.name() + ": " + errors);
-          }
+          checkErrors(result, 5000); // ignore  {"msg":"GSI CreateIndex() - cause: Index userIdobjectId already exist.","code":5000}
 
         }
       }
 
+    }
+  }
+
+  private void checkErrors(N1qlQueryResult result, int skipCode) throws Storage.StorageException {
+    if (!result.errors().isEmpty()) {
+      String errors = "[ ";
+      List<JsonObject> errorsList = result.errors();
+      for (JsonObject err : errorsList) {
+        
+        int code = err.getInt("code");
+        if(errorsList.size() ==1 && (code != 0 && code == skipCode)) {
+          logger.warn("Ignored error on index setup: {}", err.toString());
+          return;
+        }
+        
+        errors += err.toString() + ", ";
+      }
+      errors += "]";
+      throw new Storage.StorageException("Error on index for " + bucket.name() + ": " + errors);
     }
   }
 

@@ -40,6 +40,11 @@ abstract public class AbstractConnection implements Storage.Connection {
     this.configuration = configuration;
   }
 
+  @Override
+  public void destroy() {
+    // does nothing by default
+  }
+
   public StorageConfiguration getConfiguration() {
     return configuration;
   }

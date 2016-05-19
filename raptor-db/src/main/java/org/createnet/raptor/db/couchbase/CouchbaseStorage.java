@@ -93,6 +93,19 @@ public class CouchbaseStorage extends AbstractStorage {
   }
 
   @Override
+  public void destroy() {
+    
+    Map<String, String> buckets = getConfiguration().couchbase.buckets;
+    
+    ClusterManager clusterManager = getClusterManager();
+    for (Map.Entry<String, String> el : buckets.entrySet()) {
+      logger.debug("Removing bucket {}", el.getValue());
+      clusterManager.removeBucket(el.getValue());
+    }
+
+  }
+
+  @Override
   public void disconnect() {
 
     logger.debug("Disconnecting from couchbase");

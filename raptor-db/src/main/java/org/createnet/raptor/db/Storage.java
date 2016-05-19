@@ -30,10 +30,12 @@ public interface Storage {
 
     public String getId();
     
-    public void disconnect();
-    public void connect() throws StorageException;
+
+    public void initialize(StorageConfiguration configuration);    
     public void setup(boolean forceSetup) throws StorageException;
-    public void initialize(StorageConfiguration configuration);
+    public void connect() throws StorageException;    
+    public void disconnect();
+    public void destroy();
     
     public void set(String id, String data, int ttlDays) throws StorageException;
     public String get(String id) throws StorageException;
@@ -46,6 +48,7 @@ public interface Storage {
   public void setup(boolean forceSetup) throws StorageException;
   public void connect() throws StorageException;
   public void disconnect();
+  public void destroy();
   
   public Connection getConnection(String id);
   
