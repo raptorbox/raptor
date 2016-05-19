@@ -42,7 +42,7 @@ public class Commands {
   }
   
   public void launch() {    
-    new Launcher().start();
+    new ServiceLauncher().start();
   }
   
 }

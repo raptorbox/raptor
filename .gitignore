@@ -1,3 +1,4 @@
 ./raptor*/target/*
 .vagrant
 /raptor-broker/target/
+/raptor-parent/target/

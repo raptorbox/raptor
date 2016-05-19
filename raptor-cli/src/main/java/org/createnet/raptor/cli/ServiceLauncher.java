@@ -27,9 +27,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class Launcher {
+public class ServiceLauncher {
 
-  final private Logger logger = LoggerFactory.getLogger(Launcher.class);
+  final private Logger logger = LoggerFactory.getLogger(ServiceLauncher.class);
   final private ExecutorService executor = Executors.newFixedThreadPool(2);
   
   void start() {

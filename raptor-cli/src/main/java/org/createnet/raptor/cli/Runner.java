@@ -38,9 +38,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class Cli {
+public class Runner {
 
-  static final private Logger logger = LoggerFactory.getLogger(Cli.class);
+  static final private Logger logger = LoggerFactory.getLogger(Runner.class);
   final private Commands commands = new Commands();
 
   public static class CommandName {
@@ -53,7 +53,7 @@ public class Cli {
 
   }
 
-  public Cli() {
+  public Runner() {
 
     ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
     ServiceLocator serviceLocator = locatorFactory.create("CliLocator");
@@ -65,10 +65,10 @@ public class Cli {
 
   public static void main(String[] args) throws ParseException {
 
-    final Cli app = new Cli();
+    final Runner app = new Runner();
     
     try {
-      if(!Cli.isRoot()) {
+      if(!Runner.isRoot()) {
         logger.warn("Current user is not root");
       }
     }
