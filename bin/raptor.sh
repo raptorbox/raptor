@@ -7,5 +7,4 @@ SCRIPTPATH=`dirname $SCRIPT`
 RPATH="$SCRIPTPATH/../raptor-cli"
 
 cd $RPATH
-
-java -cp -jar target/raptor-cli-1.0-jar-with-dependencies.jar $@
+mvn exec:java -Dexec.args="$1 $2 $3"
