@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -192,6 +193,24 @@ public class StorageService {
     
     return list;
   }
+
+  // @TODO: introduce batch operation in storage
+  public void deleteData(Stream stream) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
+    
+    BaseQuery query = BaseQuery.queryBy("userId", auth.getUser().getUserId());
+    
+    query.getQueryOptions().timeout = 30;
+    query.getQueryOptions().timeoutUnit = TimeUnit.SECONDS;
+    
+    List<String> results = getDataConnection().list(query);
+    
+    for(String raw : results) {
+      RecordSet rs = RecordSet.fromJSON(raw);
+      deleteData(stream, rs);
+    }
+
+  }
+
   
   // Actuations
   

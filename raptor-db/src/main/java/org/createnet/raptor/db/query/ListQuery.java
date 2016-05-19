@@ -16,6 +16,7 @@
 package org.createnet.raptor.db.query;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -61,7 +62,18 @@ public interface ListQuery {
     }
     
   }
+  
+  public class QueryOptions {
+    
+    public int retries = 3;
+    public int timeout = 10;
+    public TimeUnit timeoutUnit = TimeUnit.SECONDS;
 
+    public QueryOptions() {
+    }
+    
+  }
+  
   public int getOffset();
 
   public int getLimit();
@@ -69,5 +81,6 @@ public interface ListQuery {
   public SortBy getSort();
 
   public List<QueryParam> getParams();
-
+  
+  public QueryOptions getQueryOptions();
 }

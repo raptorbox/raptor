@@ -49,6 +49,7 @@ public class Cli {
 
     final public static String SETUP = "setup";
     final public static String INDEX = "index";
+    final public static String LAUNCH = "launch";
 
   }
 
@@ -82,7 +83,13 @@ public class Cli {
             .desc("Setup the current Raptor instance WARNING: if used with force flag, ALL DATA AND INDEXES will be wiped")
             .build();
 
+    Option launchCommand = Option.builder(CommandName.LAUNCH)
+            .hasArg(false)
+            .desc("Launch a Raptor instance")
+            .build();    
+    
     options.addOption(setupCommand);
+    options.addOption(launchCommand);
     options.addOption("force", false, "Force command execution");
 
     CommandLineParser parser = new DefaultParser();
@@ -94,6 +101,9 @@ public class Cli {
     if (cmd.hasOption("setup")) {
       app.setup(cmd.hasOption("force"));
     }
+    if (cmd.hasOption("launch")) {
+      app.launch();
+    }
 
   }
 
@@ -104,6 +114,11 @@ public class Cli {
     } catch (Indexer.IndexerException | Storage.StorageException | ConfigurationException ex) {
       logger.error("Error during setup", ex);
     }
+  }
+
+  public void launch() {
+    logger.debug("Launching new Raptor instance");
+    commands.launch();
   }
 
   // from http://stackoverflow.com/a/24064448/833499 

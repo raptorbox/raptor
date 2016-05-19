@@ -17,6 +17,7 @@ package org.createnet.raptor.db.query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -28,6 +29,8 @@ abstract public class AbstractQuery implements ListQuery {
   public SortBy sortBy;
   public int offset = 0;
   public int limit = 0;
+  
+  final private QueryOptions options = new QueryOptions();
   
   @Override
   public int getOffset() {
@@ -47,6 +50,11 @@ abstract public class AbstractQuery implements ListQuery {
   @Override
   public List<QueryParam> getParams() {
     return params;
+  }
+  
+  @Override
+  public QueryOptions getQueryOptions() {
+    return options;
   }
   
   public void setSort(String field, Sort sort) {

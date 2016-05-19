@@ -114,13 +114,13 @@ public class CouchbaseConnection extends AbstractConnection {
     logger.debug("Performing N1QL query: {}", selectQuery);
 
     N1qlParams ryow = N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS);
-
+    
+    ListQuery.QueryOptions queryOptions = query.getQueryOptions();
     N1qlQueryResult results = null;
-    int i = 3;
+    int i = queryOptions.retries;
     while (i > 0) {
       try {
-        // wait 10 seconds then retry, query longer than 
-        results = bucket.query(N1qlQuery.simple(selectQuery, ryow), 10000, TimeUnit.MILLISECONDS);
+        results = bucket.query(N1qlQuery.simple(selectQuery, ryow), queryOptions.timeout, queryOptions.timeoutUnit);
         break;
       } catch (RuntimeException ex) {
         logger.error("Runtime exception on couchbase.list()", ex);

@@ -18,8 +18,8 @@ package org.createnet.raptor.http.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.util.Collection;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -86,6 +86,32 @@ public class DataApi extends AbstractApi {
     logger.debug("Fetched {} records for stream {} in object {}", data.size(), streamName, obj.id);
 
     return Response.ok(data.toJson()).build();
+  }
+  
+  @DELETE
+  @Path("{stream}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response delete(
+          @PathParam("id") String id,
+          @PathParam("stream") String streamName
+  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, IOException {
+
+    ServiceObject obj = loadObject(id);
+    Stream stream = loadStream(streamName, obj);
+
+    if (!auth.isAllowed(Authorization.Permission.Push)) {
+      throw new NotAuthorizedException("Cannot delete data");
+    }
+    
+    if(!obj.settings.storeEnabled()) {
+      return Response.noContent().build();
+    }
+    
+    storage.deleteData(stream);
+
+    logger.debug("Delete all records for stream {} in object {}", streamName, obj.id);
+
+    return Response.ok().build();
   }
 
   @GET
