@@ -1,20 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.createnet</groupId>
   <artifactId>raptor</artifactId>
+  
+  <name>Raptor</name>  
   <version>1.0</version>
+  
   <packaging>pom</packaging>
+  
   <modules>
+    
+    <module>raptor-models</module>    
+
+    <module>raptor-dispatcher</module>    
+    <module>raptor-auth</module>    
     <module>raptor-db</module>
-    <module>raptor-dispatcher</module>
-    <module>raptor-models</module>
     <module>raptor-search</module>
+    
     <module>raptor-http-api</module>
+    <module>raptor-broker</module>
+    
     <module>raptor-cli</module>
+    
   </modules>
+  
   <properties>
+    
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+
+    <jackson>2.7.4</jackson>
+    <slf4j>1.7.21</slf4j>    
+    <elastic-search>2.3.1</elastic-search>
+    <junit>4.12</junit>
+    
+    
   </properties>
-  <name>Raptor</name>
+  
 </project>

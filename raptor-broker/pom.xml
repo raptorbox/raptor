@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <parent>
+    <groupId>org.createnet</groupId>
+    <artifactId>raptor</artifactId>
+    <version>1.0</version>
+  </parent>
   
+    
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.createnet</groupId>
   <artifactId>raptor-broker</artifactId>
-  
-  <version>1.0</version>
   <packaging>jar</packaging>
     
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <artemis.version>1.2.0</artemis.version>
+    <artemis>1.2.0</artemis>
   </properties>
 
   <dependencies>
@@ -20,66 +22,40 @@
     <dependency>
       <groupId>org.apache.activemq</groupId>
       <artifactId>artemis-server</artifactId>
-      <version>${artemis.version}</version>
+      <version>${artemis}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.activemq</groupId>
       <artifactId>artemis-core-client</artifactId>
-      <version>${artemis.version}</version>
+      <version>${artemis}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.activemq</groupId>
       <artifactId>artemis-jms-server</artifactId>
-      <version>${artemis.version}</version>
+      <version>${artemis}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.activemq</groupId>
       <artifactId>artemis-mqtt-protocol</artifactId>
-      <version>${artemis.version}</version>
+      <version>${artemis}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.activemq</groupId>
       <artifactId>artemis-stomp-protocol</artifactId>
-      <version>${artemis.version}</version>
+      <version>${artemis}</version>
     </dependency>
     
     
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.21</version>
+      <version>${slf4j}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.7.21</version>
+      <version>${slf4j}</version>
     </dependency>
-    
-    <!--    <dependency>
-      <groupId>org.apache.activemq</groupId>
-      <artifactId>artemis-server</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.activemq</groupId>
-      <artifactId>artemis-core-client</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.activemq</groupId>
-      <artifactId>artemis-jms-server</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.activemq</groupId>
-      <artifactId>artemis-mqtt-protocol</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.activemq</groupId>
-      <artifactId>artemis-stomp-protocol</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
-    </dependency>-->
     
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -87,32 +63,5 @@
       <version>${project.version}</version>
     </dependency>
   </dependencies>
-
-  <build>
-    <!--    <plugins>
-      <plugin>
-        <groupId>org.apache.activemq</groupId>
-        <artifactId>artemis-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>runClient</id>
-            <goals>
-              <goal>runClient</goal>
-            </goals>
-            <configuration>
-              <clientClass>org.createnet.raptor.broker.Broker</clientClass>
-            </configuration>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.activemq.examples.broker</groupId>
-            <artifactId>embedded-simple</artifactId>
-            <version>${artemis.version}</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-    </plugins>-->
-  </build>
 
 </project>
