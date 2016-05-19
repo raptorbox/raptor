@@ -48,7 +48,9 @@ import static org.junit.Assert.*;
 public class CouchbaseConnectionTest {
 
   static String bucketKey = "stream";
-
+  String userId = "dude";
+  String streamId = "sensorstuff";
+    
   static final protected ObjectMapper mapper = new ObjectMapper();
   static final StorageProvider storage = new StorageProvider();
 
@@ -158,7 +160,7 @@ public class CouchbaseConnectionTest {
 
   protected int getTTL(int time) {
     return time + (1000 * 60 * 60 * 24 * 90); // +3 months;
-  } 
+  }
 
   @Test
   public void testSetGet() throws IOException, Storage.StorageException {
@@ -218,27 +220,8 @@ public class CouchbaseConnectionTest {
   @Test
   public void testList() throws Exception {
 
-    String userId = "dude";
-    String streamId = "sensorstuff";
-
     int count = 5;
-    for (int i = 0; i < count; i++) {
-
-      int time = getTime();
-
-      ObjectNode record = record = loadData("record");
-
-      record.put("lastUpdate", time + (i*100));
-      record.put("userId", userId);
-      record.put("streamId", streamId);
-
-      String id = getStreamId(record, time + (i*100));
-      instance.set(id, record.toString(), 0);
-      
-      String res = instance.get(id);
-      assertNotNull(res);
-      
-    }
+    int lastUpdate = createRecords(5);
 
     // list records by userId + streamId
     BaseQuery query = BaseQuery.queryBy(
@@ -250,6 +233,59 @@ public class CouchbaseConnectionTest {
 
     assertEquals(result.size(), count);
 
+  }
+
+  /**
+   * Test of list method, of class CouchbaseConnection.
+   */
+  @Test
+  public void testListLimit() throws Exception {
+
+    int count = 5;
+    int lastUpdate = createRecords(5);
+
+    // list records by userId + streamId
+    BaseQuery query = BaseQuery.queryBy(
+            new BaseQuery.QueryParam("userId", userId),
+            new BaseQuery.QueryParam("streamId", streamId)
+    );
+
+    query.limit = 1;
+    query.setSort("lastUpdate", ListQuery.Sort.DESC);
+
+    List<String> result = instance.list(query);
+
+    JsonNode json2 = mapper.readTree(result.get(0));
+
+    assertEquals(json2.get("lastUpdate").asInt(), lastUpdate);
+
+  }
+
+  private int createRecords(int count) throws Storage.StorageException, IOException {
+
+    int lastUpdate = 0;
+    
+    for (int i = 0; i < count; i++) {
+
+      int time = getTime();
+
+      ObjectNode record = record = loadData("record");
+
+      lastUpdate = time + (i * 100);
+
+      record.put("lastUpdate", lastUpdate);
+      record.put("userId", userId);
+      record.put("streamId", streamId);
+
+      String id = getStreamId(record, lastUpdate);
+      instance.set(id, record.toString(), 0);
+
+      String res = instance.get(id);
+      assertNotNull(res);
+
+    }
+    
+    return lastUpdate;
   }
 
 }
