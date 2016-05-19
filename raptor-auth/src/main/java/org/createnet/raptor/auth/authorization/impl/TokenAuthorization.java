@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.createnet.raptor.auth.AuthConfiguration;
@@ -34,7 +33,9 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class TokenAuthorization extends AbstractAuthorization {
-
+  
+  final ObjectMapper mapper = new ObjectMapper();
+      
   final private Logger logger = LoggerFactory.getLogger(TokenAuthorization.class);
   final private AuthHttpClient client = new AuthHttpClient();
 
@@ -47,7 +48,6 @@ public class TokenAuthorization extends AbstractAuthorization {
 
       String response = request(accessToken, id, op.name());
 
-      ObjectMapper mapper = new ObjectMapper();
       JsonNode node = mapper.readTree(response);
 
       boolean allowed = node.get("result").booleanValue();

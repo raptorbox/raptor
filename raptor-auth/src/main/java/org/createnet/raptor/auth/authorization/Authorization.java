@@ -35,7 +35,8 @@ public interface Authorization {
   }
 
   public enum Permission {
-
+    
+    List,
     // ServiceObject definition
     Read, Create, Update, Delete,
     // Stream data
