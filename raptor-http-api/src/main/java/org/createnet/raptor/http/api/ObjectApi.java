@@ -24,7 +24,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
@@ -61,7 +60,7 @@ public class ObjectApi extends AbstractApi {
   public List<String> list() throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException {
 
     if (!auth.isAllowed(Authorization.Permission.Read)) {
-      throw new NotAllowedException("Cannot list objects");
+      throw new NotAuthorizedException("Cannot list objects");
     }
 
     List<ServiceObject> list = storage.listObjects();
@@ -181,7 +180,7 @@ public class ObjectApi extends AbstractApi {
   public List<String> search(ObjectQuery query) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.SearchException, IOException {
 
     if (!auth.isAllowed(Authorization.Permission.Read)) {
-      throw new NotAllowedException("Cannot search for objects");
+      throw new NotAuthorizedException("Cannot search for objects");
     }
     
     List<String> list = indexer.searchObject(query);

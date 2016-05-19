@@ -17,9 +17,14 @@ package org.createnet.raptor.auth.cache.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.auth.cache.AbstractCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -27,55 +32,102 @@ import org.createnet.raptor.auth.cache.AbstractCache;
  */
 public class MemoryCache extends AbstractCache {
 
-  final private int maxSize = 1000;
+  private final Logger logger = LoggerFactory.getLogger(MemoryCache.class);
+  
+  final private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);  
+  
+  static private final Map<String, CachedItem<Authentication.UserInfo>> users = new HashMap();
+  static private final Map<String, CachedItem<Boolean>> permissions = new HashMap();
 
-  private final Map<String, Authentication.UserInfo> users = new HashMap();
-  private final Map<String, Boolean> permissions = new HashMap();
+  protected class CachedItem<T> {
+    
+    private final int defaultTTL = (10 * 1000); // 10 sec TTL
+    
+    final private T item;
+    final private long expiry;
 
+    public CachedItem(T item, long expiry) {
+      this.item = item;
+      this.expiry = expiry;
+    }
+    
+    public CachedItem(T item) {
+      this.item = item;
+      this.expiry = System.currentTimeMillis() + defaultTTL;
+    }
+    
+    public boolean isExpired() {
+      return expiry < System.currentTimeMillis();
+    }
+
+    public T getItem() {      
+      return isExpired() ? null : item;
+    }
+    
+  }
+  
+  public MemoryCache() {
+    try {
+      scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+        @Override
+        public void run() {
+
+          for(Map.Entry<String, CachedItem<Authentication.UserInfo>> el : getUsers().entrySet()) {
+            if(el.getValue().isExpired()) {
+              getUsers().remove(el.getKey());
+              logger.debug("Removed cached user {}", el.getKey());
+            }
+          }
+
+          for(Map.Entry<String, CachedItem<Boolean>> el : getPermissions().entrySet()) {
+            if(el.getValue().isExpired()) {
+              getPermissions().remove(el.getKey());
+              logger.debug("Removed cached permission {}", el.getKey());
+            }
+          }
+
+        }
+      }, 0, 5, TimeUnit.SECONDS);
+    }
+    catch(RuntimeException ex) {
+      logger.warn("Scheduled task exception", ex);
+    }
+  }
+  
   @Override
   public Boolean get(String userId, String id, Authorization.Permission op) throws PermissionCacheException {
-    String key = userId + id + op.name();
-    return permissions.get(key);
+    String key = userId + id + op.name();        
+    return getPermissions().get(key).getItem();
   }
 
   @Override
   public void set(Authentication.UserInfo user) throws PermissionCacheException {
-    
-    if (users.size() > maxSize) {
-      for (String key : users.keySet()) {
-        users.remove(key);
-        break;
-      }
-    }
-    
-    users.put(user.getAccessToken(), user);
+    getUsers().put(user.getAccessToken(), new CachedItem(user));
   }
 
   @Override
   public void set(String userId, String id, Authorization.Permission op, boolean result) throws PermissionCacheException {
-
-    if (permissions.size() > maxSize) {
-      for (String key : permissions.keySet()) {
-        permissions.remove(key);
-        break;
-      }
-    }
-
     String key = userId + id + op.name();
-    permissions.put(key, result);
+    getPermissions().put(key, new CachedItem(result));
   }
 
   @Override
   public Authentication.UserInfo get(String accessToken) throws PermissionCacheException {
-    return users.get(accessToken);
+    return getUsers().get(accessToken).getItem();
   }
 
   @Override
   public void clear() {
-    permissions.clear();
-    users.clear();
+    getPermissions().clear();
+    getUsers().clear();
   }
 
-  
+  synchronized public static Map<String, CachedItem<Authentication.UserInfo>> getUsers() {
+    return users;
+  }
+
+  synchronized public static Map<String, CachedItem<Boolean>> getPermissions() {
+    return permissions;
+  }
   
 }
