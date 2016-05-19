@@ -26,6 +26,6 @@ couchbase:
 
   buckets:
     # Configure couchbase bucket name
-    objects: serviceobjects
-    data: soupdates
-    actuations: actuations
+    objects: raptorobjects
+    data: raptordata
+    actuations: raptoractions
