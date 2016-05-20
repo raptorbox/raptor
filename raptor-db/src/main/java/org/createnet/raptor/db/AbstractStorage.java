@@ -37,15 +37,16 @@ abstract public class AbstractStorage implements Storage {
     connections.put(conn.getId(), conn);
   }
   
-  public void removeConnection(String bucketId) {
-    if(connections.containsKey(bucketId)) {
+  public void removeConnection(String id) {
+    if(connections.containsKey(id)) {
       try {
-        connections.get(bucketId).disconnect();
+        logger.warn("Disconnecting " + id);
+        connections.get(id).disconnect();
       }
       catch(Exception e) {
-        logger.warn("Exception disconnecting " + bucketId, e);
+        logger.warn("Exception disconnecting " + id, e);
       }
-      connections.remove(bucketId);
+      connections.remove(id);
     }
   }
 

@@ -107,10 +107,10 @@ public class CouchbaseStorage extends AbstractStorage {
     for (Map.Entry<String, String> el : buckets.entrySet()) {
       
       logger.debug("Removing bucket {}", el.getValue());
-      
-      clusterManager.removeBucket(el.getValue());
 
       removeConnection(el.getKey());
+
+      clusterManager.removeBucket(el.getValue());
       
     }
 
@@ -143,20 +143,23 @@ public class CouchbaseStorage extends AbstractStorage {
 
       boolean exists = clusterManager.hasBucket(bucketName);
 
-      if (exists && forceSetup) {
-        
-        logger.debug("Drop bucket {}", bucketName);
-        
-        if(getConnection(bucketId) != null) {
-          logger.debug("Disconnect {} before removal", bucketName);
-          removeConnection(bucketId);
-        }
-        
-        clusterManager.removeBucket(bucketName);
-        exists = false;
-      }
-
-      if (!exists) {
+//      if (exists && forceSetup) {
+//        logger.debug("Drop bucket {}", bucketName);
+//        
+//        if(getConnection(bucketId) != null) {
+//          logger.debug("Disconnect {} before removal", bucketName);
+//          removeConnection(bucketId);
+//        }
+//        
+//        clusterManager.removeBucket(bucketName);
+//        exists = false;
+//      }
+//      if (!exists) {      
+      
+      if (exists) {
+        logger.debug("Bucket {} exists, skip creation", bucketName);
+      }     
+      else {
 
         StorageConfiguration.Couchbase.BucketDefaults bucketDef = getConfiguration().couchbase.bucketDefaults;
 
@@ -174,7 +177,6 @@ public class CouchbaseStorage extends AbstractStorage {
 
         clusterManager.insertBucket(bucketSettings);
       }
-
     }
 
     connectBuckets();
