@@ -8,7 +8,7 @@ echo "Init CB node"
     -c localhost --user=$CBUSER --password=$CBPASS \
     --node-init-data-path=$CBDATAPATH
 
-sleep 5
+sleep 2
 echo "Init CB cluster"
 /opt/couchbase/bin/couchbase-cli cluster-init \
     -c localhost --user=$CBUSER --password=$CBPASS \
