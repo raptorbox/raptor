@@ -110,6 +110,10 @@ public class CouchbaseConnection extends AbstractConnection {
       selectQuery += " LIMIT " + query.getLimit();
     }
 
+    if (query.getOffset() > 0) {
+      selectQuery += " OFFSET " + query.getOffset();
+    }
+
     logger.debug("Performing N1QL query: {}", selectQuery);
 
     N1qlParams ryow = N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS);
