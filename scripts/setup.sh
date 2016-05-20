@@ -6,9 +6,15 @@ CBDATAPATH=/data/couchbase
 # change password
 #curl -u $CBUSER:$CBPASS -d username=$CBUSER -d password=$CBPASS -d port=8091 http://$CBHOST:8091/settings/web
 
+cd ../bin
+sudo ln -s `pwd`/raptor.sh /usr/bin/raptor
+
+cd ../scripts
 sudo mkdir -p /var/log/raptor
 sudo ln -s `pwd`/raptor.service  /usr/lib/systemd/system/
 sudo systemctl start raptor
+
+
 
 echo "Init CB node"
 
