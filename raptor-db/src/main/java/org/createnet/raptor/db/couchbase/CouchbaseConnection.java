@@ -165,14 +165,14 @@ public class CouchbaseConnection extends AbstractConnection {
   @Override
   public void setup(boolean forceSetup) throws Storage.StorageException {
 
-    logger.debug("Setup connection {}, force {}", this.id, forceSetup);
+    logger.debug("{} Setup connection {}, force {}", bucket.name(), this.id, forceSetup);
 
     List<List<String>> indexFields = getConfiguration().couchbase.bucketsIndex.getOrDefault(this.id, new ArrayList());
 
     // @TODO: find a way to query N1QL to check if index exists
     if (forceSetup) {
 
-      logger.debug("Drop primary index");
+      logger.debug("{} Drop primary index", bucket.name());
 
       N1qlQueryResult result = bucket.query(N1qlQuery.simple(
               Index.dropPrimaryIndex(bucket.name())
@@ -185,7 +185,7 @@ public class CouchbaseConnection extends AbstractConnection {
 
           String indexName = getIndexName(fieldsList);
 
-          logger.debug("Drop secondary index {}", indexName);
+          logger.debug("{} Drop secondary index {}", bucket.name(), indexName);
           result = bucket.query(N1qlQuery.simple(
                   Index.dropIndex(bucket.name(), indexName)
           ));
@@ -195,7 +195,7 @@ public class CouchbaseConnection extends AbstractConnection {
         }
       }
 
-      logger.debug("Create primary index");
+      logger.debug("{} Create primary index", bucket.name());
       bucket.query(N1qlQuery.simple(
               Index.createPrimaryIndex().on(bucket.name())
       ));
@@ -214,8 +214,8 @@ public class CouchbaseConnection extends AbstractConnection {
                   + "` ON `" + bucket.name()
                   + "` (" + fieldsNames.substring(0, fieldsNames.length() - 1) + ")";
 
-          logger.debug("Create secondary index {}", indexName);
-          logger.debug("N1QL query: {}", indexQuery);
+          logger.debug("{} Create secondary index {}", bucket.name(), indexName);
+          logger.debug("{} N1QL query: {}", bucket.name(), indexQuery);
 
           result = bucket.query(N1qlQuery.simple(indexQuery));
 
@@ -235,7 +235,7 @@ public class CouchbaseConnection extends AbstractConnection {
         
         int code = err.getInt("code");
         if(errorsList.size() ==1 && (code != 0 && code == skipCode)) {
-          logger.warn("Ignored error on index setup: {}", err.toString());
+          logger.warn("{} Ignored error on index setup: {}", bucket.name(), err.toString());
           return;
         }
         

@@ -24,6 +24,7 @@ import com.couchbase.client.java.cluster.ClusterManager;
 import com.couchbase.client.java.cluster.DefaultBucketSettings;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.createnet.raptor.db.AbstractStorage;
 import org.createnet.raptor.db.config.StorageConfiguration;
 import org.slf4j.Logger;
@@ -77,7 +78,7 @@ public class CouchbaseStorage extends AbstractStorage {
 
       logger.debug("Connecting bucket {}", bucketName);
 
-      Bucket bucket = cluster.openBucket(bucketName, getConfiguration().couchbase.bucketDefaults.password);
+      Bucket bucket = cluster.openBucket(bucketName, getConfiguration().couchbase.bucketDefaults.password, 15, TimeUnit.SECONDS);
       Connection conn = new CouchbaseConnection(bucketId, bucket);
 
       conn.initialize(getConfiguration());
