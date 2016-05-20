@@ -15,9 +15,10 @@
  */
 package org.createnet.raptor.broker.security;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
 import javax.inject.Inject;
 import javax.security.cert.X509Certificate;
 import org.apache.activemq.artemis.core.security.CheckType;
@@ -36,31 +37,37 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
-  
+
   protected enum Roles {
     user, admin
   }
-  
+
   private final Logger logger = LoggerFactory.getLogger(RaptorSecurityManager.class);
-  
+
+  private final Map<String, Authentication.UserInfo> localUsers = new HashMap();
+
   @Inject
   AuthService auth;
-  
+
+  public RaptorSecurityManager() {
+
+  }
+
   protected Authentication.UserInfo getUser(String token) {
     try {
-      
+
       Authentication.UserInfo user = auth.getUser(token);
-      if(user != null) {
+      if (user != null) {
         logger.debug("Authenticated user {}", user.getUserId());
         return user;
       }
-      
+
     } catch (ConfigurationException | Authentication.AuthenticationException e) {
       logger.error("Authentication failed", e);
     }
     return null;
   }
-  
+
   @Override
   public boolean validateUser(String user, String password, X509Certificate[] certificates) {
     logger.debug("Authenticate user {} with token {}", user, password);
@@ -69,49 +76,62 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
   @Override
   public boolean validateUserAndRole(String username, String password, Set<Role> roles, CheckType checkType, String address, RemotingConnection connection) {
-    
+
     logger.debug("Authenticate user {} with token {} and roles {} on topic {}", username, password, roles, address);
-    
+
     Authentication.UserInfo user = getUser(password);
     
-    if(
-        address.contains("$sys.mqtt.queue.qos2") ||
-            address.contains("$sys.mqtt.#")
-      ) {
-      switch(checkType) {
-        
+    if (address.contains("$sys.mqtt.queue.qos2")
+            || address.contains("$sys.mqtt.#")) {
+      switch (checkType) {
+
         case CREATE_DURABLE_QUEUE:
         case DELETE_DURABLE_QUEUE:
-          
+
         case CREATE_NON_DURABLE_QUEUE:
         case DELETE_NON_DURABLE_QUEUE:
-          
+
         case CONSUME:
         case SEND:
-          
+
           return true;
         case MANAGE:
-          if(user.getRoles().contains(Roles.admin.name()))
+          if (user.getRoles().contains(Roles.admin.name())) {
             return true;
+          }
         default:
           return false;
       }
     }
-    
+
     String[] topicTokens = address.split("\\.");
-    if(topicTokens.length > 2) {
-      
+    if (topicTokens.length > 2) {
+
       String objectId = topicTokens[2];
+      int idLen = objectId.length();
+
       
-      try {
-        UUID.fromString(objectId);
+      switch (idLen) {
+        // standard UUID
+        case 48:
+          try {
+            UUID.fromString(objectId);
+          } catch (IllegalArgumentException e) {
+            return false;
+          }
+          break;
+          
+        // UUID without hyphens (legacy id format)
+        case 45:
+          logger.debug("Legacy id format detected {}", objectId);
+          break;
+        default:
+          logger.debug("Object id length mismatch ({})", idLen);
+          return false;
       }
-      catch(IllegalArgumentException e) {
-        return false;
-      }
-      
+
       try {
-        logger.debug("Check access permission of user {} to object {}", user.getUserId(), objectId);        
+        logger.debug("Check access permission of user {} to object {}", user.getUserId(), objectId);
         boolean allowed = auth.isAllowed(user.getAccessToken(), objectId, Authorization.Permission.Subscribe);
         return allowed;
       } catch (Authorization.AuthorizationException ex) {
@@ -119,7 +139,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         return false;
       }
     }
-    
+
     return false;
   }
 
@@ -127,14 +147,14 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
   public boolean validateUser(String user, String password) {
     logger.debug("validateUser(user, password): NOT IMPLEMENTED");
 //    logger.debug("Authenticate user {} with token {}", user, password);
-    return true;
+    return false;
   }
 
   @Override
   public boolean validateUserAndRole(String user, String password, Set<Role> roles, CheckType checkType) {
     logger.debug("validateUserAndRole(user, password, roles, checkType): NOT IMPLEMENTED");
 //    logger.warn("Authenticate user {} with token {} and roles {} on {}", user, password, roles, checkType);
-    return false;    
+    return false;
   }
-  
+
 }

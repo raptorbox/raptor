@@ -15,9 +15,7 @@
  */
 package org.createnet.raptor.broker;
 
-import java.util.logging.Level;
 import org.apache.activemq.artemis.core.server.embedded.EmbeddedActiveMQ;
-import org.createnet.raptor.broker.security.RaptorLoginModule;
 import org.createnet.raptor.broker.security.RaptorSecurityManager;
 import org.createnet.raptor.http.ApplicationConfig;
 import org.glassfish.hk2.api.ServiceLocator;
@@ -32,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Broker {
   
-  final protected Logger logger = LoggerFactory.getLogger(RaptorLoginModule.class);
+  final protected Logger logger = LoggerFactory.getLogger(Broker.class);
   
   public static void main(final String[] args) throws BrokerException {
     

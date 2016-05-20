@@ -19,7 +19,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.createnet.raptor.db.AbstractConnection;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.query.ListQuery;

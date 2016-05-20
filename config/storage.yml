@@ -1,14 +1,14 @@
-
+sh
 type: couchbase
 couchbase:
   nodes:
     - raptor.local
 
-  username: Administrator
+  username: admin
   password: password
 
   bucketDefaults:
-    password: mybucket
+    password: ""
     quota: 360
     replica: 0
     indexReplica: false
@@ -26,6 +26,6 @@ couchbase:
 
   buckets:
     # Configure couchbase bucket name
-    objects: raptorobjects
-    data: raptordata
-    actuations: raptoractions
+    objects: raptor-objects
+    data: raptor-data
+    actuations: raptor-actions

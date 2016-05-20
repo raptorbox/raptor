@@ -1,17 +1,17 @@
-CBUSER=Administrator
+CBUSER=admin
 CBPASS=password
-
+CBDATAPATH=/data/couchbase
 
 echo "Init CB node"
 
 /opt/couchbase/bin/couchbase-cli node-init \
     -c localhost --user=$CBUSER --password=$CBPASS \
-    --node-init-data-path=/data/couchbase
+    --node-init-data-path=$CBDATAPATH
 
 sleep 5
 echo "Init CB cluster"
 /opt/couchbase/bin/couchbase-cli cluster-init \
-    -c localhost --user=admin --password=$CBPASS \
+    -c localhost --user=$CBUSER --password=$CBPASS \
     --cluster-init-username=$CBUSER \
-    --cluster-init-password="" \
+    --cluster-init-password=$CBPASS \
     --cluster-init-ramsize=1600
