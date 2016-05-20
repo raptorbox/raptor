@@ -59,7 +59,7 @@ public class Runner {
     ServiceLocator serviceLocator = locatorFactory.create("CliLocator");
     ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());
 
-    serviceLocator.inject(commands);   
+    serviceLocator.inject(commands);
     
   }
 
@@ -88,8 +88,15 @@ public class Runner {
             .desc("Launch a Raptor instance")
             .build();    
     
+    Option indexCommand = Option.builder(CommandName.INDEX)
+            .hasArg(false)
+            .desc("Index object definitions")
+            .build();    
+    
     options.addOption(setupCommand);
     options.addOption(launchCommand);
+    options.addOption(indexCommand);
+    
     options.addOption("force", false, "Force command execution");
 
     CommandLineParser parser = new DefaultParser();
@@ -103,6 +110,9 @@ public class Runner {
     }
     if (cmd.hasOption("launch")) {
       app.launch();
+    }
+    if (cmd.hasOption("index")) {
+      app.index();
     }
 
   }
@@ -119,6 +129,11 @@ public class Runner {
   public void launch() {
     logger.debug("Launching new Raptor instance");
     commands.launch();
+  }
+
+  public void index() {
+    logger.debug("Launching object indexing");
+    commands.index();
   }
 
   // from http://stackoverflow.com/a/24064448/833499 
