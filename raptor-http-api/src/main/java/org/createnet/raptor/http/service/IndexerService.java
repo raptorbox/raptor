@@ -51,7 +51,7 @@ public class IndexerService {
 
   private Indexer indexer;
   
-  protected enum IndexNames {
+  public enum IndexNames {
     object, data, subscriptions
   }
   
@@ -71,7 +71,7 @@ public class IndexerService {
     return configuration.getIndexer().elasticsearch.indices.names.get(name.name());
   }
   
-  protected Indexer.IndexRecord getIndexRecord(IndexNames name) throws ConfigurationException {
+  public Indexer.IndexRecord getIndexRecord(IndexNames name) throws ConfigurationException {
     IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = getIndexDescriptor(name);
     return new Indexer.IndexRecord(desc.index, desc.type);
   }

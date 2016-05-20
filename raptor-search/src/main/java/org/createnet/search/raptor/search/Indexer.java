@@ -75,7 +75,7 @@ public interface Indexer {
     public String type;
     public String id;
     public String body = null;
-
+    
     public IndexRecord(String index, String type, String id, String body) {
       this.index = index;
       this.type = type;

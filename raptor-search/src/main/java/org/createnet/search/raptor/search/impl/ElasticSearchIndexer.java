@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import org.createnet.search.raptor.search.AbstractIndexer;
 import org.createnet.search.raptor.search.Indexer;
 import org.createnet.search.raptor.search.Indexer.IndexerException;
@@ -224,13 +223,14 @@ public class ElasticSearchIndexer extends AbstractIndexer {
           logger.error("Bulk failed", failure);
         }
       })
-              .setBulkActions(5000)
-              .setBulkSize(new ByteSizeValue(1, ByteSizeUnit.MB))
-              .setFlushInterval(TimeValue.timeValueSeconds(1))
-              .setConcurrentRequests(2)
-              .setBackoffPolicy(
-                      BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3))
-              .build();
+      .setBulkActions(list.size())
+      .setBulkSize(new ByteSizeValue(1, ByteSizeUnit.MB))
+      .setFlushInterval(TimeValue.timeValueSeconds(1))
+      .setConcurrentRequests(2)
+      .setBackoffPolicy(
+        BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3)
+      )
+      .build();
 
       Iterator<IndexOperation> it = list.iterator();
       while (it.hasNext()) {

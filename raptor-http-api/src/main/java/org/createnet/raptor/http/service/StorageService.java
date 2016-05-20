@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.http.service;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,16 +48,16 @@ import org.slf4j.LoggerFactory;
  */
 @Service
 public class StorageService {
-  
+
   private final int defaultDataTTL = 3 * 30; // 3 months, 90 days
   private final Logger logger = LoggerFactory.getLogger(StorageService.class);
-  
+
   @Inject
   ConfigurationService configuration;
-  
+
   @Inject
   AuthService auth;
-  
+
   private Storage storage;
 
   private enum ConnectionId {
@@ -79,15 +78,15 @@ public class StorageService {
     return storage;
   }
 
-  protected Storage.Connection getObjectConnection() throws ConfigurationException, Storage.StorageException {
+  public Storage.Connection getObjectConnection() throws ConfigurationException, Storage.StorageException {
     return getStorage().getConnection(ConnectionId.objects.name());
   }
-  
-  protected Storage.Connection getDataConnection() throws ConfigurationException, Storage.StorageException {
+
+  public Storage.Connection getDataConnection() throws ConfigurationException, Storage.StorageException {
     return getStorage().getConnection(ConnectionId.data.name());
   }
-  
-  protected Storage.Connection getActionConnection() throws ConfigurationException, Storage.StorageException {
+
+  public Storage.Connection getActionConnection() throws ConfigurationException, Storage.StorageException {
     return getStorage().getConnection(ConnectionId.actuations.name());
   }
 
@@ -102,15 +101,15 @@ public class StorageService {
   }
 
   public String saveObject(ServiceObject obj) throws ConfigurationException, Storage.StorageException, RaptorComponent.ParserException, RaptorComponent.ValidationException, Authentication.AuthenticationException {
-    
+
     obj.validate();
-    
-    if(obj.id == null) {
+
+    if (obj.id == null) {
       obj.id = ServiceObject.generateUUID();
     }
 
     obj.userId = auth.getUser().getUserId();
-    
+
     String json = obj.toJSON(ServiceObjectView.Internal);
     getObjectConnection().set(obj.id, json, 0);
     return obj.id;
@@ -119,123 +118,120 @@ public class StorageService {
   public void deleteObject(String id) throws ConfigurationException, Storage.StorageException {
     getObjectConnection().delete(id);
   }
-  
+
   public List<ServiceObject> listObjects() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
-    
+
     List<String> results = getObjectConnection().list(BaseQuery.queryBy("userId", auth.getUser().getUserId()));
-    
+
     List<ServiceObject> list = new ArrayList();
-    for(String raw : results) {
+    for (String raw : results) {
       list.add(ServiceObject.fromJSON(raw));
     }
-    
+
     return list;
   }
 
   // Data 
-  
   protected String getDataId(Stream stream, RecordSet record) {
     return stream.getServiceObject().id + "-" + stream.name + "-" + record.getLastUpdate().getTime();
   }
-  
+
   public ResultSet fetchData(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
     return fetchData(stream, 0);
   }
-  
+
   public ResultSet fetchData(Stream stream, int limit) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
-    
+
     ResultSet resultset = new ResultSet(stream);
-    
+
     BaseQuery query = BaseQuery.queryBy(
-        "userId", auth.getUser().getUserId(),
-        "streamId", stream.name
+            "userId", auth.getUser().getUserId(),
+            "streamId", stream.name
     );
-    
-    if(limit > 0) {
+
+    if (limit > 0) {
       query.limit = limit;
       query.setSort("lastUpdate", ListQuery.Sort.ASC);
     }
-    
+
     List<String> results = getDataConnection().list(query);
 
-    for(String raw : results) {
+    for (String raw : results) {
       resultset.add(raw);
     }
-    
+
     return resultset;
   }
-  
+
   public RecordSet fetchLastUpdate(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
     ResultSet resultset = fetchData(stream, 1);
     return resultset.data.isEmpty() ? null : resultset.data.get(0);
   }
-  
+
   public void saveData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException, JsonProcessingException, IOException, Authentication.AuthenticationException {
     record.userId = auth.getUser().getUserId();
     record.streamId = stream.name;
     getDataConnection().set(getDataId(stream, record), record.toJson(), defaultDataTTL);
   }
-  
+
   public void deleteData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException {
     getDataConnection().delete(getDataId(stream, record));
   }
-  
-  public List<RecordSet> listData() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException  {
-    
+
+  public List<RecordSet> listData() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
+
     List<String> results = getDataConnection().list(
-      BaseQuery.queryBy("userId", auth.getUser().getUserId())
+            BaseQuery.queryBy("userId", auth.getUser().getUserId())
     );
-    
+
     List<RecordSet> list = new ArrayList();
-    for(String raw : results) {
+    for (String raw : results) {
       list.add(RecordSet.fromJSON(raw));
     }
-    
+
     return list;
   }
 
   // @TODO: introduce batch operation in storage
   public void deleteData(Stream stream) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
-    
+
     BaseQuery query = BaseQuery.queryBy("userId", auth.getUser().getUserId());
-    
+
     query.getQueryOptions().timeout = 30;
     query.getQueryOptions().timeoutUnit = TimeUnit.SECONDS;
-    
+
     List<String> results = getDataConnection().list(query);
-    
-    for(String raw : results) {
+
+    for (String raw : results) {
       RecordSet rs = RecordSet.fromJSON(raw);
       deleteData(stream, rs);
     }
 
   }
 
-  
   // Actuations
-  
   protected String getActionId(Action action) {
     return action.getServiceObject().id + "-" + action.name;
   }
-  
+
   public ActionStatus getActionStatus(Action action) throws ConfigurationException, Storage.StorageException, IOException, RaptorComponent.ParserException {
-        
+
     String rawStatus = getActionConnection().get(getActionId(action));
-    
+
     ActionStatus actionStatus = ActionStatus.parseJSON(rawStatus);
-    
+
     return actionStatus;
   }
-  
-  public ActionStatus saveActionStatus(Action action, String status) throws IOException, ConfigurationException, Storage.StorageException, RaptorComponent.ParserException{
+
+  public ActionStatus saveActionStatus(Action action, String status) throws IOException, ConfigurationException, Storage.StorageException, RaptorComponent.ParserException {
 
     ActionStatus actionStatus = new ActionStatus(action, status);
-    
+
     getActionConnection().set(getActionId(action), actionStatus.toJSON(ActionStatus.ViewType.Internal), defaultDataTTL);
-    
+
     return actionStatus;
   }
-  
+
   public void deleteActionStatus(Action action) throws ConfigurationException, Storage.StorageException {
     getActionConnection().delete(getActionId(action));
   }

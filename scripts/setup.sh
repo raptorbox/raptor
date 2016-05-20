@@ -1,6 +1,9 @@
+CBHOST=raptor.local
 CBUSER=admin
 CBPASS=password
 CBDATAPATH=/data/couchbase
+
+#curl -u $CBUSER:$CBPASS -d username=$CBUSER -d password=$CBPASS -d port=8091 http://$CBHOST:8091/settings/web
 
 echo "Init CB node"
 

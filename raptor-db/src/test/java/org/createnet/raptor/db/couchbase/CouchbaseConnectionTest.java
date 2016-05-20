@@ -19,16 +19,12 @@ import com.couchbase.client.deps.com.fasterxml.jackson.databind.JsonNode;
 import com.couchbase.client.deps.com.fasterxml.jackson.databind.ObjectMapper;
 import com.couchbase.client.deps.com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.net.ConnectException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.StorageProvider;
 import org.createnet.raptor.db.config.StorageConfiguration;
@@ -112,7 +108,7 @@ public class CouchbaseConnectionTest {
 
       config.couchbase.nodes.add("raptor.local");
 
-      config.couchbase.username = "Administrator";
+      config.couchbase.username = "admin";
       config.couchbase.password = "password";
 
       // bootstrap

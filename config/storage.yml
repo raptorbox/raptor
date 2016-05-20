@@ -3,10 +3,8 @@ type: couchbase
 couchbase:
   nodes:
     - raptor.local
-
   username: admin
   password: password
-
   bucketDefaults:
     password: ""
     quota: 360
