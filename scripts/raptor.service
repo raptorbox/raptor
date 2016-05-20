@@ -1,0 +1,11 @@
+[Unit]
+Description=Raptor
+
+[Service]
+RemainAfterExit=yes
+Type=oneshot
+ExecStart=raptor -launch
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
