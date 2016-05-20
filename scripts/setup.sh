@@ -5,6 +5,8 @@ CBDATAPATH=/data/couchbase
 
 #curl -u $CBUSER:$CBPASS -d username=$CBUSER -d password=$CBPASS -d port=8091 http://$CBHOST:8091/settings/web
 
+mkdir -p /var/log/raptor
+
 echo "Init CB node"
 
 /opt/couchbase/bin/couchbase-cli node-init \
