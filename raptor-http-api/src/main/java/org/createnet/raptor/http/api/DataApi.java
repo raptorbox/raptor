@@ -57,6 +57,10 @@ public class DataApi extends AbstractApi {
 
     ServiceObject obj = loadObject(id);
 
+    if (!auth.isAllowed(id, Authorization.Permission.Read)) {
+      throw new NotAuthorizedException("Cannot fetch data");
+    }
+    
     logger.debug("Load streams for object {}", obj.id);
 
     return obj.streams.values();
@@ -73,7 +77,7 @@ public class DataApi extends AbstractApi {
     ServiceObject obj = loadObject(id);
     Stream stream = loadStream(streamName, obj);
 
-    if (!auth.isAllowed(Authorization.Permission.Pull)) {
+    if (!auth.isAllowed(id, Authorization.Permission.Pull)) {
       throw new NotAuthorizedException("Cannot fetch data");
     }
     
@@ -99,7 +103,7 @@ public class DataApi extends AbstractApi {
     ServiceObject obj = loadObject(id);
     Stream stream = loadStream(streamName, obj);
 
-    if (!auth.isAllowed(Authorization.Permission.Push)) {
+    if (!auth.isAllowed(id, Authorization.Permission.Push)) {
       throw new NotAuthorizedException("Cannot delete data");
     }
     
@@ -125,7 +129,7 @@ public class DataApi extends AbstractApi {
     ServiceObject obj = loadObject(id);
     Stream stream = loadStream(streamName, obj);
 
-    if (!auth.isAllowed(Authorization.Permission.Pull)) {
+    if (!auth.isAllowed(id, Authorization.Permission.Pull)) {
       throw new NotAuthorizedException("Cannot fetch data");
     }
     
@@ -158,7 +162,7 @@ public class DataApi extends AbstractApi {
 
     Stream stream = loadStream(streamName, obj);
 
-    if (!auth.isAllowed(Authorization.Permission.Push)) {
+    if (!auth.isAllowed(id, Authorization.Permission.Push)) {
       throw new NotAuthorizedException("Cannot push data");
     }
     

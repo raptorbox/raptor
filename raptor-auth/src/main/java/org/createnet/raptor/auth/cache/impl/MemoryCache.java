@@ -41,7 +41,7 @@ public class MemoryCache extends AbstractCache {
 
   protected class CachedItem<T> {
     
-    private final int defaultTTL = (10 * 1000); // 10 sec TTL
+    static public final int defaultTTL = (10 * 1000); // 10 sec TTL
     
     final private T item;
     final private long expiry;
@@ -68,10 +68,11 @@ public class MemoryCache extends AbstractCache {
   
   public MemoryCache() {
     try {
+
       scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
         @Override
         public void run() {
-
+          
           for(Map.Entry<String, CachedItem<Authentication.UserInfo>> el : getUsers().entrySet()) {
             if(el.getValue().isExpired()) {
               getUsers().remove(el.getKey());
@@ -92,6 +93,7 @@ public class MemoryCache extends AbstractCache {
     catch(RuntimeException ex) {
       logger.warn("Scheduled task exception", ex);
     }
+    
   }
   
   @Override

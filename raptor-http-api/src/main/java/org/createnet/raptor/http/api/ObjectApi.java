@@ -77,7 +77,7 @@ public class ObjectApi extends AbstractApi {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response create(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException {
 
-    if (!auth.isAllowed(Authorization.Permission.Create)) {
+    if (!auth.isAllowed(obj.id, Authorization.Permission.Create)) {
       throw new NotAuthorizedException("Cannot create object");
     }
 

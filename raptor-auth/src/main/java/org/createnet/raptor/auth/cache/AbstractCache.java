@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.auth.cache;
 
-import java.util.Map;
 import org.createnet.raptor.auth.AuthConfiguration;
 
 /**

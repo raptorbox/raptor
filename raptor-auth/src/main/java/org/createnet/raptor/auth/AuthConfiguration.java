@@ -20,7 +20,15 @@ package org.createnet.raptor.auth;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class AuthConfiguration {
-
+  
+  public enum Type {
+    token, allow_all
+  }
+  
+  public enum Cache {
+    memory, none
+  }
+  
   public String type;
   public String cache;
   public Token token = new Token();

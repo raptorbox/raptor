@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.auth;
 
-import org.apache.http.auth.AuthenticationException;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authentication.impl.AllowAllAuthentication;
 import org.createnet.raptor.auth.authentication.impl.TokenAuthentication;
@@ -97,7 +96,7 @@ public class AuthProvider implements Authorization, Authentication {
       
       Boolean cachedValue = cache.get(user.getUserId(), id, op);
       if(cachedValue != null) {
-        logger.debug("Reusing permission cache for {}.{}.{}", user.getUserId(), id, op.name());
+        logger.debug("Reusing permission cache for userId {} objectId {} permission {} = {}", user.getUserId(), id, op.name(), cachedValue);
         return cachedValue;
       }
       
@@ -106,6 +105,8 @@ public class AuthProvider implements Authorization, Authentication {
       boolean isauthorized = authorizationInstance.isAuthorized(accessToken, id, op);
       
       cache.set(user.getUserId(), id, op, isauthorized);
+      
+      logger.debug("Permission check for userId {} objectId {} permission {} = {}", user.getUserId(), id, op.name(), cachedValue);
       
       return isauthorized;
       
@@ -118,14 +119,14 @@ public class AuthProvider implements Authorization, Authentication {
   public UserInfo getUser(String accessToken) throws AuthenticationException {
     
     if(accessToken == null) {
-      throw new AuthenticationException("accessToken is null");
+      throw new AuthenticationException("accessToken not provided");
     }
     
     try {
 
       UserInfo cachedValue = cache.get(accessToken);
       if(cachedValue != null) {
-        logger.debug("Reusing cached user details for {}", cachedValue.getUserId());
+        logger.debug("Reusing cached user details for userId {}", cachedValue.getUserId());
         return cachedValue;
       }
       
@@ -147,26 +148,22 @@ public class AuthProvider implements Authorization, Authentication {
     return user;
   }
   
-  public static void main(String[] argv) throws AuthorizationException, AuthenticationException {
-    
-    AuthConfiguration config = new AuthConfiguration();
-    config.type = "token";
-    config.cache = "memory";
-    config.token.url = "http://raptorbox.eu/api/token/check";
-    
-    AuthProvider auth = new AuthProvider();
-    auth.initialize(config);
-    
-    UserInfo user = auth.getUser("Bearer TEST");
-    
-    System.out.println("UserInfo: " +user.toString() );
-    
-    auth.isAuthorized(user.getAccessToken(), "myObjectId", Permission.Read);
-    
-  }
+//  public static void main(String[] argv) throws AuthorizationException, AuthenticationException {
+//    
+//    AuthConfiguration config = new AuthConfiguration();
+//    config.type = "token";
+//    config.cache = "memory";
+//    config.token.url = "http://raptorbox.eu/api/token/check";
+//    
+//    AuthProvider auth = new AuthProvider();
+//    auth.initialize(config);
+//    
+//    UserInfo user = auth.getUser("Bearer TEST");
+//    
+//    System.out.println("UserInfo: " +user.toString() );
+//    
+//    auth.isAuthorized(user.getAccessToken(), "myObjectId", Permission.Read);
+//    
+//  }
 
-  public UserInfo getUserById(String userId) {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-  
 }

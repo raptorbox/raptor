@@ -16,7 +16,6 @@
 package org.createnet.raptor.http.filter;
 
 import java.security.Principal;
-import java.util.logging.Level;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -54,11 +53,12 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
     } catch (Authentication.AuthenticationException ex) {
 
-      logger.error("Token is not valid", ex);
+      logger.warn("Token is not valid", ex);
 
       requestContext.abortWith(
               Response.status(Response.Status.UNAUTHORIZED).build()
       );
+      
     } catch (ConfigurationException ex) {
 
       logger.error("Error loading auth configuration", ex);

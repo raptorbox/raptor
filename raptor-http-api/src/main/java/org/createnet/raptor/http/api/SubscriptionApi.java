@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.http.api;
 
-import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -24,12 +23,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.createnet.raptor.http.service.StorageService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.createnet.raptor.http.service.AuthService;
-import org.createnet.raptor.http.service.DispatcherService;
-import org.createnet.raptor.http.service.IndexerService;
+
 
 /**
  *
@@ -38,20 +32,20 @@ import org.createnet.raptor.http.service.IndexerService;
 @Path("/")
 public class SubscriptionApi {
 
-  final private Logger logger = LoggerFactory.getLogger(DataApi.class);
+//  final private Logger logger = LoggerFactory.getLogger(SubscriptionApi.class);
 
-  @Inject
-  StorageService storage;
-
-  @Inject
-  IndexerService indexer;
-
-  @Inject
-  DispatcherService dispatcher;
-
-  @Inject
-  AuthService auth;
-  
+//  @Inject
+//  StorageService storage;
+//
+//  @Inject
+//  IndexerService indexer;
+//
+//  @Inject
+//  DispatcherService dispatcher;
+//
+//  @Inject
+//  AuthService auth;
+//  
   @GET
   @Path("{id}/streams/{streamId}/subscriptions")
   @Produces(MediaType.APPLICATION_JSON)
