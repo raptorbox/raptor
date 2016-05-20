@@ -2,7 +2,7 @@
 type: couchbase
 couchbase:
   nodes:
-    - localhost
+    - raptor.local
   username: admin
   password: password
   bucketDefaults:

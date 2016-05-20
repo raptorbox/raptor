@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CouchbaseStorage extends AbstractStorage {
 
-  final Logger logger = LoggerFactory.getLogger(CouchbaseStorage.class);
+  final protected Logger logger = LoggerFactory.getLogger(CouchbaseStorage.class);
 
   protected Cluster cluster;
 
@@ -75,6 +75,11 @@ public class CouchbaseStorage extends AbstractStorage {
         logger.debug("Skipped connection to non-existan bucket {}", bucketName);
         continue;
       }
+      
+      if (getConnection(bucketId) != null) {
+        logger.debug("Connection already initiated for {}", bucketName);
+        continue;
+      }
 
       logger.debug("Connecting bucket {}", bucketName);
 
@@ -100,8 +105,13 @@ public class CouchbaseStorage extends AbstractStorage {
     
     ClusterManager clusterManager = getClusterManager();
     for (Map.Entry<String, String> el : buckets.entrySet()) {
+      
       logger.debug("Removing bucket {}", el.getValue());
+      
       clusterManager.removeBucket(el.getValue());
+
+      removeConnection(el.getKey());
+      
     }
 
   }
@@ -128,12 +138,20 @@ public class CouchbaseStorage extends AbstractStorage {
     ClusterManager clusterManager = getClusterManager();
     for (Map.Entry<String, String> el : buckets.entrySet()) {
 
+      String bucketId = el.getKey();
       String bucketName = el.getValue();
 
       boolean exists = clusterManager.hasBucket(bucketName);
 
       if (exists && forceSetup) {
+        
         logger.debug("Drop bucket {}", bucketName);
+        
+        if(getConnection(bucketId) != null) {
+          logger.debug("Disconnect {} before removal", bucketName);
+          removeConnection(bucketId);
+        }
+        
         clusterManager.removeBucket(bucketName);
         exists = false;
       }
@@ -143,6 +161,7 @@ public class CouchbaseStorage extends AbstractStorage {
         StorageConfiguration.Couchbase.BucketDefaults bucketDef = getConfiguration().couchbase.bucketDefaults;
 
         logger.debug("Creating bucket {}", bucketName);
+        
         BucketSettings bucketSettings = new DefaultBucketSettings.Builder()
                 .type(BucketType.COUCHBASE)
                 .name(bucketName)

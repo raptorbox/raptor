@@ -10,6 +10,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import org.createnet.raptor.db.config.StorageConfiguration;
+import org.createnet.raptor.db.couchbase.CouchbaseStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -17,6 +20,8 @@ import org.createnet.raptor.db.config.StorageConfiguration;
  */
 abstract public class AbstractStorage implements Storage {
   
+  final protected Logger logger = LoggerFactory.getLogger(AbstractStorage.class);
+
   protected StorageConfiguration config;
   final protected Map<String, Connection> connections = new HashMap<>();
 
@@ -30,6 +35,18 @@ abstract public class AbstractStorage implements Storage {
 
   public void addConnection(Connection conn) {
     connections.put(conn.getId(), conn);
+  }
+  
+  public void removeConnection(String bucketId) {
+    if(connections.containsKey(bucketId)) {
+      try {
+        connections.get(bucketId).disconnect();
+      }
+      catch(Exception e) {
+        logger.warn("Exception disconnecting " + bucketId, e);
+      }
+      connections.remove(bucketId);
+    }
   }
 
   @Override
