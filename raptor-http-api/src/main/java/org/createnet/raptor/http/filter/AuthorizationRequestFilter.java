@@ -41,6 +41,17 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
   @Override
   public void filter(ContainerRequestContext requestContext) {
 
+    // skip CORS requests
+    if(!(requestContext.getMethod().toUpperCase().equals("OPTIONS") && 
+            requestContext.getHeaderString("Access-Control-Request-Method") != null )) {
+      checkAuth(requestContext);
+    }
+    
+    
+  }
+  
+  protected void checkAuth(ContainerRequestContext requestContext) {
+    
     try {
 
       String accessToken = requestContext.getHeaderString("Authorization");
