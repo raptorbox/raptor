@@ -1,8 +1,7 @@
 
 artemisConfiguration: file:///etc/raptor/broker.xml
 users:
-  - name: system
-    password: passwd
+  - name: frontend
+    password: frontend42
     roles:
       - admin
-      - user

@@ -45,6 +45,10 @@ public class DispatcherService {
   @Inject
   AuthService auth;
   
+  public enum MessageType {
+    object, stream, actuation
+  }
+  
   public enum ObjectOperation {
     create, update, delete, push
   }
@@ -80,7 +84,7 @@ public class DispatcherService {
     
     ObjectNode message = createObjectMessage(obj);
     
-    message.put("type", "object");
+    message.put("type", MessageType.object.name());
     message.put("op", op.name());
     
     getDispatcher().add(topic, message.toString());
@@ -93,7 +97,7 @@ public class DispatcherService {
     ObjectNode message = createObjectMessage(stream.getServiceObject());
     
     
-    message.put("type", "stream");
+    message.put("type", MessageType.stream.name());
     message.put("op", "data");
     
     message.put("streamId", stream.name);
@@ -109,7 +113,7 @@ public class DispatcherService {
     
     ObjectNode message = createObjectMessage(action.getServiceObject());
     
-    message.put("type", "actuation");
+    message.put("type", MessageType.actuation.name());
     message.put("op", op.name());
     
     message.put("actionId", action.name);
