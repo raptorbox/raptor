@@ -109,6 +109,10 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
       return false;
     }
     
+    if(user.hasRole(Roles.admin.name())) {
+      return true;
+    }    
+    
     if (address.contains("$sys.mqtt.queue.qos2")
             || address.contains("$sys.mqtt.#")) {
       switch (checkType) {
@@ -130,10 +134,6 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         default:
           return false;
       }
-    }
-    
-    if(user.hasRole(Roles.admin.name())) {
-      return true;
     }
     
     String[] topicTokens = address.split("\\.");
@@ -177,9 +177,8 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
   @Override
   public boolean validateUser(String user, String password) {
-    logger.debug("validateUser(user, password): NOT IMPLEMENTED");
-//    logger.debug("Authenticate user {} with token {}", user, password);
-    return false;
+    logger.debug("Authenticate user {} with token {}", user, password);
+    return validateUser(user, password, null);
   }
 
   @Override

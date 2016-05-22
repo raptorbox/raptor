@@ -1,0 +1,130 @@
+/*
+ * Copyright 2016 Luca Capra <lcapra@create-net.org>.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.createnet.raptor.broker.security;
+
+import java.util.HashSet;
+import java.util.Set;
+import javax.security.cert.X509Certificate;
+import org.apache.activemq.artemis.core.security.CheckType;
+import org.apache.activemq.artemis.core.security.Role;
+import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
+import org.createnet.raptor.auth.authentication.Authentication;
+import org.createnet.raptor.broker.configuration.BrokerConfiguration;
+import org.createnet.raptor.http.ApplicationConfig;
+import org.glassfish.hk2.api.ServiceLocator;
+import org.glassfish.hk2.api.ServiceLocatorFactory;
+import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+/**
+ *
+ * @author Luca Capra <lcapra@create-net.org>
+ */
+public class RaptorSecurityManagerTest {
+  
+  final private RaptorSecurityManager manager = new RaptorSecurityManager();
+  
+  String roleUser = "user";
+  String roleAdmin = "admin";
+  
+  public RaptorSecurityManagerTest() {
+  }
+  
+  @BeforeClass
+  public static void setUpClass() {
+  }
+  
+  @AfterClass
+  public static void tearDownClass() {
+  }
+  
+  @Before
+  public void setUp() {
+    
+    // inject DI
+    ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
+    ServiceLocator serviceLocator = locatorFactory.create("BrokerLocator");
+    ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());
+
+    serviceLocator.inject(manager);
+    
+    
+    
+    BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
+    
+    brokerConfiguration.artemisConfiguration = "file:///etc/raptor/broker.xml";   
+    
+    BrokerConfiguration.BrokerUser user = new BrokerConfiguration.BrokerUser(roleUser, roleUser);
+    user.addRole(roleUser);
+    
+    brokerConfiguration.users.add(user);
+    
+    user = new BrokerConfiguration.BrokerUser(roleAdmin, roleAdmin);
+    user.addRole(roleAdmin);
+    brokerConfiguration.users.add(user);
+    
+    manager.setBrokerConfiguration(brokerConfiguration);
+  }
+  
+  @After
+  public void tearDown() {
+  }
+
+  @Test
+  public void testLocalUser() {
+    assertTrue(manager.validateUser(roleUser, roleUser));
+    assertTrue(manager.validateUser(roleAdmin, roleAdmin));
+    assertFalse(manager.validateUser("thief", "dude"));
+  }
+
+  @Test
+  public void testLocalUserRoles() {
+    
+    Set<Role> roles = new HashSet();
+    
+    roles.add(new Role(roleAdmin, true, true, true, true, true, true, true));
+    
+    String address = "$sys.mqtt.myobject.something";
+    
+    assertFalse(
+        manager.validateUserAndRole(
+            roleUser, roleUser, 
+            roles, 
+            CheckType.CONSUME, 
+            address, 
+            null
+        )
+    );
+    
+    address = "$sys.mqtt.anything";
+    
+    assertTrue(
+        manager.validateUserAndRole(
+            roleAdmin, roleAdmin, 
+            roles, 
+            CheckType.CREATE_NON_DURABLE_QUEUE, 
+            address, 
+            null
+        )
+    );
+  }
+  
+}

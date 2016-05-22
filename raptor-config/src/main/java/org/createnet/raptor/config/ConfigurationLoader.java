@@ -56,7 +56,7 @@ public class ConfigurationLoader {
   final private Map<String, Configuration> cache = new HashMap();
 
   protected File getFile(String filename) {
-    return new File(getBasePath() + filename + ".yml");
+    return new File(getBasePath() + "/" + filename + ".yml");
   }
 
   public Configuration getInstance(String name, Class<? extends Configuration> clazz) throws ConfigurationException {

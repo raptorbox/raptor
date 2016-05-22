@@ -29,10 +29,23 @@ public class BrokerConfiguration implements Configuration {
 
     public String name;
     public String password;
-    public List<String> roles;
+    public List<String> roles = new ArrayList();
+
+    public BrokerUser() {
+    }
+
+    public BrokerUser(String name, String password) {
+      this.name = name;
+      this.password = password;
+    }
     
     public boolean login(String password) {
       return this.password.equals(password);
+    }
+    
+    public void addRole(String role) {
+      if(!roles.contains(role))
+        roles.add(role);
     }
     
     public boolean hasRole(String role) {
