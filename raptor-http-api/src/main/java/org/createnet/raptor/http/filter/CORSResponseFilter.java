@@ -29,13 +29,21 @@ public class CORSResponseFilter implements ContainerResponseFilter {
   @Override
   public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
           throws IOException {
-
+    
     responseContext.getHeaders().add("X-Powered-By", "Raptor");
 
     responseContext.getHeaders().add("Access-Control-Allow-Origin", "*");
-    responseContext.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, UPDATE, DELETE, OPTIONS");
+    responseContext.getHeaders().add("Access-Control-Allow-Credentials", "true");
+    responseContext.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
     responseContext.getHeaders().add("Access-Control-Max-Age", "151200");
-    responseContext.getHeaders().add("Access-Control-Allow-Headers", "X-Requested-With,Authorization,Content-Type");
+    responseContext.getHeaders().add("Access-Control-Allow-Headers", "X-Requested-With,Accept,Authorization,Content-Type");
 
+    if(requestContext.getMethod().toUpperCase().equals("OPTIONS") && 
+            requestContext.getHeaderString("Access-Control-Request-Method") != null ) {
+      
+      responseContext.setStatus(200);
+      
+    }    
+    
   }
 }
