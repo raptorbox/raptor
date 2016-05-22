@@ -87,9 +87,6 @@ public class AuthProvider implements Authorization, Authentication {
   @Override
   public boolean isAuthorized(String accessToken, String id, Permission op) throws AuthorizationException {
     
-    // used for list objects
-    if(id == null) id = accessToken;
-    
     try {
     
       UserInfo user = getUser(accessToken);

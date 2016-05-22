@@ -98,6 +98,7 @@ public class MemoryCache extends AbstractCache {
   
   @Override
   public Boolean get(String userId, String id, Authorization.Permission op) throws PermissionCacheException {
+    if(id == null) id = "";
     String key = userId + id + op.name();
     CachedItem<Boolean> cache = getPermissions().get(key);
     return cache == null ? null : cache.getItem();
