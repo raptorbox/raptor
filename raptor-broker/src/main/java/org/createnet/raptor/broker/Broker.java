@@ -15,8 +15,13 @@
  */
 package org.createnet.raptor.broker;
 
+import java.io.File;
+import java.util.Arrays;
 import org.apache.activemq.artemis.core.server.embedded.EmbeddedActiveMQ;
+import org.createnet.raptor.broker.configuration.BrokerConfiguration;
 import org.createnet.raptor.broker.security.RaptorSecurityManager;
+import org.createnet.raptor.config.ConfigurationLoader;
+import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.ApplicationConfig;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.ServiceLocatorFactory;
@@ -31,8 +36,9 @@ import org.slf4j.LoggerFactory;
 public class Broker {
   
   final protected Logger logger = LoggerFactory.getLogger(Broker.class);
+  final private ConfigurationLoader configLoader = new ConfigurationLoader();
   
-  public static void main(final String[] args) throws BrokerException {
+  public static void main(final String[] args) throws BrokerException, ConfigurationException {
     
     final Broker broker = new Broker();
     broker.initialize();
@@ -41,6 +47,8 @@ public class Broker {
     
   }
   
+  private BrokerConfiguration brokerConfiguration;
+ 
   public class BrokerException extends Exception {
     public BrokerException(Throwable t) {
       super(t);
@@ -52,18 +60,23 @@ public class Broker {
   
   public Broker() {}
 
-  public void initialize() {
+  public void initialize() throws ConfigurationException {
     
     ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
     ServiceLocator serviceLocator = locatorFactory.create("BrokerLocator");
     ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());
 
     serviceLocator.inject(securityManager);
+    
+    securityManager.setBrokerConfiguration(getBrokerConfiguration());
+    
+    server.setSecurityManager(securityManager);
+    server.setConfigResourcePath(getConfigPath());
+    
   }
   
   public void start() throws BrokerException {
-    
-    server.setSecurityManager(securityManager);
+       
     try {
       logger.debug("Starting broker");
       server.start();
@@ -81,6 +94,22 @@ public class Broker {
     } catch (Exception ex) {
       throw new BrokerException(ex);
     }
+  }
+
+  private BrokerConfiguration getBrokerConfiguration() throws ConfigurationException {
+    
+    if(brokerConfiguration == null)
+      brokerConfiguration = (BrokerConfiguration) configLoader.getInstance("broker", BrokerConfiguration.class);
+    
+    return brokerConfiguration;
+  }
+  
+  private String getConfigPath() throws ConfigurationException {
+     
+    if(brokerConfiguration.artemisConfiguration == null)
+      throw new RuntimeException("broker.xml path not specified");
+    
+    return brokerConfiguration.artemisConfiguration;
   }
   
 }

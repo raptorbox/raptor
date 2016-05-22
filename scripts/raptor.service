@@ -2,9 +2,8 @@
 Description=Raptor
 
 [Service]
-RemainAfterExit=yes
-Type=oneshot
 ExecStart=/usr/bin/raptor -launch
+User=raptor
 
 [Install]
 WantedBy=multi-user.target

@@ -30,7 +30,7 @@ import org.createnet.raptor.db.StorageProvider;
 import org.createnet.raptor.db.query.BaseQuery;
 import org.createnet.raptor.db.query.ListQuery;
 import org.createnet.raptor.http.configuration.StorageConfiguration;
-import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;

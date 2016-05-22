@@ -6,6 +6,8 @@ CBDATAPATH=/data/couchbase
 # change password
 #curl -u $CBUSER:$CBPASS -d username=$CBUSER -d password=$CBPASS -d port=8091 http://$CBHOST:8091/settings/web
 
+adduser --system --no-create-home --group --disabled-login raptor
+
 cd ../bin
 sudo ln -s `pwd`/raptor.sh /usr/bin/raptor
 

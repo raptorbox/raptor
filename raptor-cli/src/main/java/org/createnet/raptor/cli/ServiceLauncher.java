@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.createnet.raptor.broker.Broker;
+import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +78,7 @@ public class ServiceLauncher {
         try {
           broker.initialize();
           broker.start();
-        } catch (Broker.BrokerException ex) {
+        } catch (Broker.BrokerException | ConfigurationException ex) {
           logger.error("Error starting broker service", ex);
           throw new RuntimeException(ex);
         }

@@ -13,14 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.http.configuration;
+package org.createnet.raptor.broker.configuration;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.createnet.raptor.config.Configuration;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class IndexerConfiguration extends org.createnet.search.raptor.search.IndexerConfiguration implements Configuration {
-  
+public class BrokerConfiguration implements Configuration {
+
+  public static class BrokerUser {
+
+    public String name;
+    public String password;
+    public List<String> roles;
+    
+    public boolean login(String password) {
+      return this.password.equals(password);
+    }
+    
+    public boolean hasRole(String role) {
+      return roles.contains(role);
+    }
+
+    public List<String> getRoles() {
+      return roles;
+    }
+
+  }
+
+  public String artemisConfiguration;
+  public List<BrokerUser> users = new ArrayList();
+
 }

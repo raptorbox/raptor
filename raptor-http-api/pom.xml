@@ -37,12 +37,6 @@
       <artifactId>jackson-annotations</artifactId>
       <version>${jackson}</version>
       <type>jar</type>
-    </dependency>     
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-yaml</artifactId>
-      <version>${jackson}</version>
     </dependency>
 
     <dependency>
@@ -104,6 +98,11 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>raptor-dispatcher</artifactId>
       <version>0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>raptor-config</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 

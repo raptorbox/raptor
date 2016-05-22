@@ -68,15 +68,15 @@ public class ServiceObject extends ServiceObjectContainer {
   static public class Settings {
 
     public boolean storeData = true;
-    public boolean eventsEnabled = true;
+//    public boolean eventsEnabled = true;
 
     public boolean storeEnabled() {
       return storeData;
     }
     
-    public boolean eventsEnabled() {
-      return eventsEnabled;
-    }
+//    public boolean eventsEnabled() {
+//      return eventsEnabled;
+//    }
   }
 
   public static String generateUUID() {

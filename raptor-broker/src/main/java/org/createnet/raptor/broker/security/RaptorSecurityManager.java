@@ -27,7 +27,8 @@ import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
 import org.apache.activemq.artemis.spi.core.security.ActiveMQSecurityManager2;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
-import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.broker.configuration.BrokerConfiguration;
+import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.service.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,13 +39,15 @@ import org.slf4j.LoggerFactory;
  */
 public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
+  private BrokerConfiguration brokerConfiguration;
+
   protected enum Roles {
     user, admin
   }
 
   private final Logger logger = LoggerFactory.getLogger(RaptorSecurityManager.class);
 
-  private final Map<String, Authentication.UserInfo> localUsers = new HashMap();
+  private final Map<String, BrokerConfiguration.BrokerUser> localUsers = new HashMap();
 
   @Inject
   AuthService auth;
@@ -67,11 +70,23 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     }
     return null;
   }
-
+  
+  protected BrokerConfiguration.BrokerUser getLocalUser(String username, String password) {
+    BrokerConfiguration.BrokerUser user = localUsers.getOrDefault(username, null);
+    return (user != null && user.login(password)) ? user : null;
+  }
+  
   @Override
   public boolean validateUser(String user, String password, X509Certificate[] certificates) {
+    
     logger.debug("Authenticate user {} with token {}", user, password);
-    return (getUser(password) != null);
+    
+    if((getLocalUser(user, password) != null )) {
+      logger.debug("Match on local user {}", user);
+      return true;
+    }
+    
+    return getUser(password) != null;
   }
 
   @Override
@@ -79,7 +94,20 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
     logger.debug("Authenticate user {} with token {} and roles {} on topic {}", username, password, roles, address);
 
-    Authentication.UserInfo user = getUser(password);
+    Authentication.UserInfo user;
+    BrokerConfiguration.BrokerUser localUser = getLocalUser(username, password);
+    
+    if(localUser != null) {
+      logger.debug("Local user {} found", username);
+      user = new Authentication.UserInfo(username, password);
+      user.setRoles(localUser.getRoles());
+    }
+    else user = getUser(password);
+    
+    if(user == null) {
+      logger.debug("User {} login failed", username);
+      return false;
+    }
     
     if (address.contains("$sys.mqtt.queue.qos2")
             || address.contains("$sys.mqtt.#")) {
@@ -103,7 +131,11 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
           return false;
       }
     }
-
+    
+    if(user.hasRole(Roles.admin.name())) {
+      return true;
+    }
+    
     String[] topicTokens = address.split("\\.");
     if (topicTokens.length > 2) {
 
@@ -155,6 +187,16 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     logger.debug("validateUserAndRole(user, password, roles, checkType): NOT IMPLEMENTED");
 //    logger.warn("Authenticate user {} with token {} and roles {} on {}", user, password, roles, checkType);
     return false;
+  }
+
+  public void setBrokerConfiguration(BrokerConfiguration brokerConfiguration) {
+    
+    localUsers.clear();
+    for (BrokerConfiguration.BrokerUser user: brokerConfiguration.users) {
+      localUsers.put(user.name, user);
+    }    
+    
+    this.brokerConfiguration = brokerConfiguration;
   }
 
 }

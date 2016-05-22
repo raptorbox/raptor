@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.http.configuration;
 
+import org.createnet.raptor.config.Configuration;
+
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>

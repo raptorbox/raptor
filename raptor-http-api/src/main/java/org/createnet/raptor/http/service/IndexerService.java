@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import org.createnet.raptor.auth.authentication.Authentication;
-import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.RaptorComponent;

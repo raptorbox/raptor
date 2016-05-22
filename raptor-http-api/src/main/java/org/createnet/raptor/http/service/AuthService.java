@@ -22,7 +22,7 @@ import org.createnet.raptor.auth.AuthProvider;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authentication.Authentication.UserInfo;
 import org.createnet.raptor.auth.authorization.Authorization;
-import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.config.exception.ConfigurationException;
 
 /**
  *

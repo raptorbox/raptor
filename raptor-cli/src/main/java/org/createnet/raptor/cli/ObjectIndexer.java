@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.query.BaseQuery;
-import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.StorageService;
 import org.createnet.raptor.models.objects.RaptorComponent;

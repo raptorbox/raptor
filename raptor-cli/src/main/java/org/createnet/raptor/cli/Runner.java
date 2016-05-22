@@ -26,7 +26,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.http.ApplicationConfig;
-import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.search.raptor.search.Indexer;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.ServiceLocatorFactory;

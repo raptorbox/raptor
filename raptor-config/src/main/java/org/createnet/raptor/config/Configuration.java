@@ -13,16 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.http.exception;
+package org.createnet.raptor.config;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class ConfigurationException extends Exception {
-
-  public ConfigurationException(Throwable ex) {
-    super(ex);
-  }
-  
+public interface Configuration {
 }

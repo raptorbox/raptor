@@ -15,16 +15,10 @@
  */
 package org.createnet.raptor.http.service;
 
-import org.createnet.raptor.http.exception.ConfigurationException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import javax.inject.Singleton;
+import org.createnet.raptor.config.ConfigurationLoader;
+import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.configuration.AuthConfiguration;
-import org.createnet.raptor.http.configuration.Configuration;
 import org.createnet.raptor.http.configuration.DispatcherConfiguration;
 import org.createnet.raptor.http.configuration.IndexerConfiguration;
 import org.createnet.raptor.http.configuration.StorageConfiguration;
@@ -39,36 +33,10 @@ import org.slf4j.LoggerFactory;
 
 @Service
 @Singleton
-public class ConfigurationService {
+public class ConfigurationService extends ConfigurationLoader {
   
   final private Logger logger = LoggerFactory.getLogger(ConfigurationService.class);
-  
-  final private String basePath = "/etc/raptor/";
-  final private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-  
-  final private Map<String, Configuration> cache = new HashMap();
-  
-  protected File getFile(String filename) {
-    return new File(basePath + filename + ".yml");
-  }
-  
-  protected Configuration getInstance(String name, Class<? extends Configuration> clazz) throws ConfigurationException {
-    
-    Configuration config = cache.get(name);
-    if(config == null) {
-      try {
-        config = mapper.readValue(getFile(name), clazz);
-      }
-      catch(IOException ex) {
-        logger.error("Failed to read configuration", ex);
-        throw new RuntimeException(ex);
-      }
-      cache.put(name, config);
-    }
-    
-    return config;
-  }
-  
+
   public StorageConfiguration getStorage() throws ConfigurationException {
     return (StorageConfiguration) getInstance("storage", StorageConfiguration.class);
   }

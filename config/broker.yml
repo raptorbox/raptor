@@ -1,0 +1,8 @@
+
+artemisConfiguration: /etc/raptor/broker.xml
+users:
+  - name: system
+    password: passwd
+    roles:
+      - admin
+      - user

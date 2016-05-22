@@ -17,7 +17,7 @@ package org.createnet.raptor.cli;
 
 import javax.inject.Inject;
 import org.createnet.raptor.db.Storage;
-import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.StorageService;
 import org.createnet.search.raptor.search.Indexer;

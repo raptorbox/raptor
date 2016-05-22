@@ -21,7 +21,7 @@ import javax.inject.Inject;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.dispatcher.Dispatcher;
-import org.createnet.raptor.http.exception.ConfigurationException;
+import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.RaptorComponent;

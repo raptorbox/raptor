@@ -95,6 +95,10 @@ public interface Authentication {
     public void addRole(String newRole) {
       roles.add(newRole);
     }
+
+    public boolean hasRole(String name) {
+      return roles.contains(name);
+    }
     
   }
   
