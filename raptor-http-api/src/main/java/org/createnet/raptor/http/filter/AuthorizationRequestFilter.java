@@ -42,15 +42,11 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
   public void filter(ContainerRequestContext requestContext) {
 
     // skip CORS requests
-    if(!(requestContext.getMethod().toUpperCase().equals("OPTIONS") && 
-            requestContext.getHeaderString("Access-Control-Request-Method") != null )) {
-      checkAuth(requestContext);
+    if(requestContext.getMethod().toUpperCase().equals("OPTIONS") && 
+            requestContext.getHeaderString("Access-Control-Request-Method") != null ) {
+      logger.debug("CORS request detected, skip auth check");
+      return;
     }
-    
-    
-  }
-  
-  protected void checkAuth(ContainerRequestContext requestContext) {
     
     try {
 
