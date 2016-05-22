@@ -30,18 +30,16 @@ public class CORSResponseFilter implements ContainerResponseFilter {
   public void filter(ContainerRequestContext request, ContainerResponseContext response)
           throws IOException {
 
-    response.getHeaders().add("X-Powered-By", "Raptor");    
-    
-    response.getHeaders().add("Access-Control-Allow-Origin", "*");
-    response.getHeaders().add("Access-Control-Allow-Headers",
-            "origin, content-type, accept, authorization");
-    response.getHeaders().add("Access-Control-Allow-Credentials", "true");
-    response.getHeaders().add("Access-Control-Allow-Methods",
-            "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+    response.getHeaders().add("X-Powered-By", "Raptor");
 
-    String reqHead = request.getHeaderString("Access-Control-Request-Headers");
-    if (null != reqHead && reqHead.length() > 0) {
-      response.getHeaders().add("Access-Control-Allow-Headers", reqHead);
+    if (request.getMethod().toUpperCase().equals("OPTIONS")) {
+      
+      response.getHeaders().add("Access-Control-Allow-Origin", "*");
+      response.getHeaders().add("Access-Control-Allow-Headers", "*");
+      response.getHeaders().add("Access-Control-Allow-Credentials", "true");
+      response.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+      response.getHeaders().add("Access-Control-Allow-Headers", "Access-Control-Allow-Headers");
+
     }
 
   }
