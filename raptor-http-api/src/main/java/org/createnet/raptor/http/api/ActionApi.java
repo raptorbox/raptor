@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.events.ActionEvent;
-import org.createnet.raptor.http.service.DispatcherService;
 import org.createnet.raptor.http.service.EventEmitterService;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.exception.RecordsetException;
