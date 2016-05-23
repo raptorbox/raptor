@@ -17,28 +17,27 @@ package org.createnet.raptor.auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyManagementException;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.List;
+import javax.net.ssl.SSLContext;
 import org.apache.http.Consts;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContexts;
 
 /**
  *
@@ -46,30 +45,24 @@ import org.apache.http.impl.client.HttpClients;
  */
 public class AuthHttpClient {
 
-  CloseableHttpClient httpclient;
+  private CloseableHttpClient getHttpClient() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException, UnrecoverableKeyException, CertificateException, IOException {
 
-  private CloseableHttpClient getHttpClient() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException, UnrecoverableKeyException {
-    if (httpclient == null) {
-      
-      
-      // @TODO handle properly keystore
-      KeyStore keystore = KeyStore.getInstance("default");
+    // Trust own CA and all self-signed certs
+    SSLContext sslcontext = SSLContexts.custom()
+            .loadTrustMaterial(new File(config.token.truststore.path), config.token.truststore.password.toCharArray(),
+                    new TrustSelfSignedStrategy())
+            .build();
 
-      TrustStrategy trustStrategy = new TrustStrategy() {
-        public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-          return true;
-        }
-      };
+    // Allow TLSv1 protocol only
+    SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+            sslcontext,
+            new String[]{"TLS", "TLSv2"},
+            null,
+            SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 
-      SSLSocketFactory sslsf = new SSLSocketFactory("TLS", null, null, keystore, null,
-              trustStrategy, new AllowAllHostnameVerifier());
-
-      httpclient = HttpClients
-              .custom()
-              .setHostnameVerifier(SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER)
-              .setSSLSocketFactory(sslsf)
-              .build();
-    }
+    CloseableHttpClient httpclient = HttpClients.custom()
+            .setSSLSocketFactory(sslsf)
+            .build();
 
     return httpclient;
   }
@@ -114,27 +107,26 @@ public class AuthHttpClient {
 
   }
 
+  private AuthConfiguration config;
+
   private String checkUrl;
-  private String url;
+  private String syncUrl;
 
   public AuthHttpClient() {
   }
 
-  public AuthHttpClient(String url) {
-    this.url = url;
+  public void setConfig(AuthConfiguration configuration) {
+
+    this.config = configuration;
+
+    this.syncUrl = configuration.token.syncUrl;
+    this.checkUrl = configuration.token.checkUrl;
+
   }
 
-  public void setUrl(String url) {
-    this.url = url;
-  }
+  public String check(String accessToken, List<NameValuePair> args) throws ClientException, IOException {
 
-  public void setCheckUrl(String url) {
-    this.checkUrl = url;
-  }
-
-  public String check(String accessToken, List<NameValuePair> args) throws ClientException {
-
-    HttpPost httpost = new HttpPost(url);
+    HttpPost httpost = new HttpPost(checkUrl);
 
     httpost.setHeader("Authorization", accessToken);
 
@@ -146,7 +138,7 @@ public class AuthHttpClient {
     CloseableHttpClient httpclient;
     try {
       httpclient = getHttpClient();
-    } catch (KeyStoreException | NoSuchAlgorithmException | KeyManagementException | UnrecoverableKeyException ex) {
+    } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException | UnrecoverableKeyException ex) {
       throw new ClientException(ex);
     }
 
@@ -172,6 +164,8 @@ public class AuthHttpClient {
 
     } catch (IOException ex) {
       throw new ClientException(ex);
+    } finally {
+      httpclient.close();
     }
 
     return response;
@@ -179,7 +173,7 @@ public class AuthHttpClient {
 
   public boolean sync(String accessToken, String body) throws ClientException {
 
-    HttpPost httpost = new HttpPost(checkUrl);
+    HttpPost httpost = new HttpPost(syncUrl);
 
     httpost.addHeader("Authorization", accessToken);
     httpost.addHeader("Accept", "application/json");
@@ -191,10 +185,10 @@ public class AuthHttpClient {
     CloseableHttpClient httpclient;
     try {
       httpclient = getHttpClient();
-    } catch (KeyStoreException | NoSuchAlgorithmException | KeyManagementException | UnrecoverableKeyException ex) {
+    } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException | UnrecoverableKeyException ex) {
       throw new ClientException(ex);
-    }    
-    
+    }
+
     try (CloseableHttpResponse httpResponse = httpclient.execute(httpost)) {
 
       if (httpResponse.getStatusLine().getStatusCode() >= 400) {

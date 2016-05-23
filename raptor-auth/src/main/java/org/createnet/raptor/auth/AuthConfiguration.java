@@ -34,6 +34,13 @@ public class AuthConfiguration {
   public Token token = new Token();
   
   static public class Token {
+    
+    static public class Truststore {
+      public String path;
+      public String password;
+    }
+    
+    public Truststore truststore = new Truststore();
     public String checkUrl;
     public String syncUrl;
   }

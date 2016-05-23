@@ -2,5 +2,11 @@
 type: token
 cache: memory
 token:
+
+  truststore:
+    path: ~/truststore
+    name: raptor
+    password: passwd
+
   checkUrl: https://raptorbox.eu/api/token/check
   syncUrl: https://raptorbox.eu/api/device/sync
