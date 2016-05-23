@@ -41,43 +41,124 @@ import org.slf4j.LoggerFactory;
  */
 @Service
 public class DispatcherService {
-  
+
   private final Logger logger = LoggerFactory.getLogger(DispatcherService.class);
-  
+
   @Inject
   ConfigurationService configuration;
-  
+
   @Inject
   AuthService auth;
-  
+
   @Inject
   EventEmitterService emitter;
-  
+
   public enum MessageType {
     object, stream, actuation
   }
-  
+
   public enum ObjectOperation {
     create, update, delete, push
   }
-  
+
   public enum ActionOperation {
     execute, delete
   }
-  
+
   private Dispatcher dispatcher;
 
   public DispatcherService() {
+  }
+
+  public Dispatcher getDispatcher() throws ConfigurationException {
+    if (dispatcher == null) {
+      dispatcher = new Dispatcher();
+      dispatcher.initialize(configuration.getDispatcher());
+    }
+
+    initialize();
+
+    return dispatcher;
+  }
+
+  protected ObjectNode createObjectMessage(ServiceObject obj) throws ConfigurationException, Authentication.AuthenticationException {
+
+    ObjectNode message = ServiceObject.getMapper().createObjectNode();
+
+    message.put("userId", auth.getUser().getUserId());
+
+    message.set("object", obj.toJsonNode());
+
+    return message;
+  }
+
+  public void notifyObjectEvent(String op, ServiceObject obj) throws ConfigurationException, RaptorComponent.ParserException, Authentication.AuthenticationException {
+
+    String topic = obj.id + "/events";
+
+    ObjectNode message = createObjectMessage(obj);
+
+    message.put("type", MessageType.object.name());
+    message.put("op", op);
+
+    getDispatcher().add(topic, message.toString());
+  }
+
+  public void notifyDataEvent(Stream stream, RecordSet record) throws IOException, ConfigurationException, Authentication.AuthenticationException {
+
+    String topic = stream.getServiceObject().id + "/events";
+
+    ObjectNode message = createObjectMessage(stream.getServiceObject());
+
+    message.put("type", MessageType.stream.name());
+    message.put("op", "data");
+
+    message.put("streamId", stream.name);
+
+    message.set("data", record.toJsonNode());
+
+    getDispatcher().add(topic, message.toString());
+  }
+
+  public void notifyActionEvent(String op, Action action, String status) throws IOException, ConfigurationException, Authentication.AuthenticationException {
+
+    String topic = action.getServiceObject().id + "/events";
+
+    ObjectNode message = createObjectMessage(action.getServiceObject());
+
+    message.put("type", MessageType.actuation.name());
+    message.put("op", op);
+
+    message.put("actionId", action.name);
+
+    if (status != null) {
+      message.put("data", status);
+    }
+
+    getDispatcher().add(topic, message.toString());
+  }
+
+  public void pushData(Stream stream, RecordSet records) throws ConfigurationException, Authentication.AuthenticationException, IOException {
+    String topic = stream.getServiceObject().id + "/stream/" + stream.name + "/updates";
+    getDispatcher().add(topic, records.toJson());
+  }
+
+  public void actionTrigger(Action action, String status) throws ConfigurationException, Authentication.AuthenticationException {
+    String topic = action.getServiceObject().id + "/actuations/" + action.name;
+    getDispatcher().add(topic, status);
+  }
+
+  private void initialize() {
     emitter.on(EventEmitterService.EventName.all, new Emitter.Callback() {
       @Override
       public void run(Event event) throws Emitter.EmitterException {
-                
+
         try {
-          
-          switch(event.getEvent()) {
-            case "create": 
-            case "update": 
-            case "delete": 
+
+          switch (event.getEvent()) {
+            case "create":
+            case "update":
+            case "delete":
               ObjectEvent objEvent = (ObjectEvent) event;
               notifyObjectEvent(objEvent.getEvent(), objEvent.getObject());
               break;
@@ -94,92 +175,13 @@ public class DispatcherService {
               notifyActionEvent(op, actionEvent.getAction(), actionEvent.getActionStatus().status);
               break;
           }
-          
-        }
-        catch(ConfigurationException | RaptorComponent.ParserException | Authentication.AuthenticationException | IOException e) {
+
+        } catch (ConfigurationException | RaptorComponent.ParserException | Authentication.AuthenticationException | IOException e) {
           logger.error("Failed to dispatch message", e);
         }
-        
-        
+
       }
     });
-  }
-  
-  
-  
-  public Dispatcher getDispatcher() throws ConfigurationException {
-    if(dispatcher == null) {
-      dispatcher = new Dispatcher();
-      dispatcher.initialize(configuration.getDispatcher());
-    }
-    return dispatcher;
-  }
-  
-  protected ObjectNode createObjectMessage(ServiceObject obj) throws ConfigurationException, Authentication.AuthenticationException {
-    
-    ObjectNode message = ServiceObject.getMapper().createObjectNode();
-    
-    message.put("userId", auth.getUser().getUserId());
-   
-    message.set("object", obj.toJsonNode());
-    
-    return message;
-  }
-  
-  public void notifyObjectEvent(String op, ServiceObject obj) throws ConfigurationException, RaptorComponent.ParserException, Authentication.AuthenticationException {
-    
-    String topic = obj.id + "/events";
-    
-    ObjectNode message = createObjectMessage(obj);
-    
-    message.put("type", MessageType.object.name());
-    message.put("op", op);
-    
-    getDispatcher().add(topic, message.toString());
-  }
-
-  public void notifyDataEvent(Stream stream, RecordSet record) throws IOException, ConfigurationException, Authentication.AuthenticationException {
-    
-    String topic = stream.getServiceObject().id + "/events";
-    
-    ObjectNode message = createObjectMessage(stream.getServiceObject());
-    
-    
-    message.put("type", MessageType.stream.name());
-    message.put("op", "data");
-    
-    message.put("streamId", stream.name);
-    
-    message.set("data", record.toJsonNode());
-    
-    getDispatcher().add(topic, message.toString());    
-  }
-
-  public void notifyActionEvent(String op, Action action, String status) throws IOException, ConfigurationException, Authentication.AuthenticationException {
-    
-    String topic = action.getServiceObject().id + "/events";
-    
-    ObjectNode message = createObjectMessage(action.getServiceObject());
-    
-    message.put("type", MessageType.actuation.name());
-    message.put("op", op);
-    
-    message.put("actionId", action.name);
-    
-    if(status != null)
-      message.put("data", status);
-    
-    getDispatcher().add(topic, message.toString());    
-  }
-
-  public void pushData(Stream stream, RecordSet records) throws ConfigurationException, Authentication.AuthenticationException, IOException {
-    String topic = stream.getServiceObject().id + "/stream/" + stream.name + "/updates";
-    getDispatcher().add(topic, records.toJson());
-  }
-
-  public void actionTrigger(Action action, String status) throws ConfigurationException, Authentication.AuthenticationException {
-    String topic = action.getServiceObject().id + "/actuations/" + action.name;
-    getDispatcher().add(topic, status);
-  }
+  }  
   
 }

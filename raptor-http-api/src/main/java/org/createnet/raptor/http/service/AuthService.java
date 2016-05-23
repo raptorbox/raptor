@@ -44,16 +44,6 @@ public class AuthService {
   private final org.slf4j.Logger logger = LoggerFactory.getLogger(AuthService.class);
 
   public AuthService() {
-
-    emitter.on(EventEmitterService.EventName.object, (Event event) -> {
-      try {
-        ObjectEvent objEvent = (ObjectEvent) event;
-        getProvider().sync(objEvent.getAccessToken(), objEvent.getObject().id);
-      } catch (Authentication.AuthenticationException | ConfigurationException ex) {
-        logger.error("Event trigger exception", ex);
-      }
-    });
-
   }
 
   private AuthProvider auth;
@@ -63,18 +53,21 @@ public class AuthService {
       auth = new AuthProvider();
       auth.initialize(config.getAuth());
     }
+    
+    initialize();
+    
     return auth;
   }
 
-  public boolean isAllowed(String accessToken, String id, Authorization.Permission op) throws Authorization.AuthorizationException {
-    return auth.isAuthorized(accessToken, id, op);
+  public boolean isAllowed(String accessToken, String id, Authorization.Permission op) throws Authorization.AuthorizationException, ConfigurationException {
+    return getProvider().isAuthorized(accessToken, id, op);
   }
 
-  public boolean isAllowed(String id, Authorization.Permission op) throws Authorization.AuthorizationException {
-    return auth.isAuthorized(getAccessToken(), id, op);
+  public boolean isAllowed(String id, Authorization.Permission op) throws Authorization.AuthorizationException, ConfigurationException {
+    return getProvider().isAuthorized(getAccessToken(), id, op);
   }
 
-  public boolean isAllowed(Authorization.Permission op) throws Authorization.AuthorizationException {
+  public boolean isAllowed(Authorization.Permission op) throws Authorization.AuthorizationException, ConfigurationException {
     return isAllowed(null, op);
   }
 
@@ -91,6 +84,19 @@ public class AuthService {
       return null;
     }
     return securityContext.getUserPrincipal().getName();
+  }
+
+  private void initialize() {
+
+    emitter.on(EventEmitterService.EventName.object, (Event event) -> {
+      try {
+        ObjectEvent objEvent = (ObjectEvent) event;
+        getProvider().sync(objEvent.getAccessToken(), objEvent.getObject().id);
+      } catch (Authentication.AuthenticationException | ConfigurationException ex) {
+        logger.error("Event trigger exception", ex);
+      }
+    });
+
   }
 
 }
