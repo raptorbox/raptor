@@ -29,7 +29,9 @@ abstract public class AbstractAuthentication implements Authentication {
   public void initialize(AuthConfiguration configuration) {
     this.configuration = configuration;
   }
-  
-  
+
+  @Override
+  public void sync(String accessToken, String id) throws AuthenticationException {
+  }
   
 }

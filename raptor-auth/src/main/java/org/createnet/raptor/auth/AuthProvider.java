@@ -144,23 +144,10 @@ public class AuthProvider implements Authorization, Authentication {
     
     return user;
   }
-  
-//  public static void main(String[] argv) throws AuthorizationException, AuthenticationException {
-//    
-//    AuthConfiguration config = new AuthConfiguration();
-//    config.type = "token";
-//    config.cache = "memory";
-//    config.token.url = "http://raptorbox.eu/api/token/check";
-//    
-//    AuthProvider auth = new AuthProvider();
-//    auth.initialize(config);
-//    
-//    UserInfo user = auth.getUser("Bearer TEST");
-//    
-//    System.out.println("UserInfo: " +user.toString() );
-//    
-//    auth.isAuthorized(user.getAccessToken(), "myObjectId", Permission.Read);
-//    
-//  }
+
+  @Override
+  public void sync() throws AuthenticationException {
+    authenticationInstance.sync();
+  }
 
 }

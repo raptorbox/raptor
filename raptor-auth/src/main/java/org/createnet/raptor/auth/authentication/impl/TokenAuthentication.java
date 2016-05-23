@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.createnet.raptor.auth.AuthConfiguration;
@@ -47,7 +48,7 @@ public class TokenAuthentication extends AbstractAuthentication {
       
       logger.debug("Loading user by token {}", accessToken);
       
-      String response = request(accessToken);
+      String response = checkRequest(accessToken);
       JsonNode node = mapper.readTree(response);
       
       if(!node.has("id")) {
@@ -67,15 +68,27 @@ public class TokenAuthentication extends AbstractAuthentication {
   @Override
   public void initialize(AuthConfiguration configuration) {
     super.initialize(configuration);
-    client.setUrl(configuration.token.url);
+    client.setUrl(configuration.token.checkUrl);
   }
 
-  protected String request(String accessToken) throws IOException, AuthHttpClient.ClientException {
+
+  @Override
+  public void sync(String accessToken, String objId) throws AuthenticationException {
+    try {
+      client.sync(accessToken, "{\"id\": \""+ objId +"\"}");
+    } catch (AuthHttpClient.ClientException ex) {
+      throw new AuthenticationException(ex);
+    }
+  }
+
+  
+  protected String checkRequest(String accessToken) throws IOException, AuthHttpClient.ClientException {
     
     List<NameValuePair> args = new ArrayList();
     args.add(new BasicNameValuePair("operation", "loadUser"));
     
-    return client.request(accessToken, args);
+    return client.check(accessToken, args);
   }
-
+ 
+  
 }

@@ -2,4 +2,5 @@
 type: token
 cache: memory
 token:
-  url: http://raptorbox.eu/api/token/check
+  checkUrl: https://raptorbox.eu/api/token/check
+  syncUrl: https://raptorbox.eu/api/device/sync

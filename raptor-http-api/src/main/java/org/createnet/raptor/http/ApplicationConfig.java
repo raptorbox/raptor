@@ -22,6 +22,7 @@ import org.createnet.raptor.http.filter.CORSResponseFilter;
 import org.createnet.raptor.http.service.AuthService;
 import org.createnet.raptor.http.service.ConfigurationService;
 import org.createnet.raptor.http.service.DispatcherService;
+import org.createnet.raptor.http.service.EventEmitterService;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.StorageService;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -58,6 +59,11 @@ public class ApplicationConfig extends ResourceConfig {
               .to(DispatcherService.class)
               .in(Singleton.class);
 
+      bind(EventEmitterService.class)
+              .to(EventEmitterService.class)
+              .in(Singleton.class);
+
+      
 //        bind(AuthService.class)
 //                .proxy(true)
 //                .proxyForSameScope(false)

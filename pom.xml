@@ -23,7 +23,7 @@
     <module>raptor-broker</module>
     
     <module>raptor-cli</module>
-
+    <module>raptor-events</module>
   </modules>
   
   <properties>

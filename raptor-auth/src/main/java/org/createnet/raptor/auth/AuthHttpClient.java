@@ -24,6 +24,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
@@ -76,7 +77,8 @@ public class AuthHttpClient {
   }
 
   final private CloseableHttpClient httpclient = HttpClients.createDefault();
-
+  
+  private String checkUrl;
   private String url;
 
   public AuthHttpClient() {
@@ -89,14 +91,61 @@ public class AuthHttpClient {
   public void setUrl(String url) {
     this.url = url;
   }
+  
+  public void setCheckUrl(String url) {
+    this.checkUrl = url;
+  }
 
-  public String request(String accessToken, List<NameValuePair> args) throws ClientException {
+  public String check(String accessToken, List<NameValuePair> args) throws ClientException {
 
     HttpPost httpost = new HttpPost(url);
 
     httpost.setHeader("Authorization", accessToken);
 
     UrlEncodedFormEntity entity = new UrlEncodedFormEntity(args, Consts.UTF_8);
+    httpost.setEntity(entity);
+    
+    String response = null;
+    
+    try (CloseableHttpResponse httpResponse = httpclient.execute(httpost)) {
+
+      if (httpResponse.getStatusLine().getStatusCode() >= 400) {
+        throw new ClientException(
+                httpResponse.getStatusLine().getStatusCode(),
+                httpResponse.getStatusLine().getReasonPhrase()
+//          "Request error [code: " + httpResponse.getStatusLine().getStatusCode()
+//          + ", reason: "+ httpResponse.getStatusLine().getReasonPhrase() + "]"
+        );
+      }
+
+      InputStream inputStream = httpResponse.getEntity().getContent();
+
+      ByteArrayOutputStream result = new ByteArrayOutputStream();
+      byte[] buffer = new byte[1024];
+      int length;
+      while ((length = inputStream.read(buffer)) != -1) {
+        result.write(buffer, 0, length);
+      }
+
+      response = result.toString(Consts.UTF_8.name());
+      
+    } catch (IOException ex) {
+      throw new ClientException(ex);
+    }
+
+    return response;
+  }
+  
+  
+  public String sync(String accessToken, String body) throws ClientException {
+
+    HttpPost httpost = new HttpPost(checkUrl);
+
+    httpost.addHeader("Authorization", accessToken);
+    httpost.addHeader("Accept", "application/json");
+    httpost.addHeader("Content-Type", "application/json");
+    
+    StringEntity entity = new StringEntity(body, Consts.UTF_8);
     httpost.setEntity(entity);
     
     String response = null;

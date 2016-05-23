@@ -13,29 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth;
+package org.createnet.raptor.http.service;
+
+import org.createnet.raptor.events.Emitter;
+import org.jvnet.hk2.annotations.Service;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class AuthConfiguration {
+@Service
+public class EventEmitterService extends Emitter {
   
-  public enum Type {
-    token, allow_all
-  }
   
-  public enum Cache {
-    memory, none
-  }
-  
-  public String type;
-  public String cache;
-  public Token token = new Token();
-  
-  static public class Token {
-    public String checkUrl;
-    public String syncUrl;
-  }
   
 }

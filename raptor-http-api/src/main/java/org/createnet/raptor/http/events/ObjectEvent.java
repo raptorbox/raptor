@@ -13,29 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth;
+package org.createnet.raptor.http.events;
+
+import org.createnet.raptor.events.Event;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class AuthConfiguration {
+public class ObjectEvent implements Event {
   
-  public enum Type {
-    token, allow_all
+  public String id;
+  public String userId;
+  public String accessToken;
+
+  public ObjectEvent() {
   }
   
-  public enum Cache {
-    memory, none
-  }
-  
-  public String type;
-  public String cache;
-  public Token token = new Token();
-  
-  static public class Token {
-    public String checkUrl;
-    public String syncUrl;
+  public ObjectEvent(String id, String userId, String accessToken) {
+    this.id = id;
+    this.userId = userId;
+    this.accessToken = accessToken;
   }
   
 }

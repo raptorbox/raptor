@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.http.service;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
@@ -23,38 +25,56 @@ import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authentication.Authentication.UserInfo;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.config.exception.ConfigurationException;
+import org.createnet.raptor.events.Emitter;
+import org.createnet.raptor.events.Event;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-
-
 public class AuthService {
-  
-  @Inject ConfigurationService config;
+
+  @Inject
+  ConfigurationService config;
+  @Inject
+  EventEmitterService emitter;
 
   @Context
   SecurityContext securityContext;
-  
+
+  private final org.slf4j.Logger logger = LoggerFactory.getLogger(AuthService.class);
+
+  public AuthService() {
+
+    emitter.on("object.create", (Event event) -> {
+      try {
+        getProvider().sync();
+      } catch (Authentication.AuthenticationException | ConfigurationException ex) {
+        logger.error("Event trigger exception", ex);
+      }
+    });
+
+  }
+
   private AuthProvider auth;
-  
+
   protected AuthProvider getProvider() throws ConfigurationException {
-    if(auth == null) {
-     auth = new AuthProvider();
-     auth.initialize(config.getAuth());
+    if (auth == null) {
+      auth = new AuthProvider();
+      auth.initialize(config.getAuth());
     }
     return auth;
   }
-  
+
   public boolean isAllowed(String accessToken, String id, Authorization.Permission op) throws Authorization.AuthorizationException {
     return auth.isAuthorized(accessToken, id, op);
   }
-  
+
   public boolean isAllowed(String id, Authorization.Permission op) throws Authorization.AuthorizationException {
     return auth.isAuthorized(getAccessToken(), id, op);
   }
-  
+
   public boolean isAllowed(Authorization.Permission op) throws Authorization.AuthorizationException {
     return isAllowed(null, op);
   }
@@ -62,13 +82,15 @@ public class AuthService {
   public UserInfo getUser() throws ConfigurationException, Authentication.AuthenticationException {
     return getProvider().getUser(getAccessToken());
   }
-  
+
   public UserInfo getUser(String accessToken) throws ConfigurationException, Authentication.AuthenticationException {
     return getProvider().getUser(accessToken);
   }
-  
+
   public String getAccessToken() {
-    if(securityContext == null) return null;
+    if (securityContext == null) {
+      return null;
+    }
     return securityContext.getUserPrincipal().getName();
   }
 

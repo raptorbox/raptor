@@ -105,4 +105,6 @@ public interface Authentication {
   public void initialize(AuthConfiguration configuration);
   public UserInfo getUser(String accessToken) throws AuthenticationException;
   
+  public void sync(String accessToken, String id) throws AuthenticationException;
+  
 }
