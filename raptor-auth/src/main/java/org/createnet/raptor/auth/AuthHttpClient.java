@@ -201,8 +201,8 @@ public class AuthHttpClient {
       InputStream inputStream = httpResponse.getEntity().getContent();
       JsonNode json = AuthProvider.mapper.readTree(inputStream);
 
-      if (json.has("result")) {
-        return json.get("result").asBoolean();
+      if (json.has("success")) {
+        return json.get("success").asBoolean();
       }
 
       throw new IOException("Cannot read sync response: " + json.toString());
