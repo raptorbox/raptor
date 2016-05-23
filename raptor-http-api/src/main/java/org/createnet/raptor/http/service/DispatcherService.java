@@ -160,17 +160,26 @@ public class DispatcherService {
             case "update":
             case "delete":
               ObjectEvent objEvent = (ObjectEvent) event;
+              
+              if(!objEvent.getObject().settings.eventsEnabled()) return;
+              
               notifyObjectEvent(objEvent.getEvent(), objEvent.getObject());
               break;
             case "push":
               // notify data event
               DataEvent dataEvent = (DataEvent) event;
+              
+              if(!dataEvent.getStream().getServiceObject().settings.eventsEnabled()) return;
+              
               notifyDataEvent(dataEvent.getStream(), dataEvent.getRecord());
               break;
             case "execute":
             case "deleteAction":
               // notify event
               ActionEvent actionEvent = (ActionEvent) event;
+              
+              if(!actionEvent.getAction().getServiceObject().settings.eventsEnabled()) return;
+              
               String op = event.getEvent().equals("execute") ? "execute" : "delete";
               notifyActionEvent(op, actionEvent.getAction(), actionEvent.getActionStatus().status);
               break;
