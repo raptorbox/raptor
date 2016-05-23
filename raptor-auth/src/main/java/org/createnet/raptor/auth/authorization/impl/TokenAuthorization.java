@@ -65,7 +65,7 @@ public class TokenAuthorization extends AbstractAuthorization {
   @Override
   public void initialize(AuthConfiguration configuration) {
     super.initialize(configuration);
-    client.setUrl(configuration.token.checkUrl);
+    client.setConfig(configuration);
   }
 
   protected String request(String accessToken, String id, String permission) throws IOException, AuthHttpClient.ClientException {
