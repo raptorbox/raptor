@@ -40,7 +40,6 @@ import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.createnet.raptor.db.Storage;
-import org.createnet.raptor.http.service.DispatcherService;
 import org.createnet.search.raptor.search.Indexer;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.events.ObjectEvent;
@@ -129,9 +128,10 @@ public class ObjectApi extends AbstractApi {
     storedObj.customFields.putAll(obj.customFields);
 
     storedObj.settings.storeData = obj.settings.storeData;
+    storedObj.settings.eventsEnabled = obj.settings.eventsEnabled;
     
-    // diff streams and drop data
-    // diff actions and drop data
+    // @TODO: diff streams and drop data
+    // @TODO: diff actions and drop data
     
     storage.saveObject(storedObj);
     indexer.indexObject(storedObj, false);
