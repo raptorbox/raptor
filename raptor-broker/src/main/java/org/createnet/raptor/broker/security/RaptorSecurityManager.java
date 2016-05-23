@@ -166,7 +166,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         logger.debug("Check access permission of user {} to object {}", user.getUserId(), objectId);
         boolean allowed = auth.isAllowed(user.getAccessToken(), objectId, Authorization.Permission.Subscribe);
         return allowed;
-      } catch (Authorization.AuthorizationException ex) {
+      } catch (Authorization.AuthorizationException | ConfigurationException ex) {
         logger.error("Failed to subscribe", ex);
         return false;
       }
