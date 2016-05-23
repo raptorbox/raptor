@@ -19,12 +19,23 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import org.apache.http.Consts;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -34,6 +45,34 @@ import org.apache.http.impl.client.HttpClients;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class AuthHttpClient {
+
+  CloseableHttpClient httpclient;
+
+  private CloseableHttpClient getHttpClient() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException, UnrecoverableKeyException {
+    if (httpclient == null) {
+      
+      
+      // @TODO handle properly keystore
+      KeyStore keystore = KeyStore.getInstance("default");
+
+      TrustStrategy trustStrategy = new TrustStrategy() {
+        public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+          return true;
+        }
+      };
+
+      SSLSocketFactory sslsf = new SSLSocketFactory("TLS", null, null, keystore, null,
+              trustStrategy, new AllowAllHostnameVerifier());
+
+      httpclient = HttpClients
+              .custom()
+              .setHostnameVerifier(SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER)
+              .setSSLSocketFactory(sslsf)
+              .build();
+    }
+
+    return httpclient;
+  }
 
   public class ClientException extends Exception {
 
@@ -75,8 +114,6 @@ public class AuthHttpClient {
 
   }
 
-  final private CloseableHttpClient httpclient = HttpClients.createDefault();
-
   private String checkUrl;
   private String url;
 
@@ -106,14 +143,19 @@ public class AuthHttpClient {
 
     String response = null;
 
+    CloseableHttpClient httpclient;
+    try {
+      httpclient = getHttpClient();
+    } catch (KeyStoreException | NoSuchAlgorithmException | KeyManagementException | UnrecoverableKeyException ex) {
+      throw new ClientException(ex);
+    }
+
     try (CloseableHttpResponse httpResponse = httpclient.execute(httpost)) {
 
       if (httpResponse.getStatusLine().getStatusCode() >= 400) {
         throw new ClientException(
                 httpResponse.getStatusLine().getStatusCode(),
                 httpResponse.getStatusLine().getReasonPhrase()
-        //          "Request error [code: " + httpResponse.getStatusLine().getStatusCode()
-        //          + ", reason: "+ httpResponse.getStatusLine().getReasonPhrase() + "]"
         );
       }
 
@@ -146,6 +188,13 @@ public class AuthHttpClient {
     StringEntity entity = new StringEntity(body, Consts.UTF_8);
     httpost.setEntity(entity);
 
+    CloseableHttpClient httpclient;
+    try {
+      httpclient = getHttpClient();
+    } catch (KeyStoreException | NoSuchAlgorithmException | KeyManagementException | UnrecoverableKeyException ex) {
+      throw new ClientException(ex);
+    }    
+    
     try (CloseableHttpResponse httpResponse = httpclient.execute(httpost)) {
 
       if (httpResponse.getStatusLine().getStatusCode() >= 400) {

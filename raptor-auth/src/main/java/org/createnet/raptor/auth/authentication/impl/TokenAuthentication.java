@@ -18,8 +18,10 @@ package org.createnet.raptor.auth.authentication.impl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.net.ssl.SSLContext;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.createnet.raptor.auth.AuthConfiguration;
@@ -39,7 +41,7 @@ public class TokenAuthentication extends AbstractAuthentication {
   
   ObjectMapper mapper = new ObjectMapper();
   final private AuthHttpClient client = new AuthHttpClient();
-  
+
   @Override
   public Authentication.UserInfo getUser(String accessToken) throws AuthenticationException {
 
