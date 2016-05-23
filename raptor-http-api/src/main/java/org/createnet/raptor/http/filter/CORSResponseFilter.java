@@ -35,7 +35,7 @@ public class CORSResponseFilter implements ContainerResponseFilter {
     if (request.getMethod().toUpperCase().equals("OPTIONS")) {
       
       response.getHeaders().add("Access-Control-Allow-Origin", "*");
-      response.getHeaders().add("Access-Control-Allow-Headers", "*");
+      response.getHeaders().add("Access-Control-Allow-Headers", "Authorization,Content-Type,X-Requested-With");
       response.getHeaders().add("Access-Control-Allow-Credentials", "true");
       response.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
 
