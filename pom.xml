@@ -38,6 +38,7 @@
     <elastic-search>2.3.1</elastic-search>
     <junit>4.12</junit>
     <httpclient>4.5.2</httpclient>
+    <paho>1.0.2</paho>
     
   </properties>
   
