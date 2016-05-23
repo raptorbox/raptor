@@ -56,7 +56,7 @@ public class AuthHttpClient {
     // Allow TLSv1 protocol only
     SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
             sslcontext,
-            new String[]{"TLS", "TLSv2"},
+            new String[]{"TLSv1.2", "TLSv1.1", "TLSv1"},
             null,
             SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 
