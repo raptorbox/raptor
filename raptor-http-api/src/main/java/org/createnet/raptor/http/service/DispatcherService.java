@@ -22,6 +22,11 @@ import org.createnet.raptor.auth.authentication.Authentication;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.dispatcher.Dispatcher;
 import org.createnet.raptor.config.exception.ConfigurationException;
+import org.createnet.raptor.events.Emitter;
+import org.createnet.raptor.events.Event;
+import org.createnet.raptor.http.events.ActionEvent;
+import org.createnet.raptor.http.events.DataEvent;
+import org.createnet.raptor.http.events.ObjectEvent;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -45,6 +50,9 @@ public class DispatcherService {
   @Inject
   AuthService auth;
   
+  @Inject
+  EventEmitterService emitter;
+  
   public enum MessageType {
     object, stream, actuation
   }
@@ -58,6 +66,46 @@ public class DispatcherService {
   }
   
   private Dispatcher dispatcher;
+
+  public DispatcherService() {
+    emitter.on(EventEmitterService.EventName.all, new Emitter.Callback() {
+      @Override
+      public void run(Event event) throws Emitter.EmitterException {
+                
+        try {
+          
+          switch(event.getEvent()) {
+            case "create": 
+            case "update": 
+            case "delete": 
+              ObjectEvent objEvent = (ObjectEvent) event;
+              notifyObjectEvent(objEvent.getEvent(), objEvent.getObject());
+              break;
+            case "push":
+              // notify data event
+              DataEvent dataEvent = (DataEvent) event;
+              notifyDataEvent(dataEvent.getStream(), dataEvent.getRecord());
+              break;
+            case "execute":
+            case "deleteAction":
+              // notify event
+              ActionEvent actionEvent = (ActionEvent) event;
+              String op = event.getEvent().equals("execute") ? "execute" : "delete";
+              notifyActionEvent(op, actionEvent.getAction(), actionEvent.getActionStatus().status);
+              break;
+          }
+          
+        }
+        catch(ConfigurationException | RaptorComponent.ParserException | Authentication.AuthenticationException | IOException e) {
+          logger.error("Failed to dispatch message", e);
+        }
+        
+        
+      }
+    });
+  }
+  
+  
   
   public Dispatcher getDispatcher() throws ConfigurationException {
     if(dispatcher == null) {
@@ -78,14 +126,14 @@ public class DispatcherService {
     return message;
   }
   
-  public void notifyObjectEvent(ObjectOperation op, ServiceObject obj) throws ConfigurationException, RaptorComponent.ParserException, Authentication.AuthenticationException {
+  public void notifyObjectEvent(String op, ServiceObject obj) throws ConfigurationException, RaptorComponent.ParserException, Authentication.AuthenticationException {
     
     String topic = obj.id + "/events";
     
     ObjectNode message = createObjectMessage(obj);
     
     message.put("type", MessageType.object.name());
-    message.put("op", op.name());
+    message.put("op", op);
     
     getDispatcher().add(topic, message.toString());
   }
@@ -107,14 +155,14 @@ public class DispatcherService {
     getDispatcher().add(topic, message.toString());    
   }
 
-  public void notifyActionEvent(ActionOperation op, Action action, String status) throws IOException, ConfigurationException, Authentication.AuthenticationException {
+  public void notifyActionEvent(String op, Action action, String status) throws IOException, ConfigurationException, Authentication.AuthenticationException {
     
     String topic = action.getServiceObject().id + "/events";
     
     ObjectNode message = createObjectMessage(action.getServiceObject());
     
     message.put("type", MessageType.actuation.name());
-    message.put("op", op.name());
+    message.put("op", op);
     
     message.put("actionId", action.name);
     

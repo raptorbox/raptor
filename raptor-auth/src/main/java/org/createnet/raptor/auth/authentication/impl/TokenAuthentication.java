@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.createnet.raptor.auth.AuthConfiguration;
@@ -71,10 +70,10 @@ public class TokenAuthentication extends AbstractAuthentication {
     client.setUrl(configuration.token.checkUrl);
   }
 
-
   @Override
   public void sync(String accessToken, String objId) throws AuthenticationException {
     try {
+      logger.debug("Syncing object operation for {}", objId);
       client.sync(accessToken, "{\"id\": \""+ objId +"\"}");
     } catch (AuthHttpClient.ClientException ex) {
       throw new AuthenticationException(ex);

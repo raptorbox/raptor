@@ -15,42 +15,36 @@
  */
 package org.createnet.raptor.http.events;
 
-import org.createnet.raptor.events.AbstractEvent;
-import javax.inject.Inject;
-import org.createnet.raptor.http.service.AuthService;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.data.ActionStatus;
+import org.createnet.raptor.models.objects.Action;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class ObjectEvent extends AbstractEvent {
+public class ActionEvent  extends ObjectEvent {
   
-  @Inject
-  AuthService auth;
+  final private Action action;
+  final private ActionStatus status;
   
-  protected ServiceObject obj;
-  protected String accessToken;
-  
-  public ObjectEvent() {
+  public ActionEvent(Action action, ActionStatus status) {
+    super(action.getServiceObject());
+    this.action = action;
+    this.status = status;
   }
   
-  public ObjectEvent(ServiceObject obj) {
-    this.obj = obj;
-    this.accessToken = auth.getAccessToken();
-  }
-  
-  public ObjectEvent(ServiceObject obj, String accessToken) {
-    this.obj = obj;
-    this.accessToken = accessToken;
+  public ActionEvent(Action action, ActionStatus status, String accessToken) {
+    super(action.getServiceObject(), accessToken);
+    this.action = action;
+    this.status = status;
   }
 
-  public ServiceObject getObject() {
-    return obj;
+  public Action getAction() {
+    return action;
   }
 
-  public String getAccessToken() {
-    return accessToken;
+  public ActionStatus getActionStatus() {
+    return status;
   }
   
 }

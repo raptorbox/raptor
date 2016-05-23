@@ -23,6 +23,7 @@ import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.service.AuthService;
 import org.createnet.raptor.http.service.DispatcherService;
+import org.createnet.raptor.http.service.EventEmitterService;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.StorageService;
 import org.createnet.raptor.models.objects.Action;
@@ -36,6 +37,9 @@ import org.createnet.raptor.models.objects.Stream;
  */
 abstract public class AbstractApi {
   
+
+  @Inject
+  protected EventEmitterService emitter;
 
   @Inject
   protected StorageService storage;

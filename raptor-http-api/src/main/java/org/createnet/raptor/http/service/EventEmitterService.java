@@ -16,6 +16,7 @@
 package org.createnet.raptor.http.service;
 
 import org.createnet.raptor.events.Emitter;
+import org.createnet.raptor.events.Event;
 import org.jvnet.hk2.annotations.Service;
 
 /**
@@ -25,6 +26,55 @@ import org.jvnet.hk2.annotations.Service;
 @Service
 public class EventEmitterService extends Emitter {
   
+  public enum EventName {
+    
+    create, update, delete, 
+    push, pull, 
+    
+    execute, deleteAction,
+    
+    subscribe, 
+    
+    object, data,
+    
+    all, 
+    
+  }
   
+  public void on(EventName name, Callback cb) {
+    on(name.name(), cb);
+  }
   
+  public void off(EventName name, Callback cb) {
+    off(name.name(), cb);
+  }
+  
+  public void off(EventName name) {
+    off(name.name());
+  }
+
+  public void trigger(EventName name, Event event) {
+    
+    // trigger to all listener
+    trigger(EventName.all.name(), event);
+    
+    // group event call
+    switch(name) {
+      
+      case create:
+      case update:
+      case delete:
+        trigger(EventName.object.name(), event);
+        break;
+      
+      case push:
+      case pull:
+        trigger(EventName.data.name(), event);
+        break;
+
+    }
+    
+    trigger(name.name(), event);
+  }
+
 }

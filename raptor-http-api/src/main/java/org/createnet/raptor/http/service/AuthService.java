@@ -15,8 +15,6 @@
  */
 package org.createnet.raptor.http.service;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
@@ -25,8 +23,8 @@ import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authentication.Authentication.UserInfo;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.config.exception.ConfigurationException;
-import org.createnet.raptor.events.Emitter;
 import org.createnet.raptor.events.Event;
+import org.createnet.raptor.http.events.ObjectEvent;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -47,9 +45,10 @@ public class AuthService {
 
   public AuthService() {
 
-    emitter.on("object.create", (Event event) -> {
+    emitter.on(EventEmitterService.EventName.object, (Event event) -> {
       try {
-        getProvider().sync();
+        ObjectEvent objEvent = (ObjectEvent) event;
+        getProvider().sync(objEvent.getAccessToken(), objEvent.getObject().id);
       } catch (Authentication.AuthenticationException | ConfigurationException ex) {
         logger.error("Event trigger exception", ex);
       }

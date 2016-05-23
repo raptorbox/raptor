@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.auth;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +36,7 @@ import org.apache.http.impl.client.HttpClients;
 public class AuthHttpClient {
 
   public class ClientException extends Exception {
-    
+
     private int code = 0;
     private String reason;
 
@@ -49,19 +50,17 @@ public class AuthHttpClient {
 
     @Override
     public String getMessage() {
-      if(getCode() > 0) {
+      if (getCode() > 0) {
         return getCode() + " " + getReason();
       }
-      return super.getMessage(); 
+      return super.getMessage();
     }
-    
-    
-    
+
     public ClientException(int code, String reason) {
       this.reason = reason;
       this.code = code;
     }
-    
+
     public ClientException(Throwable t) {
       super(t);
     }
@@ -73,11 +72,11 @@ public class AuthHttpClient {
     public ClientException(String m) {
       super(m);
     }
-    
+
   }
 
   final private CloseableHttpClient httpclient = HttpClients.createDefault();
-  
+
   private String checkUrl;
   private String url;
 
@@ -91,7 +90,7 @@ public class AuthHttpClient {
   public void setUrl(String url) {
     this.url = url;
   }
-  
+
   public void setCheckUrl(String url) {
     this.checkUrl = url;
   }
@@ -104,17 +103,17 @@ public class AuthHttpClient {
 
     UrlEncodedFormEntity entity = new UrlEncodedFormEntity(args, Consts.UTF_8);
     httpost.setEntity(entity);
-    
+
     String response = null;
-    
+
     try (CloseableHttpResponse httpResponse = httpclient.execute(httpost)) {
 
       if (httpResponse.getStatusLine().getStatusCode() >= 400) {
         throw new ClientException(
                 httpResponse.getStatusLine().getStatusCode(),
                 httpResponse.getStatusLine().getReasonPhrase()
-//          "Request error [code: " + httpResponse.getStatusLine().getStatusCode()
-//          + ", reason: "+ httpResponse.getStatusLine().getReasonPhrase() + "]"
+        //          "Request error [code: " + httpResponse.getStatusLine().getStatusCode()
+        //          + ", reason: "+ httpResponse.getStatusLine().getReasonPhrase() + "]"
         );
       }
 
@@ -128,55 +127,46 @@ public class AuthHttpClient {
       }
 
       response = result.toString(Consts.UTF_8.name());
-      
+
     } catch (IOException ex) {
       throw new ClientException(ex);
     }
 
     return response;
   }
-  
-  
-  public String sync(String accessToken, String body) throws ClientException {
+
+  public boolean sync(String accessToken, String body) throws ClientException {
 
     HttpPost httpost = new HttpPost(checkUrl);
 
     httpost.addHeader("Authorization", accessToken);
     httpost.addHeader("Accept", "application/json");
     httpost.addHeader("Content-Type", "application/json");
-    
+
     StringEntity entity = new StringEntity(body, Consts.UTF_8);
     httpost.setEntity(entity);
-    
-    String response = null;
-    
+
     try (CloseableHttpResponse httpResponse = httpclient.execute(httpost)) {
 
       if (httpResponse.getStatusLine().getStatusCode() >= 400) {
         throw new ClientException(
                 httpResponse.getStatusLine().getStatusCode(),
                 httpResponse.getStatusLine().getReasonPhrase()
-//          "Request error [code: " + httpResponse.getStatusLine().getStatusCode()
-//          + ", reason: "+ httpResponse.getStatusLine().getReasonPhrase() + "]"
         );
       }
 
       InputStream inputStream = httpResponse.getEntity().getContent();
+      JsonNode json = AuthProvider.mapper.readTree(inputStream);
 
-      ByteArrayOutputStream result = new ByteArrayOutputStream();
-      byte[] buffer = new byte[1024];
-      int length;
-      while ((length = inputStream.read(buffer)) != -1) {
-        result.write(buffer, 0, length);
+      if (json.has("result")) {
+        return json.get("result").asBoolean();
       }
 
-      response = result.toString(Consts.UTF_8.name());
-      
+      throw new IOException("Cannot read sync response: " + json.toString());
+
     } catch (IOException ex) {
       throw new ClientException(ex);
     }
-
-    return response;
   }
 
 }

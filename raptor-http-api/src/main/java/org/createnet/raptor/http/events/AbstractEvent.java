@@ -13,15 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.events;
+package org.createnet.raptor.http.events;
+
+import org.createnet.raptor.http.service.EventEmitterService;
+
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public interface Event {
+public class AbstractEvent extends org.createnet.raptor.events.AbstractEvent {
   
-  public String getEvent();
-  public void setEvent(String name);
+  private String event;
+  
+  public void setEvent(EventEmitterService.EventName event) {
+    setEvent(event.name());
+  }
   
 }

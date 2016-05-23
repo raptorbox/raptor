@@ -36,7 +36,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.config.exception.ConfigurationException;
+import org.createnet.raptor.http.events.ActionEvent;
 import org.createnet.raptor.http.service.DispatcherService;
+import org.createnet.raptor.http.service.EventEmitterService;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Action;
@@ -55,7 +57,7 @@ public class ActionApi extends AbstractApi {
   public Collection<Action> list(
           @PathParam("id") String id
   ) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException {
-    
+
     ServiceObject obj = loadObject(id);
 
     logger.debug("Load actions for object {}", obj.id);
@@ -79,10 +81,10 @@ public class ActionApi extends AbstractApi {
     }
 
     ActionStatus actionStatus = storage.getActionStatus(action);
-    
+
     logger.debug("Fetched action {} status for object {}", action.name, obj.id);
-    
-    if(actionStatus == null) {
+
+    if (actionStatus == null) {
       return Response.noContent().build();
     }
 
@@ -105,15 +107,14 @@ public class ActionApi extends AbstractApi {
     if (!auth.isAllowed(obj.id, Authorization.Permission.Execute)) {
       throw new NotAuthorizedException("Cannot fetch data");
     }
-    
+
     ActionStatus actionStatus = storage.saveActionStatus(action, body);
-    
-    // notify event
-    dispatcher.notifyActionEvent(DispatcherService.ActionOperation.execute, action, actionStatus.status);
-    
+
+    emitter.trigger(EventEmitterService.EventName.execute, new ActionEvent(action, actionStatus));
+
     // trigger action over mqtt
     dispatcher.actionTrigger(action, actionStatus.status);
-    
+
     logger.debug("Saved action {} status for object {}", action.name, obj.id);
 
     return actionStatus.toString();
@@ -135,11 +136,12 @@ public class ActionApi extends AbstractApi {
     }
 
     storage.deleteActionStatus(action);
-    dispatcher.notifyActionEvent(DispatcherService.ActionOperation.execute, action, null);
-    
+
+    emitter.trigger(EventEmitterService.EventName.deleteAction, new ActionEvent(action, null));
+
     logger.debug("Aborted action {} status for object {}", action.name, obj.id);
 
     return Response.accepted().build();
   }
-  
+
 }

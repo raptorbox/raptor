@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.auth;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authentication.impl.AllowAllAuthentication;
 import org.createnet.raptor.auth.authentication.impl.TokenAuthentication;
@@ -44,7 +45,9 @@ public class AuthProvider implements Authorization, Authentication {
   protected AuthCache cache;
 
   protected AuthConfiguration configuration;
-
+  
+  final public static ObjectMapper mapper = new ObjectMapper();
+  
   @Override
   public void initialize(AuthConfiguration configuration) {
 
@@ -146,8 +149,8 @@ public class AuthProvider implements Authorization, Authentication {
   }
 
   @Override
-  public void sync() throws AuthenticationException {
-    authenticationInstance.sync();
+  public void sync(String accessToken, String id) throws AuthenticationException {
+    authenticationInstance.sync(accessToken, id);
   }
 
 }

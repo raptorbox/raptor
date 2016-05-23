@@ -15,42 +15,39 @@
  */
 package org.createnet.raptor.http.events;
 
-import org.createnet.raptor.events.AbstractEvent;
 import javax.inject.Inject;
 import org.createnet.raptor.http.service.AuthService;
+import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Stream;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class ObjectEvent extends AbstractEvent {
+public class DataEvent  extends ObjectEvent {
   
-  @Inject
-  AuthService auth;
+  final private Stream stream;
+  final private RecordSet record;
   
-  protected ServiceObject obj;
-  protected String accessToken;
-  
-  public ObjectEvent() {
+  public DataEvent(Stream stream, RecordSet record) {
+    super(stream.getServiceObject());
+    this.stream = stream;
+    this.record = record;
   }
   
-  public ObjectEvent(ServiceObject obj) {
-    this.obj = obj;
-    this.accessToken = auth.getAccessToken();
-  }
-  
-  public ObjectEvent(ServiceObject obj, String accessToken) {
-    this.obj = obj;
-    this.accessToken = accessToken;
+  public DataEvent(Stream stream, RecordSet record, String accessToken) {
+    super(stream.getServiceObject(), accessToken);
+    this.stream = stream;
+    this.record = record;
   }
 
-  public ServiceObject getObject() {
-    return obj;
+  public Stream getStream() {
+    return stream;
   }
 
-  public String getAccessToken() {
-    return accessToken;
+  public RecordSet getRecord() {
+    return record;
   }
   
 }

@@ -78,6 +78,7 @@ public class Emitter {
         @Override
         public void run() {
           try {
+            arg.setEvent(name);
             next.run(arg);
           } catch (EmitterException ex) {
             logger.error("Event "+ name +" execution error", ex);
@@ -86,7 +87,11 @@ public class Emitter {
       });
     }
   }
-
+  
+  public boolean hasCallbacks(String name) {
+    return !getEvents(name).isEmpty();
+  }
+  
   protected List<Callback> getEvents(String name) {
     if (events.getOrDefault(name, null) == null) {
       events.put(name, new ArrayList<>());

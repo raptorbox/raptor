@@ -43,6 +43,8 @@ import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.http.service.DispatcherService;
 import org.createnet.search.raptor.search.Indexer;
 import org.createnet.raptor.config.exception.ConfigurationException;
+import org.createnet.raptor.http.events.ObjectEvent;
+import org.createnet.raptor.http.service.EventEmitterService;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 import org.createnet.search.raptor.search.query.impl.es.ObjectQuery;
 
@@ -95,8 +97,8 @@ public class ObjectApi extends AbstractApi {
       
       throw new InternalServerErrorException();
     }    
-    
-    dispatcher.notifyObjectEvent(DispatcherService.ObjectOperation.create, obj);
+       
+    emitter.trigger(EventEmitterService.EventName.create, new ObjectEvent(obj, auth.getAccessToken()));
     
     logger.debug("Created new object {} for {}", obj.id, auth.getUser().getUserId());
     
@@ -134,7 +136,7 @@ public class ObjectApi extends AbstractApi {
     storage.saveObject(storedObj);
     indexer.indexObject(storedObj, false);
     
-    dispatcher.notifyObjectEvent(DispatcherService.ObjectOperation.update, storedObj);
+    emitter.trigger(EventEmitterService.EventName.update, new ObjectEvent(storedObj, auth.getAccessToken()));
     
     logger.debug("Updated object {} for {}", storedObj.id, auth.getUser().getUserId());
     
@@ -162,8 +164,6 @@ public class ObjectApi extends AbstractApi {
   @Produces(MediaType.APPLICATION_JSON)
   public Response delete(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, Authorization.AuthorizationException, ConfigurationException, Indexer.IndexerException, Authentication.AuthenticationException  {
 
-    logger.debug("delete object {}", id);
-
     ServiceObject obj = loadObject(id);
 
     if(!auth.isAllowed(obj.id, Authorization.Permission.Delete)) {
@@ -173,7 +173,9 @@ public class ObjectApi extends AbstractApi {
     storage.deleteObject(id);
     indexer.deleteObject(id);
     
-    dispatcher.notifyObjectEvent(DispatcherService.ObjectOperation.delete, obj);
+    emitter.trigger(EventEmitterService.EventName.delete, new ObjectEvent(obj, auth.getAccessToken()));
+
+    logger.debug("Deleted object {}", id);
     
     return Response.status(Response.Status.OK).build();
   }

@@ -15,13 +15,23 @@
  */
 package org.createnet.raptor.events;
 
+
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public interface Event {
+public class AbstractEvent implements Event {
   
-  public String getEvent();
-  public void setEvent(String name);
+  private String event;
+  
+  @Override
+  public String getEvent() {
+    return event;
+  }
+  
+  @Override
+  public void setEvent(String event) {
+    this.event = event;
+  }
   
 }
