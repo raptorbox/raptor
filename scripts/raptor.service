@@ -3,6 +3,7 @@ Description=Raptor
 
 [Service]
 ExecStart=/usr/bin/raptor -launch
+ExecStop=killall -u raptor
 User=raptor
 KillMode=process
 

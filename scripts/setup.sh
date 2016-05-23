@@ -11,6 +11,9 @@ sudo adduser --system --no-create-home --group --disabled-login raptor
 sudo mkdir -p /opt/maven
 sudo chown raptor /opt/maven -R
 
+sudo mkdir -p  /opt/raptor/data
+sudo chown raptor /opt/raptor/ -R
+
 cd ../bin
 sudo ln -s `pwd`/raptor.sh /usr/bin/raptor
 
@@ -18,7 +21,10 @@ cd ../scripts
 sudo mkdir -p /var/log/raptor
 sudo ln -s `pwd`/raptor.service  /usr/lib/systemd/system/
 
+sudo systemctl daemon-reload
 sudo systemctl start raptor
+
+#journalctl -xe
 
 echo "Init CB node"
 
