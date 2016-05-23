@@ -7,4 +7,4 @@ SCRIPTPATH=`dirname $SCRIPT`
 RPATH="$SCRIPTPATH/../raptor-cli"
 
 cd $RPATH
-mvn exec:java -Dexec.args="$1 $2 $3"
+mvn exec:java -Dmaven.repo.local=/opt/maven -Dexec.args="$1 $2 $3"

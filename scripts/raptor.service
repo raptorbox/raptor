@@ -4,6 +4,7 @@ Description=Raptor
 [Service]
 ExecStart=/usr/bin/raptor -launch
 User=raptor
+KillMode=process
 
 [Install]
 WantedBy=multi-user.target
