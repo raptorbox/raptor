@@ -1,0 +1,10 @@
+/var/log/raptor/*.log {
+        daily
+        missingok
+        rotate 14
+        compress
+        delaycompress
+        notifempty
+        create 0640 raptor adm
+        sharedscripts
+}
