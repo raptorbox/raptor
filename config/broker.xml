@@ -28,6 +28,15 @@ under the License.
 
     <core xmlns="urn:activemq:core">
 
+        <remoting-incoming-interceptors>
+            <class-name>org.createnet.raptor.broker.interceptors.StompInterceptor</class-name>
+            <class-name>org.createnet.raptor.broker.interceptors.IncomingInterceptor</class-name>
+        </remoting-incoming-interceptors>
+
+        <remoting-outgoing-interceptors>
+           <class-name>org.createnet.raptor.broker.interceptors.OutgoingInterceptor</class-name>
+        </remoting-outgoing-interceptors>
+
         <persistence-enabled>true</persistence-enabled>
 
         <!-- this could be ASYNCIO or NIO -->
@@ -45,27 +54,30 @@ under the License.
 
         <journal-pool-files>-1</journal-pool-files>
 
+        <wild-card-routing-enabled>true</wild-card-routing-enabled>
+
         <connectors>
             <connector name="in-vm">vm://0</connector>
+            <!-- <connector name="mqtt">tcp://0.0.0.0:1883?protocols=MQTT</connector> -->
+            <!-- <connector name="stomp">tcp://0.0.0.0:61623?protocols=STOMP</connector> -->
         </connectors>
 
         <acceptors>
             <!-- Default ActiveMQ Artemis Acceptor.  Multi-protocol adapter.  Currently supports ActiveMQ Artemis Core, OpenWire, STOMP, AMQP, MQTT, and HornetQ Core. -->
             <!-- performance tests have shown that openWire performs best with these buffer sizes -->
-
-            <!-- <acceptor name="artemis">tcp://0.0.0.0:61616?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576</acceptor> -->
+            <acceptor name="artemis">tcp://127.0.0.1:61616?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576</acceptor>
 
             <!-- AMQP Acceptor.  Listens on default AMQP port for AMQP traffic.-->
             <!--<acceptor name="amqp">tcp://0.0.0.0:5672?protocols=AMQP</acceptor>-->
 
             <!-- STOMP Acceptor. -->
-            <acceptor name="stomp">tcp://0.0.0.0:61613?protocols=STOMP</acceptor>
+            <!-- <acceptor name="stomp">tcp://0.0.0.0:61623?protocols=STOMP</acceptor> -->
 
             <!-- HornetQ Compatibility Acceptor.  Enables HornetQ Core and STOMP for legacy HornetQ clients. -->
             <!--<acceptor name="hornetq">tcp://0.0.0.0:5445?protocols=HORNETQ,STOMP</acceptor>-->
 
             <!-- MQTT Acceptor -->
-            <acceptor name="mqtt">tcp://0.0.0.0:1883?protocols=MQTT</acceptor>
+            <acceptor name="multiprotocol">tcp://0.0.0.0:1883?protocols=MQTT,STOMP</acceptor>
         </acceptors>
 
         <address-settings>
@@ -78,7 +90,7 @@ under the License.
                 <dead-letter-address>jms.queue.DLQ</dead-letter-address>
                 <expiry-address>jms.queue.ExpiryQueue</expiry-address>
 
-                <expiry-delay>1000</expiry-delay>
+                <expiry-delay>5000</expiry-delay>
                 <redelivery-delay>-1</redelivery-delay>
 
                 <max-size-bytes>10485760</max-size-bytes>

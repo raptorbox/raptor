@@ -18,6 +18,7 @@ package org.createnet.raptor.models.objects;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.createnet.raptor.models.objects.deserializer.ServiceObjectDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -26,8 +27,11 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import static org.createnet.raptor.models.objects.RaptorContainer.mapper;
@@ -64,6 +68,27 @@ public class ServiceObject extends ServiceObjectContainer {
   public Map<String, Stream> streams = new HashMap();
   public Map<String, Subscription> subscriptions = new HashMap();
   public Map<String, Action> actions = new HashMap();
+
+  public void parse(JsonNode jsonObj1) {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  public void addStreams(Collection<Stream> streams) {
+    for (Stream stream : streams) {
+      stream.setServiceObject(this);
+      for (Channel channel : stream.channels.values()) {
+        channel.setServiceObject(this);
+      }
+      this.streams.put(stream.name, stream);
+    }
+  }
+
+  public void addActions(Collection<Action> values) {
+    for (Action action : values) {
+      action.setServiceObject(this);
+      this.actions.put(action.name, action);
+    }
+  }
 
   static public class Settings {
 
@@ -243,4 +268,5 @@ public class ServiceObject extends ServiceObjectContainer {
     return toJSON(ServiceObjectView.Public);
   }
 
+  
 }

@@ -24,6 +24,9 @@ sudo ln -s `pwd`/raptor.service  /usr/lib/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl start raptor
 
+sudo ln -s `pwd`/logrotate /etc/logrotate.d/raptor
+sudo service rsyslog restart
+
 #journalctl -xe
 
 echo "Init CB node"

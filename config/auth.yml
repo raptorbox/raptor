@@ -1,12 +1,9 @@
 # define the type of auth: token, allow_all
-type: token
+type: allow_all
 cache: memory
 token:
-
   truststore:
     path: ~/truststore
-    name: raptor
     password: passwd
-
   checkUrl: https://raptorbox.eu/api/token/check
   syncUrl: https://raptorbox.eu/api/device/sync

@@ -8,10 +8,12 @@ package org.createnet.raptor.objects;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
-import java.math.BigDecimal;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 import org.createnet.raptor.utils.TestUtils;
 import org.junit.After;
@@ -142,5 +144,6 @@ public class ServiceObjectTest extends TestUtils {
   public void testIsNew() {
     assertTrue((new ServiceObject()).isNew());
   }
+
 
 }

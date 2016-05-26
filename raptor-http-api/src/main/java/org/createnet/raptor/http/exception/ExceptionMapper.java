@@ -16,6 +16,7 @@
 package org.createnet.raptor.http.exception;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.slf4j.Logger;
@@ -35,8 +36,14 @@ public class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Throwabl
     logger.error("API Exception", e);
     
     if(e instanceof WebApplicationException) {
-      return ((WebApplicationException) e).getResponse();
-    }      
+      WebApplicationException ex = (WebApplicationException) e;
+      return Response
+              .status(ex.getResponse().getStatus())
+              .type(MediaType.APPLICATION_JSON)
+              .entity("{ \"code\": "+ ex.getResponse().getStatus() +
+                        ", \"message\": \""+ ex.getResponse().getEntity().toString() +"\" }")
+              .build();
+    }
     
     if(e instanceof RaptorComponent.ValidationException) {
       return Response

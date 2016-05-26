@@ -62,7 +62,7 @@ public class Action extends ServiceObjectContainer {
     this.name = name;
     parse(json, object);
   }
-
+  
   public Action(String name, JsonNode json) {
     this.name = name;
     parse(json, null);

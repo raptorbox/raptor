@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -44,6 +45,10 @@ import org.createnet.search.raptor.search.Indexer;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.events.ObjectEvent;
 import org.createnet.raptor.http.service.EventEmitterService;
+import org.createnet.raptor.models.exception.RecordsetException;
+import org.createnet.raptor.models.objects.Action;
+import org.createnet.raptor.models.objects.Channel;
+import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 import org.createnet.search.raptor.search.query.impl.es.ObjectQuery;
 
@@ -76,7 +81,7 @@ public class ObjectApi extends AbstractApi {
   @POST
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response create(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException {
+  public Response create(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException {
 
     if (!auth.isAllowed(Authorization.Permission.Create)) {
       throw new NotAuthorizedException("Cannot create object");
@@ -92,7 +97,7 @@ public class ObjectApi extends AbstractApi {
       logger.error("Indexing error occured", ex);
       logger.warn("Removing object {} from storage", obj.id);
       
-      storage.deleteObject(obj.id);
+      storage.deleteObject(obj);
       
       throw new InternalServerErrorException();
     }    
@@ -108,10 +113,18 @@ public class ObjectApi extends AbstractApi {
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public String update(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.IndexerException {
+  public String update(@PathParam("id") String id, ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.IndexerException, IOException, RecordsetException {
 
-    ServiceObject storedObj = loadObject(obj.id);
-
+    ServiceObject storedObj = loadObject(id);
+  
+    if(obj.id == null || obj.id.isEmpty()) {
+      obj.id = storedObj.id;
+    }
+    
+    if(!storedObj.id.equals(obj.id)) {
+      throw new NotFoundException("Request id does not match payload defined id");
+    }    
+    
     if(!auth.isAllowed(obj.id, Authorization.Permission.Update)) {
       throw new NotAuthorizedException("Cannot update object");
     }
@@ -127,14 +140,30 @@ public class ObjectApi extends AbstractApi {
     storedObj.customFields.clear();
     storedObj.customFields.putAll(obj.customFields);
 
+    // update settings
     storedObj.settings.storeData = obj.settings.storeData;
     storedObj.settings.eventsEnabled = obj.settings.eventsEnabled;
     
-    // @TODO: diff streams and drop data
-    // @TODO: diff actions and drop data
+    // merge stream definitions
+    List<Stream> changedStreams = getChangedStreams(storedObj, obj);
+    
+    storedObj.streams.clear();
+    storedObj.addStreams(obj.streams.values());
+    
+    // merge action definitions
+    List<Action> changedActions = getChangedActions(storedObj, obj);
+    
+    storedObj.actions.clear();
+    storedObj.addActions(obj.actions.values());   
     
     storage.saveObject(storedObj);
     indexer.indexObject(storedObj, false);
+    
+    // clean up data for changed stream and actions
+    storage.deleteData(changedStreams);
+    indexer.deleteData(changedStreams);
+    
+    storage.deleteActionStatus(changedActions);
     
     emitter.trigger(EventEmitterService.EventName.update, new ObjectEvent(storedObj, auth.getAccessToken()));
     
@@ -162,7 +191,7 @@ public class ObjectApi extends AbstractApi {
   @DELETE
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response delete(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, Authorization.AuthorizationException, ConfigurationException, Indexer.IndexerException, Authentication.AuthenticationException  {
+  public Response delete(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, Authorization.AuthorizationException, ConfigurationException, Indexer.IndexerException, Authentication.AuthenticationException, IOException, RecordsetException  {
 
     ServiceObject obj = loadObject(id);
 
@@ -170,8 +199,8 @@ public class ObjectApi extends AbstractApi {
       throw new NotAuthorizedException("Cannot delete object");
     }
 
-    storage.deleteObject(id);
-    indexer.deleteObject(id);
+    storage.deleteObject(obj);
+    indexer.deleteObject(obj);
     
     emitter.trigger(EventEmitterService.EventName.delete, new ObjectEvent(obj, auth.getAccessToken()));
 
@@ -193,5 +222,60 @@ public class ObjectApi extends AbstractApi {
     List<String> list = indexer.searchObject(query);
     return list;
   }  
+
+  private List<Stream> getChangedStreams(ServiceObject storedObj, ServiceObject obj) {
+    
+    List<Stream> changedStream = new ArrayList();
+    
+    // loop previous stream list and find missing streams
+    for (Map.Entry<String, Stream> item : obj.streams.entrySet()) {
+      
+      String streamName = item.getKey();
+      Stream stream = item.getValue();           
+      
+      // stream found
+      if(storedObj.streams.containsKey(streamName)) {
+        
+        // loop stream and find changed channels
+        for (Map.Entry<String, Channel> channelItem : stream.channels.entrySet()) {
+          
+          String channelName = channelItem.getKey();
+          Channel channel = channelItem.getValue();
+          
+          if(storedObj.streams.get(streamName).channels.containsKey(channelName)) {
+            // check if channel definition changed
+            if(!storedObj.streams.get(streamName).channels.get(channelName).type.equals(channel.type)) {
+              changedStream.add(stream);
+              break;
+            }
+          }
+          else {
+            // channel has gone, drop stream
+            changedStream.add(stream);
+            break;
+          }
+          
+        }
+      }
+      else {
+        // drop stream
+        changedStream.add(stream);
+        storedObj.streams.remove(streamName);
+      }
+
+    }
+    
+    return changedStream;
+  }
+
+  private List<Action> getChangedActions(ServiceObject storedObj, ServiceObject obj) {
+    List<Action> changedAction = new ArrayList();
+    for (Action action : storedObj.actions.values()) {
+      if(!obj.actions.containsKey(action.name)) {
+        changedAction.add(action);
+      }
+    }
+    return changedAction;
+  }
   
 }

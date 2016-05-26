@@ -18,6 +18,7 @@ package org.createnet.raptor.http.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -115,8 +116,14 @@ public class StorageService {
     return obj.id;
   }
 
-  public void deleteObject(String id) throws ConfigurationException, Storage.StorageException {
-    getObjectConnection().delete(id);
+  public void deleteObject(ServiceObject obj) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
+        
+    // cleanup data
+    deleteData(obj.streams.values());
+    deleteActionStatus(obj.actions.values());
+    
+    getObjectConnection().delete(obj.id);    
+    
   }
 
   public List<ServiceObject> listObjects() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
@@ -209,6 +216,16 @@ public class StorageService {
 
   }
 
+  public void deleteData(Collection<Stream> changedStreams) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
+    if (!changedStreams.isEmpty()) {
+      //drop stream data
+      for (Stream changedStream : changedStreams) {
+        logger.debug("Removing stream {} data for object {}", changedStream.name, changedStream.getServiceObject().id);
+        deleteData(changedStream);
+      }
+    }
+  }
+
   // Actuations
   protected String getActionId(Action action) {
     return action.getServiceObject().id + "-" + action.name;
@@ -234,6 +251,16 @@ public class StorageService {
 
   public void deleteActionStatus(Action action) throws ConfigurationException, Storage.StorageException {
     getActionConnection().delete(getActionId(action));
+  }
+
+  public void deleteActionStatus(Collection<Action> changedActions) throws ConfigurationException, Storage.StorageException {
+    if (!changedActions.isEmpty()) {
+      // drop action data
+      for (Action changedAction : changedActions) {
+        logger.debug("Removing action {} data for object {}", changedAction.name, changedAction.getServiceObject().id);
+        deleteActionStatus(changedAction);
+      }
+    }
   }
 
 }

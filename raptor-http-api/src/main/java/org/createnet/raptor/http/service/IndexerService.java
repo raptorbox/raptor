@@ -18,12 +18,15 @@ package org.createnet.raptor.http.service;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.inject.Inject;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.models.data.RecordSet;
+import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.exception.RecordsetException;
+import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
@@ -33,6 +36,7 @@ import org.createnet.search.raptor.search.IndexerConfiguration;
 import org.createnet.search.raptor.search.IndexerProvider;
 import org.createnet.search.raptor.search.query.AbstractQuery;
 import org.createnet.search.raptor.search.query.Query;
+import org.createnet.search.raptor.search.query.impl.es.DataQuery;
 import org.createnet.search.raptor.search.query.impl.es.LastUpdateQuery;
 import org.createnet.search.raptor.search.query.impl.es.ObjectQuery;
 
@@ -50,7 +54,7 @@ public class IndexerService {
   AuthService auth;
 
   private Indexer indexer;
-  
+ 
   public enum IndexNames {
     object, data, subscriptions
   }
@@ -94,12 +98,15 @@ public class IndexerService {
     getIndexer().save(record);
   }
   
-  public void deleteObject(String id) throws ConfigurationException, Indexer.IndexerException{
+  public void deleteObject(ServiceObject obj) throws ConfigurationException, Indexer.IndexerException, IOException, RecordsetException{
     
     Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
-    record.id = id;
+    record.id = obj.id;
     
     getIndexer().delete(record);
+    
+    deleteData(obj.streams.values());
+    
   }
 
   public List<String> searchObject(ObjectQuery query) throws Indexer.SearchException, IOException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException {
@@ -150,5 +157,45 @@ public class IndexerService {
     
     getIndexer().save(record);
   }
+  
+  public void deleteData(Stream stream) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException  {
+    
+    DataQuery query = new DataQuery();
+    
+    List<Indexer.IndexOperation> deletes = new ArrayList();
+    List<String> results = getIndexer().search(query);
+    
+    for (String result : results) {
+      
+      RecordSet recordSet = new RecordSet(stream, result);
+      
+      Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
+      record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getLastUpdate().getTime();
+      
+      Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.DELETE, record);
+      deletes.add(op);
+    }
+    getIndexer().batch(deletes);
+    
+  }
+  
+  public List<ResultSet> searchData(Stream stream, DataQuery query) throws Indexer.SearchException, RecordsetException, Indexer.IndexerException, ConfigurationException {
+    List<ResultSet> results = new ArrayList();
+    
+    List<String> res = getIndexer().search(query);
+    
+    for (String raw : res) {
+      results.add(new ResultSet(stream, raw));
+    }
+    
+    return results;
+  }
+
+  public void deleteData(Collection<Stream> changedStreams) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
+    for (Stream changedStream : changedStreams) {
+      deleteData(changedStream);
+    }
+  }
+
   
 }

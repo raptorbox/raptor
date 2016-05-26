@@ -18,9 +18,11 @@ package org.createnet.raptor.http.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -42,6 +44,7 @@ import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Stream;
+import org.createnet.search.raptor.search.query.impl.es.DataQuery;
 
 /**
  *
@@ -100,7 +103,7 @@ public class DataApi extends AbstractApi {
   public Response delete(
           @PathParam("id") String id,
           @PathParam("stream") String streamName
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, IOException {
+  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, IOException, Indexer.IndexerException {
 
     ServiceObject obj = loadObject(id);
     Stream stream = loadStream(streamName, obj);
@@ -114,6 +117,7 @@ public class DataApi extends AbstractApi {
     }
     
     storage.deleteData(stream);
+    indexer.deleteData(stream);
 
     logger.debug("Delete all records for stream {} in object {}", streamName, obj.id);
 
@@ -193,6 +197,35 @@ public class DataApi extends AbstractApi {
     logger.debug("Stored record for stream {} in object {}", streamName, obj.id);
     
     return Response.accepted().build();
+  }
+  
+  
+  @POST
+  @Path("{stream}/search")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response search(
+          @PathParam("id") String id,
+          @PathParam("stream") String streamName,
+          DataQuery query
+          
+  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException, Indexer.IndexerException, IOException {
+
+    ServiceObject obj = loadObject(id);
+    Stream stream = loadStream(streamName, obj);
+
+    if (!auth.isAllowed(id, Authorization.Permission.Read)) {
+      throw new NotAuthorizedException("Cannot search data");
+    }
+    
+    if(!obj.settings.storeEnabled()) {
+      return Response.noContent().build();
+    }
+    
+    List<ResultSet> results = indexer.searchData(stream, query);
+    
+    logger.debug("Search data for stream {} in object {} has {} results", streamName, obj.id, results.size());
+    
+    return Response.ok().entity(results).build();
   }
   
   
