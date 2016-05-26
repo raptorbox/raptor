@@ -17,7 +17,11 @@ package org.createnet.raptor.broker;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Set;
+import org.apache.activemq.artemis.core.config.ConnectorServiceConfiguration;
+import org.apache.activemq.artemis.core.server.ConnectorService;
 import org.apache.activemq.artemis.core.server.embedded.EmbeddedActiveMQ;
+import org.apache.activemq.artemis.core.server.impl.ConnectorsService;
 import org.createnet.raptor.broker.configuration.BrokerConfiguration;
 import org.createnet.raptor.broker.security.RaptorSecurityManager;
 import org.createnet.raptor.config.ConfigurationLoader;
