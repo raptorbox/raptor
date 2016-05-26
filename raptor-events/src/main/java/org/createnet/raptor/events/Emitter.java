@@ -15,12 +15,12 @@
  */
 package org.createnet.raptor.events;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -36,7 +36,7 @@ public class Emitter {
   
   private final Logger logger = LoggerFactory.getLogger(Emitter.class);
   
-  final private Map<String, List<Callback>> events = new HashMap();
+  final private Map<String, List<Callback>> events = new ConcurrentHashMap();
   final private BlockingQueue<Runnable> queue = new LinkedBlockingQueue();
   final private ExecutorService executorService = new ThreadPoolExecutor(1, 10, 30, TimeUnit.SECONDS, queue);  
   
@@ -94,7 +94,7 @@ public class Emitter {
   
   protected List<Callback> getEvents(String name) {
     if (events.getOrDefault(name, null) == null) {
-      events.put(name, new ArrayList<>());
+      events.put(name, new CopyOnWriteArrayList());
     }
     return events.get(name);
   }
