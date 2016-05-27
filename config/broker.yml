@@ -5,3 +5,7 @@ users:
     password: frontend42
     roles:
       - admin
+  - name: system
+    password: system123
+    roles:
+      - admin
