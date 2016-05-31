@@ -158,7 +158,7 @@ public class StorageService {
 
     if (limit > 0) {
       query.limit = limit;
-      query.setSort("lastUpdate", ListQuery.Sort.ASC);
+      query.setSort("lastUpdate", ListQuery.Sort.DESC);
     }
 
     List<String> results = getDataConnection().list(query);
