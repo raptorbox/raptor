@@ -33,22 +33,23 @@ public class ConfigurationLoader {
 
   protected final Logger logger = LoggerFactory.getLogger(ConfigurationLoader.class);
 
-  final private String defaultPath = "/etc/raptor/";
+  static final private String defaultPath = "/etc/raptor/";
   private File basePathFile;
+
+  public static String getConfigPath() {
+    String configDir = System.getProperty("configDir", null);
+    return configDir == null ? defaultPath : configDir;
+  }
 
   public String getBasePath() {
 
     if (basePathFile == null) {
-
-      String configDir = System.getProperty("configDir", null);
-      basePathFile = new File( configDir == null ? defaultPath : configDir );      
-      
+      basePathFile = new File(getConfigPath());
       if (!basePathFile.exists()) {
-        throw new RuntimeException("Configuration directory does not exists: " + configDir);
-      }      
-      
+        throw new RuntimeException("Configuration directory does not exists: " + basePathFile.getPath());
+      }
     }
-    
+
     return basePathFile.getAbsolutePath();
   }
   final private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());

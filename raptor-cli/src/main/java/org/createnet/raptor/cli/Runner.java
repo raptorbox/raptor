@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.cli;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.apache.commons.cli.CommandLine;
@@ -24,6 +25,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.createnet.raptor.config.ConfigurationLoader;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.http.ApplicationConfig;
 import org.createnet.raptor.config.exception.ConfigurationException;
@@ -40,6 +42,18 @@ import org.slf4j.LoggerFactory;
  */
 public class Runner {
 
+  static {
+    // initialize logback config path
+    String configPath = ConfigurationLoader.getConfigPath();
+    File filePath = new File(configPath + "/logback.xml");
+    if(filePath.exists()) {
+      System.setProperty("logback.configurationFile", filePath.getAbsolutePath());
+    }
+    else {
+      System.out.println("Logback configuration file does not esists at " + filePath.getAbsolutePath());
+    }
+  }
+  
   static final private Logger logger = LoggerFactory.getLogger(Runner.class);
   final private Commands commands = new Commands();
 
