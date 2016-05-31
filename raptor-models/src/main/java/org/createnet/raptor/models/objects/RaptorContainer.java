@@ -17,16 +17,13 @@ package org.createnet.raptor.models.objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import org.createnet.raptor.models.events.IEventListener;
 
 /**
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-abstract class RaptorContainer implements RaptorComponent {
+public abstract class RaptorContainer implements RaptorComponent {
 
   abstract public void validate() throws ValidationException;
 
