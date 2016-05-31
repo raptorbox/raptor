@@ -173,7 +173,9 @@ public class DataApi extends AbstractApi {
     }
     
     if(obj.settings.storeEnabled()) {
-
+      
+      logger.debug("Storing data for {} on {}", obj.id, stream.name);
+      
       // save data
       storage.saveData(stream, record);
 
@@ -187,6 +189,9 @@ public class DataApi extends AbstractApi {
         throw ex;
       }
 
+    }
+    else {
+      logger.debug("Skipped data storage for {}", obj.id);
     }
        
     emitter.trigger(EventEmitterService.EventName.push, new DataEvent(stream, record, auth.getAccessToken()));
