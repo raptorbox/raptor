@@ -41,14 +41,14 @@ public class ConfigurationLoader {
     if (basePathFile == null) {
 
       String configDir = System.getProperty("configDir", null);
-      basePathFile = new File( configDir == null ? defaultPath : configDir );
-        
+      basePathFile = new File( configDir == null ? defaultPath : configDir );      
+      
       if (!basePathFile.exists()) {
         throw new RuntimeException("Configuration directory does not exists: " + configDir);
       }      
       
     }
-
+    
     return basePathFile.getAbsolutePath();
   }
   final private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());

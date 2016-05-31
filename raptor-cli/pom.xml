@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  
+
+  <parent>
+    <groupId>org.createnet</groupId>
+    <artifactId>raptor</artifactId>
+    <version>1.0</version>
+  </parent>
+    
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.createnet</groupId>
   <artifactId>raptor-cli</artifactId>
-  <version>1.0</version>
   <packaging>jar</packaging>
   
   <dependencies>
@@ -16,27 +20,58 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.21</version>
+      <version>${slf4j}</version>
     </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>1.7.21</version>
-    </dependency>
+    
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>raptor-http-api</artifactId>
       <version>${project.version}</version>
+      
+      <exclusions>
+        <exclusion> 
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-simple</artifactId>
+        </exclusion>
+      </exclusions>
+      
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>raptor-broker</artifactId>
       <version>${project.version}</version>
+      
+      <exclusions>
+        <exclusion> 
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-simple</artifactId>
+        </exclusion>
+      </exclusions>      
+      
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>raptor-config</artifactId>
       <version>${project.version}</version>
+      
+      <exclusions>
+        <exclusion> 
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-simple</artifactId>
+        </exclusion>
+      </exclusions>      
+      
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>${logback}</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${logback}</version>
     </dependency>
   </dependencies>
   
