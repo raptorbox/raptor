@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LoggerResponseFilter implements ContainerResponseFilter {
 
-  final private Logger logger = LoggerFactory.getLogger("AccessLog");
+  final private Logger logger = LoggerFactory.getLogger(LoggerResponseFilter.class);
 
   @Override
   public void filter(ContainerRequestContext request, ContainerResponseContext response)
