@@ -16,6 +16,7 @@
 package org.createnet.raptor.http.api;
 
 import javax.inject.Inject;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.NotFoundException;
 import org.createnet.raptor.auth.authorization.Authorization;
@@ -58,7 +59,7 @@ abstract public class AbstractApi {
     ServiceObject obj = storage.getObject(id);
 
     if (!auth.isAllowed(id, Authorization.Permission.Read)) {
-      throw new NotAllowedException("Cannot access object");
+      throw new ForbiddenException("Cannot access object");
     }
     
     if (obj == null) {

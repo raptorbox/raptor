@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Collection;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
@@ -76,7 +77,7 @@ public class ActionApi extends AbstractApi {
     Action action = loadAction(actionId, obj);
 
     if (!auth.isAllowed(obj.id, Authorization.Permission.Read)) {
-      throw new NotAuthorizedException("Cannot fetch data");
+      throw new ForbiddenException("Cannot fetch data");
     }
 
     ActionStatus actionStatus = storage.getActionStatus(action);
@@ -104,7 +105,7 @@ public class ActionApi extends AbstractApi {
     Action action = loadAction(actionId, obj);
 
     if (!auth.isAllowed(obj.id, Authorization.Permission.Execute)) {
-      throw new NotAuthorizedException("Cannot fetch data");
+      throw new ForbiddenException("Cannot fetch data");
     }
 
     ActionStatus actionStatus = storage.saveActionStatus(action, body);
@@ -131,7 +132,7 @@ public class ActionApi extends AbstractApi {
     Action action = loadAction(actionId, obj);
 
     if (!auth.isAllowed(obj.id, Authorization.Permission.Update)) {
-      throw new NotAuthorizedException("Cannot fetch data");
+      throw new ForbiddenException("Cannot fetch data");
     }
 
     storage.deleteActionStatus(action);

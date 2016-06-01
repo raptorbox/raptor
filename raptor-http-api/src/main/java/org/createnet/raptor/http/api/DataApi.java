@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
@@ -63,7 +64,7 @@ public class DataApi extends AbstractApi {
     ServiceObject obj = loadObject(id);
 
     if (!auth.isAllowed(id, Authorization.Permission.Read)) {
-      throw new NotAuthorizedException("Cannot fetch data");
+      throw new ForbiddenException("Cannot fetch data");
     }
     
     logger.debug("Load streams for object {}", obj.id);
@@ -83,7 +84,7 @@ public class DataApi extends AbstractApi {
     Stream stream = loadStream(streamName, obj);
 
     if (!auth.isAllowed(id, Authorization.Permission.Pull)) {
-      throw new NotAuthorizedException("Cannot fetch data");
+      throw new ForbiddenException("Cannot fetch data");
     }
     
     if(!obj.settings.storeEnabled()) {
@@ -109,7 +110,7 @@ public class DataApi extends AbstractApi {
     Stream stream = loadStream(streamName, obj);
 
     if (!auth.isAllowed(id, Authorization.Permission.Push)) {
-      throw new NotAuthorizedException("Cannot delete data");
+      throw new ForbiddenException("Cannot delete data");
     }
     
     if(!obj.settings.storeEnabled()) {
@@ -136,7 +137,7 @@ public class DataApi extends AbstractApi {
     Stream stream = loadStream(streamName, obj);
 
     if (!auth.isAllowed(id, Authorization.Permission.Pull)) {
-      throw new NotAuthorizedException("Cannot fetch data");
+      throw new ForbiddenException("Cannot fetch data");
     }
     
     if(!obj.settings.storeEnabled()) {
@@ -169,7 +170,7 @@ public class DataApi extends AbstractApi {
     Stream stream = loadStream(streamName, obj);
 
     if (!auth.isAllowed(id, Authorization.Permission.Push)) {
-      throw new NotAuthorizedException("Cannot push data");
+      throw new ForbiddenException("Cannot push data");
     }
     
     if(obj.settings.storeEnabled()) {
@@ -218,8 +219,8 @@ public class DataApi extends AbstractApi {
     ServiceObject obj = loadObject(id);
     Stream stream = loadStream(streamName, obj);
 
-    if (!auth.isAllowed(id, Authorization.Permission.Read)) {
-      throw new NotAuthorizedException("Cannot search data");
+    if (!auth.isAllowed(id, Authorization.Permission.Pull)) {
+      throw new ForbiddenException("Cannot search data");
     }
     
     if(!obj.settings.storeEnabled()) {

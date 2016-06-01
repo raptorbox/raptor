@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
@@ -84,7 +85,7 @@ public class ObjectApi extends AbstractApi {
   public Response create(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException {
 
     if (!auth.isAllowed(Authorization.Permission.Create)) {
-      throw new NotAuthorizedException("Cannot create object");
+      throw new ForbiddenException("Cannot create object");
     }
 
     storage.saveObject(obj);
@@ -125,7 +126,7 @@ public class ObjectApi extends AbstractApi {
     }    
     
     if(!auth.isAllowed(obj.id, Authorization.Permission.Update)) {
-      throw new NotAuthorizedException("Cannot update object");
+      throw new ForbiddenException("Cannot update object");
     }
     
     if (!storedObj.userId.equals(auth.getUser().getUserId())) {
@@ -181,7 +182,7 @@ public class ObjectApi extends AbstractApi {
     ServiceObject obj = loadObject(id);
 
     if(!auth.isAllowed(obj.id, Authorization.Permission.Read)) {
-      throw new NotAuthorizedException("Cannot read object");
+      throw new ForbiddenException("Cannot read object");
     }
     
     return obj.toJSON();
@@ -215,7 +216,7 @@ public class ObjectApi extends AbstractApi {
   public List<String> search(ObjectQuery query) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.SearchException, IOException {
 
     if (!auth.isAllowed(Authorization.Permission.Read)) {
-      throw new NotAuthorizedException("Cannot search for objects");
+      throw new ForbiddenException("Cannot search for objects");
     }
     
     List<String> list = indexer.searchObject(query);
