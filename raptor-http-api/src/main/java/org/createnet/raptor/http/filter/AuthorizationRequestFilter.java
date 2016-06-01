@@ -23,7 +23,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.config.exception.ConfigurationException;
+import org.createnet.raptor.http.exception.ApiExceptionMapper;
 import org.createnet.raptor.http.service.AuthService;
+import org.jvnet.hk2.internal.ErrorResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,12 +44,12 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
   public void filter(ContainerRequestContext requestContext) {
 
     // skip CORS requests
-    if(requestContext.getMethod().toUpperCase().equals("OPTIONS") && 
-            requestContext.getHeaderString("Access-Control-Request-Method") != null ) {
+    if (requestContext.getMethod().toUpperCase().equals("OPTIONS")
+            && requestContext.getHeaderString("Access-Control-Request-Method") != null) {
       logger.debug("CORS request detected, skip auth check");
       return;
     }
-    
+
     try {
 
       String accessToken = requestContext.getHeaderString("Authorization");
@@ -63,18 +65,28 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
       logger.warn("Token is not valid", ex);
 
       requestContext.abortWith(
-              Response.status(Response.Status.UNAUTHORIZED).build()
+              Response
+              .status(Response.Status.UNAUTHORIZED)
+              .entity(getErrorMessage(Response.Status.UNAUTHORIZED, "Token is not valid"))
+              .build()
       );
-      
+
     } catch (ConfigurationException ex) {
 
       logger.error("Error loading auth configuration", ex);
 
       requestContext.abortWith(
-              Response.serverError().build()
+              Response
+              .status(Response.Status.INTERNAL_SERVER_ERROR)
+              .entity(getErrorMessage(Response.Status.INTERNAL_SERVER_ERROR, "Internal error on authentication"))
+              .build()
       );
     }
 
+  }
+
+  private String getErrorMessage(Response.Status status, String msg) {
+    return "{ \"code\": " + status.getStatusCode() + ", \"message\": \"" + msg + "\" }";
   }
 
   public class Authorizer implements SecurityContext {

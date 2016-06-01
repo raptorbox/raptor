@@ -28,30 +28,29 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class LoggerResponseFilter implements ContainerResponseFilter {
-  
+
   final private Logger logger = LoggerFactory.getLogger("AccessLog");
-  
+
   @Override
   public void filter(ContainerRequestContext request, ContainerResponseContext response)
           throws IOException {
 
-    if(response.getStatus() > 400) {
+    if (response.getStatus() > 400) {
       Principal p = request.getSecurityContext().getUserPrincipal();
-      logger.warn("API request error {} {}: [] {} {}", 
-              response.getStatus(), 
+      logger.warn("API request error {} {}: [] {} {}",
+              response.getStatus(),
               response.getStatusInfo().getReasonPhrase(),
               p == null ? "unknown user" : p.getName(),
-              request.getMethod(), 
+              request.getMethod(),
               request.getUriInfo().getPath()
       );
     }
-    else {
-      logger.info("API request {}: [] {} {}", 
-              response.getStatus(),
-              request.getSecurityContext().getUserPrincipal().getName(),
-              request.getMethod(), 
-              request.getUriInfo().getPath()
-      );
-    }
+    logger.info("API request {}: [] {} {}",
+            response.getStatus(),
+            request.getSecurityContext().getUserPrincipal().getName(),
+            request.getMethod(),
+            request.getUriInfo().getPath()
+    );
+
   }
 }
