@@ -121,7 +121,7 @@ public class DataApi extends AbstractApi {
 
     logger.debug("Delete all records for stream {} in object {}", streamName, obj.id);
 
-    return Response.ok().build();
+    return Response.noContent().build();
   }
 
   @GET
