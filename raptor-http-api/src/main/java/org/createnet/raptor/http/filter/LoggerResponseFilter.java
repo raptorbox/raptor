@@ -46,7 +46,7 @@ public class LoggerResponseFilter implements ContainerResponseFilter {
       );
     }
     else {
-      logger.info("API request {} {}: [] {} {}", 
+      logger.info("API request {}: [] {} {}", 
               response.getStatus(),
               request.getSecurityContext().getUserPrincipal().getName(),
               request.getMethod(), 
