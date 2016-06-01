@@ -89,7 +89,6 @@ public class ObjectApi extends AbstractApi {
 
     storage.saveObject(obj);
 
-
     try {
       indexer.indexObject(obj, true);
     } catch (Indexer.IndexerException ex) {

@@ -29,12 +29,12 @@
       <artifactId>raptor-http-api</artifactId>
       <version>${project.version}</version>
       
-      <exclusions>
+<!--      <exclusions>
         <exclusion> 
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-simple</artifactId>
         </exclusion>
-      </exclusions>
+      </exclusions>-->
       
     </dependency>
     <dependency>

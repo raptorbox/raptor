@@ -15,9 +15,13 @@
  */
 package org.createnet.raptor.http.exception;
 
+import java.util.Arrays;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,36 +30,54 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Throwable> {
+@Provider
+public class ApiExceptionMapper implements ExceptionMapper<Exception> {
+
+  public class JsonErrorResponse {
+
+    public int code;
+    public String message;
+
+    public JsonErrorResponse(int code, String message) {
+      this.code = code;
+      this.message = message;
+    }
+
+  }
 
   private static final Logger logger = LoggerFactory.getLogger(ExceptionMapper.class);
 
   @Override
-  public Response toResponse(Throwable e) {
-    
-    logger.error("API Exception", e);
-    
-    if(e instanceof WebApplicationException) {
+  public Response toResponse(Exception e) {
+
+    logger.error("API exception: {}", e.getMessage());
+
+    if (e instanceof WebApplicationException) {
       WebApplicationException ex = (WebApplicationException) e;
+
+      int code = ex.getResponse().getStatus();
+      String message = ex.getResponse().getStatusInfo().getReasonPhrase();
+
       return Response
-              .status(ex.getResponse().getStatus())
+              .status(code)
               .type(MediaType.APPLICATION_JSON)
-              .entity("{ \"code\": "+ ex.getResponse().getStatus() +
-                        ", \"message\": \""+ ex.getResponse().getEntity().toString() +"\" }")
+              .entity(new JsonErrorResponse(code, message))
               .build();
     }
-    
-    if(e instanceof RaptorComponent.ValidationException) {
+
+    if (e instanceof RaptorComponent.ValidationException) {
       return Response
-            .status(Response.Status.INTERNAL_SERVER_ERROR)
-            .entity("{ \"code\": 500, \"reason\": \""+ e.getMessage() +"\"}")
-            .type("application/json")
-            .build();
-    }   
+              .status(Response.Status.INTERNAL_SERVER_ERROR)
+              .entity(new JsonErrorResponse(500, e.getMessage()))
+              .type("application/json")
+              .build();
+    }
+
+    logger.error("Unhandled exception stack", e);
 
     return Response
             .status(Response.Status.INTERNAL_SERVER_ERROR)
-            .entity("{ \"code\": 500, \"reason\": \"Internal exception occured\"}")
+            .entity(new JsonErrorResponse(500, "Internal exception occured"))
             .type("application/json")
             .build();
   }

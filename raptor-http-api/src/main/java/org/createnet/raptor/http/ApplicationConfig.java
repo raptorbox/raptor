@@ -16,9 +16,10 @@
 package org.createnet.raptor.http;
 
 import javax.inject.Singleton;
-import org.createnet.raptor.http.exception.ExceptionMapper;
+import org.createnet.raptor.http.exception.ApiExceptionMapper;
 import org.createnet.raptor.http.filter.AuthorizationRequestFilter;
 import org.createnet.raptor.http.filter.CORSResponseFilter;
+import org.createnet.raptor.http.filter.LoggerResponseFilter;
 import org.createnet.raptor.http.service.AuthService;
 import org.createnet.raptor.http.service.ConfigurationService;
 import org.createnet.raptor.http.service.DispatcherService;
@@ -76,7 +77,9 @@ public class ApplicationConfig extends ResourceConfig {
 
     register(AuthorizationRequestFilter.class);
     register(CORSResponseFilter.class);
-    register(ExceptionMapper.class);
+    register(LoggerResponseFilter.class);
+    
+    register(ApiExceptionMapper.class);
 
     register(new AppBinder());
 
