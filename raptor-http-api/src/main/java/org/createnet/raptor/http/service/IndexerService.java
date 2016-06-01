@@ -150,7 +150,7 @@ public class IndexerService {
     
     ObjectNode data = (ObjectNode) recordSet.toJsonNode();
     
-    data.put("stream", stream.name);
+    data.put("streamId", stream.name);
     data.put("objectId", stream.getServiceObject().getId());
     
     record.body = data.toString();
@@ -161,6 +161,11 @@ public class IndexerService {
   public void deleteData(Stream stream) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException  {
     
     DataQuery query = new DataQuery();
+    setQueryIndex(query, IndexNames.data);
+    
+    query.match = true;
+    query.matchfield = "streamId";
+    query.matchstring = stream.name;
     
     List<Indexer.IndexOperation> deletes = new ArrayList();
     List<String> results = getIndexer().search(query);

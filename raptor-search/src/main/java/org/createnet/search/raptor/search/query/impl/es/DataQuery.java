@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.createnet.search.raptor.search.query.Query;
 import org.elasticsearch.common.unit.DistanceUnit;
-import org.elasticsearch.index.query.AndQueryBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.GeoBoundingBoxQueryBuilder;
 import org.elasticsearch.index.query.GeoDistanceQueryBuilder;

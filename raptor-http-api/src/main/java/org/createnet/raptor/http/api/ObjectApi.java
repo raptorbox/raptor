@@ -229,13 +229,13 @@ public class ObjectApi extends AbstractApi {
     List<Stream> changedStream = new ArrayList();
     
     // loop previous stream list and find missing streams
-    for (Map.Entry<String, Stream> item : obj.streams.entrySet()) {
+    for (Map.Entry<String, Stream> item : storedObj.streams.entrySet()) {
       
       String streamName = item.getKey();
       Stream stream = item.getValue();           
       
       // stream found
-      if(storedObj.streams.containsKey(streamName)) {
+      if(obj.streams.containsKey(streamName)) {
         
         // loop stream and find changed channels
         for (Map.Entry<String, Channel> channelItem : stream.channels.entrySet()) {
@@ -271,8 +271,8 @@ public class ObjectApi extends AbstractApi {
 
   private List<Action> getChangedActions(ServiceObject storedObj, ServiceObject obj) {
     List<Action> changedAction = new ArrayList();
-    for (Action action : storedObj.actions.values()) {
-      if(!obj.actions.containsKey(action.name)) {
+    for (Action action : obj.actions.values()) {
+      if(!storedObj.actions.containsKey(action.name)) {
         changedAction.add(action);
       }
     }

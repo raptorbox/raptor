@@ -202,8 +202,8 @@ public class StorageService {
   // @TODO: introduce batch operation in storage
   public void deleteData(Stream stream) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
 
-    BaseQuery query = BaseQuery.queryBy("userId", auth.getUser().getUserId());
-
+    BaseQuery query = BaseQuery.queryBy("userId", auth.getUser().getUserId(), "streamId", stream.name);
+    
     query.getQueryOptions().timeout = 30;
     query.getQueryOptions().timeoutUnit = TimeUnit.SECONDS;
 

@@ -8,6 +8,7 @@ package org.createnet.raptor.db.couchbase;
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonObject;
+import com.couchbase.client.java.error.DocumentDoesNotExistException;
 import com.couchbase.client.java.query.Index;
 import com.couchbase.client.java.query.N1qlParams;
 import com.couchbase.client.java.query.N1qlQuery;
@@ -85,7 +86,13 @@ public class CouchbaseConnection extends AbstractConnection {
 
   @Override
   public void delete(String id) {
-    bucket.remove(id);
+    try {
+      bucket.remove(id);
+    }
+    catch(DocumentDoesNotExistException ex) {
+      logger.debug("Cannot remove doc, doesn't exists {}", id);
+    }
+      
   }
 
   @Override
