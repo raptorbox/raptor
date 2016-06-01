@@ -87,7 +87,8 @@ public class ObjectApi extends AbstractApi {
     if (!auth.isAllowed(Authorization.Permission.Create)) {
       throw new ForbiddenException("Cannot create object");
     }
-
+    
+    obj.id = null;
     storage.saveObject(obj);
 
     try {

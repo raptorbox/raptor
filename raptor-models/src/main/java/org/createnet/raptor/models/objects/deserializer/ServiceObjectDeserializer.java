@@ -82,18 +82,8 @@ public class ServiceObjectDeserializer extends JsonDeserializer<ServiceObject> {
     if (tree.has("actions")) {
       
       if (tree.get("actions").isArray()) {
-
         for (JsonNode json : tree.get("actions")) {
-          Action actuation;
-          
-          if(json.isTextual()) {
-            actuation = new Action(json.asText(), serviceObject);
-          }
-          else {
-            actuation = new Action(json);
-          }
-          
-          actuation.setServiceObject(serviceObject);
+          Action actuation = new Action(json, serviceObject);
           serviceObject.actions.put(actuation.name, actuation);
         }
       }
@@ -105,14 +95,7 @@ public class ServiceObjectDeserializer extends JsonDeserializer<ServiceObject> {
           String name = fieldNames.next();
           JsonNode json = tree.get("actions").get(name);
           
-          Action actuation;
-          if(json.isTextual()) {
-            actuation = new Action(json.asText(), serviceObject);
-          }
-          else {
-            actuation = new Action(json, serviceObject);
-          }
-
+          Action actuation = new Action(name, json, serviceObject);
           serviceObject.actions.put(actuation.name, actuation);
         }
       }
