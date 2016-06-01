@@ -45,7 +45,7 @@ public class LoggerResponseFilter implements ContainerResponseFilter {
               request.getUriInfo().getPath()
       );
     }
-    logger.info("API request {}: [] {} {}",
+    logger.info("API request {}: [{}] {} {}",
             response.getStatus(),
             request.getSecurityContext().getUserPrincipal().getName(),
             request.getMethod(),
