@@ -80,15 +80,15 @@ public class StorageService {
   }
 
   public Storage.Connection getObjectConnection() throws ConfigurationException, Storage.StorageException {
-    return getStorage().getConnection(ConnectionId.objects.name());
+    return getStorage().getConnection(ConnectionId.objects.toString());
   }
 
   public Storage.Connection getDataConnection() throws ConfigurationException, Storage.StorageException {
-    return getStorage().getConnection(ConnectionId.data.name());
+    return getStorage().getConnection(ConnectionId.data.toString());
   }
 
   public Storage.Connection getActionConnection() throws ConfigurationException, Storage.StorageException {
-    return getStorage().getConnection(ConnectionId.actuations.name());
+    return getStorage().getConnection(ConnectionId.actuations.toString());
   }
 
   public ServiceObject getObject(String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException {

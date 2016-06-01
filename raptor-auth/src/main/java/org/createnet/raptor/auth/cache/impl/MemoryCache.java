@@ -99,7 +99,7 @@ public class MemoryCache extends AbstractCache {
   @Override
   public Boolean get(String userId, String id, Authorization.Permission op) throws PermissionCacheException {
     if(id == null) id = "";
-    String key = userId + id + op.name();
+    String key = userId + id + op.toString();
     CachedItem<Boolean> cache = getPermissions().get(key);
     return cache == null ? null : cache.getItem();
   }
@@ -111,7 +111,7 @@ public class MemoryCache extends AbstractCache {
 
   @Override
   public void set(String userId, String id, Authorization.Permission op, boolean result) throws PermissionCacheException {
-    String key = userId + id + op.name();
+    String key = userId + id + op.toString();
     getPermissions().put(key, new CachedItem(result));
   }
 

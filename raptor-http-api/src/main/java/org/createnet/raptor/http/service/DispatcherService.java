@@ -98,7 +98,7 @@ public class DispatcherService {
 
     ObjectNode message = createObjectMessage(obj);
 
-    message.put("type", MessageType.object.name());
+    message.put("type", MessageType.object.toString());
     message.put("op", op);
 
     getDispatcher().add(topic, message.toString());
@@ -110,7 +110,7 @@ public class DispatcherService {
 
     ObjectNode message = createObjectMessage(stream.getServiceObject());
 
-    message.put("type", MessageType.stream.name());
+    message.put("type", MessageType.stream.toString());
     message.put("op", "data");
 
     message.put("streamId", stream.name);
@@ -126,7 +126,7 @@ public class DispatcherService {
 
     ObjectNode message = createObjectMessage(action.getServiceObject());
 
-    message.put("type", MessageType.actuation.name());
+    message.put("type", MessageType.actuation.toString());
     message.put("op", op);
 
     message.put("actionId", action.name);

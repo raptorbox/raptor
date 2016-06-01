@@ -50,8 +50,8 @@ public class MemoryCacheTest {
     
     AuthConfiguration config = new AuthConfiguration();
     
-    config.cache = AuthConfiguration.Cache.memory.name();
-    config.type = AuthConfiguration.Type.allow_all.name();
+    config.cache = AuthConfiguration.Cache.memory.toString();
+    config.type = AuthConfiguration.Type.allow_all.toString();
     
     instance =  new MemoryCache();
     instance.initialize(config);

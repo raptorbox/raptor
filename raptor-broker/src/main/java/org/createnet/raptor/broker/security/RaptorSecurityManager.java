@@ -110,7 +110,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
       return false;
     }
     
-    boolean isAdmin = user.hasRole(Roles.admin.name());
+    boolean isAdmin = user.hasRole(Roles.admin.toString());
     
     if(isAdmin) {
       return true;

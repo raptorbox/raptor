@@ -42,21 +42,21 @@ public class EventEmitterService extends Emitter {
   }
   
   public void on(EventName name, Callback cb) {
-    on(name.name(), cb);
+    on(name.toString(), cb);
   }
   
   public void off(EventName name, Callback cb) {
-    off(name.name(), cb);
+    off(name.toString(), cb);
   }
   
   public void off(EventName name) {
-    off(name.name());
+    off(name.toString());
   }
 
   public void trigger(EventName name, Event event) {
     
     // trigger to all listener
-    trigger(EventName.all.name(), event);
+    trigger(EventName.all.toString(), event);
     
     // group event call
     switch(name) {
@@ -64,17 +64,17 @@ public class EventEmitterService extends Emitter {
       case create:
       case update:
       case delete:
-        trigger(EventName.object.name(), event);
+        trigger(EventName.object.toString(), event);
         break;
       
       case push:
       case pull:
-        trigger(EventName.data.name(), event);
+        trigger(EventName.data.toString(), event);
         break;
 
     }
     
-    trigger(name.name(), event);
+    trigger(name.toString(), event);
   }
 
 }

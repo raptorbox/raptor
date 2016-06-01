@@ -160,7 +160,7 @@ public class AuthHttpClient {
         result.write(buffer, 0, length);
       }
 
-      response = result.toString(Consts.UTF_8.name());
+      response = result.toString(Consts.UTF_8.toString());
 
     } catch (IOException ex) {
       throw new ClientException(ex);

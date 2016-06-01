@@ -27,7 +27,7 @@ public class AbstractEvent extends org.createnet.raptor.events.AbstractEvent {
   private String event;
   
   public void setEvent(EventEmitterService.EventName event) {
-    setEvent(event.name());
+    setEvent(event.toString());
   }
   
 }

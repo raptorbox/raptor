@@ -44,15 +44,15 @@ public class TokenAuthorization extends AbstractAuthorization {
 
     try {
 
-      logger.debug("Check authorization of user {} for permission {}", id, op.name());
+      logger.debug("Check authorization of user {} for permission {}", id, op.toString());
 
-      String response = request(accessToken, id, op.name());
+      String response = request(accessToken, id, op.toString());
 
       JsonNode node = mapper.readTree(response);
 
       boolean allowed = node.get("result").booleanValue();
 
-      logger.debug("User {} {} allowed to {}", id, (allowed ? "NOT" : ""), op.name());
+      logger.debug("User {} {} allowed to {}", id, (allowed ? "NOT" : ""), op.toString());
 
       return allowed;
 

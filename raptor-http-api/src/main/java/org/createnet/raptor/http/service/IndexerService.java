@@ -72,7 +72,7 @@ public class IndexerService {
   }
   
   protected IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor getIndexDescriptor(IndexNames name) throws ConfigurationException {
-    return configuration.getIndexer().elasticsearch.indices.names.get(name.name());
+    return configuration.getIndexer().elasticsearch.indices.names.get(name.toString());
   }
   
   public Indexer.IndexRecord getIndexRecord(IndexNames name) throws ConfigurationException {

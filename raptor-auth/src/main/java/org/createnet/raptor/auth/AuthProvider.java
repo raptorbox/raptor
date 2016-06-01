@@ -96,7 +96,7 @@ public class AuthProvider implements Authorization, Authentication {
       
       Boolean cachedValue = cache.get(user.getUserId(), id, op);
       if(cachedValue != null) {
-        logger.debug("Reusing permission cache for userId {} objectId {} permission {} = {}", user.getUserId(), id, op.name(), cachedValue);
+        logger.debug("Reusing permission cache for userId {} objectId {} permission {} = {}", user.getUserId(), id, op.toString(), cachedValue);
         return cachedValue;
       }
       
@@ -106,7 +106,7 @@ public class AuthProvider implements Authorization, Authentication {
       
       cache.set(user.getUserId(), id, op, isauthorized);
       
-      logger.debug("Permission check for userId {} objectId {} permission {} = {}", user.getUserId(), id, op.name(), isauthorized);
+      logger.debug("Permission check for userId {} objectId {} permission {} = {}", user.getUserId(), id, op.toString(), isauthorized);
       
       return isauthorized;
       

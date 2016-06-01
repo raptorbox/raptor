@@ -41,7 +41,7 @@ public interface ListQuery {
     }
 
     public String getSort() {
-      return getSortBy().name();
+      return getSortBy().toString();
     }
     
     public String getField() {
