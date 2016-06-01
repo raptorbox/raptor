@@ -35,19 +35,23 @@ public class LoggerResponseFilter implements ContainerResponseFilter {
   public void filter(ContainerRequestContext request, ContainerResponseContext response)
           throws IOException {
 
+    
+    Principal p = request.getSecurityContext().getUserPrincipal();
+    String authName = p == null ? "unknown user" : p.getName();
+    
     if (response.getStatus() > 400) {
-      Principal p = request.getSecurityContext().getUserPrincipal();
       logger.warn("API request error {} {}: [{}] {} {}",
               response.getStatus(),
               response.getStatusInfo().getReasonPhrase(),
-              p == null ? "unknown user" : p.getName(),
+              authName,
               request.getMethod(),
               request.getUriInfo().getPath()
       );
     }
+
     logger.info("API request {}: [{}] {} {}",
             response.getStatus(),
-            request.getSecurityContext().getUserPrincipal().getName(),
+            authName,
             request.getMethod(),
             request.getUriInfo().getPath()
     );
