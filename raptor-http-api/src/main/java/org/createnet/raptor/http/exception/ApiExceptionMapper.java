@@ -15,9 +15,7 @@
  */
 package org.createnet.raptor.http.exception;
 
-import java.util.Arrays;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;

@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,31 +61,44 @@ public class Emitter {
   }
   
   public void on(String event, Callback callback) {
+    logger.debug("Added callback for event {}", event);
     getEvents(event).add(callback);
   }
 
   public void off(String event, Callback callback) {
+    logger.debug("Removed callback for event {}", event);
     getEvents(event).remove(callback);
   }
   
   public void off(String event) {
+    logger.debug("Removed all callbacks for event {}", event);
     getEvents(event).clear();
   }
 
   public void trigger(String name, Event arg) {
-    for (Iterator<Callback> iterator = getEvents(name).iterator(); iterator.hasNext();) {
+    Iterator<Callback> iterator = getEvents(name).iterator();
+    while(iterator.hasNext()) {
       final Callback next = iterator.next();
       executorService.execute(new Runnable() {
         @Override
         public void run() {
+          logger.debug("Executing trigger for {}", name);
           try {
             arg.setEvent(name);
             next.run(arg);
+            logger.debug("Done trigger for {}", name);
           } catch (EmitterException ex) {
             logger.error("Event "+ name +" execution error", ex);
           }
         }
       });
+    }
+    
+    //
+    try {
+      executorService.awaitTermination(100, TimeUnit.MILLISECONDS);
+    } catch (InterruptedException ex) {
+      logger.debug("Emitter did not complete in time", ex);
     }
   }
   

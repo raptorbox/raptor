@@ -21,6 +21,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
@@ -101,8 +102,8 @@ public class ObjectApi extends AbstractApi {
       storage.deleteObject(obj);
       
       throw new InternalServerErrorException();
-    }    
-       
+    }
+    
     emitter.trigger(EventEmitterService.EventName.create, new ObjectEvent(obj, auth.getAccessToken()));
     
     logger.debug("Created new object {} for {}", obj.id, auth.getUser().getUserId());
@@ -163,8 +164,8 @@ public class ObjectApi extends AbstractApi {
     // clean up data for changed stream and actions
     storage.deleteData(changedStreams);
     indexer.deleteData(changedStreams);
-    
     storage.deleteActionStatus(changedActions);
+
     
     emitter.trigger(EventEmitterService.EventName.update, new ObjectEvent(storedObj, auth.getAccessToken()));
     

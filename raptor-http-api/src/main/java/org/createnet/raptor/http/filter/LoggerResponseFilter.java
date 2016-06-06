@@ -39,7 +39,7 @@ public class LoggerResponseFilter implements ContainerResponseFilter {
     String authName = p == null ? "-" : p.getName();
 
     if (response.getStatus() > 400) {
-      logger.warn("API request error {} {}: [{}] {} {}",
+      logger.warn("API request error {} {}: [{}] {} /{}",
               response.getStatus(),
               response.getStatusInfo().getReasonPhrase(),
               authName,
@@ -47,7 +47,7 @@ public class LoggerResponseFilter implements ContainerResponseFilter {
               request.getUriInfo().getPath()
       );
     } else {
-      logger.info("API request ({}) [{}] {} {}",
+      logger.info("API request ({}) [{}] {} /{}",
               response.getStatus(),
               authName,
               request.getMethod(),

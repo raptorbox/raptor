@@ -35,6 +35,7 @@ public class AuthService {
 
   @Inject
   ConfigurationService config;
+  
   @Inject
   EventEmitterService emitter;
 
@@ -49,12 +50,12 @@ public class AuthService {
   private AuthProvider auth;
 
   protected AuthProvider getProvider() throws ConfigurationException {
+    
     if (auth == null) {
       auth = new AuthProvider();
       auth.initialize(config.getAuth());
-    }
-    
-    initialize();
+      initialize();
+    }   
     
     return auth;
   }
@@ -86,6 +87,10 @@ public class AuthService {
     return securityContext.getUserPrincipal().getName();
   }
 
+  public void sync(String id) throws ConfigurationException, Authentication.AuthenticationException {
+    getProvider().sync(getAccessToken(), id);
+  }
+  
   private void initialize() {
 
     emitter.on(EventEmitterService.EventName.object, (Event event) -> {
@@ -99,4 +104,6 @@ public class AuthService {
 
   }
 
+  
+  
 }
