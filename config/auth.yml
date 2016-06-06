@@ -1,9 +1,9 @@
 # define the type of auth: token, allow_all
-type: allow_all
+type: token
 cache: memory
 token:
   truststore:
-    path: ~/truststore
+    path: /etc/raptor/truststore
     password: passwd
-  checkUrl: https://raptorbox.eu/api/token/check
-  syncUrl: https://raptorbox.eu/api/device/sync
+  checkUrl: https://frontend.raptor.local/api/token/check
+  syncUrl: https://frontend.raptor.local/api/device/sync?XDEBUG_SESSION_START=XDEBUG_ECLIPSE
