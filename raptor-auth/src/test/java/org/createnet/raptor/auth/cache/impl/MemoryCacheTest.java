@@ -70,6 +70,8 @@ public class MemoryCacheTest {
     String objectId = "obj";
     Authorization.Permission perm = Authorization.Permission.Create;
     
+    MemoryCache.CachedItem.defaultTTL = 100;
+    
     boolean value = true;
     
     instance.set(userId, objectId, perm, value);

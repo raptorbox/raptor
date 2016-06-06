@@ -100,13 +100,13 @@ public class AuthProvider implements Authorization, Authentication {
         return cachedValue;
       }
       
-      logger.debug("Requesting {} permission for {}", op, id);
+      logger.debug("Requesting {} permission for object {}", op, id);
       
       boolean isauthorized = authorizationInstance.isAuthorized(accessToken, id, op);
       
       cache.set(user.getUserId(), id, op, isauthorized);
       
-      logger.debug("Permission check for userId {} objectId {} permission {} = {}", user.getUserId(), id, op.toString(), isauthorized);
+      logger.debug("Permission check for user {} object {} permission {} = {}", user.getUserId(), id, op.toString(), isauthorized ? "yes" : "no");
       
       return isauthorized;
       

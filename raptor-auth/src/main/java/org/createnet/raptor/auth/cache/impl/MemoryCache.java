@@ -39,9 +39,9 @@ public class MemoryCache extends AbstractCache {
   static private final Map<String, CachedItem<Authentication.UserInfo>> users = new HashMap();
   static private final Map<String, CachedItem<Boolean>> permissions = new HashMap();
 
-  protected class CachedItem<T> {
+  static protected class CachedItem<T> {
     
-    static public final int defaultTTL = (10 * 1000); // 10 sec TTL
+    static public int defaultTTL = 10000; // 10 sec TTL
     
     final private T item;
     final private long expiry;
