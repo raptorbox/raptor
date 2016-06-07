@@ -6,4 +6,4 @@ token:
     path: /etc/raptor/truststore
     password: passwd
   checkUrl: https://frontend.raptor.local/api/token/check
-  syncUrl: https://frontend.raptor.local/api/device/sync?XDEBUG_SESSION_START=XDEBUG_ECLIPSE
+  syncUrl: https://frontend.raptor.local/api/device/sync
