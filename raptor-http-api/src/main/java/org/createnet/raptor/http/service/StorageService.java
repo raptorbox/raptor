@@ -164,16 +164,20 @@ public class StorageService {
     List<String> results = getDataConnection().list(query);
 
     long parseError = 0;
+    RecordsetException lastException = null;
     for (String raw : results) {
       try {
         resultset.add(raw);
-      } catch (org.createnet.raptor.models.exception.RecordsetException ex) {
+      } catch (RecordsetException ex) {
         parseError++;
+        lastException = ex;
       }
     }
     
     if(parseError > 0) {
       logger.debug("Skipped {} records due to parser error", parseError);
+      if(lastException != null)
+        logger.error("Last exception", lastException);
     }
     
     return resultset;
