@@ -92,7 +92,8 @@ public class AuthService {
   }
   
   private void initialize() {
-
+    
+    logger.debug("Register auth event trigger");
     emitter.on(EventEmitterService.EventName.object, (Event event) -> {
       try {
         ObjectEvent objEvent = (ObjectEvent) event;

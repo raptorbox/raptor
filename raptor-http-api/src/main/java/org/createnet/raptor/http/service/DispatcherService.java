@@ -74,9 +74,8 @@ public class DispatcherService {
     if (dispatcher == null) {
       dispatcher = new Dispatcher();
       dispatcher.initialize(configuration.getDispatcher());
+      initialize();
     }
-
-    initialize();
 
     return dispatcher;
   }
@@ -149,6 +148,9 @@ public class DispatcherService {
   }
 
   private void initialize() {
+    
+    logger.debug("Register dispatcher event trigger");
+    
     emitter.on(EventEmitterService.EventName.all, new Emitter.Callback() {
       @Override
       public void run(Event event) throws Emitter.EmitterException {
