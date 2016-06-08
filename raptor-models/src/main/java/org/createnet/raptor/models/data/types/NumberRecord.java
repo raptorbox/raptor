@@ -54,7 +54,9 @@ public class NumberRecord extends Record<Number> {
           }
           
           if(value instanceof JsonNode) {
+            
             JsonNode node = (JsonNode) value;
+            
             if(node.isNumber()) {
               
               if(node.isInt() || node.isShort())
@@ -66,6 +68,11 @@ public class NumberRecord extends Record<Number> {
               if(node.isLong())
                 return (Number) node.asLong();
             }
+            
+            if(node.isTextual()) {
+              value = node.asText();
+            }
+            
           }
           
           NumberFormat formatter = NumberFormat.getInstance();
