@@ -117,13 +117,13 @@ public class StorageService {
   }
 
   public void deleteObject(ServiceObject obj) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
-        
+
     // cleanup data
     deleteData(obj.streams.values());
     deleteActionStatus(obj.actions.values());
-    
-    getObjectConnection().delete(obj.id);    
-    
+
+    getObjectConnection().delete(obj.id);
+
   }
 
   public List<ServiceObject> listObjects() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
@@ -163,10 +163,19 @@ public class StorageService {
 
     List<String> results = getDataConnection().list(query);
 
+    long parseError = 0;
     for (String raw : results) {
-      resultset.add(raw);
+      try {
+        resultset.add(raw);
+      } catch (org.createnet.raptor.models.exception.RecordsetException ex) {
+        parseError++;
+      }
     }
-
+    
+    if(parseError > 0) {
+      logger.debug("Skipped {} records due to parser error", parseError);
+    }
+    
     return resultset;
   }
 
@@ -203,7 +212,7 @@ public class StorageService {
   public void deleteData(Stream stream) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
 
     BaseQuery query = BaseQuery.queryBy("userId", auth.getUser().getUserId(), "streamId", stream.name);
-    
+
     query.getQueryOptions().timeout = 30;
     query.getQueryOptions().timeoutUnit = TimeUnit.SECONDS;
 
