@@ -52,8 +52,13 @@ public class StringRecord extends Record<String> {
         
         if(value instanceof JsonNode) {
           JsonNode node = (JsonNode) value;
+          
           if(node.isTextual()) 
             return node.asText();
+          
+          if(node.isNumber()) 
+            return node.asText();
+          
         }
         
         return (String) value;
