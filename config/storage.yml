@@ -19,6 +19,7 @@ couchbase:
       - [userId]
       - [userId, streamId]
       - [userId, objectId]
+      - [userId, objectId, streamId]
     actuations:
       - [userId]
 

@@ -24,12 +24,13 @@
                         "path_match": "lastUpdate",
                         "mapping": {
                             "index": "not_analyzed",
-                            "type": "date"
+                            "type": "date",
+                            "ignore_malformed": true
                         }
                     }
                 }, {
                     "locations_are_geojson": {
-                        "path_match": "channels.*.current-value",
+                        "path_match": "channels.location.current-value",
                         "match_mapping_type": "geo_point",
                         "mapping": {
                             "store": "no",

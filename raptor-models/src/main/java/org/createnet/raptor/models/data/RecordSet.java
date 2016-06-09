@@ -57,11 +57,14 @@ public class RecordSet {
 
   public Date lastUpdate;
   final public Map<String, IRecord> channels = new HashMap();
+
   public String userId;
   public String streamId;
+  public String objectId;
   
   @JsonIgnoreProperties
   private final Logger logger = LoggerFactory.getLogger(RecordSet.class);
+
   
   public RecordSet() {
     this.lastUpdate = new Date();
