@@ -164,19 +164,26 @@ public class StorageService {
 
     long parseError = 0;
     RecordsetException lastException = null;
+    String lastRecord = null;
     for (String raw : results) {
       try {
         resultset.add(raw);
       } catch (RecordsetException ex) {
         parseError++;
         lastException = ex;
+        lastRecord = raw;
       }
     }
     
     if(parseError > 0) {
       logger.debug("Skipped {} records due to parser error", parseError);
+      
       if(lastException != null)
         logger.error("Last exception", lastException);
+      
+      if(lastRecord != null)
+        logger.error("Last raw record", lastRecord);
+      
     }
     
     return resultset;
