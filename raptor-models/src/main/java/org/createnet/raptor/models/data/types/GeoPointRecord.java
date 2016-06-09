@@ -84,7 +84,6 @@ public class GeoPointRecord extends Record<GeoPoint> {
               return point;
           }
           
-          val = node.asText();
         }
         else {
           val = (String)raw;

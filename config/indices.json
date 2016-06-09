@@ -31,7 +31,6 @@
                 }, {
                     "locations_are_geojson": {
                         "path_match": "channels.location.current-value",
-                        "match_mapping_type": "geo_point",
                         "mapping": {
                             "store": "no",
                             "index": "not_analyzed",
