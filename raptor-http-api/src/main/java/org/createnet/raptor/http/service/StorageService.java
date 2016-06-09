@@ -182,7 +182,7 @@ public class StorageService {
         logger.error("Last exception", lastException);
       
       if(lastRecord != null)
-        logger.error("Last raw record", lastRecord);
+        logger.error("Last raw record: {}", lastRecord);
       
     }
     
