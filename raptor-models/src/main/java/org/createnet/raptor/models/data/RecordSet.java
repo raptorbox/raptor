@@ -205,13 +205,15 @@ public class RecordSet {
 
   private void parseJson(Stream stream, JsonNode row) throws RecordsetException {
 
-    if (row.has("lastUpdate")) {
-      Date date = new Date(row.get("lastUpdate").asLong());
-      this.setLastUpdate(date);
-    }
 
     JsonNode channels = row;
     if (row.has("channels")) {
+      
+      if (row.has("lastUpdate")) {
+        Date date = new Date(row.get("lastUpdate").asLong());
+        this.setLastUpdate(date);
+      }
+      
       channels = row.get("channels");
     }
 

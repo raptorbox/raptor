@@ -84,18 +84,22 @@ public class GeoPointRecord extends Record<GeoPoint> {
               return point;
           }
           
-        }
-        else {
-          val = (String)raw;
-        }        
-        
-        GeoUtils.parseGeoPoint(val, point);
-        
-        if(!validateCoords(point)) {
-          throw new Exception("Lat or Lon coordinates invalid: " + val);
+//          val = node.asText();
         }
         
-        return point;
+        // Avoid to parse plain text as ther may be false matches with commons string
+        throw new Exception("Cannot parse value: " + raw);
+        
+//        else {
+//          val = (String)raw;
+//        }
+//        
+//        GeoUtils.parseGeoPoint(val, point);       
+//        if(!validateCoords(point)) {
+//          throw new Exception("Lat or Lon coordinates invalid: " + val);
+//        }
+//        
+//        return point;
       } 
       catch(Exception e) {
         throw new RaptorComponent.ParserException(e);
