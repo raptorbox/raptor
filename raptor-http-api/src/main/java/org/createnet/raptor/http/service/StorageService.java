@@ -151,10 +151,9 @@ public class StorageService {
 
     ResultSet resultset = new ResultSet(stream);
 
-    BaseQuery query = BaseQuery.queryBy(
-            "userId", auth.getUser().getUserId(),
-            "streamId", stream.name
-    );
+    BaseQuery query = BaseQuery.queryBy("userId", auth.getUser().getUserId());
+    query.params.add(new ListQuery.QueryParam("streamId", stream.name));
+    query.params.add(new ListQuery.QueryParam("objectId", stream.getServiceObject().id));
 
     if (limit > 0) {
       query.limit = limit;
