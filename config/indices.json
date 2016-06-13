@@ -156,7 +156,7 @@
                 "dynamic": false,
                 "_source": {
                     "includes": [
-                        "meta.*"
+                        "id", "userId", "createdAt"
                     ]
                 },
                 "properties": {
@@ -168,6 +168,10 @@
                     "userId": {
                         "type": "string",
                         "analyzer": "whitespace",
+                        "index": "not_analyzed"
+                    },
+                    "createdAt": {
+                        "type": "date",
                         "index": "not_analyzed"
                     },
                     "public": {

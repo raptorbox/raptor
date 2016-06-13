@@ -26,10 +26,10 @@ import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.exception.RecordsetException;
-import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.search.raptor.search.Indexer;
 import org.createnet.search.raptor.search.IndexerConfiguration;
@@ -90,7 +90,7 @@ public class IndexerService {
     
     Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
     record.id = obj.id;
-    record.body = obj.toJSON();
+    record.body = obj.toJSON(ServiceObjectView.Internal);
     
     // force creation
     record.isNew(isNew);
@@ -109,12 +109,12 @@ public class IndexerService {
     
   }
 
-  public List<String> searchObject(ObjectQuery query) throws Indexer.SearchException, IOException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException {
+  public List<String> searchObject(ObjectQuery query) throws Indexer.SearchException, IOException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
     
     setQueryIndex(query, IndexNames.object);
     query.setUserId(auth.getUser().getUserId());
     
-    List<String> results = indexer.search(query);
+    List<String> results = getIndexer().search(query);
     List<String> list = new ArrayList();
     
     for(String result : results) {
@@ -124,7 +124,7 @@ public class IndexerService {
     return list;
   }
 
-  public RecordSet searchLastUpdate(Stream stream) throws ConfigurationException, Indexer.SearchException, RecordsetException {
+  public RecordSet searchLastUpdate(Stream stream) throws ConfigurationException, Indexer.SearchException, RecordsetException, Indexer.IndexerException {
     
     LastUpdateQuery lastUpdateQuery = new LastUpdateQuery(stream.getServiceObject().id, stream.name);
     setQueryIndex(lastUpdateQuery, IndexNames.data);
@@ -133,7 +133,7 @@ public class IndexerService {
     lastUpdateQuery.setLimit(1);
     lastUpdateQuery.setSort(new Query.SortBy("lastUpdate", Query.Sort.DESC));
     
-    List<String> results = indexer.search(lastUpdateQuery);
+    List<String> results = getIndexer().search(lastUpdateQuery);
     
     if(results.isEmpty()) {
       return null; 
@@ -142,7 +142,7 @@ public class IndexerService {
     return new RecordSet(stream, results.get(0));
   }
   
-  public void indexData(Stream stream, RecordSet recordSet) throws ConfigurationException, IOException, Indexer.IndexerException  {
+  public void indexData(Stream stream, RecordSet recordSet) throws ConfigurationException, IOException, Indexer.IndexerException, Authentication.AuthenticationException  {
     
     Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
     record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getLastUpdate().getTime();
@@ -152,6 +152,7 @@ public class IndexerService {
     
     data.put("streamId", stream.name);
     data.put("objectId", stream.getServiceObject().getId());
+    data.put("userId", auth.getUser().getUserId());
     
     record.body = data.toString();
     

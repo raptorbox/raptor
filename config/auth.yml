@@ -1,5 +1,5 @@
 # define the type of auth: token, allow_all
-type: token
+type: allow_all
 cache: memory
 token:
   truststore:

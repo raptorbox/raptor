@@ -79,16 +79,16 @@ public class ObjectQuery extends AbstractQuery {
     boolQuery.must(QueryBuilders.matchQuery("userId", userId));
     
     if (search != null && search.length() > 0) {
-      boolQuery.filter(QueryBuilders.queryStringQuery(search));
+      boolQuery.must(QueryBuilders.multiMatchQuery(search, "name", "customFields.*", "description", "id"));
       return boolQuery;
     }
 
     if (name != null && name.length() > 0) {
-      boolQuery.filter(QueryBuilders.wildcardQuery("name", name.toLowerCase()));
+      boolQuery.must(QueryBuilders.matchQuery("name", name.toLowerCase()));
     }
 
     if (description != null && description.length() > 0) {
-      boolQuery.filter(QueryBuilders.wildcardQuery("description", description.toLowerCase()));
+      boolQuery.must(QueryBuilders.matchQuery("description", description.toLowerCase()));
     }
 
     if (customFields != null && !customFields.isEmpty()) {
@@ -99,7 +99,7 @@ public class ObjectQuery extends AbstractQuery {
         String key = (String) keys.next();
         String val = customFields.get(key).toString().toLowerCase();
 
-        boolQuery.filter(QueryBuilders.matchQuery("customFields." + key, val));
+        boolQuery.must(QueryBuilders.matchQuery("customFields." + key, val));
 
       }
 

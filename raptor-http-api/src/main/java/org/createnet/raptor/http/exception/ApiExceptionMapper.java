@@ -48,9 +48,10 @@ public class ApiExceptionMapper implements ExceptionMapper<Exception> {
   @Override
   public Response toResponse(Exception e) {
 
-    logger.error("API exception: {}", e.getMessage());
-
     if (e instanceof WebApplicationException) {
+    
+      logger.error("API exception: [{}] {}", e.getClass().getName(), e.getMessage());
+    
       WebApplicationException ex = (WebApplicationException) e;
 
       int code = ex.getResponse().getStatus();
@@ -64,9 +65,10 @@ public class ApiExceptionMapper implements ExceptionMapper<Exception> {
     }
 
     if (e instanceof RaptorComponent.ValidationException) {
+      logger.error("Validation exception: {}", e.getMessage());
       return Response
-              .status(Response.Status.INTERNAL_SERVER_ERROR)
-              .entity(new JsonErrorResponse(500, e.getMessage()))
+              .status(Response.Status.BAD_REQUEST)
+              .entity(new JsonErrorResponse(Response.Status.BAD_REQUEST.getStatusCode(), e.getMessage()))
               .type("application/json")
               .build();
     }

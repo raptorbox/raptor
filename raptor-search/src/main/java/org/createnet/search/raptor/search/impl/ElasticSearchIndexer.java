@@ -411,9 +411,13 @@ public class ElasticSearchIndexer extends AbstractIndexer {
       if(query.getSort() != null) {
         searchBuilder.addSort(query.getSort().field, query.getSort().sort == Query.Sort.ASC ? SortOrder.ASC : SortOrder.DESC);
       }
-
+      
+      logger.debug("Search query: {}", searchBuilder.toString());
+      
       SearchResponse response = searchBuilder.execute().actionGet();
-
+      
+      logger.debug("Found {} records in {}", response.getHits().getTotalHits(), response.getTook().toString());
+      
       SearchHit[] results = response.getHits().getHits();
 
       List<String> list = new ArrayList();
