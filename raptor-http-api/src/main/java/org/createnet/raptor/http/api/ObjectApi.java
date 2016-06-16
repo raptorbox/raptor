@@ -21,6 +21,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
@@ -88,6 +89,10 @@ public class ObjectApi extends AbstractApi {
       throw new ForbiddenException("Cannot create object");
     }
     
+    if(obj == null) {
+      throw new BadRequestException("Body is empty");
+    }
+    
     obj.id = null;
     storage.saveObject(obj);
 
@@ -115,7 +120,11 @@ public class ObjectApi extends AbstractApi {
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
   public String update(@PathParam("id") String id, ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.IndexerException, IOException, RecordsetException {
-
+    
+    if(obj == null) {
+      throw new BadRequestException("Body is empty");
+    }    
+    
     ServiceObject storedObj = loadObject(id);
   
     if(obj.id == null || obj.id.isEmpty()) {
@@ -215,7 +224,11 @@ public class ObjectApi extends AbstractApi {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public List<String> search(ObjectQuery query) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.SearchException, IOException, Indexer.IndexerException {
-
+    
+    if(query == null) {
+      throw new BadRequestException("Body is empty");
+    }    
+    
     if (!auth.isAllowed(Authorization.Permission.Read)) {
       throw new ForbiddenException("Cannot search for objects");
     }

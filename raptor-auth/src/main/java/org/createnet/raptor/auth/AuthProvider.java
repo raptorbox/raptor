@@ -51,7 +51,7 @@ public class AuthProvider implements Authorization, Authentication {
   @Override
   public void initialize(AuthConfiguration configuration) {
 
-    this.configuration = (AuthConfiguration)configuration;
+    this.configuration = configuration;
     
     String cacheType = this.configuration.cache;
     cache = loadCachePlugin(cacheType);

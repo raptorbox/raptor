@@ -45,7 +45,7 @@ public class PluginConfigurationLoader extends ConfigurationLoader {
 
   public Configuration load(PluginConfiguration pluginConfiguration) {
     
-    if(pluginConfiguration == null) {
+    if(pluginConfiguration == null || pluginConfiguration.getType() == null) {
       return null;
     }
     
