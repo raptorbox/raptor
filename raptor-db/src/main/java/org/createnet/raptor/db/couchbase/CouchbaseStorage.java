@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.createnet.raptor.db.AbstractStorage;
 import org.createnet.raptor.db.config.StorageConfiguration;
+import org.createnet.raptor.plugin.PluginConfiguration;
+import org.createnet.raptor.plugin.impl.BasePluginConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -197,6 +199,11 @@ public class CouchbaseStorage extends AbstractStorage {
 
     ClusterManager clusterManager = cluster.clusterManager(adminUsername, adminPassword);
     return clusterManager;
+  }
+
+  @Override
+  public PluginConfiguration<StorageConfiguration> getPluginConfiguration() {
+    return new BasePluginConfiguration("couchbase", StorageConfiguration.class, "storage.yml");
   }
 
 }

@@ -16,15 +16,11 @@
 package org.createnet.raptor.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Iterator;
-import java.util.ServiceLoader;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.auth.cache.AuthCache;
-import org.createnet.raptor.config.Configuration;
-import org.createnet.raptor.plugin.Plugin;
 import org.createnet.raptor.plugin.PluginConfiguration;
-import org.createnet.raptor.plugin.PluginConfigurationLoader;
+import org.createnet.raptor.plugin.PluginLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +40,9 @@ public class AuthProvider implements Authorization, Authentication {
   protected AuthCache cache;
   
   protected AuthConfiguration configuration;
-  protected final PluginConfigurationLoader pluginConfigLoader = PluginConfigurationLoader.getInstance();
+  protected final PluginLoader<AuthCache> cachePluginLoader = new PluginLoader();
+  protected final PluginLoader<Authorization> authorizationPluginLoader = new PluginLoader();
+  protected final PluginLoader<Authentication> authenticationPluginLoader = new PluginLoader();
 
   final public static ObjectMapper mapper = new ObjectMapper();
   
@@ -54,12 +52,12 @@ public class AuthProvider implements Authorization, Authentication {
     this.configuration = configuration;
     
     String cacheType = this.configuration.cache;
-    cache = loadCachePlugin(cacheType);
+    cache = cachePluginLoader.load(cacheType, AuthCache.class);
     cache.setup();
 
     String authType = this.configuration.type;
-    authenticationInstance = loadAuthenticationPlugin(authType);
-    authorizationInstance = loadAuthorizationPlugin(authType);
+    authenticationInstance = authenticationPluginLoader.load(authType, Authentication.class);
+    authorizationInstance = authorizationPluginLoader.load(authType, Authorization.class);
 
   }
 
@@ -127,70 +125,6 @@ public class AuthProvider implements Authorization, Authentication {
   @Override
   public void sync(String accessToken, String id) throws AuthenticationException {
     authenticationInstance.sync(accessToken, id);
-  }
-  
-  protected void initializePlugin(Plugin<AuthConfiguration> plugin) {
-    
-    Configuration config = pluginConfigLoader.load(plugin);
-    
-    if (config == null) {
-      plugin.initialize(null);
-      return;
-    }
-    
-    plugin.initialize(plugin.getPluginConfiguration().getType().cast(config));
-  }
-  
-  protected AuthCache loadCachePlugin(String name) {
-
-    Iterator<AuthCache> services = ServiceLoader.load(AuthCache.class).iterator();
-
-    while (services.hasNext()) {
-      AuthCache service = services.next();
-      if (service.getPluginConfiguration() != null
-              && service.getPluginConfiguration().getName().equals(name)) {
-        logger.debug("Loaded AuthCache plugin: {}", service.getClass().getName());        
-        initializePlugin(service);
-        return service;
-      }
-    }
-
-    throw new RuntimeException("Cannot load AuthCache plugin " + name);
-  }
-  
-  protected Authorization loadAuthorizationPlugin(String name) {
-
-    Iterator<Authorization> services = ServiceLoader.load(Authorization.class).iterator();
-
-    while (services.hasNext()) {
-      Authorization service = services.next();
-      if (service.getPluginConfiguration() != null
-              && service.getPluginConfiguration().getName().equals(name)) {
-
-        logger.debug("Loaded Authorization plugin: {}", service.getClass().getName());        
-        initializePlugin(service);
-        return service;
-      }
-    }
-
-    throw new RuntimeException("Cannot load Authorization plugin " + name);
-  }
-
-  protected Authentication loadAuthenticationPlugin(String name) {
-
-    Iterator<Authentication> services = ServiceLoader.load(Authentication.class).iterator();
-
-    while (services.hasNext()) {
-      Authentication service = services.next();
-      if (service.getPluginConfiguration() != null
-              && service.getPluginConfiguration().getName().equals(name)) {
-        logger.debug("Loaded Authentication plugin: {}", service.getClass().getName());
-        initializePlugin(service);
-        return service;
-      }
-    }
-
-    throw new RuntimeException("Cannot load Authentication plugin " + name);
   }
 
   @Override

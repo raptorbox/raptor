@@ -23,8 +23,9 @@ import java.util.concurrent.TimeUnit;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.auth.cache.AbstractCache;
+import org.createnet.raptor.auth.plugin.AuthPluginConfiguration;
 import org.createnet.raptor.config.Configuration;
-import org.createnet.raptor.plugin.BasePluginConfiguration;
+import org.createnet.raptor.plugin.impl.BasePluginConfiguration;
 import org.createnet.raptor.plugin.PluginConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,11 +42,6 @@ public class MemoryCache extends AbstractCache {
   
   static private final Map<String, CachedItem<Authentication.UserInfo>> users = new HashMap();
   static private final Map<String, CachedItem<Boolean>> permissions = new HashMap();
-
-  @Override
-  public PluginConfiguration getPluginConfiguration() {
-    return new BasePluginConfiguration("memory");
-  }
   
   static protected class CachedItem<T> {
     
@@ -142,5 +138,10 @@ public class MemoryCache extends AbstractCache {
   synchronized public static Map<String, CachedItem<Boolean>> getPermissions() {
     return permissions;
   }
- 
+
+  @Override
+  public PluginConfiguration getPluginConfiguration() {
+    return new AuthPluginConfiguration("memory");
+  }
+  
 }

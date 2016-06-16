@@ -25,7 +25,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.AuthHttpClient;
 import org.createnet.raptor.auth.authorization.AbstractAuthorization;
-import org.createnet.raptor.plugin.BasePluginConfiguration;
+import org.createnet.raptor.auth.plugin.AuthPluginConfiguration;
+import org.createnet.raptor.plugin.impl.BasePluginConfiguration;
 import org.createnet.raptor.plugin.PluginConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +83,7 @@ public class TokenAuthorization extends AbstractAuthorization {
 
   @Override
   public PluginConfiguration getPluginConfiguration() {
-    return new BasePluginConfiguration("token");
+    return new AuthPluginConfiguration("token");
   }
 
 }

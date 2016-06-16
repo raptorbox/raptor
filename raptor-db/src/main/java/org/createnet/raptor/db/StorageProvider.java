@@ -16,8 +16,8 @@
 package org.createnet.raptor.db;
 
 import org.createnet.raptor.db.config.StorageConfiguration;
-import org.createnet.raptor.db.couchbase.CouchbaseStorage;
-import org.createnet.raptor.db.none.NoneStorage;
+import org.createnet.raptor.plugin.PluginConfiguration;
+import org.createnet.raptor.plugin.PluginLoader;
 
 /**
  *
@@ -26,24 +26,12 @@ import org.createnet.raptor.db.none.NoneStorage;
 public class StorageProvider extends AbstractStorage {
 
   private Storage instance;
-
+  protected final PluginLoader<Storage> pluginLoader = new PluginLoader();
+  
   @Override
-  public void initialize(StorageConfiguration configuration) throws StorageException {
-
+  public void initialize(StorageConfiguration configuration) {
     super.initialize(configuration);
-
-    switch (configuration.type) {
-      case "couchbase":
-        instance = new CouchbaseStorage();
-        break;
-      case "none":
-        instance = new NoneStorage();
-        break;
-      default:
-        throw new StorageException("Storage type `"+ configuration.type +"` is not supported");
-    }
-    
-    instance.initialize(configuration);
+    instance = pluginLoader.load(configuration.type, Storage.class);
   }
 
   @Override
@@ -69,6 +57,11 @@ public class StorageProvider extends AbstractStorage {
   @Override
   public void destroy() {
     instance.destroy();
+  }
+
+  @Override
+  public PluginConfiguration<StorageConfiguration> getPluginConfiguration() {
+    return null;
   }
 
 }

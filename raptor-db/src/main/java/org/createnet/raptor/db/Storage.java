@@ -6,8 +6,10 @@
 package org.createnet.raptor.db;
 
 import java.util.List;
+import org.createnet.raptor.config.Configuration;
 import org.createnet.raptor.db.config.StorageConfiguration;
 import org.createnet.raptor.db.query.ListQuery;
+import org.createnet.raptor.plugin.Plugin;
 
 
 
@@ -15,7 +17,7 @@ import org.createnet.raptor.db.query.ListQuery;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public interface Storage {
+public interface Storage extends Plugin<StorageConfiguration>{
 
   public static class StorageException extends Exception {
     public StorageException(Throwable e) {
@@ -44,7 +46,6 @@ public interface Storage {
 
   }
 
-  public void initialize(StorageConfiguration configuration) throws StorageException;  
   public void setup(boolean forceSetup) throws StorageException;
   public void connect() throws StorageException;
   public void disconnect();

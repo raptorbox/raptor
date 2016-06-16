@@ -18,8 +18,9 @@ package org.createnet.raptor.auth.cache.impl;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.auth.cache.AbstractCache;
-import org.createnet.raptor.plugin.BasePluginConfiguration;
+import org.createnet.raptor.plugin.impl.BasePluginConfiguration;
 import org.createnet.raptor.plugin.PluginConfiguration;
+import org.createnet.raptor.plugin.impl.NoPluginConfiguration;
 
 /**
  *
@@ -48,7 +49,7 @@ public class NoCache extends AbstractCache {
 
   @Override
   public PluginConfiguration getPluginConfiguration() {
-    return new BasePluginConfiguration("none");
+    return new NoPluginConfiguration();
   }  
   
 }

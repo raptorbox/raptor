@@ -1,7 +1,17 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2016 CREATE-NET http://create-net.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.createnet.raptor.db;
 
@@ -10,7 +20,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import org.createnet.raptor.db.config.StorageConfiguration;
-import org.createnet.raptor.db.couchbase.CouchbaseStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +74,7 @@ abstract public class AbstractStorage implements Storage {
   }
 
   @Override
-  public void initialize(StorageConfiguration configuration) throws StorageException {
+  public void initialize(StorageConfiguration configuration) {
     this.config = configuration;
   }
 
@@ -74,7 +83,7 @@ abstract public class AbstractStorage implements Storage {
     // does nothing by default
   }
   
-  protected StorageConfiguration getConfiguration() {
+  public StorageConfiguration getConfiguration() {
     return config;
   }
 

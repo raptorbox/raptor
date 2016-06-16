@@ -1,0 +1,2 @@
+org.createnet.raptor.db.couchbase.CouchbaseStorage
+org.createnet.raptor.db.none.NoneStorage

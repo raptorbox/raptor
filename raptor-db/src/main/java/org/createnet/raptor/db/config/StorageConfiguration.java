@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.createnet.raptor.config.Configuration;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class StorageConfiguration {
+public class StorageConfiguration implements Configuration {
 
   public StorageConfiguration() {
   }
