@@ -1,7 +1,17 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2016 CREATE-NET
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.createnet.raptor.plugin;
 
@@ -9,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import org.createnet.raptor.config.Configuration;
 import org.createnet.raptor.config.ConfigurationLoader;
-import org.createnet.raptor.config.exception.ConfigurationException;
 
 /**
  *
@@ -32,8 +41,9 @@ public class PluginConfigurationLoader extends ConfigurationLoader {
 
   @Override
   protected File getFile(String filename) {
-    File file = new File(filename);
+    File file = new File(getConfigPath() + File.separator + filename);
     if (file.exists()) {
+      logger.debug("Using configuration at {}", file.getAbsolutePath());
       return file;
     }
     return super.getFile(filename);
@@ -45,17 +55,17 @@ public class PluginConfigurationLoader extends ConfigurationLoader {
 
   public Configuration load(PluginConfiguration pluginConfiguration) {
     
-    if(pluginConfiguration == null || pluginConfiguration.getType() == null) {
+    if(pluginConfiguration == null || pluginConfiguration.getConfigurationClass() == null) {
       return null;
     }
     
     String name = pluginConfiguration.getName();
     String basePath = pluginConfiguration.getPath();
-    Class<? extends Configuration> clazz = pluginConfiguration.getType();
+    Class<? extends Configuration> clazz = pluginConfiguration.getConfigurationClass();
 
     Configuration config = cache.getOrDefault(name, null);
     if (config == null) {
-      String path = (basePath == null ? "" : basePath) + name;
+      String path = basePath != null ? basePath : name;
       try {
         config = mapper.readValue(getFile(path), clazz);
       } catch (IOException ex) {

@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.plugin;
+package org.createnet.raptor.plugin.impl;
+
+import org.createnet.raptor.plugin.PluginConfiguration;
 
 
 /**
@@ -54,8 +56,13 @@ public class BasePluginConfiguration<T> implements PluginConfiguration {
   }
 
   @Override
-  public Class<T> getType() {
+  public Class<T> getConfigurationClass() {
     return clazz;
+  }
+
+  @Override
+  public String toString() {
+    return "Plugin " + getName() + (getConfigurationClass() != null ? "(" + getConfigurationClass().getName() + ")" : "");
   }
   
 }
