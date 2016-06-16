@@ -21,8 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.createnet.raptor.dispatcher;
+package org.createnet.raptor.dispatcher.client;
 
+import org.createnet.raptor.dispatcher.DispatcherConfiguration;
+import org.createnet.raptor.dispatcher.DispatcherConfiguration;
 import org.createnet.raptor.dispatcher.exception.DispatchException;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;

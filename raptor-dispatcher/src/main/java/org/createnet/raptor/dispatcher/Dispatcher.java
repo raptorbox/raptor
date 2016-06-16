@@ -23,6 +23,7 @@
  */
 package org.createnet.raptor.dispatcher;
 
+import org.createnet.raptor.dispatcher.client.BrokerClient;
 import org.createnet.raptor.dispatcher.exception.DispatchException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
