@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.createnet.raptor.dispatcher;
+package org.createnet.raptor.dispatcher.exception;
 
 /**
  *

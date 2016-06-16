@@ -23,6 +23,7 @@
  */
 package org.createnet.raptor.dispatcher;
 
+import org.createnet.raptor.dispatcher.exception.DispatchException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -184,42 +185,4 @@ public class Dispatcher {
     logger.debug("Closed dispatcher");
   }
   
-
-//
-//  static public void main(String[] args) throws Exception {
-//
-//    String topic = "foo/bar";
-//    String message = "hello world +";
-//    int times = 5000;
-//
-//    ExecutorService exec = Executors.newFixedThreadPool(5);
-//
-//    DispatcherConfiguration config = new DispatcherConfiguration();
-//    config.uri = "tcp://raptor.local:1883";
-//    config.username = "compose";
-//    config.password = "shines";
-//
-//    config.queueLength = 10000;
-//    config.poolSize = 15;
-//
-//    Dispatcher instance = new Dispatcher();
-//    instance.initialize(config);
-//
-//    for (int i = 0; i < times; i++) {
-//      final String msg = message + i;
-//      try {
-//        System.out.println("org.createnet.raptor.dispatcher.Dispatcher.main() Send msg " + i);
-//        exec.execute(() -> {
-//          instance.add(topic, msg);
-//        });
-//      } catch (Exception e) {
-//        System.out.println("org.createnet.raptor.dispatcher.Dispatcher.main()" + e.getMessage());
-//      }
-//    }
-//
-////    exec.shutdown();
-////    instance.close();
-//    System.out.println("Completed");
-//  }
-
 }

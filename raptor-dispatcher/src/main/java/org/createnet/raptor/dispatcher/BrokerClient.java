@@ -23,6 +23,7 @@
  */
 package org.createnet.raptor.dispatcher;
 
+import org.createnet.raptor.dispatcher.exception.DispatchException;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;

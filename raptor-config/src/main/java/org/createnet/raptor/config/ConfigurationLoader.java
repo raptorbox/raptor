@@ -16,7 +16,6 @@
 package org.createnet.raptor.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,7 +32,7 @@ public class ConfigurationLoader {
   
   protected final Logger logger = LoggerFactory.getLogger(ConfigurationLoader.class);
 
-  static final private String defaultPath = "/etc/raptor/";
+  static final public String defaultPath = "/etc/raptor";
   private File basePathFile;
 
   private static ConfigurationLoader instance;
@@ -69,7 +68,7 @@ public class ConfigurationLoader {
   final protected Map<String, Configuration> cache = new HashMap();
 
   protected File getFile(String filename) {
-    return new File(getBasePath() + "/" + filename + ".yml");
+    return new File(getBasePath() + File.separator + filename + ".yml");
   }
 
   public Configuration getInstance(String name, Class<? extends Configuration> clazz) throws ConfigurationException {
