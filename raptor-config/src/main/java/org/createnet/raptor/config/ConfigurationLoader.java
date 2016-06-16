@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Luca Capra <lcapra@create-net.org>.
+ * Copyright 2016 CREATE-NET http://create-net.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,23 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class ConfigurationLoader {
-
+  
   protected final Logger logger = LoggerFactory.getLogger(ConfigurationLoader.class);
 
   static final private String defaultPath = "/etc/raptor/";
   private File basePathFile;
 
+  private static ConfigurationLoader instance;
+  
+  static public ConfigurationLoader getInstance() {
+    if(instance == null) {
+      instance = new ConfigurationLoader();
+    }
+    return instance;
+  }
+  
+  protected ConfigurationLoader() {}
+  
   public static String getConfigPath() {
     String configDir = System.getProperty("configDir", null);
     return configDir == null ? defaultPath : configDir;
@@ -52,9 +63,10 @@ public class ConfigurationLoader {
 
     return basePathFile.getAbsolutePath();
   }
-  final private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+  
+  final public static ObjectMapper mapper = YamlMapper.get();
 
-  final private Map<String, Configuration> cache = new HashMap();
+  final protected Map<String, Configuration> cache = new HashMap();
 
   protected File getFile(String filename) {
     return new File(getBasePath() + "/" + filename + ".yml");

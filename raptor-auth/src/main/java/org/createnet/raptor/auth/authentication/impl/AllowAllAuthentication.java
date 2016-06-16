@@ -18,6 +18,8 @@ package org.createnet.raptor.auth.authentication.impl;
 import org.createnet.raptor.auth.authentication.AbstractAuthentication;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.impl.AllowAllAuthorization;
+import org.createnet.raptor.plugin.BasePluginConfiguration;
+import org.createnet.raptor.plugin.PluginConfiguration;
 
 /**
  *
@@ -29,5 +31,10 @@ public class AllowAllAuthentication extends AbstractAuthentication {
   public Authentication.UserInfo getUser(String accessToken) throws AuthenticationException {
     return new Authentication.UserInfo(AllowAllAuthorization.defaultUserId, AllowAllAuthorization.defaultAccessToken);
   }
+  
+  @Override
+  public PluginConfiguration getPluginConfiguration() {
+    return new BasePluginConfiguration("allow_all");
+  }  
   
 }

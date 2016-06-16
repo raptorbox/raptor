@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Luca Capra <lcapra@create-net.org>.
+ * Copyright 2016 CREATE-NET http://create-net.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import org.createnet.raptor.auth.AuthConfiguration;
+import org.createnet.raptor.plugin.Plugin;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public interface Authentication {
+public interface Authentication extends Plugin<AuthConfiguration> {
   
   public class AuthenticationException extends Exception {
     public AuthenticationException(Throwable t) {
@@ -102,7 +103,6 @@ public interface Authentication {
     
   }
   
-  public void initialize(AuthConfiguration configuration);
   public UserInfo getUser(String accessToken) throws AuthenticationException;
   
   public void sync(String accessToken, String id) throws AuthenticationException;

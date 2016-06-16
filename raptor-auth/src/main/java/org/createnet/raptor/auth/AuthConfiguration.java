@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Luca Capra <lcapra@create-net.org>.
+ * Copyright 2016 CREATE-NET http://create-net.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.createnet.raptor.auth;
 
+import org.createnet.raptor.config.Configuration;
+
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class AuthConfiguration {
+public class AuthConfiguration implements Configuration {
   
   public enum Type {
     token, allow_all

@@ -25,6 +25,7 @@
     <module>raptor-cli</module>
     <module>raptor-events</module>
     <module>raptor-client</module>
+    <module>raptor-plugin</module>
   </modules>
   
   <properties>

@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.auth.authorization.impl;
 import org.createnet.raptor.auth.authorization.AbstractAuthorization;
+import org.createnet.raptor.plugin.BasePluginConfiguration;
+import org.createnet.raptor.plugin.PluginConfiguration;
 
 /**
  *
@@ -29,5 +31,11 @@ public class AllowAllAuthorization extends AbstractAuthorization {
   public boolean isAuthorized(String accessToken, String id, Permission op) throws AuthorizationException {
     return !accessToken.isEmpty();
   }
+
+  @Override
+  public PluginConfiguration getPluginConfiguration() {
+    return new BasePluginConfiguration("allow_all");
+  }
+
 
 }

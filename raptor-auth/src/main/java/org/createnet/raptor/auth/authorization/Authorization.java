@@ -16,12 +16,14 @@
 package org.createnet.raptor.auth.authorization;
 
 import org.createnet.raptor.auth.AuthConfiguration;
+import org.createnet.raptor.config.Configuration;
+import org.createnet.raptor.plugin.Plugin;
 
 /**
  *
  * @author Luca Capra <luca.capra@create-net.org>
  */
-public interface Authorization {
+public interface Authorization extends Plugin<AuthConfiguration> {
 
   public class AuthorizationException extends Exception {
 
@@ -47,8 +49,6 @@ public interface Authorization {
     Execute
 
   }
-
-  public void initialize(AuthConfiguration configuration);
 
   public boolean isAuthorized(String accessToken, String id, Permission op) throws AuthorizationException;
 

@@ -1,0 +1,2 @@
+org.createnet.raptor.auth.authorization.impl.AllowAllAuthorization
+org.createnet.raptor.auth.authorization.impl.TokenAuthorization

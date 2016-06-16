@@ -26,6 +26,8 @@ import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.AuthHttpClient;
 import org.createnet.raptor.auth.authentication.AbstractAuthentication;
 import org.createnet.raptor.auth.authentication.Authentication;
+import org.createnet.raptor.plugin.BasePluginConfiguration;
+import org.createnet.raptor.plugin.PluginConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,5 +91,9 @@ public class TokenAuthentication extends AbstractAuthentication {
     return client.check(accessToken, args);
   }
  
+  @Override
+  public PluginConfiguration getPluginConfiguration() {
+    return new BasePluginConfiguration("token");
+  }  
   
 }

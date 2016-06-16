@@ -38,6 +38,9 @@ abstract public class AbstractCache implements AuthCache {
     this.configuration = configuration;
   }
   
-  
+  @Override
+  public AuthConfiguration getConfiguration() {
+    return configuration;
+  }  
   
 }

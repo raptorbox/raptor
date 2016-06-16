@@ -30,4 +30,8 @@ abstract public class AbstractAuthorization implements Authorization {
     this.configuration = configuration;
   }
   
+  @Override
+  public AuthConfiguration getConfiguration() {
+    return configuration;
+  }  
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Luca Capra <lcapra@create-net.org>.
+ * Copyright 2016 CREATE-NET http://create-net.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 package org.createnet.raptor.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Iterator;
+import java.util.ServiceLoader;
 import org.createnet.raptor.auth.authentication.Authentication;
-import org.createnet.raptor.auth.authentication.impl.AllowAllAuthentication;
-import org.createnet.raptor.auth.authentication.impl.TokenAuthentication;
 import org.createnet.raptor.auth.authorization.Authorization;
-import org.createnet.raptor.auth.authorization.impl.AllowAllAuthorization;
-import org.createnet.raptor.auth.authorization.impl.TokenAuthorization;
 import org.createnet.raptor.auth.cache.AuthCache;
-import org.createnet.raptor.auth.cache.impl.MemoryCache;
-import org.createnet.raptor.auth.cache.impl.NoCache;
+import org.createnet.raptor.config.Configuration;
+import org.createnet.raptor.plugin.Plugin;
+import org.createnet.raptor.plugin.PluginConfiguration;
+import org.createnet.raptor.plugin.PluginConfigurationLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,49 +41,25 @@ public class AuthProvider implements Authorization, Authentication {
 
   protected Authorization authorizationInstance;
   protected Authentication authenticationInstance;
-
   protected AuthCache cache;
-
-  protected AuthConfiguration configuration;
   
+  protected AuthConfiguration configuration;
+  protected final PluginConfigurationLoader pluginConfigLoader = PluginConfigurationLoader.getInstance();
+
   final public static ObjectMapper mapper = new ObjectMapper();
   
   @Override
   public void initialize(AuthConfiguration configuration) {
 
-    this.configuration = configuration;
+    this.configuration = (AuthConfiguration)configuration;
     
-    String cacheType = (String) configuration.cache;
-    switch (cacheType) {
-//      case "redis":
-//        break;
-      case "memory":
-        cache = new MemoryCache();
-        break;
-      case "no_cache":
-      default:
-        cache = new NoCache();
-        break;
-    }
-
-    String authType = (String) configuration.type;
-    switch (authType) {
-      case "token":
-        authenticationInstance = new TokenAuthentication();
-        authorizationInstance = new TokenAuthorization();
-        break;
-      case "allow_all":
-      default:
-        authenticationInstance = new AllowAllAuthentication();
-        authorizationInstance = new AllowAllAuthorization();
-        break;
-    }
-    
-    cache.initialize(configuration);
+    String cacheType = this.configuration.cache;
+    cache = loadCachePlugin(cacheType);
     cache.setup();
-    
-    authenticationInstance.initialize(configuration);
-    authorizationInstance.initialize(configuration);
+
+    String authType = this.configuration.type;
+    authenticationInstance = loadAuthenticationPlugin(authType);
+    authorizationInstance = loadAuthorizationPlugin(authType);
 
   }
 
@@ -152,5 +128,79 @@ public class AuthProvider implements Authorization, Authentication {
   public void sync(String accessToken, String id) throws AuthenticationException {
     authenticationInstance.sync(accessToken, id);
   }
+  
+  protected void initializePlugin(Plugin<AuthConfiguration> plugin) {
+    
+    Configuration config = pluginConfigLoader.load(plugin);
+    
+    if (config == null) {
+      plugin.initialize(null);
+      return;
+    }
+    
+    plugin.initialize(plugin.getPluginConfiguration().getType().cast(config));
+  }
+  
+  protected AuthCache loadCachePlugin(String name) {
 
+    Iterator<AuthCache> services = ServiceLoader.load(AuthCache.class).iterator();
+
+    while (services.hasNext()) {
+      AuthCache service = services.next();
+      if (service.getPluginConfiguration() != null
+              && service.getPluginConfiguration().getName().equals(name)) {
+        logger.debug("Loaded AuthCache plugin: {}", service.getClass().getName());        
+        initializePlugin(service);
+        return service;
+      }
+    }
+
+    throw new RuntimeException("Cannot load AuthCache plugin " + name);
+  }
+  
+  protected Authorization loadAuthorizationPlugin(String name) {
+
+    Iterator<Authorization> services = ServiceLoader.load(Authorization.class).iterator();
+
+    while (services.hasNext()) {
+      Authorization service = services.next();
+      if (service.getPluginConfiguration() != null
+              && service.getPluginConfiguration().getName().equals(name)) {
+
+        logger.debug("Loaded Authorization plugin: {}", service.getClass().getName());        
+        initializePlugin(service);
+        return service;
+      }
+    }
+
+    throw new RuntimeException("Cannot load Authorization plugin " + name);
+  }
+
+  protected Authentication loadAuthenticationPlugin(String name) {
+
+    Iterator<Authentication> services = ServiceLoader.load(Authentication.class).iterator();
+
+    while (services.hasNext()) {
+      Authentication service = services.next();
+      if (service.getPluginConfiguration() != null
+              && service.getPluginConfiguration().getName().equals(name)) {
+        logger.debug("Loaded Authentication plugin: {}", service.getClass().getName());
+        initializePlugin(service);
+        return service;
+      }
+    }
+
+    throw new RuntimeException("Cannot load Authentication plugin " + name);
+  }
+
+  @Override
+  public PluginConfiguration getPluginConfiguration() {
+    return null;
+  }
+
+  @Override
+  public AuthConfiguration getConfiguration() {
+    return null;
+  }
+  
 }

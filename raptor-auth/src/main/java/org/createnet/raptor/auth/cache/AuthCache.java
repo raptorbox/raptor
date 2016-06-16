@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Luca Capra <lcapra@create-net.org>.
+ * Copyright 2016 CREATE-NET http://create-net.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
  */
 package org.createnet.raptor.auth.cache;
 
-import java.util.Map;
 import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
+import org.createnet.raptor.plugin.Plugin;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public interface AuthCache {
+public interface AuthCache extends Plugin<AuthConfiguration> {
 
   public class PermissionCacheException extends Exception {
 
@@ -53,7 +53,6 @@ public interface AuthCache {
   }
 
   
-  public void initialize(AuthConfiguration configuration);
   public void setup();
   public void clear();
   
