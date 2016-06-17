@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 CREATE-NET http://create-net.org
+ * Copyright 2016 CREATE-NET
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.http.configuration;
+package org.createnet.raptor.dispatcher.router.impl;
 
-import org.createnet.raptor.config.Configuration;
+import org.createnet.raptor.dispatcher.router.MessageRouterConfiguration;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class DispatcherConfiguration extends org.createnet.raptor.dispatcher.configuration.DispatcherConfiguration implements Configuration {
+public class DefaultMessageRouterConfiguration implements MessageRouterConfiguration {
+  
 }

@@ -13,22 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.createnet.raptor.dispatcher;
+
+import org.createnet.raptor.dispatcher.configuration.IDispatcherConfiguration;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
+ * @param <K>
  */
-public class DispatcherConfiguration {
+abstract public class AbstractDispatcher<K extends IDispatcherConfiguration> implements Dispatcher<K> {
 
-  public String protocol;
+  protected K configuration;
   
-  public String username;
-  public String password;
-  
-  public String uri;
-  public int queueLength;
-  public int poolSize;
-  
+  @Override
+  public void initialize(K configuration) {
+    this.configuration = configuration;
+  }
+
+  @Override
+  public K getConfiguration() {
+    return configuration;
+  }
   
 }

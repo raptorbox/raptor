@@ -1,4 +1,13 @@
-protocol: mqtt
-username: system
-password: system123
-uri: tcp://localhost:1883
+
+# the message router adapter, in charge of serving topic/message formatting
+# - default
+router: default
+
+# The broker client instance:
+# - mqtt
+client: mqtt
+
+mqtt:
+  username: system
+  password: system123
+  uri: tcp://localhost:1883

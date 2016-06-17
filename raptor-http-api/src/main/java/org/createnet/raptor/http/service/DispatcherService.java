@@ -20,7 +20,7 @@ import java.io.IOException;
 import javax.inject.Inject;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.jvnet.hk2.annotations.Service;
-import org.createnet.raptor.dispatcher.Dispatcher;
+import org.createnet.raptor.dispatcher.DispatcherProvider;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.events.Emitter;
 import org.createnet.raptor.events.Event;
@@ -65,14 +65,14 @@ public class DispatcherService {
     execute, delete
   }
 
-  private Dispatcher dispatcher;
+  private DispatcherProvider dispatcher;
 
   public DispatcherService() {
   }
 
-  public Dispatcher getDispatcher() throws ConfigurationException {
+  public DispatcherProvider getDispatcher() throws ConfigurationException {
     if (dispatcher == null) {
-      dispatcher = new Dispatcher();
+      dispatcher = new DispatcherProvider();
       dispatcher.initialize(configuration.getDispatcher());
       initialize();
     }
