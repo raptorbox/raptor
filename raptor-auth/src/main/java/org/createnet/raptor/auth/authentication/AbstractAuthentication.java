@@ -15,17 +15,18 @@
  */
 package org.createnet.raptor.auth.authentication;
 
-import org.createnet.raptor.auth.AuthConfiguration;
+import org.createnet.raptor.auth.IAuthConfiguration;
+import org.createnet.raptor.config.Configuration;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-abstract public class AbstractAuthentication implements Authentication {
+abstract public class AbstractAuthentication<K extends IAuthConfiguration> implements Authentication<K> {
   
-  protected AuthConfiguration configuration;
+  protected K configuration;
 
-  public void initialize(AuthConfiguration configuration) {
+  public void initialize(K configuration) {
     this.configuration = configuration;
   }
 
@@ -34,7 +35,7 @@ abstract public class AbstractAuthentication implements Authentication {
   }
 
   @Override
-  public AuthConfiguration getConfiguration() {
+  public K getConfiguration() {
     return configuration;
   }
   

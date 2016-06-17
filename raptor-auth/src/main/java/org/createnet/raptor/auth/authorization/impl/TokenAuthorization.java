@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class TokenAuthorization extends AbstractAuthorization {
+public class TokenAuthorization extends AbstractAuthorization<AuthConfiguration> {
   
   final ObjectMapper mapper = new ObjectMapper();
       

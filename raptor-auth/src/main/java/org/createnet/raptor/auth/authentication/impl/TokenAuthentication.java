@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class TokenAuthentication extends AbstractAuthentication {
+public class TokenAuthentication extends AbstractAuthentication<AuthConfiguration> {
   
   final private Logger logger = LoggerFactory.getLogger(TokenAuthentication.class);
   

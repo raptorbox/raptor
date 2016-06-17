@@ -16,12 +16,13 @@
 package org.createnet.raptor.dispatcher.client;
 
 import org.createnet.raptor.plugin.Plugin;
+import org.createnet.raptor.dispatcher.configuration.BrokerClientConfiguration;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public interface BrokerClient<T> extends Plugin {
+public interface BrokerClient<T extends BrokerClientConfiguration> extends Plugin<T> {
   
   public class BrokerClientException extends Exception {
 
@@ -39,7 +40,6 @@ public interface BrokerClient<T> extends Plugin {
     
   }
   
-  public void initialize(T configuration) ;
   public void connect() throws BrokerClientException;
   public boolean isConnected();
   public void send(String topic, String message) throws BrokerClientException;

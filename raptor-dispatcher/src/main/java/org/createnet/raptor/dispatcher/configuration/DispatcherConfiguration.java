@@ -15,14 +15,11 @@
  */
 package org.createnet.raptor.dispatcher.configuration;
 
-import org.createnet.raptor.config.Configuration;
-import org.createnet.raptor.dispatcher.configuration.IDispatcherConfiguration;
-
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class DispatcherConfiguration implements IDispatcherConfiguration {
+public class DispatcherConfiguration implements IDispatcherConfiguration, BrokerClientConfiguration {
 
   public String client;
   public String router;

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class AuthProvider implements Authorization, Authentication {
+public class AuthProvider implements Authorization<AuthConfiguration>, Authentication<AuthConfiguration> {
 
   protected final Logger logger = LoggerFactory.getLogger(AuthProvider.class);
 

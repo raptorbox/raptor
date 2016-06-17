@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 CREATE-NET
+ * Copyright 2016 Luca Capra <lcapra@create-net.org>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.authorization;
+package org.createnet.raptor.auth;
 
-import org.createnet.raptor.auth.IAuthConfiguration;
 import org.createnet.raptor.config.Configuration;
 
 /**
  *
- * @author Luca Capra <luca.capra@create-net.org>
+ * @author Luca Capra <lcapra@create-net.org>
  */
-abstract public class AbstractAuthorization<K extends IAuthConfiguration> implements Authorization<K> {
-
-  protected K configuration;
-   
-  @Override
-  public void initialize(K configuration) {
-    this.configuration = configuration;
-  }
+public interface IAuthConfiguration extends Configuration{
   
-  @Override
-  public K getConfiguration() {
-    return configuration;
-  }  
 }

@@ -13,26 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.authorization;
+package org.createnet.raptor.dispatcher.client;
 
-import org.createnet.raptor.auth.IAuthConfiguration;
-import org.createnet.raptor.config.Configuration;
+import org.createnet.raptor.dispatcher.configuration.BrokerClientConfiguration;
 
 /**
  *
- * @author Luca Capra <luca.capra@create-net.org>
+ * @author Luca Capra <lcapra@create-net.org>
  */
-abstract public class AbstractAuthorization<K extends IAuthConfiguration> implements Authorization<K> {
+abstract public class AbstractBrokerClient<T extends BrokerClientConfiguration> implements BrokerClient<T> {
 
-  protected K configuration;
-   
+  protected T configuration;
+  
   @Override
-  public void initialize(K configuration) {
+  public void initialize(T configuration) {
     this.configuration = configuration;
   }
   
   @Override
-  public K getConfiguration() {
+  public T getConfiguration() {
     return configuration;
-  }  
+  }
+  
 }

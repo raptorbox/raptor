@@ -15,13 +15,11 @@
  */
 package org.createnet.raptor.auth;
 
-import org.createnet.raptor.config.Configuration;
-
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class AuthConfiguration implements Configuration {
+public class AuthConfiguration implements IAuthConfiguration {
   
   public enum Type {
     token, allow_all

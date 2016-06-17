@@ -16,6 +16,7 @@
 package org.createnet.raptor.auth.authorization;
 
 import org.createnet.raptor.auth.AuthConfiguration;
+import org.createnet.raptor.auth.IAuthConfiguration;
 import org.createnet.raptor.config.Configuration;
 import org.createnet.raptor.plugin.Plugin;
 
@@ -23,7 +24,7 @@ import org.createnet.raptor.plugin.Plugin;
  *
  * @author Luca Capra <luca.capra@create-net.org>
  */
-public interface Authorization extends Plugin<AuthConfiguration> {
+public interface Authorization<K extends IAuthConfiguration> extends Plugin<K> {
 
   public class AuthorizationException extends Exception {
 

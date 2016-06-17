@@ -16,8 +16,11 @@
 package org.createnet.raptor.dispatcher.client;
 
 import org.createnet.raptor.config.Configuration;
+import org.createnet.raptor.dispatcher.configuration.BrokerClientConfiguration;
 import org.createnet.raptor.dispatcher.configuration.DispatcherConfiguration;
+import org.createnet.raptor.dispatcher.configuration.MqttBrokerClientConfiguration;
 import org.createnet.raptor.plugin.PluginConfiguration;
+import org.createnet.raptor.plugin.impl.BasePluginConfiguration;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -29,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class MqttBrokerClient implements BrokerClient<DispatcherConfiguration> {
+public class MqttBrokerClient extends AbstractBrokerClient<MqttBrokerClientConfiguration> {
     
   Logger logger = LoggerFactory.getLogger(MqttBrokerClient.class);
   
@@ -42,11 +45,6 @@ public class MqttBrokerClient implements BrokerClient<DispatcherConfiguration> {
   
   private final int qos = 2;
   private final boolean retain = false;
-
-  @Override
-  public void initialize(DispatcherConfiguration configuration) {
-    this.configuration = configuration;
-  }
 
   @Override
   public synchronized void connect() throws BrokerClientException {
@@ -127,17 +125,7 @@ public class MqttBrokerClient implements BrokerClient<DispatcherConfiguration> {
   
   @Override
   public PluginConfiguration getPluginConfiguration() {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
-  public Configuration getConfiguration() {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
-  public void initialize(Configuration configuration) {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    return new BasePluginConfiguration("mqtt", MqttBrokerClientConfiguration.class, "dispatcher.yml");
   }
   
 }

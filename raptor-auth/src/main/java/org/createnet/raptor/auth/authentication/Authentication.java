@@ -19,13 +19,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import org.createnet.raptor.auth.AuthConfiguration;
+import org.createnet.raptor.auth.IAuthConfiguration;
+import org.createnet.raptor.config.Configuration;
 import org.createnet.raptor.plugin.Plugin;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public interface Authentication extends Plugin<AuthConfiguration> {
+public interface Authentication<K extends IAuthConfiguration> extends Plugin<K> {
   
   public class AuthenticationException extends Exception {
     public AuthenticationException(Throwable t) {
