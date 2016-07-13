@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 public class Broker {
   
   final protected Logger logger = LoggerFactory.getLogger(Broker.class);
-  final private ConfigurationLoader configLoader = new ConfigurationLoader();
+  final private ConfigurationLoader configLoader = ConfigurationLoader.getInstance();
   
   public static void main(final String[] args) throws BrokerException, ConfigurationException {
     

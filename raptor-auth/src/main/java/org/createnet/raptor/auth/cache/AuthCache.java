@@ -18,13 +18,14 @@ package org.createnet.raptor.auth.cache;
 import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
+import org.createnet.raptor.config.Configuration;
 import org.createnet.raptor.plugin.Plugin;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public interface AuthCache extends Plugin<AuthConfiguration> {
+public interface AuthCache<K extends Configuration> extends Plugin<K> {
 
   public class PermissionCacheException extends Exception {
 

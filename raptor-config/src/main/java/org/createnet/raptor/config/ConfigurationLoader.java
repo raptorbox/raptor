@@ -47,8 +47,7 @@ public class ConfigurationLoader {
   protected ConfigurationLoader() {}
   
   public static String getConfigPath() {
-    String configDir = System.getProperty("configDir", null);
-    return configDir == null ? defaultPath : configDir;
+    return System.getProperty("configDir", defaultPath);
   }
 
   public String getBasePath() {
@@ -68,7 +67,9 @@ public class ConfigurationLoader {
   final protected Map<String, Configuration> cache = new HashMap();
 
   protected File getFile(String filename) {
-    return new File(getBasePath() + File.separator + filename + ".yml");
+    File file = new File(getBasePath() + File.separator + filename + ".yml");
+    logger.debug("Loading configuration file {}", file.getAbsolutePath());
+    return file;
   }
 
   public Configuration getInstance(String name, Class<? extends Configuration> clazz) throws ConfigurationException {

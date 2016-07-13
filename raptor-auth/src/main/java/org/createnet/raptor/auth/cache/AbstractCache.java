@@ -16,14 +16,15 @@
 package org.createnet.raptor.auth.cache;
 
 import org.createnet.raptor.auth.AuthConfiguration;
+import org.createnet.raptor.config.Configuration;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-abstract public class AbstractCache implements AuthCache {
+abstract public class AbstractCache<K extends Configuration> implements AuthCache<K> {
 
-  private AuthConfiguration configuration;
+  private K configuration;
 
   @Override
   public void clear() {
@@ -34,12 +35,12 @@ abstract public class AbstractCache implements AuthCache {
   }
 
   @Override
-  public void initialize(AuthConfiguration configuration) {
+  public void initialize(K configuration) {
     this.configuration = configuration;
   }
   
   @Override
-  public AuthConfiguration getConfiguration() {
+  public K getConfiguration() {
     return configuration;
   }  
   

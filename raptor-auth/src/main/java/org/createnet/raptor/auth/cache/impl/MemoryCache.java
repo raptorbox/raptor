@@ -20,12 +20,11 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.auth.cache.AbstractCache;
 import org.createnet.raptor.auth.plugin.AuthPluginConfiguration;
-import org.createnet.raptor.config.Configuration;
-import org.createnet.raptor.plugin.impl.BasePluginConfiguration;
 import org.createnet.raptor.plugin.PluginConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class MemoryCache extends AbstractCache {
+public class MemoryCache extends AbstractCache<AuthConfiguration> {
 
   private final Logger logger = LoggerFactory.getLogger(MemoryCache.class);
   
