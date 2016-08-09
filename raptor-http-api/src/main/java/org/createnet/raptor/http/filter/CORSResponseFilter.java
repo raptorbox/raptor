@@ -32,10 +32,14 @@ public class CORSResponseFilter implements ContainerResponseFilter {
 
     response.getHeaders().add("Powered-By", "Raptor");
     
-    response.getHeaders().add("Access-Control-Allow-Credentials", "false");
-    response.getHeaders().add("Access-Control-Allow-Origin", "*");
+    String origin = request.getHeaderString("Origin");
+    
+    response.getHeaders().add("Access-Control-Allow-Credentials", "true");    
+    response.getHeaders().add("Access-Control-Allow-Origin", origin);
+    
     response.getHeaders().add("Access-Control-Allow-Headers", "Authorization,Content-Type");
     response.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+    response.getHeaders().add("Access-Control-Max-Age", "3600");
 
   }
 }
