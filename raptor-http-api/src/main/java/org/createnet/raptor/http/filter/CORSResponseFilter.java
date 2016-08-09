@@ -30,11 +30,11 @@ public class CORSResponseFilter implements ContainerResponseFilter {
   public void filter(ContainerRequestContext request, ContainerResponseContext response)
           throws IOException {
 
-    response.getHeaders().add("X-Powered-By", "Raptor");
+    response.getHeaders().add("Powered-By", "Raptor");
     
-//    response.getHeaders().add("Access-Control-Allow-Credentials", "true");
+    response.getHeaders().add("Access-Control-Allow-Credentials", "false");
     response.getHeaders().add("Access-Control-Allow-Origin", "*");
-//    response.getHeaders().add("Access-Control-Allow-Headers", "Authorization,Content-Type,X-Requested-With");
+    response.getHeaders().add("Access-Control-Allow-Headers", "Authorization,Content-Type");
     response.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
 
   }
