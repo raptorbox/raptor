@@ -1,0 +1,3 @@
+
+cd ~/raptor
+git pull && mvn clean install -DskipTests=true -Dmaven.repo.local=/opt/maven
