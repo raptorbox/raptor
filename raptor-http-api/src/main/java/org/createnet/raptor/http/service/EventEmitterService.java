@@ -55,6 +55,8 @@ public class EventEmitterService extends Emitter {
 
   public void trigger(EventName name, Event event) {
     
+    event.setParentEvent(name.toString());
+    
     // trigger to all listener
     trigger(EventName.all.toString(), event);
     

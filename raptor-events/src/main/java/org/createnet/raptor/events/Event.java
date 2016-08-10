@@ -20,8 +20,14 @@ package org.createnet.raptor.events;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public interface Event {
-  
+
   public String getEvent();
   public void setEvent(String name);
-  
+
+  public String getParentEvent();
+  public void setParentEvent(String name);
+
+  public String getUserId();
+  public void setUserId(String name);
+
 }

@@ -25,9 +25,14 @@ import org.createnet.raptor.http.service.EventEmitterService;
 public class AbstractEvent extends org.createnet.raptor.events.AbstractEvent {
   
   private String event;
+  private String parentEvent;
   
   public void setEvent(EventEmitterService.EventName event) {
-    setEvent(event.toString());
+    super.setEvent(event.toString());
+  }
+  
+  public void setParentEvent(EventEmitterService.EventName event) {
+    super.setParentEvent(event.toString());
   }
   
 }

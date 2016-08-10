@@ -17,6 +17,7 @@ package org.createnet.raptor.http.service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
+import java.util.logging.Level;
 import javax.inject.Inject;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.jvnet.hk2.annotations.Service;
@@ -85,7 +86,6 @@ public class DispatcherService {
     ObjectNode message = ServiceObject.getMapper().createObjectNode();
 
     message.put("userId", auth.getUser().getUserId());
-
     message.set("object", obj.toJsonNode());
 
     return message;
@@ -103,17 +103,17 @@ public class DispatcherService {
     getDispatcher().add(topic, message.toString());
   }
 
-  public void notifyDataEvent(Stream stream, RecordSet record) throws IOException, ConfigurationException, Authentication.AuthenticationException {
+  public void notifyDataEvent(Stream stream, RecordSet record) throws IOException, ConfigurationException {
 
     String topic = stream.getServiceObject().id + "/events";
 
-    ObjectNode message = createObjectMessage(stream.getServiceObject());
+    ObjectNode message = ServiceObject.getMapper().createObjectNode();
 
+    message.put("userId", stream.getServiceObject().getUserId());
+    message.set("object", stream.getServiceObject().toJsonNode());
     message.put("type", MessageType.stream.toString());
     message.put("op", "data");
-
     message.put("streamId", stream.name);
-
     message.set("data", record.toJsonNode());
 
     getDispatcher().add(topic, message.toString());
@@ -157,9 +157,9 @@ public class DispatcherService {
 
         try {
           
-          logger.debug("Processing dispatcher event {}", event.getEvent());
+          logger.debug("Processing dispatcher event {} (parent: {})", event.getEvent(), event.getParentEvent());
           
-          switch (event.getEvent()) {
+          switch (event.getParentEvent()) {
             case "create":
             case "update":
             case "delete":
