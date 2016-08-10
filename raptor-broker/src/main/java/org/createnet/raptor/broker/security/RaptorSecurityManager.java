@@ -146,8 +146,9 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     logger.debug("Validating topic {}", address);
     String[] topicTokens = address.split("\\.");
     if (topicTokens.length >= 2) {
-
-      String objectId = topicTokens[2];
+      
+      int soidIndex = 0;
+      String objectId = topicTokens[soidIndex];
       
       boolean validUUID = topicChecker.checkUUID(objectId);
       if(!validUUID) {
