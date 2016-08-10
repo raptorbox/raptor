@@ -143,14 +143,15 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
       return false;
     }
     
+    logger.debug("Validating topic {}", address);
     String[] topicTokens = address.split("\\.");
     if (topicTokens.length >= 2) {
 
-      String objectId = topicTokens[2];     
+      String objectId = topicTokens[2];
       
       boolean validUUID = topicChecker.checkUUID(objectId);
       if(!validUUID) {
-        logger.debug("Object ID length mismatch ({}): {}", objectId.length(), objectId);
+        logger.debug("Object ID length mismatch ({}: {})", objectId.length(), objectId);
         return false;
       }
       
