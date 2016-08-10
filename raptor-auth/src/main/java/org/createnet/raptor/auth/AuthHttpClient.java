@@ -167,13 +167,16 @@ public class AuthHttpClient {
     if(token.substring(0, prefix.length()).equals(prefix)) {
       return token;
     }
+    logger.debug("Add bearer prefix to token {}", token);
     return prefix + token;
   }
   
   public String check(String accessToken, List<NameValuePair> args) throws ClientException, IOException {
     
+    logger.debug("Http client check request");
     
-    
+    accessToken = checkToken(accessToken);
+            
     HttpPost httpost = new HttpPost(checkUrl);
     httpost.setConfig(requestConfig);
     httpost.setHeader("Authorization", accessToken);
@@ -227,7 +230,9 @@ public class AuthHttpClient {
   public boolean sync(String accessToken, String body) throws ClientException {
 
     logger.debug("Http client sync request");
-
+    
+    accessToken = checkToken(accessToken);
+    
     HttpPost httpost = new HttpPost(syncUrl);
 
     httpost.addHeader("Authorization", accessToken);

@@ -67,7 +67,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
       }
 
     } catch (ConfigurationException | Authentication.AuthenticationException e) {
-      logger.error("Authentication failed", e);
+      logger.error("Authentication failed");
     }
     return null;
   }
