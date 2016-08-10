@@ -24,23 +24,18 @@ import java.util.UUID;
 public class TopicChecker {
 
   public boolean checkUUID(String objectId) {
+    
     int idLen = objectId.length();
 
-    switch (idLen) {
-      // standard UUID
-      case 48:
-        try {
-          UUID.fromString(objectId);
-        } catch (IllegalArgumentException e) {
-          return false;
-        }
-        break;
-
-      // UUID without hyphens (legacy id format)
-      case 45:
-        break;
-      default:
-        return false;
+    // UUID without hyphens (legacy id format)
+    if(idLen == 45) {
+      return true;      
+    }
+    
+    try {
+      UUID.fromString(objectId);
+    } catch (IllegalArgumentException e) {
+      return false;
     }
     
     return true;

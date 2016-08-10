@@ -150,7 +150,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
       
       boolean validUUID = topicChecker.checkUUID(objectId);
       if(!validUUID) {
-        logger.debug("Object id length mismatch ({})", objectId.length());
+        logger.debug("Object ID length mismatch ({}): {}", objectId.length(), objectId);
         return false;
       }
       
@@ -177,7 +177,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
   public boolean validateUserAndRole(String user, String password, Set<Role> roles, CheckType checkType) {
     logger.debug("validateUserAndRole(user, password, roles, checkType): NOT IMPLEMENTED");
 //    logger.warn("Authenticate user {} with token {} and roles {} on {}", user, password, roles, checkType);
-    return false;
+    return roles.contains(Roles.admin) && validateUser(user, password);
   }
 
   public void setBrokerConfiguration(BrokerConfiguration brokerConfiguration) {
