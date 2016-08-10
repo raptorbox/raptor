@@ -87,7 +87,13 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
       return true;
     }
     
-    return getUser(password) != null;
+    boolean result = getUser(password) != null;
+    
+    if(!result) {
+      logger.debug("Login failed for {}:{}", user, password);
+    }
+    
+    return result;
   }
 
   @Override
