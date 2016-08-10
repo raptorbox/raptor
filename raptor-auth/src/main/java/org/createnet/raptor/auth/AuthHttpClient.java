@@ -161,9 +161,19 @@ public class AuthHttpClient {
     this.checkUrl = configuration.token.checkUrl;
 
   }
-
+  
+  protected String checkToken(String token) {
+    String prefix = "Bearer ";
+    if(token.substring(0, prefix.length()).equals(prefix)) {
+      return token;
+    }
+    return prefix + token;
+  }
+  
   public String check(String accessToken, List<NameValuePair> args) throws ClientException, IOException {
-
+    
+    
+    
     HttpPost httpost = new HttpPost(checkUrl);
     httpost.setConfig(requestConfig);
     httpost.setHeader("Authorization", accessToken);
