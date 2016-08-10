@@ -156,7 +156,9 @@ public class DispatcherService {
       public void run(Event event) throws Emitter.EmitterException {
 
         try {
-
+          
+          logger.debug("Processing dispatcher event {}", event.getEvent());
+          
           switch (event.getEvent()) {
             case "create":
             case "update":
