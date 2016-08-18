@@ -208,7 +208,7 @@ public class DispatcherService implements RaptorService {
   }
 
   public void pushData(Stream stream, RecordSet records) throws ConfigurationException, IOException {
-    String topic = stream.getServiceObject().id + "/stream/" + stream.name + "/updates";
+    String topic = stream.getServiceObject().id + "/streams/" + stream.name + "/updates";
     getDispatcher().add(topic, records.toJson());
   }
 
