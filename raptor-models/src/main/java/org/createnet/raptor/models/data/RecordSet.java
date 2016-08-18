@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -210,7 +211,7 @@ public class RecordSet {
     if (row.has("channels")) {
       
       if (row.has("lastUpdate")) {
-        Date date = new Date(row.get("lastUpdate").asLong());
+        Date date = Date.from(Instant.ofEpochSecond(row.get("lastUpdate").asLong()));
         this.setLastUpdate(date);
       }
       
