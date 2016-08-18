@@ -84,8 +84,7 @@ public class BrokerClient {
       connection.connect(connOpts);
       
     } catch (MqttException me) {
-//      logger.error("Failed to connect to broker", me);
-      logger.error("Failed to connect to broker", me);
+      logger.error("Failed to connect to broker: {}", me.getMessage());
       throw me;
     }
   }
@@ -99,15 +98,17 @@ public class BrokerClient {
     try {
       
       MqttClient conn = getConnection();
+      
       if(conn == null || !conn.isConnected() ) {
         throw new DispatchException("Connection is not available");
       }
       
       getConnection().publish(topic, message.getBytes(), qos, retain);
+
     }
-    catch(MqttException e) {
-      logger.error("MQTT exception", e);
-      throw new DispatchException();
+    catch(Exception e) {
+      logger.error("Failed to send message. MQTT exception: {}", e.getMessage());
+      throw new DispatchException(e);
     }
   }
   
@@ -116,7 +117,7 @@ public class BrokerClient {
       try {
         connection.disconnect();
       } catch (MqttException ex) {
-        logger.error("Cannot close connection properly", ex);
+        logger.error("Cannot close connection properly: {}", ex.getMessage());
       }
     }
   }
