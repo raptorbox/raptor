@@ -78,9 +78,17 @@ public class StorageService {
 
     return storage;
   }
-
+  
+  protected  Storage.Connection getConnection(String name) throws Storage.StorageException, ConfigurationException {
+    Storage.Connection conn = getStorage().getConnection(name);
+    if(conn == null) {
+      throw new Storage.StorageException("Cannot load connection for " + name);
+    }
+    return conn;
+  }
+  
   public Storage.Connection getObjectConnection() throws ConfigurationException, Storage.StorageException {
-    return getStorage().getConnection(ConnectionId.objects.toString());
+    return getConnection(ConnectionId.objects.toString());
   }
 
   public Storage.Connection getDataConnection() throws ConfigurationException, Storage.StorageException {
