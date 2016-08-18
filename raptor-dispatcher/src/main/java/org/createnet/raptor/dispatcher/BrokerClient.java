@@ -55,11 +55,11 @@ public class BrokerClient {
   protected synchronized void connect() throws MqttException {
     
     if(connection != null && connection.isConnected()) {
-      logger.debug("Mqtt connection available");
+//      logger.debug("Mqtt connection available");
       return;
     }
     
-    logger.debug("Connecting to mqtt broker");
+//    logger.debug("Connecting to mqtt broker");
     
     try {
 
