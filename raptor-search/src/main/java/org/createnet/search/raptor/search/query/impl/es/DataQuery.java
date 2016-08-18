@@ -23,10 +23,10 @@ import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.GeoBoundingBoxQueryBuilder;
 import org.elasticsearch.index.query.GeoDistanceQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.elasticsearch.index.query.TermQueryBuilder;
 
 /**
  *
@@ -37,12 +37,12 @@ public class DataQuery extends AbstractQuery {
   public DataQuery() {}
   
   public List<DataQuery> queryList = new ArrayList();
-
+  
   public boolean timerange = false;
   public boolean numericrange = false;
 
-  public double rangefrom = Double.MIN_VALUE;
-  public double rangeto = Double.MAX_VALUE;
+  public double numericrangefrom = Double.MIN_VALUE;
+  public double numericrangeto = Double.MAX_VALUE;
 
   public double timerangefrom = Double.MIN_VALUE;
   public double timerangeto = Double.MAX_VALUE;
@@ -115,8 +115,8 @@ public class DataQuery extends AbstractQuery {
 
       RangeQueryBuilder numericrangeFilter
               = QueryBuilders.rangeQuery("doc." + numericrangefield)
-              .from(rangefrom).includeLower(true)
-              .to(rangeto).includeUpper(true);
+              .from(numericrangefrom).includeLower(true)
+              .to(numericrangeto).includeUpper(true);
 
       //filter.append(numericrangeFilter());
       queries.add(numericrangeFilter);
@@ -145,7 +145,7 @@ public class DataQuery extends AbstractQuery {
     }
 
     if (match) {
-      TermQueryBuilder matchFilter = QueryBuilders.termQuery(matchfield, matchstring);
+      MatchQueryBuilder matchFilter = QueryBuilders.matchQuery(matchfield, matchstring);
       queries.add(matchFilter);
     }
     
