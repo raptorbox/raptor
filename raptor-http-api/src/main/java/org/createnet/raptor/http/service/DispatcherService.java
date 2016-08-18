@@ -51,9 +51,6 @@ public class DispatcherService implements RaptorService {
   ConfigurationService configuration;
 
   @Inject
-  AuthService auth;
-
-  @Inject
   EventEmitterService emitter;
 
   Emitter.Callback emitterCallback = new Emitter.Callback() {
@@ -100,7 +97,7 @@ public class DispatcherService implements RaptorService {
             break;
         }
 
-      } catch (ConfigurationException | RaptorComponent.ParserException | Authentication.AuthenticationException | IOException e) {
+      } catch (ConfigurationException | IOException e) {
         logger.error("Failed to dispatch message", e);
       }
 
@@ -156,17 +153,17 @@ public class DispatcherService implements RaptorService {
     return dispatcher;
   }
 
-  protected ObjectNode createObjectMessage(ServiceObject obj) throws ConfigurationException, Authentication.AuthenticationException {
+  protected ObjectNode createObjectMessage(ServiceObject obj) {
 
     ObjectNode message = ServiceObject.getMapper().createObjectNode();
 
-    message.put("userId", auth.getUser().getUserId());
+    message.put("userId", obj.getUserId());
     message.set("object", obj.toJsonNode());
 
     return message;
   }
 
-  public void notifyObjectEvent(String op, ServiceObject obj) throws ConfigurationException, RaptorComponent.ParserException, Authentication.AuthenticationException {
+  public void notifyObjectEvent(String op, ServiceObject obj) throws ConfigurationException {
 
     String topic = obj.id + "/events";
 
@@ -182,10 +179,8 @@ public class DispatcherService implements RaptorService {
 
     String topic = stream.getServiceObject().id + "/events";
 
-    ObjectNode message = ServiceObject.getMapper().createObjectNode();
-
-    message.put("userId", stream.getServiceObject().getUserId());
-    message.set("object", stream.getServiceObject().toJsonNode());
+    ObjectNode message = createObjectMessage(stream.getServiceObject());
+    
     message.put("type", MessageType.stream.toString());
     message.put("op", "data");
     message.put("streamId", stream.name);
@@ -194,7 +189,7 @@ public class DispatcherService implements RaptorService {
     getDispatcher().add(topic, message.toString());
   }
 
-  public void notifyActionEvent(String op, Action action, String status) throws IOException, ConfigurationException, Authentication.AuthenticationException {
+  public void notifyActionEvent(String op, Action action, String status) throws IOException, ConfigurationException {
 
     String topic = action.getServiceObject().id + "/events";
 
@@ -212,12 +207,12 @@ public class DispatcherService implements RaptorService {
     getDispatcher().add(topic, message.toString());
   }
 
-  public void pushData(Stream stream, RecordSet records) throws ConfigurationException, Authentication.AuthenticationException, IOException {
+  public void pushData(Stream stream, RecordSet records) throws ConfigurationException, IOException {
     String topic = stream.getServiceObject().id + "/stream/" + stream.name + "/updates";
     getDispatcher().add(topic, records.toJson());
   }
 
-  public void actionTrigger(Action action, String status) throws ConfigurationException, Authentication.AuthenticationException {
+  public void actionTrigger(Action action, String status) throws ConfigurationException {
     String topic = action.getServiceObject().id + "/actuations/" + action.name;
     getDispatcher().add(topic, status);
   }
