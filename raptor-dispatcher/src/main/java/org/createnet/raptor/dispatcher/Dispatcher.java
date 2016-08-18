@@ -74,7 +74,7 @@ public class Dispatcher {
         logger.debug("Message sent to {}", qm.topic);
       } catch (DispatchException ex) {
         requeue(qm);
-        logger.error("Error sending message", ex);
+        logger.error("Error sending message: {}", ex.getMessage());
       }
     }
 
