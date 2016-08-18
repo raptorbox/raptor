@@ -13,7 +13,6 @@ import org.createnet.raptor.models.data.types.BooleanRecord;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.exception.RecordsetException;
-import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.utils.TestUtils;
 import org.junit.After;
@@ -99,7 +98,7 @@ public class RecordsetTest extends TestUtils {
     String strjson = results.toJson();
     JsonNode json = mapper.readTree(strjson);
     
-    assertTrue(json.has("data"));
+    assertTrue(json.size() == results.size());
     
   }
 

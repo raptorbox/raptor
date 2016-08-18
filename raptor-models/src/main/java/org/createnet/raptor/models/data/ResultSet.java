@@ -17,13 +17,14 @@ package org.createnet.raptor.models.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.ServiceObject;
@@ -35,25 +36,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-public class ResultSet {
-  
-  // json properties
-  public final Data data = new Data();
-  
-  @JsonIgnore
-  public int lastUpdate;
-  
+public class ResultSet extends ArrayList<RecordSet> {
+
   @JsonIgnore
   protected Stream stream;
     
   @JsonIgnore
   private final Logger logger = LoggerFactory.getLogger(ResultSet.class);
-  
-  static public class Data extends ArrayList<RecordSet>{
-    
-    public Data() {}
-    
-  }
   
   public Stream getStream() {
     return stream;
@@ -85,45 +74,45 @@ public class ResultSet {
     try {
       json = mapper.readTree(jsonString);
     } catch (IOException ex) {
-      logger.error("Error parsing: " + jsonString, ex);
+      logger.error("Error parsing: {}", jsonString, ex);
       return;
     }
-
-    JsonNode list = json.get("data");
-
-    if (list.isArray()) {
-      for (JsonNode row : list) {
-        this.add(jsonString);
+    
+    if (json.isArray()) {
+      for (JsonNode row : json) {
+        this.add(new RecordSet(this.getStream(), row));
       }
     }
 
   }
   
-  public Iterator<RecordSet> iterator() {
-    return data.iterator();
-  }
-  
-  public int size() {
-    return data.size();
-  }
-  
-  public RecordSet add(RecordSet recordset) {
-    this.data.add(recordset);
-    return recordset;
-  }
-  
-  public RecordSet add(String raw) throws RecordsetException {
+  public boolean add(String raw) throws RecordsetException {
     RecordSet recordset = new RecordSet(stream, raw);
     return this.add(recordset);
   }
   
-  public String toJson() throws JsonProcessingException, IOException {
+  public String toJson() throws IOException {
     return toJsonNode().toString();
   }
   
-  public ObjectNode toJsonNode() throws JsonProcessingException, IOException {
+  public ArrayNode toJsonNode() throws JsonProcessingException, IOException {
     ObjectMapper mapper = ServiceObject.getMapper();
-    return mapper.convertValue(this, ObjectNode.class);
+    ArrayNode list = mapper.createArrayNode();
+    for (RecordSet record : this) {
+      list.add(record.toJsonNode());
+    }
+    return list;
   }
 
+  @Override
+  public String toString() {
+    try {
+      return toJson();
+    } catch (IOException ex) {
+      logger.error("Cannot serialize ResultSet: {}", ex.getMessage(), ex);
+    }
+    return "[]";
+  }
+  
+  
 }
