@@ -18,6 +18,7 @@ package org.createnet.raptor.cli;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.createnet.raptor.broker.Broker;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.HttpService;
@@ -33,34 +34,50 @@ public class ServiceLauncher {
   final private Logger logger = LoggerFactory.getLogger(ServiceLauncher.class);
   final private ExecutorService executor = Executors.newFixedThreadPool(2);
   
+  protected boolean shuttingDown = false;
+
+  protected Future<?> brokerTask;
+  protected Future<?> httpTask;
+  
   void start() {
+
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      @Override
+      public void run() {
+        logger.debug("Shutting down!");
+        shuttingDown = true;
+        brokerTask.cancel(true);
+        httpTask.cancel(true);
+      }
+    });
+
     launch();
   }
-  
+
   private void relaunch() {
+    
+    if(shuttingDown) return;
     
     try {
       executor.shutdownNow();
       Thread.sleep(5000);
-    }
-    catch(InterruptedException e) {
+    } catch (InterruptedException e) {
       logger.error("Interruption detected, exit.");
       System.exit(1);
-    }
-    catch(Exception e) {
+    } catch (Exception e) {
       logger.error("Exception on relaunch", e);
     }
-    
+
     launch();
   }
-  
+
   private void launch() {
-    
+
     try {
-      
+
       logger.info("Starting job for HTTPService");
       
-      executor.submit(()-> {
+      httpTask = executor.submit(() -> {
         HttpService http = new HttpService();
         try {
           http.start();
@@ -69,11 +86,10 @@ public class ServiceLauncher {
           throw new RuntimeException(ex);
         }
       });
-      
-      
+
       logger.info("Starting job for Broker");
-      
-      executor.submit(()-> {
+
+      brokerTask = executor.submit(() -> {
         Broker broker = new Broker();
         try {
           broker.initialize();
@@ -84,11 +100,10 @@ public class ServiceLauncher {
         }
       });
 
-    }    
-    catch(RuntimeException ex) {
+    } catch (RuntimeException ex) {
       logger.error("RuntimeException received, restarting services", ex);
       relaunch();
     }
   }
-  
+
 }

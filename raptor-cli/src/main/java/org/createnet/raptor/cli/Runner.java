@@ -94,7 +94,7 @@ public class Runner {
 
     Option setupCommand = Option.builder(CommandName.SETUP)
             .hasArg(false)
-            .desc("Setup the current Raptor instance WARNING: if used with force flag, ALL DATA AND INDEXES will be wiped")
+            .desc("Setup the current Raptor instance WARNING: if used with force flag, ALL DATA AND INDEXES will be wiped out")
             .build();
 
     Option launchCommand = Option.builder(CommandName.LAUNCH)
