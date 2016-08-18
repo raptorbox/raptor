@@ -64,12 +64,6 @@ public class ApplicationConfig extends ResourceConfig {
               .to(EventEmitterService.class)
               .in(Singleton.class);
 
-      
-//        bind(AuthService.class)
-//                .proxy(true)
-//                .proxyForSameScope(false)
-//                .to(AuthService.class)
-//                .in(RequestScoped.class);
     }
   }
 

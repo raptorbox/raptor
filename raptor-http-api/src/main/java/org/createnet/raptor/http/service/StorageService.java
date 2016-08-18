@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -48,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 @Service
-public class StorageService {
+public class StorageService implements RaptorService {
 
   private final int defaultDataTTL = 3 * 30; // 3 months, 90 days
   private final Logger logger = LoggerFactory.getLogger(StorageService.class);
@@ -60,6 +62,27 @@ public class StorageService {
   AuthService auth;
 
   private Storage storage;
+
+  @PostConstruct
+  @Override
+  public void initialize() throws ServiceException {
+    try {
+      getStorage();
+    } catch (Storage.StorageException | ConfigurationException e) {
+      throw new ServiceException(e);
+    }
+  }
+
+  @PreDestroy
+  @Override
+  public void shutdown() throws ServiceException {
+    try {
+      getStorage().disconnect();
+      storage = null;
+    } catch (Storage.StorageException | ConfigurationException e) {
+      throw new ServiceException(e);
+    }
+  }
 
   private enum ConnectionId {
     objects, data, subscriptions, actuations
@@ -78,15 +101,15 @@ public class StorageService {
 
     return storage;
   }
-  
-  protected  Storage.Connection getConnection(String name) throws Storage.StorageException, ConfigurationException {
+
+  protected Storage.Connection getConnection(String name) throws Storage.StorageException, ConfigurationException {
     Storage.Connection conn = getStorage().getConnection(name);
-    if(conn == null) {
+    if (conn == null) {
       throw new Storage.StorageException("Cannot load connection for " + name);
     }
     return conn;
   }
-  
+
   public Storage.Connection getObjectConnection() throws ConfigurationException, Storage.StorageException {
     return getConnection(ConnectionId.objects.toString());
   }
@@ -182,18 +205,20 @@ public class StorageService {
         lastRecord = raw;
       }
     }
-    
-    if(parseError > 0) {
+
+    if (parseError > 0) {
       logger.debug("Skipped {} records due to parser error", parseError);
-      
-      if(lastException != null)
+
+      if (lastException != null) {
         logger.error("Last exception", lastException);
-      
-      if(lastRecord != null)
+      }
+
+      if (lastRecord != null) {
         logger.error("Last raw record: {}", lastRecord);
-      
+      }
+
     }
-    
+
     return resultset;
   }
 

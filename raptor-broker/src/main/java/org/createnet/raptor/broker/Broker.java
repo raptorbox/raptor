@@ -68,8 +68,9 @@ public class Broker {
     
     ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
     ServiceLocator serviceLocator = locatorFactory.create("BrokerLocator");
-    ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());
 
+    ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());
+    
     serviceLocator.inject(securityManager);
     
     securityManager.setBrokerConfiguration(getBrokerConfiguration());
@@ -91,7 +92,6 @@ public class Broker {
   
   public void stop() throws BrokerException {
     
-    server.setSecurityManager(securityManager);
     try {
       logger.debug("Stopping broker");
       server.stop();

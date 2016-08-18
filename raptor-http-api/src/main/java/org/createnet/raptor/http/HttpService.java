@@ -22,8 +22,11 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.ext.RuntimeDelegate;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import java.util.Iterator;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.createnet.raptor.http.service.RaptorService;
 
 /**
  *
@@ -62,7 +65,7 @@ public class HttpService {
     URI serviceURI = UriBuilder.fromUri(uri).build();
     
     logger.debug("Starting HTTP service");
-    
+            
     // default to port 8080
     server = HttpServer.create(new InetSocketAddress(serviceURI.getHost(), serviceURI.getPort()), 0);
     HttpHandler handler = RuntimeDelegate.getInstance().createEndpoint(new ApplicationConfig(), HttpHandler.class);

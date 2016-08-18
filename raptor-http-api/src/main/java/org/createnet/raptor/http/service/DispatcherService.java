@@ -17,7 +17,9 @@ package org.createnet.raptor.http.service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
-import java.util.logging.Level;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import javax.inject.Inject;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.jvnet.hk2.annotations.Service;
@@ -41,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 @Service
-public class DispatcherService {
+public class DispatcherService implements RaptorService {
 
   private final Logger logger = LoggerFactory.getLogger(DispatcherService.class);
 
@@ -53,6 +55,80 @@ public class DispatcherService {
 
   @Inject
   EventEmitterService emitter;
+
+  Emitter.Callback emitterCallback = new Emitter.Callback() {
+    @Override
+    public void run(Event event) throws Emitter.EmitterException {
+
+      try {
+
+        logger.debug("Processing dispatcher event {} (parent: {})", event.getEvent(), event.getParentEvent());
+
+        switch (event.getParentEvent()) {
+          case "create":
+          case "update":
+          case "delete":
+            ObjectEvent objEvent = (ObjectEvent) event;
+
+            if (!objEvent.getObject().settings.eventsEnabled()) {
+              return;
+            }
+
+            notifyObjectEvent(objEvent.getEvent(), objEvent.getObject());
+            break;
+          case "push":
+            // notify data event
+            DataEvent dataEvent = (DataEvent) event;
+
+            if (!dataEvent.getStream().getServiceObject().settings.eventsEnabled()) {
+              return;
+            }
+
+            notifyDataEvent(dataEvent.getStream(), dataEvent.getRecord());
+            break;
+          case "execute":
+          case "deleteAction":
+            // notify event
+            ActionEvent actionEvent = (ActionEvent) event;
+
+            if (!actionEvent.getAction().getServiceObject().settings.eventsEnabled()) {
+              return;
+            }
+
+            String op = event.getEvent().equals("execute") ? "execute" : "delete";
+            notifyActionEvent(op, actionEvent.getAction(), actionEvent.getActionStatus().status);
+            break;
+        }
+
+      } catch (ConfigurationException | RaptorComponent.ParserException | Authentication.AuthenticationException | IOException e) {
+        logger.error("Failed to dispatch message", e);
+      }
+
+    }
+  };
+   
+    
+  @PostConstruct
+  @Override
+  public void initialize() throws ServiceException {
+    try {
+      getDispatcher();
+    } catch (Exception e) {
+      throw new ServiceException(e);
+    }
+  }
+
+  @PreDestroy
+  @Override
+  public void shutdown() throws ServiceException {
+    try {
+      removeEmitterCallback();
+      getDispatcher().close();
+      dispatcher = null;
+    } catch (Exception e) {
+      throw new ServiceException(e);
+    }
+  }
 
   public enum MessageType {
     object, stream, actuation
@@ -75,9 +151,8 @@ public class DispatcherService {
     if (dispatcher == null) {
       dispatcher = new Dispatcher();
       dispatcher.initialize(configuration.getDispatcher());
-      initialize();
+      addEmitterCallback();
     }
-
     return dispatcher;
   }
 
@@ -147,54 +222,14 @@ public class DispatcherService {
     getDispatcher().add(topic, status);
   }
 
-  private void initialize() {
-    
+  private void addEmitterCallback() {
     logger.debug("Register dispatcher event trigger");
-    
-    emitter.on(EventEmitterService.EventName.all, new Emitter.Callback() {
-      @Override
-      public void run(Event event) throws Emitter.EmitterException {
+    emitter.on(EventEmitterService.EventName.all, emitterCallback);
+  }
 
-        try {
-          
-          logger.debug("Processing dispatcher event {} (parent: {})", event.getEvent(), event.getParentEvent());
-          
-          switch (event.getParentEvent()) {
-            case "create":
-            case "update":
-            case "delete":
-              ObjectEvent objEvent = (ObjectEvent) event;
-              
-              if(!objEvent.getObject().settings.eventsEnabled()) return;
-              
-              notifyObjectEvent(objEvent.getEvent(), objEvent.getObject());
-              break;
-            case "push":
-              // notify data event
-              DataEvent dataEvent = (DataEvent) event;
-              
-              if(!dataEvent.getStream().getServiceObject().settings.eventsEnabled()) return;
-              
-              notifyDataEvent(dataEvent.getStream(), dataEvent.getRecord());
-              break;
-            case "execute":
-            case "deleteAction":
-              // notify event
-              ActionEvent actionEvent = (ActionEvent) event;
-              
-              if(!actionEvent.getAction().getServiceObject().settings.eventsEnabled()) return;
-              
-              String op = event.getEvent().equals("execute") ? "execute" : "delete";
-              notifyActionEvent(op, actionEvent.getAction(), actionEvent.getActionStatus().status);
-              break;
-          }
+  private void removeEmitterCallback() {
+    logger.debug("Unregister dispatcher event trigger");
+    emitter.off(EventEmitterService.EventName.all, emitterCallback);
+  }
 
-        } catch (ConfigurationException | RaptorComponent.ParserException | Authentication.AuthenticationException | IOException e) {
-          logger.error("Failed to dispatch message", e);
-        }
-
-      }
-    });
-  }  
-  
 }
