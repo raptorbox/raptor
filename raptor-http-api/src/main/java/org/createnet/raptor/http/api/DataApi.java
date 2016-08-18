@@ -232,11 +232,11 @@ public class DataApi extends AbstractApi {
       return Response.noContent().build();
     }
     
-    List<ResultSet> results = indexer.searchData(stream, query);
+    ResultSet results = indexer.searchData(stream, query);
     
     logger.debug("Search data for stream {} in object {} has {} results", streamName, obj.id, results.size());
     
-    return Response.ok().entity(results).build();
+    return Response.ok().entity(results.toJsonNode()).build();
   }
   
   

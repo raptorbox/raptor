@@ -208,16 +208,17 @@ public class IndexerService implements RaptorService {
 
   }
 
-  public List<ResultSet> searchData(Stream stream, DataQuery query) throws Indexer.SearchException, RecordsetException, Indexer.IndexerException, ConfigurationException {
-    List<ResultSet> results = new ArrayList();
-
+  public ResultSet searchData(Stream stream, DataQuery query) throws Indexer.SearchException, RecordsetException, Indexer.IndexerException, ConfigurationException {
+    
+    setQueryIndex(query, IndexNames.data);
     List<String> res = getIndexer().search(query);
-
+    
+    ResultSet resultset = new ResultSet(stream);
     for (String raw : res) {
-      results.add(new ResultSet(stream, raw));
+      resultset.add(new RecordSet(stream, raw));
     }
 
-    return results;
+    return resultset;
   }
 
   public void deleteData(Collection<Stream> changedStreams) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {

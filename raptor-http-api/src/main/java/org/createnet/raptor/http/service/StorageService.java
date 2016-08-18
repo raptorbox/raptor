@@ -238,7 +238,7 @@ public class StorageService implements RaptorService {
 
   public RecordSet fetchLastUpdate(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
     ResultSet resultset = fetchData(stream, 1, 0);
-    return resultset.data.isEmpty() ? null : resultset.data.get(0);
+    return resultset.isEmpty() ? null : resultset.get(0);
   }
 
   public void saveData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException, JsonProcessingException, IOException, Authentication.AuthenticationException {
