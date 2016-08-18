@@ -27,6 +27,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.createnet.raptor.auth.authentication.Authentication;
@@ -75,8 +76,13 @@ public class DataApi extends AbstractApi {
   @Path("{stream}")
   @Produces(MediaType.APPLICATION_JSON)
   public Response fetch(
+          
           @PathParam("id") String id,
-          @PathParam("stream") String streamName
+          @PathParam("stream") String streamName,
+          
+          @QueryParam("limit") int limit,
+          @QueryParam("offset") int offset
+          
   ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, IOException {
 
     ServiceObject obj = loadObject(id);
@@ -90,7 +96,7 @@ public class DataApi extends AbstractApi {
       return Response.noContent().build();
     }
     
-    ResultSet data = storage.fetchData(stream);
+    ResultSet data = storage.fetchData(stream, limit, offset);
 
     logger.debug("Fetched {} records for stream {} in object {}", data.size(), streamName, obj.id);
 

@@ -52,7 +52,17 @@ import org.slf4j.LoggerFactory;
 @Service
 public class StorageService implements RaptorService {
 
-  private final int defaultDataTTL = 3 * 30; // 3 months, 90 days
+  /**
+   * Maximum duration time for a record in the database
+   * eg. 90 days
+   */
+  private final int defaultDataTTL = 90; 
+  
+  /**
+   * Limit of records that can be fetched per request
+   */  
+  private final int defaultRecordLimit = 1000;
+  
   private final Logger logger = LoggerFactory.getLogger(StorageService.class);
 
   @Inject
@@ -175,10 +185,10 @@ public class StorageService implements RaptorService {
   }
 
   public ResultSet fetchData(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
-    return fetchData(stream, 0);
+    return fetchData(stream, defaultRecordLimit, 0);
   }
 
-  public ResultSet fetchData(Stream stream, int limit) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
+  public ResultSet fetchData(Stream stream, int limit, int offset) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
 
     ResultSet resultset = new ResultSet(stream);
 
@@ -186,9 +196,13 @@ public class StorageService implements RaptorService {
     query.params.add(new ListQuery.QueryParam("streamId", stream.name));
     query.params.add(new ListQuery.QueryParam("objectId", stream.getServiceObject().id));
 
+    query.setSort("lastUpdate", ListQuery.Sort.DESC);
+    
+    if(offset > 0)
+      query.offset = offset;
+    
     if (limit > 0) {
-      query.limit = limit;
-      query.setSort("lastUpdate", ListQuery.Sort.DESC);
+      query.limit = limit > defaultRecordLimit ? defaultRecordLimit : limit;
     }
 
     List<String> results = getDataConnection().list(query);
@@ -223,7 +237,7 @@ public class StorageService implements RaptorService {
   }
 
   public RecordSet fetchLastUpdate(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
-    ResultSet resultset = fetchData(stream, 1);
+    ResultSet resultset = fetchData(stream, 1, 0);
     return resultset.data.isEmpty() ? null : resultset.data.get(0);
   }
 
