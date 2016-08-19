@@ -133,13 +133,15 @@ public class CouchbaseConnection extends AbstractConnection {
         results = bucket.query(N1qlQuery.simple(selectQuery, ryow), queryOptions.timeout, queryOptions.timeoutUnit);
         break;
       } catch (RuntimeException ex) {
-        logger.error("Runtime exception on couchbase.list()", ex);
+        logger.error("Runtime exception on couchbase.list: {}", ex.getMessage());
+        results = null;
       } finally {
         i--;
       }
     }
 
     if (results == null) {
+      logger.warn("Couchbase query failed");
       throw new Storage.StorageException("List query cannot be completed");
     }
 
