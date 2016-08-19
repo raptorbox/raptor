@@ -35,6 +35,8 @@ abstract public class TestUtils {
   
   protected final ObjectMapper mapper = ServiceObject.getMapper();
   
+  final protected String defaultStreamName = "mylocation";  
+  
   protected void loadObject() throws IOException {
     jsonServiceObject = loadData("model");
     serviceObject = new ServiceObject();

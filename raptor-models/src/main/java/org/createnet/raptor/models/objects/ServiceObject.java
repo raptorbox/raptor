@@ -67,10 +67,6 @@ public class ServiceObject extends ServiceObjectContainer {
   public Map<String, Subscription> subscriptions = new HashMap();
   public Map<String, Action> actions = new HashMap();
 
-  public void parse(JsonNode jsonObj1) {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
   public void addStreams(Collection<Stream> streams) {
     for (Stream stream : streams) {
       stream.setServiceObject(this);
@@ -161,6 +157,10 @@ public class ServiceObject extends ServiceObjectContainer {
 
   }
 
+  public void parse(JsonNode json) throws ParserException {
+    parse(json.toString());
+  }  
+  
   @Override
   public void parse(String json) throws ParserException {
 

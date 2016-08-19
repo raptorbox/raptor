@@ -242,9 +242,10 @@ public class StorageService implements RaptorService {
   }
 
   public void saveData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException, JsonProcessingException, IOException, Authentication.AuthenticationException {
+
+    record.setStream(stream);
     record.userId = auth.getUser().getUserId();
-    record.streamId = stream.name;
-    record.objectId = stream.getServiceObject().id;
+    
     getDataConnection().set(getDataId(stream, record), record.toJson(), defaultDataTTL);
   }
 

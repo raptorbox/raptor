@@ -185,6 +185,7 @@ public class DataApi extends AbstractApi {
       // set the stream, enforcing channels constrain on serialization
       // this avoid records that do not comply with the stored model
       record.setStream(stream);
+      record.validate();
       
       // save data
       storage.saveData(stream, record);

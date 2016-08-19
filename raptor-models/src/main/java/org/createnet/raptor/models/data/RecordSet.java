@@ -59,11 +59,10 @@ public class RecordSet {
 
   public Date lastUpdate;
   final public Map<String, IRecord> channels = new HashMap();
-
+  
   public String userId;
   public String streamId;
   public String objectId;
-  
   
   @JsonIgnore
   private final Logger logger = LoggerFactory.getLogger(RecordSet.class);
@@ -78,7 +77,7 @@ public class RecordSet {
   
   public RecordSet(Stream stream) {
     this();
-    this.stream = stream;
+    this.setStream(stream);
   }
 
   public RecordSet(Stream stream, JsonNode row) throws RecordsetException {
@@ -297,11 +296,49 @@ public class RecordSet {
   }
 
   public void setStream(Stream stream) {
+    
     this.stream = stream;
+    
+    if(stream != null) {
+      
+      this.streamId = stream.name;      
+      
+      if(stream.getServiceObject() != null) {
+        
+        this.objectId = stream.getServiceObject().getId();
+        
+        if(this.userId == null) {
+          this.userId = stream.getServiceObject().getUserId();
+        }        
+
+      }
+      
+    }
+    
   }
   
   public Stream getStream() {
     return this.stream;
+  }
+  
+  public void validate() throws RaptorComponent.ValidationException {
+    
+    if(getStream() != null) {
+      
+//      for (String channelName : stream.channels.keySet()) {
+//        if (!channels.containsKey(channelName)) {
+//          throw new RaptorComponent.ValidationException("Missing channel: " + channelName);
+//        }
+//      }
+      
+      for (String channelName : channels.keySet()) {
+        if (!getStream().channels.containsKey(channelName)) {
+          throw new RaptorComponent.ValidationException("Objet model does not define this channel: " + channelName);
+        }
+      }
+
+    }
+
   }
   
 }

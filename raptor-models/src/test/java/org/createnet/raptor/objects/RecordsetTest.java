@@ -13,6 +13,7 @@ import org.createnet.raptor.models.data.types.BooleanRecord;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.exception.RecordsetException;
+import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.utils.TestUtils;
 import org.junit.After;
@@ -99,6 +100,39 @@ public class RecordsetTest extends TestUtils {
     JsonNode json = mapper.readTree(strjson);
     
     assertTrue(json.size() == results.size());
+    
+  }
+  
+  @Test(expected=RaptorComponent.ValidationException.class)
+  public void testParseRecordSet() throws RecordsetException, JsonProcessingException, IOException, RaptorComponent.ValidationException, RaptorComponent.ParserException {
+    
+   
+    JsonNode resultset = loadData("resultset");
+    JsonNode json = resultset.get(0);
+    
+    serviceObject.parse(jsonServiceObject);
+    
+    Stream stream = serviceObject.streams.getOrDefault(defaultStreamName, null);
+    
+    assertNotNull("Stream "+ defaultStreamName +" not found in model", stream);
+            
+    RecordSet recordSet = new RecordSet(stream, json);
+    // should not throw exception
+    recordSet.validate();
+    
+    JsonNode invalidRecord = loadData("recordset_invalid");
+    
+    recordSet = mapper.convertValue(invalidRecord, RecordSet.class);
+
+    // should not throw exception
+    recordSet.validate();
+    
+    recordSet.setStream(stream);
+    
+    // should throw an exception now, as there are additional channels
+    recordSet.validate();
+    
+    
     
   }
 
