@@ -104,7 +104,7 @@ public class DataQuery extends AbstractQuery {
 
     if (timerange) {
       RangeQueryBuilder rangeFilter
-              = QueryBuilders.rangeQuery("doc.lastUpdate")
+              = QueryBuilders.rangeQuery("lastUpdate")
               .from((long) timerangefrom).to((long) timerangeto)
               .includeLower(true).includeUpper(true);
       //filter.append(rangeFilter.toString());
@@ -114,7 +114,7 @@ public class DataQuery extends AbstractQuery {
     if (numericrange) {
 
       RangeQueryBuilder numericrangeFilter
-              = QueryBuilders.rangeQuery("doc." + numericrangefield)
+              = QueryBuilders.rangeQuery(numericrangefield)
               .from(numericrangefrom).includeLower(true)
               .to(numericrangeto).includeUpper(true);
 
