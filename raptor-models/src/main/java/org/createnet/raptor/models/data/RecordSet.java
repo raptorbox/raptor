@@ -16,6 +16,7 @@
 package org.createnet.raptor.models.data;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.createnet.raptor.models.data.types.NumberRecord;
 import org.createnet.raptor.models.data.types.BooleanRecord;
@@ -34,7 +35,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import org.createnet.raptor.models.data.types.StringRecord;
 import org.createnet.raptor.models.data.types.TypesManager;
 import org.createnet.raptor.models.exception.RecordsetException;
@@ -64,23 +64,30 @@ public class RecordSet {
   public String streamId;
   public String objectId;
   
-  @JsonIgnoreProperties
+  
+  @JsonIgnore
   private final Logger logger = LoggerFactory.getLogger(RecordSet.class);
+  
+  @JsonIgnore
+  private Stream stream;
 
   
   public RecordSet() {
     this.lastUpdate = new Date();
   }
+  
+  public RecordSet(Stream stream) {
+    this();
+    this.stream = stream;
+  }
 
   public RecordSet(Stream stream, JsonNode row) throws RecordsetException {
-    this();
+    this(stream);
     parseJson(stream, row);
   }
 
   public RecordSet(Stream stream, String body) throws RecordsetException {
-
-    this.lastUpdate = new Date();
-
+    this(stream);
     ObjectMapper mapper = ServiceObject.getMapper();
     try {
       parseJson(stream, mapper.readTree(body));
@@ -90,12 +97,10 @@ public class RecordSet {
   }
 
   public RecordSet(ArrayList<IRecord> records) {
-    
+    this();
     for (IRecord record : records) {
       this.channels.put(record.getName(), record);
     }
-    
-    this.lastUpdate = new Date();
   }
 
   public RecordSet(ArrayList<IRecord> records, Date date) {
@@ -289,6 +294,14 @@ public class RecordSet {
 
   public static RecordSet fromJSON(String raw) throws IOException {
     return ServiceObject.getMapper().readValue(raw, RecordSet.class);
+  }
+
+  public void setStream(Stream stream) {
+    this.stream = stream;
+  }
+  
+  public Stream getStream() {
+    return this.stream;
   }
   
 }

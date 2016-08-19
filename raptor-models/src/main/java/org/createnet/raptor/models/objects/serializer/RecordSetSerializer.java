@@ -30,43 +30,59 @@ import org.createnet.raptor.models.data.RecordSet;
  */
 public class RecordSetSerializer extends JsonSerializer<RecordSet> {
 
-    @Override
-    public void serialize(RecordSet r, JsonGenerator jg, SerializerProvider sp) throws IOException, JsonProcessingException {
+  @Override
+  public void serialize(RecordSet r, JsonGenerator jg, SerializerProvider sp) throws IOException, JsonProcessingException {
 
-        jg.writeStartObject();
-        
-        jg.writeObjectFieldStart("channels");
-        
-        for(Map.Entry<String, IRecord> item : r.channels.entrySet()) {
-          
-          String channelName = item.getKey();
-          IRecord channel = item.getValue();
-          
-          if(channel == null) continue;
-          if(channel.getValue() == null) continue;
-          
-          jg.writeObjectFieldStart(channelName);
-          jg.writeObjectField("current-value", channel.getValue());
-          jg.writeEndObject();
-          
+    jg.writeStartObject();
+
+    jg.writeObjectFieldStart("channels");
+
+    for (Map.Entry<String, IRecord> item : r.channels.entrySet()) {
+
+      String channelName = item.getKey();
+      IRecord channel = item.getValue();
+      
+      // enforce stream schema if available
+      if(r.getStream() != null) {
+        if(!r.getStream().channels.containsKey(channelName)) {
+          // skip unmanaged field
+          return;
         }
-        
-        jg.writeEndObject();
-        
-        jg.writeNumberField("lastUpdate", r.getLastUpdateTime());
-        
-        if(r.userId != null)
-          jg.writeStringField("userId", r.userId);
-        
-        if(r.objectId != null)
-          jg.writeStringField("objectId", r.objectId);
-        
-        if(r.streamId != null)
-          jg.writeStringField("streamId", r.streamId);
-        
-        
-        jg.writeEndObject();
+      }
+
+      if (channel == null) {
+        continue;
+      }
+      if (channel.getValue() == null) {
+        continue;
+      }
+
+      jg.writeObjectFieldStart(channelName);
+      jg.writeObjectField("current-value", channel.getValue());
+      jg.writeEndObject();
 
     }
-    
+
+    jg.writeEndObject();
+
+    jg.writeNumberField("lastUpdate", r.getLastUpdateTime());
+
+    if (r.userId != null) {
+      jg.writeStringField("userId", r.userId);
+    }
+
+    if (r.objectId != null) {
+      jg.writeStringField("objectId", r.objectId);
+    }
+
+    if (r.getStream() != null) {
+      jg.writeStringField("streamId", r.getStream().name);
+    } else if (r.streamId != null) {
+      jg.writeStringField("streamId", r.streamId);
+    }
+
+    jg.writeEndObject();
+
+  }
+
 }

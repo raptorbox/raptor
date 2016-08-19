@@ -17,15 +17,11 @@ package org.createnet.raptor.models.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.List;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;

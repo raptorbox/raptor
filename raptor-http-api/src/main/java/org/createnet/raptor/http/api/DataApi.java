@@ -18,7 +18,6 @@ package org.createnet.raptor.http.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
@@ -181,6 +180,11 @@ public class DataApi extends AbstractApi {
     if(obj.settings.storeEnabled()) {
       
       logger.debug("Storing data for {} on {}", obj.id, stream.name);
+
+      
+      // set the stream, enforcing channels constrain on serialization
+      // this avoid records that do not comply with the stored model
+      record.setStream(stream);
       
       // save data
       storage.saveData(stream, record);
