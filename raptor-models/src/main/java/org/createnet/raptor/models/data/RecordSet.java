@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import org.createnet.raptor.models.data.types.StringRecord;
 import org.createnet.raptor.models.data.types.TypesManager;
 import org.createnet.raptor.models.exception.RecordsetException;
@@ -177,6 +178,17 @@ public class RecordSet {
     return toJsonNode().toString();
   }
 
+  @Override
+  public String toString() {
+    try {
+      return toJson();
+    } catch (IOException ex) {
+      logger.error("Cannot serialize RecordSet: {}", ex.getMessage());
+    }
+    return "{}";
+  }
+  
+  
   public Date getLastUpdate() {
     if (lastUpdate == null) {
       setLastUpdate(new Date());
@@ -185,7 +197,7 @@ public class RecordSet {
   }
 
   public Long getLastUpdateTime() {
-    return (Long) (getLastUpdate().getTime() / 1000);
+    return getLastUpdate().toInstant().getEpochSecond();
   }
 
   public void setLastUpdate(Date lastUpdate) {
