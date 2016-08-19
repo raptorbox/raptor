@@ -73,7 +73,7 @@ public class HttpService {
     server.createContext(serviceURI.getPath(), handler);
     server.start();
 
-    logger.info("HTTP service running at {}. Hit enter to stop.", serviceURI.toString());
+    logger.info("HTTP service running at {}", serviceURI.toString());
     
     return server;
   }
@@ -84,13 +84,12 @@ public class HttpService {
   }
 
   @SuppressWarnings("ResultOfMethodCallIgnored")
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, InterruptedException {
 
     HttpService launcher = new HttpService();
-    launcher.startServer();
+    HttpServer server = launcher.startServer();
     
-    System.in.read();
-    launcher.stopServer(0);
+//    launcher.stopServer(0);
   }
 
   private String getURI() {
