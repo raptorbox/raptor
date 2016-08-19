@@ -236,7 +236,7 @@ public class DataApi extends AbstractApi {
     
     logger.debug("Search data for stream {} in object {} has {} results", streamName, obj.id, results.size());
     
-    return Response.ok().entity(results.toJsonNode()).build();
+    return Response.ok().entity(results).build();
   }
   
   
