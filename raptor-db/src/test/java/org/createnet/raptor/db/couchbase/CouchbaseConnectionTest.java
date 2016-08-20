@@ -15,9 +15,9 @@
  */
 package org.createnet.raptor.db.couchbase;
 
-import com.couchbase.client.deps.com.fasterxml.jackson.databind.JsonNode;
-import com.couchbase.client.deps.com.fasterxml.jackson.databind.ObjectMapper;
-import com.couchbase.client.deps.com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -47,7 +47,7 @@ public class CouchbaseConnectionTest {
   String userId = "dude";
   String streamId = "sensorstuff";
     
-  static final protected ObjectMapper mapper = new ObjectMapper();
+  static final protected ObjectMapper mapper = Storage.mapper;
   static final StorageProvider storage = new StorageProvider();
 
   static Storage.Connection instance = null;
@@ -168,16 +168,14 @@ public class CouchbaseConnectionTest {
 
     String id = getStreamId(record, time);
 
-    instance.set(id, record.toString(), 0);
+    instance.set(id, (JsonNode)record, 0);
 
-    String result = instance.get(id);
+    JsonNode json = instance.get(id);
 
-    assertNotNull(result);
+    assertNotNull(json);
 
-    JsonNode json2 = mapper.readTree(result);
-
-    assertTrue(json2.has("channels"));
-    assertEquals(json2.get("lastUpdate").asInt(), time);
+    assertTrue(json.has("channels"));
+    assertEquals(json.get("lastUpdate").asInt(), time);
 
     instance.delete(id);
 
@@ -196,10 +194,10 @@ public class CouchbaseConnectionTest {
 
     String id = getStreamId(record, time);
 
-    instance.set(id, record.toString(), 0);
+    instance.set(id, record, 0);
 
     // load data, ensure is set
-    String result = instance.get(id);
+    JsonNode result = instance.get(id);
     assertNotNull(result);
 
     instance.delete(id);
@@ -225,7 +223,7 @@ public class CouchbaseConnectionTest {
             new BaseQuery.QueryParam("streamId", streamId)
     );
 
-    List<String> result = instance.list(query);
+    List<JsonNode> result = instance.list(query);
 
     assertEquals(result.size(), count);
 
@@ -249,11 +247,9 @@ public class CouchbaseConnectionTest {
     query.limit = 1;
     query.setSort("lastUpdate", ListQuery.Sort.DESC);
 
-    List<String> result = instance.list(query);
+    List<JsonNode> result = instance.list(query);
 
-    JsonNode json2 = mapper.readTree(result.get(0));
-
-    assertEquals(json2.get("lastUpdate").asInt(), lastUpdate);
+    assertEquals(result.get(0).get("lastUpdate").asInt(), lastUpdate);
 
   }
 
@@ -274,9 +270,9 @@ public class CouchbaseConnectionTest {
       record.put("streamId", streamId);
 
       String id = getStreamId(record, lastUpdate);
-      instance.set(id, record.toString(), 0);
+      instance.set(id, record, 0);
 
-      String res = instance.get(id);
+      JsonNode res = instance.get(id);
       assertNotNull(res);
 
     }

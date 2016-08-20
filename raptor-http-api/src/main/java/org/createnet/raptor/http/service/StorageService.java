@@ -16,6 +16,7 @@
 package org.createnet.raptor.http.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -133,7 +134,7 @@ public class StorageService implements RaptorService {
   }
 
   public ServiceObject getObject(String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException {
-    String json = getObjectConnection().get(id);
+    JsonNode json = getObjectConnection().get(id);
     if (json == null) {
       return null;
     }
@@ -152,7 +153,7 @@ public class StorageService implements RaptorService {
 
     obj.userId = auth.getUser().getUserId();
 
-    String json = obj.toJSON(ServiceObjectView.Internal);
+    JsonNode json = obj.toJsonNode(ServiceObjectView.Internal);
     getObjectConnection().set(obj.id, json, 0);
     return obj.id;
   }
@@ -169,10 +170,10 @@ public class StorageService implements RaptorService {
 
   public List<ServiceObject> listObjects() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
 
-    List<String> results = getObjectConnection().list(BaseQuery.queryBy("userId", auth.getUser().getUserId()));
+    List<JsonNode> results = getObjectConnection().list(BaseQuery.queryBy("userId", auth.getUser().getUserId()));
 
     List<ServiceObject> list = new ArrayList();
-    for (String raw : results) {
+    for (JsonNode raw : results) {
       list.add(ServiceObject.fromJSON(raw));
     }
 
@@ -205,12 +206,12 @@ public class StorageService implements RaptorService {
       query.limit = limit > defaultRecordLimit ? defaultRecordLimit : limit;
     }
 
-    List<String> results = getDataConnection().list(query);
+    List<JsonNode> results = getDataConnection().list(query);
 
     long parseError = 0;
     RecordsetException lastException = null;
-    String lastRecord = null;
-    for (String raw : results) {
+    JsonNode lastRecord = null;
+    for (JsonNode raw : results) {
       try {
         resultset.add(raw);
       } catch (RecordsetException ex) {
@@ -246,7 +247,7 @@ public class StorageService implements RaptorService {
     record.setStream(stream);
     record.userId = auth.getUser().getUserId();
     
-    getDataConnection().set(getDataId(stream, record), record.toJson(), defaultDataTTL);
+    getDataConnection().set(getDataId(stream, record), record.toJsonNode(), defaultDataTTL);
   }
 
   public void deleteData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException {
@@ -255,12 +256,12 @@ public class StorageService implements RaptorService {
 
   public List<RecordSet> listData() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
 
-    List<String> results = getDataConnection().list(
+    List<JsonNode> results = getDataConnection().list(
             BaseQuery.queryBy("userId", auth.getUser().getUserId())
     );
 
     List<RecordSet> list = new ArrayList();
-    for (String raw : results) {
+    for (JsonNode raw : results) {
       list.add(RecordSet.fromJSON(raw));
     }
 
@@ -275,9 +276,9 @@ public class StorageService implements RaptorService {
     query.getQueryOptions().timeout = 30;
     query.getQueryOptions().timeoutUnit = TimeUnit.SECONDS;
 
-    List<String> results = getDataConnection().list(query);
+    List<JsonNode> results = getDataConnection().list(query);
 
-    for (String raw : results) {
+    for (JsonNode raw : results) {
       RecordSet rs = RecordSet.fromJSON(raw);
       deleteData(stream, rs);
     }
@@ -301,7 +302,7 @@ public class StorageService implements RaptorService {
 
   public ActionStatus getActionStatus(Action action) throws ConfigurationException, Storage.StorageException, IOException, RaptorComponent.ParserException {
 
-    String rawStatus = getActionConnection().get(getActionId(action));
+    JsonNode rawStatus = getActionConnection().get(getActionId(action));
 
     ActionStatus actionStatus = ActionStatus.parseJSON(rawStatus);
 
@@ -312,7 +313,7 @@ public class StorageService implements RaptorService {
 
     ActionStatus actionStatus = new ActionStatus(action, status);
 
-    getActionConnection().set(getActionId(action), actionStatus.toJSON(ActionStatus.ViewType.Internal), defaultDataTTL);
+    getActionConnection().set(getActionId(action), actionStatus.toJsonNode(ActionStatus.ViewType.Internal), defaultDataTTL);
 
     return actionStatus;
   }
