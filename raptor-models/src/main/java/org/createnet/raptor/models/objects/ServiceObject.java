@@ -206,6 +206,10 @@ public class ServiceObject extends ServiceObjectContainer {
   public static ServiceObject fromJSON(String json) throws IOException {
     return mapper.readValue(json, ServiceObject.class);
   }
+  
+  public static ServiceObject fromJSON(JsonNode json) throws IOException {
+    return mapper.convertValue(json, ServiceObject.class);
+  }
 
   public boolean isNew() {
     return isNew;

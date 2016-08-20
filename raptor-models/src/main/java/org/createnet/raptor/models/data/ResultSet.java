@@ -87,6 +87,11 @@ public class ResultSet extends ArrayList<RecordSet> {
     return this.add(recordset);
   }
   
+  public boolean add(JsonNode raw) throws RecordsetException {
+    RecordSet recordset = new RecordSet(stream, raw);
+    return this.add(recordset);
+  }
+  
   public String toJson() throws IOException {
     return toJsonNode().toString();
   }

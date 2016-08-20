@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.cli;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -137,11 +138,11 @@ public class ObjectIndexer {
       
       logger.debug("Loading {} objects from offset {}", limit, offset);
       
-      List<String> objList = storage.getObjectConnection().list(query);
+      List<JsonNode> objList = storage.getObjectConnection().list(query);
 
       List<ServiceObject> list = new ArrayList();
 
-      for (String rawobj : objList) {
+      for (JsonNode rawobj : objList) {
         list.add(ServiceObject.fromJSON(rawobj));
       }
 

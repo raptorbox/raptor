@@ -1,17 +1,7 @@
 /*
- * Copyright 2016 CREATE-NET.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
 package org.createnet.raptor.db.couchbase;
 
@@ -25,7 +15,6 @@ import com.couchbase.client.java.query.N1qlQuery;
 import com.couchbase.client.java.query.N1qlQueryResult;
 import com.couchbase.client.java.query.N1qlQueryRow;
 import com.couchbase.client.java.query.consistency.ScanConsistency;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -66,9 +55,9 @@ public class CouchbaseConnection extends AbstractConnection {
   }
 
   @Override
-  public void set(String id, JsonNode data, int ttlDays) {
+  public void set(String id, String data, int ttlDays) {
 
-    JsonObject obj = JsonObject.fromJson(data.toString());
+    JsonObject obj = JsonObject.fromJson(data);
 
     int ttl = ttlDays;
     if (ttlDays > 0) {
@@ -82,17 +71,17 @@ public class CouchbaseConnection extends AbstractConnection {
     bucket.upsert(doc);
   }
 
-  public void set(String id, JsonNode data) {
+  public void set(String id, String data) {
     set(id, data, 0);
   }
 
   @Override
-  public JsonNode get(String id) {
+  public String get(String id) {
     JsonDocument doc = bucket.get(id);
     if (doc == null) {
       return null;
     }
-    return Storage.mapper.convertValue(doc.content().toString(), JsonNode.class) ;
+    return doc.content().toString();
   }
 
   @Override
@@ -107,7 +96,7 @@ public class CouchbaseConnection extends AbstractConnection {
   }
 
   @Override
-  public List<JsonNode> list(ListQuery query) throws Storage.StorageException {
+  public List<String> list(ListQuery query) throws Storage.StorageException {
 
     String selectQuery = "SELECT * FROM `" + bucket.name() + "`";
 
@@ -156,7 +145,7 @@ public class CouchbaseConnection extends AbstractConnection {
       throw new Storage.StorageException("List query cannot be completed");
     }
 
-    List<JsonNode> list = new ArrayList();
+    List<String> list = new ArrayList();
     if (!results.errors().isEmpty()) {
       String errors = "";
       for (JsonObject err : results.errors()) {
@@ -168,9 +157,7 @@ public class CouchbaseConnection extends AbstractConnection {
     Iterator<N1qlQueryRow> it = results.allRows().iterator();
     while (it.hasNext()) {
       N1qlQueryRow row = it.next();
-      list.add(
-        Storage.mapper.convertValue(row.value().get(bucket.name()).toString(), JsonNode.class)
-      );
+      list.add(row.value().get(bucket.name()).toString());
     }
 
     return list;

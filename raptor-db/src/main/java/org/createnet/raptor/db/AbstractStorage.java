@@ -1,16 +1,26 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2016 CREATE-NET.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.createnet.raptor.db;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import org.createnet.raptor.db.config.StorageConfiguration;
-import org.createnet.raptor.db.couchbase.CouchbaseStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 abstract public class AbstractStorage implements Storage {
-  
+    
   final protected Logger logger = LoggerFactory.getLogger(AbstractStorage.class);
 
   protected StorageConfiguration config;
@@ -40,11 +50,11 @@ abstract public class AbstractStorage implements Storage {
   public void removeConnection(String id) {
     if(connections.containsKey(id)) {
       try {
-        logger.warn("Disconnecting " + id);
+        logger.warn("Disconnecting {}", id);
         connections.get(id).disconnect();
       }
       catch(Exception e) {
-        logger.warn("Exception disconnecting " + id, e);
+        logger.warn("Exception disconnecting {}", id, e);
       }
       connections.remove(id);
     }
@@ -78,11 +88,11 @@ abstract public class AbstractStorage implements Storage {
     return config;
   }
 
-  public void set(String connectionId, String id, String data, int ttl) throws StorageException {
+  public void set(String connectionId, String id, JsonNode data, int ttl) throws StorageException {
     getConnection(connectionId).set(id, data, ttl);
   }
 
-  public String get(String connectionId, String id) throws StorageException {
+  public JsonNode get(String connectionId, String id) throws StorageException {
     return getConnection(connectionId).get(id);
   }
 

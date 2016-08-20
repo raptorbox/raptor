@@ -17,7 +17,9 @@ package org.createnet.raptor.models.data;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
@@ -28,6 +30,7 @@ import java.util.UUID;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 
 /**
  *
@@ -39,7 +42,7 @@ public class ActionStatus {
   public enum ViewType {
     Internal, Public
   }
-  
+
   public String id;
   public String status;
   public int createdAt;
@@ -62,42 +65,52 @@ public class ActionStatus {
     this.id = UUID.randomUUID().toString();
   }
 
+  private final static ObjectMapper mapper = new ObjectMapper();
+
+  private ObjectMapper getMapper(ViewType type) {
+
+    Set<String> filterFields = new HashSet<>();
+    switch (type) {
+      case Internal:
+        break;
+      case Public:
+      default:
+        filterFields.add("actionId");
+        filterFields.add("objectId");
+        break;
+    }
+
+    FilterProvider filter = new SimpleFilterProvider()
+            .addFilter("statusFilter",
+                    SimpleBeanPropertyFilter.serializeAllExcept(filterFields));
+
+    mapper.setFilterProvider(filter);
+
+    return mapper;
+  }
+
   public String toJSON() throws RaptorComponent.ParserException {
     return this.toJSON(ViewType.Public);
   }
 
-  public String toJSON(ViewType type) throws RaptorComponent.ParserException {
+  public String toJSON(ViewType type) {
+    return toJsonNode(type).toString();
+  }
 
-    ObjectMapper mapper = ServiceObject.getMapper();
+  public ObjectNode toJsonNode() {
+    return toJsonNode(ViewType.Public);
+  }
 
-    try {
-
-      Set<String> filterFields = new HashSet<>();
-      switch (type) {
-        case Internal:
-          break;
-        case Public:
-        default:
-          filterFields.add("actionId");
-          filterFields.add("objectId");
-          break;
-      }
-
-      FilterProvider filter = new SimpleFilterProvider()
-        .addFilter("statusFilter",
-                SimpleBeanPropertyFilter.serializeAllExcept(filterFields));
-
-      String json = mapper.writer(filter).writeValueAsString(this);
-      return json;
-      
-    } catch (JsonProcessingException ex) {
-      throw new RaptorComponent.ParserException(ex);
-    }
-
+  public ObjectNode toJsonNode(ViewType type) {
+    return getMapper(type).convertValue(this, ObjectNode.class);
   }
 
   public static ActionStatus parseJSON(String rawStatus) throws IOException {
     return ServiceObject.getMapper().readValue(rawStatus, ActionStatus.class);
+  }
+
+  public static ActionStatus parseJSON(JsonNode rawStatus) throws IOException {
+    return ServiceObject.getMapper().convertValue(rawStatus, ActionStatus.class);
   }
 
   @Override

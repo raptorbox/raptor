@@ -294,6 +294,10 @@ public class RecordSet {
   public static RecordSet fromJSON(String raw) throws IOException {
     return ServiceObject.getMapper().readValue(raw, RecordSet.class);
   }
+  
+  public static RecordSet fromJSON(JsonNode raw) throws IOException {
+    return ServiceObject.getMapper().convertValue(raw, RecordSet.class);
+  }
 
   public void setStream(Stream stream) {
     
