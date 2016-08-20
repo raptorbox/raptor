@@ -1,9 +1,19 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2016 CREATE-NET.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-package org.createnet.raptor.db.couchbase;
+package org.createnet.raptor.db.jdbc;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.document.JsonDocument;
@@ -15,6 +25,7 @@ import com.couchbase.client.java.query.N1qlQuery;
 import com.couchbase.client.java.query.N1qlQueryResult;
 import com.couchbase.client.java.query.N1qlQueryRow;
 import com.couchbase.client.java.query.consistency.ScanConsistency;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -22,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.createnet.raptor.db.AbstractConnection;
 import org.createnet.raptor.db.Storage;
+import org.createnet.raptor.db.config.StorageConfiguration;
 import org.createnet.raptor.db.query.ListQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,34 +42,30 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class CouchbaseConnection extends AbstractConnection {
+public class JdbcConnection extends AbstractConnection {
 
-  private final Logger logger = LoggerFactory.getLogger(CouchbaseConnection.class);
-
-  final Bucket bucket;
-
-  public CouchbaseConnection(String id, Bucket bucket) {
+  private final Logger logger = LoggerFactory.getLogger(JdbcConnection.class);
+  private final StorageConfiguration.Jdbc.Table table;
+  
+  public JdbcConnection(String id, StorageConfiguration.Jdbc.Table table) {
     this.id = id;
-    this.bucket = bucket;
+    this.table = table;
   }
 
   @Override
-  public void disconnect() {
-    bucket.close();
-  }
+  public void disconnect() {}
 
   @Override
-  public void destroy() {
-  }
+  public void destroy() {}
 
   @Override
   public void connect() {
   }
 
   @Override
-  public void set(String id, String data, int ttlDays) {
+  public void set(String id, JsonNode data, int ttlDays) {
 
-    JsonObject obj = JsonObject.fromJson(data);
+    JsonObject obj = JsonObject.fromJson(data.toString());
 
     int ttl = ttlDays;
     if (ttlDays > 0) {
@@ -71,17 +79,17 @@ public class CouchbaseConnection extends AbstractConnection {
     bucket.upsert(doc);
   }
 
-  public void set(String id, String data) {
+  public void set(String id, JsonNode data) {
     set(id, data, 0);
   }
 
   @Override
-  public String get(String id) {
+  public JsonNode get(String id) {
     JsonDocument doc = bucket.get(id);
     if (doc == null) {
       return null;
     }
-    return doc.content().toString();
+    return Storage.mapper.convertValue(doc.content().toString(), JsonNode.class) ;
   }
 
   @Override
@@ -96,7 +104,7 @@ public class CouchbaseConnection extends AbstractConnection {
   }
 
   @Override
-  public List<String> list(ListQuery query) throws Storage.StorageException {
+  public List<JsonNode> list(ListQuery query) throws Storage.StorageException {
 
     String selectQuery = "SELECT * FROM `" + bucket.name() + "`";
 
@@ -145,7 +153,7 @@ public class CouchbaseConnection extends AbstractConnection {
       throw new Storage.StorageException("List query cannot be completed");
     }
 
-    List<String> list = new ArrayList();
+    List<JsonNode> list = new ArrayList();
     if (!results.errors().isEmpty()) {
       String errors = "";
       for (JsonObject err : results.errors()) {
@@ -157,7 +165,9 @@ public class CouchbaseConnection extends AbstractConnection {
     Iterator<N1qlQueryRow> it = results.allRows().iterator();
     while (it.hasNext()) {
       N1qlQueryRow row = it.next();
-      list.add(row.value().get(bucket.name()).toString());
+      list.add(
+        Storage.mapper.convertValue(row.value().get(bucket.name()).toString(), JsonNode.class)
+      );
     }
 
     return list;
