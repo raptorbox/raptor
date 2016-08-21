@@ -1,29 +1,9 @@
 
-type: jdbc
+type: mapdb
 
-jdbc:
-  connection: jdbc:sqlite:~/tmp/raptor.sqlite
-  tables:
-    objects:
-      name: objects
-      fields:
-        objectId: string
-        userId: string
-
-    data:
-      name: data
-      fields:
-        lastUpdate: int
-        objectId: string
-        userId: string
-        streamId: string
-
-    actuations:
-      name: actions
-      fields:
-        objectId: string
-        userId: string
-        actionId: string
+mapdb:
+  storage: file # or memory
+  storePath: /tmp/raptor
 
 couchbase:
   nodes:

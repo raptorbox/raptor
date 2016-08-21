@@ -83,7 +83,7 @@ abstract public class AbstractStorage implements Storage {
   public void destroy() {
     // does nothing by default
   }
-  
+ 
   protected StorageConfiguration getConfiguration() {
     return config;
   }
@@ -99,5 +99,24 @@ abstract public class AbstractStorage implements Storage {
   public void delete(String connectionId, String id) throws StorageException {
     getConnection(connectionId).delete(id);
   }  
+
+  /**
+   * Call destroy() on all connections
+   */
+  public void destroyAll() {
+    for (Connection conn : connections.values()) {
+      conn.destroy();
+    }
+  }
+  
+  /**
+   * Call connect() on all connections
+   */
+  public void connectAll() throws StorageException {
+    for (Connection conn : connections.values()) {
+      conn.connect();
+    }
+  }
+
   
 }

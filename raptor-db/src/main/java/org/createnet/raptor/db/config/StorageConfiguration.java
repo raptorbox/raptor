@@ -30,25 +30,17 @@ public class StorageConfiguration {
   }
   
   public String type;
-  public Couchbase couchbase = new Couchbase();
-  public Jdbc jdbc = new Jdbc();
+  public final Couchbase couchbase = new Couchbase();
+  public final MapDB mapdb = new MapDB();
   
-  static public class Jdbc {
+  static public class MapDB {
     
-    public String connection = "";    
-    final public Map<String, Table> tables = new HashMap();
+    public String storage = null;
+    public String storePath = null;
     
-    static public class Table {
-      
-      public String name;
-      public Map<String, String> fields;
-      
-      public Table() {}
-    }
-    
-    public Jdbc() {
-    }
+    public MapDB(){}
   }
+  
   static public class Couchbase {
 
     public Couchbase() {
