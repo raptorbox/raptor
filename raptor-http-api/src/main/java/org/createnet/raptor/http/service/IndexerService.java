@@ -243,7 +243,7 @@ public class IndexerService implements RaptorService {
     setQueryIndex(query, IndexNames.data);
 
     query.setLimit(defaultRecordLimit);
-    query.setSort(new Query.SortBy("lastUpdate", Query.Sort.ASC));
+    query.setSort(new Query.SortBy("lastUpdate", Query.Sort.DESC));
     query.timeRange(Instant.EPOCH);
     
     ResultSet data = searchData(stream, query);
