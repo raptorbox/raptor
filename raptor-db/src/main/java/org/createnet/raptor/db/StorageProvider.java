@@ -17,6 +17,7 @@ package org.createnet.raptor.db;
 
 import org.createnet.raptor.db.config.StorageConfiguration;
 import org.createnet.raptor.db.couchbase.CouchbaseStorage;
+import org.createnet.raptor.db.mapdb.MapDBStorage;
 import org.createnet.raptor.db.none.NoneStorage;
 
 /**
@@ -35,6 +36,9 @@ public class StorageProvider extends AbstractStorage {
     switch (configuration.type) {
       case "couchbase":
         instance = new CouchbaseStorage();
+        break;
+      case "mapdb":
+        instance = new MapDBStorage();
         break;
       case "none":
         instance = new NoneStorage();

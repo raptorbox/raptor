@@ -165,10 +165,10 @@ public class StorageService implements RaptorService {
 
   public List<ServiceObject> listObjects() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
 
-    List<String> results = getObjectConnection().list(BaseQuery.queryBy("userId", auth.getUser().getUserId()));
+    List<JsonNode> results = getObjectConnection().list(BaseQuery.queryBy("userId", auth.getUser().getUserId()));
 
     List<ServiceObject> list = new ArrayList();
-    for (String raw : results) {
+    for (JsonNode raw : results) {
       list.add(ServiceObject.fromJSON(raw));
     }
 
@@ -180,62 +180,62 @@ public class StorageService implements RaptorService {
     return stream.getServiceObject().id + "-" + stream.name + "-" + record.getLastUpdate().getTime();
   }
 
-  public ResultSet fetchData(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
-    return fetchData(stream, defaultRecordLimit, 0);
-  }
+//  public ResultSet fetchData(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
+//    return fetchData(stream, defaultRecordLimit, 0);
+//  }
+//
+//  public ResultSet fetchData(Stream stream, int limit, int offset) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
+//
+//    ResultSet resultset = new ResultSet(stream);
+//
+//    BaseQuery query = BaseQuery.queryBy("userId", auth.getUser().getUserId());
+//    query.params.add(new ListQuery.QueryParam("streamId", stream.name));
+//    query.params.add(new ListQuery.QueryParam("objectId", stream.getServiceObject().id));
+//
+//    query.setSort("lastUpdate", ListQuery.Sort.DESC);
+//    
+//    if(offset > 0)
+//      query.offset = offset;
+//    
+//    if (limit > 0) {
+//      query.limit = limit > defaultRecordLimit ? defaultRecordLimit : limit;
+//    }
+//
+//    List<JsonNode> results = getDataConnection().list(query);
+//
+//    long parseError = 0;
+//    RecordsetException lastException = null;
+//    JsonNode lastRecord = null;
+//    for (JsonNode raw : results) {
+//      try {
+//        resultset.add(raw);
+//      } catch (RecordsetException ex) {
+//        parseError++;
+//        lastException = ex;
+//        lastRecord = raw;
+//      }
+//    }
+//
+//    if (parseError > 0) {
+//      logger.debug("Skipped {} records due to parser error", parseError);
+//
+//      if (lastException != null) {
+//        logger.error("Last exception", lastException);
+//      }
+//
+//      if (lastRecord != null) {
+//        logger.error("Last raw record: {}", lastRecord);
+//      }
+//
+//    }
+//
+//    return resultset;
+//  }
 
-  public ResultSet fetchData(Stream stream, int limit, int offset) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
-
-    ResultSet resultset = new ResultSet(stream);
-
-    BaseQuery query = BaseQuery.queryBy("userId", auth.getUser().getUserId());
-    query.params.add(new ListQuery.QueryParam("streamId", stream.name));
-    query.params.add(new ListQuery.QueryParam("objectId", stream.getServiceObject().id));
-
-    query.setSort("lastUpdate", ListQuery.Sort.DESC);
-    
-    if(offset > 0)
-      query.offset = offset;
-    
-    if (limit > 0) {
-      query.limit = limit > defaultRecordLimit ? defaultRecordLimit : limit;
-    }
-
-    List<JsonNode> results = getDataConnection().list(query);
-
-    long parseError = 0;
-    RecordsetException lastException = null;
-    JsonNode lastRecord = null;
-    for (JsonNode raw : results) {
-      try {
-        resultset.add(raw);
-      } catch (RecordsetException ex) {
-        parseError++;
-        lastException = ex;
-        lastRecord = raw;
-      }
-    }
-
-    if (parseError > 0) {
-      logger.debug("Skipped {} records due to parser error", parseError);
-
-      if (lastException != null) {
-        logger.error("Last exception", lastException);
-      }
-
-      if (lastRecord != null) {
-        logger.error("Last raw record: {}", lastRecord);
-      }
-
-    }
-
-    return resultset;
-  }
-
-  public RecordSet fetchLastUpdate(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
-    ResultSet resultset = fetchData(stream, 1, 0);
-    return resultset.isEmpty() ? null : resultset.get(0);
-  }
+//  public RecordSet fetchLastUpdate(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
+//    ResultSet resultset = fetchData(stream, 1, 0);
+//    return resultset.isEmpty() ? null : resultset.get(0);
+//  }
 
   public void saveData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException, JsonProcessingException, IOException, Authentication.AuthenticationException {
 
@@ -251,7 +251,7 @@ public class StorageService implements RaptorService {
 
   public List<RecordSet> listData() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
 
-    List<String> results = getDataConnection().list(
+    List<JsonNode> results = getDataConnection().list(
             BaseQuery.queryBy("userId", auth.getUser().getUserId())
     );
 

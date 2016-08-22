@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.config.StorageConfiguration;
 import org.createnet.raptor.db.AbstractConnection;
@@ -128,9 +129,21 @@ class MapDBConnection extends AbstractConnection {
 
   @Override
   public List<JsonNode> list(ListQuery query) throws Storage.StorageException {
-    List<JsonNode> results = new ArrayList();
-    logger.warn("NOT IMPLEMENTED: list()");
-    return results;
+    /**
+     * TODO: 
+     *  - add indeces in config, like per couchbase
+     *  - on set() add maps for each indexable key and its ref id
+     *  - on list() match parameters with index keys and create subsets to iterate over
+     */
+    throw new RuntimeException("Not Implemented");
+//    List<JsonNode> results = new ArrayList();
+//    query.getParams()
+//    
+//    for (Map.Entry<String, String> entry : map.getEntries()) {
+//      Record r = parseRecord(entry.getValue());
+//      results.add(r.content);
+//    }
+//    return results;
   }
 
   @Override
