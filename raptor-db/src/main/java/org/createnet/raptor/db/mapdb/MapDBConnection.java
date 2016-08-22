@@ -17,6 +17,7 @@ package org.createnet.raptor.db.mapdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.config.StorageConfiguration;
@@ -42,13 +43,19 @@ class MapDBConnection extends AbstractConnection {
   
   private DB db;
   private HTreeMap<String, String> map;
-  private  BTreeMap<Long, String> ttl;
+  private BTreeMap<Long, String> ttl;
 
   static public class Record {
     
     public long ttl;
-    public String content;
+    public JsonNode content;
     public String id;
+    
+    private Record(String id, JsonNode content, long ttl) {
+      this.id = id;
+      this.content = content;
+      this.ttl = ttl;
+    }
     
     public JsonNode toJsonNode() {
       return Storage.mapper.convertValue(this, JsonNode.class);
@@ -105,25 +112,34 @@ class MapDBConnection extends AbstractConnection {
 
   @Override
   public void set(String id, JsonNode data, int ttlDays) throws Storage.StorageException {
-    ttl.put((long)ttlDays, id);
-    map.put(id, data.toString());
+    Record r = new Record(id, data, (long)ttlDays);
+    ttl.put(r.ttl, r.id);
+    map.put(r.id, r.content.toString());
   }
 
   @Override
   public JsonNode get(String id) throws Storage.StorageException {
-//    return Storage.mapper.convertValue(map.get(id), JsonNode.class);
+    return getRecord(id).content;
+  }
+  
+  public Record getRecord(String id) throws Storage.StorageException {
+    return parseRecord(map.get(id));
   }
 
   @Override
   public List<JsonNode> list(ListQuery query) throws Storage.StorageException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    List<JsonNode> results = new ArrayList();
+    logger.warn("NOT IMPLEMENTED: list()");
+    return results;
   }
 
   @Override
   public void delete(String id) throws Storage.StorageException {
+    Record r = getRecord(id);
     map.remove(id);
+    ttl.remove(r.ttl);
   }
-  
+
   protected Record parseRecord(String raw) {
     return Storage.mapper.convertValue(raw, Record.class);
   }
