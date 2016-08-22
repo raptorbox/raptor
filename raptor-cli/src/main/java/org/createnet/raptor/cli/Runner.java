@@ -29,7 +29,7 @@ import org.createnet.raptor.config.ConfigurationLoader;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.http.ApplicationConfig;
 import org.createnet.raptor.config.exception.ConfigurationException;
-import org.createnet.search.raptor.search.Indexer;
+import org.createnet.raptor.search.raptor.search.Indexer;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.ServiceLocatorFactory;
 import org.glassfish.hk2.utilities.ServiceLocatorUtilities;

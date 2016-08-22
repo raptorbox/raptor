@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.search.raptor.search.impl;
+package org.createnet.raptor.search.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,11 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.createnet.search.raptor.search.AbstractIndexer;
-import org.createnet.search.raptor.search.Indexer;
-import org.createnet.search.raptor.search.Indexer.IndexerException;
-import org.createnet.search.raptor.search.impl.es.ElasticSearchIndexAdmin;
-import org.createnet.search.raptor.search.query.Query;
+import org.createnet.raptor.search.raptor.search.AbstractIndexer;
+import org.createnet.raptor.search.raptor.search.Indexer;
+import org.createnet.raptor.search.raptor.search.Indexer.IndexerException;
+import org.createnet.raptor.search.raptor.search.impl.es.ElasticSearchIndexAdmin;
+import org.createnet.raptor.search.raptor.search.query.Query;
 import org.elasticsearch.action.bulk.BackoffPolicy;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.search.raptor.search;
+package org.createnet.raptor.search.raptor.search;
 
 import java.util.List;
-import org.createnet.search.raptor.search.impl.ElasticSearchIndexer;
-import org.createnet.search.raptor.search.query.Query;
+import org.createnet.raptor.search.impl.ElasticSearchIndexer;
+import org.createnet.raptor.search.raptor.search.query.Query;
 
 /**
  *

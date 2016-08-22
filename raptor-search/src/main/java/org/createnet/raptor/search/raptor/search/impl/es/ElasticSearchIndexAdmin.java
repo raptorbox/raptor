@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.search.raptor.search.impl.es;
+package org.createnet.raptor.search.raptor.search.impl.es;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import org.createnet.search.raptor.search.impl.ElasticSearchIndexer;
+import org.createnet.raptor.search.impl.ElasticSearchIndexer;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;

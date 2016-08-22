@@ -21,6 +21,6 @@ import org.createnet.raptor.config.Configuration;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class IndexerConfiguration extends org.createnet.search.raptor.search.IndexerConfiguration implements Configuration {
+public class IndexerConfiguration extends org.createnet.raptor.search.raptor.search.IndexerConfiguration implements Configuration {
   
 }

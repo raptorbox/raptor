@@ -33,14 +33,14 @@ import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 import org.jvnet.hk2.annotations.Service;
-import org.createnet.search.raptor.search.Indexer;
-import org.createnet.search.raptor.search.IndexerConfiguration;
-import org.createnet.search.raptor.search.IndexerProvider;
-import org.createnet.search.raptor.search.query.AbstractQuery;
-import org.createnet.search.raptor.search.query.Query;
-import org.createnet.search.raptor.search.query.impl.es.DataQuery;
-import org.createnet.search.raptor.search.query.impl.es.LastUpdateQuery;
-import org.createnet.search.raptor.search.query.impl.es.ObjectQuery;
+import org.createnet.raptor.search.raptor.search.Indexer;
+import org.createnet.raptor.search.raptor.search.IndexerConfiguration;
+import org.createnet.raptor.search.raptor.search.IndexerProvider;
+import org.createnet.raptor.search.raptor.search.query.AbstractQuery;
+import org.createnet.raptor.search.raptor.search.query.Query;
+import org.createnet.raptor.search.raptor.search.query.impl.es.DataQuery;
+import org.createnet.raptor.search.raptor.search.query.impl.es.LastUpdateQuery;
+import org.createnet.raptor.search.raptor.search.query.impl.es.ObjectQuery;
 
 /**
  *
