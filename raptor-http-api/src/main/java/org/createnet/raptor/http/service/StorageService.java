@@ -201,9 +201,7 @@ public class StorageService implements RaptorService {
     if(offset > 0)
       query.offset = offset;
     
-    if (limit > 0) {
-      query.limit = limit > defaultRecordLimit ? defaultRecordLimit : limit;
-    }
+    query.limit = limit > defaultRecordLimit || limit == 0 ? defaultRecordLimit : limit;
 
     List<String> results = getDataConnection().list(query);
 
