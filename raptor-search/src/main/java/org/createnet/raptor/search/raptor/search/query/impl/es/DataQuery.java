@@ -15,8 +15,10 @@
  */
 package org.createnet.raptor.search.raptor.search.query.impl.es;
 
+import java.time.Instant;
 import org.createnet.raptor.search.raptor.search.query.AbstractQuery;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.createnet.raptor.search.raptor.search.query.Query;
 import org.elasticsearch.common.unit.DistanceUnit;
@@ -170,6 +172,17 @@ public class DataQuery extends AbstractQuery {
     }
 
     return qb.toString();
+  }
+
+  public DataQuery timeRange(Instant from) {
+    return timeRange(from, Instant.now());
+  }
+  
+  public DataQuery timeRange(Instant from, Instant to) {
+    this.timerange = true;
+    this.timerangefrom = from.getEpochSecond();
+    this.timerangeto = to.getEpochSecond();
+    return this;
   }
 
 }

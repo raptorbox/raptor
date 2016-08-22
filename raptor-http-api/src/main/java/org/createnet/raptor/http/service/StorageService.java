@@ -31,13 +31,10 @@ import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.StorageProvider;
 import org.createnet.raptor.db.query.BaseQuery;
-import org.createnet.raptor.db.query.ListQuery;
 import org.createnet.raptor.http.configuration.StorageConfiguration;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.data.RecordSet;
-import org.createnet.raptor.models.data.ResultSet;
-import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
@@ -57,12 +54,7 @@ public class StorageService implements RaptorService {
    * eg. 90 days
    */
   private final int defaultDataTTL = 90; 
-  
-  /**
-   * Limit of records that can be fetched per request
-   */  
-  private final int defaultRecordLimit = 1000;
-  
+    
   private final Logger logger = LoggerFactory.getLogger(StorageService.class);
 
   @Inject
@@ -184,60 +176,60 @@ public class StorageService implements RaptorService {
     return stream.getServiceObject().id + "-" + stream.name + "-" + record.getLastUpdate().getTime();
   }
 
-  public ResultSet fetchData(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
-    return fetchData(stream, defaultRecordLimit, 0);
-  }
-
-  public ResultSet fetchData(Stream stream, int limit, int offset) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
-
-    ResultSet resultset = new ResultSet(stream);
-
-    BaseQuery query = BaseQuery.queryBy("userId", auth.getUser().getUserId());
-    query.params.add(new ListQuery.QueryParam("streamId", stream.name));
-    query.params.add(new ListQuery.QueryParam("objectId", stream.getServiceObject().id));
-
-    query.setSort("lastUpdate", ListQuery.Sort.DESC);
-    
-    if(offset > 0)
-      query.offset = offset;
-    
-    query.limit = limit > defaultRecordLimit || limit == 0 ? defaultRecordLimit : limit;
-
-    List<String> results = getDataConnection().list(query);
-
-    long parseError = 0;
-    RecordsetException lastException = null;
-    String lastRecord = null;
-    for (String raw : results) {
-      try {
-        resultset.add(raw);
-      } catch (RecordsetException ex) {
-        parseError++;
-        lastException = ex;
-        lastRecord = raw;
-      }
-    }
-
-    if (parseError > 0) {
-      logger.debug("Skipped {} records due to parser error", parseError);
-
-      if (lastException != null) {
-        logger.error("Last exception", lastException);
-      }
-
-      if (lastRecord != null) {
-        logger.error("Last raw record: {}", lastRecord);
-      }
-
-    }
-
-    return resultset;
-  }
-
-  public RecordSet fetchLastUpdate(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
-    ResultSet resultset = fetchData(stream, 1, 0);
-    return resultset.isEmpty() ? null : resultset.get(0);
-  }
+//  public ResultSet fetchData(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
+//    return fetchData(stream, defaultRecordLimit, 0);
+//  }
+//
+//  public ResultSet fetchData(Stream stream, int limit, int offset) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
+//
+//    ResultSet resultset = new ResultSet(stream);
+//
+//    BaseQuery query = BaseQuery.queryBy("userId", auth.getUser().getUserId());
+//    query.params.add(new ListQuery.QueryParam("streamId", stream.name));
+//    query.params.add(new ListQuery.QueryParam("objectId", stream.getServiceObject().id));
+//
+//    query.setSort("lastUpdate", ListQuery.Sort.DESC);
+//    
+//    if(offset > 0)
+//      query.offset = offset;
+//    
+//    query.limit = limit > defaultRecordLimit || limit == 0 ? defaultRecordLimit : limit;
+//
+//    List<String> results = getDataConnection().list(query);
+//
+//    long parseError = 0;
+//    RecordsetException lastException = null;
+//    String lastRecord = null;
+//    for (String raw : results) {
+//      try {
+//        resultset.add(raw);
+//      } catch (RecordsetException ex) {
+//        parseError++;
+//        lastException = ex;
+//        lastRecord = raw;
+//      }
+//    }
+//
+//    if (parseError > 0) {
+//      logger.debug("Skipped {} records due to parser error", parseError);
+//
+//      if (lastException != null) {
+//        logger.error("Last exception", lastException);
+//      }
+//
+//      if (lastRecord != null) {
+//        logger.error("Last raw record: {}", lastRecord);
+//      }
+//
+//    }
+//
+//    return resultset;
+//  }
+//
+//  public RecordSet fetchLastUpdate(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
+//    ResultSet resultset = fetchData(stream, 1, 0);
+//    return resultset.isEmpty() ? null : resultset.get(0);
+//  }
 
   public void saveData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException, JsonProcessingException, IOException, Authentication.AuthenticationException {
 
