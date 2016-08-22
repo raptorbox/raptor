@@ -9,27 +9,13 @@
                 },
 
                 "_all": {
-                    "enabled": false
+                    "enabled": true
                 },
 
                 "dynamic": true,
 
-                "_source": {
-                    "includes": [
-                        "meta.*"
-                    ]
-                },
                 "dynamic_templates": [{
-                    "lastUpdates_are_date": {
-                        "path_match": "lastUpdate",
-                        "mapping": {
-                            "index": "not_analyzed",
-                            "type": "date",
-                            "ignore_malformed": true
-                        }
-                    }
-                }, {
-                    "locations_are_geojson": {
+                    "geo_point_location": {
                         "path_match": "channels.location.current-value",
                         "mapping": {
                             "store": "no",
@@ -39,44 +25,45 @@
                         }
                     }
                 }, {
-                    "current-value_are_strings": {
+                    "string": {
                         "path_match": "channels.*.current-value",
                         "match_mapping_type": "string",
                         "mapping": {
-                            "store": "no",
+                            "store": "yes",
                             "index": "not_analyzed",
                             "type": "string",
+                            "date_detection": false,
                             "ignore_malformed": true
                         }
                     }
                 }, {
-                    "current-value_are_double": {
+                    "double": {
                         "path_match": "channels.*.current-value",
                         "match_mapping_type": "double",
                         "mapping": {
-                            "store": "no",
+                            "store": "yes",
                             "index": "not_analyzed",
                             "type": "double",
                             "ignore_malformed": true
                         }
                     }
                 }, {
-                    "current-value_are_int": {
+                    "integer": {
                         "path_match": "channels.*.current-value",
                         "match_mapping_type": "integer",
                         "mapping": {
-                            "store": "no",
+                            "store": "yes",
                             "index": "not_analyzed",
                             "type": "double",
                             "ignore_malformed": true
                         }
                     }
                 }, {
-                    "current-value_are_long": {
+                    "long": {
                         "path_match": "channels.*.current-value",
                         "match_mapping_type": "integer",
                         "mapping": {
-                            "store": "no",
+                            "store": "yes",
                             "index": "not_analyzed",
                             "type": "double",
                             "ignore_malformed": true
@@ -89,10 +76,18 @@
                         "analyzer": "whitespace",
                         "index": "not_analyzed"
                     },
+                    "lastUpdate": {
+                        "type": "date",
+                        "index": "not_analyzed"
+                    },
                     "userId": {
                         "type": "string",
                         "analyzer": "whitespace",
                         "index": "not_analyzed"
+                    },
+                    "channels": {
+                        "type": "object",
+                        "dynamic": false
                     },
                     "streamId": {
                         "type": "string",

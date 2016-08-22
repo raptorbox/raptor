@@ -17,6 +17,7 @@ package org.createnet.raptor.http.service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,14 +34,14 @@ import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 import org.jvnet.hk2.annotations.Service;
-import org.createnet.search.raptor.search.Indexer;
-import org.createnet.search.raptor.search.IndexerConfiguration;
-import org.createnet.search.raptor.search.IndexerProvider;
-import org.createnet.search.raptor.search.query.AbstractQuery;
-import org.createnet.search.raptor.search.query.Query;
-import org.createnet.search.raptor.search.query.impl.es.DataQuery;
-import org.createnet.search.raptor.search.query.impl.es.LastUpdateQuery;
-import org.createnet.search.raptor.search.query.impl.es.ObjectQuery;
+import org.createnet.raptor.search.raptor.search.Indexer;
+import org.createnet.raptor.search.raptor.search.IndexerConfiguration;
+import org.createnet.raptor.search.raptor.search.IndexerProvider;
+import org.createnet.raptor.search.raptor.search.query.AbstractQuery;
+import org.createnet.raptor.search.raptor.search.query.Query;
+import org.createnet.raptor.search.raptor.search.query.impl.es.DataQuery;
+import org.createnet.raptor.search.raptor.search.query.impl.es.LastUpdateQuery;
+import org.createnet.raptor.search.raptor.search.query.impl.es.ObjectQuery;
 
 /**
  *
@@ -55,6 +56,11 @@ public class IndexerService implements RaptorService {
   @Inject
   AuthService auth;
 
+  /**
+   * Limit of records that can be fetched per request
+   */  
+  private final int defaultRecordLimit = 1000;
+  
   private Indexer indexer;
 
   public enum IndexNames {
@@ -226,5 +232,27 @@ public class IndexerService implements RaptorService {
       deleteData(changedStream);
     }
   }
+  
+  public ResultSet fetchData(Stream stream) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
+    return fetchData(stream, 0);
+  }
+  public ResultSet fetchData(Stream stream, long limit) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
+    
+    // query for all the data
+    DataQuery query = new DataQuery();
+    setQueryIndex(query, IndexNames.data);
 
+    query.setLimit(defaultRecordLimit);
+    query.setSort(new Query.SortBy("lastUpdate", Query.Sort.DESC));
+    query.timeRange(Instant.EPOCH);
+    
+    ResultSet data = searchData(stream, query);
+    return data;
+  }
+
+  public RecordSet fetchLastUpdate(Stream stream) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
+    ResultSet data = fetchData(stream, 1);
+    return data.size() > 0 ? data.get(0) : null;
+  }
+  
 }

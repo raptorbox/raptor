@@ -27,7 +27,7 @@ import org.createnet.raptor.http.service.StorageService;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
-import org.createnet.search.raptor.search.Indexer;
+import org.createnet.raptor.search.raptor.search.Indexer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

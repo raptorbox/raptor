@@ -58,12 +58,7 @@ public class StorageService implements RaptorService {
    * eg. 90 days
    */
   private final int defaultDataTTL = 90; 
-  
-  /**
-   * Limit of records that can be fetched per request
-   */  
-  private final int defaultRecordLimit = 1000;
-  
+    
   private final Logger logger = LoggerFactory.getLogger(StorageService.class);
 
   @Inject
@@ -170,10 +165,10 @@ public class StorageService implements RaptorService {
 
   public List<ServiceObject> listObjects() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
 
-    List<JsonNode> results = getObjectConnection().list(BaseQuery.queryBy("userId", auth.getUser().getUserId()));
+    List<String> results = getObjectConnection().list(BaseQuery.queryBy("userId", auth.getUser().getUserId()));
 
     List<ServiceObject> list = new ArrayList();
-    for (JsonNode raw : results) {
+    for (String raw : results) {
       list.add(ServiceObject.fromJSON(raw));
     }
 
@@ -256,7 +251,7 @@ public class StorageService implements RaptorService {
 
   public List<RecordSet> listData() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
 
-    List<JsonNode> results = getDataConnection().list(
+    List<String> results = getDataConnection().list(
             BaseQuery.queryBy("userId", auth.getUser().getUserId())
     );
 

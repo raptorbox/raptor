@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.createnet.search.raptor.search.query.Query;
+import org.createnet.raptor.search.raptor.search.query.Query;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.junit.After;
 import org.junit.AfterClass;

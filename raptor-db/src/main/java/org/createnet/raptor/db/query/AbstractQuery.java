@@ -17,7 +17,6 @@ package org.createnet.raptor.db.query;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  *

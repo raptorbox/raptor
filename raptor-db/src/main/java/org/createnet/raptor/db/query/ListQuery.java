@@ -66,7 +66,7 @@ public interface ListQuery {
   public class QueryOptions {
     
     public int retries = 3;
-    public int timeout = 10;
+    public int timeout = 30;
     public TimeUnit timeoutUnit = TimeUnit.SECONDS;
 
     public QueryOptions() {

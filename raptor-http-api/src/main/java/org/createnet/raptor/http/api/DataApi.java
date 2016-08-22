@@ -17,7 +17,9 @@ package org.createnet.raptor.http.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Collection;
+import java.util.Date;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
@@ -36,7 +38,7 @@ import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.createnet.raptor.db.Storage;
-import org.createnet.search.raptor.search.Indexer;
+import org.createnet.raptor.search.raptor.search.Indexer;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.events.DataEvent;
 import org.createnet.raptor.http.service.EventEmitterService;
@@ -44,7 +46,8 @@ import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Stream;
-import org.createnet.search.raptor.search.query.impl.es.DataQuery;
+import org.createnet.raptor.search.raptor.search.query.Query;
+import org.createnet.raptor.search.raptor.search.query.impl.es.DataQuery;
 
 /**
  *
@@ -82,7 +85,7 @@ public class DataApi extends AbstractApi {
           @QueryParam("limit") int limit,
           @QueryParam("offset") int offset
           
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, IOException {
+  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, IOException, Indexer.IndexerException {
 
     ServiceObject obj = loadObject(id);
     Stream stream = loadStream(streamName, obj);
@@ -94,8 +97,8 @@ public class DataApi extends AbstractApi {
     if(!obj.settings.storeEnabled()) {
       return Response.noContent().build();
     }
-    
-    ResultSet data = storage.fetchData(stream, limit, offset);
+
+    ResultSet data = indexer.fetchData(stream);
 
     logger.debug("Fetched {} records for stream {} in object {}", data.size(), streamName, obj.id);
 
@@ -135,7 +138,7 @@ public class DataApi extends AbstractApi {
   public Response fetchLastUpdate(
           @PathParam("id") String id,
           @PathParam("stream") String streamName
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException, IOException {
+  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException, IOException, Indexer.IndexerException {
 
     ServiceObject obj = loadObject(id);
     Stream stream = loadStream(streamName, obj);
@@ -148,8 +151,8 @@ public class DataApi extends AbstractApi {
       return Response.noContent().build();
     }
     
-    RecordSet data = storage.fetchLastUpdate(stream);
-
+    RecordSet data = indexer.fetchLastUpdate(stream);
+    
     logger.debug("Fetched lastUpdate record for stream {} in object {}", streamName, obj.id);
 
     if (data == null) {

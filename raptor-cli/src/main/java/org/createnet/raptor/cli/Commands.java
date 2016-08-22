@@ -20,7 +20,7 @@ import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.StorageService;
-import org.createnet.search.raptor.search.Indexer;
+import org.createnet.raptor.search.raptor.search.Indexer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
