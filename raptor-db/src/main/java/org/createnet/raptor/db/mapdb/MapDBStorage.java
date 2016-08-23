@@ -16,10 +16,7 @@
 package org.createnet.raptor.db.mapdb;
 
 import java.io.File;
-import java.util.concurrent.ConcurrentMap;
-import org.mapdb.*;
 import org.createnet.raptor.db.AbstractStorage;
-import org.createnet.raptor.db.Storage;
 
 /**
  *
@@ -27,45 +24,40 @@ import org.createnet.raptor.db.Storage;
  */
 public class MapDBStorage extends AbstractStorage {
 
-  protected DB db;
-
   @Override
   public void setup(boolean forceSetup) throws StorageException {
-    setupDB();
-    ConcurrentMap map = db.hashMap("map").createOrOpen();
-    map.put("something", "here");
-  }
-
-  @Override
-  public void connect() throws StorageException {
-  }
-
-  @Override
-  public void disconnect() {
-    super.disconnect();
-    db.close();
-  }
-
-  private void setupDB() throws StorageException {
+    
     if (config.mapdb.storage.equals("file")) {
-
       File dir = new File(config.mapdb.storePath);
       if (!dir.exists()) {
         if (!dir.mkdirs()) {
           throw new StorageException("Cannot create directory " + config.mapdb.storePath);
         }
       }
+    }
 
-      for (ConnectionId connId : Storage.ConnectionId.values()) {
-        File file = new File(config.mapdb.storePath + File.separator + connId.name());
-        logger.debug("Create store for {} at {}", connId, file.getPath());
-        db = DBMaker.fileDB(file).make();
-        addConnection(new MapDBConnection(connId));
+    for (ConnectionId connId : ConnectionId.values()) {
+      
+      if(getConnections().containsKey(connId.name())) {
+        continue;
       }
 
-    } else {
-      db = DBMaker.memoryDB().make();
+      MapDBConnection conn = new MapDBConnection(connId);
+      conn.initialize(config);
+      conn.setup(forceSetup);
+      addConnection(conn);
     }
+
+  }
+
+  @Override
+  public void connect() throws StorageException {
+    connectAll();
+  }
+  
+  @Override
+  public void disconnect() {
+    super.disconnect();
   }
 
 }

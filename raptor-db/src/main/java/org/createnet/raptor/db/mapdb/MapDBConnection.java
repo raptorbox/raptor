@@ -17,14 +17,13 @@ package org.createnet.raptor.db.mapdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.File;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.config.StorageConfiguration;
 import org.createnet.raptor.db.AbstractConnection;
 import org.createnet.raptor.db.query.ListQuery;
-import org.mapdb.BTreeMap;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.mapdb.HTreeMap;
@@ -40,102 +39,140 @@ class MapDBConnection extends AbstractConnection {
 
   private final Logger logger = LoggerFactory.getLogger(MapDBConnection.class);
 
-  private StorageConfiguration config;
-  
   private DB db;
   private HTreeMap<String, String> map;
-  private BTreeMap<Long, String> ttl;
+//  private BTreeMap<Long, String> ttl;
 
   static public class Record {
-    
+
     public long ttl;
     public JsonNode content;
     public String id;
+
+    private Record() {}
     
     private Record(String id, JsonNode content, long ttl) {
       this.id = id;
       this.content = content;
       this.ttl = ttl;
     }
-    
+
     public JsonNode toJsonNode() {
       return Storage.mapper.convertValue(this, JsonNode.class);
     }
-    
+
     @Override
     public String toString() {
       return toJsonNode().toString();
     }
-    
+
   }
-  
+
   public MapDBConnection(Storage.ConnectionId connId) {
     this.id = connId.name();
   }
 
   @Override
   public void setup(boolean forceSetup) throws Storage.StorageException {
-
-    if (config.mapdb.storage.equals("memory")) {
-      db = DBMaker.memoryDB().make();
+    
+    if (db != null) {
       return;
     }
+    
+    if (configuration.mapdb.storage.equals("memory")) {
+      db = DBMaker.memoryDB().make();
+    } else {
 
-    File file = new File(config.mapdb.storePath + File.separator + this.id);
+      File file = new File(configuration.mapdb.storePath + File.separator + this.id + ".mapdb");
 
-    if (forceSetup && file.exists()) {
-      file.delete();
+      if (forceSetup && file.exists()) {
+        file.delete();
+      }
+
+      try {
+
+        db = DBMaker
+              .fileDB(file)
+              .closeOnJvmShutdown()
+              .closeOnJvmShutdownWeakReference()
+  //            .checksumStoreEnable()
+  //            .checksumHeaderBypass()
+              .transactionEnable()
+              .make();
+        
+        setupIndexes();
+        
+      }
+      catch(Exception e) {
+        logger.error("Failed to open db at {}: {}", file.getPath(), e.getMessage());
+        throw new Storage.StorageException(e);
+      }
+      
+      logger.debug("Loaded store for {} at {}", this.id, file.getPath());
     }
 
-    db = DBMaker.fileDB(file).make();
+  }
 
-    logger.debug("Created store for {} at {}", this.id, file.getPath());
-    
+  @Override
+  public void connect() throws Storage.StorageException {
+
     map = db.hashMap(this.id + "_dataset")
             .keySerializer(Serializer.STRING)
             .valueSerializer(Serializer.STRING)
             .createOrOpen();
 
-    ttl = db.treeMap(this.id + "_ttl")
-            .keySerializer(Serializer.LONG)
-            .valueSerializer(Serializer.STRING)
-            .createOrOpen();    
-    
-  }
+//    ttl = db.treeMap(this.id + "_ttl")
+//            .keySerializer(Serializer.LONG)
+//            .valueSerializer(Serializer.STRING)
+//            .createOrOpen();
 
-  @Override
-  public void connect() throws Storage.StorageException {
   }
 
   @Override
   public void disconnect() {
+    if(db != null)
+      db.close();
   }
 
   @Override
   public void set(String id, JsonNode data, int ttlDays) throws Storage.StorageException {
-    Record r = new Record(id, data, (long)ttlDays);
-    ttl.put(r.ttl, r.id);
-    map.put(r.id, r.content.toString());
+    Record r = new Record(id, data, (long) ttlDays);
+//    ttl.put(r.ttl, r.id);
+    map.put(r.id, r.toString());
+    db.commit();
   }
 
   @Override
   public JsonNode get(String id) throws Storage.StorageException {
-    return getRecord(id).content;
+
+    Record r = getRecord(id);
+
+    if(r.ttl > 0 && Instant.ofEpochSecond(r.ttl).isBefore(Instant.now())) {
+      delete(id);
+      return null;
+    }
+
+    return r.content;
   }
-  
+
   public Record getRecord(String id) throws Storage.StorageException {
-    return parseRecord(map.get(id));
+    try {
+      return parseRecord(map.get(id));
+    }
+    catch(IOException e) {
+      throw new Storage.StorageException(e);
+    }
   }
 
   @Override
   public List<JsonNode> list(ListQuery query) throws Storage.StorageException {
     /**
-     * TODO: 
-     *  - add indeces in config, like per couchbase
-     *  - on set() add maps for each indexable key and its ref id
-     *  - on list() match parameters with index keys and create subsets to iterate over
+     * TODO: - add indeces in config, like per couchbase - on set() add maps for
+     * each indexable key and its ref id - on list() match parameters with index
+     * keys and create subsets to iterate over
      */
     throw new RuntimeException("Not Implemented");
+    
 //    List<JsonNode> results = new ArrayList();
 //    query.getParams()
 //    
@@ -150,11 +187,21 @@ class MapDBConnection extends AbstractConnection {
   public void delete(String id) throws Storage.StorageException {
     Record r = getRecord(id);
     map.remove(id);
-    ttl.remove(r.ttl);
+//    ttl.remove(r.ttl);
   }
 
-  protected Record parseRecord(String raw) {
-    return Storage.mapper.convertValue(raw, Record.class);
+  protected Record parseRecord(String raw) throws IOException {
+    return Storage.mapper.readValue(raw, Record.class);
+  }
+
+  private void setupIndexes() {
+    
+    if(!configuration.mapdb.indices.containsKey(this.id)) {
+      return;
+    }
+    
+    List<List<String>> indexDefinition = configuration.mapdb.indices.get(this.id);
+    
   }
   
 }

@@ -4,6 +4,16 @@ type: mapdb
 mapdb:
   storage: file # or memory
   storePath: /tmp/raptor
+  indexes:
+    objects:
+      - [userId]
+    data:
+      - [userId]
+      - [userId, streamId]
+      - [userId, objectId]
+      - [userId, objectId, streamId]
+    actuations:
+      - [userId]
 
 couchbase:
   nodes:

@@ -37,26 +37,27 @@ public class StorageConfiguration {
     
     public String storage = null;
     public String storePath = null;
+    final public Map<String, List<List<String>>> indices = new HashMap();
     
-    public MapDB(){}
+    public MapDB() {}
   }
   
   static public class Couchbase {
 
-    public Couchbase() {
-    }
+    public Couchbase() {}
     
     final public List<String> nodes = new ArrayList();
+    
     public String username;
     public String password;
+    
     final public Map<String, String> buckets = new HashMap();
     final public Map<String, List<List<String>>> bucketsIndex = new HashMap();
     final public BucketDefaults bucketDefaults = new BucketDefaults();
-    
+
     static public class BucketDefaults {
 
-      public BucketDefaults() {
-      }
+      public BucketDefaults() {}
       
       public String password = "";
       public int quota = 120;
