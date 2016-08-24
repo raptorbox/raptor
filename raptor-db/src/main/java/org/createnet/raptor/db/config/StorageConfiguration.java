@@ -30,6 +30,7 @@ public class StorageConfiguration {
   }
   
   public String type;
+
   public final Couchbase couchbase = new Couchbase();
   public final MapDB mapdb = new MapDB();
   
@@ -37,6 +38,7 @@ public class StorageConfiguration {
     
     public String storage = null;
     public String storePath = null;
+
     final public Map<String, List<List<String>>> indices = new HashMap();
     
     public MapDB() {}

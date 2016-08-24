@@ -60,7 +60,7 @@ public interface ListQuery {
       this.key = key;
       this.value = value;
     }
-    
+
   }
   
   public class QueryOptions {

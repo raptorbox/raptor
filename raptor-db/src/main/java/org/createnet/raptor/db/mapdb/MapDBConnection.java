@@ -15,15 +15,19 @@
  */
 package org.createnet.raptor.db.mapdb;
 
+import com.couchbase.client.deps.com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.AbstractConnection;
 import org.createnet.raptor.db.query.ListQuery;
@@ -40,13 +44,15 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <luca.capra@gmail.com>
  */
 class MapDBConnection extends AbstractConnection {
-
+  
+  protected static final String keySeparator = "_";
+  
   private final Logger logger = LoggerFactory.getLogger(MapDBConnection.class);
 
   private DB db;
   private HTreeMap<String, String> map;
   private HTreeMap<String, String> configStore;
-  private final Map<String, BTreeMap<String, Integer>> indexMap = new HashMap();
+  private final Map<String, BTreeMap<String, String>> indexMap = new HashMap();
 
   static public class Record {
 
@@ -115,7 +121,7 @@ class MapDBConnection extends AbstractConnection {
     }
 
     try {
-      setupIndexes();
+      setupIndexes(forceSetup);
     } catch (JsonProcessingException ex) {
       throw new Storage.StorageException(ex);
     }
@@ -156,7 +162,11 @@ class MapDBConnection extends AbstractConnection {
   public JsonNode get(String id) throws Storage.StorageException {
 
     Record r = getRecord(id);
-
+    
+    if(r == null) {
+      return null;
+    }
+    
     if (r.ttl > 0 && Instant.ofEpochSecond(r.ttl).isBefore(Instant.now())) {
       delete(id);
       return null;
@@ -167,7 +177,11 @@ class MapDBConnection extends AbstractConnection {
 
   public Record getRecord(String id) throws Storage.StorageException {
     try {
-      return parseRecord(map.get(id));
+      String content = map.get(id);
+      if(content == null) {
+        return null;
+      }
+      return parseRecord(content);
     } catch (IOException e) {
       throw new Storage.StorageException(e);
     }
@@ -175,26 +189,84 @@ class MapDBConnection extends AbstractConnection {
 
   @Override
   public List<JsonNode> list(ListQuery query) throws Storage.StorageException {
-    /**
-     * TODO: - add indeces in config, like per couchbase - on set() add maps for
-     * each indexable key and its ref id - on list() match parameters with index
-     * keys and create subsets to iterate over
-     */
-    throw new RuntimeException("Not Implemented");
 
-//    List<JsonNode> results = new ArrayList();
-//    query.getParams()
-//    
-//    for (Map.Entry<String, String> entry : map.getEntries()) {
-//      Record r = parseRecord(entry.getValue());
-//      results.add(r.content);
-//    }
-//    return results;
+    
+    List<JsonNode> results = new ArrayList();
+    
+    List<ListQuery.QueryParam> params = query.getParams();
+    
+    if(params.size() > 0) {
+      
+      List<String> keys = new ArrayList();
+      Map<String, String> values = new HashMap();
+      
+      for (ListQuery.QueryParam param : params) {
+        keys.add(param.key);
+        values.put(param.key, param.value.toString());
+      }
+      
+      String key = getIndexKey(keys);
+      
+      String[] arrKeys = new String[keys.size()];
+      arrKeys = keys.toArray(arrKeys);
+      Arrays.sort(arrKeys);    
+      
+      String[] keyVal = new String[arrKeys.length];
+      int i = 0;
+      for (String arrKey : arrKeys) {
+        keyVal[i] = values.get(arrKey);
+        i++;
+      }
+      
+      String valuesKey = String.join(keySeparator, keyVal);
+      
+      BTreeMap<String, String > idx = indexMap.get(key);
+      
+      if(idx == null) {
+        logger.debug("Missing index for {}", key);
+        throw new Storage.StorageException("Missing index " + key);
+      }
+      
+      String json = idx.get(valuesKey);
+      
+      // no results
+      if(json == null) {
+        return results;
+      }
+      
+      try {
+        
+        String[] ids = Storage.mapper.readValue(json, String[].class);
+        
+        for (String id1 : ids) {
+          JsonNode row = get(id1);
+          if(row != null)
+            results.add(row);
+        }
+        
+      } catch (IOException ex) {
+        throw new  Storage.StorageException(ex);
+      }
+
+    }
+    
+    if(query.getLimit() > 0) {
+    }
+    
+    if(query.getOffset() > 0) {
+    }
+    
+    return results;
   }
 
   @Override
   public void delete(String id) throws Storage.StorageException {
+
     Record r = getRecord(id);
+    if(r == null) {
+      return;
+    }
+    
     map.remove(id);
 //    ttl.remove(r.ttl);
   }
@@ -203,7 +275,7 @@ class MapDBConnection extends AbstractConnection {
     return Storage.mapper.readValue(raw, Record.class);
   }
 
-  private void setupIndexes() throws JsonProcessingException {
+  private void setupIndexes(boolean forceSetup) throws JsonProcessingException {
 
     if (!configuration.mapdb.indices.containsKey(this.id)) {
       return;
@@ -227,32 +299,83 @@ class MapDBConnection extends AbstractConnection {
 
         logger.debug("Adding index for {}", key);
 
-        BTreeMap<String, Integer> idxmap = db.treeMap(String.format("%s_idx_%s", this.id, key))
+        BTreeMap<String, String> idxmap = db.treeMap(String.format("%s_idx_%s", this.id, key))
                 .keySerializer(Serializer.STRING)
-                .valueSerializer(Serializer.INTEGER)
+                .valueSerializer(Serializer.STRING)
                 .createOrOpen();
 
         indexMap.put(key, idxmap);
       }
 
     }
+    
+    db.commit();
 
   }
 
-  protected BTreeMap<String, Integer> getIndexMap(String key) {
+  protected BTreeMap<String, String> getIndexMap(String key) {
     return indexMap.getOrDefault(key, null);
   }
-  
+
   protected String getIndexKey(List<String> keys) {
-    String[] arrKeys = (String[]) keys.toArray();
+    String[] arrKeys = new String[keys.size()];
+    arrKeys = keys.toArray(arrKeys);
     Arrays.sort(arrKeys);
-    return String.join("_", arrKeys);
+    return String.join(keySeparator, arrKeys);
+  }
+  
+  protected String getIndexKeyVal(List<String> keys, Record r) throws Storage.StorageException {
+    String[] arrKeys = new String[keys.size()];
+    arrKeys = keys.toArray(arrKeys);
+    Arrays.sort(arrKeys);    
+    String[] keyVal = new String[ arrKeys.length ];
+    int i = 0;
+    for (String arrKey : arrKeys) {
+      if(!r.content.has(arrKey)) {
+        logger.debug("Missing record key {} for record {}", arrKey, r.id);
+        throw new Storage.StorageException("Cannot index record, missing key " + arrKey);
+      }
+      keyVal[i] = r.content.get(arrKey).asText();
+      i++;
+    }
+    
+    return String.join(keySeparator, keyVal);
   }
 
-  protected void addToIndex(Record r) {
+  protected void addToIndex(Record r) throws Storage.StorageException {
+    
     List<List<String>> indexDefinition = configuration.mapdb.indices.get(this.id);
     for (List<String> keys : indexDefinition) {
-      getIndexMap(getIndexKey(keys)).put(r.id, 0);
+      
+      String keyhash = getIndexKey(keys);
+      String valhash = getIndexKeyVal(keys, r);
+      BTreeMap<String, String> idx = getIndexMap(keyhash);
+      List<String> list = new ArrayList();
+      String json;
+
+      json = idx.get(valhash);
+      if (json != null) {
+        try {
+          list = new ArrayList(Arrays.asList(Storage.mapper.readValue(json, String[].class)));
+        } catch (IOException ex) {
+          throw  new Storage.StorageException(ex);
+        }
+      }
+
+      if (list.contains(r.id)) {
+        // duplicate found, abort!
+        continue;
+      }
+
+      list.add(r.id);
+
+      try {
+        json = Storage.mapper.writeValueAsString(list);
+        idx.put(valhash, json);
+      } catch (JsonProcessingException ex) {
+        throw  new Storage.StorageException(ex);
+      }
+
     }
 
   }
