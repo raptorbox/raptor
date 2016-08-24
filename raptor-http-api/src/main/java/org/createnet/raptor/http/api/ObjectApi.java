@@ -21,7 +21,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
@@ -65,7 +64,7 @@ public class ObjectApi extends AbstractApi {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public List<String> list() throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException {
+  public List<String> list() throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException, Indexer.IndexerException {
 
     if (!auth.isAllowed(Authorization.Permission.List)) {
       throw new NotAuthorizedException("Cannot list objects");
@@ -83,7 +82,7 @@ public class ObjectApi extends AbstractApi {
   @POST
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response create(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException {
+  public Response create(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException, Indexer.IndexerException, RecordsetException {
 
     if (!auth.isAllowed(Authorization.Permission.Create)) {
       throw new ForbiddenException("Cannot create object");
@@ -221,8 +220,14 @@ public class ObjectApi extends AbstractApi {
       throw new ForbiddenException("Cannot search for objects");
     }
     
-    List<String> list = indexer.searchObject(query);
-    return list;
+    List<ServiceObject> list = indexer.searchObject(query);
+    
+    List<String> results = new ArrayList();
+    for (ServiceObject serviceObject : list) {
+      results.add(serviceObject.getId()) ;
+    }
+    
+    return results;
   }  
 
   private List<Stream> getChangedStreams(ServiceObject storedObj, ServiceObject obj) {

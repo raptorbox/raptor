@@ -206,34 +206,34 @@ public class MapDBConnectionTest {
     dataStore.destroy();
 
   }
-
-  @Test
-  public void testListObjects() throws Exception {
-
-    populateObjectData(0);
-
-    ListQuery query = BaseQuery.createQuery(new ListQuery.QueryParam[]{
-      new ListQuery.QueryParam("userId", "test-user"),});
-
-    List<JsonNode> result = objectStore.list(query);
-    assertEquals(2, result.size());
-
-  }
-
-  @Test
-  public void testListData() throws Exception {
-    
-    int len = 100;
-    populateObjectData(len);
-    
-    ListQuery query = BaseQuery.createQuery(new ListQuery.QueryParam[]{
-      new ListQuery.QueryParam("userId", "test-user"),
-      new ListQuery.QueryParam("streamId", "mylocation"),
-    });
-
-    List<JsonNode> result = dataStore.list(query);
-    assertEquals(len, result.size());
-
-  }
+//
+//  @Test
+//  public void testListObjects() throws Exception {
+//
+//    populateObjectData(0);
+//
+//    ListQuery query = BaseQuery.createQuery(new ListQuery.QueryParam[]{
+//      new ListQuery.QueryParam("userId", "test-user"),});
+//
+//    List<JsonNode> result = objectStore.list(query);
+//    assertEquals(2, result.size());
+//
+//  }
+//
+//  @Test
+//  public void testListData() throws Exception {
+//    
+//    int len = 100;
+//    populateObjectData(len);
+//    
+//    ListQuery query = BaseQuery.createQuery(new ListQuery.QueryParam[]{
+//      new ListQuery.QueryParam("userId", "test-user"),
+//      new ListQuery.QueryParam("streamId", "mylocation"),
+//    });
+//
+//    List<JsonNode> result = dataStore.list(query);
+//    assertEquals(len, result.size());
+//
+//  }
   
 }

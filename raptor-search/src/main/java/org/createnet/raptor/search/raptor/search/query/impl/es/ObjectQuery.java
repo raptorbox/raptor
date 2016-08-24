@@ -42,7 +42,11 @@ public class ObjectQuery extends AbstractQuery {
   public void setUserId(String userId) {
     this.userId = userId;
   }
-  
+
+  public String getUserId() {
+    return this.userId;
+  }
+
   @Override
   public void validate() throws QueryException {
     

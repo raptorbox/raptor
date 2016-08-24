@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
@@ -36,9 +35,11 @@ import org.createnet.raptor.http.configuration.StorageConfiguration;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.data.RecordSet;
+import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
+import org.createnet.raptor.search.raptor.search.Indexer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,9 @@ public class StorageService implements RaptorService {
 
   @Inject
   AuthService auth;
+  
+  @Inject
+  IndexerService indexer;
 
   private Storage storage;
 
@@ -150,7 +154,7 @@ public class StorageService implements RaptorService {
     return obj.id;
   }
 
-  public void deleteObject(ServiceObject obj) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
+  public void deleteObject(ServiceObject obj) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException, Indexer.IndexerException, RecordsetException {
 
     // cleanup data
     deleteData(obj.streams.values());
@@ -160,16 +164,8 @@ public class StorageService implements RaptorService {
 
   }
 
-  public List<ServiceObject> listObjects() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
-
-    List<JsonNode> results = getObjectConnection().list(BaseQuery.queryBy("userId", auth.getUser().getUserId()));
-
-    List<ServiceObject> list = new ArrayList();
-    for (JsonNode raw : results) {
-      list.add(ServiceObject.fromJSON(raw));
-    }
-
-    return list;
+  public List<ServiceObject> listObjects() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException, RaptorComponent.ParserException, Indexer.IndexerException {
+    return indexer.getObjects(auth.getUser().getUserId());
   }
 
   // Data 
@@ -246,45 +242,42 @@ public class StorageService implements RaptorService {
     getDataConnection().delete(getDataId(stream, record));
   }
 
-  public List<RecordSet> listData() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
+//  public List<RecordSet> listData() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
+//
+//    List<JsonNode> results = getDataConnection().list(
+//            BaseQuery.queryBy("userId", auth.getUser().getUserId())
+//    );
+//
+//    List<RecordSet> list = new ArrayList();
+//    for (JsonNode raw : results) {
+//      list.add(RecordSet.fromJSON(raw));
+//    }
+//
+//    return list;
+//  }
 
-    List<JsonNode> results = getDataConnection().list(
-            BaseQuery.queryBy("userId", auth.getUser().getUserId())
-    );
-
-    List<RecordSet> list = new ArrayList();
-    for (JsonNode raw : results) {
-      list.add(RecordSet.fromJSON(raw));
-    }
-
-    return list;
-  }
-
-  // @TODO: introduce batch operation in storage
-  public void deleteData(Stream stream) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
-
-    BaseQuery query = BaseQuery.queryBy("userId", auth.getUser().getUserId(), "streamId", stream.name);
-
-    query.getQueryOptions().timeout = 30;
-    query.getQueryOptions().timeoutUnit = TimeUnit.SECONDS;
-
-    List<JsonNode> results = getDataConnection().list(query);
-
-    for (JsonNode raw : results) {
-      RecordSet rs = RecordSet.fromJSON(raw);
-      deleteData(stream, rs);
+  public void deleteData(Stream stream) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException, Indexer.IndexerException, RecordsetException {
+    
+    List<RecordSet> records = indexer.getStreamData(stream);
+    
+    for (RecordSet record : records) {
+      deleteData(stream, record);
     }
 
   }
 
-  public void deleteData(Collection<Stream> changedStreams) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
-    if (!changedStreams.isEmpty()) {
-      //drop stream data
-      for (Stream changedStream : changedStreams) {
-        logger.debug("Removing stream {} data for object {}", changedStream.name, changedStream.getServiceObject().id);
-        deleteData(changedStream);
-      }
+  public void deleteData(Collection<Stream> streams) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException, Indexer.IndexerException, RecordsetException {
+    
+    if (streams.isEmpty()) {
+      return;
     }
+    
+    //drop stream data
+    for (Stream stream : streams) {
+      logger.debug("Removing stream {} data for object {}", stream.name, stream.getServiceObject().id);
+      deleteData(stream);
+    }
+    
   }
 
   // Actuations

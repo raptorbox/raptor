@@ -63,6 +63,12 @@ public class IndexerService implements RaptorService {
   
   private Indexer indexer;
 
+  List<ServiceObject> getObjects(String userId) throws IOException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+    ObjectQuery q = new ObjectQuery();
+    q.setUserId(userId);
+    return searchObject(q);
+  }
+
   public enum IndexNames {
     object, data, subscriptions
   }
@@ -138,16 +144,18 @@ public class IndexerService implements RaptorService {
 
   }
 
-  public List<String> searchObject(ObjectQuery query) throws Indexer.SearchException, IOException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+  public List<ServiceObject> searchObject(ObjectQuery query) throws Indexer.SearchException, IOException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
 
     setQueryIndex(query, IndexNames.object);
-    query.setUserId(auth.getUser().getUserId());
+    if(query.getUserId() == null) {
+      query.setUserId(auth.getUser().getUserId());
+    }
 
     List<String> results = getIndexer().search(query);
-    List<String> list = new ArrayList();
+    List<ServiceObject> list = new ArrayList();
 
     for (String result : results) {
-      list.add(ServiceObject.fromJSON(result).id);
+      list.add(ServiceObject.fromJSON(result));
     }
 
     return list;
@@ -187,8 +195,9 @@ public class IndexerService implements RaptorService {
 
     getIndexer().save(record);
   }
+  
+  public List<RecordSet> getStreamData(Stream stream) throws ConfigurationException, Indexer.IndexerException, RecordsetException {
 
-  public void deleteData(Stream stream) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
 
     DataQuery query = new DataQuery();
     setQueryIndex(query, IndexNames.data);
@@ -196,13 +205,24 @@ public class IndexerService implements RaptorService {
     query.match = true;
     query.matchfield = "streamId";
     query.matchstring = stream.name;
+    
+    List<String> rawResults = getIndexer().search(query);
+    List<RecordSet> results = new ArrayList();
+    
+    for (String result : rawResults) {
+      RecordSet recordSet = new RecordSet(stream, result);
+      results.add(recordSet);
+    }  
+    
+    return results;
+  }
+  
+  public void deleteData(Stream stream) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
 
     List<Indexer.IndexOperation> deletes = new ArrayList();
-    List<String> results = getIndexer().search(query);
-
-    for (String result : results) {
-
-      RecordSet recordSet = new RecordSet(stream, result);
+    List<RecordSet> results = getStreamData(stream);
+    
+    for (RecordSet recordSet : results) {
 
       Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
       record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getLastUpdate().getTime();
@@ -210,6 +230,7 @@ public class IndexerService implements RaptorService {
       Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.DELETE, record);
       deletes.add(op);
     }
+
     getIndexer().batch(deletes);
 
   }
