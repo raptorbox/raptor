@@ -25,10 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.config.StorageConfiguration;
 import org.createnet.raptor.db.query.BaseQuery;
@@ -64,23 +61,10 @@ public class MapDBConnectionTest {
 
   @Before
   public void setUp() throws Storage.StorageException {
-
-    config.mapdb.storage = "file";
-    config.mapdb.storePath = "/tmp/raptor-test";
-
-    List<List<String>> indeces = new ArrayList();
-
-    List<String> idx = new ArrayList();
-    idx.add("userId");
-    indeces.add(idx);
-
-    idx = new ArrayList();
-    idx.add("userId");
-    idx.add("objectId");
+    
+    loadConfig();
     
     new File(config.mapdb.storePath).mkdirs();
-    
-    config.mapdb.indices.put(Storage.ConnectionId.objects.name(), indeces);
 
     instance = new MapDBConnection(Storage.ConnectionId.objects);
     instance.initialize(config);
@@ -95,21 +79,20 @@ public class MapDBConnectionTest {
   }
 
   @Test
-  public void testList() throws Exception {
+  public void testListObjects() throws Exception {
 
-    populateData();
+    populateObjectData();
 
     ListQuery query = BaseQuery.createQuery(new ListQuery.QueryParam[]{
       new ListQuery.QueryParam("userId", "test-user"),
-      new ListQuery.QueryParam("objectId", "test1")
     });
 
     List<JsonNode> result = instance.list(query);
-    assertEquals(result.size(), 2);
+    assertEquals(result.size(), 3);
     
   }
 
-  private void populateData() throws IOException, Storage.StorageException {
+  private void populateObjectData() throws IOException, Storage.StorageException {
     ObjectNode obj = loadData("model");
     
     obj.put("id", "test1");
@@ -140,6 +123,46 @@ public class MapDBConnectionTest {
     byte[] content = Files.readAllBytes(path);
 
     return (ObjectNode) mapper.readTree(content);
+  }
+
+  private void loadConfig() {
+
+    config.mapdb.storage = "file";
+    config.mapdb.storePath = "/tmp/raptor-test";
+    
+    List<List<String>> indices;
+    List<String> idx;
+    
+    
+    // objects index
+    indices = new ArrayList();
+    
+    idx = new ArrayList();
+    idx.add("userId");
+    indices.add(idx);
+    
+    idx = new ArrayList();
+    idx.add("userId");
+    indices.add(idx);
+    
+    config.mapdb.indices.put(Storage.ConnectionId.objects.name(), indices);
+    
+    // data stream index
+    indices = new ArrayList();
+    
+    idx = new ArrayList();
+    idx.add("userId");
+    idx.add("objectId");
+    indices.add(idx);
+    
+    idx = new ArrayList();
+    idx.add("userId");
+    idx.add("objectId");
+    idx.add("streamId");
+    indices.add(idx);
+    
+    config.mapdb.indices.put(Storage.ConnectionId.data.name(), indices);
+    
   }
 
 }

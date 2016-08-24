@@ -15,15 +15,19 @@
  */
 package org.createnet.raptor.db.mapdb;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.createnet.raptor.db.Storage;
-import org.createnet.raptor.db.config.StorageConfiguration;
 import org.createnet.raptor.db.AbstractConnection;
 import org.createnet.raptor.db.query.ListQuery;
+import org.mapdb.BTreeMap;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.mapdb.HTreeMap;
@@ -41,7 +45,8 @@ class MapDBConnection extends AbstractConnection {
 
   private DB db;
   private HTreeMap<String, String> map;
-//  private BTreeMap<Long, String> ttl;
+  private HTreeMap<String, String> configStore;
+  private final Map<String, BTreeMap<String, Integer>> indexMap = new HashMap();
 
   static public class Record {
 
@@ -49,8 +54,9 @@ class MapDBConnection extends AbstractConnection {
     public JsonNode content;
     public String id;
 
-    private Record() {}
-    
+    private Record() {
+    }
+
     private Record(String id, JsonNode content, long ttl) {
       this.id = id;
       this.content = content;
@@ -74,11 +80,11 @@ class MapDBConnection extends AbstractConnection {
 
   @Override
   public void setup(boolean forceSetup) throws Storage.StorageException {
-    
+
     if (db != null) {
       return;
     }
-    
+
     if (configuration.mapdb.storage.equals("memory")) {
       db = DBMaker.memoryDB().make();
     } else {
@@ -92,23 +98,26 @@ class MapDBConnection extends AbstractConnection {
       try {
 
         db = DBMaker
-              .fileDB(file)
-              .closeOnJvmShutdown()
-              .closeOnJvmShutdownWeakReference()
-  //            .checksumStoreEnable()
-  //            .checksumHeaderBypass()
-              .transactionEnable()
-              .make();
-        
-        setupIndexes();
-        
-      }
-      catch(Exception e) {
+                .fileDB(file)
+                .closeOnJvmShutdown()
+                .closeOnJvmShutdownWeakReference()
+                //            .checksumStoreEnable()
+                //            .checksumHeaderBypass()
+                .transactionEnable()
+                .make();
+
+      } catch (Exception e) {
         logger.error("Failed to open db at {}: {}", file.getPath(), e.getMessage());
         throw new Storage.StorageException(e);
       }
-      
+
       logger.debug("Loaded store for {} at {}", this.id, file.getPath());
+    }
+
+    try {
+      setupIndexes();
+    } catch (JsonProcessingException ex) {
+      throw new Storage.StorageException(ex);
     }
 
   }
@@ -125,13 +134,13 @@ class MapDBConnection extends AbstractConnection {
 //            .keySerializer(Serializer.LONG)
 //            .valueSerializer(Serializer.STRING)
 //            .createOrOpen();
-
   }
 
   @Override
   public void disconnect() {
-    if(db != null)
+    if (db != null) {
       db.close();
+    }
   }
 
   @Override
@@ -139,6 +148,7 @@ class MapDBConnection extends AbstractConnection {
     Record r = new Record(id, data, (long) ttlDays);
 //    ttl.put(r.ttl, r.id);
     map.put(r.id, r.toString());
+    addToIndex(r);
     db.commit();
   }
 
@@ -147,7 +157,7 @@ class MapDBConnection extends AbstractConnection {
 
     Record r = getRecord(id);
 
-    if(r.ttl > 0 && Instant.ofEpochSecond(r.ttl).isBefore(Instant.now())) {
+    if (r.ttl > 0 && Instant.ofEpochSecond(r.ttl).isBefore(Instant.now())) {
       delete(id);
       return null;
     }
@@ -158,8 +168,7 @@ class MapDBConnection extends AbstractConnection {
   public Record getRecord(String id) throws Storage.StorageException {
     try {
       return parseRecord(map.get(id));
-    }
-    catch(IOException e) {
+    } catch (IOException e) {
       throw new Storage.StorageException(e);
     }
   }
@@ -172,7 +181,7 @@ class MapDBConnection extends AbstractConnection {
      * keys and create subsets to iterate over
      */
     throw new RuntimeException("Not Implemented");
-    
+
 //    List<JsonNode> results = new ArrayList();
 //    query.getParams()
 //    
@@ -194,14 +203,58 @@ class MapDBConnection extends AbstractConnection {
     return Storage.mapper.readValue(raw, Record.class);
   }
 
-  private void setupIndexes() {
-    
-    if(!configuration.mapdb.indices.containsKey(this.id)) {
+  private void setupIndexes() throws JsonProcessingException {
+
+    if (!configuration.mapdb.indices.containsKey(this.id)) {
       return;
     }
-    
+
+    configStore = db.hashMap(this.id + "_config")
+            .keySerializer(Serializer.STRING)
+            .valueSerializer(Serializer.STRING)
+            .createOrOpen();
+
     List<List<String>> indexDefinition = configuration.mapdb.indices.get(this.id);
-    
+    logger.debug("Setup index for {}", this.id);
+
+    configStore.put("indexes", Storage.mapper.writeValueAsString(indexDefinition));
+
+    for (List<String> keys : indexDefinition) {
+
+      String key = getIndexKey(keys);
+
+      if (!indexMap.containsKey(key)) {
+
+        logger.debug("Adding index for {}", key);
+
+        BTreeMap<String, Integer> idxmap = db.treeMap(String.format("%s_idx_%s", this.id, key))
+                .keySerializer(Serializer.STRING)
+                .valueSerializer(Serializer.INTEGER)
+                .createOrOpen();
+
+        indexMap.put(key, idxmap);
+      }
+
+    }
+
+  }
+
+  protected BTreeMap<String, Integer> getIndexMap(String key) {
+    return indexMap.getOrDefault(key, null);
   }
   
+  protected String getIndexKey(List<String> keys) {
+    String[] arrKeys = (String[]) keys.toArray();
+    Arrays.sort(arrKeys);
+    return String.join("_", arrKeys);
+  }
+
+  protected void addToIndex(Record r) {
+    List<List<String>> indexDefinition = configuration.mapdb.indices.get(this.id);
+    for (List<String> keys : indexDefinition) {
+      getIndexMap(getIndexKey(keys)).put(r.id, 0);
+    }
+
+  }
+
 }
