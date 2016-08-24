@@ -4,7 +4,7 @@ type: mapdb
 mapdb:
   storage: file # or memory
   storePath: /tmp/raptor
-  indexes:
+  indices:
     objects:
       - [userId]
     data:
