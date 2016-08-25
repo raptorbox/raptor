@@ -15,9 +15,9 @@
  */
 package org.createnet.raptor.http.api;
 
+import java.io.IOException;
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotAllowedException;
 import javax.ws.rs.NotFoundException;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.db.Storage;

@@ -16,85 +16,71 @@
 package org.createnet.raptor.http;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.ext.RuntimeDelegate;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
-import java.util.Iterator;
-import java.util.Set;
+import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.createnet.raptor.http.service.RaptorService;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class HttpService {
-  
+
   final private Logger logger = LoggerFactory.getLogger(HttpService.class);
-  
+
   protected String defaultURI = "http://127.0.0.1:8080/";
-  
+
   private HttpServer server;
-  
-  public void start(String uri) throws IOException {
+
+  public void start(String uri) throws Exception {
     startServer(uri);
   }
-  
-  public void start() throws IOException {
+
+  public void start() throws Exception {
     startServer();
   }
-  
-  public void stop() throws IOException {
-    stopServer(0);
+
+  public void stop() throws Exception {
+    stopServer();
   }
-  
-  public void stop(int i) throws IOException {
-    stopServer(i);
-  }
-  
-  private HttpServer startServer() throws IOException {
+
+  private HttpServer startServer() throws Exception {
     return startServer(getURI());
   }
-  
-  private HttpServer startServer(String uri) throws IOException {
-        
+
+  private HttpServer startServer(String uri) throws IOException, Exception {
+
     URI serviceURI = UriBuilder.fromUri(uri).build();
-    
+
     logger.debug("Starting HTTP service");
-            
-    // default to port 8080
-    server = HttpServer.create(new InetSocketAddress(serviceURI.getHost(), serviceURI.getPort()), 0);
-    HttpHandler handler = RuntimeDelegate.getInstance().createEndpoint(new ApplicationConfig(), HttpHandler.class);
-    
-    server.createContext(serviceURI.getPath(), handler);
+
+    HttpServer server = GrizzlyHttpServerFactory.createHttpServer(serviceURI, new ApplicationConfig());
+
     server.start();
 
     logger.info("HTTP service running at {}", serviceURI.toString());
-    
+
     return server;
   }
 
-  private void stopServer(int i) {
-    server.stop(i);
+  private void stopServer() throws Exception {
+    server.shutdown();
     logger.debug("Stopped HTTP service");
   }
 
   @SuppressWarnings("ResultOfMethodCallIgnored")
-  public static void main(String[] args) throws IOException, InterruptedException {
+  public static void main(String[] args) throws Exception {
 
     HttpService launcher = new HttpService();
     HttpServer server = launcher.startServer();
-    
-//    launcher.stopServer(0);
   }
 
   private String getURI() {
     String uri = System.getProperty("uri");
     return uri == null ? defaultURI : uri;
   }
-  
+
 }

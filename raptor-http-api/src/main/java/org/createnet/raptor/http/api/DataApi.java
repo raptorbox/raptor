@@ -17,9 +17,7 @@ package org.createnet.raptor.http.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.Collection;
-import java.util.Date;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
@@ -46,7 +44,6 @@ import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Stream;
-import org.createnet.raptor.search.raptor.search.query.Query;
 import org.createnet.raptor.search.raptor.search.query.impl.es.DataQuery;
 
 /**
@@ -171,11 +168,11 @@ public class DataApi extends AbstractApi {
           RecordSet record
           
   ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException, Indexer.IndexerException, IOException {
-
+    
     ServiceObject obj = loadObject(id);
-
+    
     Stream stream = loadStream(streamName, obj);
-
+    
     if (!auth.isAllowed(id, Authorization.Permission.Push)) {
       throw new ForbiddenException("Cannot push data");
     }
@@ -183,7 +180,6 @@ public class DataApi extends AbstractApi {
     if(obj.settings.storeEnabled()) {
       
       logger.debug("Storing data for {} on {}", obj.id, stream.name);
-
       
       // set the stream, enforcing channels constrain on serialization
       // this avoid records that do not comply with the stored model
@@ -192,7 +188,8 @@ public class DataApi extends AbstractApi {
       
       // save data
       storage.saveData(stream, record);
-
+//      profiler.log("Saved record");
+      
       // index data (with objectId and stream props)
       try {
         indexer.indexData(stream, record);

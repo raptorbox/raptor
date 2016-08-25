@@ -25,6 +25,7 @@ import org.createnet.raptor.http.service.ConfigurationService;
 import org.createnet.raptor.http.service.DispatcherService;
 import org.createnet.raptor.http.service.EventEmitterService;
 import org.createnet.raptor.http.service.IndexerService;
+import org.createnet.raptor.http.service.RaptorApplicationEventListener;
 import org.createnet.raptor.http.service.StorageService;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -68,17 +69,16 @@ public class ApplicationConfig extends ResourceConfig {
   }
 
   public ApplicationConfig() {
-
+  
     register(AuthorizationRequestFilter.class);
     register(CORSResponseFilter.class);
     register(LoggerResponseFilter.class);
-    
     register(ApiExceptionMapper.class);
-
+    register(RaptorApplicationEventListener.class);
+    
     register(new AppBinder());
-
+    
     packages(true, "org.createnet.raptor.http.api");
-
   }
 
 }

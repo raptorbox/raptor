@@ -63,7 +63,7 @@ public class IndexerService implements RaptorService {
   
   private Indexer indexer;
 
-  List<ServiceObject> getObjects(String userId) throws IOException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+  List<ServiceObject> getObjects(String userId) throws ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
     ObjectQuery q = new ObjectQuery();
     q.setUserId(userId);
     return searchObject(q);
@@ -144,7 +144,7 @@ public class IndexerService implements RaptorService {
 
   }
 
-  public List<ServiceObject> searchObject(ObjectQuery query) throws Indexer.SearchException, IOException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+  public List<ServiceObject> searchObject(ObjectQuery query) throws Indexer.SearchException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
 
     setQueryIndex(query, IndexNames.object);
     if(query.getUserId() == null) {

@@ -43,7 +43,7 @@ public class ApiExceptionMapper implements ExceptionMapper<Exception> {
 
   }
 
-  private static final Logger logger = LoggerFactory.getLogger(ExceptionMapper.class);
+  private static final Logger logger = LoggerFactory.getLogger(ApiExceptionMapper.class);
 
   @Override
   public Response toResponse(Exception e) {
@@ -73,7 +73,7 @@ public class ApiExceptionMapper implements ExceptionMapper<Exception> {
               .build();
     }
 
-    logger.error("Unhandled exception stack", e);
+    logger.error("Unhandled exception stack: {}", e.getMessage(), e);
 
     return Response
             .status(Response.Status.INTERNAL_SERVER_ERROR)

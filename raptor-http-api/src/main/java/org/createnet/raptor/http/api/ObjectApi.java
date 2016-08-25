@@ -64,7 +64,7 @@ public class ObjectApi extends AbstractApi {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public List<String> list() throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException, Indexer.IndexerException {
+  public List<String> list() throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.IndexerException {
 
     if (!auth.isAllowed(Authorization.Permission.List)) {
       throw new NotAuthorizedException("Cannot list objects");

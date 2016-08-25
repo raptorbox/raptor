@@ -18,7 +18,6 @@ package org.createnet.raptor.http.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -30,7 +29,6 @@ import org.createnet.raptor.models.objects.ServiceObject;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.StorageProvider;
-import org.createnet.raptor.db.query.BaseQuery;
 import org.createnet.raptor.http.configuration.StorageConfiguration;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.models.data.ActionStatus;
@@ -40,6 +38,7 @@ import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 import org.createnet.raptor.search.raptor.search.Indexer;
+import org.mapdb.DBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +74,7 @@ public class StorageService implements RaptorService {
   public void initialize() throws ServiceException {
     try {
       getStorage();
-    } catch (Storage.StorageException | ConfigurationException e) {
+    } catch (Storage.StorageException | ConfigurationException |  DBException e) {
       throw new ServiceException(e);
     }
   }
@@ -134,9 +133,7 @@ public class StorageService implements RaptorService {
     if (json == null) {
       return null;
     }
-    ServiceObject obj = new ServiceObject();
-    obj.parse(json);
-    return obj;
+    return ServiceObject.fromJSON(json);
   }
 
   public String saveObject(ServiceObject obj) throws ConfigurationException, Storage.StorageException, RaptorComponent.ParserException, RaptorComponent.ValidationException, Authentication.AuthenticationException {
@@ -164,7 +161,7 @@ public class StorageService implements RaptorService {
 
   }
 
-  public List<ServiceObject> listObjects() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException, RaptorComponent.ParserException, Indexer.IndexerException {
+  public List<ServiceObject> listObjects() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException,  RaptorComponent.ParserException, Indexer.IndexerException {
     return indexer.getObjects(auth.getUser().getUserId());
   }
 

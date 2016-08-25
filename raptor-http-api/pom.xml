@@ -17,44 +17,46 @@
     <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
     
-  <dependencies>
-      
+  <dependencies> 
+    
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
       <version>${jackson}</version>
     </dependency>
-
+    
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson}</version>
-      <type>jar</type>
-    </dependency>        
-                     
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <version>${jackson}</version>
-      <type>jar</type>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-json-jackson</artifactId>
+      <version>2.23.2</version>
     </dependency>
-
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.5</version>
-    </dependency>    
-
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-server</artifactId>
+      <version>2.23.2</version>
+    </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.containers</groupId>
-      <artifactId>jersey-container-jdk-http</artifactId>
-      <version>2.22.2</version>
+      <artifactId>jersey-container-servlet-core</artifactId>
+      <version>2.23.2</version>
     </dependency>
     <dependency>
-      <groupId>com.eclipsesource.jaxrs</groupId>
-      <artifactId>jersey-all</artifactId>
-      <version>2.22.2</version>
-    </dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-grizzly2-http</artifactId>
+      <version>2.23.2</version>
+    </dependency>    
+    
+    <dependency>
+      <groupId>org.glassfish.grizzly</groupId>
+      <artifactId>grizzly-http-server</artifactId>
+      <version>2.3.26</version>
+    </dependency>    
+    <dependency>
+      <groupId>org.glassfish.grizzly</groupId>
+      <artifactId>grizzly-http-servlet</artifactId>
+      <version>2.3.26</version>
+    </dependency>    
+    
     
     <dependency>
       <groupId>junit</groupId>
@@ -109,6 +111,27 @@
       <artifactId>raptor-events</artifactId>
       <version>${project.version}</version>
     </dependency>
+      
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson}</version>
+      <type>jar</type>
+    </dependency>        
+                     
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson}</version>
+      <type>jar</type>
+    </dependency>
+        
   </dependencies>
 
   <profiles>
