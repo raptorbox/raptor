@@ -1,5 +1,10 @@
 #!/bin/sh
 
+CBHOST=raptor.local
+CBUSER=admin
+CBPASS=password
+CBDATAPATH=/data/couchbase
+
 IP="192.168.100.10"
 EScluster=raptor
 
@@ -10,6 +15,8 @@ RAPTORDIR=/opt/raptor
 
 sudo adduser --system --no-create-home --group --disabled-login raptor
 adduser `whoami` raptor
+
+echo "$IP raptor.local" | sudo tee -a /etc/hosts
 
 if [ -e /vagrant ]; then
   sudo adduser vagrant raptor
@@ -72,6 +79,26 @@ sudo rm /etc/nginx/sites-enabled/default
 sudo ln -s $RAPTORDIR/config/raptor-nginx.conf /etc/nginx/sites-enabled/raptor.conf
 
 sudo service nginx restart
+
+sudo wget http://packages.couchbase.com/releases/4.1.0/couchbase-server-community_4.1.0-ubuntu14.04_amd64.deb
+sudo dpkg -i couchbase-server-community_4.1.0-ubuntu14.04_amd64.deb
+sudo rm couchbase-server-community_4.1.0-ubuntu14.04_amd64.deb
+
+sudo service couchbase start
+
+sudo mkdir -p /data/couchbase
+sudo chown couchbase.couchbase /data/couchbase
+
+/opt/couchbase/bin/couchbase-cli node-init \
+    -c localhost --user=$CBUSER --password=$CBPASS \
+    --node-init-data-path=$CBDATAPATH
+sleep 2
+
+/opt/couchbase/bin/couchbase-cli cluster-init \
+    -c localhost --user=$CBUSER --password=$CBPASS \
+    --cluster-init-username=$CBUSER \
+    --cluster-init-password=$CBPASS \
+    --cluster-init-ramsize=1600
 
 cd $BASEDIR
 git clone -b master --single-branch https://github.com/apache/activemq-artemis.git
