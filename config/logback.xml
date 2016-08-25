@@ -51,15 +51,39 @@
 
   </appender>
 
+  <appender name="FILE-ALL"
+            class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${DEV_HOME}/all.log</file>
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <Pattern>
+        %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+      </Pattern>
+    </encoder>
+
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- rollover daily -->
+      <fileNamePattern>${DEV_HOME}/all.%d{yyyy-MM-dd}.%i.log
+      </fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy
+        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <maxFileSize>10MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+    </rollingPolicy>
+
+  </appender>
+
   <!-- Send logs to both console and file audit -->
-  <logger name="org.createnet.raptor" level="debug"
-          additivity="false">
+  <logger name="org.createnet.raptor" level="DEBUG" additivity="true">
     <appender-ref ref="FILE-AUDIT" />
     <appender-ref ref="STDOUT" />
   </logger>
 
-  <root level="error">
+  <!-- <logger name="org.createnet.raptor" level="ERROR" additivity="true">
     <appender-ref ref="FILE-ERROR" />
+  </logger> -->
+
+  <root level="INFO">
+    <appender-ref ref="FILE-ALL" />
   </root>
 
 </configuration>

@@ -49,7 +49,7 @@ class MapDBConnection extends AbstractConnection {
   
   private final Logger logger = LoggerFactory.getLogger(MapDBConnection.class);
 
-  private DB db;
+  static private DB db;
   private HTreeMap<String, String> map;
   private HTreeMap<String, String> configStore;
   private final Map<String, BTreeMap<String, String>> indexMap = new HashMap();
@@ -352,8 +352,14 @@ class MapDBConnection extends AbstractConnection {
       BTreeMap<String, String> idx = getIndexMap(keyhash);
       List<String> list = new ArrayList();
       String json;
+      
+      if(idx == null) {
+       logger.debug("Skipped indexing for key: {}", keyhash);
+       return;
+      }
 
       json = idx.get(valhash);
+      
       if (json != null) {
         try {
           list = new ArrayList(Arrays.asList(Storage.mapper.readValue(json, String[].class)));

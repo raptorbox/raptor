@@ -1,5 +1,6 @@
 
-type: mapdb
+type: couchbase
+# type: mapdb
 
 mapdb:
   storage: file # or memory
@@ -22,7 +23,7 @@ couchbase:
   password: password
   bucketDefaults:
     password: ""
-    quota: 360
+    quota: 100
     replica: 0
     indexReplica: false
     enableFlush: false

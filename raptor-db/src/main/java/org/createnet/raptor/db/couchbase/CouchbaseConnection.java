@@ -26,11 +26,13 @@ import com.couchbase.client.java.query.N1qlQueryResult;
 import com.couchbase.client.java.query.N1qlQueryRow;
 import com.couchbase.client.java.query.consistency.ScanConsistency;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import org.createnet.raptor.db.AbstractConnection;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.query.ListQuery;
@@ -92,7 +94,12 @@ public class CouchbaseConnection extends AbstractConnection {
     if (doc == null) {
       return null;
     }
-    return Storage.mapper.convertValue(doc.content().toString(), JsonNode.class) ;
+    try {
+      return Storage.mapper.readTree(doc.content().toString());
+    } catch (IOException ex) {
+      logger.error("Cannot parse response JSON: {}", ex.getMessage());
+      return null;
+    }
   }
 
   @Override
