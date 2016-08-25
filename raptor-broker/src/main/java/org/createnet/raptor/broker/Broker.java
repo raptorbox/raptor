@@ -66,12 +66,15 @@ public class Broker {
     ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());
     
     serviceLocator.inject(securityManager);
+    setupServer();
+  }
+
+  protected void setupServer() throws ConfigurationException {
     
     securityManager.setBrokerConfiguration(getBrokerConfiguration());
     
     server.setSecurityManager(securityManager);
     server.setConfigResourcePath(getConfigPath());
-    
   }
   
   public void start() throws BrokerException {
