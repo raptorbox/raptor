@@ -203,11 +203,15 @@ public class ServiceObject extends ServiceObjectContainer {
     isNew = (id == null);
   }
 
-  public static ServiceObject fromJSON(String json) throws IOException {
-    return mapper.readValue(json, ServiceObject.class);
+  public static ServiceObject fromJSON(String json) throws ParserException {
+    try {
+      return mapper.readValue(json, ServiceObject.class);
+    } catch (IOException e) {
+      throw new RaptorComponent.ParserException(e);
+    }
   }
   
-  public static ServiceObject fromJSON(JsonNode json) throws IOException {
+  public static ServiceObject fromJSON(JsonNode json) {
     return mapper.convertValue(json, ServiceObject.class);
   }
 
