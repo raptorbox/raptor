@@ -147,7 +147,7 @@ public class ObjectIndexer {
       }
 
       return list;
-    } catch (IOException | ConfigurationException | Storage.StorageException ex) {
+    } catch (ConfigurationException | Storage.StorageException ex) {
       logger.debug("Exception while loading objects", ex);
       throw new ObjectIndexerException(ex);
     }

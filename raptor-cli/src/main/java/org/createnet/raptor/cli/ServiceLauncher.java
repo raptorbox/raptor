@@ -15,12 +15,10 @@
  */
 package org.createnet.raptor.cli;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.createnet.raptor.broker.Broker;
-import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +70,7 @@ public class ServiceLauncher {
   }
 
   private void launch() {
-
+    
     try {
 
       logger.info("Starting job for HTTPService");
@@ -81,9 +79,9 @@ public class ServiceLauncher {
         HttpService http = new HttpService();
         try {
           http.start();
-        } catch (IOException ex) {
-          logger.error("Error starting http service", ex);
-          throw new RuntimeException(ex);
+        } catch (Exception ex) {
+          logger.error("Error starting http service: {}", ex.getMessage(), ex);
+          Thread.currentThread().interrupt();
         }
       });
 
@@ -94,14 +92,14 @@ public class ServiceLauncher {
         try {
           broker.initialize();
           broker.start();
-        } catch (Broker.BrokerException | ConfigurationException ex) {
-          logger.error("Error starting broker service", ex);
-          throw new RuntimeException(ex);
+        } catch (Exception ex) {
+          logger.error("Error starting broker service: {}", ex.getMessage());
+          Thread.currentThread().interrupt();
         }
       });
-
-    } catch (RuntimeException ex) {
-      logger.error("RuntimeException received, restarting services", ex);
+      
+    } catch (Exception ex) {
+      logger.error("Exception received, restarting services. {}", ex.getMessage());
       relaunch();
     }
   }
