@@ -107,5 +107,3 @@ mvn -q clean install -DskipTests=true
 
 cd $RAPTORDIR
 mvn -q clean install -DskipTests=true
-
-sudo service raptor start
