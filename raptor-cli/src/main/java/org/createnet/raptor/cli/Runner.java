@@ -21,7 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import org.createnet.raptor.cli.command.IndexCommand;
 import org.createnet.raptor.cli.command.LaunchCommand;
 import org.createnet.raptor.cli.command.SetupCommand;
@@ -52,7 +51,7 @@ public class Runner {
   }
 
   static final private Logger logger = LoggerFactory.getLogger(Runner.class);
-  final protected ServiceLocator serviceLocator;
+  protected ServiceLocator serviceLocator;
   protected JCommander cmd;
 
   // add here commands!
@@ -70,20 +69,15 @@ public class Runner {
     app.run();
   }
 
-  public Runner() {
-
-    checkUser();
-
-    ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
-
-    serviceLocator = locatorFactory.create("CliLocator");
-    ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());
-  }
-
   private void initialize(String[] args) throws Command.CommandException {
 
     cmd = new JCommander(this);
 
+    ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
+
+    serviceLocator = locatorFactory.create("CliLocator");
+    ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());    
+    
     for (Class availCommand : availCommands) {
       try {
 

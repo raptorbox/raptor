@@ -17,8 +17,6 @@ package org.createnet.raptor.cli.command;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.inject.Inject;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.db.Storage;
