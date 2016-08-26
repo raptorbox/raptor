@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 CREATE-NET
+ * Copyright 2016 Luca Capra <lcapra@create-net.org>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,46 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.cli;
+package org.createnet.raptor.cli.command;
 
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.inject.Inject;
-import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.config.exception.ConfigurationException;
+import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.StorageService;
 import org.createnet.raptor.search.raptor.search.Indexer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class Commands {
-  
+@Parameters(separators = "=", commandDescription = "Record changes to the repository")
+public class SetupCommand implements Command {
+
   @Inject
   StorageService storage;
   
   @Inject
   IndexerService indexer;
   
-  public void setup(boolean force) throws Storage.StorageException, ConfigurationException, Indexer.IndexerException {
-    indexer.getIndexer().setup(force);    
-    storage.getStorage().setup(force);
-  }
   
-  public void index()  {
+  @Parameter(names = "--force", description = "Force the setup, REMOVING any previous data and configuration")
+  public Boolean force = false;
+
+  @Override
+  public String getName() {
+    return "setup";
+  }
+
+  @Override
+  public void run() throws CommandException {
+
     try {
-      ObjectIndexer objIndexer = new ObjectIndexer(storage, indexer);
-      objIndexer.sync();
+      indexer.getIndexer().setup(force);
+      storage.getStorage().setup(force);
+    } catch (Indexer.IndexerException | ConfigurationException | Storage.StorageException ex) {
+      throw new CommandException(ex);
     }
-    catch(ObjectIndexer.ObjectIndexerException e) {
-      throw new RuntimeException(e);
-    }
-  }
-  
-  public void launch() {    
-    new ServiceLauncher().start();
+
   }
   
 }
+

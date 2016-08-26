@@ -15,26 +15,24 @@
  */
 package org.createnet.raptor.cli;
 
+import com.beust.jcommander.JCommander;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import org.createnet.raptor.cli.command.IndexCommand;
+import org.createnet.raptor.cli.command.LaunchCommand;
+import org.createnet.raptor.cli.command.SetupCommand;
 import org.createnet.raptor.config.ConfigurationLoader;
-import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.http.ApplicationConfig;
-import org.createnet.raptor.config.exception.ConfigurationException;
-import org.createnet.raptor.search.raptor.search.Indexer;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.ServiceLocatorFactory;
 import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.createnet.raptor.cli.command.Command;
 
 /**
  *
@@ -46,108 +44,78 @@ public class Runner {
     // initialize logback config path
     String configPath = ConfigurationLoader.getConfigPath();
     File filePath = new File(configPath + "/logback.xml");
-    if(filePath.exists()) {
+    if (filePath.exists()) {
       System.setProperty("logback.configurationFile", filePath.getAbsolutePath());
-    }
-    else {
+    } else {
       System.out.println("Logback configuration file does not esists at " + filePath.getAbsolutePath());
     }
   }
-  
+
   static final private Logger logger = LoggerFactory.getLogger(Runner.class);
-  final private Commands commands = new Commands();
+  final protected ServiceLocator serviceLocator;
+  protected JCommander cmd;
 
-  public static class CommandName {
+  // add here commands!
+  final protected Class[] availCommands = new Class[]{
+    SetupCommand.class,
+    IndexCommand.class,
+    LaunchCommand.class,
+  };
 
-    final public static String CLI_NAME = "raptor-cli";
+  final protected Map<String, Command> commands = new HashMap();
 
-    final public static String SETUP = "setup";
-    final public static String INDEX = "index";
-    final public static String LAUNCH = "launch";
-
+  public static void main(String[] args) throws Command.CommandException {
+    final Runner app = new Runner();
+    app.initialize(args);
+    app.run();
   }
 
   public Runner() {
 
-    ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
-    ServiceLocator serviceLocator = locatorFactory.create("CliLocator");
-    ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());
+    checkUser();
 
-    serviceLocator.inject(commands);
-    
+    ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
+
+    serviceLocator = locatorFactory.create("CliLocator");
+    ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());
   }
 
-  public static void main(String[] args) throws ParseException {
+  private void initialize(String[] args) throws Command.CommandException {
 
-    final Runner app = new Runner();
-    
-    try {
-      if(!Runner.isRoot()) {
-        logger.warn("Current user is not root");
+    cmd = new JCommander(this);
+
+    for (Class availCommand : availCommands) {
+      try {
+
+        Command c = (Command) availCommand.newInstance();
+        logger.debug("Added command {}", c.getName());
+        serviceLocator.inject(c);
+        commands.put(c.getName(), c);
+
+      } catch (InstantiationException | IllegalAccessException ex) {
+        throw new Command.CommandException(ex);
       }
     }
-    catch(Exception e) {
-      logger.error("Cannot get current username", e);
-    }
     
-    Options options = new Options();
-
-    Option setupCommand = Option.builder(CommandName.SETUP)
-            .hasArg(false)
-            .desc("Setup the current Raptor instance WARNING: if used with force flag, ALL DATA AND INDEXES will be wiped out")
-            .build();
-
-    Option launchCommand = Option.builder(CommandName.LAUNCH)
-            .hasArg(false)
-            .desc("Launch a Raptor instance")
-            .build();    
-    
-    Option indexCommand = Option.builder(CommandName.INDEX)
-            .hasArg(false)
-            .desc("Index object definitions")
-            .build();    
-    
-    options.addOption(setupCommand);
-    options.addOption(launchCommand);
-    options.addOption(indexCommand);
-    
-    options.addOption("force", false, "Force command execution");
-
-    CommandLineParser parser = new DefaultParser();
-    CommandLine cmd = parser.parse(options, args);
-
-    HelpFormatter formatter = new HelpFormatter();
-    formatter.printHelp(CommandName.CLI_NAME, options);
-
-    if (cmd.hasOption("setup")) {
-      app.setup(cmd.hasOption("force"));
-    }
-    if (cmd.hasOption("launch")) {
-      app.launch();
-    }
-    if (cmd.hasOption("index")) {
-      app.index();
-    }
-
+    cmd.parse(args);
   }
 
-  public void setup(boolean force) {
-    logger.debug("Running setup, force {}", force);
-    try {
-      commands.setup(force);
-    } catch (Indexer.IndexerException | Storage.StorageException | ConfigurationException ex) {
-      logger.error("Error during setup", ex);
+  private void run() {
+
+    String subcommand = cmd.getParsedCommand();
+
+    if (commands.containsKey(subcommand)) {
+      
+      try {
+        commands.get(subcommand).run();
+      } catch (Command.CommandException ex) {
+        logger.error("Execption running command: {}", ex.getMessage());
+        throw new RuntimeException(ex);
+      }
+      return;
     }
-  }
 
-  public void launch() {
-    logger.debug("Launching new Raptor instance");
-    commands.launch();
-  }
-
-  public void index() {
-    logger.debug("Launching object indexing");
-    commands.index();
+    cmd.usage("raptor");
   }
 
   // from http://stackoverflow.com/a/24064448/833499 
@@ -169,11 +137,21 @@ public class Runner {
       Method method = c.getDeclaredMethod("getUsername");
       Object o = c.newInstance();
       String name = (String) method.invoke(o);
-      
+
       return name.equals("root") || name.equals("Administrator");
     }
-    
+
     return false;
+  }
+
+  private void checkUser() {
+    try {
+      if (!Runner.isRoot()) {
+        logger.debug("Current user is not root");
+      }
+    } catch (Exception e) {
+      logger.error("Cannot get current username: ", e.getMessage());
+    }
   }
 
 }

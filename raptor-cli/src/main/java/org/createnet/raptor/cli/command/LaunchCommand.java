@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 CREATE-NET
+ * Copyright 2016 Luca Capra <lcapra@create-net.org>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.cli;
+package org.createnet.raptor.cli.command;
 
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import javax.inject.Inject;
 import org.createnet.raptor.broker.Broker;
 import org.createnet.raptor.http.HttpService;
+import org.createnet.raptor.http.service.IndexerService;
+import org.createnet.raptor.http.service.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,69 +31,52 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class ServiceLauncher {
+@Parameters(separators = "=", commandDescription = "Launch service(s)")
+public class LaunchCommand implements Command {
 
-  final private Logger logger = LoggerFactory.getLogger(ServiceLauncher.class);
+  final private Logger logger = LoggerFactory.getLogger(LaunchCommand.class);
   final private ExecutorService executor = Executors.newFixedThreadPool(2);
-  
-  protected boolean shuttingDown = false;
 
-  protected Future<?> brokerTask;
-  protected Future<?> httpTask;
-  
-  void start() {
+  @Inject
+  StorageService storage;
 
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      @Override
-      public void run() {
-        logger.debug("Shutting down!");
-        shuttingDown = true;
-        brokerTask.cancel(true);
-        httpTask.cancel(true);
-      }
-    });
+  @Inject
+  IndexerService indexer;
 
-    launch();
+  @Parameter(names = "--broker", description = "Launch the broker")
+  public Boolean broker = false;
+
+  @Parameter(names = "--http", description = "Launch the http api")
+  public Boolean http = false;
+
+  @Override
+  public String getName() {
+    return "launch";
   }
 
-  private void relaunch() {
-    
-    if(shuttingDown) return;
-    
-    try {
-      executor.shutdownNow();
-      Thread.sleep(5000);
-    } catch (InterruptedException e) {
-      logger.error("Interruption detected, exit.");
-      System.exit(1);
-    } catch (Exception e) {
-      logger.error("Exception on relaunch", e);
-    }
+  @Override
+  public void run() throws CommandException {
 
-    launch();
-  }
+    boolean all = (!http && !broker);
 
-  private void launch() {
-    
-    try {
-
-      logger.info("Starting job for HTTPService");
-      
-      httpTask = executor.submit(() -> {
+    if (http || all) {
+      executor.submit(() -> {
         HttpService http = new HttpService();
         try {
+          logger.info("Starting HTTP API");
           http.start();
         } catch (Exception ex) {
           logger.error("Error starting http service: {}", ex.getMessage(), ex);
           Thread.currentThread().interrupt();
         }
       });
+    }
 
-      logger.info("Starting job for Broker");
-
-      brokerTask = executor.submit(() -> {
+    if (broker || all) {
+      executor.submit(() -> {
         Broker broker = new Broker();
         try {
+          logger.info("Starting broker");
           broker.initialize();
           broker.start();
         } catch (Exception ex) {
@@ -97,10 +84,6 @@ public class ServiceLauncher {
           Thread.currentThread().interrupt();
         }
       });
-      
-    } catch (Exception ex) {
-      logger.error("Exception received, restarting services. {}", ex.getMessage());
-      relaunch();
     }
   }
 

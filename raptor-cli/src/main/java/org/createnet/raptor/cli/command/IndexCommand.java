@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 CREATE-NET
+ * Copyright 2016 Luca Capra <lcapra@create-net.org>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.cli;
+package org.createnet.raptor.cli.command;
 
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import javax.inject.Inject;
+import org.createnet.raptor.broker.Broker;
+import org.createnet.raptor.cli.ObjectIndexer;
+import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.query.BaseQuery;
-import org.createnet.raptor.config.exception.ConfigurationException;
+import org.createnet.raptor.http.HttpService;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.StorageService;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -34,14 +43,19 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class ObjectIndexer {
+@Parameters(separators = "=", commandDescription = "Index record from storage")
+public class IndexCommand implements Command {
 
-  final private Logger logger = LoggerFactory.getLogger(ObjectIndexer.class);
-  
-  final private StorageService storage;
-  final private IndexerService indexer;
+  final private Logger logger = LoggerFactory.getLogger(IndexCommand.class);
 
-  final private int batchSize = 500;
+  @Inject
+  StorageService storage;
+
+  @Inject
+  IndexerService indexer;
+
+  @Parameter(names = "--batch-size", description = "Number of records to index per operation")
+  public int batchSize = 500;
 
   public class ObjectIndexerException extends Exception {
 
@@ -53,11 +67,6 @@ public class ObjectIndexer {
       super(cause);
     }
 
-  }
-
-  public ObjectIndexer(StorageService storage, IndexerService indexer) {
-    this.storage = storage;
-    this.indexer = indexer;
   }
 
   public void sync() throws ObjectIndexerException {
@@ -151,5 +160,22 @@ public class ObjectIndexer {
       throw new ObjectIndexerException(ex);
     }
   }
+  
+  
+  @Override
+  public String getName() {
+    return "index";
+  }
 
+  @Override
+  public void run() throws CommandException {
+    try {
+      sync();
+    } catch (ObjectIndexerException ex) {
+      throw new CommandException(ex);
+    }
+  }
+
+  
+  
 }
