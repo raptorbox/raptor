@@ -70,7 +70,7 @@ public class Runner {
   }
 
   private void initialize(String[] args) throws Command.CommandException {
-
+    
     cmd = new JCommander(this);
 
     ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
@@ -85,6 +85,7 @@ public class Runner {
         logger.debug("Added command {}", c.getName());
         serviceLocator.inject(c);
         commands.put(c.getName(), c);
+        cmd.addCommand(c.getName(), c);
 
       } catch (InstantiationException | IllegalAccessException ex) {
         throw new Command.CommandException(ex);
