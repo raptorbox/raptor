@@ -101,6 +101,7 @@ public class Runner {
     if (commands.containsKey(subcommand)) {
       
       try {
+        logger.info("Running command {}", subcommand);
         commands.get(subcommand).run();
       } catch (Command.CommandException ex) {
         logger.error("Execption running command: {}", ex.getMessage());
@@ -109,7 +110,7 @@ public class Runner {
       return;
     }
 
-    cmd.usage("raptor");
+    cmd.usage();
   }
 
   // from http://stackoverflow.com/a/24064448/833499 
