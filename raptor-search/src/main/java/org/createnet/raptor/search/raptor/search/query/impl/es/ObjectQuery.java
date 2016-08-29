@@ -73,7 +73,7 @@ public class ObjectQuery extends AbstractQuery {
       return;
     }
 
-    throw new QueryException("Query is empty");
+//    throw new QueryException("Query is empty");
   }
 
   protected QueryBuilder buildQuery() {
