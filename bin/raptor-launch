@@ -1,6 +1,8 @@
 
-echo "Kill instance"
+echo "Killing instance"
 sudo killall -u raptor -9
+#drop broker cache
+sudo rm /opt/raptor/data/ -r
 sleep 1
 
 echo "Starting service"
