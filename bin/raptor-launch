@@ -1,7 +1,9 @@
 
-#cd ~/raptor
-#sudo -u raptor raptor launch
+echo "Kill instance"
+sudo killall -u raptor -9
+sleep 1
 
-sudo killall -u raptor
+echo "Starting service"
 sudo service raptor restart
+
 tail -f /var/log/raptor/debug.log
