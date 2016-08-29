@@ -83,6 +83,7 @@ public class Broker {
       logger.debug("Starting broker");
       server.start();
     } catch (Exception ex) {
+      logger.error("Error launching the borker: {}", ex.getMessage(), ex);
       throw new BrokerException(ex);
     }
   }
