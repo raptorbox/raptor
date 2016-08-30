@@ -15,6 +15,7 @@
     <module>raptor-models</module>    
     <module>raptor-config</module>
     <module>raptor-dispatcher</module>    
+    <module>raptor-auth-service</module>
     <module>raptor-auth</module>    
     <module>raptor-db</module>
     <module>raptor-search</module>
