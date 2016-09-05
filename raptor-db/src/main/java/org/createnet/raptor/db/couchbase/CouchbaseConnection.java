@@ -175,9 +175,15 @@ public class CouchbaseConnection extends AbstractConnection {
     Iterator<N1qlQueryRow> it = results.allRows().iterator();
     while (it.hasNext()) {
       N1qlQueryRow row = it.next();
-      list.add(
-        Storage.mapper.convertValue(row.value().get(bucket.name()).toString(), JsonNode.class)
-      );
+      String raw = row.value().get(bucket.name()).toString();
+      JsonNode node;
+      try {
+        node = Storage.mapper.readTree(raw);
+        list.add(node);        
+      } catch (IOException ex) {
+        logger.warn("Cannot parse record: {}" , raw);
+        continue;
+      }
     }
 
     return list;
