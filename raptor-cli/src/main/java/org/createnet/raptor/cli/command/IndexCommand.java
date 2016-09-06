@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 @Parameters(separators = "=", commandDescription = "Index record from storage")
 public class IndexCommand implements Command {
 
-  protected static String TYPE_DEFINITION = "definition";
+  protected static String TYPE_DEFINITION = "objects";
   protected static String TYPE_DATA = "data";
 
   final private Logger logger = LoggerFactory.getLogger(IndexCommand.class);
@@ -82,10 +82,10 @@ public class IndexCommand implements Command {
 
     int offset = 0;
     int limit = batchSize;
-    
+
     int completed = 0;
     int types = 0;
-    
+
     logger.debug("Syncing definition, batch size at {}", batchSize);
 
     Map<String, SyncObject> recordsMap = new HashMap();
@@ -98,9 +98,9 @@ public class IndexCommand implements Command {
     if (dataType.contains(TYPE_DEFINITION)) {
       recordsMap.put(TYPE_DEFINITION, new SyncObject());
     }
-    
+
     types = recordsMap.size();
-    
+
     while (true) {
 
       if (recordsMap.containsKey(TYPE_DATA)) {
@@ -115,10 +115,6 @@ public class IndexCommand implements Command {
 
         String key = entry.getKey();
         SyncObject value = entry.getValue();
-
-        if (value.completed) {
-          continue;
-        }
 
         List<Indexer.IndexRecord> list = value.items;
 
@@ -135,11 +131,11 @@ public class IndexCommand implements Command {
         value.items.clear();
       }
 
-      if(types == completed) {
+      if (types == completed) {
         logger.debug("Completed");
         break;
       }
-      
+
       offset += limit;
     }
 
@@ -228,11 +224,16 @@ public class IndexCommand implements Command {
 
         Indexer.IndexRecord indexRecord = indexer.getIndexRecord(IndexerService.IndexNames.data);
 
-        
-        indexRecord.id = rawobj.get("objectId").asText() + "-" + rawobj.get("streamId").asText() + "-" + rawobj.get("lastUpdate").asText();
+        try {
+          indexRecord.id = rawobj.get("objectId").asText() + "-" + rawobj.get("streamId").asText() + "-" + rawobj.get("lastUpdate").asText();
+        } catch (NullPointerException ex) {
+          logger.warn("NPE on record {}", rawobj.toString());
+          continue;
+        }
+
         indexRecord.body = rawobj.toString();
         indexRecord.isNew(true);
-        
+
         list.add(indexRecord);
       }
 
@@ -242,7 +243,7 @@ public class IndexCommand implements Command {
       throw new ObjectIndexerException(ex);
     }
   }
-  
+
   @Override
   public String getName() {
     return "index";
@@ -256,5 +257,5 @@ public class IndexCommand implements Command {
       throw new CommandException(ex);
     }
   }
-  
+
 }
