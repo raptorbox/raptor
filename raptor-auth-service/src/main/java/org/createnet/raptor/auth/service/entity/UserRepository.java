@@ -17,7 +17,30 @@ package org.createnet.raptor.auth.service.entity;
 
 import org.springframework.data.repository.CrudRepository;
 
+/**
+ *
+ * @author Luca Capra <lcapra@create-net.org>
+ */
 public interface UserRepository extends CrudRepository<User, Long> {
 
-  User findByLogin(String login);
+  User findByUsername(String username);
+  User findByUuid(String uuid);
+
+  @Override
+  public void delete(User entity);
+
+  @Override
+  public void delete(Long id);
+
+  @Override
+  public boolean exists(Long id);
+
+  @Override
+  public User findOne(Long id);
+
+  @Override
+  public <S extends User> S save(S entity);
+  
+  
+  
 }

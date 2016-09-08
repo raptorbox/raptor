@@ -18,7 +18,6 @@ package org.createnet.raptor.auth.service.entity;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -28,69 +27,117 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-
 import org.hibernate.validator.constraints.NotEmpty;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import org.hibernate.validator.constraints.Email;
 
+/**
+ *
+ * @author Luca Capra <lcapra@create-net.org>
+ */
 @Entity
-public class User {
+@Table(name = "users")
+public class User implements Serializable {
 
+  @JsonIgnore
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private Integer id;
+  private Long id;
 
   @NotEmpty
-  private String name;
+  private String uuid = UUID.randomUUID().toString();
 
   @NotEmpty
-  @Column(unique = true, nullable = false)
-  private String login;
+  @Column(unique = true, nullable = false, length = 256)
+  @Size(min = 4, max = 256)
+  private String username;
 
+  @JsonIgnore
   @NotEmpty
+  @Column(length = 128)
+  @Size(min = 4, max = 128)
   private String password;
 
   @JsonIgnore
+  @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+  final private List<Token> tokens = new ArrayList();
+
   @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "user_role", joinColumns = {
     @JoinColumn(name = "user_id")}, inverseJoinColumns = {
     @JoinColumn(name = "role_id")})
-  private Set<Role> roles = new HashSet<Role>();
+  final private List<Role> roles = new ArrayList();
+
+  @Column(length = 64)
+  @Size(min = 4, max = 64)
+  private String firstname;
+
+  @Column(length = 64)
+  @Size(min = 4, max = 64)
+  private String lastname;
+
+  @Column(length = 128)
+  @NotNull
+  @Email
+  private String email;
+
+  @Column()
+  @NotNull
+  private Boolean enabled = true;
+
+  @JsonIgnore
+  @Column(name = "last_password_reset")
+  @Temporal(TemporalType.TIMESTAMP)
+  @NotNull
+  private Date lastPasswordResetDate = new Date();
+  
+  @Column(name = "created")
+  @Temporal(TemporalType.TIMESTAMP)
+  @NotNull
+  private Date created = new Date();
 
   public User() {
   }
 
   public User(User user) {
+
     super();
+
     this.id = user.getId();
-    this.name = user.getName();
-    this.login = user.getLogin();
+    this.uuid = user.getUuid();
+    this.username = user.getUsername();
     this.password = user.getPassword();
-    this.roles = user.getRoles();
+
+    user.getTokens().stream().forEach((token) -> this.addToken(token));
+    user.getRoles().stream().forEach((role) -> this.addRole(role));
+
   }
 
-  public Integer getId() {
+  public Long getId() {
     return id;
   }
 
-  public void setId(Integer id) {
+  public void setId(Long id) {
     this.id = id;
   }
 
-  public String getName() {
-    return name;
+  public String getUsername() {
+    return username;
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getLogin() {
-    return login;
-  }
-
-  public void setLogin(String login) {
-    this.login = login;
+  public void setUsername(String username) {
+    this.username = username;
   }
 
   public String getPassword() {
@@ -101,12 +148,110 @@ public class User {
     this.password = password;
   }
 
-  public Set<Role> getRoles() {
+  public List<Role> getRoles() {
     return roles;
   }
 
   public void setRoles(Set<Role> roles) {
-    this.roles = roles;
+    this.roles.clear();
+    this.roles.addAll(roles);
+  }
+
+  public void addRole(Role role) {
+    if (!this.roles.contains(role)) {
+      this.roles.add(role);
+    }
+  }
+
+  public void removeRole(Role role) {
+    if (this.roles.contains(role)) {
+      this.roles.remove(role);
+    }
+  }
+
+  public String getUuid() {
+    return uuid;
+  }
+
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
+  }
+
+  public List<Token> getTokens() {
+    return tokens;
+  }
+
+  public void setTokens(List<Token> tokens) {
+    this.tokens.clear();
+    this.tokens.addAll(tokens);
+  }
+
+  public void addToken(Token token) {
+    if (!this.tokens.contains(token)) {
+      this.tokens.add(token);
+    }
+  }
+
+  public void removeToken(Token token) {
+    if (this.tokens.contains(token)) {
+      this.tokens.remove(token);
+    }
+  }
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
+
+  public String getFirstname() {
+    return firstname;
+  }
+
+  public void setFirstname(String firstname) {
+    this.firstname = firstname;
+  }
+
+  public String getLastname() {
+    return lastname;
+  }
+
+  public void setLastname(String lastname) {
+    this.lastname = lastname;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public Boolean getEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(Boolean enabled) {
+    this.enabled = enabled;
+  }
+
+  public Date getLastPasswordResetDate() {
+    return lastPasswordResetDate;
+  }
+
+  public void setLastPasswordResetDate(Date lastPasswordResetDate) {
+    this.lastPasswordResetDate = lastPasswordResetDate;
+  }
+
+  public Date getCreated() {
+    return created;
+  }
+
+  public void setCreated(Date created) {
+    this.created = created;
   }
 
 }

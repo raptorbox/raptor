@@ -26,6 +26,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+/**
+ *
+ * @author Luca Capra <lcapra@create-net.org>
+ */
 @Service
 public class RaptorUserDetailsService implements UserDetailsService {
 
@@ -38,7 +42,7 @@ public class RaptorUserDetailsService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    User user = userRepository.findByLogin(username);
+    User user = userRepository.findByUsername(username);
     if (user == null) {
       throw new UsernameNotFoundException(String.format("User %s does not exist!", username));
     }
@@ -46,20 +50,20 @@ public class RaptorUserDetailsService implements UserDetailsService {
   }
 
   public final static class RaptorUserDetails extends User implements UserDetails {
-    
+
     protected User user;
-    
+
     private static final long serialVersionUID = 1L;
 
-    private RaptorUserDetails(User user) {
+    public RaptorUserDetails(User user) {
       super(user);
       this.user = user;
     }
-    
+
     public User getUser() {
-     return user;
+      return user;
     }
-    
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
       return getRoles();
@@ -67,7 +71,7 @@ public class RaptorUserDetailsService implements UserDetailsService {
 
     @Override
     public String getUsername() {
-      return getLogin();
+      return super.getUsername();
     }
 
     @Override

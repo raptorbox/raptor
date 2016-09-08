@@ -13,17 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.service.controller;
+package org.createnet.raptor.auth.service.entity;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
+import org.springframework.data.repository.CrudRepository;
 
-@RestController
-public class HomeController {
+/**
+ *
+ * @author Luca Capra <lcapra@create-net.org>
+ */
+public interface TokenRepository extends CrudRepository<Token, Long> {
 
-  @RequestMapping("/")
-  public String home() {
-    return "home";
-  }
+  Token findByToken(String token);
+
+  List<Token> findByUserId(String userId);
+
+  List<Token> findByUserUuid(String userUuid);
+
+  @Override
+  Token findOne(Long id);
+
+  @Override
+  public void delete(Token entity);
+
+  @Override
+  public void delete(Long id);
+
+  @Override
+  public <S extends Token> S save(S entity);
 
 }

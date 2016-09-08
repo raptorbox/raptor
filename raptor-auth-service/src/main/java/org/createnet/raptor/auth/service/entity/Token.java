@@ -15,43 +15,48 @@
  */
 package org.createnet.raptor.auth.service.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import javax.persistence.JoinColumn;
 
 import org.hibernate.validator.constraints.NotEmpty;
-import org.springframework.security.core.GrantedAuthority;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
+import java.util.Date;
+import javax.persistence.ManyToOne;
 
+/**
+ *
+ * @author Luca Capra <lcapra@create-net.org>
+ */
 @Entity
-public class Role implements GrantedAuthority {
-  
-  public static enum Roles {
-    ROLE_ADMIN, ROLE_USER
-  }
-  
-  private static final long serialVersionUID = 1L;
+public class Token implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Integer id;
 
   @NotEmpty
-  private Roles name;
+  private String name;
+
+  @NotEmpty
+  @Column(unique = true, nullable = false)
+  private String token;
 
   @JsonIgnore
-  @ManyToMany(fetch = FetchType.LAZY, mappedBy = "roles")
-  private List<User> users = new ArrayList();
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "user_id")
+  private User user;
 
-  @Override
-  public String getAuthority() {
-    return name.name();
+  private Date created;
+  
+  public Token() {
+    this.created = new Date();
   }
 
   public Integer getId() {
@@ -62,20 +67,32 @@ public class Role implements GrantedAuthority {
     this.id = id;
   }
 
-  public Roles getName() {
+  public String getName() {
     return name;
   }
 
-  public void setName(Roles name) {
+  public void setName(String name) {
     this.name = name;
   }
 
-  public List<User> getUsers() {
-    return users;
+  public String getToken() {
+    return token;
   }
 
-  public void setUsers(List<User> users) {
-    this.users = users;
+  public void setToken(String token) {
+    this.token = token;
+  }
+
+  public User getUser() {
+    return user;
+  }
+
+  public void setUser(User user) {
+    this.user = user;
+  }
+
+  public void setId(Long tokenId) {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
 }

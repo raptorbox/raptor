@@ -1,11 +1,31 @@
 spring:
   application:
     name: jdbc
-management:
-  context_path: /admin
 logging:
   level:
     # org.springframework.security: DEBUG
+
+## Mysql support
+#  jpa:
+#    hibernate:
+#      # possible values: validate | update | create | create-drop
+#      ddl-auto: create-drop
+#  datasource:
+#    url: jdbc:mysql://localhost/raptor
+#    username: raptor
+#    password: raptor
+#    driver-class-name: com.mysql.jdbc.Driver
+
+---
+
+jwt:
+  header: Authorization
+  secret: mySecret
+  expiration: 604800
+  route:
+    authentication:
+      path: login
+      refresh: refresh
 
 ---
 
