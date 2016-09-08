@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.auth.service.controller;
 
+import java.util.Optional;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.auth.service.entity.User;
 import org.createnet.raptor.auth.service.entity.UserRepository;
@@ -23,6 +24,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,30 +43,41 @@ public class UserController {
   private UserRepository userRepository;
 
   @RequestMapping(value = "/users", method = RequestMethod.GET)
-  public Iterable<User> getUsers() {
+  public Iterable<User> getUsers(
+          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails user
+  ) {
+    
+    if(!user.isAdmin()) {
+      throw new AccessDeniedException("Cannot access this resource");
+    }
+    
     return userRepository.findAll();
   }
 
   @RequestMapping(value = {"/me", "/user/{uuid}"}, method = RequestMethod.GET)
-  public User me(@AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails user) {
-    return new User(user);
+  public User me(
+          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails user
+  ) {
+    User user1 = userRepository.findOne(user.getId());
+    return user1;
   }
 
   @RequestMapping(value = {"/me", "/user/{uuid}", "/user"}, method = RequestMethod.PUT)
   public User update(
           @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
-          @PathVariable String uuid,
-          User rawUser
+          @PathVariable Optional<String> uuidValue,
+          @RequestBody User rawUser
   ) {
+
+    String uuid = uuidValue.isPresent() ? uuidValue.get() : currentUser.getUuid();
 
     // TODO check user role or permissions
     if (!currentUser.isAdmin() && !uuid.equals(currentUser.getUuid())) {
       throw new AccessDeniedException("Cannot update user details");
     }
-    
-    
-    User user = userRepository.findByUuid(uuid);  
-    
+
+    User user = userRepository.findByUuid(uuid);
+
     if (rawUser.getFirstname() != null && !rawUser.getFirstname().isEmpty()) {
       user.setFirstname(rawUser.getFirstname());
     }
@@ -81,12 +94,20 @@ public class UserController {
       user.setEnabled(rawUser.getEnabled());
     }
 
+
+
+//      // TODO add Role repository
+//    if (!rawUser.getRoles().isEmpty()) {
+//      rawUser.getRoles().stream().forEach(r -> user.addRole(r));
+//    }
+
     // TODO missing password validation
     if (rawUser.getPassword() != null && !rawUser.getPassword().isEmpty()) {
       user.setPassword(passwordEncoder.encode(rawUser.getPassword()));
     }
 
-    return userRepository.save(user);
+    User user1 = userRepository.save(user);
+    return user1;
   }
 
 }

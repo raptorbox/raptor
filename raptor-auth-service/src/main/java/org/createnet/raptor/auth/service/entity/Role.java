@@ -33,7 +33,7 @@ import java.util.List;
 public class Role implements GrantedAuthority {
   
   public static enum Roles {
-    ROLE_ADMIN, ROLE_USER
+    ROLE_SUPER_ADMIN, ROLE_ADMIN, ROLE_USER
   }
   
   private static final long serialVersionUID = 1L;
@@ -50,6 +50,12 @@ public class Role implements GrantedAuthority {
   @ManyToMany(fetch = FetchType.LAZY, mappedBy = "roles")
   private List<User> users = new ArrayList();
 
+  public Role() {}
+  
+  public Role(String name) {
+    this.name = Roles.valueOf(name);
+  }
+  
   @JsonIgnore
   @Override
   public String getAuthority() {
