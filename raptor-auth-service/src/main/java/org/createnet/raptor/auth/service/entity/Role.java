@@ -38,10 +38,11 @@ public class Role implements GrantedAuthority {
   
   private static final long serialVersionUID = 1L;
 
+  @JsonIgnore
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Integer id;
-
+ 
   @NotEmpty
   private Roles name;
 
@@ -49,11 +50,20 @@ public class Role implements GrantedAuthority {
   @ManyToMany(fetch = FetchType.LAZY, mappedBy = "roles")
   private List<User> users = new ArrayList();
 
+  @JsonIgnore
   @Override
   public String getAuthority() {
     return name.name();
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if(obj instanceof Roles) {
+      return ((Roles)obj).equals(this.name);
+    }
+    return super.equals(obj); 
+  }
+  
   public Integer getId() {
     return id;
   }

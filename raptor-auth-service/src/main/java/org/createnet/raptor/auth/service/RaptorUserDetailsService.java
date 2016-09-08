@@ -51,22 +51,15 @@ public class RaptorUserDetailsService implements UserDetailsService {
 
   public final static class RaptorUserDetails extends User implements UserDetails {
 
-    protected User user;
-
     private static final long serialVersionUID = 1L;
 
     public RaptorUserDetails(User user) {
       super(user);
-      this.user = user;
-    }
-
-    public User getUser() {
-      return user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-      return getRoles();
+      return this.getRoles();
     }
 
     @Override

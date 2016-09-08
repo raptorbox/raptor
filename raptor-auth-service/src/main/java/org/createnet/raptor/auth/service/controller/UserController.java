@@ -19,8 +19,12 @@ import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.auth.service.entity.User;
 import org.createnet.raptor.auth.service.entity.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -31,16 +35,58 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
   @Autowired
+  private PasswordEncoder passwordEncoder;
+
+  @Autowired
   private UserRepository userRepository;
 
-  @RequestMapping("/users")
+  @RequestMapping(value = "/users", method = RequestMethod.GET)
   public Iterable<User> getUsers() {
     return userRepository.findAll();
   }
 
-  @RequestMapping("/me")
+  @RequestMapping(value = {"/me", "/user/{uuid}"}, method = RequestMethod.GET)
   public User me(@AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails user) {
-    return user.getUser();
+    return new User(user);
+  }
+
+  @RequestMapping(value = {"/me", "/user/{uuid}", "/user"}, method = RequestMethod.PUT)
+  public User update(
+          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
+          @PathVariable String uuid,
+          User rawUser
+  ) {
+
+    // TODO check user role or permissions
+    if (!currentUser.isAdmin() && !uuid.equals(currentUser.getUuid())) {
+      throw new AccessDeniedException("Cannot update user details");
+    }
+    
+    
+    User user = userRepository.findByUuid(uuid);  
+    
+    if (rawUser.getFirstname() != null && !rawUser.getFirstname().isEmpty()) {
+      user.setFirstname(rawUser.getFirstname());
+    }
+
+    if (rawUser.getLastname() != null && !rawUser.getLastname().isEmpty()) {
+      user.setLastname(rawUser.getLastname());
+    }
+
+    if (rawUser.getEmail() != null && !rawUser.getEmail().isEmpty()) {
+      user.setEmail(rawUser.getEmail());
+    }
+
+    if (rawUser.getEnabled() != null) {
+      user.setEnabled(rawUser.getEnabled());
+    }
+
+    // TODO missing password validation
+    if (rawUser.getPassword() != null && !rawUser.getPassword().isEmpty()) {
+      user.setPassword(passwordEncoder.encode(rawUser.getPassword()));
+    }
+
+    return userRepository.save(user);
   }
 
 }

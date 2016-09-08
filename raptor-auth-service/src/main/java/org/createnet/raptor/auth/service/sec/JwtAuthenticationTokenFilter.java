@@ -18,6 +18,8 @@ import java.io.IOException;
 
 public class JwtAuthenticationTokenFilter extends GenericFilterBean {
 
+    private String PREFIX = "Bearer ";
+  
     @Autowired
     private UserDetailsService userDetailsService;
 
@@ -33,8 +35,10 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String authToken = httpRequest.getHeader(this.tokenHeader);
         
-        if(authToken.startsWith("Bearer ")) {
-          authToken = authToken.substring(7);
+        if(authToken != null && !authToken.isEmpty()) {
+          if(authToken.startsWith(PREFIX)) {
+            authToken = authToken.substring(PREFIX.length());
+          }
         }
         
         String username = jwtTokenUtil.getUsernameFromToken(authToken);

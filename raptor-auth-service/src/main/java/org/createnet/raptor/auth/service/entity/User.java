@@ -124,6 +124,11 @@ public class User implements Serializable {
 
   }
 
+  @JsonIgnore
+  public boolean isAdmin() {
+    return this.getRoles().contains(Role.Roles.ROLE_ADMIN);
+  }
+  
   public Long getId() {
     return id;
   }
@@ -196,14 +201,6 @@ public class User implements Serializable {
     if (this.tokens.contains(token)) {
       this.tokens.remove(token);
     }
-  }
-
-  public boolean isEnabled() {
-    return enabled;
-  }
-
-  public void setEnabled(boolean enabled) {
-    this.enabled = enabled;
   }
 
   public String getFirstname() {
