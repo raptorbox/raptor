@@ -94,8 +94,6 @@ public class UserController {
       user.setEnabled(rawUser.getEnabled());
     }
 
-
-
 //      // TODO add Role repository
 //    if (!rawUser.getRoles().isEmpty()) {
 //      rawUser.getRoles().stream().forEach(r -> user.addRole(r));

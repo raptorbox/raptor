@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
-import org.createnet.raptor.auth.service.sec.JwtAuthenticationRequest;
-import org.createnet.raptor.auth.service.sec.JwtAuthenticationResponse;
-import org.createnet.raptor.auth.service.sec.JwtTokenUtil;
+import org.createnet.raptor.auth.service.jwt.JwtAuthenticationRequest;
+import org.createnet.raptor.auth.service.jwt.JwtAuthenticationResponse;
+import org.createnet.raptor.auth.service.jwt.JwtTokenUtil;
 
 @RestController
 public class AuthenticationController {

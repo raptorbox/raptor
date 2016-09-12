@@ -1,4 +1,4 @@
-package org.createnet.raptor.auth.service.sec;
+package org.createnet.raptor.auth.service.jwt;
 
 import java.io.Serializable;
 

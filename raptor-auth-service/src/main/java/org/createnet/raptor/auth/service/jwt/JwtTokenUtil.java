@@ -1,4 +1,4 @@
-package org.createnet.raptor.auth.service.sec;
+package org.createnet.raptor.auth.service.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

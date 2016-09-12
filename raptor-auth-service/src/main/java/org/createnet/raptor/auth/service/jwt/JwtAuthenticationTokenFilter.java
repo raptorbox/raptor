@@ -1,4 +1,4 @@
-package org.createnet.raptor.auth.service.sec;
+package org.createnet.raptor.auth.service.jwt;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
