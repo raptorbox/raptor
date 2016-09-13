@@ -12,7 +12,7 @@ logging:
 #      ddl-auto: create-drop
 #  datasource:
 #    url: jdbc:mysql://localhost/raptor
-#    username: raptor
+#    username: root
 #    password: raptor
 #    driver-class-name: com.mysql.jdbc.Driver
 
@@ -20,7 +20,7 @@ logging:
 
 jwt:
   header: Authorization
-  secret: mySecret
+  secret: raptor
   expiration: 604800
   route:
     authentication:
