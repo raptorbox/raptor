@@ -23,23 +23,24 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 
-import org.hibernate.validator.constraints.NotEmpty;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
 @Entity
+@Table(name = "tokens")
 public class Token implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private Integer id;
+  private Long id;
 
   @NotEmpty
   private String name;
@@ -47,6 +48,9 @@ public class Token implements Serializable {
   @NotEmpty
   @Column(unique = true, nullable = false)
   private String token;
+  
+  @Column(unique = false, nullable = false)
+  private Boolean enabled;
 
   @JsonIgnore
   @ManyToOne(fetch = FetchType.EAGER)
@@ -59,11 +63,11 @@ public class Token implements Serializable {
     this.created = new Date();
   }
 
-  public Integer getId() {
+  public Long getId() {
     return id;
   }
 
-  public void setId(Integer id) {
+  public void setId(Long id) {
     this.id = id;
   }
 
@@ -91,8 +95,12 @@ public class Token implements Serializable {
     this.user = user;
   }
 
-  public void setId(Long tokenId) {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  public Boolean getEnabled() {
+    return enabled;
+  }
+
+  public Date getCreated() {
+    return created;
   }
 
 }

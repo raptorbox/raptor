@@ -101,7 +101,7 @@ public class User implements Serializable {
   @Temporal(TemporalType.TIMESTAMP)
   @NotNull
   private Date lastPasswordResetDate = new Date();
-  
+
   @Column(name = "created")
   @Temporal(TemporalType.TIMESTAMP)
   @NotNull
@@ -128,7 +128,7 @@ public class User implements Serializable {
   public boolean isAdmin() {
     return this.getRoles().contains(Role.Roles.ROLE_ADMIN);
   }
-  
+
   public Long getId() {
     return id;
   }

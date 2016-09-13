@@ -28,12 +28,16 @@ import org.springframework.security.core.GrantedAuthority;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "roles")
 public class Role implements GrantedAuthority {
   
   public static enum Roles {
-    ROLE_SUPER_ADMIN, ROLE_ADMIN, ROLE_USER
+    ROLE_SUPER_ADMIN, 
+    ROLE_ADMIN, 
+    ROLE_USER
   }
   
   private static final long serialVersionUID = 1L;
@@ -44,7 +48,7 @@ public class Role implements GrantedAuthority {
   private Integer id;
  
   @NotEmpty
-  private Roles name;
+  private String name;
 
   @JsonIgnore
   @ManyToMany(fetch = FetchType.LAZY, mappedBy = "roles")
@@ -53,13 +57,13 @@ public class Role implements GrantedAuthority {
   public Role() {}
   
   public Role(String name) {
-    this.name = Roles.valueOf(name);
+    this.name = name;
   }
   
   @JsonIgnore
   @Override
   public String getAuthority() {
-    return name.name();
+    return name;
   }
 
   @Override
@@ -78,11 +82,11 @@ public class Role implements GrantedAuthority {
     this.id = id;
   }
 
-  public Roles getName() {
+  public String getName() {
     return name;
   }
 
-  public void setName(Roles name) {
+  public void setName(String name) {
     this.name = name;
   }
 

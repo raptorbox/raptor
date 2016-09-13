@@ -2,3 +2,6 @@ raptor*/target/*
 .vagrant
 raptor-parent/target/
 nb*
+tmp
+data
+

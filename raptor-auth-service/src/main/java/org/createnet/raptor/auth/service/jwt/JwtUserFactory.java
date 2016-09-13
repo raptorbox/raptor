@@ -11,16 +11,16 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public final class JwtUserFactory {
 
-    private JwtUserFactory() {
-    }
+  private JwtUserFactory() {
+  }
 
-    public static User create(User user) {
-        return new RaptorUserDetailsService.RaptorUserDetails(user);
-    }
+  public static User create(User user) {
+    return new RaptorUserDetailsService.RaptorUserDetails(user);
+  }
 
-    private static List<GrantedAuthority> mapToGrantedAuthorities(List<Role> roles) {
-        return roles.stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
-                .collect(Collectors.toList());
-    }
+  private static List<GrantedAuthority> mapToGrantedAuthorities(List<Role> roles) {
+    return roles.stream()
+            .map(role -> new SimpleGrantedAuthority(role.getName()))
+            .collect(Collectors.toList());
+  }
 }

@@ -19,21 +19,43 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
+import javax.sql.DataSource;
+import org.createnet.raptor.auth.service.entity.Role;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.cache.CacheProperties;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.acls.domain.AclAuthorizationStrategy;
+import org.springframework.security.acls.domain.AclAuthorizationStrategyImpl;
+import org.springframework.security.acls.domain.AuditLogger;
+import org.springframework.security.acls.domain.ConsoleAuditLogger;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.domain.SidRetrievalStrategyImpl;
+import org.springframework.security.acls.domain.SpringCacheBasedAclCache;
+import org.springframework.security.acls.jdbc.BasicLookupStrategy;
+import org.springframework.security.acls.jdbc.JdbcMutableAclService;
+import org.springframework.security.acls.jdbc.LookupStrategy;
 import org.springframework.security.acls.model.AccessControlEntry;
 import org.springframework.security.acls.model.Acl;
+import org.springframework.security.acls.model.AclCache;
+import org.springframework.security.acls.model.AclService;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.NotFoundException;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Permission;
+import org.springframework.security.acls.model.PermissionGrantingStrategy;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.acls.model.SidRetrievalStrategy;
 import org.springframework.security.acls.model.UnloadedSidException;
@@ -50,15 +72,52 @@ import org.springframework.transaction.annotation.Transactional;
 public class AclManagerImpl implements AclManager {
 
   private final Logger log = LoggerFactory.getLogger(AclManagerImpl.class);
+  
+  @Bean
+  public MutableAclService aclService() {
+    return new JdbcMutableAclService(dataSource, lookupStrategy(), aclCache());
+  }
+  
+  @Bean
+  public AclCache aclCache() {
+    return new SpringCacheBasedAclCache(cacheManager.getCache("acl"), new PermissionGrantingStrategy() {
+      @Override
+      public boolean isGranted(Acl acl, List<Permission> permission, List<Sid> sids, boolean administrativeMode) {
+        return true;
+      }
+    }, aclAuthorizationStrategy());
+  }
 
+  @Bean
+  public LookupStrategy lookupStrategy() {
+    return new BasicLookupStrategy(dataSource, aclCache(), aclAuthorizationStrategy(), auditLogger());
+  }  
+  
+  @Bean
+  public AclAuthorizationStrategy aclAuthorizationStrategy() {
+    return new AclAuthorizationStrategyImpl(new Role(Role.Roles.ROLE_SUPER_ADMIN.name()));
+  }
+  
+  @Bean
+  public AuditLogger auditLogger() {
+    return new ConsoleAuditLogger();
+  }
+  
   @Autowired
+  private CacheManager cacheManager;
+  
   private MutableAclService aclService;
-
+  
+  @Autowired
+  public void setMutableAclService(MutableAclService aclService) {
+    this.aclService = aclService;
+  }
+  
+  @Autowired
+  private DataSource dataSource;
+ 
   @Autowired
   private JdbcTemplate jdbcTemplate;
-
-  @Autowired
-  private PermissionEvaluator permissionEvaluator;
 
   private final SidRetrievalStrategy sidRetrievalStrategy = new SidRetrievalStrategyImpl();
 
