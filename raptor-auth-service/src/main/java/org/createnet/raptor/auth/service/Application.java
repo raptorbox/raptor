@@ -16,12 +16,16 @@
 package org.createnet.raptor.auth.service;
 
 import javax.sql.DataSource;
+import org.createnet.raptor.auth.service.entity.Role;
 import org.createnet.raptor.auth.service.entity.User;
-import org.createnet.raptor.auth.service.entity.UserRepository;
+import org.createnet.raptor.auth.service.entity.repository.RoleRepository;
+import org.createnet.raptor.auth.service.entity.repository.UserRepository;
 import org.createnet.raptor.auth.service.jwt.JsonUsernamePasswordFilter;
 import org.createnet.raptor.auth.service.jwt.JwtAuthenticationEntryPoint;
 import org.createnet.raptor.auth.service.jwt.JwtAuthenticationTokenFilter;
+import org.createnet.raptor.auth.service.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -29,7 +33,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -56,11 +59,26 @@ public class Application {
 
   static final protected BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+  @Value("${raptor.admin.enabled}")
+  private Boolean defaultUserEnabled;
+  @Value("${raptor.admin.username}")
+  private String defaultUserUsername;
+  @Value("${raptor.admin.password}")
+  private String defaultUserPassword;
+  @Value("${raptor.admin.email}")
+  private String defaultUserEmail;
+
   @Autowired
   private DataSource dataSource;
 
   @Autowired
+  private UserService userService;
+  
+  @Autowired
   private UserRepository userRepository;
+  
+  @Autowired
+  private RoleRepository roleRepository;
 
   @Autowired
   public void init(AuthenticationManagerBuilder auth) throws Exception {
@@ -68,16 +86,30 @@ public class Application {
             .jdbcAuthentication()
             .dataSource(dataSource);
 
-    // creat user 1
-    if (!userRepository.exists(1L)) {
-      User adminUser = new User();
+    createDefaultUser();
+  }
 
-      adminUser.setUsername("admin");
-      adminUser.setPassword(passwordEncoder.encode("admin"));
-      adminUser.setEmail("admin@raptor.local");
-
-      userRepository.save(adminUser);
+  protected void createDefaultUser() {
+    
+    if (defaultUserEnabled != null && defaultUserEnabled == false) {
+      return;
     }
+
+    User defaultUser = userRepository.findByUsername(defaultUserUsername);
+    if (defaultUser != null) {
+      userRepository.delete(defaultUser.getId());
+    }
+
+    User adminUser = new User();
+
+    adminUser.setUsername(defaultUserUsername);
+    adminUser.setPassword(passwordEncoder.encode(defaultUserPassword));
+    adminUser.setEmail(defaultUserEmail);
+    
+//    adminUser.addRole(roleRepository.findByName(Role.Roles.ROLE_SUPER_ADMIN.name()));
+    adminUser.addRole(Role.Roles.super_admin);
+
+    userService.save(adminUser);
 
   }
 

@@ -16,7 +16,7 @@
 package org.createnet.raptor.auth.service.controller;
 
 import org.createnet.raptor.auth.service.entity.Token;
-import org.createnet.raptor.auth.service.entity.TokenRepository;
+import org.createnet.raptor.auth.service.entity.repository.TokenRepository;
 import org.createnet.raptor.auth.service.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

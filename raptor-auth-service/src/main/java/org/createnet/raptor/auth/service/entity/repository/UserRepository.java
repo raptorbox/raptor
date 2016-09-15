@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.service.entity;
+package org.createnet.raptor.auth.service.entity.repository;
 
+import org.createnet.raptor.auth.service.entity.User;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
+@Transactional
 public interface UserRepository extends CrudRepository<User, Long> {
 
   User findByUsername(String username);

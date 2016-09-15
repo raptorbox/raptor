@@ -17,12 +17,13 @@ package org.createnet.raptor.auth.service.controller;
 
 import java.util.Optional;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
+import org.createnet.raptor.auth.service.entity.Role;
 import org.createnet.raptor.auth.service.entity.User;
-import org.createnet.raptor.auth.service.entity.UserRepository;
+import org.createnet.raptor.auth.service.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,78 +35,71 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Luca Capra <lcapra@create-net.org>
  */
 @RestController
+@PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
 public class UserController {
 
   @Autowired
-  private PasswordEncoder passwordEncoder;
-
-  @Autowired
-  private UserRepository userRepository;
+  private UserService userService;
 
   @RequestMapping(value = "/users", method = RequestMethod.GET)
-  public Iterable<User> getUsers(
-          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails user
-  ) {
-    
-    if(!user.isAdmin()) {
-      throw new AccessDeniedException("Cannot access this resource");
-    }
-    
-    return userRepository.findAll();
+  public Iterable<User> getUsers() {
+    return userService.list();
   }
 
-  @RequestMapping(value = {"/me", "/user/{uuid}"}, method = RequestMethod.GET)
+  @RequestMapping(value = {"/user",}, method = RequestMethod.GET)
   public User me(
           @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails user
   ) {
-    User user1 = userRepository.findOne(user.getId());
-    return user1;
+    return (User) user;
   }
 
-  @RequestMapping(value = {"/me", "/user/{uuid}", "/user"}, method = RequestMethod.PUT)
+  @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
+  @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.GET)
+  public User readUser(
+          @PathVariable String uuid,
+          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser
+  ) {
+    return userService.getByUuid(uuid);
+  }
+
+  @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
+  @RequestMapping(value = {"/user"}, method = RequestMethod.PUT)
+  public User updateMe(
+          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
+          @RequestBody User rawUser
+  ) {
+    return userService.update(currentUser.getUuid(), rawUser);
+  }
+
+  @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
+  @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.PUT)
   public User update(
           @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
           @PathVariable Optional<String> uuidValue,
           @RequestBody User rawUser
   ) {
-
     String uuid = uuidValue.isPresent() ? uuidValue.get() : currentUser.getUuid();
-
-    // TODO check user role or permissions
-    if (!currentUser.isAdmin() && !uuid.equals(currentUser.getUuid())) {
-      throw new AccessDeniedException("Cannot update user details");
-    }
-
-    User user = userRepository.findByUuid(uuid);
-
-    if (rawUser.getFirstname() != null && !rawUser.getFirstname().isEmpty()) {
-      user.setFirstname(rawUser.getFirstname());
-    }
-
-    if (rawUser.getLastname() != null && !rawUser.getLastname().isEmpty()) {
-      user.setLastname(rawUser.getLastname());
-    }
-
-    if (rawUser.getEmail() != null && !rawUser.getEmail().isEmpty()) {
-      user.setEmail(rawUser.getEmail());
-    }
-
-    if (rawUser.getEnabled() != null) {
-      user.setEnabled(rawUser.getEnabled());
-    }
-
-//      // TODO add Role repository
-//    if (!rawUser.getRoles().isEmpty()) {
-//      rawUser.getRoles().stream().forEach(r -> user.addRole(r));
-//    }
-
-    // TODO missing password validation
-    if (rawUser.getPassword() != null && !rawUser.getPassword().isEmpty()) {
-      user.setPassword(passwordEncoder.encode(rawUser.getPassword()));
-    }
-
-    User user1 = userRepository.save(user);
-    return user1;
+    return userService.update(uuid, rawUser);
   }
 
+  @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
+  @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.PUT)
+  public ResponseEntity<String> delete(
+          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
+          @PathVariable String uuid,
+          @RequestBody User rawUser
+  ) {
+    userService.delete(uuid);
+    return ResponseEntity.accepted().body(null);
+  }
+
+  @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
+  @RequestMapping(value = {"/user"}, method = RequestMethod.POST)
+  public User create(
+          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
+          @RequestBody User rawUser
+  ) {
+    return userService.create(rawUser);
+  }
+  
 }

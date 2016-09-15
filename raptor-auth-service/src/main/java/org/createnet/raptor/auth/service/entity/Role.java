@@ -33,20 +33,17 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "roles")
 public class Role implements GrantedAuthority {
-  
+
   public static enum Roles {
-    ROLE_SUPER_ADMIN, 
-    ROLE_ADMIN, 
-    ROLE_USER
+    super_admin, admin, user, guest
   }
-  
+
   private static final long serialVersionUID = 1L;
 
-  @JsonIgnore
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private Integer id;
- 
+  private Long id;
+
   @NotEmpty
   private String name;
 
@@ -54,12 +51,17 @@ public class Role implements GrantedAuthority {
   @ManyToMany(fetch = FetchType.LAZY, mappedBy = "roles")
   private List<User> users = new ArrayList();
 
-  public Role() {}
-  
+  public Role() {
+  }
+
   public Role(String name) {
     this.name = name;
   }
-  
+
+  public Role(Roles role) {
+    this.name = role.name();
+  }
+
   @JsonIgnore
   @Override
   public String getAuthority() {
@@ -68,17 +70,17 @@ public class Role implements GrantedAuthority {
 
   @Override
   public boolean equals(Object obj) {
-    if(obj instanceof Roles) {
-      return ((Roles)obj).equals(this.name);
+    if (obj instanceof Roles) {
+      return ((Roles) obj).equals(this.name);
     }
-    return super.equals(obj); 
+    return super.equals(obj);
   }
-  
-  public Integer getId() {
+
+  public Long getId() {
     return id;
   }
 
-  public void setId(Integer id) {
+  public void setId(Long id) {
     this.id = id;
   }
 

@@ -29,6 +29,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -63,7 +64,7 @@ public class User implements Serializable {
   @Size(min = 4, max = 256)
   private String username;
 
-  @JsonIgnore
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   @NotEmpty
   @Column(length = 128)
   @Size(min = 4, max = 128)
@@ -74,7 +75,7 @@ public class User implements Serializable {
   final private List<Token> tokens = new ArrayList();
 
   @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(name = "user_role", joinColumns = {
+  @JoinTable(name = "users_roles", joinColumns = {
     @JoinColumn(name = "user_id")}, inverseJoinColumns = {
     @JoinColumn(name = "role_id")})
   final private List<Role> roles = new ArrayList();
@@ -126,7 +127,20 @@ public class User implements Serializable {
 
   @JsonIgnore
   public boolean isAdmin() {
-    return this.getRoles().contains(Role.Roles.ROLE_ADMIN);
+    return isSuperAdmin() || this.hasRole(Role.Roles.admin);
+  }
+  
+  @JsonIgnore
+  public boolean isSuperAdmin() {
+    return this.hasRole(Role.Roles.super_admin);
+  }
+  
+  public boolean hasRole(Role.Roles name) {
+    return hasRole(name.name());
+  }
+  
+  public boolean hasRole(String name) {
+    return this.getRoles().stream().filter(r -> r.getName().equals(name)).count() >= 1;
   }
 
   public Long getId() {
@@ -163,14 +177,26 @@ public class User implements Serializable {
   }
 
   public void addRole(Role role) {
-    if (!this.roles.contains(role)) {
+    if (!this.hasRole(role.getName())) {
       this.roles.add(role);
+    }
+  }
+  
+  public void addRole(Role.Roles role) {
+    if (!this.hasRole(role)) {
+      this.roles.add(new Role(role));
     }
   }
 
   public void removeRole(Role role) {
-    if (this.roles.contains(role)) {
+    if (this.hasRole(role.getName())) {
       this.roles.remove(role);
+    }
+  }
+  
+  public void removeRole(Role.Roles role) {
+    if (this.hasRole(role)) {
+      this.roles.remove(new Role(role));
     }
   }
 

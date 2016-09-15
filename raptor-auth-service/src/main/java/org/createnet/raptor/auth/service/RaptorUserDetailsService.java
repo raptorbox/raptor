@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.auth.service;
 
-import org.createnet.raptor.auth.service.entity.UserRepository;
+import org.createnet.raptor.auth.service.entity.repository.UserRepository;
 import org.createnet.raptor.auth.service.entity.User;
 import java.util.Collection;
 
@@ -33,12 +33,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class RaptorUserDetailsService implements UserDetailsService {
 
-  private final UserRepository userRepository;
-
   @Autowired
-  public RaptorUserDetailsService(UserRepository userRepository) {
-    this.userRepository = userRepository;
-  }
+  private UserRepository userRepository;
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
