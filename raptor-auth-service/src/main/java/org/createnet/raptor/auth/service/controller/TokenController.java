@@ -17,7 +17,7 @@ package org.createnet.raptor.auth.service.controller;
 
 import org.createnet.raptor.auth.service.entity.Token;
 import org.createnet.raptor.auth.service.entity.User;
-import org.createnet.raptor.auth.service.jwt.JwtTokenUtil;
+import org.createnet.raptor.auth.service.services.JwtTokenService;
 import org.createnet.raptor.auth.service.services.TokenService;
 import org.createnet.raptor.auth.service.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +52,7 @@ public class TokenController {
     return tokenService.list(uuid);
   }
 
-  @RequestMapping(value = "/user/{uuid}/tokens/{tid}", method = RequestMethod.GET)
+  @RequestMapping(value = "/user/{uuid}/token/{tid}", method = RequestMethod.GET)
   public Token get(
           @AuthenticationPrincipal User user,
           @PathVariable String uuid,
@@ -62,7 +62,7 @@ public class TokenController {
     return tokenService.read(tokenId);
   }
 
-  @RequestMapping(value = "/user/{uuid}/tokens/{tid}", method = RequestMethod.PUT)
+  @RequestMapping(value = "/user/{uuid}/token/{tid}", method = RequestMethod.PUT)
   public Token update(
           @AuthenticationPrincipal User user,
           @PathVariable String uuid,
@@ -73,7 +73,7 @@ public class TokenController {
     return tokenService.update(token);
   }
 
-  @RequestMapping(value = "/user/{uuid}/tokens", method = RequestMethod.POST)
+  @RequestMapping(value = "/user/{uuid}/token", method = RequestMethod.POST)
   public ResponseEntity<Token> create(
           @AuthenticationPrincipal User currentUser,
           @PathVariable String uuid,
@@ -85,7 +85,18 @@ public class TokenController {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
     
-    Token token = tokenService.create(rawToken.getName(), user, rawToken.getSecret());
+    
+    
+    Token token = new Token();
+    token.setName(rawToken.getName());
+    token.setEnabled(rawToken.getEnabled());
+    token.setExpires(rawToken.getExpires());
+    token.setSecret(rawToken.getSecret());
+    token.setType(rawToken.getType());
+    token.setUser(user);
+    token.setToken(null);
+    
+    tokenService.create(token);
     
     if(token == null) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);

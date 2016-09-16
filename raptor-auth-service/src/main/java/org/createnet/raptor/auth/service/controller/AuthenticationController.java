@@ -1,5 +1,21 @@
+/*
+ * Copyright 2016 CREATE-NET
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.createnet.raptor.auth.service.controller;
 
+import java.security.Principal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -16,58 +32,86 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import org.createnet.raptor.auth.service.RaptorUserDetailsService;
-import org.createnet.raptor.auth.service.jwt.JwtAuthenticationRequest;
-import org.createnet.raptor.auth.service.jwt.JwtAuthenticationResponse;
-import org.createnet.raptor.auth.service.jwt.JwtTokenUtil;
+import org.createnet.raptor.auth.service.entity.Token;
+import org.createnet.raptor.auth.service.entity.User;
+import org.createnet.raptor.auth.service.services.JwtTokenService;
+import org.createnet.raptor.auth.service.services.TokenService;
+import org.springframework.security.access.prepost.PreAuthorize;
 
+/**
+ *
+ * @author Luca Capra <lcapra@create-net.org>
+ */
 @RestController
 public class AuthenticationController {
 
-    @Value("${jwt.header}")
-    private String tokenHeader;
+  protected static class JwtRequest {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    public JwtRequest() {}
 
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
-
-    @RequestMapping(value = "${jwt.route.authentication.path}", method = RequestMethod.POST)
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtAuthenticationRequest authenticationRequest) throws AuthenticationException {
-
-        // Perform the security
-        final Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authenticationRequest.getUsername(),
-                        authenticationRequest.getPassword()
-                )
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // Reload password post-security so we can generate token
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-        final String token = jwtTokenUtil.generateToken(userDetails);
-
-        // Return the token
-        return ResponseEntity.ok(new JwtAuthenticationResponse(token));
+    public JwtRequest(String username, String password) {
+      this.username = username;
+      this.password = password;
     }
+    
+    public String username;
+    public String password;
+  }
 
-    @RequestMapping(value = "${jwt.route.authentication.refresh}", method = RequestMethod.GET)
-    public ResponseEntity<?> refreshAndGetAuthenticationToken(HttpServletRequest request) {
-        String token = request.getHeader(tokenHeader);
-        String username = jwtTokenUtil.getUsernameFromToken(token);
-        RaptorUserDetailsService.RaptorUserDetails user = (RaptorUserDetailsService.RaptorUserDetails) userDetailsService.loadUserByUsername(username);
+  protected static class JwtResponse {
 
-        if (jwtTokenUtil.canTokenBeRefreshed(token, user.getLastPasswordResetDate())) {
-            String refreshedToken = jwtTokenUtil.refreshToken(token);
-            return ResponseEntity.ok(new JwtAuthenticationResponse(refreshedToken));
-        } else {
-            return ResponseEntity.badRequest().body(null);
-        }
+    public JwtResponse(String token) {
+      this.token = token;
     }
+    public String token;
+  }
+
+  @Value("${jwt.header}")
+  private String tokenHeader;
+
+  @Autowired
+  private AuthenticationManager authenticationManager;
+
+  @Autowired
+  private UserDetailsService userDetailsService;
+  
+  @Autowired
+  private TokenService tokenService;
+
+  @RequestMapping(value = "${jwt.route.authentication.path}", method = RequestMethod.POST)
+  public ResponseEntity<?> login(@RequestBody JwtRequest authenticationRequest) throws AuthenticationException {
+
+    final Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(authenticationRequest.username,authenticationRequest.password)
+    );
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    // Reload password post-security so we can generate token
+    final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.username);
+    final Token token = tokenService.createLoginToken((User)userDetails);
+    
+    // Return the token
+    return ResponseEntity.ok(new JwtResponse(token.getToken()));
+  }
+
+  @PreAuthorize("isAuthenticated()")
+  @RequestMapping(value = "${jwt.route.authentication.refresh}", method = RequestMethod.GET)
+  public ResponseEntity<?> refreshToken(
+    HttpServletRequest request,
+    Principal principal
+  ) {
+
+//    User user = (User) ((Authentication) principal).getPrincipal();
+    String reqToken = request.getHeader(tokenHeader).replace("Bearer ", "");
+    
+    Token token = tokenService.read(reqToken);
+    
+    if(token == null) {
+      return ResponseEntity.badRequest().body(null);
+    }
+    
+    Token refreshedToken = tokenService.refreshToken(token);
+    return ResponseEntity.ok(new JwtResponse(refreshedToken.getToken()));
+  }
 
 }

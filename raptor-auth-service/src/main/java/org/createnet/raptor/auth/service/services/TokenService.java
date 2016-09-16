@@ -15,15 +15,14 @@
  */
 package org.createnet.raptor.auth.service.services;
 
-import org.createnet.raptor.auth.service.entity.Role;
+import java.time.Instant;
 import org.createnet.raptor.auth.service.entity.Token;
 import org.createnet.raptor.auth.service.entity.User;
-import org.createnet.raptor.auth.service.entity.repository.RoleRepository;
 import org.createnet.raptor.auth.service.entity.repository.TokenRepository;
-import org.createnet.raptor.auth.service.jwt.JwtTokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,8 +34,14 @@ public class TokenService {
 
   private static final Logger logger = LoggerFactory.getLogger(TokenService.class);
 
+  @Value("${jwt.secret}")
+  private String secret;
+  
+  @Value("${jwt.expiration}")
+  private Long expiration;  
+  
   @Autowired
-  private JwtTokenUtil tokenUtil;
+  private JwtTokenService tokenUtil;
 
   @Autowired
   private TokenRepository tokenRepository;
@@ -61,25 +66,38 @@ public class TokenService {
     tokenRepository.save(token);
     return token;
   }
-
-  /** 
-   * @deprecated this should be dropped in favour of forcing to have a secret 
-   * provided each time or preset at user options level
-   */ 
-  public Token create(String name, User user) {
-    return create(name, user, null);
-  }
   
-  public Token create(String name, User user, String secret) {
-
-    Token token = new Token();
-
-    token.setUser(user);
-    token.setToken(tokenUtil.generateToken(user, secret));
-    token.setName(name);
-
+  public Token create(Token token) {
     tokenRepository.save(token);
     return token;
+  }
+
+  public Token read(String authToken) {
+    if(authToken == null) return null;
+    return tokenRepository.findByToken(authToken);
+  }
+
+  public Token createLoginToken(User user) {
+    Token token = tokenUtil.createToken("login", user, this.expiration, this.secret);
+    token.setSecret(null);
+    token.setType(Token.Type.LOGIN);
+    return create(token);
+  }
+  
+  public Token refreshToken(Token token) {
+    tokenUtil.refreshToken(token);
+    return tokenRepository.save(token);
+  }
+
+  public boolean isValid(Token token, String secret) {
+    // Cannot read the token claims?
+    if(tokenUtil.getClaims(token, secret) == null) 
+      return false;
+    return token.isValid();
+  }
+  
+  public boolean isValid(Token token) {
+    return isValid(token, token.getSecret() == null ? this.secret : token.getSecret());
   }
 
 }

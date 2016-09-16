@@ -82,7 +82,7 @@ public class UserController {
   }
 
   @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
-  @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.PUT)
+  @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.DELETE)
   public ResponseEntity<String> delete(
           @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
           @PathVariable String uuid,

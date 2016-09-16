@@ -26,9 +26,15 @@ import javax.persistence.JoinColumn;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Date;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotEmpty;
 
 /**
@@ -38,7 +44,11 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Entity
 @Table(name = "tokens")
 public class Token implements Serializable {
-
+  
+  public static enum Type {
+    LOGIN, DEFAULT
+  }
+  
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
@@ -50,23 +60,30 @@ public class Token implements Serializable {
   @Column(unique = true, nullable = false)
   private String token;
   
-  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+  @Column(unique = false, nullable = true)
   private String secret;
   
   @Column(unique = false, nullable = false)
-  private Boolean enabled;
+  private boolean enabled = false;
 
   @JsonIgnore
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "user_id")
   private User user;
 
-  private Date created;
+  @Column(name = "created")
+  @Temporal(TemporalType.TIMESTAMP)
+  @NotNull  
+  private Date created = new Date();
   
-  public Token() {
-    this.created = new Date();
-  }
-
+  @Column(name = "expires")
+  private Long expires = null;
+  
+  @Enumerated(EnumType.STRING)
+  @Column(name = "type")
+  private Type type = Type.DEFAULT;
+  
   public Long getId() {
     return id;
   }
@@ -115,4 +132,46 @@ public class Token implements Serializable {
     this.secret = secret;
   }
 
+  public Instant getExpiresInstant() {
+    if(expires == null)
+      return null;
+    return Instant.now().plusSeconds(expires);
+  }
+  
+  public Long getExpires() {
+    return expires;
+  }
+
+  public void setExpires(Long expires) {
+    this.expires = expires;
+  }
+  
+  public boolean isExpired() {
+    return getExpiresInstant() != null && getExpiresInstant().isBefore(Instant.now());
+  }
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+  
+  public boolean isValid() {
+    return isEnabled() && !isExpired() && (getUser() != null && getUser().isEnabled());
+  }
+
+  public void setEnabled(Boolean enabled) {
+    this.enabled = enabled;
+  }
+
+  public void setCreated(Date created) {
+    this.created = created;
+  }
+
+  public Type getType() {
+    return type;
+  }
+
+  public void setType(Type type) {
+    this.type = type;
+  }
+  
 }

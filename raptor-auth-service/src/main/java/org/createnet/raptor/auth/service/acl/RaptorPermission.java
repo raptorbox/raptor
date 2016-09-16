@@ -43,5 +43,31 @@ public class RaptorPermission extends BasePermission {
   public static final Permission SUBSCRIBE = new RaptorPermission(1 << 7, 'S'); // 128
   public static final Permission EXECUTE = new RaptorPermission(1 << 8, 'E'); // 256
   public static final Permission LIST = new RaptorPermission(1 << 9, 'L'); // 512
-
+  
+  public static Permission getByName(String name) {
+    switch(name.toUpperCase()) {
+      case "READ":
+        return RaptorPermission.READ;
+      case "WRITE":
+        return RaptorPermission.WRITE;
+      case "CREATE":
+        return RaptorPermission.CREATE;
+      case "DELETE":
+        return RaptorPermission.DELETE;
+      case "ADMINISTRATION":
+        return RaptorPermission.ADMINISTRATION;
+      case "PUSH":
+        return RaptorPermission.PUSH;
+      case "PULL":
+        return RaptorPermission.PULL;
+      case "SUBSCRIBE":
+        return RaptorPermission.SUBSCRIBE;
+      case "EXECUTE":
+        return RaptorPermission.EXECUTE;
+      case "LIST":
+        return RaptorPermission.LIST;
+    }
+    return null;
+  }
+  
 }

@@ -65,22 +65,17 @@ public class RaptorUserDetailsService implements UserDetailsService {
 
     @Override
     public boolean isAccountNonExpired() {
-      return true;
+      return isEnabled();
     }
 
     @Override
     public boolean isAccountNonLocked() {
-      return true;
+      return isEnabled();
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-      return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-      return true;
+      return isEnabled();
     }
 
   }

@@ -94,7 +94,7 @@ public class User implements Serializable {
 
   @Column()
   @NotNull
-  private Boolean enabled = true;
+  private boolean enabled = true;
 
   @JsonIgnore
   @Column(name = "last_password_reset")
@@ -253,6 +253,10 @@ public class User implements Serializable {
   }
 
   public Boolean getEnabled() {
+    return enabled;
+  }
+  
+  public boolean isEnabled() {
     return enabled;
   }
 
