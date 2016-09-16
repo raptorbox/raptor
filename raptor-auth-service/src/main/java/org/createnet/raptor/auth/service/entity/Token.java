@@ -24,6 +24,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.ManyToOne;
@@ -48,6 +49,9 @@ public class Token implements Serializable {
   @NotEmpty
   @Column(unique = true, nullable = false)
   private String token;
+  
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+  private String secret;
   
   @Column(unique = false, nullable = false)
   private Boolean enabled;
@@ -101,6 +105,14 @@ public class Token implements Serializable {
 
   public Date getCreated() {
     return created;
+  }
+
+  public String getSecret() {
+    return secret;
+  }
+
+  public void setSecret(String secret) {
+    this.secret = secret;
   }
 
 }

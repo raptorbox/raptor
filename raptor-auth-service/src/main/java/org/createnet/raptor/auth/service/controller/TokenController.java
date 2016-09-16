@@ -16,9 +16,13 @@
 package org.createnet.raptor.auth.service.controller;
 
 import org.createnet.raptor.auth.service.entity.Token;
-import org.createnet.raptor.auth.service.entity.repository.TokenRepository;
 import org.createnet.raptor.auth.service.entity.User;
+import org.createnet.raptor.auth.service.jwt.JwtTokenUtil;
+import org.createnet.raptor.auth.service.services.TokenService;
+import org.createnet.raptor.auth.service.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,7 +38,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class TokenController {
 
   @Autowired
-  private TokenRepository tokenRepository;
+  private TokenService tokenService;
+  
+  @Autowired
+  private UserService userService;
 
   @RequestMapping("/user/{uuid}/tokens")
   public Iterable<Token> getTokens(
@@ -42,7 +49,7 @@ public class TokenController {
           @PathVariable String uuid
   ) {
     // TODO add ACL checks
-    return tokenRepository.findByUserUuid(uuid);
+    return tokenService.list(uuid);
   }
 
   @RequestMapping(value = "/user/{uuid}/tokens/{tid}", method = RequestMethod.GET)
@@ -52,9 +59,9 @@ public class TokenController {
           @PathVariable Long tokenId
   ) {
     // TODO add ACL checks
-    return tokenRepository.findOne(tokenId);
+    return tokenService.read(tokenId);
   }
-  
+
   @RequestMapping(value = "/user/{uuid}/tokens/{tid}", method = RequestMethod.PUT)
   public Token update(
           @AuthenticationPrincipal User user,
@@ -62,12 +69,29 @@ public class TokenController {
           @PathVariable Long tokenId,
           @RequestBody Token token
   ) {
-    
     token.setId(tokenId);
+    return tokenService.update(token);
+  }
+
+  @RequestMapping(value = "/user/{uuid}/tokens", method = RequestMethod.POST)
+  public ResponseEntity<Token> create(
+          @AuthenticationPrincipal User currentUser,
+          @PathVariable String uuid,
+          @RequestBody Token rawToken
+  ) {
     
-    // TODO add ACL checks
+    User user = userService.getByUuid(uuid);
+    if(user == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
     
-    return tokenRepository.save(token);
+    Token token = tokenService.create(rawToken.getName(), user, rawToken.getSecret());
+    
+    if(token == null) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    }
+    
+    return ResponseEntity.status(HttpStatus.CREATED).body(token);
   }
 
 }

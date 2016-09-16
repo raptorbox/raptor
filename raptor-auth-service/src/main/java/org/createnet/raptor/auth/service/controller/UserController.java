@@ -17,7 +17,6 @@ package org.createnet.raptor.auth.service.controller;
 
 import java.util.Optional;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
-import org.createnet.raptor.auth.service.entity.Role;
 import org.createnet.raptor.auth.service.entity.User;
 import org.createnet.raptor.auth.service.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
