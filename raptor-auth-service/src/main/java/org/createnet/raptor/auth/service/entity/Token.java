@@ -69,7 +69,6 @@ public class Token implements Serializable {
 
   @JsonIgnore
   @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "user_id")
   private User user;
 
   @Column(name = "created")

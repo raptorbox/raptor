@@ -2,4 +2,8 @@
 
 Welcome to the Raptor IoT broker repository.
 
-### Coming soon
+### Development setup
+
+To setup the basic services required use docker-compose
+
+`docker-compose up`

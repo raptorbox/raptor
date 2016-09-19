@@ -40,6 +40,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.validator.constraints.Email;
 
 /**
@@ -70,7 +72,8 @@ public class User implements Serializable {
   private String password;
 
   @JsonIgnore
-  @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "user", fetch= FetchType.EAGER, orphanRemoval = true)
+  @Cascade(value = { CascadeType.REMOVE, CascadeType.SAVE_UPDATE })
   final private List<Token> tokens = new ArrayList();
 
   @ManyToMany(fetch = FetchType.EAGER)
