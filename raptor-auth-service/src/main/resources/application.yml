@@ -17,10 +17,12 @@ spring:
       naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
       dialect: org.hibernate.dialect.MySQL5Dialect
 
-  logging:
-    level:
-      # org.springframework.security: DEBUG
+---
 
+logging:
+  level:
+    root: DEBUG
+#    org.springframework.security: DEBUG
 
 ---
 

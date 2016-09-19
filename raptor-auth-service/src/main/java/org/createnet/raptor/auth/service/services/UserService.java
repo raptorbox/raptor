@@ -48,7 +48,7 @@ public class UserService {
     saveRoles(user);
     return userRepository.save(user);
   }
-  
+
   public User getByUuid(String uuid) {
     return userRepository.findByUuid(uuid);
   }
@@ -102,23 +102,35 @@ public class UserService {
       saveRoles(user);
     }
 
-    // TODO missing password validation
-    if (rawUser.getPassword() != null && !rawUser.getPassword().isEmpty()) {
-      user.setPassword(passwordEncoder.encode(rawUser.getPassword()));
-    }
+    encodePassword(rawUser);
 
-    return userRepository.save(user);    
+    return userRepository.save(user);
   }
 
   public User create(User rawUser) {
+
+    encodePassword(rawUser);
+
     return userRepository.save(rawUser);
   }
 
-  public void delete(String uuid) {
-    User user = getByUuid(uuid);
-    if(user == null) {
-      return;
-    }
+  public void delete(User user ) {
     userRepository.delete(user.getId());
   }
+
+  protected void encodePassword(User user) {
+    // TODO missing password validation
+    if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+      user.setPassword(passwordEncoder.encode(user.getPassword()));
+    }
+  }
+
+  public boolean exists(User rawUser) {
+    
+    User user = getByUuid(rawUser.getUuid());
+    if(user != null) return true;
+    
+    return userRepository.findByUsername(rawUser.getUsername()) != null;
+  }
+
 }

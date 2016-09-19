@@ -9,7 +9,7 @@ db:
   volumes:
     - ./data/mariadb:/var/lib/mysql
   environment:
-    # MYSQL_USERNAME: root
+    MYSQL_USERNAME: root
     MYSQL_ROOT_PASSWORD: raptor
     PMA_HOST: mysql
 

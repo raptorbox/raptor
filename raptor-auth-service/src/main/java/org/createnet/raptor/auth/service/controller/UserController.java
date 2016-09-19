@@ -20,6 +20,7 @@ import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.auth.service.entity.User;
 import org.createnet.raptor.auth.service.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,7 +46,24 @@ public class UserController {
     return userService.list();
   }
 
-  @RequestMapping(value = {"/user",}, method = RequestMethod.GET)
+
+  @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
+  @RequestMapping(value = {"/user"}, method = RequestMethod.POST)
+  public ResponseEntity<User> create(
+          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
+          @RequestBody User rawUser
+  ) {
+
+    boolean exists = userService.exists(rawUser);
+
+    if (exists) {
+      return ResponseEntity.status(403).body(null);
+    }
+
+    return ResponseEntity.ok(userService.create(rawUser));
+  }  
+  
+  @RequestMapping(value = {"/user"}, method = RequestMethod.GET)
   public User me(
           @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails user
   ) {
@@ -74,31 +92,24 @@ public class UserController {
   @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.PUT)
   public User update(
           @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
-          @PathVariable Optional<String> uuidValue,
+          @PathVariable String uuid,
           @RequestBody User rawUser
   ) {
-    String uuid = uuidValue.isPresent() ? uuidValue.get() : currentUser.getUuid();
     return userService.update(uuid, rawUser);
   }
 
   @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
   @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.DELETE)
-  public ResponseEntity<String> delete(
-          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
-          @PathVariable String uuid,
-          @RequestBody User rawUser
-  ) {
-    userService.delete(uuid);
+  public ResponseEntity<String> delete(@PathVariable String uuid) {
+
+    User user = userService.getByUuid(uuid);
+    if (user == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found");
+    }
+
+    userService.delete(user);
+
     return ResponseEntity.accepted().body(null);
   }
 
-  @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
-  @RequestMapping(value = {"/user"}, method = RequestMethod.POST)
-  public User create(
-          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
-          @RequestBody User rawUser
-  ) {
-    return userService.create(rawUser);
-  }
-  
 }

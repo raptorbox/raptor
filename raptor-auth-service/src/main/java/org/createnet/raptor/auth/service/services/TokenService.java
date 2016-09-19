@@ -97,7 +97,15 @@ public class TokenService {
   }
   
   public boolean isValid(Token token) {
+    if(token == null) return false;
     return isValid(token, token.getSecret() == null ? this.secret : token.getSecret());
+  }
+
+  public void delete(Token token) {
+    Token t2 = tokenRepository.findOne(token.getId());
+    if(t2 == null)
+      return;
+    tokenRepository.delete(t2.getId());
   }
 
 }

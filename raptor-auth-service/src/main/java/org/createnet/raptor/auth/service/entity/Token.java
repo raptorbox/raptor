@@ -44,7 +44,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Entity
 @Table(name = "tokens")
 public class Token implements Serializable {
-  
+
   public static enum Type {
     LOGIN, DEFAULT
   }
@@ -173,4 +173,8 @@ public class Token implements Serializable {
     this.type = type;
   }
   
+  public boolean isLoginToken() {
+    return this.getType().equals(Type.LOGIN);
+  }
+
 }
