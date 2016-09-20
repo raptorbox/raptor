@@ -25,7 +25,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.AuthHttpClient;
 import org.createnet.raptor.auth.authorization.AbstractAuthorization;
-import org.createnet.raptor.auth.authorization.impl.token.AuthorizationRequest;
+import org.createnet.raptor.auth.entity.AuthorizationRequest;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,15 +45,17 @@ public class TokenAuthorization extends AbstractAuthorization {
   public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) throws AuthorizationException {
 
     try {
-
-      logger.debug("Check authorization for object {} for permission {}", obj.getId(), op.toString());
       
-      String response = request(accessToken, obj.getId(), op.toString());
+      String id = obj == null ? null : obj.getId();
+      
+      logger.debug("Check authorization for object {} for permission {}", id, op.toString());
+      
+      String response = request(accessToken, id, op.toString());
 
       JsonNode node = mapper.readTree(response);
       boolean allowed = node.get("result").booleanValue();
 
-      logger.debug("User {} allowed to {} on {}", (!allowed ? "NOT" : ""), op.toString(), obj.getId());
+      logger.debug("User {} allowed to {} on {}", (!allowed ? "NOT" : ""), op.toString(), id);
 
       return allowed;
 

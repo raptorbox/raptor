@@ -22,9 +22,9 @@ import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.AuthHttpClient;
 import org.createnet.raptor.auth.authentication.AbstractAuthentication;
 import org.createnet.raptor.auth.authentication.Authentication;
-import org.createnet.raptor.auth.authentication.impl.token.AuthenticationRequest;
-import org.createnet.raptor.auth.authentication.impl.token.AuthenticationResponse;
-import org.createnet.raptor.auth.authentication.impl.token.SyncRequest;
+import org.createnet.raptor.auth.entity.SyncRequest;
+import org.createnet.raptor.auth.entity.AuthorizationRequest;
+import org.createnet.raptor.auth.entity.AuthorizationResponse;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ public class TokenAuthentication extends AbstractAuthentication {
 
       logger.debug("Loading user by token {}", accessToken);
 
-      AuthenticationResponse response = getUserRequest(accessToken);
+      AuthorizationResponse response = getUserRequest(accessToken);
 
       if (response.userId == null) {
         throw new AuthenticationException("User id not found in response");
@@ -88,14 +88,13 @@ public class TokenAuthentication extends AbstractAuthentication {
     }
   }
 
-  protected AuthenticationResponse getUserRequest(String accessToken) throws IOException, AuthHttpClient.ClientException {
-
-    AuthenticationRequest chkreq = new AuthenticationRequest();
-    chkreq.operation = AuthenticationRequest.Operation.User;
+  protected AuthorizationResponse getUserRequest(String accessToken) throws IOException, AuthHttpClient.ClientException {
     
-    String payload = mapper.writeValueAsString(chkreq);
+    AuthorizationRequest areq = new AuthorizationRequest(AuthorizationRequest.Operation.User);
+    
+    String payload = mapper.writeValueAsString(areq);
     String response = client.check(accessToken, payload);
-    return mapper.readValue(response, AuthenticationResponse.class);
+    return mapper.readValue(response, AuthorizationResponse.class);
   }
 
 }

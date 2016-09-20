@@ -13,13 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.authorization.impl.token;
+package org.createnet.raptor.auth.entity;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class AuthorizationRequest {
+  
+  public static enum Operation {
+    User, Permission
+  }
+  
+  public AuthorizationRequest(){}
+  
+  public AuthorizationRequest(Operation op) {
+    this.operation = op.name();
+  }
+  
+  public String operation = Operation.Permission.name();
   public String permission;
   public String objectId;
+  
+  public Operation getOperation() {
+    return Operation.valueOf(operation);
+  }
+
 }

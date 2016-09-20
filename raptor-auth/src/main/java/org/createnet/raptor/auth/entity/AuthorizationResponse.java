@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.authorization.impl.token;
+package org.createnet.raptor.auth.entity;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -21,4 +25,7 @@ package org.createnet.raptor.auth.authorization.impl.token;
  */
 public class AuthorizationResponse {
   public boolean result;
+  public String userId;
+  public List<String> roles = new ArrayList<>();
+  public JsonNode details;
 }

@@ -178,8 +178,11 @@ public class AuthHttpClient {
     accessToken = checkToken(accessToken);
             
     HttpPost httpost = new HttpPost(checkUrl);
+
     httpost.setConfig(requestConfig);
     httpost.setHeader("Authorization", accessToken);
+    httpost.addHeader("Accept", "application/json");
+    httpost.addHeader("Content-Type", "application/json");
 
     StringEntity entity = new StringEntity(payload, Consts.UTF_8);
     httpost.setEntity(entity);
