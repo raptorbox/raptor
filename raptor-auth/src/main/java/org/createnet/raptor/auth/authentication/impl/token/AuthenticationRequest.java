@@ -15,19 +15,13 @@
  */
 package org.createnet.raptor.auth.authentication.impl.token;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class AuthenticationRequest {
-  
-  public static enum Operation {
-    User, // check request token only, returning the referenced user
-  }
-  
-  public Operation operation;
-  
-  public String objectId;
+public class AuthenticationResponse {
   public String userId;
- 
+  public JsonNode details;
 }
