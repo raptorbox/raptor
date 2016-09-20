@@ -4,4 +4,4 @@ raptor-parent/target/
 nb*
 tmp
 data
-
+*/*.log
