@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Luca Capra <lcapra@create-net.org>
  */
 @RestController
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize("isAuthenticated() and hasIpAddress('127.0.0.1')")
 public class ObjectController {
 
   private static final Logger logger = LoggerFactory.getLogger(ObjectController.class);

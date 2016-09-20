@@ -33,6 +33,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -73,13 +74,12 @@ public class Application {
 
   @Autowired
   private UserService userService;
-  
+
   @Autowired
   private UserRepository userRepository;
-  
-  @Autowired
-  private RoleRepository roleRepository;
 
+//  @Autowired
+//  private RoleRepository roleRepository;
   @Autowired
   public void init(AuthenticationManagerBuilder auth) throws Exception {
     auth
@@ -90,7 +90,7 @@ public class Application {
   }
 
   protected void createDefaultUser() {
-    
+
     if (defaultUserEnabled != null && defaultUserEnabled == false) {
       return;
     }
@@ -105,7 +105,7 @@ public class Application {
     adminUser.setUsername(defaultUserUsername);
     adminUser.setPassword(passwordEncoder.encode(defaultUserPassword));
     adminUser.setEmail(defaultUserEmail);
-    
+
 //    adminUser.addRole(roleRepository.findByName(Role.Roles.ROLE_SUPER_ADMIN.name()));
     adminUser.addRole(Role.Roles.super_admin);
 
@@ -117,6 +117,12 @@ public class Application {
   @EnableWebSecurity
   @EnableGlobalMethodSecurity(prePostEnabled = true)
   protected static class JWTWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+
+    @Value("${jwt.route.authentication.path}")
+    private String authenticationPath;
+    
+    @Value("${jwt.route.authentication.refresh}")
+    private String authenticationRefresh;
 
     @Autowired
     private JwtAuthenticationEntryPoint unauthorizedHandler;
@@ -150,21 +156,12 @@ public class Application {
               // don't create session
               .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
               .authorizeRequests()
-              //.antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-              //// allow anonymous resource requests
-              //              .antMatchers(
-              //                      HttpMethod.GET,
-              //                      "/",
-              //                      "/*.html",
-              //                      "/favicon.ico",
-              //                      "/**/*.html",
-              //                      "/**/*.css",
-              //                      "/**/*.js"
-              //              ).permitAll()
-
-              .antMatchers("/login").permitAll()
-              .antMatchers("/refresh").permitAll()
+              
+              // CORS
+              .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+              
+              .antMatchers(authenticationPath).permitAll()
+              .antMatchers(authenticationRefresh).permitAll()
               .anyRequest().authenticated();
 
       // Custom JWT based security filter

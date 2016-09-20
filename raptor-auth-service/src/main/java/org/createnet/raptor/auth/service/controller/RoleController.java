@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.auth.service.controller;
 
-import java.util.Optional;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.auth.service.entity.Role;
 import org.createnet.raptor.auth.service.services.RoleService;
@@ -45,66 +44,73 @@ public class RoleController {
   @Autowired
   private RoleService roleService;
 
+  @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
   @RequestMapping(value = "/roles", method = RequestMethod.GET)
-  public ResponseEntity<Iterable<Role>> getUsers() {
+  public ResponseEntity<?> getUsers() {
     Iterable<Role> list = roleService.list();
     return ResponseEntity.ok(list);
   }
 
+  @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
   @RequestMapping(value = {"/roles/{roleId}"}, method = RequestMethod.PUT)
-  public ResponseEntity<Role> update(
+  public ResponseEntity<?> update(
           @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
-          @PathVariable Optional<Long> roleIdValue,
+          @PathVariable Long roleId,
           @RequestBody Role rawRole
   ) {
 
-    Long roleId = roleIdValue.isPresent() ? roleIdValue.get() : rawRole.getId();
-    
-    if (roleId == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    if ((rawRole.getName().isEmpty() || rawRole.getName() == null)) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name property is missing");
     }
-    
+
+    Role role2 = roleService.getByName(rawRole.getName());
+    if (role2 != null) {
+      return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+    }
+
+    rawRole.setId(roleId);
     Role role = roleService.update(roleId, rawRole);
-    if(role == null) {
+    if (role == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
-    
+
     logger.debug("Updated role {}", role.getName());
     return ResponseEntity.ok(role);
   }
 
+  @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
   @RequestMapping(value = {"/roles"}, method = RequestMethod.POST)
-  public ResponseEntity<Role> create(
+  public ResponseEntity<?> create(
           @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
           @RequestBody Role rawRole
   ) {
 
-    // TODO check user role or permissions
-    if (!currentUser.isAdmin()) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+    if ((rawRole.getName().isEmpty() || rawRole.getName() == null)) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name property is missing");
     }
-    
-    Role role = roleService.create(rawRole);
-    if (role  == null) {
+
+    Role role2 = roleService.getByName(rawRole.getName());
+    if (role2 != null) {
       return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
     }
-    
+
+    Role role = roleService.create(rawRole);
+    if (role == null) {
+      return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+    }
+
     logger.debug("Created role {}", role.getName());
     return ResponseEntity.ok(role);
   }
 
+  @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
   @RequestMapping(value = {"/roles/{roleId}"}, method = RequestMethod.DELETE)
   public ResponseEntity<Role> delete(
           @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
           @PathVariable Long roleId
   ) {
 
-    // TODO check user role or permissions
-    if (!currentUser.isAdmin()) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-    }
-    
-    if(!roleService.delete(roleId)) {
+    if (!roleService.delete(roleId)) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 

@@ -94,8 +94,18 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-devtools</artifactId>
       <optional>true</optional>
-    </dependency>    
-  </dependencies>    
+    </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>raptor-auth</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>raptor-models</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>    
   
     
   <dependencyManagement>

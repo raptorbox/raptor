@@ -1,4 +1,11 @@
 
+server:
+  contextPath: /auth
+  port: 8090
+  address: 127.0.0.1
+
+---
+
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/raptor
@@ -21,8 +28,9 @@ spring:
 
 logging:
   level:
-    root: DEBUG
-#    org.springframework.security: DEBUG
+    root: INFO
+    org.springframework.security: DEBUG
+    org.createnet.raptor.auth.service: DEBUG
 
 ---
 
@@ -38,8 +46,8 @@ jwt:
   
   route:
     authentication:
-      path: login
-      refresh: refresh
+      path: /login
+      refresh: /refresh
 ---
 
 raptor:

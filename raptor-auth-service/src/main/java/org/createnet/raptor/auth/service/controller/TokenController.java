@@ -23,6 +23,7 @@ import org.createnet.raptor.auth.service.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,6 +53,7 @@ public class TokenController {
     return tokenService.list(uuid);
   }
 
+  @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
   @RequestMapping(value = "/user/{uuid}/token/{tid}", method = RequestMethod.GET)
   public Token get(
           @AuthenticationPrincipal User user,
@@ -61,7 +63,8 @@ public class TokenController {
     // TODO add ACL checks
     return tokenService.read(tokenId);
   }
-
+  
+  @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
   @RequestMapping(value = "/user/{uuid}/token/{tid}", method = RequestMethod.PUT)
   public Token update(
           @AuthenticationPrincipal User user,
@@ -72,7 +75,8 @@ public class TokenController {
     token.setId(tokenId);
     return tokenService.update(token);
   }
-
+  
+  @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
   @RequestMapping(value = "/user/{uuid}/token", method = RequestMethod.POST)
   public ResponseEntity<Token> create(
           @AuthenticationPrincipal User currentUser,
@@ -96,13 +100,13 @@ public class TokenController {
     token.setUser(user);
     token.setToken(null);
     
-    tokenService.create(token);
+    Token token2 = tokenService.create(token);
     
-    if(token == null) {
+    if(token2 == null) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
     
-    return ResponseEntity.status(HttpStatus.CREATED).body(token);
+    return ResponseEntity.status(HttpStatus.CREATED).body(token2);
   }
 
 }
