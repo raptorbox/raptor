@@ -29,7 +29,11 @@ import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.broker.configuration.BrokerConfiguration;
 import org.createnet.raptor.broker.util.TopicChecker;
 import org.createnet.raptor.config.exception.ConfigurationException;
+import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.http.service.AuthService;
+import org.createnet.raptor.http.service.StorageService;
+import org.createnet.raptor.models.objects.RaptorComponent;
+import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +56,9 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
   @Inject
   AuthService auth;
+
+  @Inject
+  StorageService storage;
 
   public RaptorSecurityManager() {
 
@@ -161,12 +168,13 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         logger.debug("Object ID length mismatch ({}: {})", objectId.length(), objectId);
         return false;
       }
-      
+           
       try {
+        ServiceObject obj = storage.getObject(objectId);
         logger.debug("Check access permission of user {} to object {}", user.getUserId(), objectId);
-        boolean allowed = auth.isAllowed(user.getAccessToken(), objectId, Authorization.Permission.Subscribe);
+        boolean allowed = auth.isAllowed(user.getAccessToken(), obj, Authorization.Permission.Subscribe);
         return allowed;
-      } catch (Authorization.AuthorizationException | ConfigurationException ex) {
+      } catch (Authorization.AuthorizationException | Storage.StorageException | RaptorComponent.ParserException | ConfigurationException ex) {
         logger.error("Failed to subscribe", ex);
         return false;
       }
