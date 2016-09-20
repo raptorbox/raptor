@@ -60,7 +60,7 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
     } catch (Authentication.AuthenticationException ex) {
 
-      logger.warn("Token is not valid", ex);
+      logger.warn("Token is not valid: {}", ex.getMessage());
 
       requestContext.abortWith(
               Response
