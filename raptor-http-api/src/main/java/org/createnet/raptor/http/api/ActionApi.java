@@ -75,7 +75,7 @@ public class ActionApi extends AbstractApi {
     ServiceObject obj = loadObject(id);
     Action action = loadAction(actionId, obj);
 
-    if (!auth.isAllowed(obj.id, Authorization.Permission.Read)) {
+    if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
       throw new ForbiddenException("Cannot fetch data");
     }
 
@@ -103,7 +103,7 @@ public class ActionApi extends AbstractApi {
     ServiceObject obj = loadObject(id);
     Action action = loadAction(actionId, obj);
 
-    if (!auth.isAllowed(obj.id, Authorization.Permission.Execute)) {
+    if (!auth.isAllowed(obj, Authorization.Permission.Execute)) {
       throw new ForbiddenException("Cannot fetch data");
     }
 
@@ -130,7 +130,7 @@ public class ActionApi extends AbstractApi {
     ServiceObject obj = loadObject(id);
     Action action = loadAction(actionId, obj);
 
-    if (!auth.isAllowed(obj.id, Authorization.Permission.Update)) {
+    if (!auth.isAllowed(obj, Authorization.Permission.Update)) {
       throw new ForbiddenException("Cannot fetch data");
     }
 

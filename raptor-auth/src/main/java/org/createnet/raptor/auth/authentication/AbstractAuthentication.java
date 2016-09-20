@@ -16,6 +16,7 @@
 package org.createnet.raptor.auth.authentication;
 
 import org.createnet.raptor.auth.AuthConfiguration;
+import org.createnet.raptor.models.objects.ServiceObject;
 
 /**
  *
@@ -31,7 +32,7 @@ abstract public class AbstractAuthentication implements Authentication {
   }
 
   @Override
-  public void sync(String accessToken, String id) throws AuthenticationException {
+  public void sync(String accessToken, ServiceObject obj) throws AuthenticationException {
   }
   
 }

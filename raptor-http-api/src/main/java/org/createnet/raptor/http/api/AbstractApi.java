@@ -58,7 +58,7 @@ abstract public class AbstractApi {
 
     ServiceObject obj = storage.getObject(id);
 
-    if (!auth.isAllowed(id, Authorization.Permission.Read)) {
+    if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
       throw new ForbiddenException("Cannot access object");
     }
     

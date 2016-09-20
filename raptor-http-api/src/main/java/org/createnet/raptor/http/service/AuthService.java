@@ -25,6 +25,7 @@ import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.events.Event;
 import org.createnet.raptor.http.events.ObjectEvent;
+import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -60,12 +61,12 @@ public class AuthService {
     return auth;
   }
 
-  public boolean isAllowed(String accessToken, String id, Authorization.Permission op) throws Authorization.AuthorizationException, ConfigurationException {
-    return getProvider().isAuthorized(accessToken, id, op);
+  public boolean isAllowed(String accessToken, ServiceObject obj, Authorization.Permission op) throws Authorization.AuthorizationException, ConfigurationException {
+    return getProvider().isAuthorized(accessToken, obj, op);
   }
 
-  public boolean isAllowed(String id, Authorization.Permission op) throws Authorization.AuthorizationException, ConfigurationException {
-    return getProvider().isAuthorized(getAccessToken(), id, op);
+  public boolean isAllowed(ServiceObject obj, Authorization.Permission op) throws Authorization.AuthorizationException, ConfigurationException {
+    return getProvider().isAuthorized(getAccessToken(), obj, op);
   }
 
   public boolean isAllowed(Authorization.Permission op) throws Authorization.AuthorizationException, ConfigurationException {
@@ -87,8 +88,8 @@ public class AuthService {
     return securityContext.getUserPrincipal().getName();
   }
 
-  public void sync(String id) throws ConfigurationException, Authentication.AuthenticationException {
-    getProvider().sync(getAccessToken(), id);
+  public void sync(ServiceObject obj) throws ConfigurationException, Authentication.AuthenticationException {
+    getProvider().sync(getAccessToken(), obj);
   }
   
   private void initialize() {
@@ -97,7 +98,7 @@ public class AuthService {
     emitter.on(EventEmitterService.EventName.object, (Event event) -> {
       try {
         ObjectEvent objEvent = (ObjectEvent) event;
-        getProvider().sync(objEvent.getAccessToken(), objEvent.getObject().id);
+        getProvider().sync(objEvent.getAccessToken(), objEvent.getObject());
       } catch (Authentication.AuthenticationException | ConfigurationException ex) {
         logger.error("Event trigger exception", ex);
       }

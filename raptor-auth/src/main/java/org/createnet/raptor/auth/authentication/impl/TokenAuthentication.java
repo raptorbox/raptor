@@ -15,17 +15,17 @@
  */
 package org.createnet.raptor.auth.authentication.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.AuthHttpClient;
 import org.createnet.raptor.auth.authentication.AbstractAuthentication;
 import org.createnet.raptor.auth.authentication.Authentication;
+import org.createnet.raptor.auth.authentication.impl.token.AuthenticationRequest;
+import org.createnet.raptor.auth.authentication.impl.token.AuthenticationResponse;
+import org.createnet.raptor.auth.authentication.impl.token.SyncRequest;
+import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +34,9 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class TokenAuthentication extends AbstractAuthentication {
-  
+
   final private Logger logger = LoggerFactory.getLogger(TokenAuthentication.class);
-  
+
   ObjectMapper mapper = new ObjectMapper();
   final private AuthHttpClient client = new AuthHttpClient();
 
@@ -44,18 +44,17 @@ public class TokenAuthentication extends AbstractAuthentication {
   public Authentication.UserInfo getUser(String accessToken) throws AuthenticationException {
 
     try {
-      
+
       logger.debug("Loading user by token {}", accessToken);
-      
-      String response = checkRequest(accessToken);
-      JsonNode node = mapper.readTree(response);
-      
-      if(!node.has("id")) {
+
+      AuthenticationResponse response = getUserRequest(accessToken);
+
+      if (response.userId == null) {
         throw new AuthenticationException("User id not found in response");
       }
-      
-      return new Authentication.UserInfo(node.get("userid").asText(), accessToken, node);
-      
+
+      return new Authentication.UserInfo(response.userId, accessToken, response.details);
+
     } catch (IOException ex) {
       throw new AuthenticationException(ex);
     } catch (AuthHttpClient.ClientException ex) {
@@ -71,23 +70,32 @@ public class TokenAuthentication extends AbstractAuthentication {
   }
 
   @Override
-  public void sync(String accessToken, String objId) throws AuthenticationException {
+  public void sync(String accessToken, ServiceObject obj) throws AuthenticationException {
     try {
-      logger.debug("Syncing object operation for {}", objId);
-      client.sync(accessToken, "{\"id\": \""+ objId +"\"}");
-    } catch (AuthHttpClient.ClientException ex) {
+      logger.debug("Syncing object operation for {}", obj.id);
+
+      SyncRequest synreq = new SyncRequest();
+      synreq.userId = obj.getUserId();
+      synreq.objectId = obj.getId();
+      synreq.created = obj.createdAt;
+
+      String payload = mapper.writeValueAsString(synreq);
+
+      client.sync(accessToken, payload);
+
+    } catch (AuthHttpClient.ClientException | JsonProcessingException ex) {
       throw new AuthenticationException(ex);
     }
   }
 
-  
-  protected String checkRequest(String accessToken) throws IOException, AuthHttpClient.ClientException {
+  protected AuthenticationResponse getUserRequest(String accessToken) throws IOException, AuthHttpClient.ClientException {
+
+    AuthenticationRequest chkreq = new AuthenticationRequest();
+    chkreq.operation = AuthenticationRequest.Operation.User;
     
-    List<NameValuePair> args = new ArrayList();
-    args.add(new BasicNameValuePair("operation", "loadUser"));
-    
-    return client.check(accessToken, args);
+    String payload = mapper.writeValueAsString(chkreq);
+    String response = client.check(accessToken, payload);
+    return mapper.readValue(response, AuthenticationResponse.class);
   }
- 
-  
+
 }

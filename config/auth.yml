@@ -1,9 +1,10 @@
-# define the type of auth: token, allow_all
-type: allow_all
+#auth: token, allow_all
+type: token
+#cache: memory, none
 cache: memory
 token:
   truststore:
     path: /etc/raptor/truststore
     password: passwd
-  checkUrl: https://frontend.raptor.local/api/token/check
-  syncUrl: https://frontend.raptor.local/api/device/sync
+  checkUrl: http://localhost:8090/check
+  syncUrl: http://localhost:8090/sync

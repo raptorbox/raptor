@@ -25,6 +25,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.AuthHttpClient;
 import org.createnet.raptor.auth.authorization.AbstractAuthorization;
+import org.createnet.raptor.auth.authorization.impl.token.AuthorizationRequest;
+import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,18 +42,18 @@ public class TokenAuthorization extends AbstractAuthorization {
   final private AuthHttpClient client = new AuthHttpClient();
 
   @Override
-  public boolean isAuthorized(String accessToken, String id, Permission op) throws AuthorizationException {
+  public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) throws AuthorizationException {
 
     try {
 
-      logger.debug("Check authorization for object {} for permission {}", id, op.toString());
-
-      String response = request(accessToken, id, op.toString());
+      logger.debug("Check authorization for object {} for permission {}", obj.getId(), op.toString());
+      
+      String response = request(accessToken, obj.getId(), op.toString());
 
       JsonNode node = mapper.readTree(response);
       boolean allowed = node.get("result").booleanValue();
 
-      logger.debug("User {} allowed to {} on {}", (!allowed ? "NOT" : ""), op.toString(), id);
+      logger.debug("User {} allowed to {} on {}", (!allowed ? "NOT" : ""), op.toString(), obj.getId());
 
       return allowed;
 
@@ -69,13 +71,13 @@ public class TokenAuthorization extends AbstractAuthorization {
 
   protected String request(String accessToken, String id, String permission) throws IOException, AuthHttpClient.ClientException {
 
-    List<NameValuePair> args = new ArrayList();
+    AuthorizationRequest authzreq = new AuthorizationRequest();
+    authzreq.permission = permission;
+    authzreq.objectId = id;
 
-    args.add(new BasicNameValuePair("operation", "checkPermission"));
-    args.add(new BasicNameValuePair("permission", permission));
-    args.add(new BasicNameValuePair("soid", id));
-
-    return client.check(accessToken, args);
+    String payload = mapper.writeValueAsString(authzreq);
+    
+    return client.check(accessToken, payload);
   }
 
 }

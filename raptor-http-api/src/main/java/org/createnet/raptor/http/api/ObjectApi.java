@@ -126,7 +126,7 @@ public class ObjectApi extends AbstractApi {
       throw new NotFoundException("Request id does not match payload defined id");
     }    
     
-    if(!auth.isAllowed(obj.id, Authorization.Permission.Update)) {
+    if(!auth.isAllowed(obj, Authorization.Permission.Update)) {
       throw new ForbiddenException("Cannot update object");
     }
     
@@ -182,7 +182,7 @@ public class ObjectApi extends AbstractApi {
 
     ServiceObject obj = loadObject(id);
 
-    if(!auth.isAllowed(obj.id, Authorization.Permission.Read)) {
+    if(!auth.isAllowed(obj, Authorization.Permission.Read)) {
       throw new ForbiddenException("Cannot read object");
     }
     
@@ -196,7 +196,7 @@ public class ObjectApi extends AbstractApi {
 
     ServiceObject obj = loadObject(id);
 
-    if(!auth.isAllowed(obj.id, Authorization.Permission.Delete)) {
+    if(!auth.isAllowed(obj, Authorization.Permission.Delete)) {
       throw new NotAuthorizedException("Cannot delete object");
     }
 

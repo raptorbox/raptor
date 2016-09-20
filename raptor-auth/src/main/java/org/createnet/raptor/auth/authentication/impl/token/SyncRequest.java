@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 CREATE-NET
+ * Copyright 2016 Luca Capra <lcapra@create-net.org>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.authorization.impl;
-import org.createnet.raptor.auth.authorization.AbstractAuthorization;
-import org.createnet.raptor.models.objects.ServiceObject;
+package org.createnet.raptor.auth.authentication.impl.token;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class AllowAllAuthorization extends AbstractAuthorization {
-
-  static final public String defaultAccessToken = "Bearer 1234567890";
-  static final public String defaultUserId = "default-user";
-
-  @Override
-  public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) throws AuthorizationException {
-    return !accessToken.isEmpty();
-  }
-
+public class SyncRequest {
+  public String objectId;
+  public String userId;
+  public Long created;
 }

@@ -62,7 +62,7 @@ public class DataApi extends AbstractApi {
 
     ServiceObject obj = loadObject(id);
 
-    if (!auth.isAllowed(id, Authorization.Permission.Read)) {
+    if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
       throw new ForbiddenException("Cannot fetch data");
     }
     
@@ -87,7 +87,7 @@ public class DataApi extends AbstractApi {
     ServiceObject obj = loadObject(id);
     Stream stream = loadStream(streamName, obj);
 
-    if (!auth.isAllowed(id, Authorization.Permission.Pull)) {
+    if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
       throw new ForbiddenException("Cannot fetch data");
     }
     
@@ -113,7 +113,7 @@ public class DataApi extends AbstractApi {
     ServiceObject obj = loadObject(id);
     Stream stream = loadStream(streamName, obj);
 
-    if (!auth.isAllowed(id, Authorization.Permission.Push)) {
+    if (!auth.isAllowed(obj, Authorization.Permission.Push)) {
       throw new ForbiddenException("Cannot delete data");
     }
     
@@ -140,7 +140,7 @@ public class DataApi extends AbstractApi {
     ServiceObject obj = loadObject(id);
     Stream stream = loadStream(streamName, obj);
 
-    if (!auth.isAllowed(id, Authorization.Permission.Pull)) {
+    if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
       throw new ForbiddenException("Cannot fetch data");
     }
     
@@ -173,7 +173,7 @@ public class DataApi extends AbstractApi {
     
     Stream stream = loadStream(streamName, obj);
     
-    if (!auth.isAllowed(id, Authorization.Permission.Push)) {
+    if (!auth.isAllowed(obj, Authorization.Permission.Push)) {
       throw new ForbiddenException("Cannot push data");
     }
     
@@ -229,7 +229,7 @@ public class DataApi extends AbstractApi {
     ServiceObject obj = loadObject(id);
     Stream stream = loadStream(streamName, obj);
 
-    if (!auth.isAllowed(id, Authorization.Permission.Pull)) {
+    if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
       throw new ForbiddenException("Cannot search data");
     }
     

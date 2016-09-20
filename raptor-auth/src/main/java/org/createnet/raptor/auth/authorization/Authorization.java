@@ -16,6 +16,7 @@
 package org.createnet.raptor.auth.authorization;
 
 import org.createnet.raptor.auth.AuthConfiguration;
+import org.createnet.raptor.models.objects.ServiceObject;
 
 /**
  *
@@ -50,6 +51,6 @@ public interface Authorization {
 
   public void initialize(AuthConfiguration configuration);
 
-  public boolean isAuthorized(String accessToken, String id, Permission op) throws AuthorizationException;
+  public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) throws AuthorizationException;
 
 }

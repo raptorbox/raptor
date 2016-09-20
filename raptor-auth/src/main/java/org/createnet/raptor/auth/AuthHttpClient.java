@@ -171,7 +171,7 @@ public class AuthHttpClient {
     return prefix + token;
   }
   
-  public String check(String accessToken, List<NameValuePair> args) throws ClientException, IOException {
+  public String check(String accessToken, String payload) throws ClientException, IOException {
     
     logger.debug("Http client check request");
     
@@ -181,7 +181,7 @@ public class AuthHttpClient {
     httpost.setConfig(requestConfig);
     httpost.setHeader("Authorization", accessToken);
 
-    UrlEncodedFormEntity entity = new UrlEncodedFormEntity(args, Consts.UTF_8);
+    StringEntity entity = new StringEntity(payload, Consts.UTF_8);
     httpost.setEntity(entity);
 
     String response = null;

@@ -25,6 +25,7 @@ import org.createnet.raptor.auth.authorization.impl.TokenAuthorization;
 import org.createnet.raptor.auth.cache.AuthCache;
 import org.createnet.raptor.auth.cache.impl.MemoryCache;
 import org.createnet.raptor.auth.cache.impl.NoCache;
+import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,25 +89,25 @@ public class AuthProvider implements Authorization, Authentication {
   }
 
   @Override
-  public boolean isAuthorized(String accessToken, String id, Permission op) throws AuthorizationException {
+  public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) throws AuthorizationException {
     
     try {
     
       UserInfo user = getUser(accessToken);
       
-      Boolean cachedValue = cache.get(user.getUserId(), id, op);
+      Boolean cachedValue = cache.get(user.getUserId(), obj.getId(), op);
       if(cachedValue != null) {
-        logger.debug("Reusing permission cache for userId {} objectId {} permission {} = {}", user.getUserId(), id, op.toString(), cachedValue);
+        logger.debug("Reusing permission cache for userId {} objectId {} permission {} = {}", user.getUserId(), obj.getId(), op.toString(), cachedValue);
         return cachedValue;
       }
       
-      logger.debug("Requesting {} permission for object {}", op, id);
+      logger.debug("Requesting {} permission for object {}", op, obj.getId());
       
-      boolean isauthorized = authorizationInstance.isAuthorized(accessToken, id, op);
+      boolean isauthorized = authorizationInstance.isAuthorized(accessToken, obj, op);
       
-      cache.set(user.getUserId(), id, op, isauthorized);
+      cache.set(user.getUserId(), obj.getId(), op, isauthorized);
       
-      logger.debug("Permission check for user {} object {} permission {} = {}", user.getUserId(), id, op.toString(), isauthorized ? "yes" : "no");
+      logger.debug("Permission check for user {} object {} permission {} = {}", user.getUserId(), obj.getId(), op.toString(), isauthorized ? "yes" : "no");
       
       return isauthorized;
       
@@ -149,8 +150,8 @@ public class AuthProvider implements Authorization, Authentication {
   }
 
   @Override
-  public void sync(String accessToken, String id) throws AuthenticationException {
-    authenticationInstance.sync(accessToken, id);
+  public void sync(String accessToken, ServiceObject obj) throws AuthenticationException {
+    authenticationInstance.sync(accessToken, obj);
   }
 
 }
