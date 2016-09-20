@@ -24,7 +24,7 @@ couchbase1:
 
 elasticsearch1:
   image: elasticsearch:2.4
-  command: elasticsearch -Des.network.host=0.0.0.0 -Des.node.name="raptor"
+  command: elasticsearch -Des.network.host=0.0.0.0 -Des.cluster.name="raptor" -Des.node.name="elasticsearch1"
   volumes:
     - ./data/elasticsearch1:/usr/share/elasticsearch/data
   ports:

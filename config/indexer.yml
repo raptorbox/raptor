@@ -4,7 +4,7 @@ elasticsearch:
   clientConfig:
     cluster.name: raptor
   transport:
-    host: raptor.local
+    host: 127.0.0.1
     port: 9300
   indices:
     source: /etc/raptor/indices.json

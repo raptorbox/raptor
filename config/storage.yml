@@ -18,7 +18,7 @@ mapdb:
 
 couchbase:
   nodes:
-    - raptor.local
+    - 127.0.0.1
   username: admin
   password: password
   bucketDefaults:
