@@ -60,9 +60,6 @@ public class StorageService implements RaptorService {
 
   @Inject
   ConfigurationService configuration;
-
-  @Inject
-  AuthService auth;
   
   @Inject
   IndexerService indexer;
@@ -143,9 +140,7 @@ public class StorageService implements RaptorService {
     if (obj.id == null) {
       obj.id = ServiceObject.generateUUID();
     }
-
-    obj.userId = auth.getUser().getUserId();
-
+    
     JsonNode json = obj.toJsonNode(ServiceObjectView.Internal);
     getObjectConnection().set(obj.id, json, 0);
     return obj.id;
@@ -161,8 +156,8 @@ public class StorageService implements RaptorService {
 
   }
 
-  public List<ServiceObject> listObjects() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException,  RaptorComponent.ParserException, Indexer.IndexerException {
-    return indexer.getObjects(auth.getUser().getUserId());
+  public List<ServiceObject> listObjects(String userId) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException,  RaptorComponent.ParserException, Indexer.IndexerException {
+    return indexer.getObjects(userId);
   }
 
   // Data 
@@ -230,7 +225,7 @@ public class StorageService implements RaptorService {
   public void saveData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException, JsonProcessingException, IOException, Authentication.AuthenticationException {
 
     record.setStream(stream);
-    record.userId = auth.getUser().getUserId();
+    record.userId = stream.getServiceObject().getUserId();
     
     getDataConnection().set(getDataId(stream, record), record.toJsonNode(), defaultDataTTL);
   }

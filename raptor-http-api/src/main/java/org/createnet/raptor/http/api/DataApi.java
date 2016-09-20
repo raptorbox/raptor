@@ -170,7 +170,6 @@ public class DataApi extends AbstractApi {
   ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException, Indexer.IndexerException, IOException {
     
     ServiceObject obj = loadObject(id);
-    
     Stream stream = loadStream(streamName, obj);
     
     if (!auth.isAllowed(obj, Authorization.Permission.Push)) {

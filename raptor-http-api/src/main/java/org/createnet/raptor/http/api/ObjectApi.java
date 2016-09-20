@@ -70,7 +70,7 @@ public class ObjectApi extends AbstractApi {
       throw new NotAuthorizedException("Cannot list objects");
     }
 
-    List<ServiceObject> list = storage.listObjects();
+    List<ServiceObject> list = storage.listObjects(auth.getUser().getUserId());
     List<String> idList = new ArrayList();
     for (ServiceObject obj : list) {
       idList.add(obj.id);
@@ -89,6 +89,8 @@ public class ObjectApi extends AbstractApi {
     }
     
     obj.id = null;
+    obj.userId = auth.getUser().getUserId();
+
     storage.saveObject(obj);
 
     try {
@@ -219,6 +221,8 @@ public class ObjectApi extends AbstractApi {
     if (!auth.isAllowed(Authorization.Permission.Read)) {
       throw new ForbiddenException("Cannot search for objects");
     }
+    
+    query.setUserId(auth.getUser().getUserId());
     
     List<ServiceObject> list = indexer.searchObject(query);
     

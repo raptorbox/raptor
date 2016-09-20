@@ -53,9 +53,6 @@ public class IndexerService implements RaptorService {
   @Inject
   ConfigurationService configuration;
 
-  @Inject
-  AuthService auth;
-
   /**
    * Limit of records that can be fetched per request
    */  
@@ -147,9 +144,6 @@ public class IndexerService implements RaptorService {
   public List<ServiceObject> searchObject(ObjectQuery query) throws Indexer.SearchException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
 
     setQueryIndex(query, IndexNames.object);
-    if(query.getUserId() == null) {
-      query.setUserId(auth.getUser().getUserId());
-    }
 
     List<String> results = getIndexer().search(query);
     List<ServiceObject> list = new ArrayList();
@@ -189,7 +183,7 @@ public class IndexerService implements RaptorService {
 
     data.put("streamId", stream.name);
     data.put("objectId", stream.getServiceObject().getId());
-    data.put("userId", auth.getUser().getUserId());
+    data.put("userId", stream.getServiceObject().getUserId());
 
     record.body = data.toString();
 
