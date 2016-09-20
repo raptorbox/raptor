@@ -18,7 +18,6 @@ package org.createnet.raptor.auth.service;
 import javax.sql.DataSource;
 import org.createnet.raptor.auth.service.entity.Role;
 import org.createnet.raptor.auth.service.entity.User;
-import org.createnet.raptor.auth.service.entity.repository.RoleRepository;
 import org.createnet.raptor.auth.service.entity.repository.UserRepository;
 import org.createnet.raptor.auth.service.jwt.JsonUsernamePasswordFilter;
 import org.createnet.raptor.auth.service.jwt.JwtAuthenticationEntryPoint;
@@ -162,6 +161,10 @@ public class Application {
               
               .antMatchers(authenticationPath).permitAll()
               .antMatchers(authenticationRefresh).permitAll()
+              
+              // keep this method private to allow sync beetween api and auth
+              .antMatchers("/sync").hasIpAddress("127.0.0.1")
+              
               .anyRequest().authenticated();
 
       // Custom JWT based security filter

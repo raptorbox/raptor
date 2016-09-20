@@ -32,8 +32,10 @@ public class AuthorizationRequest {
   }
   
   public String operation = Operation.Permission.name();
+
   public String permission;
   public String objectId;
+  public String userId;
   
   public Operation getOperation() {
     return Operation.valueOf(operation);
