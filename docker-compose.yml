@@ -1,9 +1,9 @@
 
 #TODO: Add Auth Service + Broker API
 
-db:
+mariadb:
   image: mariadb:latest
-  container_name: raptorauthdb
+  container_name: mariadb
   ports:
     - 3306:3306
   volumes:
@@ -11,24 +11,9 @@ db:
   environment:
     MYSQL_USERNAME: root
     MYSQL_ROOT_PASSWORD: raptor
-    PMA_HOST: mysql
-
-phpmyadmin:
-  image: phpmyadmin/phpmyadmin
-  container_name: raptormyadmin
-  links:
-    - db:mysql
-  restart: always
-  ports:
-    - 10080:80
-  environment:
-    MYSQL_USERNAME: root
-    MYSQL_ROOT_PASSWORD: raptor
-    MYSQL_DATABASE: raptor
 
 couchbase1:
   image: couchbase/server
-  container_name: raptorcouchbase1
   volumes:
     - ./data/couchbase1:/opt/couchbase/var
   ports:
@@ -36,3 +21,12 @@ couchbase1:
     - 8092:8092
     - 8093:8093
     - 11210:11210
+
+elasticsearch1:
+  image: elasticsearch:2.4
+  command: elasticsearch -Des.network.host=0.0.0.0 -Des.node.name="raptor"
+  volumes:
+    - ./data/elasticsearch1:/usr/share/elasticsearch/data
+  ports:
+    - 9200:9200
+    - 9300:9300
