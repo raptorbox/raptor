@@ -30,7 +30,6 @@ public class CheckRequestBody {
   public String permission;
   public String objectId;
   public List<String> tree;
-
   
   protected boolean validateUUID(String uuid, String fieldName) throws ValidationException {
 
