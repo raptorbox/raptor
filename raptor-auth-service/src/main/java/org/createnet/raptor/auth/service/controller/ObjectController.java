@@ -20,8 +20,12 @@ import org.createnet.raptor.auth.entity.AuthorizationRequest;
 import org.createnet.raptor.auth.entity.AuthorizationResponse;
 import org.createnet.raptor.auth.entity.SyncRequest;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
+import org.createnet.raptor.auth.service.acl.entity.AclServiceObject;
+import org.createnet.raptor.auth.service.services.AclManagerService;
+import org.createnet.raptor.auth.service.services.AclObjectService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,7 +44,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class ObjectController {
 
   private static final Logger logger = LoggerFactory.getLogger(ObjectController.class);
-
+  
+  @Autowired
+  private AclObjectService aclObjectService;
+  
   @RequestMapping(value = "/check", method = RequestMethod.POST)
   public ResponseEntity<?> checkPermission(
           @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
@@ -79,7 +86,10 @@ public class ObjectController {
   public ResponseEntity<?> syncObject(
           @RequestBody SyncRequest body
   ) {
-
+    
+    AclServiceObject obj = new AclServiceObject(body.objectId, body.parentId, body.userId);
+    aclObjectService.register(obj);
+    
     return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
   }
 

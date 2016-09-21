@@ -154,10 +154,10 @@ public class Application {
               .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
               // don't create session
               .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-              .authorizeRequests()
               
-              // CORS
-              .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+              .cors().and()
+              
+              .authorizeRequests()
               
               .antMatchers(authenticationPath).permitAll()
               .antMatchers(authenticationRefresh).permitAll()

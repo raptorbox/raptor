@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.service.acl;
+package org.createnet.raptor.auth.service.services;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.sql.DataSource;
+import org.createnet.raptor.auth.service.acl.AclManager;
+import org.createnet.raptor.auth.service.acl.entity.AclServiceObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.domain.SidRetrievalStrategyImpl;
@@ -48,9 +48,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 @Service
-public class AclManagerImpl implements AclManager {
+public class AclManagerService implements AclManager {
 
-  private final Logger log = LoggerFactory.getLogger(AclManagerImpl.class);
+  private final Logger log = LoggerFactory.getLogger(AclManagerService.class);
   
   @Autowired
   private MutableAclService aclService;
@@ -137,6 +137,10 @@ public class AclManagerImpl implements AclManager {
       permissionsList.add(ace.getPermission().getPattern());
     }
     return permissionsList;
+  }
+
+  public void registerObject(AclServiceObject obj) {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
 }

@@ -22,5 +22,6 @@ package org.createnet.raptor.auth.entity;
 public class SyncRequest {
   public String objectId;
   public String userId;
+  public String parentId;  
   public Long created;
 }
