@@ -175,9 +175,12 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         logger.debug("Check access permission of user {} to object {}: {} allowed", user.getUserId(), objectId, allowed ? "" : "not");
         return allowed;
       } catch (Authorization.AuthorizationException | Storage.StorageException | RaptorComponent.ParserException | ConfigurationException ex) {
-        logger.error("Failed to subscribe", ex);
+        logger.error("Failed to subscribe at ", address, ex);
         return false;
       }
+    }
+    else {
+      logger.warn("Topic NOT valid: {}", address);
     }
 
     return false;
