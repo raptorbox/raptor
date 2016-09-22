@@ -78,6 +78,7 @@ public class DispatcherService implements RaptorService {
             DataEvent dataEvent = (DataEvent) event;
 
             if (!dataEvent.getStream().getServiceObject().settings.eventsEnabled()) {
+              logger.debug("Events disabled in object config (eventsEnabled)");
               return;
             }
 
@@ -185,7 +186,8 @@ public class DispatcherService implements RaptorService {
     message.put("op", "data");
     message.put("streamId", stream.name);
     message.set("data", record.toJsonNode());
-
+    
+    logger.debug("Notifying data event");
     getDispatcher().add(topic, message.toString());
   }
 
