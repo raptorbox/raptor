@@ -15,13 +15,18 @@
  */
 package org.createnet.raptor.auth.service.services;
 
+import java.util.List;
 import org.createnet.raptor.auth.service.acl.RaptorPermission;
-import org.createnet.raptor.auth.service.acl.entity.AclServiceObject;
+import org.createnet.raptor.auth.service.entity.Device;
+import org.createnet.raptor.auth.service.entity.repository.DeviceRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.acls.domain.ObjectIdentityImpl;
+import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Permission;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,17 +36,27 @@ import org.springframework.stereotype.Service;
 @Service
 public class AclObjectService {
 
-  private final Logger log = LoggerFactory.getLogger(AclObjectService.class);
-  
+  private final Logger logger = LoggerFactory.getLogger(AclObjectService.class);
+
   @Autowired
   private AclManagerService aclManagerService;
-  
-  protected Permission[] defaultAcls = new Permission[] {
+
+  @Autowired
+  private DeviceRepository deviceRepository;
+
+  protected Permission[] defaultAcls = new Permission[]{
+    RaptorPermission.READ,
     RaptorPermission.WRITE,
   };
-  
-  public void register(AclServiceObject obj) {
+
+  public void sync(Authentication auth, Device device) {
+
+    ObjectIdentity oiDevice = new ObjectIdentityImpl(device.getClass(), device.getId());
+    List<Permission> permissions = aclManagerService.getPermissionList(auth, oiDevice);
+
     
+    logger.debug("Found {} permissions", permissions.size());
+
   }
 
 }

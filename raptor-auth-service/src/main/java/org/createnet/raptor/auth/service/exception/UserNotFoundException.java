@@ -13,37 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.service.entity.repository;
+package org.createnet.raptor.auth.service.exception;
 
-import org.createnet.raptor.auth.service.entity.Role;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.acls.model.NotFoundException;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
+public class UserNotFoundException extends NotFoundException {
 
-public interface RoleRepository extends CrudRepository<Role, Long> {
+  public UserNotFoundException(String msg) {
+    super(msg);
+  }
 
-  Role findByName(String name);
-  
-  @Transactional
-  @Override
-  public void delete(Role entity);
+  public UserNotFoundException() {
+    super("User not found");
+  }
 
-  @Transactional
-  @Override
-  public void delete(Long id);
-
-  @Override
-  public boolean exists(Long id);
-
-  @Override
-  public Role findOne(Long id);
-
-  @Transactional
-  @Override
-  public <R extends Role> R save(R entity);
+  public UserNotFoundException(String msg, Throwable t) {
+    super(msg, t);
+  }
   
 }

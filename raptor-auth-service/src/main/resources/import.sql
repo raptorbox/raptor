@@ -1,6 +1,4 @@
 
-create database if not exists raptor;
-
 delete from roles where name = 'super_admin' limit 1;
 delete from roles where name = 'admin'  limit 1;
 delete from roles where name = 'user'  limit 1;

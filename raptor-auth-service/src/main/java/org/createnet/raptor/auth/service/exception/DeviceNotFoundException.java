@@ -13,37 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.service.entity.repository;
-
-import org.createnet.raptor.auth.service.entity.Role;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.transaction.annotation.Transactional;
+package org.createnet.raptor.auth.service.exception;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
+public class DeviceNotFoundException extends UserNotFoundException {
 
-public interface RoleRepository extends CrudRepository<Role, Long> {
+  public DeviceNotFoundException(String msg) {
+    super(msg);
+  }
 
-  Role findByName(String name);
-  
-  @Transactional
-  @Override
-  public void delete(Role entity);
+  public DeviceNotFoundException() {
+    super("Device not found");
+  }
 
-  @Transactional
-  @Override
-  public void delete(Long id);
-
-  @Override
-  public boolean exists(Long id);
-
-  @Override
-  public Role findOne(Long id);
-
-  @Transactional
-  @Override
-  public <R extends Role> R save(R entity);
+  public DeviceNotFoundException(String msg, Throwable t) {
+    super(msg, t);
+  }
   
 }

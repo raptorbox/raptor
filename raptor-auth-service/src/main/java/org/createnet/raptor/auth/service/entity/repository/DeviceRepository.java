@@ -15,7 +15,8 @@
  */
 package org.createnet.raptor.auth.service.entity.repository;
 
-import org.createnet.raptor.auth.service.entity.Role;
+import org.createnet.raptor.auth.service.entity.Device;
+import org.createnet.raptor.auth.service.entity.User;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,14 +24,14 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
+public interface DeviceRepository extends CrudRepository<Device, Long> {
 
-public interface RoleRepository extends CrudRepository<Role, Long> {
+  Device findByUuid(String uuid);
+  Device findByOwner(User owner);
 
-  Role findByName(String name);
-  
   @Transactional
   @Override
-  public void delete(Role entity);
+  public void delete(Device entity);
 
   @Transactional
   @Override
@@ -40,10 +41,10 @@ public interface RoleRepository extends CrudRepository<Role, Long> {
   public boolean exists(Long id);
 
   @Override
-  public Role findOne(Long id);
+  public Device findOne(Long id);
 
   @Transactional
   @Override
-  public <R extends Role> R save(R entity);
+  public <S extends Device> S save(S entity);
   
 }

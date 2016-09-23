@@ -61,8 +61,8 @@ public class User implements Serializable {
   private String uuid = UUID.randomUUID().toString();
 
   @NotEmpty
-  @Column(unique = true, nullable = false, length = 256)
-  @Size(min = 4, max = 256)
+  @Column(unique = true, nullable = false, length = 128)
+  @Size(min = 4, max = 128)
   private String username;
 
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -72,7 +72,12 @@ public class User implements Serializable {
   private String password;
 
   @JsonIgnore
-  @OneToMany(mappedBy = "user", fetch= FetchType.EAGER, orphanRemoval = true)
+  @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, orphanRemoval = true)
+  @Cascade(value = {CascadeType.REMOVE, CascadeType.SAVE_UPDATE})
+  final private List<Device> devices = new ArrayList();
+  
+  @JsonIgnore
+  @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, orphanRemoval = true)
   @Cascade(value = { CascadeType.REMOVE, CascadeType.SAVE_UPDATE })
   final private List<Token> tokens = new ArrayList();
 
@@ -281,6 +286,10 @@ public class User implements Serializable {
 
   public void setCreated(Date created) {
     this.created = created;
+  }
+
+  public List<Device> getDevices() {
+    return devices;
   }
 
 }

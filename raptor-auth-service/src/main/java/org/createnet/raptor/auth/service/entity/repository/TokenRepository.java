@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-@Transactional
+
 public interface TokenRepository extends CrudRepository<Token, Long> {
 
   Token findByToken(String token);
@@ -36,12 +36,15 @@ public interface TokenRepository extends CrudRepository<Token, Long> {
   @Override
   Token findOne(Long id);
 
+  @Transactional
   @Override
   public void delete(Token entity);
 
+  @Transactional
   @Override
   public void delete(Long id);
 
+  @Transactional
   @Override
   public <S extends Token> S save(S entity);
 

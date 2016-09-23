@@ -20,9 +20,10 @@ spring:
     database-platform: org.hibernate.dialect.MySQL5Dialect
     # Hibernate ddl auto (create, create-drop, update)
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
       naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
       dialect: org.hibernate.dialect.MySQL5Dialect
+      show_sql: true
 
 ---
 

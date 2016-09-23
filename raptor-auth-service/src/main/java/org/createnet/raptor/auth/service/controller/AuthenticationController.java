@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import org.createnet.raptor.auth.service.entity.Token;
 import org.createnet.raptor.auth.service.entity.User;
-import org.createnet.raptor.auth.service.services.JwtTokenService;
 import org.createnet.raptor.auth.service.services.TokenService;
 import org.springframework.security.access.prepost.PreAuthorize;
 

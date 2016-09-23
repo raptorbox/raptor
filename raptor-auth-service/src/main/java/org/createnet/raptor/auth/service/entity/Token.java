@@ -21,7 +21,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -70,6 +69,10 @@ public class Token implements Serializable {
   @JsonIgnore
   @ManyToOne(fetch = FetchType.EAGER)
   private User user;
+
+  @JsonIgnore
+  @ManyToOne(fetch = FetchType.EAGER)
+  private Device device;
 
   @Column(name = "created")
   @Temporal(TemporalType.TIMESTAMP)
@@ -175,6 +178,14 @@ public class Token implements Serializable {
   
   public boolean isLoginToken() {
     return this.getType().equals(Type.LOGIN);
+  }
+
+  public Device getDevice() {
+    return device;
+  }
+
+  public void setDevice(Device device) {
+    this.device = device;
   }
 
 }

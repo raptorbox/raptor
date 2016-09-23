@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.createnet.raptor.auth.service.acl.AclManager;
-import org.createnet.raptor.auth.service.acl.entity.AclServiceObject;
+import org.createnet.raptor.auth.service.entity.Device;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,19 +127,29 @@ public class AclManagerService implements AclManager {
     jdbcTemplate.update("delete from acl_class");
   }
 
-  public List<String> getPermissionList(Authentication authentication, ObjectIdentity oid) {
+  public List<Permission> getPermissionList(Authentication authentication, ObjectIdentity oid) {
+    
     List<Sid> sids = sidRetrievalStrategy.getSids(authentication);
+    List<Permission> permissionsList = new ArrayList();
+    
     // Lookup only ACLs for SIDs we're interested in
-    Acl acl = aclService.readAclById(oid, sids);
+    Acl acl = null;
+    try {
+      acl = aclService.readAclById(oid, sids);
+    }
+    catch(Exception e) {
+      return permissionsList;
+    }
+    
     List<AccessControlEntry> aces = acl.getEntries();
-    List<String> permissionsList = new ArrayList();
+
     for (AccessControlEntry ace : aces) {
-      permissionsList.add(ace.getPermission().getPattern());
+      permissionsList.add(ace.getPermission());
     }
     return permissionsList;
   }
 
-  public void registerObject(AclServiceObject obj) {
+  public void registerObject(Device obj) {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 

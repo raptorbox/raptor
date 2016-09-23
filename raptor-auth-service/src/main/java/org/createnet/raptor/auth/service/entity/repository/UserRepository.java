@@ -23,15 +23,17 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-@Transactional
 public interface UserRepository extends CrudRepository<User, Long> {
 
   User findByUsername(String username);
+
   User findByUuid(String uuid);
 
+  @Transactional
   @Override
   public void delete(User entity);
 
+  @Transactional
   @Override
   public void delete(Long id);
 
@@ -41,9 +43,8 @@ public interface UserRepository extends CrudRepository<User, Long> {
   @Override
   public User findOne(Long id);
 
+  @Transactional
   @Override
   public <S extends User> S save(S entity);
-  
-  
-  
+
 }
