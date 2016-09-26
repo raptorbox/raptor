@@ -99,5 +99,9 @@ public class Device {
   public List<Token> getTokens() {
     return tokens;
   }
+
+  public boolean hasParent() {
+    return this.getParent() != null;
+  }
   
 }

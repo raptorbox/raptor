@@ -20,7 +20,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.createnet.raptor.auth.service.acl.AclManager;
+import org.createnet.raptor.auth.service.acl.UserSid;
 import org.createnet.raptor.auth.service.entity.Device;
+import org.createnet.raptor.auth.service.entity.User;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +41,7 @@ import org.springframework.security.acls.model.Sid;
 import org.springframework.security.acls.model.SidRetrievalStrategy;
 import org.springframework.security.acls.model.UnloadedSidException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,7 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AclManagerService implements AclManager {
 
   private final Logger log = LoggerFactory.getLogger(AclManagerService.class);
-  
+
   @Autowired
   private MutableAclService aclService;
 
@@ -66,6 +69,12 @@ public class AclManagerService implements AclManager {
     MutableAcl acl = isNewAcl(identity);
     isPermissionGranted(permission, sid, acl);
     aclService.updateAcl(acl);
+  }
+
+  public <T> void addPermissions(Class<T> clazz, Serializable identifier, Sid sid, List<Permission> permissions) {
+    permissions.stream().forEach((Permission p) -> {
+      addPermission(clazz, identifier, sid, p);
+    });
   }
 
   @Override
@@ -127,30 +136,40 @@ public class AclManagerService implements AclManager {
     jdbcTemplate.update("delete from acl_class");
   }
 
+  public List<Permission> getPermissionList(User user, ObjectIdentity oid) {
+    return getPermissionList(new PreAuthenticatedAuthenticationToken(user, user.getRoles()), oid);
+  }
+
   public List<Permission> getPermissionList(Authentication authentication, ObjectIdentity oid) {
-    
+
     List<Sid> sids = sidRetrievalStrategy.getSids(authentication);
     List<Permission> permissionsList = new ArrayList();
-    
+
     // Lookup only ACLs for SIDs we're interested in
     Acl acl = null;
     try {
       acl = aclService.readAclById(oid, sids);
-    }
-    catch(Exception e) {
+    } catch (Exception e) {
       return permissionsList;
     }
-    
-    List<AccessControlEntry> aces = acl.getEntries();
 
+    List<AccessControlEntry> aces = acl.getEntries();
     for (AccessControlEntry ace : aces) {
       permissionsList.add(ace.getPermission());
     }
+
     return permissionsList;
   }
 
-  public void registerObject(Device obj) {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
+  public void setPermissions(Class<?> clazz, Long identifier, UserSid userSid, List<Permission> permissions) {
 
+    ObjectIdentity identity = new ObjectIdentityImpl(clazz, identifier);
+
+    List<Permission> currentPermissions = getPermissionList(userSid.getUser(), identity);
+    currentPermissions.forEach((Permission permission) -> {
+      removePermission(clazz, identifier, userSid, permission);
+    });
+
+    addPermissions(clazz, identifier, userSid, permissions);
+  }
 }

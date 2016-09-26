@@ -20,16 +20,19 @@ import org.createnet.raptor.auth.entity.AuthorizationRequest;
 import org.createnet.raptor.auth.entity.AuthorizationResponse;
 import org.createnet.raptor.auth.entity.SyncRequest;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
+import org.createnet.raptor.auth.service.acl.RaptorPermission;
 import org.createnet.raptor.auth.service.entity.Device;
-import org.createnet.raptor.auth.service.services.AclManagerService;
-import org.createnet.raptor.auth.service.services.AclObjectService;
+import org.createnet.raptor.auth.service.entity.User;
+import org.createnet.raptor.auth.service.services.AclDeviceService;
 import org.createnet.raptor.auth.service.services.DeviceService;
+import org.createnet.raptor.auth.service.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.acls.model.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,16 +47,19 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @PreAuthorize("isAuthenticated()")
-public class ObjectController {
+public class DeviceController {
 
-  private static final Logger logger = LoggerFactory.getLogger(ObjectController.class);
-  
+  private static final Logger logger = LoggerFactory.getLogger(DeviceController.class);
+
   @Autowired
   private DeviceService deviceService;
-  
+
   @Autowired
-  private AclObjectService aclObjectService;
-  
+  private UserService userService;
+
+  @Autowired
+  private AclDeviceService aclDeviceService;
+
   @RequestMapping(value = "/check", method = RequestMethod.POST)
   public ResponseEntity<?> checkPermission(
           @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
@@ -77,12 +83,26 @@ public class ObjectController {
 
         logger.debug("Check if user {} can `{}` on object {}", body.userId, body.permission, body.objectId);
         
-        // TODO: add ACL check on user / object pair
-        response.result = true;
+        
+        User user = (User) currentUser;
+        if(body.userId != null) {
+          user = userService.getByUuid(body.userId);
+        }
+        
+        
+        if(user == null) return ResponseEntity.notFound().build();
 
+        Device device = deviceService.getByUuid(body.objectId);
+        if(device == null) return ResponseEntity.notFound().build();
+
+        Permission permission = RaptorPermission.getByName(body.permission.toLowerCase());
+        if(permission == null) return ResponseEntity.notFound().build();
+        
+        response.result = aclDeviceService.check(device, user, permission);
+        
         break;
       default:
-        
+
         response.result = false;
         break;
     }
@@ -97,7 +117,7 @@ public class ObjectController {
 
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     deviceService.sync(auth, body);
-    
+
     return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
   }
 

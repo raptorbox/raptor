@@ -18,6 +18,7 @@ package org.createnet.raptor.auth.service;
 import javax.sql.DataSource;
 import org.createnet.raptor.auth.service.entity.Role;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.ehcache.EhCacheFactoryBean;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
@@ -47,6 +48,9 @@ public class AclConfiguration {
   @Autowired
   private CacheManager cacheManager;
 
+  @Value("${spring.datasource.lastInsertQuery}")
+  private String lastInsertQuery;
+  
   @Bean
   public LookupStrategy lookupStrategy() {
     return new BasicLookupStrategy(dataSource, aclCache(), aclAuthorizationStrategy(), auditLogger());
@@ -80,9 +84,15 @@ public class AclConfiguration {
     return new DefaultPermissionGrantingStrategy(auditLogger());
   }
 
+  /**
+   * @TODO
+   * Add additional support for @setSidIdentityQuery
+   */ 
   @Bean
   public JdbcMutableAclService aclService() {
     JdbcMutableAclService service = new JdbcMutableAclService(dataSource, lookupStrategy(), aclCache());
+    service.setSidIdentityQuery(lastInsertQuery);
+    service.setClassIdentityQuery(lastInsertQuery);
     return service;
   }
   

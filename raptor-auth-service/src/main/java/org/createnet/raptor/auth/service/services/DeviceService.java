@@ -44,14 +44,26 @@ public class DeviceService {
   private DeviceRepository deviceRepository;
 
   @Autowired
-  private AclObjectService aclObjectService;
+  private AclDeviceService aclObjectService;
 
-  protected Device save(Device device) {
-    return deviceRepository.save(device);
+  public Device save(Device device) {
+    
+    deviceRepository.save(device);
+    aclObjectService.register(device);
+    
+    return device;
+  }
+
+  public Device getByUuid(String uuid) {
+    return deviceRepository.findByUuid(uuid);
+  }
+
+  public Device get(Long id) {
+    return deviceRepository.findOne(id);
   }
 
   public Device sync(Authentication auth, SyncRequest req) {
-
+    
     Device device = null;
     if (req.objectId != null) {
       device = deviceRepository.findByUuid(req.objectId);
@@ -80,9 +92,7 @@ public class DeviceService {
       device.setParent(parentDevice);
     }
 
-    Device dev = save(device);
-    
-    aclObjectService.sync(auth, dev);
+    Device dev = save(device);   
     
     return dev;
   }

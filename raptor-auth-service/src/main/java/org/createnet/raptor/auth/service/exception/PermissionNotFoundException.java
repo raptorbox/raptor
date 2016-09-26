@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Luca Capra <lcapra@create-net.org>.
+ * Copyright 2016 CREATE-NET
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.entity;
+package org.createnet.raptor.auth.service.exception;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.security.acls.model.NotFoundException;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class AuthorizationResponse {
-  
-  public boolean result;
-  
-  public String userId;
-  public List<String> roles = new ArrayList();
+public class PermissionNotFoundException extends NotFoundException {
 
-  public JsonNode details;
+  public PermissionNotFoundException(String msg) {
+    super(msg);
+  }
+
+  public PermissionNotFoundException() {
+    super("Permission not found");
+  }
+
+  public PermissionNotFoundException(String msg, Throwable t) {
+    super(msg, t);
+  }
+  
 }

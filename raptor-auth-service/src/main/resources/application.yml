@@ -15,6 +15,8 @@ spring:
     testWhileIdle: true
     validationQuery: SELECT 1
     
+    lastInsertQuery: SELECT LAST_INSERT_ID()
+    
   jpa:
     show-sql: true
     database-platform: org.hibernate.dialect.MySQL5Dialect

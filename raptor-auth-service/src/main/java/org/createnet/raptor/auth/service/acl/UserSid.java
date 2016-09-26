@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Luca Capra <lcapra@create-net.org>.
+ * Copyright 2016 CREATE-NET
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.entity;
+package org.createnet.raptor.auth.service.acl;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import java.util.ArrayList;
-import java.util.List;
+import org.createnet.raptor.auth.service.entity.User;
+import org.springframework.security.acls.domain.PrincipalSid;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class AuthorizationResponse {
+public class UserSid extends PrincipalSid {
   
-  public boolean result;
-  
-  public String userId;
-  public List<String> roles = new ArrayList();
+  final private User user;
 
-  public JsonNode details;
+  public UserSid(User user) {
+    super(user.getUuid());    
+    this.user = user;
+  }
+
+  public User getUser() {
+    return user;
+  }
+  
 }
