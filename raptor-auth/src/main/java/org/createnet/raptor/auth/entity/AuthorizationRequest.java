@@ -25,7 +25,7 @@ public class AuthorizationRequest {
     User, Permission
   }
   
-  public AuthorizationRequest(){}
+  public AuthorizationRequest() {}
   
   public AuthorizationRequest(Operation op) {
     this.operation = op.name();

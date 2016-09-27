@@ -16,6 +16,7 @@
 package org.createnet.raptor.auth.service;
 
 import javax.sql.DataSource;
+import org.createnet.raptor.auth.service.acl.RaptorPermission;
 import org.createnet.raptor.auth.service.entity.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,8 +29,10 @@ import org.springframework.security.acls.domain.AclAuthorizationStrategy;
 import org.springframework.security.acls.domain.AclAuthorizationStrategyImpl;
 import org.springframework.security.acls.domain.AuditLogger;
 import org.springframework.security.acls.domain.ConsoleAuditLogger;
+import org.springframework.security.acls.domain.DefaultPermissionFactory;
 import org.springframework.security.acls.domain.DefaultPermissionGrantingStrategy;
 import org.springframework.security.acls.domain.EhCacheBasedAclCache;
+import org.springframework.security.acls.domain.PermissionFactory;
 import org.springframework.security.acls.jdbc.BasicLookupStrategy;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.jdbc.LookupStrategy;
@@ -53,7 +56,9 @@ public class AclConfiguration {
   
   @Bean
   public LookupStrategy lookupStrategy() {
-    return new BasicLookupStrategy(dataSource, aclCache(), aclAuthorizationStrategy(), auditLogger());
+    BasicLookupStrategy ls = new BasicLookupStrategy(dataSource, aclCache(), aclAuthorizationStrategy(), auditLogger());
+    ls.setPermissionFactory(new DefaultPermissionFactory(RaptorPermission.class));
+    return ls;
   }
 
   @Bean
@@ -83,7 +88,7 @@ public class AclConfiguration {
   public DefaultPermissionGrantingStrategy permissionGrantingStrategy() {
     return new DefaultPermissionGrantingStrategy(auditLogger());
   }
-
+  
   /**
    * @TODO
    * Add additional support for @setSidIdentityQuery
@@ -100,18 +105,5 @@ public class AclConfiguration {
   public AuditLogger auditLogger() {
     return new ConsoleAuditLogger();
   }
-
-//  @Bean
-//  public DefaultMethodSecurityExpressionHandler defaultMethodSecurityExpressionHandler() {
-//    return new DefaultMethodSecurityExpressionHandler();
-//  }
-
-//  @Bean
-//  public MethodSecurityExpressionHandler createExpressionHandler() {
-//    DefaultMethodSecurityExpressionHandler expressionHandler = defaultMethodSecurityExpressionHandler();
-//    expressionHandler.setPermissionEvaluator(new AclPermissionEvaluator(aclService()));
-//    expressionHandler.setPermissionCacheOptimizer(new AclPermissionCacheOptimizer(aclService()));
-//    return expressionHandler;
-//  }
 
 }

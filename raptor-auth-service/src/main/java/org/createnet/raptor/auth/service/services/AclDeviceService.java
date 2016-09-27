@@ -46,34 +46,34 @@ public class AclDeviceService {
   protected Permission[] defaultPermissions = new Permission[]{
     RaptorPermission.READ,
     RaptorPermission.WRITE,};
-  
+
   public void add(Device device, User user, Permission permission) {
     aclManagerService.addPermission(Device.class, device.getId(), new UserSid(user), permission);
   }
-  
+
   public void add(Device device, User user, List<Permission> permissions) {
     aclManagerService.addPermissions(Device.class, device.getId(), new UserSid(user), permissions);
   }
-  
-  public void set(Device device, User user, List<Permission> permissions) {    
+
+  public void set(Device device, User user, List<Permission> permissions) {
     aclManagerService.setPermissions(Device.class, device.getId(), new UserSid(user), permissions);
   }
-  
+
   public List<Permission> list(Device device, User user) {
-    ObjectIdentity oiDevice = new ObjectIdentityImpl(Device.class, device.getId());    
+    ObjectIdentity oiDevice = new ObjectIdentityImpl(Device.class, device.getId());
     return aclManagerService.getPermissionList(user, oiDevice);
   }
-  
+
   public void remove(Device device, User user, Permission permission) {
     aclManagerService.removePermission(Device.class, device.getId(), new UserSid(user), permission);
   }
-  
+
   public boolean isGranted(Device device, User user, Permission permission) {
     return aclManagerService.isPermissionGranted(Device.class, device.getId(), new UserSid(user), permission);
   }
-  
+
   public void register(Device device) {
-    
+
     User owner = device.getOwner();
     List<Permission> permissions = list(device, owner);
     Sid sid = new UserSid(owner);
@@ -94,28 +94,39 @@ public class AclDeviceService {
       }
 
     }
-    
+
     String perms = permissions.stream().map(Permission::toString).collect(Collectors.joining("\n - "));
     logger.debug("Permission set for device {} to {}\n - {}", device.getUuid(), device.getOwner().getUuid(), perms);
 
   }
 
   public boolean check(Device device, User user, Permission permission) {
-    
-    if(user == null) return false;
-    if(device == null) return  false;
-    if(permission == null) return false;
-    
+
+    if (user == null) {
+      return false;
+    }
+    if (device == null) {
+      return false;
+    }
+    if (permission == null) {
+      return false;
+    }
+
+    // check if user has ADMINISTRATION permission on device 
+    if (isGranted(device, user, RaptorPermission.ADMINISTRATION)) {
+      return true;
+    }
+
     // check device specific permission first
-    if(isGranted(device, user, permission)) {
+    if (isGranted(device, user, permission)) {
       return true;
     }
 
     // check parent permission if available
-    if(device.hasParent()) {
+    if (device.hasParent()) {
       return check(device.getParent(), user, permission);
     }
-    
+
     return false;
   }
 

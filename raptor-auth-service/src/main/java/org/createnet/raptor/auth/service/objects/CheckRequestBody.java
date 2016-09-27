@@ -48,7 +48,7 @@ public class CheckRequestBody {
 
   public boolean validate() {
 
-    Permission p = RaptorPermission.getByName(permission);
+    Permission p = RaptorPermission.fromLabel(permission);
     if (p == null) {
       throw new ValidationException("Permission missing or not valid");
     }

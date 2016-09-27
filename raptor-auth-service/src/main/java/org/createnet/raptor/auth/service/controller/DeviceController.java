@@ -82,24 +82,37 @@ public class DeviceController {
       case Permission:
 
         logger.debug("Check if user {} can `{}` on object {}", body.userId, body.permission, body.objectId);
-        
-        
+
         User user = (User) currentUser;
-        if(body.userId != null) {
+        if (body.userId != null) {
           user = userService.getByUuid(body.userId);
         }
-        
-        
-        if(user == null) return ResponseEntity.notFound().build();
 
-        Device device = deviceService.getByUuid(body.objectId);
-        if(device == null) return ResponseEntity.notFound().build();
+        if (user == null) {
+          return ResponseEntity.notFound().build();
+        }
 
-        Permission permission = RaptorPermission.getByName(body.permission.toLowerCase());
-        if(permission == null) return ResponseEntity.notFound().build();
-        
-        response.result = aclDeviceService.check(device, user, permission);
-        
+        Permission permission = RaptorPermission.fromLabel(body.permission.toLowerCase());
+        if (permission == null) {
+          return ResponseEntity.notFound().build();
+        }
+
+        /**
+         * @TODO CREATE permission should be attached to an user rather than on the object itself
+         */
+        final boolean isCreate = (body.objectId == null && permission == RaptorPermission.CREATE);
+        if (isCreate) {
+          response.result = true;
+        } else {
+
+          Device device = deviceService.getByUuid(body.objectId);
+          if (device == null) {
+            return ResponseEntity.notFound().build();
+          }
+
+          response.result = aclDeviceService.check(device, user, permission);
+        }
+
         break;
       default:
 

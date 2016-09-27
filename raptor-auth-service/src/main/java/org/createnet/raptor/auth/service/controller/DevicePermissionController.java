@@ -17,9 +17,6 @@ package org.createnet.raptor.auth.service.controller;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import org.createnet.raptor.auth.entity.AuthorizationRequest;
-import org.createnet.raptor.auth.entity.AuthorizationResponse;
-import org.createnet.raptor.auth.entity.SyncRequest;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.auth.service.acl.RaptorPermission;
 import org.createnet.raptor.auth.service.entity.Device;
@@ -35,9 +32,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.acls.model.Permission;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,16 +47,24 @@ import org.springframework.web.bind.annotation.RestController;
 @PreAuthorize("isAuthenticated()")
 public class DevicePermissionController {
 
-  public class PermissionRequest {
+  static public class PermissionRequest {
 
     public String permission;
     public String user;
+
+    public PermissionRequest() {
+    }
+
   }
 
-  public class PermissionRequestBatch {
+  static public class PermissionRequestBatch {
 
     public List<String> permissions;
     public String user;
+
+    public PermissionRequestBatch() {
+    }
+
   }
 
   private static final Logger logger = LoggerFactory.getLogger(DevicePermissionController.class);
@@ -91,14 +94,54 @@ public class DevicePermissionController {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
     }
 
-    Permission permission = RaptorPermission.getByName(body.permission);
+    Permission permission = RaptorPermission.fromLabel(body.permission);
     if (permission == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Permission not recognized");
     }
 
     aclDeviceService.add(device, user, permission);
-    List<Permission> permissions = aclDeviceService.list(device, user);
+    List<String> permissions = RaptorPermission.toLabel(aclDeviceService.list(device, user));
 
+    return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
+  }
+
+  @RequestMapping(value = "/{deviceUuid}/permission/{userUuid}", method = RequestMethod.GET)
+  public ResponseEntity<?> listPermissions(
+          @PathVariable("deviceUuid") String deviceUuid,
+          @PathVariable("userUuid") String userUuid
+  ) {
+
+    Device device = deviceService.getByUuid(deviceUuid);
+    if (device == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Device not found");
+    }
+
+    User user = userService.getByUuid(userUuid);
+    if (user == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+    }
+
+    List<String> permissions = RaptorPermission.toLabel(aclDeviceService.list(device, user));
+    return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
+  }
+
+  @RequestMapping(value = "/{deviceUuid}/permission", method = RequestMethod.GET)
+  public ResponseEntity<?> listOwnPermissions(
+          @PathVariable("deviceUuid") String deviceUuid,
+          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser
+  ) {
+
+    Device device = deviceService.getByUuid(deviceUuid);
+    if (device == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Device not found");
+    }
+
+    User user = userService.getByUuid(currentUser.getUuid());
+    if (user == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+    }
+
+    List<String> permissions = RaptorPermission.toLabel(aclDeviceService.list(device, user));
     return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
   }
 
@@ -121,7 +164,7 @@ public class DevicePermissionController {
     List<Permission> permissions = body.permissions
             .stream()
             .map((String s) -> {
-              Permission p = RaptorPermission.getByName(s);
+              Permission p = RaptorPermission.fromLabel(s);
               if (p == null) {
                 throw new PermissionNotFoundException("Permission not found ");
               }
@@ -130,7 +173,7 @@ public class DevicePermissionController {
             .collect(Collectors.toList());
 
     aclDeviceService.set(device, user, permissions);
-    List<Permission> settedPermissions = aclDeviceService.list(device, user);
+    List<String> settedPermissions = RaptorPermission.toLabel(aclDeviceService.list(device, user));
 
     return ResponseEntity.status(HttpStatus.ACCEPTED).body(settedPermissions);
   }

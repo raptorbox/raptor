@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.auth.service.acl;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.security.acls.domain.BasePermission;
 import org.springframework.security.acls.model.Permission;
 
@@ -43,28 +45,60 @@ public class RaptorPermission extends BasePermission {
   public static final Permission SUBSCRIBE = new RaptorPermission(1 << 7, 'S'); // 128
   public static final Permission EXECUTE = new RaptorPermission(1 << 8, 'E'); // 256
   
-  public static Permission getByName(String name) {
-    switch(name.toUpperCase()) {
-      case "READ":
+  public static String toLabel(Permission p) {
+    switch (p.getMask()) {
+      case 1:
+        return "read";
+      case 2:
+        return "write";
+      case 4:
+        return "create";
+      case 8:
+        return "delete";
+      case 16:
+        return "admin";
+      case 32:
+        return "push";
+      case 64:
+        return "pull";
+      case 128:
+        return "subscribe";
+      case 256:
+        return "execute";
+    }
+    return null;
+  }
+
+  public static List<String> toLabel(List<Permission> p) {
+    return p.stream().map(RaptorPermission::toLabel).collect(Collectors.toList());
+  }
+  
+  public static Permission fromLabel(String name) {
+    switch (name.toLowerCase()) {
+      case "read":
         return RaptorPermission.READ;
-      case "WRITE":
+      case "write":
         return RaptorPermission.WRITE;
-      case "CREATE":
+      case "create":
         return RaptorPermission.CREATE;
-      case "DELETE":
+      case "delete":
         return RaptorPermission.DELETE;
-      case "ADMINISTRATION":
+      case "admin":
         return RaptorPermission.ADMINISTRATION;
-      case "PUSH":
+      case "push":
         return RaptorPermission.PUSH;
-      case "PULL":
+      case "pull":
         return RaptorPermission.PULL;
-      case "SUBSCRIBE":
+      case "subscribe":
         return RaptorPermission.SUBSCRIBE;
-      case "EXECUTE":
+      case "execute":
         return RaptorPermission.EXECUTE;
     }
     return null;
   }
+
+  public static List<Permission> fromLabel(List<String> p) {
+    return p.stream().map(RaptorPermission::fromLabel).collect(Collectors.toList());
+  }  
   
 }
