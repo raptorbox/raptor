@@ -103,5 +103,10 @@ public class Device {
   public boolean hasParent() {
     return this.getParent() != null;
   }
+
+  @Override
+  public String toString() {
+    return "Device{" + "uuid=" + uuid + '}';
+  }
   
 }

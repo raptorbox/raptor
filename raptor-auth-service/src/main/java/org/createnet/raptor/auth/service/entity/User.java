@@ -292,4 +292,9 @@ public class User implements Serializable {
     return devices;
   }
 
+  @Override
+  public String toString() {
+    return "User{" + "uuid=" + uuid + '}';
+  }
+  
 }

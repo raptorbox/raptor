@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
+import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.domain.SidRetrievalStrategyImpl;
 import org.springframework.security.acls.model.AccessControlEntry;
 import org.springframework.security.acls.model.Acl;
@@ -153,17 +154,15 @@ public class AclManagerService implements AclManager {
     }
 
     List<AccessControlEntry> aces = acl.getEntries();
-    for (AccessControlEntry ace : aces) {
-      
-      String siduuid = ace.getSid().toString();
-      if(!sid.getUser().getUuid().equals(siduuid))
-        continue;
-      
-      if(!ace.isGranting())
-        continue;
-      
-      permissionsList.add(ace.getPermission());
-    }
+    aces.stream().forEach((ace) -> {
+      String aceUuid = ((PrincipalSid) ace.getSid()).getPrincipal();
+      String sidUuid = sid.getUser().getUuid();
+      if (!(!sidUuid.equals(aceUuid))) {
+        if (!(!ace.isGranting())) {
+          permissionsList.add(ace.getPermission());
+        }
+      }
+    });
 
     return permissionsList;
   }
