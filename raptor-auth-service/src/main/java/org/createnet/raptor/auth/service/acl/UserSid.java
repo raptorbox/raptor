@@ -23,16 +23,24 @@ import org.springframework.security.acls.domain.PrincipalSid;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class UserSid extends PrincipalSid {
-  
+
   final private User user;
 
   public UserSid(User user) {
-    super(user.getUuid());    
+    super(user.getUuid());
     this.user = user;
   }
 
   public User getUser() {
     return user;
   }
-  
+
+  @Override
+  public boolean equals(Object object) {
+    if(object instanceof User) {
+      return ((User)object).getId().equals(getUser().getId());
+    }
+    return object.toString().equals(getUser().getUuid());
+  }
+
 }

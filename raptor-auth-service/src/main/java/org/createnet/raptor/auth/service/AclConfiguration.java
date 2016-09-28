@@ -32,7 +32,6 @@ import org.springframework.security.acls.domain.ConsoleAuditLogger;
 import org.springframework.security.acls.domain.DefaultPermissionFactory;
 import org.springframework.security.acls.domain.DefaultPermissionGrantingStrategy;
 import org.springframework.security.acls.domain.EhCacheBasedAclCache;
-import org.springframework.security.acls.domain.PermissionFactory;
 import org.springframework.security.acls.jdbc.BasicLookupStrategy;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.jdbc.LookupStrategy;

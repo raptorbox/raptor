@@ -28,6 +28,7 @@ import java.security.cert.CertificateException;
 import java.util.List;
 import javax.net.ssl.SSLContext;
 import org.apache.http.Consts;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -230,7 +231,7 @@ public class AuthHttpClient {
     return response;
   }
 
-  public boolean sync(String accessToken, String body) throws ClientException {
+  public void sync(String accessToken, String body) throws ClientException {
 
     logger.debug("Http client sync request");
     
@@ -255,29 +256,20 @@ public class AuthHttpClient {
     }
 
     try (CloseableHttpResponse httpResponse = httpclient.execute(httpost)) {
-
-      if (httpResponse.getStatusLine().getStatusCode() >= 400) {
-        logger.debug("Http request failed for sync");
-        throw new ClientException(
-                httpResponse.getStatusLine().getStatusCode(),
-                httpResponse.getStatusLine().getReasonPhrase()
-        );
-      }
-
-      InputStream inputStream = httpResponse.getEntity().getContent();
-      JsonNode json = AuthProvider.mapper.readTree(inputStream);
+      
+      int statusCode = httpResponse.getStatusLine().getStatusCode();
+      String statusMessage = httpResponse.getStatusLine().getReasonPhrase();
 
       //close the response
       httpResponse.close();
-
-      if (json.has("success")) {
-        return json.get("success").asBoolean();
+      
+      if (statusCode >= 400) {
+        logger.debug("Http request failed for sync ");
+        throw new ClientException(statusCode, statusMessage);
       }
-
-      throw new IOException("Cannot read sync response: " + json.toString());
-
-    } catch (IOException ex) {
-      logger.error("Http request error for sync", ex);
+      
+    } catch (ClientException | IOException ex) {
+      logger.error("Http request error for sync: {}", ex.getMessage());
       throw new ClientException(ex);
     } finally {
       logger.debug("Http request release connection for sync");

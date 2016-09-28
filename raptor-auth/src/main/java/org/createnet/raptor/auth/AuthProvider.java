@@ -151,8 +151,8 @@ public class AuthProvider implements Authorization, Authentication {
   }
 
   @Override
-  public void sync(String accessToken, ServiceObject obj) throws AuthenticationException {
-    authenticationInstance.sync(accessToken, obj);
+  public void sync(String accessToken, ServiceObject obj, SyncOperation op) throws AuthenticationException {
+    authenticationInstance.sync(accessToken, obj, op);
   }
 
 }

@@ -70,14 +70,15 @@ public class TokenAuthentication extends AbstractAuthentication {
   }
 
   @Override
-  public void sync(String accessToken, ServiceObject obj) throws AuthenticationException {
+  public void sync(String accessToken, ServiceObject obj, SyncOperation op) throws AuthenticationException {
     try {
-      logger.debug("Syncing object operation for {}", obj.id);
+      logger.debug("Syncing object op:{} for id:{}", op.name(), obj.id);
 
       SyncRequest synreq = new SyncRequest();
       synreq.userId = obj.getUserId();
       synreq.objectId = obj.getId();
       synreq.created = obj.createdAt;
+      synreq.operation = op.name().toLowerCase();
 
       String payload = mapper.writeValueAsString(synreq);
 

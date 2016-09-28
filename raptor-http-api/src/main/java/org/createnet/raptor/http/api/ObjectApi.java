@@ -61,7 +61,7 @@ import org.createnet.raptor.search.raptor.search.query.impl.es.ObjectQuery;
 public class ObjectApi extends AbstractApi {
 
   final private Logger logger = LoggerFactory.getLogger(ObjectApi.class);
-
+  
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public List<String> list() throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.IndexerException {
@@ -102,7 +102,22 @@ public class ObjectApi extends AbstractApi {
       
       storage.deleteObject(obj);
       
-      throw new InternalServerErrorException();
+      throw new InternalServerErrorException("Failed to index device");
+    }
+    
+    try {
+      
+      auth.sync(auth.getAccessToken(), obj, Authentication.SyncOperation.CREATE);
+      
+    } catch (Authentication.AuthenticationException | ConfigurationException ex) {
+      
+      logger.error("Error syncing object to auth system: {}", ex.getMessage());    
+      logger.error("Auth sync failed, aborting creation of object {}", obj.id);
+      
+      storage.deleteObject(obj);
+      indexer.deleteObject(obj);
+      
+      throw new InternalServerErrorException("Failed to sync device");      
     }
     
     emitter.trigger(EventEmitterService.EventName.create, new ObjectEvent(obj, auth.getAccessToken()));
@@ -201,6 +216,13 @@ public class ObjectApi extends AbstractApi {
     if(!auth.isAllowed(obj, Authorization.Permission.Delete)) {
       throw new NotAuthorizedException("Cannot delete object");
     }
+
+    try {
+      auth.sync(auth.getAccessToken(), obj, Authentication.SyncOperation.DELETE);
+    } catch (Authentication.AuthenticationException | ConfigurationException ex) {
+      logger.error("Auth sync failed, aborting deletion of object {}", obj.id);
+      throw new InternalServerErrorException("Failed to sync device");      
+    }    
 
     storage.deleteObject(obj);
     indexer.deleteObject(obj);

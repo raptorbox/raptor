@@ -16,6 +16,7 @@
 package org.createnet.raptor.auth.service.services;
 
 import org.createnet.raptor.auth.entity.SyncRequest;
+import org.createnet.raptor.auth.service.acl.RaptorPermission;
 import org.createnet.raptor.auth.service.entity.Device;
 import org.createnet.raptor.auth.service.entity.User;
 import org.createnet.raptor.auth.service.entity.repository.DeviceRepository;
@@ -25,6 +26,7 @@ import org.createnet.raptor.auth.service.exception.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.acls.model.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -63,12 +65,26 @@ public class DeviceService {
   }
 
   public Device sync(Authentication auth, SyncRequest req) {
+
+    Permission p = RaptorPermission.fromLabel(req.operation);
     
     Device device = null;
     if (req.objectId != null) {
       device = deviceRepository.findByUuid(req.objectId);
     }
-
+    
+    // delete device record
+    if(p == RaptorPermission.DELETE) {
+      
+      if (device == null) {
+        throw new DeviceNotFoundException();
+      }
+      
+      deviceRepository.delete(device);
+      return null;
+    }
+    
+    // create or update device record
     if (device == null) {
       device = new Device();
       device.setUuid(req.objectId);
@@ -91,7 +107,7 @@ public class DeviceService {
       }
       device.setParent(parentDevice);
     }
-
+    
     Device dev = save(device);   
     
     return dev;

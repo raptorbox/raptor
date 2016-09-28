@@ -27,6 +27,8 @@ import org.createnet.raptor.models.objects.ServiceObject;
  */
 public interface Authentication {
   
+  public enum SyncOperation { CREATE, DELETE }
+
   public class AuthenticationException extends Exception {
     public AuthenticationException(Throwable t) {
       super(t);
@@ -106,6 +108,6 @@ public interface Authentication {
   public void initialize(AuthConfiguration configuration);
   public UserInfo getUser(String accessToken) throws AuthenticationException;
   
-  public void sync(String accessToken, ServiceObject obj) throws AuthenticationException;
+  public void sync(String accessToken, ServiceObject obj, SyncOperation op) throws AuthenticationException;
   
 }

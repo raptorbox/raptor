@@ -137,24 +137,31 @@ public class AclManagerService implements AclManager {
   }
 
   public List<Permission> getPermissionList(User user, ObjectIdentity oid) {
-    return getPermissionList(new PreAuthenticatedAuthenticationToken(user, user.getRoles()), oid);
+    return getPermissionList(new UserSid(user), oid);
   }
 
-  public List<Permission> getPermissionList(Authentication authentication, ObjectIdentity oid) {
+  public List<Permission> getPermissionList(UserSid sid, ObjectIdentity oid) {
 
-    List<Sid> sids = sidRetrievalStrategy.getSids(authentication);
     List<Permission> permissionsList = new ArrayList();
 
     // Lookup only ACLs for SIDs we're interested in
     Acl acl = null;
     try {
-      acl = aclService.readAclById(oid, sids);
+      acl = aclService.readAclById(oid, Arrays.asList(sid));
     } catch (Exception e) {
       return permissionsList;
     }
 
     List<AccessControlEntry> aces = acl.getEntries();
     for (AccessControlEntry ace : aces) {
+      
+      String siduuid = ace.getSid().toString();
+      if(!sid.getUser().getUuid().equals(siduuid))
+        continue;
+      
+      if(!ace.isGranting())
+        continue;
+      
       permissionsList.add(ace.getPermission());
     }
 

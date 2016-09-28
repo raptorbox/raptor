@@ -95,8 +95,8 @@ public class AclDeviceService {
 
     }
 
-    String perms = permissions.stream().map(Permission::toString).collect(Collectors.joining("\n - "));
-    logger.debug("Permission set for device {} to {}\n - {}", device.getUuid(), device.getOwner().getUuid(), perms);
+    String perms = String.join(", ", RaptorPermission.toLabel(permissions));
+    logger.debug("Permission set for device {} to {} - {}", device.getUuid(), device.getOwner().getUuid(), perms);
 
   }
 

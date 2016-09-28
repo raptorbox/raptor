@@ -14,7 +14,6 @@ spring:
     # Keep the connection alive if idle for a long time (needed in production)
     testWhileIdle: true
     validationQuery: SELECT 1
-    
     lastInsertQuery: SELECT LAST_INSERT_ID()
     
   jpa:
@@ -25,15 +24,16 @@ spring:
       ddl-auto: validate
       naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
       dialect: org.hibernate.dialect.MySQL5Dialect
-      show_sql: true
+      show_sql: false
 
 ---
 
 logging:
   level:
-    root: INFO
-    org.springframework.security: DEBUG
+#    root: INFO
+#    org.springframework.security: DEBUG
     org.createnet.raptor.auth.service: DEBUG
+    org.createnet.raptor: DEBUG
 
 ---
 

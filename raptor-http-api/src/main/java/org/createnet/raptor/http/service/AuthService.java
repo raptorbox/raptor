@@ -23,8 +23,6 @@ import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authentication.Authentication.UserInfo;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.config.exception.ConfigurationException;
-import org.createnet.raptor.events.Event;
-import org.createnet.raptor.http.events.ObjectEvent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +53,6 @@ public class AuthService {
     if (auth == null) {
       auth = new AuthProvider();
       auth.initialize(config.getAuth());
-      initialize();
     }   
     
     return auth;
@@ -88,24 +85,8 @@ public class AuthService {
     return securityContext.getUserPrincipal().getName();
   }
 
-  public void sync(ServiceObject obj) throws ConfigurationException, Authentication.AuthenticationException {
-    getProvider().sync(getAccessToken(), obj);
+  public void sync(String token, ServiceObject obj, Authentication.SyncOperation op) throws ConfigurationException, Authentication.AuthenticationException {
+    getProvider().sync(token, obj, op);
   }
-  
-  private void initialize() {
-    
-    logger.debug("Register auth event trigger");
-    emitter.on(EventEmitterService.EventName.object, (Event event) -> {
-      try {
-        ObjectEvent objEvent = (ObjectEvent) event;
-        getProvider().sync(objEvent.getAccessToken(), objEvent.getObject());
-      } catch (Authentication.AuthenticationException | ConfigurationException ex) {
-        logger.error("Event trigger exception", ex);
-      }
-    });
-
-  }
-
-  
   
 }

@@ -24,4 +24,5 @@ public class SyncRequest {
   public String userId;
   public String parentId;  
   public Long created;
+  public String operation;
 }

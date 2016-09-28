@@ -58,11 +58,12 @@ public class AuthenticationController {
   }
 
   protected static class JwtResponse {
-
-    public JwtResponse(String token) {
+    public JwtResponse(User user, String token) {
+      this.user = user;
       this.token = token;
     }
     public String token;
+    public User user;
   }
 
   @Value("${jwt.header}")
@@ -90,7 +91,7 @@ public class AuthenticationController {
     final Token token = tokenService.createLoginToken((User)userDetails);
     
     // Return the token
-    return ResponseEntity.ok(new JwtResponse(token.getToken()));
+    return ResponseEntity.ok(new JwtResponse((User) userDetails, token.getToken()));
   }
 
   @PreAuthorize("isAuthenticated()")
@@ -110,7 +111,7 @@ public class AuthenticationController {
     }
     
     Token refreshedToken = tokenService.refreshToken(token);
-    return ResponseEntity.ok(new JwtResponse(refreshedToken.getToken()));
+    return ResponseEntity.ok(new JwtResponse((User) principal, refreshedToken.getToken()));
   }
 
 }

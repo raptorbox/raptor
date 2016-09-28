@@ -32,7 +32,7 @@ abstract public class AbstractAuthentication implements Authentication {
   }
 
   @Override
-  public void sync(String accessToken, ServiceObject obj) throws AuthenticationException {
+  public void sync(String accessToken, ServiceObject obj, SyncOperation op) throws AuthenticationException {
   }
   
 }
