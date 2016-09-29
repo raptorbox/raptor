@@ -160,6 +160,7 @@ public class Application {
               
               .antMatchers(authenticationPath).permitAll()
               .antMatchers(authenticationRefresh).permitAll()
+              .antMatchers("/v2/api-docs").permitAll()
               
               // keep this method private to allow sync beetween api and auth
               .antMatchers("/sync").hasIpAddress("127.0.0.1")
