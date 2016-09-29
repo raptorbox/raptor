@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import static org.createnet.raptor.models.objects.RaptorContainer.mapper;
 import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +56,8 @@ public class ServiceObject extends ServiceObjectContainer {
   public String name;
   public String description = "";
 
+  public ServiceObject parent;
+  
   public Long createdAt = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
   public Long updatedAt = createdAt;
 
@@ -125,7 +126,11 @@ public class ServiceObject extends ServiceObjectContainer {
   public void setUpdateTime() {
     updatedAt = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
   }
-
+  
+  public boolean isRoot() {
+    return parent == null;
+  }
+  
   @Override
   public void validate() throws ValidationException {
 
@@ -181,7 +186,9 @@ public class ServiceObject extends ServiceObjectContainer {
 
     customFields.clear();
     customFields.putAll(serviceObject.customFields);
-
+    
+    parent = serviceObject.parent;
+    
     streams.clear();
     for (Map.Entry<String, Stream> el : serviceObject.streams.entrySet()) {
       el.getValue().setServiceObject(this);
@@ -273,6 +280,5 @@ public class ServiceObject extends ServiceObjectContainer {
   public String toJSON() throws ParserException {
     return toJSON(ServiceObjectView.Public);
   }
-
   
 }

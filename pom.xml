@@ -26,6 +26,7 @@
     <module>raptor-events</module>
     <module>raptor-client</module>
     <module>raptor-auth-service</module>
+    <module>raptor-groups</module>
   </modules>
   
   <properties>
