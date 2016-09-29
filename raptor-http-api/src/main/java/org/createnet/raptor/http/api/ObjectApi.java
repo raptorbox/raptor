@@ -15,7 +15,10 @@
  */
 package org.createnet.raptor.http.api;
 
-
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -58,36 +61,48 @@ import org.createnet.raptor.search.raptor.search.query.impl.es.ObjectQuery;
  * @author Luca Capra <lcapra@create-net.org>
  */
 @Path("/")
+@Api
 public class ObjectApi extends AbstractApi {
 
   final private Logger logger = LoggerFactory.getLogger(ObjectApi.class);
-  
+
   @GET
   @Produces(MediaType.APPLICATION_JSON)
+  @ApiOperation(value = "List available devices definition", notes = "")
+  @ApiResponses(value = {
+    @ApiResponse(code = 200, message = "Ok"),
+    @ApiResponse(code = 403, message = "Forbidden")
+  })
   public List<String> list() throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.IndexerException {
 
     if (!auth.isAllowed(Authorization.Permission.List)) {
-      throw new NotAuthorizedException("Cannot list objects");
+      throw new ForbiddenException("Cannot list objects");
     }
 
     List<ServiceObject> list = storage.listObjects(auth.getUser().getUserId());
     List<String> idList = new ArrayList();
-    for (ServiceObject obj : list) {
+    list.stream().forEach((obj) -> {
       idList.add(obj.id);
-    }
-    
+    });
+
     return idList;
   }
 
   @POST
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
+  @ApiOperation(value = "Create a new device definition", notes = "")
+  @ApiResponses(value = {
+    @ApiResponse(code = 200, message = "Ok"),
+    @ApiResponse(code = 403, message = "Forbidden"),
+    @ApiResponse(code = 500, message = "Internal error")
+  })
   public Response create(ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException, Indexer.IndexerException, RecordsetException {
 
     if (!auth.isAllowed(Authorization.Permission.Create)) {
       throw new ForbiddenException("Cannot create object");
     }
-    
+
     obj.id = null;
     obj.userId = auth.getUser().getUserId();
 
@@ -96,34 +111,34 @@ public class ObjectApi extends AbstractApi {
     try {
       indexer.indexObject(obj, true);
     } catch (Indexer.IndexerException ex) {
-      
+
       logger.error("Indexing error occured", ex);
       logger.warn("Removing object {} from storage", obj.id);
-      
+
       storage.deleteObject(obj);
-      
+
       throw new InternalServerErrorException("Failed to index device");
     }
-    
+
     try {
-      
+
       auth.sync(auth.getAccessToken(), obj, Authentication.SyncOperation.CREATE);
-      
+
     } catch (Authentication.AuthenticationException | ConfigurationException ex) {
-      
-      logger.error("Error syncing object to auth system: {}", ex.getMessage());    
+
+      logger.error("Error syncing object to auth system: {}", ex.getMessage());
       logger.error("Auth sync failed, aborting creation of object {}", obj.id);
-      
+
       storage.deleteObject(obj);
       indexer.deleteObject(obj);
-      
-      throw new InternalServerErrorException("Failed to sync device");      
+
+      throw new InternalServerErrorException("Failed to sync device");
     }
-    
+
     emitter.trigger(EventEmitterService.EventName.create, new ObjectEvent(obj, auth.getAccessToken()));
-    
+
     logger.debug("Created new object {} for {}", obj.id, auth.getUser().getUserId());
-    
+
     return Response.created(URI.create("/" + obj.id)).entity(obj.toJSON(ServiceObjectView.IdOnly)).build();
   }
 
@@ -131,22 +146,28 @@ public class ObjectApi extends AbstractApi {
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
+  @ApiOperation(value = "Update a device definition", notes = "")
+  @ApiResponses(value = {
+    @ApiResponse(code = 200, message = "Ok"),
+    @ApiResponse(code = 404, message = "Not Found"),
+    @ApiResponse(code = 403, message = "Forbidden")
+  })
   public String update(@PathParam("id") String id, ServiceObject obj) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.IndexerException, IOException, RecordsetException {
 
     ServiceObject storedObj = loadObject(id);
-  
-    if(obj.id == null || obj.id.isEmpty()) {
+
+    if (obj.id == null || obj.id.isEmpty()) {
       obj.id = storedObj.id;
     }
-    
-    if(!storedObj.id.equals(obj.id)) {
+
+    if (!storedObj.id.equals(obj.id)) {
       throw new NotFoundException("Request id does not match payload defined id");
-    }    
-    
-    if(!auth.isAllowed(obj, Authorization.Permission.Update)) {
+    }
+
+    if (!auth.isAllowed(obj, Authorization.Permission.Update)) {
       throw new ForbiddenException("Cannot update object");
     }
-    
+
     if (!storedObj.userId.equals(auth.getUser().getUserId())) {
       logger.warn("User {} tried to update object {} owned by {}", auth.getUser().getUserId(), storedObj.id, storedObj.userId);
       throw new NotFoundException();
@@ -161,76 +182,86 @@ public class ObjectApi extends AbstractApi {
     // update settings
     storedObj.settings.storeData = obj.settings.storeData;
     storedObj.settings.eventsEnabled = obj.settings.eventsEnabled;
-    
+
     // merge stream definitions
     List<Stream> changedStreams = getChangedStreams(storedObj, obj);
-    
+
     storedObj.streams.clear();
     storedObj.addStreams(obj.streams.values());
-    
+
     // merge action definitions
     List<Action> changedActions = getChangedActions(storedObj, obj);
-    
+
     storedObj.actions.clear();
-    storedObj.addActions(obj.actions.values());   
-    
+    storedObj.addActions(obj.actions.values());
+
     storage.saveObject(storedObj);
     indexer.indexObject(storedObj, false);
-    
+
     // clean up data for changed stream and actions
     storage.deleteData(changedStreams);
     indexer.deleteData(changedStreams);
     storage.deleteActionStatus(changedActions);
 
-    
     emitter.trigger(EventEmitterService.EventName.update, new ObjectEvent(storedObj, auth.getAccessToken()));
-    
+
     logger.debug("Updated object {} for {}", storedObj.id, auth.getUser().getUserId());
-    
+
     return obj.toJSON();
   }
 
   @GET
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
+  @ApiOperation(value = "Return a device definition", notes = "")
+  @ApiResponses(value = {
+    @ApiResponse(code = 200, message = "Ok"),
+    @ApiResponse(code = 403, message = "Forbidden")
+  })
   public String load(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException {
 
     logger.debug("Load object {}", id);
 
     ServiceObject obj = loadObject(id);
 
-    if(!auth.isAllowed(obj, Authorization.Permission.Read)) {
+    if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
       throw new ForbiddenException("Cannot read object");
     }
-    
+
     return obj.toJSON();
   }
 
   @DELETE
   @Path("{id}")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response delete(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, Authorization.AuthorizationException, ConfigurationException, Indexer.IndexerException, Authentication.AuthenticationException, IOException, RecordsetException  {
+  @ApiOperation(value = "Delite a device definition", notes = "")
+  @ApiResponses(value = {
+    @ApiResponse(code = 200, message = "Ok"),
+    @ApiResponse(code = 403, message = "Forbidden"),
+    @ApiResponse(code = 500, message = "Internal error")
+  })  
+  public Response delete(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, Authorization.AuthorizationException, ConfigurationException, Indexer.IndexerException, Authentication.AuthenticationException, IOException, RecordsetException {
 
     ServiceObject obj = loadObject(id);
 
-    if(!auth.isAllowed(obj, Authorization.Permission.Delete)) {
-      throw new NotAuthorizedException("Cannot delete object");
+    if (!auth.isAllowed(obj, Authorization.Permission.Delete)) {
+      throw new ForbiddenException("Cannot delete object");
     }
 
     try {
       auth.sync(auth.getAccessToken(), obj, Authentication.SyncOperation.DELETE);
     } catch (Authentication.AuthenticationException | ConfigurationException ex) {
       logger.error("Auth sync failed, aborting deletion of object {}", obj.id);
-      throw new InternalServerErrorException("Failed to sync device");      
-    }    
+      throw new InternalServerErrorException("Failed to sync device");
+    }
 
     storage.deleteObject(obj);
     indexer.deleteObject(obj);
-    
+
     emitter.trigger(EventEmitterService.EventName.delete, new ObjectEvent(obj, auth.getAccessToken()));
 
     logger.debug("Deleted object {}", id);
-    
+
     return Response.status(Response.Status.OK).build();
   }
 
@@ -238,77 +269,80 @@ public class ObjectApi extends AbstractApi {
   @Path("/search")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
+  @ApiOperation(value = "Search for object definitions", notes = "")
+  @ApiResponses(value = {
+    @ApiResponse(code = 200, message = "Ok"),
+    @ApiResponse(code = 403, message = "Forbidden")
+  })  
   public List<String> search(ObjectQuery query) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.SearchException, IOException, Indexer.IndexerException {
 
     if (!auth.isAllowed(Authorization.Permission.Read)) {
       throw new ForbiddenException("Cannot search for objects");
     }
-    
+
     query.setUserId(auth.getUser().getUserId());
-    
+
     List<ServiceObject> list = indexer.searchObject(query);
-    
+
     List<String> results = new ArrayList();
     for (ServiceObject serviceObject : list) {
-      results.add(serviceObject.getId()) ;
+      results.add(serviceObject.getId());
     }
-    
+
     return results;
-  }  
+  }
 
   private List<Stream> getChangedStreams(ServiceObject storedObj, ServiceObject obj) {
-    
+
     List<Stream> changedStream = new ArrayList();
-    
+
     // loop previous stream list and find missing streams
     for (Map.Entry<String, Stream> item : storedObj.streams.entrySet()) {
-      
+
       String streamName = item.getKey();
-      Stream stream = item.getValue();           
-      
+      Stream stream = item.getValue();
+
       // stream found
-      if(obj.streams.containsKey(streamName)) {
-        
+      if (obj.streams.containsKey(streamName)) {
+
         // loop stream and find changed channels
         for (Map.Entry<String, Channel> channelItem : stream.channels.entrySet()) {
-          
+
           String channelName = channelItem.getKey();
           Channel channel = channelItem.getValue();
-          
-          if(storedObj.streams.get(streamName).channels.containsKey(channelName)) {
+
+          if (storedObj.streams.get(streamName).channels.containsKey(channelName)) {
             // check if channel definition changed
-            if(!storedObj.streams.get(streamName).channels.get(channelName).type.equals(channel.type)) {
+            if (!storedObj.streams.get(streamName).channels.get(channelName).type.equals(channel.type)) {
               changedStream.add(stream);
               break;
             }
-          }
-          else {
+          } else {
             // channel has gone, drop stream
             changedStream.add(stream);
             break;
           }
-          
+
         }
-      }
-      else {
+      } else {
         // drop stream
         changedStream.add(stream);
         storedObj.streams.remove(streamName);
       }
 
     }
-    
+
     return changedStream;
   }
 
   private List<Action> getChangedActions(ServiceObject storedObj, ServiceObject obj) {
     List<Action> changedAction = new ArrayList();
     for (Action action : obj.actions.values()) {
-      if(!storedObj.actions.containsKey(action.name)) {
+      if (!storedObj.actions.containsKey(action.name)) {
         changedAction.add(action);
       }
     }
     return changedAction;
   }
-  
+
 }

@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.http;
 
+import io.swagger.jaxrs.config.BeanConfig;
 import javax.inject.Singleton;
 import org.createnet.raptor.http.exception.ApiExceptionMapper;
 import org.createnet.raptor.http.filter.AuthorizationRequestFilter;
@@ -69,16 +70,32 @@ public class ApplicationConfig extends ResourceConfig {
   }
 
   public ApplicationConfig() {
-  
+
+    super();   
+    
+    String resourcePackage = "org.createnet.raptor.http.api";
+    packages(resourcePackage);
+
+    register(io.swagger.jaxrs.listing.ApiListingResource.class);
+    register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
+    
     register(AuthorizationRequestFilter.class);
     register(CORSResponseFilter.class);
     register(LoggerResponseFilter.class);
     register(ApiExceptionMapper.class);
     register(RaptorApplicationEventListener.class);
+    register(new AppBinder());    
+
     
-    register(new AppBinder());
+    BeanConfig beanConfig = new BeanConfig();
+    beanConfig.setVersion("3.0");
+    beanConfig.setSchemes(new String[]{"http", "https"});
+    beanConfig.setHost("api.raptor.local");
+    beanConfig.setBasePath("/");
+    beanConfig.setResourcePackage(resourcePackage);
+    beanConfig.setScan(true);
     
-    packages(true, "org.createnet.raptor.http.api");
+    
   }
 
 }

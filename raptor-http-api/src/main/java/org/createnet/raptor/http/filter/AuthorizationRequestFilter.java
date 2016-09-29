@@ -40,7 +40,12 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
   @Override
   public void filter(ContainerRequestContext requestContext) {
-
+      
+    String path = requestContext.getUriInfo().getPath();
+    if(path.startsWith("swagger.")) {
+      return;
+    }
+    
     // skip CORS requests
     if (requestContext.getMethod().toUpperCase().equals("OPTIONS")
             && requestContext.getHeaderString("Access-Control-Request-Method") != null) {

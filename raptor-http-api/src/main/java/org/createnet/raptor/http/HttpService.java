@@ -15,11 +15,16 @@
  */
 package org.createnet.raptor.http;
 
+import io.swagger.jaxrs.config.BeanConfig;
 import java.io.IOException;
 import java.net.URI;
+import javax.servlet.ServletRegistration;
 import javax.ws.rs.core.UriBuilder;
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.servlet.WebappContext;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,9 +63,10 @@ public class HttpService {
     logger.debug("Starting HTTP service");
     HttpServer server;
     try {
+
       server = GrizzlyHttpServerFactory.createHttpServer(serviceURI, new ApplicationConfig());
-    }
-    catch(Exception e) {
+
+    } catch (Exception e) {
       logger.error("Cannot start http service: {}", e.getMessage(), e);
       throw new RuntimeException(e);
     }

@@ -57,6 +57,12 @@
       <version>2.3.26</version>
     </dependency>    
     
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>3.0.1</version>
+      <!--<scope>provided</scope>-->
+    </dependency>    
     
     <dependency>
       <groupId>junit</groupId>
@@ -132,6 +138,14 @@
       <type>jar</type>
     </dependency>
         
+        
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-jersey2-jaxrs</artifactId>
+      <version>1.5.10</version>
+    </dependency>
+
+                
   </dependencies>
 
   <profiles>
