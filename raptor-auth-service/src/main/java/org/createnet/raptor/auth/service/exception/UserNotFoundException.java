@@ -16,11 +16,14 @@
 package org.createnet.raptor.auth.service.exception;
 
 import org.springframework.security.acls.model.NotFoundException;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.HttpStatus;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
+@ResponseStatus(value=HttpStatus.NOT_FOUND, reason="User not found")
 public class UserNotFoundException extends NotFoundException {
 
   public UserNotFoundException(String msg) {

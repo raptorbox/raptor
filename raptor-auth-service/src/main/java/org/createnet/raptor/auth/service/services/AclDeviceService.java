@@ -111,7 +111,15 @@ public class AclDeviceService {
     if (permission == null) {
       return false;
     }
-
+    
+    if(user.isSuperAdmin()) {
+      return true;
+    }
+    
+    if(!user.isEnabled()) {
+      return false;
+    }
+    
     // check if user has ADMINISTRATION permission on device 
     if (isGranted(device, user, RaptorPermission.ADMINISTRATION)) {
       return true;

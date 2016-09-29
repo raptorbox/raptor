@@ -15,10 +15,14 @@
  */
 package org.createnet.raptor.auth.service.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
+@ResponseStatus(value=HttpStatus.NOT_FOUND, reason="Device not found")
 public class DeviceNotFoundException extends UserNotFoundException {
 
   public DeviceNotFoundException(String msg) {

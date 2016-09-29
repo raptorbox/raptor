@@ -15,12 +15,15 @@
  */
 package org.createnet.raptor.auth.service.exception;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.acls.model.NotFoundException;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
+@ResponseStatus(value=HttpStatus.NOT_FOUND, reason="Permission not found")
 public class PermissionNotFoundException extends NotFoundException {
 
   public PermissionNotFoundException(String msg) {

@@ -26,6 +26,7 @@ import org.createnet.raptor.auth.service.exception.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.acls.model.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -46,12 +47,12 @@ public class DeviceService {
   private DeviceRepository deviceRepository;
 
   @Autowired
-  private AclDeviceService aclObjectService;
+  private AclDeviceService aclDeviceService;
 
   public Device save(Device device) {
     
     deviceRepository.save(device);
-    aclObjectService.register(device);
+    aclDeviceService.register(device);
     
     return device;
   }
@@ -64,13 +65,26 @@ public class DeviceService {
     return deviceRepository.findOne(id);
   }
 
-  public Device sync(Authentication auth, SyncRequest req) {
+  public Device sync(User user, SyncRequest req) {
 
     Permission p = RaptorPermission.fromLabel(req.operation);
     
     Device device = null;
     if (req.objectId != null) {
       device = deviceRepository.findByUuid(req.objectId);
+    }
+    
+    /**
+     * @TODO check user permissions and roles
+     */
+
+    if(!req.userId.equals(user.getUuid())) {
+      if(!user.isSuperAdmin()) {
+        if(!aclDeviceService.isGranted(device, user, RaptorPermission.ADMINISTRATION)) {
+          
+          throw new AccessDeniedException("Cannot operate on that object");
+        }        
+      }
     }
     
     // delete device record
@@ -91,7 +105,7 @@ public class DeviceService {
     }
 
     if (req.userId == null) {
-      device.setOwner((User) auth.getPrincipal());
+      device.setOwner(user);
     } else {
       User owner = userRepository.findByUuid(req.userId);
       if (owner == null) {

@@ -23,6 +23,7 @@ import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.auth.service.acl.RaptorPermission;
 import org.createnet.raptor.auth.service.entity.Device;
 import org.createnet.raptor.auth.service.entity.User;
+import org.createnet.raptor.auth.service.exception.DeviceNotFoundException;
 import org.createnet.raptor.auth.service.services.AclDeviceService;
 import org.createnet.raptor.auth.service.services.DeviceService;
 import org.createnet.raptor.auth.service.services.UserService;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.acls.model.Permission;
 import org.springframework.security.core.Authentication;
@@ -125,12 +127,12 @@ public class DeviceController {
 
   @RequestMapping(value = "/sync", method = RequestMethod.POST)
   public ResponseEntity<?> syncObject(
+          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
           @RequestBody SyncRequest body
+          
   ) {
 
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    deviceService.sync(auth, body);
-
+    deviceService.sync(currentUser, body);
     return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
   }
 
