@@ -2,18 +2,14 @@
     "soupdates": {
         "mappings": {
             "update": {
-
                 "_ttl": {
                     "enabled": true,
                     "default": "3M"
                 },
-
                 "_all": {
                     "enabled": true
                 },
-
                 "dynamic": true,
-
                 "dynamic_templates": [{
                     "geo_point_location": {
                         "path_match": "channels.location.current-value",
@@ -49,17 +45,6 @@
                     }
                 }, {
                     "integer": {
-                        "path_match": "channels.*.current-value",
-                        "match_mapping_type": "integer",
-                        "mapping": {
-                            "store": "yes",
-                            "index": "not_analyzed",
-                            "type": "double",
-                            "ignore_malformed": true
-                        }
-                    }
-                }, {
-                    "long": {
                         "path_match": "channels.*.current-value",
                         "match_mapping_type": "integer",
                         "mapping": {
@@ -184,5 +169,22 @@
                 }
             }
         }
+    },
+    "groups": {
+      "mappings": {
+        "Root": {
+          "dynamic" : false,
+          "properties" : {
+            "id" : { "type" : "string", "index" : "not_analyzed" }
+          }
+        },
+        "Child": {
+          "_parent" : { "type" : "Root" },
+          "dynamic" : false,
+          "properties" : {
+            "id" : { "type" : "string", "index" : "not_analyzed" }
+          }
+        }
+      }
     }
 }

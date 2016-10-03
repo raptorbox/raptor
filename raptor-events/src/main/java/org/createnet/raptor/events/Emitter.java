@@ -56,7 +56,6 @@ public class Emitter {
   }
 
   public interface Callback {
-
     public void run(Event event) throws EmitterException;
   }
 
@@ -94,7 +93,7 @@ public class Emitter {
 
     //
     try {
-      executorService.awaitTermination(100, TimeUnit.MILLISECONDS);
+      executorService.awaitTermination(5000, TimeUnit.MILLISECONDS);
     } catch (InterruptedException ex) {
       logger.debug("Emitter did not complete in time", ex);
     }

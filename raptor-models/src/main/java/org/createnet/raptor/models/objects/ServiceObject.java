@@ -27,8 +27,10 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -50,39 +52,42 @@ public class ServiceObject extends ServiceObjectContainer {
   private boolean isNew = true;
 
   public String userId;
-
   public String id;
 
   public String name;
   public String description = "";
 
-  public ServiceObject parent;
-  
+  public ServiceObject parent = null;
+
   public Long createdAt = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
   public Long updatedAt = createdAt;
 
-  public Map<String, Object> customFields = new HashMap();
-  public Settings settings = new Settings();
+  final public Map<String, Object> customFields = new HashMap();
+  final public Settings settings = new Settings();
 
-  public Map<String, Stream> streams = new HashMap();
-  public Map<String, Subscription> subscriptions = new HashMap();
-  public Map<String, Action> actions = new HashMap();
+  final public Map<String, Stream> streams = new HashMap();
+  final public Map<String, Subscription> subscriptions = new HashMap();
+  final public Map<String, Action> actions = new HashMap();
+  final private List<ServiceObject> children = new ArrayList();
 
   public void addStreams(Collection<Stream> streams) {
-    for (Stream stream : streams) {
+    streams.stream().forEach((stream) -> {
+
       stream.setServiceObject(this);
-      for (Channel channel : stream.channels.values()) {
+
+      stream.channels.values().stream().forEach((channel) -> {
         channel.setServiceObject(this);
-      }
+      });
+
       this.streams.put(stream.name, stream);
-    }
+    });
   }
 
   public void addActions(Collection<Action> values) {
-    for (Action action : values) {
+    values.stream().forEach((action) -> {
       action.setServiceObject(this);
       this.actions.put(action.name, action);
-    }
+    });
   }
 
   static public class Settings {
@@ -93,7 +98,7 @@ public class ServiceObject extends ServiceObjectContainer {
     public boolean storeEnabled() {
       return storeData;
     }
-    
+
     public boolean eventsEnabled() {
       return eventsEnabled;
     }
@@ -126,11 +131,23 @@ public class ServiceObject extends ServiceObjectContainer {
   public void setUpdateTime() {
     updatedAt = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
   }
-  
+
   public boolean isRoot() {
     return parent == null;
   }
-  
+
+  public ServiceObject getParent() {
+    return parent;
+  }
+
+  public List<ServiceObject> getChildren() {
+    return children;
+  }
+
+  public void addChild(ServiceObject obj) {
+    getChildren().add(obj);
+  }
+
   @Override
   public void validate() throws ValidationException {
 
@@ -164,8 +181,8 @@ public class ServiceObject extends ServiceObjectContainer {
 
   public void parse(JsonNode json) throws ParserException {
     parse(json.toString());
-  }  
-  
+  }
+
   @Override
   public void parse(String json) throws ParserException {
 
@@ -186,9 +203,9 @@ public class ServiceObject extends ServiceObjectContainer {
 
     customFields.clear();
     customFields.putAll(serviceObject.customFields);
-    
+
     parent = serviceObject.parent;
-    
+
     streams.clear();
     for (Map.Entry<String, Stream> el : serviceObject.streams.entrySet()) {
       el.getValue().setServiceObject(this);
@@ -217,7 +234,7 @@ public class ServiceObject extends ServiceObjectContainer {
       throw new RaptorComponent.ParserException(e);
     }
   }
-  
+
   public static ServiceObject fromJSON(JsonNode json) {
     return mapper.convertValue(json, ServiceObject.class);
   }
@@ -245,21 +262,21 @@ public class ServiceObject extends ServiceObjectContainer {
         propertyFilter = SimpleBeanPropertyFilter.serializeAllExcept("userId");
         break;
     }
-    
+
     FilterProvider filter = new SimpleFilterProvider()
             .addFilter("objectFieldsFilter", propertyFilter);
-    
+
     ObjectMapper mapper1 = ServiceObject.getMapper();
     mapper1.setFilterProvider(filter);
-    
+
     return mapper1;
-    
+
   }
 
   public ObjectNode toJsonNode() {
     return toJsonNode(ServiceObjectView.Public);
   }
-  
+
   public ObjectNode toJsonNode(ServiceObjectView type) {
     ObjectNode node = getMapper(type).convertValue(this, ObjectNode.class);
     return node;
@@ -276,9 +293,9 @@ public class ServiceObject extends ServiceObjectContainer {
     }
 
   }
- 
+
   public String toJSON() throws ParserException {
     return toJSON(ServiceObjectView.Public);
   }
-  
+
 }

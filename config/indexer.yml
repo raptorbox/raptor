@@ -18,3 +18,6 @@ elasticsearch:
       subscriptions:
         index: subscriptions
         type: subscription
+      groups:
+        index: groups
+        type: group

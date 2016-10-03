@@ -8,4 +8,11 @@
     </parent>
     <artifactId>raptor-groups</artifactId>
     <packaging>jar</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>raptor-search</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

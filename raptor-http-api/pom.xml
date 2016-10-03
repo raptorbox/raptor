@@ -144,8 +144,11 @@
       <artifactId>swagger-jersey2-jaxrs</artifactId>
       <version>1.5.10</version>
     </dependency>
-
-                
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>raptor-groups</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <profiles>
