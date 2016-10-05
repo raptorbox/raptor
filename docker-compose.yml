@@ -1,32 +1,32 @@
-
 #TODO: Add Auth Service + Broker API
+version: "2"
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    ports:
+      - 3306:3306
+    volumes:
+      - ./data/mariadb:/var/lib/mysql
+    environment:
+      MYSQL_USERNAME: root
+      MYSQL_ROOT_PASSWORD: raptor
 
-mariadb:
-  image: mariadb:latest
-  container_name: mariadb
-  ports:
-    - 3306:3306
-  volumes:
-    - ./data/mariadb:/var/lib/mysql
-  environment:
-    MYSQL_USERNAME: root
-    MYSQL_ROOT_PASSWORD: raptor
+  couchbase1:
+    image: couchbase/server
+    volumes:
+      - ./data/couchbase1:/opt/couchbase/var
+    ports:
+      - 8091:8091
+      - 8092:8092
+      - 8093:8093
+      - 11210:11210
 
-couchbase1:
-  image: couchbase/server
-  volumes:
-    - ./data/couchbase1:/opt/couchbase/var
-  ports:
-    - 8091:8091
-    - 8092:8092
-    - 8093:8093
-    - 11210:11210
-
-elasticsearch1:
-  image: elasticsearch:2.4
-  command: elasticsearch -Des.network.host=0.0.0.0 -Des.cluster.name="raptor" -Des.node.name="elasticsearch1"
-  volumes:
-    - ./data/elasticsearch1:/usr/share/elasticsearch/data
-  ports:
-    - 9200:9200
-    - 9300:9300
+  elasticsearch1:
+    image: elasticsearch:2.4
+    command: elasticsearch -Des.network.host=0.0.0.0 -Des.cluster.name="raptor" -Des.node.name="elasticsearch1"
+    volumes:
+      - ./data/elasticsearch1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
