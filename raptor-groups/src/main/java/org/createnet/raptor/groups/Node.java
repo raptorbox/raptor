@@ -26,10 +26,12 @@ public interface Node<T> {
   public Node getParent();
   public List<Node> getChildren();
   
+  public Node getRoot();  
   public boolean isRoot();
-  public T next();
-  public T previous();
   
-  public T item();
-  
+  public Node next();
+  public Node previous();
+
+  public T get();  
+  public List<Node> path();
 }

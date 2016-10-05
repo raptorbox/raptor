@@ -155,13 +155,12 @@ public class ElasticSearchIndexer extends AbstractIndexer {
    * @throws IndexerException
    */
   protected void create(IndexRecord record) throws IndexerException {
-
     try {
-
       logger.debug("Create index record to {}.{}", record.index, record.type);
       IndexResponse response = client.prepareIndex(record.index, record.type, record.id)
               .setSource(record.body)
               .setTimeout(getTimeout())
+              .setParent(record.parent)
               .get();
 
     } catch (Exception e) {
@@ -223,14 +222,14 @@ public class ElasticSearchIndexer extends AbstractIndexer {
           logger.error("Bulk failed", failure);
         }
       })
-      .setBulkActions(list.size())
-      .setBulkSize(new ByteSizeValue(1, ByteSizeUnit.MB))
-      .setFlushInterval(TimeValue.timeValueSeconds(1))
-      .setConcurrentRequests(2)
-      .setBackoffPolicy(
-        BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3)
-      )
-      .build();
+              .setBulkActions(list.size())
+              .setBulkSize(new ByteSizeValue(1, ByteSizeUnit.MB))
+              .setFlushInterval(TimeValue.timeValueSeconds(1))
+              .setConcurrentRequests(2)
+              .setBackoffPolicy(
+                      BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3)
+              )
+              .build();
 
       Iterator<IndexOperation> it = list.iterator();
       while (it.hasNext()) {
@@ -332,8 +331,8 @@ public class ElasticSearchIndexer extends AbstractIndexer {
     logger.debug("Setup client, force {}", forceSetup);
 
     Map<String, String> indices = configuration.elasticsearch.indices.definitions;
-    
-    if(indices.isEmpty()) {
+
+    if (indices.isEmpty()) {
       String filepath = configuration.elasticsearch.indices.source;
       try {
         indices.putAll(ElasticSearchIndexer.loadIndicesFromFile(filepath));
@@ -341,7 +340,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
         logger.warn("Exception loading indices file {}: {}", filepath, ex.getMessage());
       }
     }
-    
+
     for (Map.Entry<String, String> el : indices.entrySet()) {
 
       String indexName = el.getKey();
@@ -399,25 +398,25 @@ public class ElasticSearchIndexer extends AbstractIndexer {
               .setTypes(query.getType())
               .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
               .setQuery(query.format());
-      
-      if(query.getLimit() != null && query.getLimit() > 0) {
+
+      if (query.getLimit() != null && query.getLimit() > 0) {
         searchBuilder.setSize(query.getLimit());
       }
-      
-      if(query.getOffset() != null) {
+
+      if (query.getOffset() != null) {
         searchBuilder.setFrom(query.getOffset());
       }
-      
-      if(query.getSort() != null) {
+
+      if (query.getSort() != null) {
         searchBuilder.addSort(query.getSort().field, query.getSort().sort == Query.Sort.ASC ? SortOrder.ASC : SortOrder.DESC);
       }
-      
+
       logger.debug("Search query: {}", searchBuilder.toString());
-      
+
       SearchResponse response = searchBuilder.execute().actionGet();
-      
+
       logger.debug("Found {} records in {}", response.getHits().getTotalHits(), response.getTook().toString());
-      
+
       SearchHit[] results = response.getHits().getHits();
 
       List<String> list = new ArrayList();

@@ -66,9 +66,7 @@ public class IndexerService implements RaptorService {
     return searchObject(q);
   }
 
-  public enum IndexNames {
-    object, data, subscriptions
-  }
+  public enum IndexNames { object, data, subscriptions }
 
   @PostConstruct
   @Override
@@ -191,7 +189,6 @@ public class IndexerService implements RaptorService {
   }
   
   public List<RecordSet> getStreamData(Stream stream) throws ConfigurationException, Indexer.IndexerException, RecordsetException {
-
 
     DataQuery query = new DataQuery();
     setQueryIndex(query, IndexNames.data);

@@ -129,7 +129,20 @@
     },
     "sodescriptions": {
         "mappings": {
+            "ParentObject": {
+                "dynamic": false,
+                "properties": {
+                    "objectId": {
+                        "type": "string",
+                        "analyzer": "whitespace",
+                        "index": "not_analyzed"
+                    }
+                }
+            },
             "serviceobject": {
+                "_parent": {
+                    "type": "ParentObject"
+                },
                 "_all": {
                     "enabled": false
                 },
@@ -169,22 +182,5 @@
                 }
             }
         }
-    },
-    "groups": {
-      "mappings": {
-        "Root": {
-          "dynamic" : false,
-          "properties" : {
-            "id" : { "type" : "string", "index" : "not_analyzed" }
-          }
-        },
-        "Child": {
-          "_parent" : { "type" : "Root" },
-          "dynamic" : false,
-          "properties" : {
-            "id" : { "type" : "string", "index" : "not_analyzed" }
-          }
-        }
-      }
     }
 }

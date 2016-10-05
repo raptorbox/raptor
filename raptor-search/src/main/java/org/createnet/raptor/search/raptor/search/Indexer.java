@@ -70,7 +70,9 @@ public interface Indexer {
   public class IndexRecord {
 
     private boolean isNew = false;
-
+    
+    public String parent = null;
+    
     public String index;
     public String type;
     public String id;

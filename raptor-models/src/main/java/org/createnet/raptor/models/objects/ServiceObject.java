@@ -68,7 +68,7 @@ public class ServiceObject extends ServiceObjectContainer {
   final public Map<String, Stream> streams = new HashMap();
   final public Map<String, Subscription> subscriptions = new HashMap();
   final public Map<String, Action> actions = new HashMap();
-  final private List<ServiceObject> children = new ArrayList();
+  final public List<ServiceObject> children = new ArrayList();
 
   public void addStreams(Collection<Stream> streams) {
     streams.stream().forEach((stream) -> {
@@ -117,7 +117,7 @@ public class ServiceObject extends ServiceObjectContainer {
 
   @Override
   public String toString() {
-    return "ServiceObject<" + (this.id == null ? this.id : this.name) + ">";
+    return "ServiceObject<" + (this.id != null ? this.id : this.name) + ">";
   }
 
   public String getId() {
@@ -132,10 +132,6 @@ public class ServiceObject extends ServiceObjectContainer {
     updatedAt = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
   }
 
-  public boolean isRoot() {
-    return parent == null;
-  }
-
   public ServiceObject getParent() {
     return parent;
   }
@@ -147,7 +143,11 @@ public class ServiceObject extends ServiceObjectContainer {
   public void addChild(ServiceObject obj) {
     getChildren().add(obj);
   }
-
+  
+  public void removeChild(ServiceObject obj) {
+    getChildren().remove(obj);
+  }
+  
   @Override
   public void validate() throws ValidationException {
 
@@ -205,24 +205,25 @@ public class ServiceObject extends ServiceObjectContainer {
     customFields.putAll(serviceObject.customFields);
 
     parent = serviceObject.parent;
+    children.addAll(serviceObject.children);
 
     streams.clear();
-    for (Map.Entry<String, Stream> el : serviceObject.streams.entrySet()) {
-      el.getValue().setServiceObject(this);
+    serviceObject.streams.entrySet().stream().forEach((el) -> {
+      el.getValue().setServiceObject(this);      
       streams.put(el.getKey(), el.getValue());
-    }
+    });
 
     subscriptions.clear();
-    for (Map.Entry<String, Subscription> el : serviceObject.subscriptions.entrySet()) {
+    serviceObject.subscriptions.entrySet().stream().forEach((el) -> {
       el.getValue().setServiceObject(this);
       subscriptions.put(el.getKey(), el.getValue());
-    }
+    });
 
     actions.clear();
-    for (Map.Entry<String, Action> el : serviceObject.actions.entrySet()) {
+    serviceObject.actions.entrySet().stream().forEach((el) -> {
       el.getValue().setServiceObject(this);
       actions.put(el.getKey(), el.getValue());
-    }
+    });
 
     isNew = (id == null);
   }

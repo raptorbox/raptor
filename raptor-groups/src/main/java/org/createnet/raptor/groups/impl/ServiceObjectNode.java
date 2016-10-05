@@ -13,45 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.http.service;
+package org.createnet.raptor.groups.impl;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.createnet.raptor.groups.AbstractNode;
+import org.createnet.raptor.groups.Node;
 import org.createnet.raptor.models.objects.ServiceObject;
-import org.jvnet.hk2.annotations.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-@Service
-public class GroupService implements RaptorService {
-
-  private final Logger logger = LoggerFactory.getLogger(GroupService.class);
-
-  @Inject
-  ConfigurationService configuration;
-
-  @Inject
-  IndexerService indexer;
-    
-  @PostConstruct
-  @Override
-  public void initialize() throws ServiceException {}
-
-  @PreDestroy
-  @Override
-  public void shutdown() throws ServiceException {}
+public class ServiceObjectNode extends AbstractNode<ServiceObject>{
   
-  public void save(ServiceObject obj) {
-    
+  final protected ServiceObject item;
+  
+  public ServiceObjectNode(ServiceObject obj) {
+    this.item = obj;
   }
-  
-  public void load(ServiceObject object) {
-      
+
+  @Override
+  public Node getParent() {
+
+    if(item.getParent() == null )  {
+      return null;
+    }
+    
+    return new ServiceObjectNode(item.getParent());
+  }
+
+  @Override
+  public List<Node> getChildren() {
+    return item.getChildren().stream().map((ServiceObject o)-> { return new ServiceObjectNode(o); }).collect(Collectors.toList());
   }
   
 }

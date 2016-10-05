@@ -17,8 +17,6 @@ package org.createnet.raptor.search.raptor.search.query.impl.es;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.createnet.raptor.search.raptor.search.query.AbstractQuery;
-import java.util.Iterator;
-import java.util.Map;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -26,104 +24,98 @@ import org.elasticsearch.index.query.QueryBuilders;
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
+ *
+ * Implement child and parent query ---
+ *
+ * -
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-has-child-query.html
+ * -
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-has-parent-query.html
+ *
  */
-public class ObjectQuery extends AbstractQuery {
+public class TreeQuery extends AbstractQuery {
 
-  public String search;
-
-  public String name;
-  public String description;
-
-  public Map<String, Object> customFields;
-  
-  @JsonIgnore
-  private String userId;
-
-  public void setUserId(String userId) {
-    this.userId = userId;
-  }
-
-  public String getUserId() {
-    return this.userId;
-  }
-
-  @Override
-  public void validate() throws QueryException {
-    
-    if(userId == null) {
-      throw new QueryException("userId not specified");
-    }
-    
-    if (search != null && search.length() > 0) {
-      return;
+    public enum TreeQueryType {
+        hasChild, hasParent
     }
 
-    if (name != null && name.length() > 0) {
-      return;
+    private TreeQueryType queryType;
+
+    private String objectId;
+
+    @JsonIgnore
+    private String userId;
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    if (description != null && description.length() > 0) {
-      return;
+    public String getUserId() {
+        return this.userId;
     }
 
-    if (customFields != null) {
-      if (customFields == null || customFields.isEmpty()) {
-        throw new QueryException("customFields must be a non-empty object.");
-      }
-      return;
-    }
+    @Override
+    public void validate() throws QueryException {
 
-//    throw new QueryException("Query is empty");
-  }
+        if (userId == null) {
+            throw new QueryException("userId not specified");
+        }
 
-  protected QueryBuilder buildQuery() {
+        if (queryType == null) {
+            throw new QueryException("queryType not specified");
+        }
 
-    BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-    
-    boolQuery.must(QueryBuilders.matchQuery("userId", userId));
-    
-    if (search != null && search.length() > 0) {
-      boolQuery.must(QueryBuilders.multiMatchQuery(search, "name", "customFields.*", "description", "id"));
-      return boolQuery;
-    }
-
-    if (name != null && name.length() > 0) {
-      boolQuery.must(QueryBuilders.matchQuery("name", name.toLowerCase()));
-    }
-
-    if (description != null && description.length() > 0) {
-      boolQuery.must(QueryBuilders.matchQuery("description", description.toLowerCase()));
-    }
-
-    if (customFields != null && !customFields.isEmpty()) {
-
-      Iterator<?> keys = customFields.entrySet().iterator();
-      while (keys.hasNext()) {
-
-        String key = (String) keys.next();
-        String val = customFields.get(key).toString().toLowerCase();
-
-        boolQuery.must(QueryBuilders.matchQuery("customFields." + key, val));
-
-      }
+        if (objectId == null) {
+            throw new QueryException("objectId not specified");
+        }
 
     }
 
-    return boolQuery.hasClauses() ? boolQuery : null;
-  }
+    protected QueryBuilder buildQuery() {
 
-  @Override
-  public String format() throws QueryException {
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
-    validate();
-
-    QueryBuilder qb = buildQuery();
-
-    if (qb == null) {
-      throw new QueryException("Query is empty");
+        boolQuery.must(QueryBuilders.matchQuery("userId", userId));
+        
+        
+//    if (name != null && name.length() > 0) {
+//      boolQuery.must(QueryBuilders.matchQuery("name", name.toLowerCase()));
+//    }
+//
+//    if (description != null && description.length() > 0) {
+//      boolQuery.must(QueryBuilders.matchQuery("description", description.toLowerCase()));
+//    }
+//
+//    if (customFields != null && !customFields.isEmpty()) {
+//
+//      Iterator<?> keys = customFields.entrySet().iterator();
+//      while (keys.hasNext()) {
+//
+//        String key = (String) keys.next();
+//        String val = customFields.get(key).toString().toLowerCase();
+//
+//        boolQuery.must(QueryBuilders.matchQuery("customFields." + key, val));
+//
+//      }
+//
+//    }
+//
+//    return boolQuery.hasClauses() ? boolQuery : null;
+        return null;
     }
 
-    return qb.toString();
-  }
+    @Override
+    public String format() throws QueryException {
+
+        validate();
+
+        QueryBuilder qb = buildQuery();
+
+        if (qb == null) {
+            throw new QueryException("Query is empty");
+        }
+
+        return qb.toString();
+    }
 
 }
