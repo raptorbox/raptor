@@ -24,24 +24,16 @@ import org.elasticsearch.index.query.QueryBuilders;
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
- *
- * Implement child and parent query ---
- *
- * -
- * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-has-child-query.html
- * -
- * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-has-parent-query.html
- *
  */
 public class TreeQuery extends AbstractQuery {
 
-    public enum TreeQueryType {
-        hasChild, hasParent
+    enum TreeQueryType {
+        Parent, Children, Root
     }
 
-    private TreeQueryType queryType;
-
-    private String objectId;
+    public String id;
+    public String parentId;
+    public TreeQueryType queryType;
 
     @JsonIgnore
     private String userId;
@@ -61,14 +53,6 @@ public class TreeQuery extends AbstractQuery {
             throw new QueryException("userId not specified");
         }
 
-        if (queryType == null) {
-            throw new QueryException("queryType not specified");
-        }
-
-        if (objectId == null) {
-            throw new QueryException("objectId not specified");
-        }
-
     }
 
     protected QueryBuilder buildQuery() {
@@ -76,8 +60,16 @@ public class TreeQuery extends AbstractQuery {
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
         boolQuery.must(QueryBuilders.matchQuery("userId", userId));
-        
-        
+
+        switch (queryType) {
+            case Parent:
+                break;
+            case Children:
+                break;
+            case Root:
+                break;
+        }
+
 //    if (name != null && name.length() > 0) {
 //      boolQuery.must(QueryBuilders.matchQuery("name", name.toLowerCase()));
 //    }

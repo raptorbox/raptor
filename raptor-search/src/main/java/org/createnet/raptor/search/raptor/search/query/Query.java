@@ -46,6 +46,9 @@ public interface Query {
   public String getIndex();
   public String getType();
   
+  public void setIndex(String index);
+  public void setType(String type);
+  
   public SortBy getSort();
   public Integer getLimit();
   public Integer getOffset();
