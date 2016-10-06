@@ -56,7 +56,7 @@ public class ActionApi extends AbstractApi {
   @Produces(MediaType.APPLICATION_JSON)
   public Collection<Action> list(
           @PathParam("id") String id
-  )  {
+  ) throws ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException  {
 
     ServiceObject obj = loadObject(id);
 
@@ -71,7 +71,7 @@ public class ActionApi extends AbstractApi {
   public Response getStatus(
           @PathParam("id") String id,
           @PathParam("actionId") String actionId
-  )  {
+  ) throws ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException, IOException, Storage.StorageException  {
 
     ServiceObject obj = loadObject(id);
     Action action = loadAction(actionId, obj);
@@ -126,7 +126,7 @@ public class ActionApi extends AbstractApi {
   public Response deleteStatus(
           @PathParam("id") String id,
           @PathParam("actionId") String actionId
-  ) {
+  ) throws ConfigurationException, Storage.StorageException, Authorization.AuthorizationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
 
     ServiceObject obj = loadObject(id);
     Action action = loadAction(actionId, obj);

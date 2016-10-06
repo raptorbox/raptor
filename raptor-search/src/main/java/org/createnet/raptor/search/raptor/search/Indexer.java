@@ -24,7 +24,7 @@ import org.createnet.raptor.search.raptor.search.query.Query;
  */
 public interface Indexer {
   
-  public class IndexerException extends RuntimeException {
+  public class IndexerException extends Exception {
 
     public IndexerException(Exception ex) {
       super("IndexerException", ex);

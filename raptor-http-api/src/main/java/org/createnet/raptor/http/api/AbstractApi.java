@@ -20,6 +20,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
+import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.config.exception.ConfigurationException;
@@ -56,7 +57,7 @@ abstract public class AbstractApi {
   @Inject
   protected AuthService auth;
   
-  protected ServiceObject loadObject(String id) {
+  protected ServiceObject loadObject(String id) throws ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
 
     List<ServiceObject> objs = indexer.getObjects(Arrays.asList(id));
 

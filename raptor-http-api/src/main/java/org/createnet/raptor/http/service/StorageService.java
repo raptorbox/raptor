@@ -273,7 +273,7 @@ public class StorageService implements RaptorService {
     return action.getServiceObject().id + "-" + action.name;
   }
 
-  public ActionStatus getActionStatus(Action action) {
+  public ActionStatus getActionStatus(Action action) throws IOException, ConfigurationException, Storage.StorageException {
 
     JsonNode rawStatus = getActionConnection().get(getActionId(action));
 
@@ -282,7 +282,7 @@ public class StorageService implements RaptorService {
     return actionStatus;
   }
 
-  public ActionStatus saveActionStatus(Action action, String status) {
+  public ActionStatus saveActionStatus(Action action, String status) throws ConfigurationException, Storage.StorageException {
 
     ActionStatus actionStatus = new ActionStatus(action, status);
 

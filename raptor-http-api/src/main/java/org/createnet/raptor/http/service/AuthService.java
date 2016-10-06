@@ -58,23 +58,23 @@ public class AuthService {
     return auth;
   }
 
-  public boolean isAllowed(String accessToken, ServiceObject obj, Authorization.Permission op) {
+  public boolean isAllowed(String accessToken, ServiceObject obj, Authorization.Permission op) throws ConfigurationException, Authorization.AuthorizationException {
     return getProvider().isAuthorized(accessToken, obj, op);
   }
 
-  public boolean isAllowed(ServiceObject obj, Authorization.Permission op) {
+  public boolean isAllowed(ServiceObject obj, Authorization.Permission op) throws ConfigurationException, Authorization.AuthorizationException {
     return getProvider().isAuthorized(getAccessToken(), obj, op);
   }
 
-  public boolean isAllowed(Authorization.Permission op) {
+  public boolean isAllowed(Authorization.Permission op) throws ConfigurationException, Authorization.AuthorizationException {
     return isAllowed(null, op);
   }
 
-  public UserInfo getUser() {
+  public UserInfo getUser() throws ConfigurationException, Authentication.AuthenticationException {
     return getProvider().getUser(getAccessToken());
   }
 
-  public UserInfo getUser(String accessToken) {
+  public UserInfo getUser(String accessToken) throws ConfigurationException, Authentication.AuthenticationException {
     return getProvider().getUser(accessToken);
   }
 
@@ -89,7 +89,7 @@ public class AuthService {
     return securityContext.getUserPrincipal().getName();
   }
 
-  public void sync(String token, ServiceObject obj, Authentication.SyncOperation op) {
+  public void sync(String token, ServiceObject obj, Authentication.SyncOperation op) throws ConfigurationException, Authentication.AuthenticationException {
     getProvider().sync(token, obj, op);
   }
 

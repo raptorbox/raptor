@@ -37,7 +37,6 @@ import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.search.raptor.search.Indexer;
 import org.createnet.raptor.search.raptor.search.IndexerConfiguration;
 import org.createnet.raptor.search.raptor.search.IndexerProvider;
-import org.createnet.raptor.search.raptor.search.query.AbstractQuery;
 import org.createnet.raptor.search.raptor.search.query.Query;
 import org.createnet.raptor.search.raptor.search.query.impl.es.DataQuery;
 import org.createnet.raptor.search.raptor.search.query.impl.es.LastUpdateQuery;
