@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 @Service
-public class GroupService implements RaptorService {
+public class GroupService implements RaptorService{
 
   private final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
@@ -51,7 +51,7 @@ public class GroupService implements RaptorService {
   }
   
   public void load(ServiceObject object) {
-      
+
   }
   
 }

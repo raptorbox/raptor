@@ -29,7 +29,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -78,8 +77,35 @@ public class ObjectApi extends AbstractApi {
     if (!auth.isAllowed(Authorization.Permission.List)) {
       throw new ForbiddenException("Cannot list objects");
     }
+    
+    // TODO: List device which access is allowed
+    
+    List<ServiceObject> list = indexer.getObjects(auth.getUser().getUserId());
+    List<String> idList = new ArrayList();
+    list.stream().forEach((obj) -> {
+      idList.add(obj.id);
+    });
 
-    List<ServiceObject> list = storage.listObjects(auth.getUser().getUserId());
+    return idList;
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @ApiOperation(value = "List available devices definition", notes = "")
+  @ApiResponses(value = {
+    @ApiResponse(code = 200, message = "Ok"),
+    @ApiResponse(code = 403, message = "Forbidden")
+  })
+  public List<String> children() throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.IndexerException {
+
+    if (!auth.isAllowed(Authorization.Permission.List)) {
+      throw new ForbiddenException("Cannot list children objects");
+    }
+    
+    // TODO: List device which access is allowed
+    
+    List<ServiceObject> list = indexer.getObjects(auth.getUser().getUserId());
+    
     List<String> idList = new ArrayList();
     list.stream().forEach((obj) -> {
       idList.add(obj.id);
@@ -218,7 +244,7 @@ public class ObjectApi extends AbstractApi {
     @ApiResponse(code = 200, message = "Ok"),
     @ApiResponse(code = 403, message = "Forbidden")
   })
-  public String load(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException {
+  public String load(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Indexer.IndexerException {
 
     logger.debug("Load object {}", id);
 
@@ -337,11 +363,9 @@ public class ObjectApi extends AbstractApi {
 
   private List<Action> getChangedActions(ServiceObject storedObj, ServiceObject obj) {
     List<Action> changedAction = new ArrayList();
-    for (Action action : obj.actions.values()) {
-      if (!storedObj.actions.containsKey(action.name)) {
+    obj.actions.values().stream().filter((action) -> (!storedObj.actions.containsKey(action.name))).forEachOrdered((action) -> {
         changedAction.add(action);
-      }
-    }
+      });
     return changedAction;
   }
 

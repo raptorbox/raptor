@@ -41,6 +41,7 @@ import org.createnet.raptor.http.service.EventEmitterService;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Action;
+import org.createnet.raptor.search.raptor.search.Indexer;
 
 /**
  *
@@ -55,7 +56,7 @@ public class ActionApi extends AbstractApi {
   @Produces(MediaType.APPLICATION_JSON)
   public Collection<Action> list(
           @PathParam("id") String id
-  ) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException {
+  )  {
 
     ServiceObject obj = loadObject(id);
 
@@ -70,7 +71,7 @@ public class ActionApi extends AbstractApi {
   public Response getStatus(
           @PathParam("id") String id,
           @PathParam("actionId") String actionId
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, IOException {
+  )  {
 
     ServiceObject obj = loadObject(id);
     Action action = loadAction(actionId, obj);
@@ -98,7 +99,7 @@ public class ActionApi extends AbstractApi {
           @PathParam("id") String id,
           @PathParam("actionId") String actionId,
           String body
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, IOException {
+  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, IOException, Indexer.IndexerException {
 
     ServiceObject obj = loadObject(id);
     Action action = loadAction(actionId, obj);
@@ -125,7 +126,7 @@ public class ActionApi extends AbstractApi {
   public Response deleteStatus(
           @PathParam("id") String id,
           @PathParam("actionId") String actionId
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, IOException {
+  ) {
 
     ServiceObject obj = loadObject(id);
     Action action = loadAction(actionId, obj);

@@ -41,6 +41,7 @@ import org.createnet.raptor.search.raptor.search.query.AbstractQuery;
 import org.createnet.raptor.search.raptor.search.query.Query;
 import org.createnet.raptor.search.raptor.search.query.impl.es.DataQuery;
 import org.createnet.raptor.search.raptor.search.query.impl.es.LastUpdateQuery;
+import org.createnet.raptor.search.raptor.search.query.impl.es.ObjectListQuery;
 import org.createnet.raptor.search.raptor.search.query.impl.es.ObjectQuery;
 
 /**
@@ -50,221 +51,230 @@ import org.createnet.raptor.search.raptor.search.query.impl.es.ObjectQuery;
 @Service
 public class IndexerService implements RaptorService {
 
-  @Inject
-  ConfigurationService configuration;
+    @Inject
+    ConfigurationService configuration;
 
-  /**
-   * Limit of records that can be fetched per request
-   */  
-  private final int defaultRecordLimit = 1000;
-  
-  private Indexer indexer;
+    /**
+     * Limit of records that can be fetched per request
+     */
+    private final int defaultRecordLimit = 1000;
 
-  List<ServiceObject> getObjects(String userId) throws ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
-    ObjectQuery q = new ObjectQuery();
-    q.setUserId(userId);
-    return searchObject(q);
-  }
+    private Indexer indexer;
 
-  public enum IndexNames { object, data, subscriptions }
-
-  @PostConstruct
-  @Override
-  public void initialize() throws ServiceException {
-    try {
-      getIndexer();
-    } catch (Indexer.IndexerException | ConfigurationException e) {
-      throw new ServiceException(e);
-    }
-  }
-
-  @PreDestroy
-  @Override
-  public void shutdown() throws ServiceException {
-    try {
-      getIndexer().close();
-      indexer = null;
-    } catch (Indexer.IndexerException | ConfigurationException e) {
-      throw new ServiceException(e);
-    }
-  }
-
-  public Indexer getIndexer() throws Indexer.IndexerException, ConfigurationException {
-
-    if (indexer == null) {
-      indexer = new IndexerProvider();
-      indexer.initialize(configuration.getIndexer());
-      indexer.open();
-      indexer.setup(false);
+    public List<ServiceObject> getObjects(String userId) throws ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+        ObjectQuery q = new ObjectQuery();
+        q.setUserId(userId);
+        return searchObject(q);
     }
 
-    return indexer;
-  }
-
-  protected IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor getIndexDescriptor(IndexNames name) throws ConfigurationException {
-    return configuration.getIndexer().elasticsearch.indices.names.get(name.toString());
-  }
-
-  public Indexer.IndexRecord getIndexRecord(IndexNames name) throws ConfigurationException {
-    IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = getIndexDescriptor(name);
-    return new Indexer.IndexRecord(desc.index, desc.type);
-  }
-
-  private void setQueryIndex(AbstractQuery query, IndexNames name) throws ConfigurationException {
-    IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = getIndexDescriptor(name);
-    query.setIndex(desc.index);
-    query.setType(desc.type);
-  }
-
-  public void indexObject(ServiceObject obj, boolean isNew) throws ConfigurationException, Indexer.IndexerException, RaptorComponent.ParserException {
-
-    Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
-    record.id = obj.id;
-    record.body = obj.toJSON(ServiceObjectView.Internal);
-
-    // force creation
-    record.isNew(isNew);
-
-    getIndexer().save(record);
-  }
-
-  public void deleteObject(ServiceObject obj) throws ConfigurationException, Indexer.IndexerException, IOException, RecordsetException {
-
-    Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
-    record.id = obj.id;
-
-    getIndexer().delete(record);
-
-    deleteData(obj.streams.values());
-
-  }
-
-  public List<ServiceObject> searchObject(ObjectQuery query) throws Indexer.SearchException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
-
-    setQueryIndex(query, IndexNames.object);
-
-    List<String> results = getIndexer().search(query);
-    List<ServiceObject> list = new ArrayList();
-
-    for (String result : results) {
-      list.add(ServiceObject.fromJSON(result));
+    public List<ServiceObject> getObjects(List<String> ids) throws ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+        ObjectListQuery q = new ObjectListQuery();
+        q.ids.addAll(ids);
+        return searchObject(q);
     }
 
-    return list;
-  }
-
-  public RecordSet searchLastUpdate(Stream stream) throws ConfigurationException, Indexer.SearchException, RecordsetException, Indexer.IndexerException {
-
-    LastUpdateQuery lastUpdateQuery = new LastUpdateQuery(stream.getServiceObject().id, stream.name);
-    setQueryIndex(lastUpdateQuery, IndexNames.data);
-
-    lastUpdateQuery.setOffset(0);
-    lastUpdateQuery.setLimit(1);
-    lastUpdateQuery.setSort(new Query.SortBy("lastUpdate", Query.Sort.DESC));
-
-    List<String> results = getIndexer().search(lastUpdateQuery);
-
-    if (results.isEmpty()) {
-      return null;
+    public enum IndexNames {
+        object, data, subscriptions
     }
 
-    return new RecordSet(stream, results.get(0));
-  }
-
-  public void indexData(Stream stream, RecordSet recordSet) throws ConfigurationException, IOException, Indexer.IndexerException, Authentication.AuthenticationException {
-
-    Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
-    record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getLastUpdate().getTime();
-    record.isNew(true);
-
-    ObjectNode data = (ObjectNode) recordSet.toJsonNode();
-
-    data.put("streamId", stream.name);
-    data.put("objectId", stream.getServiceObject().getId());
-    data.put("userId", stream.getServiceObject().getUserId());
-
-    record.body = data.toString();
-
-    getIndexer().save(record);
-  }
-  
-  public List<RecordSet> getStreamData(Stream stream) throws ConfigurationException, Indexer.IndexerException, RecordsetException {
-
-    DataQuery query = new DataQuery();
-    setQueryIndex(query, IndexNames.data);
-
-    query.match = true;
-    query.matchfield = "streamId";
-    query.matchstring = stream.name;
-    
-    List<String> rawResults = getIndexer().search(query);
-    List<RecordSet> results = new ArrayList();
-    
-    for (String result : rawResults) {
-      RecordSet recordSet = new RecordSet(stream, result);
-      results.add(recordSet);
-    }  
-    
-    return results;
-  }
-  
-  public void deleteData(Stream stream) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
-
-    List<Indexer.IndexOperation> deletes = new ArrayList();
-    List<RecordSet> results = getStreamData(stream);
-    
-    for (RecordSet recordSet : results) {
-
-      Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
-      record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getLastUpdate().getTime();
-
-      Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.DELETE, record);
-      deletes.add(op);
+    @PostConstruct
+    @Override
+    public void initialize() throws ServiceException {
+        try {
+            getIndexer();
+        } catch (Indexer.IndexerException | ConfigurationException e) {
+            throw new ServiceException(e);
+        }
     }
 
-    getIndexer().batch(deletes);
-
-  }
-
-  public ResultSet searchData(Stream stream, DataQuery query) throws Indexer.SearchException, RecordsetException, Indexer.IndexerException, ConfigurationException {
-    
-    setQueryIndex(query, IndexNames.data);
-    List<String> res = getIndexer().search(query);
-    
-    ResultSet resultset = new ResultSet(stream);
-    for (String raw : res) {
-      resultset.add(new RecordSet(stream, raw));
+    @PreDestroy
+    @Override
+    public void shutdown() throws ServiceException {
+        try {
+            getIndexer().close();
+            indexer = null;
+        } catch (Indexer.IndexerException | ConfigurationException e) {
+            throw new ServiceException(e);
+        }
     }
 
-    return resultset;
-  }
+    public Indexer getIndexer() throws Indexer.IndexerException, ConfigurationException {
 
-  public void deleteData(Collection<Stream> changedStreams) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
-    for (Stream changedStream : changedStreams) {
-      deleteData(changedStream);
+        if (indexer == null) {
+            indexer = new IndexerProvider();
+            indexer.initialize(configuration.getIndexer());
+            indexer.open();
+            indexer.setup(false);
+        }
+
+        return indexer;
     }
-  }
-  
-  public ResultSet fetchData(Stream stream) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
-    return fetchData(stream, 0);
-  }
-  public ResultSet fetchData(Stream stream, long limit) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
-    
-    // query for all the data
-    DataQuery query = new DataQuery();
-    setQueryIndex(query, IndexNames.data);
 
-    query.setLimit(defaultRecordLimit);
-    query.setSort(new Query.SortBy("lastUpdate", Query.Sort.DESC));
-    query.timeRange(Instant.EPOCH);
-    
-    ResultSet data = searchData(stream, query);
-    return data;
-  }
+    protected IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor getIndexDescriptor(IndexNames name) throws ConfigurationException {
+        return configuration.getIndexer().elasticsearch.indices.names.get(name.toString());
+    }
 
-  public RecordSet fetchLastUpdate(Stream stream) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
-    ResultSet data = fetchData(stream, 1);
-    return data.size() > 0 ? data.get(0) : null;
-  }
-  
+    public Indexer.IndexRecord getIndexRecord(IndexNames name) throws ConfigurationException {
+        IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = getIndexDescriptor(name);
+        return new Indexer.IndexRecord(desc.index, desc.type);
+    }
+
+    private void setQueryIndex(Query query, IndexNames name) throws ConfigurationException {
+        IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = getIndexDescriptor(name);
+        query.setIndex(desc.index);
+        query.setType(desc.type);
+    }
+
+    public void indexObject(ServiceObject obj, boolean isNew) throws ConfigurationException, Indexer.IndexerException, RaptorComponent.ParserException {
+
+        Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
+        record.id = obj.id;
+        record.body = obj.toJSON(ServiceObjectView.Internal);
+
+        // force creation
+        record.isNew(isNew);
+
+        getIndexer().save(record);
+    }
+
+    public void deleteObject(ServiceObject obj) throws ConfigurationException, Indexer.IndexerException, IOException, RecordsetException {
+
+        Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
+        record.id = obj.id;
+
+        getIndexer().delete(record);
+
+        deleteData(obj.streams.values());
+
+    }
+
+    public List<ServiceObject> searchObject(Query query) throws Indexer.SearchException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+
+        setQueryIndex(query, IndexNames.object);
+
+        List<String> results = getIndexer().search(query);
+        List<ServiceObject> list = new ArrayList();
+
+        for (String result : results) {
+            list.add(ServiceObject.fromJSON(result));
+        }
+
+        return list;
+    }
+
+    public RecordSet searchLastUpdate(Stream stream) throws ConfigurationException, Indexer.SearchException, RecordsetException, Indexer.IndexerException {
+
+        LastUpdateQuery lastUpdateQuery = new LastUpdateQuery(stream.getServiceObject().id, stream.name);
+        setQueryIndex(lastUpdateQuery, IndexNames.data);
+
+        lastUpdateQuery.setOffset(0);
+        lastUpdateQuery.setLimit(1);
+        lastUpdateQuery.setSort(new Query.SortBy("lastUpdate", Query.Sort.DESC));
+
+        List<String> results = getIndexer().search(lastUpdateQuery);
+
+        if (results.isEmpty()) {
+            return null;
+        }
+
+        return new RecordSet(stream, results.get(0));
+    }
+
+    public void indexData(Stream stream, RecordSet recordSet) throws ConfigurationException, IOException, Indexer.IndexerException, Authentication.AuthenticationException {
+
+        Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
+        record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getLastUpdate().getTime();
+        record.isNew(true);
+
+        ObjectNode data = (ObjectNode) recordSet.toJsonNode();
+
+        data.put("streamId", stream.name);
+        data.put("objectId", stream.getServiceObject().getId());
+        data.put("userId", stream.getServiceObject().getUserId());
+
+        record.body = data.toString();
+
+        getIndexer().save(record);
+    }
+
+    public List<RecordSet> getStreamData(Stream stream) throws ConfigurationException, Indexer.IndexerException, RecordsetException {
+
+        DataQuery query = new DataQuery();
+        setQueryIndex(query, IndexNames.data);
+
+        query.match = true;
+        query.matchfield = "streamId";
+        query.matchstring = stream.name;
+
+        List<String> rawResults = getIndexer().search(query);
+        List<RecordSet> results = new ArrayList();
+
+        for (String result : rawResults) {
+            RecordSet recordSet = new RecordSet(stream, result);
+            results.add(recordSet);
+        }
+
+        return results;
+    }
+
+    public void deleteData(Stream stream) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
+
+        List<Indexer.IndexOperation> deletes = new ArrayList();
+        List<RecordSet> results = getStreamData(stream);
+
+        for (RecordSet recordSet : results) {
+
+            Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
+            record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getLastUpdate().getTime();
+
+            Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.DELETE, record);
+            deletes.add(op);
+        }
+
+        getIndexer().batch(deletes);
+
+    }
+
+    public ResultSet searchData(Stream stream, DataQuery query) throws Indexer.SearchException, RecordsetException, Indexer.IndexerException, ConfigurationException {
+
+        setQueryIndex(query, IndexNames.data);
+        List<String> res = getIndexer().search(query);
+
+        ResultSet resultset = new ResultSet(stream);
+        for (String raw : res) {
+            resultset.add(new RecordSet(stream, raw));
+        }
+
+        return resultset;
+    }
+
+    public void deleteData(Collection<Stream> changedStreams) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
+        for (Stream changedStream : changedStreams) {
+            deleteData(changedStream);
+        }
+    }
+
+    public ResultSet fetchData(Stream stream) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
+        return fetchData(stream, 0);
+    }
+
+    public ResultSet fetchData(Stream stream, long limit) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
+
+        // query for all the data
+        DataQuery query = new DataQuery();
+        setQueryIndex(query, IndexNames.data);
+
+        query.setLimit(defaultRecordLimit);
+        query.setSort(new Query.SortBy("lastUpdate", Query.Sort.DESC));
+        query.timeRange(Instant.EPOCH);
+
+        ResultSet data = searchData(stream, query);
+        return data;
+    }
+
+    public RecordSet fetchLastUpdate(Stream stream) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
+        ResultSet data = fetchData(stream, 1);
+        return data.size() > 0 ? data.get(0) : null;
+    }
+
 }

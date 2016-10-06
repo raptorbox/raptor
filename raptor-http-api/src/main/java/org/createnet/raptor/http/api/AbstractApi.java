@@ -15,7 +15,8 @@
  */
 package org.createnet.raptor.http.api;
 
-import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
@@ -31,6 +32,7 @@ import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.search.raptor.search.Indexer;
 
 /**
  *
@@ -54,10 +56,12 @@ abstract public class AbstractApi {
   @Inject
   protected AuthService auth;
   
-  protected ServiceObject loadObject(String id) throws Authorization.AuthorizationException, Storage.StorageException, RaptorComponent.ParserException, ConfigurationException {
+  protected ServiceObject loadObject(String id) {
 
-    ServiceObject obj = storage.getObject(id);
+    List<ServiceObject> objs = indexer.getObjects(Arrays.asList(id));
 
+    ServiceObject obj = objs.get(0);
+    
     if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
       throw new ForbiddenException("Cannot access object");
     }

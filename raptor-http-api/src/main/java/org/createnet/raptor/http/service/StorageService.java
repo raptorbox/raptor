@@ -156,10 +156,6 @@ public class StorageService implements RaptorService {
 
   }
 
-  public List<ServiceObject> listObjects(String userId) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException,  RaptorComponent.ParserException, Indexer.IndexerException {
-    return indexer.getObjects(userId);
-  }
-
   // Data 
   protected String getDataId(Stream stream, RecordSet record) {
     return stream.getServiceObject().id + "-" + stream.name + "-" + record.getLastUpdate().getTime();
@@ -277,7 +273,7 @@ public class StorageService implements RaptorService {
     return action.getServiceObject().id + "-" + action.name;
   }
 
-  public ActionStatus getActionStatus(Action action) throws ConfigurationException, Storage.StorageException, IOException, RaptorComponent.ParserException {
+  public ActionStatus getActionStatus(Action action) {
 
     JsonNode rawStatus = getActionConnection().get(getActionId(action));
 
@@ -286,7 +282,7 @@ public class StorageService implements RaptorService {
     return actionStatus;
   }
 
-  public ActionStatus saveActionStatus(Action action, String status) throws IOException, ConfigurationException, Storage.StorageException, RaptorComponent.ParserException {
+  public ActionStatus saveActionStatus(Action action, String status) {
 
     ActionStatus actionStatus = new ActionStatus(action, status);
 
