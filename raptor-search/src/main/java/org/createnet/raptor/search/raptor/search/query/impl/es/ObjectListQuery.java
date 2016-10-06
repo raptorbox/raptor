@@ -21,6 +21,7 @@ import java.util.List;
 import org.createnet.raptor.search.raptor.search.query.AbstractQuery;
 import org.createnet.raptor.search.raptor.search.query.Query;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 
@@ -29,7 +30,7 @@ import org.elasticsearch.index.query.QueryBuilders;
  * @author l
  */
 public class ObjectListQuery extends AbstractQuery {
-    
+
     public String userId;
     final public List<String> ids = new ArrayList();
 
@@ -40,13 +41,16 @@ public class ObjectListQuery extends AbstractQuery {
     protected QueryBuilder buildQuery() {
 
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        
-        if(userId != null)
+
+        if (userId != null) {
             boolQuery.must(QueryBuilders.matchQuery("userId", userId));
-        
-        String [] idsArr = ids.toArray(new String[ids.size()]);
-        boolQuery.must(QueryBuilders.idsQuery(idsArr));
-        
+        }
+
+        IdsQueryBuilder idsQuery = QueryBuilders.idsQuery(this.getType());
+        idsQuery.addIds(ids);
+
+        boolQuery.must(idsQuery);
+
         return boolQuery.hasClauses() ? boolQuery : null;
     }
 

@@ -71,8 +71,6 @@ public interface Indexer {
 
     private boolean isNew = false;
     
-    public String parent = null;
-    
     public String index;
     public String type;
     public String id;

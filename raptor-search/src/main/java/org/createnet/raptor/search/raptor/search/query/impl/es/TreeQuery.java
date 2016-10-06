@@ -26,8 +26,14 @@ import org.elasticsearch.index.query.QueryBuilders;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class TreeQuery extends AbstractQuery {
-
-    enum TreeQueryType {
+    
+    public static class TreeRecord {
+        public String parentId;
+        public String id;
+        public String path;
+    }
+    
+    public static enum TreeQueryType {
         Parent, Children, Root
     }
 

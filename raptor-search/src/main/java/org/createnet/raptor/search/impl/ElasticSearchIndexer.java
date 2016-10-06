@@ -160,7 +160,6 @@ public class ElasticSearchIndexer extends AbstractIndexer {
       IndexResponse response = client.prepareIndex(record.index, record.type, record.id)
               .setSource(record.body)
               .setTimeout(getTimeout())
-              .setParent(record.parent)
               .get();
 
     } catch (Exception e) {

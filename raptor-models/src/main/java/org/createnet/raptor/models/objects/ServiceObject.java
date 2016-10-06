@@ -53,11 +53,10 @@ public class ServiceObject extends ServiceObjectContainer {
 
   public String userId;
   public String id;
+  public String parentId;
 
   public String name;
   public String description = "";
-
-  public ServiceObject parent = null;
 
   public Long createdAt = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
   public Long updatedAt = createdAt;
@@ -68,7 +67,6 @@ public class ServiceObject extends ServiceObjectContainer {
   final public Map<String, Stream> streams = new HashMap();
   final public Map<String, Subscription> subscriptions = new HashMap();
   final public Map<String, Action> actions = new HashMap();
-  final public List<ServiceObject> children = new ArrayList();
 
   public void addStreams(Collection<Stream> streams) {
     streams.stream().forEach((stream) -> {
@@ -131,22 +129,6 @@ public class ServiceObject extends ServiceObjectContainer {
   public void setUpdateTime() {
     updatedAt = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
   }
-
-  public ServiceObject getParent() {
-    return parent;
-  }
-
-  public List<ServiceObject> getChildren() {
-    return children;
-  }
-
-  public void addChild(ServiceObject obj) {
-    getChildren().add(obj);
-  }
-  
-  public void removeChild(ServiceObject obj) {
-    getChildren().remove(obj);
-  }
   
   @Override
   public void validate() throws ValidationException {
@@ -203,9 +185,6 @@ public class ServiceObject extends ServiceObjectContainer {
 
     customFields.clear();
     customFields.putAll(serviceObject.customFields);
-
-    parent = serviceObject.parent;
-    children.addAll(serviceObject.children);
 
     streams.clear();
     serviceObject.streams.entrySet().stream().forEach((el) -> {

@@ -23,7 +23,6 @@ import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.auth.service.acl.RaptorPermission;
 import org.createnet.raptor.auth.service.entity.Device;
 import org.createnet.raptor.auth.service.entity.User;
-import org.createnet.raptor.auth.service.exception.DeviceNotFoundException;
 import org.createnet.raptor.auth.service.services.AclDeviceService;
 import org.createnet.raptor.auth.service.services.DeviceService;
 import org.createnet.raptor.auth.service.services.UserService;
@@ -32,12 +31,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.acls.model.Permission;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -51,89 +47,85 @@ import org.springframework.web.bind.annotation.RestController;
 @PreAuthorize("isAuthenticated()")
 public class DeviceController {
 
-  private static final Logger logger = LoggerFactory.getLogger(DeviceController.class);
+    private static final Logger logger = LoggerFactory.getLogger(DeviceController.class);
 
-  @Autowired
-  private DeviceService deviceService;
+    @Autowired
+    private DeviceService deviceService;
 
-  @Autowired
-  private UserService userService;
+    @Autowired
+    private UserService userService;
 
-  @Autowired
-  private AclDeviceService aclDeviceService;
+    @Autowired
+    private AclDeviceService aclDeviceService;
 
-  @RequestMapping(value = "/check", method = RequestMethod.POST)
-  public ResponseEntity<?> checkPermission(
-          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
-          @RequestBody AuthorizationRequest body
-  ) {
+    @RequestMapping(value = "/check", method = RequestMethod.POST)
+    public ResponseEntity<?> checkPermission(
+            @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
+            @RequestBody AuthorizationRequest body
+    ) {
 
-    AuthorizationResponse response = new AuthorizationResponse();
+        AuthorizationResponse response = new AuthorizationResponse();
 
-    switch (body.getOperation()) {
-      case User:
+        switch (body.getOperation()) {
+            case User:
 
-        response.result = true;
-        response.userId = currentUser.getUuid();
-        response.roles = currentUser.getRoles()
-                .stream()
-                .map((r) -> r.getName())
-                .collect(Collectors.toList());
+                response.result = true;
+                response.userId = currentUser.getUuid();
+                response.roles = currentUser.getRoles()
+                        .stream()
+                        .map((r) -> r.getName())
+                        .collect(Collectors.toList());
 
-        break;
-      case Permission:
+                break;
+            case Permission:
 
-        logger.debug("Check if user {} can `{}` on object {}", body.userId, body.permission, body.objectId);
+                User user = (User) currentUser;
+                if (body.userId != null) {
+                    user = userService.getByUuid(body.userId);
+                }
 
-        User user = (User) currentUser;
-        if (body.userId != null) {
-          user = userService.getByUuid(body.userId);
+                logger.debug("Check if user {} can `{}` on object {}", user.getUuid(), body.permission, body.objectId);
+
+                Permission permission = RaptorPermission.fromLabel(body.permission.toLowerCase());
+                if (permission == null) {
+                    return ResponseEntity.notFound().build();
+                }
+
+                /**
+                 * @TODO CREATE permission should be attached to an user rather
+                 * than on the object itself
+                 */
+                final boolean isCreate = (body.objectId == null && permission == RaptorPermission.CREATE);
+                if (isCreate) {
+                    response.result = true;
+                } else {
+
+                    Device device = deviceService.getByUuid(body.objectId);
+                    if (device == null) {
+                        return ResponseEntity.notFound().build();
+                    }
+
+                    response.result = aclDeviceService.check(device, user, permission);
+                }
+
+                break;
+            default:
+
+                response.result = false;
+                break;
         }
 
-        if (user == null) {
-          return ResponseEntity.notFound().build();
-        }
-
-        Permission permission = RaptorPermission.fromLabel(body.permission.toLowerCase());
-        if (permission == null) {
-          return ResponseEntity.notFound().build();
-        }
-
-        /**
-         * @TODO CREATE permission should be attached to an user rather than on the object itself
-         */
-        final boolean isCreate = (body.objectId == null && permission == RaptorPermission.CREATE);
-        if (isCreate) {
-          response.result = true;
-        } else {
-
-          Device device = deviceService.getByUuid(body.objectId);
-          if (device == null) {
-            return ResponseEntity.notFound().build();
-          }
-
-          response.result = aclDeviceService.check(device, user, permission);
-        }
-
-        break;
-      default:
-
-        response.result = false;
-        break;
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    return ResponseEntity.status(HttpStatus.OK).body(response);
-  }
+    @RequestMapping(value = "/sync", method = RequestMethod.POST)
+    public ResponseEntity<?> syncObject(
+            @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
+            @RequestBody SyncRequest body
+    ) {
 
-  @RequestMapping(value = "/sync", method = RequestMethod.POST)
-  public ResponseEntity<?> syncObject(
-          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
-          @RequestBody SyncRequest body
-          
-  ) {
-
-    deviceService.sync(currentUser, body);
-    return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
-  }
+        deviceService.sync(currentUser, body);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
+    }
 
 }

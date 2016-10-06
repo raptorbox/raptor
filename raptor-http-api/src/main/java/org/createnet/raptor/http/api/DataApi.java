@@ -58,7 +58,7 @@ public class DataApi extends AbstractApi {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Collection<Stream> list(@PathParam("id") String id)
-          throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException {
+          throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException, Indexer.IndexerException {
 
     ServiceObject obj = loadObject(id);
 

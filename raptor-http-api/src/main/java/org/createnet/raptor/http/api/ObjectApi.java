@@ -24,6 +24,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
@@ -60,13 +62,13 @@ import org.createnet.raptor.search.raptor.search.query.impl.es.ObjectQuery;
  * @author Luca Capra <lcapra@create-net.org>
  */
 @Path("/")
+@Produces(MediaType.APPLICATION_JSON)
 @Api
 public class ObjectApi extends AbstractApi {
 
   final private Logger logger = LoggerFactory.getLogger(ObjectApi.class);
 
   @GET
-  @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(value = "List available devices definition", notes = "")
   @ApiResponses(value = {
     @ApiResponse(code = 200, message = "Ok"),
@@ -89,33 +91,7 @@ public class ObjectApi extends AbstractApi {
     return idList;
   }
 
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @ApiOperation(value = "List available devices definition", notes = "")
-  @ApiResponses(value = {
-    @ApiResponse(code = 200, message = "Ok"),
-    @ApiResponse(code = 403, message = "Forbidden")
-  })
-  public List<String> children() throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.IndexerException {
-
-    if (!auth.isAllowed(Authorization.Permission.List)) {
-      throw new ForbiddenException("Cannot list children objects");
-    }
-    
-    // TODO: List device which access is allowed
-    
-    List<ServiceObject> list = indexer.getObjects(auth.getUser().getUserId());
-    
-    List<String> idList = new ArrayList();
-    list.stream().forEach((obj) -> {
-      idList.add(obj.id);
-    });
-
-    return idList;
-  }
-
   @POST
-  @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
   @ApiOperation(value = "Create a new device definition", notes = "")
   @ApiResponses(value = {
@@ -170,7 +146,6 @@ public class ObjectApi extends AbstractApi {
 
   @PUT
   @Path("{id}")
-  @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
   @ApiOperation(value = "Update a device definition", notes = "")
   @ApiResponses(value = {
@@ -238,13 +213,12 @@ public class ObjectApi extends AbstractApi {
 
   @GET
   @Path("{id}")
-  @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(value = "Return a device definition", notes = "")
   @ApiResponses(value = {
     @ApiResponse(code = 200, message = "Ok"),
     @ApiResponse(code = 403, message = "Forbidden")
   })
-  public String load(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Indexer.IndexerException {
+  public String load(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Indexer.IndexerException, Authentication.AuthenticationException {
 
     logger.debug("Load object {}", id);
 
@@ -259,8 +233,7 @@ public class ObjectApi extends AbstractApi {
 
   @DELETE
   @Path("{id}")
-  @Produces(MediaType.APPLICATION_JSON)
-  @ApiOperation(value = "Delite a device definition", notes = "")
+  @ApiOperation(value = "Delete a device definition", notes = "")
   @ApiResponses(value = {
     @ApiResponse(code = 200, message = "Ok"),
     @ApiResponse(code = 403, message = "Forbidden"),

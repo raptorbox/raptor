@@ -15,12 +15,16 @@
  */
 package org.createnet.raptor.http.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
@@ -42,6 +46,7 @@ import org.createnet.raptor.search.raptor.search.query.impl.es.DataQuery;
 import org.createnet.raptor.search.raptor.search.query.impl.es.LastUpdateQuery;
 import org.createnet.raptor.search.raptor.search.query.impl.es.ObjectListQuery;
 import org.createnet.raptor.search.raptor.search.query.impl.es.ObjectQuery;
+import org.createnet.raptor.search.raptor.search.query.impl.es.TreeQuery;
 
 /**
  *
@@ -60,20 +65,8 @@ public class IndexerService implements RaptorService {
 
     private Indexer indexer;
 
-    public List<ServiceObject> getObjects(String userId) throws ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
-        ObjectQuery q = new ObjectQuery();
-        q.setUserId(userId);
-        return searchObject(q);
-    }
-
-    public List<ServiceObject> getObjects(List<String> ids) throws ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
-        ObjectListQuery q = new ObjectListQuery();
-        q.ids.addAll(ids);
-        return searchObject(q);
-    }
-
     public enum IndexNames {
-        object, data, subscriptions
+        object, data, subscriptions, groups
     }
 
     @PostConstruct
@@ -124,27 +117,33 @@ public class IndexerService implements RaptorService {
         query.setType(desc.type);
     }
 
-    public void indexObject(ServiceObject obj, boolean isNew) throws ConfigurationException, Indexer.IndexerException, RaptorComponent.ParserException {
+    @Deprecated
+    public List<ServiceObject> getObjects(String userId) throws ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+        ObjectQuery q = new ObjectQuery();
+        q.setUserId(userId);
+        return searchObject(q);
+    }
 
+    public List<ServiceObject> getObjects(List<String> ids) throws ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+        ObjectListQuery q = new ObjectListQuery();
+        q.ids.addAll(ids);
+        return searchObject(q);
+    }
+
+    public void indexObject(ServiceObject obj, boolean isNew) throws ConfigurationException, Indexer.IndexerException, RaptorComponent.ParserException {
         Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
         record.id = obj.id;
         record.body = obj.toJSON(ServiceObjectView.Internal);
-
         // force creation
         record.isNew(isNew);
-
         getIndexer().save(record);
     }
 
     public void deleteObject(ServiceObject obj) throws ConfigurationException, Indexer.IndexerException, IOException, RecordsetException {
-
         Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
         record.id = obj.id;
-
         getIndexer().delete(record);
-
         deleteData(obj.streams.values());
-
     }
 
     public List<ServiceObject> searchObject(Query query) throws Indexer.SearchException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
@@ -276,4 +275,45 @@ public class IndexerService implements RaptorService {
         return data.size() > 0 ? data.get(0) : null;
     }
 
+    public List<String> getChildrenList(ServiceObject parentObject) throws Indexer.SearchException, Indexer.IndexerException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException {
+        TreeQuery query = new TreeQuery();
+        query.queryType = TreeQuery.TreeQueryType.Children;
+        query.parentId = parentObject.parentId;
+        query.id = parentObject.id;
+        setQueryIndex(query, IndexNames.groups);
+        return getIndexer().search(query)
+            .stream()
+            .map((String s)-> {
+                TreeQuery.TreeRecord record = ServiceObject.getMapper().convertValue(s, TreeQuery.TreeRecord.class);
+                return record.id;
+            })
+            .collect(Collectors.toList());
+    }
+    
+    public List<ServiceObject> getChildren(ServiceObject parentObject) throws Indexer.SearchException, Indexer.IndexerException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException {
+        List<String> ids = getChildrenList(parentObject);
+        List<ServiceObject> list = getObjects(ids);
+        return list;
+    }
+
+    public void setChildrenList(ServiceObject obj, List<String> list) throws ConfigurationException, RaptorComponent.ParserException, Indexer.IndexerException {
+
+        Indexer.IndexRecord record = getIndexRecord(IndexNames.groups);
+        record.id = obj.getId();
+        record.isNew(true);
+        
+        TreeQuery.TreeRecord treeRecord = new TreeQuery.TreeRecord();
+        treeRecord.id = obj.id;
+        treeRecord.parentId = obj.parentId;
+        treeRecord.path = obj.id + "/" + obj.parentId;
+        
+        try {
+            record.body = ServiceObject.getMapper().writeValueAsString(treeRecord);
+        } catch (JsonProcessingException ex) {
+            throw new RaptorComponent.ParserException(ex);
+        }
+
+        getIndexer().save(record);
+    }
+    
 }

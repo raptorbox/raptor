@@ -22,7 +22,6 @@ import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
-import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.service.AuthService;
 import org.createnet.raptor.http.service.DispatcherService;
@@ -40,61 +39,59 @@ import org.createnet.raptor.search.raptor.search.Indexer;
  * @author Luca Capra <lcapra@create-net.org>
  */
 abstract public class AbstractApi {
-  
 
-  @Inject
-  protected EventEmitterService emitter;
+    @Inject
+    protected EventEmitterService emitter;
 
-  @Inject
-  protected StorageService storage;
+    @Inject
+    protected StorageService storage;
 
-  @Inject
-  protected IndexerService indexer;
+    @Inject
+    protected IndexerService indexer;
 
-  @Inject
-  protected DispatcherService dispatcher;
+    @Inject
+    protected DispatcherService dispatcher;
 
-  @Inject
-  protected AuthService auth;
-  
-  protected ServiceObject loadObject(String id) throws ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+    @Inject
+    protected AuthService auth;
 
-    List<ServiceObject> objs = indexer.getObjects(Arrays.asList(id));
+    protected ServiceObject loadObject(String id) throws ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
 
-    ServiceObject obj = objs.get(0);
-    
-    if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
-      throw new ForbiddenException("Cannot access object");
+        List<ServiceObject> objs = indexer.getObjects(Arrays.asList(id));
+
+        if (objs.isEmpty()) {
+            throw new NotFoundException("Object " + id + " not found");
+        }
+
+        ServiceObject obj = objs.get(0);
+
+        if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
+            throw new ForbiddenException("Cannot access object");
+        }
+
+        return obj;
     }
-    
-    if (obj == null) {
-      throw new NotFoundException("Object "+ id +" not found");
-    }    
 
-    return obj;
-  }
-  
-  protected Stream loadStream(String streamId, ServiceObject obj){
-    
-    Stream stream = obj.streams.getOrDefault(streamId, null);
-    
-    if(stream == null) {
-      throw new NotFoundException("Stream "+ streamId + "not found");
-    }
-    
-    return stream;
-  }
+    protected Stream loadStream(String streamId, ServiceObject obj) {
 
-  protected Action loadAction(String actionId, ServiceObject obj){
-    
-    Action action = obj.actions.getOrDefault(actionId, null);
-    
-    if(action == null) {
-      throw new NotFoundException("Action "+ actionId + "not found");
+        Stream stream = obj.streams.getOrDefault(streamId, null);
+
+        if (stream == null) {
+            throw new NotFoundException("Stream " + streamId + "not found");
+        }
+
+        return stream;
     }
-    
-    return action;
-  }
-  
-  
+
+    protected Action loadAction(String actionId, ServiceObject obj) {
+
+        Action action = obj.actions.getOrDefault(actionId, null);
+
+        if (action == null) {
+            throw new NotFoundException("Action " + actionId + "not found");
+        }
+
+        return action;
+    }
+
 }

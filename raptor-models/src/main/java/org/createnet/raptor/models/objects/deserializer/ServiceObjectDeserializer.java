@@ -55,15 +55,8 @@ public class ServiceObjectDeserializer extends JsonDeserializer<ServiceObject> {
       serviceObject.description = tree.get("description").asText();
     }
     
-    if (tree.has("parent")) {
-      serviceObject.parent = new ServiceObject(tree.get("parent").asText());
-    }
-    
-    if (tree.has("children") && tree.get("children").isArray()) {
-      for (Iterator<JsonNode> iterator = tree.get("children").iterator(); iterator.hasNext();) {
-        JsonNode next = iterator.next();
-        serviceObject.children.add(new ServiceObject(next.asText()));
-      }
+    if (tree.has("parentId")) {
+      serviceObject.parentId = tree.get("parentId").asText();
     }
 
     if (tree.has("streams")) {

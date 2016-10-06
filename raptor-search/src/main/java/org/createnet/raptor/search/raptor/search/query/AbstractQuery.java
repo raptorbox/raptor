@@ -19,60 +19,58 @@ package org.createnet.raptor.search.raptor.search.query;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public abstract class AbstractQuery implements Query{
-  
-  private String index;
-  private String type;
+public abstract class AbstractQuery implements Query {
 
-  private int limit;
-  private int offset;
-  private Query.SortBy sort;
-    
-  
-  @Override
-  public String getType() {
-    return type;
-  }
+    private String index;
+    private String type;
 
-  @Override
-  public String getIndex() {
-    return index;
-  }
+    private int limit;
+    private int offset;
+    private Query.SortBy sort;
 
-  @Override
-  public Integer getOffset() {
-    return offset;
-  }
+    @Override
+    public String getType() {
+        return type;
+    }
 
-  @Override
-  public Integer getLimit() {
-    return limit;
-  }
+    @Override
+    public String getIndex() {
+        return index;
+    }
 
-  @Override
-  public SortBy getSort() {
-    return sort;
-  }
+    @Override
+    public Integer getOffset() {
+        return offset;
+    }
 
-  
-  public void setIndex(String index) {
-    this.index = index;
-  }
+    @Override
+    public Integer getLimit() {
+        return limit;
+    }
 
-  public void setType(String type) {
-    this.type = type;
-  }
+    @Override
+    public SortBy getSort() {
+        return sort;
+    }
 
-  public void setLimit(int limit) {
-    this.limit = limit;
-  }
+    public void setIndex(String index) {
+        this.index = index;
+    }
 
-  public void setOffset(int offset) {
-    this.offset = offset;
-  }
+    public void setType(String type) {
+        this.type = type;
+    }
 
-  public void setSort(SortBy sort) {
-    this.sort = sort;
-  }
-  
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
+
+    public void setSort(SortBy sort) {
+        this.sort = sort;
+    }
+
 }
