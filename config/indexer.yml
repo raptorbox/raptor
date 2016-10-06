@@ -19,5 +19,5 @@ elasticsearch:
         index: subscriptions
         type: subscription
       groups:
-        index: sodescriptions
-        type: ParentObject
+        index: groups
+        type: tree

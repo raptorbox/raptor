@@ -129,20 +129,7 @@
     },
     "sodescriptions": {
         "mappings": {
-            "ParentObject": {
-                "dynamic": false,
-                "properties": {
-                    "objectId": {
-                        "type": "string",
-                        "analyzer": "whitespace",
-                        "index": "not_analyzed"
-                    }
-                }
-            },
             "serviceobject": {
-                "_parent": {
-                    "type": "ParentObject"
-                },
                 "_all": {
                     "enabled": false
                 },
@@ -178,6 +165,39 @@
                     },
                     "customFields": {
                         "type": "object"
+                    }
+                }
+            }
+        }
+    },
+    "groups": {
+        "settings": {
+            "analysis": {
+                "analyzer": {
+                    "path_analyzer": {
+                        "tokenizer": "path_tokenizer"
+                    }
+                },
+                "tokenizer": {
+                    "path_tokenizer": {
+                        "type": "path_hierarchy",
+                        "delimiter": "/"
+                    }
+                }
+            }
+        },
+        "mappings": {
+            "node": {
+                "properties": {
+                    "parentId": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "path": {
+                        "type": "string",
+                        "analyzer": "path_analyzer"
                     }
                 }
             }
