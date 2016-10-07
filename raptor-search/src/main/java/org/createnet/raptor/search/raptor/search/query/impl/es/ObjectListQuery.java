@@ -31,7 +31,7 @@ import org.elasticsearch.index.query.QueryBuilders;
  */
 public class ObjectListQuery extends AbstractQuery {
 
-    public String userId;
+//    public String userId;
     final public List<String> ids = new ArrayList();
 
     @Override
@@ -42,9 +42,9 @@ public class ObjectListQuery extends AbstractQuery {
 
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
-        if (userId != null) {
-            boolQuery.must(QueryBuilders.matchQuery("userId", userId));
-        }
+//        if (userId != null) {
+//            boolQuery.must(QueryBuilders.matchQuery("userId", userId));
+//        }
 
         IdsQueryBuilder idsQuery = QueryBuilders.idsQuery(this.getType());
         idsQuery.addIds(ids);

@@ -19,6 +19,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.ForbiddenException;
@@ -44,15 +45,13 @@ import org.createnet.raptor.config.exception.ConfigurationException;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-@Path("/{id}")
-@Produces(MediaType.APPLICATION_JSON)
+@Path("/{id}/children")
 @Api
 public class ObjectTreeApi extends AbstractApi {
 
   final private Logger logger = LoggerFactory.getLogger(ObjectTreeApi.class);
 
   @GET
-  @Path("/children")
   @ApiOperation(value = "Return the device children if any", notes = "")
   @ApiResponses(value = {
     @ApiResponse(code = 200, message = "Ok"),
@@ -82,23 +81,31 @@ public class ObjectTreeApi extends AbstractApi {
   }
 
   @POST
-  @Path("/children")
   @ApiOperation(value = "Add a device as children", notes = "")
   @ApiResponses(value = {
     @ApiResponse(code = 200, message = "Ok"),
     @ApiResponse(code = 403, message = "Forbidden"),
     @ApiResponse(code = 404, message = "Not Found")
   })
-  public List<String> setChildren(@PathParam("id") String id, List<String> childrenId) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Indexer.IndexerException, Authentication.AuthenticationException {
+  public List<String> setChildren(@PathParam("id") String id, List<String> childrenId) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Indexer.IndexerException, Authentication.AuthenticationException, RaptorComponent.ValidationException {
 
     logger.debug("Load object {}", id);
     ServiceObject obj = loadObject(id);
-
+    
     if (!auth.isAllowed(obj, Authorization.Permission.Update)) {
       throw new ForbiddenException("Cannot update object");
     }
 
+    List<ServiceObject> children = indexer.getObjects(childrenId);
+    children.forEach((ServiceObject o) -> {
+        o.parentId = id;
+    });
+
+    indexer.saveObjects(children);
+    storage.saveObjects(children);
+    
     List<String> list = indexer.getChildrenList(obj);
+
     childrenId.stream().forEach((String childId)-> {
         if(!list.contains(childId)) {
             list.add(childId);

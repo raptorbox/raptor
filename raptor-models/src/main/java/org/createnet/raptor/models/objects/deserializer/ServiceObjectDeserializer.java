@@ -56,7 +56,7 @@ public class ServiceObjectDeserializer extends JsonDeserializer<ServiceObject> {
     }
     
     if (tree.has("parentId")) {
-      serviceObject.parentId = tree.get("parentId").asText();
+      serviceObject.parentId = tree.get("parentId").isNull() ? null : tree.get("parentId").asText();
     }
 
     if (tree.has("streams")) {

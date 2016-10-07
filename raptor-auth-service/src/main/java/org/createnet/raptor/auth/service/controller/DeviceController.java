@@ -86,7 +86,7 @@ public class DeviceController {
 
                 logger.debug("Check if user {} can `{}` on object {}", user.getUuid(), body.permission, body.objectId);
 
-                Permission permission = RaptorPermission.fromLabel(body.permission.toLowerCase());
+                Permission permission = RaptorPermission.fromLabel(body.permission);
                 if (permission == null) {
                     return ResponseEntity.notFound().build();
                 }

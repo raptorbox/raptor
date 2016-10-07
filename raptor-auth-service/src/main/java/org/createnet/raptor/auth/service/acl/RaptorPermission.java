@@ -45,12 +45,15 @@ public class RaptorPermission extends BasePermission {
   public static final Permission SUBSCRIBE = new RaptorPermission(1 << 7, 'S'); // 128
   public static final Permission EXECUTE = new RaptorPermission(1 << 8, 'E'); // 256
   
+  // Aliasing
+  public static final Permission UPDATE = WRITE; // 2
+  
   public static String toLabel(Permission p) {
     switch (p.getMask()) {
       case 1:
         return "read";
       case 2:
-        return "write";
+        return "update";
       case 4:
         return "create";
       case 8:
@@ -77,7 +80,7 @@ public class RaptorPermission extends BasePermission {
     switch (name.toLowerCase()) {
       case "read":
         return RaptorPermission.READ;
-      case "write":
+      case "update":
         return RaptorPermission.WRITE;
       case "create":
         return RaptorPermission.CREATE;

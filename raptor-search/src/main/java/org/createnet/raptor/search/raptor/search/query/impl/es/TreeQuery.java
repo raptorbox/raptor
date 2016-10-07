@@ -27,7 +27,7 @@ import org.elasticsearch.index.query.QueryBuilders;
  */
 public class TreeQuery extends AbstractQuery {
     
-    public static class TreeRecord {
+    public static class TreeRecordBody {
         public String parentId;
         public String id;
         public String path;
@@ -54,52 +54,35 @@ public class TreeQuery extends AbstractQuery {
 
     @Override
     public void validate() throws QueryException {
-
-        if (userId == null) {
-            throw new QueryException("userId not specified");
-        }
-
     }
 
     protected QueryBuilder buildQuery() {
 
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
-        boolQuery.must(QueryBuilders.matchQuery("userId", userId));
+        if(userId != null) {
+            boolQuery.must(QueryBuilders.matchQuery("userId", userId));
+        }
 
         switch (queryType) {
             case Parent:
+                boolQuery.must(QueryBuilders.termQuery("objectId", parentId));
                 break;
             case Children:
+
+                String queryPath = id + "/*";
+                if(parentId != null) {
+                    queryPath = parentId + "/" + queryPath;
+                }
+                boolQuery.must(QueryBuilders.wildcardQuery("path", queryPath));
+
                 break;
             case Root:
+                boolQuery.mustNot(QueryBuilders.existsQuery("parentId"));
                 break;
         }
 
-//    if (name != null && name.length() > 0) {
-//      boolQuery.must(QueryBuilders.matchQuery("name", name.toLowerCase()));
-//    }
-//
-//    if (description != null && description.length() > 0) {
-//      boolQuery.must(QueryBuilders.matchQuery("description", description.toLowerCase()));
-//    }
-//
-//    if (customFields != null && !customFields.isEmpty()) {
-//
-//      Iterator<?> keys = customFields.entrySet().iterator();
-//      while (keys.hasNext()) {
-//
-//        String key = (String) keys.next();
-//        String val = customFields.get(key).toString().toLowerCase();
-//
-//        boolQuery.must(QueryBuilders.matchQuery("customFields." + key, val));
-//
-//      }
-//
-//    }
-//
-//    return boolQuery.hasClauses() ? boolQuery : null;
-        return null;
+        return boolQuery.hasClauses() ? boolQuery : null;
     }
 
     @Override

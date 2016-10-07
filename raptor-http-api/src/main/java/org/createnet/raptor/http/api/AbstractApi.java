@@ -56,9 +56,8 @@ abstract public class AbstractApi {
     protected AuthService auth;
 
     protected ServiceObject loadObject(String id) throws ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
-
+        
         List<ServiceObject> objs = indexer.getObjects(Arrays.asList(id));
-
         if (objs.isEmpty()) {
             throw new NotFoundException("Object " + id + " not found");
         }
