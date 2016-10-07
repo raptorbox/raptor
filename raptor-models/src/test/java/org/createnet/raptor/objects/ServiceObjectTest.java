@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.util.UUID;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
-import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 import org.createnet.raptor.utils.TestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -83,58 +82,16 @@ public class ServiceObjectTest extends TestUtils {
   }
   
   @Test
-  public void testSerializeToJsonNodeIdOnly() throws RaptorComponent.ParserException {
-    
-    serviceObject.parse(jsonServiceObject.toString());
-    
-    JsonNode node = serviceObject.toJsonNode(ServiceObjectView.IdOnly);
-    
-    assertFalse(node.has("name"));
-    
-  }
-  
-  
-  @Test
   public void testSerializeViewPublic() throws RaptorComponent.ParserException, IOException {
     
     serviceObject.parse(jsonServiceObject.toString());
     
-    String strjson = serviceObject.toJSON(ServiceObjectView.Public);
-    JsonNode json = mapper.readTree(strjson);
-    
-    assertFalse(json.has("userId"));
-    assertTrue(json.has("parent"));
-  }
-  
-  @Test
-  public void testSerializeViewInternal() throws RaptorComponent.ParserException, IOException {
-    
-    serviceObject.parse(jsonServiceObject.toString());
-    
-    String strjson = serviceObject.toJSON(ServiceObjectView.Internal);
+    String strjson = serviceObject.toJSON();
     JsonNode json = mapper.readTree(strjson);
     
     assertTrue(json.has("userId"));
-
+    assertTrue(json.has("parentId"));
   }
-  
-  @Test
-  public void testSerializeViewIdOnly() throws RaptorComponent.ParserException, IOException {
-    
-    ObjectNode jsonObj = (ObjectNode) jsonServiceObject;
-    jsonObj.put("id", UUID.randomUUID().toString());
-    
-    serviceObject.parse(jsonObj.toString());
-    
-    String strjson = serviceObject.toJSON(ServiceObjectView.IdOnly);
-    JsonNode json = mapper.readTree(strjson);
-
-    assertTrue(json.has("id"));    
-    assertFalse(json.has("userId"));
-    assertFalse(json.has("name"));
-
-  }
-
   
   /**
    * Test of isNew method, of class ServiceObject.

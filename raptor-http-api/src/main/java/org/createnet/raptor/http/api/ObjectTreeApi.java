@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.http.api;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -58,7 +59,7 @@ public class ObjectTreeApi extends AbstractApi {
     @ApiResponse(code = 403, message = "Forbidden"),
     @ApiResponse(code = 404, message = "Not Found")
   })
-  public List<String> children(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Indexer.IndexerException, Authentication.AuthenticationException {
+  public List<ServiceObject> children(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Indexer.IndexerException, Authentication.AuthenticationException {
 
     logger.debug("Load object {}", id);
     ServiceObject obj = loadObject(id);
@@ -68,16 +69,7 @@ public class ObjectTreeApi extends AbstractApi {
     }
 
     List<ServiceObject> list = indexer.getChildren(obj);
-
-    return list.stream().map((ServiceObject o)-> { 
-        try {
-            return o.toJSON();
-        } catch (RaptorComponent.ParserException ex) {
-            return null;
-        }
-        })
-        .filter(o -> o != null)
-        .collect(Collectors.toList());
+    return list;
   }
 
   @POST
@@ -87,7 +79,7 @@ public class ObjectTreeApi extends AbstractApi {
     @ApiResponse(code = 403, message = "Forbidden"),
     @ApiResponse(code = 404, message = "Not Found")
   })
-  public List<String> setChildren(@PathParam("id") String id, List<String> childrenId) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Indexer.IndexerException, Authentication.AuthenticationException, RaptorComponent.ValidationException {
+  public List<ServiceObject> setChildren(@PathParam("id") String id, List<String> childrenId) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Indexer.IndexerException, Authentication.AuthenticationException, RaptorComponent.ValidationException {
 
     logger.debug("Load object {}", id);
     ServiceObject obj = loadObject(id);

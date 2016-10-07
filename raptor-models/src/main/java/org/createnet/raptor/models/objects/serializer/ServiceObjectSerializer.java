@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
+import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 
 /**
@@ -33,26 +34,30 @@ public class ServiceObjectSerializer extends JsonSerializer<ServiceObject> {
 
         jg.writeStartObject();
 
-        if(t.id != null)
-          jg.writeStringField("id", t.id);
-        
-        if(t.userId != null)
-          jg.writeStringField("userId", t.userId);
-        
-        if(t.name != null)
-          jg.writeStringField("name", t.name);
-        
-        if(t.description != null)
-          jg.writeStringField("description", t.description);
-        
+        if (t.id != null) {
+            jg.writeStringField("id", t.id);
+        }
+
+        if (t.userId != null) {
+            jg.writeStringField("userId", t.userId);
+        }
+
+        if (t.name != null) {
+            jg.writeStringField("name", t.name);
+        }
+
+        if (t.description != null) {
+            jg.writeStringField("description", t.description);
+        }
+
         jg.writeObjectField("streams", t.streams);
         jg.writeObjectField("actions", t.actions);
-        
+
         jg.writeObjectField("customFields", t.customFields);
         jg.writeObjectField("settings", t.settings);
-        
+
         jg.writeEndObject();
 
     }
-    
+
 }

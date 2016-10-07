@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +40,6 @@ import org.slf4j.LoggerFactory;
  */
 //@JsonSerialize(using = ServiceObjectSerializer.class)
 @JsonDeserialize(using = ServiceObjectDeserializer.class)
-@JsonFilter("objectFieldsFilter")
 public class ServiceObject extends ServiceObjectContainer {
 
   Logger logger = LoggerFactory.getLogger(ServiceObject.class);
@@ -221,59 +219,21 @@ public class ServiceObject extends ServiceObjectContainer {
     return isNew;
   }
 
-  protected ObjectMapper getMapper(ServiceObjectView type) {
-
-    SimpleBeanPropertyFilter propertyFilter;
-    switch (type) {
-
-      case Internal:
-        // all fields          
-        propertyFilter = SimpleBeanPropertyFilter.serializeAllExcept();
-        break;
-      case IdOnly:
-        // Keep ids only
-        propertyFilter = SimpleBeanPropertyFilter.filterOutAllExcept("id");
-        break;
-      case Public:
-      default:
-        // Hide internal fileds
-        propertyFilter = SimpleBeanPropertyFilter.serializeAllExcept("userId");
-        break;
-    }
-
-    FilterProvider filter = new SimpleFilterProvider()
-            .addFilter("objectFieldsFilter", propertyFilter);
-
-    ObjectMapper mapper1 = ServiceObject.getMapper();
-    mapper1.setFilterProvider(filter);
-
-    return mapper1;
-
-  }
-
   public ObjectNode toJsonNode() {
-    return toJsonNode(ServiceObjectView.Public);
-  }
-
-  public ObjectNode toJsonNode(ServiceObjectView type) {
-    ObjectNode node = getMapper(type).convertValue(this, ObjectNode.class);
+    ObjectNode node = getMapper().convertValue(this, ObjectNode.class);
     return node;
   }
 
-  public String toJSON(ServiceObjectView type) throws ParserException {
+  public String toJSON() throws ParserException {
     String json = null;
     try {
-      json = getMapper(type).writeValueAsString(this);
+      json = getMapper().writeValueAsString(this);
       return json;
 
     } catch (JsonProcessingException ex) {
       throw new ParserException(ex);
     }
 
-  }
-
-  public String toJSON() throws ParserException {
-    return toJSON(ServiceObjectView.Public);
   }
 
 }

@@ -52,7 +52,6 @@ import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Channel;
 import org.createnet.raptor.models.objects.Stream;
-import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 import org.createnet.raptor.search.raptor.search.query.impl.es.ObjectQuery;
 
 /**
@@ -139,7 +138,7 @@ public class ObjectApi extends AbstractApi {
 
     logger.debug("Created new object {} for {}", obj.id, auth.getUser().getUserId());
 
-    return Response.created(URI.create("/" + obj.id)).entity(obj.toJSON(ServiceObjectView.IdOnly)).build();
+    return Response.created(URI.create("/" + obj.id)).entity(obj.toJSON()).build();
   }
 
   @PUT

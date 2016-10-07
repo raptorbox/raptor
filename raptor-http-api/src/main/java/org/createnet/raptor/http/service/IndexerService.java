@@ -35,7 +35,6 @@ import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
-import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.search.raptor.search.Indexer;
 import org.createnet.raptor.search.raptor.search.IndexerConfiguration;
@@ -136,13 +135,13 @@ public class IndexerService implements RaptorService {
     public void indexObject(ServiceObject obj, boolean isNew) throws ConfigurationException, Indexer.IndexerException, RaptorComponent.ParserException, Authentication.AuthenticationException {
         Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
         record.id = obj.id;
-        record.body = obj.toJSON(ServiceObjectView.Internal);
+        record.body = obj.toJSON();
 
         // force creation
         record.isNew(isNew);
         getIndexer().save(record);
 
-        if (!lookup(obj.id)) {
+        if (!lookupObject(obj.id)) {
             throw new Indexer.IndexerException("Index timeout while processing " + obj.id);
         }
 
@@ -152,13 +151,35 @@ public class IndexerService implements RaptorService {
      * @TODO Remove on upgrade to ES 5.x
      */    
     @Deprecated
-    protected boolean lookup(String objectId) {
+    protected boolean lookupObject(String objectId) {
         int max = 5, curr = max, wait = 500; //ms
         while (curr > 0) {
             try {
                 List<ServiceObject> objs = getObjects(Arrays.asList(objectId));
                 if (!objs.isEmpty()) {
                     logger.warn("Object {} avail in index after {}ms", objectId, (max - curr) * wait);
+                    return true;
+                }
+                Thread.sleep(wait);
+            } catch (Exception ex) {
+            } finally {
+                curr--;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @TODO Remove on upgrade to ES 5.x
+     */    
+    @Deprecated
+    protected boolean lookupGroupItem(String parentId) {
+        int max = 5, curr = max, wait = 500; //ms
+        while (curr > 0) {
+            try {
+                List<String> objs = getChildrenList(new ServiceObject(parentId));
+                if (!objs.isEmpty()) {
+                    logger.warn("Object {} avail in index after {}ms", parentId, (max - curr) * wait);
                     return true;
                 }
                 Thread.sleep(wait);
@@ -233,12 +254,12 @@ public class IndexerService implements RaptorService {
             Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
             record.id = obj.id;
             record.isNew(true);
-            record.body = obj.toJSON(ServiceObjectView.Internal);
+            record.body = obj.toJSON();
             Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.UPSERT, record);
         }
 
         getIndexer().batch(ops);
-        lookup(ids.get(0).id);
+        lookupObject(ids.get(0).id);
     }
     
     public List<RecordSet> getStreamData(Stream stream) throws ConfigurationException, Indexer.IndexerException, RecordsetException {
@@ -327,13 +348,21 @@ public class IndexerService implements RaptorService {
         query.parentId = parentObject.parentId;
         query.id = parentObject.id;
         setQueryIndex(query, IndexNames.groups);
-        return getIndexer().search(query)
-                .stream()
-                .map((String s) -> {
-                    TreeQuery.TreeRecordBody record = ServiceObject.getMapper().convertValue(s, TreeQuery.TreeRecordBody.class);
-                    return record.id;
-                })
-                .collect(Collectors.toList());
+        List<String> list = getIndexer().search(query);
+        
+        List<String> children = new ArrayList<>();
+        for (String raw : list) {
+            try {
+                TreeQuery.TreeRecordBody record = ServiceObject.getMapper().readValue(raw, TreeQuery.TreeRecordBody.class);
+                children.add(record.id);
+            }
+            catch(IOException ex) {
+                logger.error("Cannot parse group record");
+                throw new RaptorComponent.ParserException(ex);
+            }
+        }
+
+        return children;
     }
 
     public List<ServiceObject> getChildren(ServiceObject parentObject) throws Indexer.SearchException, Indexer.IndexerException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException {
@@ -349,26 +378,31 @@ public class IndexerService implements RaptorService {
 
     public void setChildrenList(ServiceObject obj, List<String> list) throws ConfigurationException, RaptorComponent.ParserException, Indexer.IndexerException {
 
-        logger.debug("Storing children list for {}: {}", obj.id, String.join(",", list));
+        logger.debug("Storing children list for {}: {}", obj != null ? obj.id : "<root>", String.join(",", list));
 
         List<Indexer.IndexOperation> ops = new ArrayList();
         for (String childId : list) {
+            
             Indexer.IndexRecord record = getIndexRecord(IndexNames.groups);
-            record.id = obj.getId();
-            record.isNew(true);
+            record.id = childId;
+//            record.isNew(true);
+            
             TreeQuery.TreeRecordBody treeRecord = new TreeQuery.TreeRecordBody();
             treeRecord.id = childId;
-            treeRecord.parentId = obj.id;
-            treeRecord.path = obj.parentId == null ? obj.id : obj.parentId + "/" + obj.id;
+            String parentId = obj != null ? obj.id : null;
+            treeRecord.parentId = parentId;
+            treeRecord.path = (parentId == null ? "" : parentId + "/" ) + childId;
             try {
                 record.body = ServiceObject.getMapper().writeValueAsString(treeRecord);
             } catch (JsonProcessingException ex) {
                 throw new RaptorComponent.ParserException(ex);
             }
             Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.UPSERT, record);
+            ops.add(op);
         }
 
         getIndexer().batch(ops);
+        lookupGroupItem(obj.id);
     }
 
 }

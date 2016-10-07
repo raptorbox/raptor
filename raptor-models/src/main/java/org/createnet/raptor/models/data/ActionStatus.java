@@ -27,10 +27,11 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
-import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 
 /**
  *
@@ -67,42 +68,20 @@ public class ActionStatus {
 
   private final static ObjectMapper mapper = new ObjectMapper();
 
-  private ObjectMapper getMapper(ViewType type) {
-
-    Set<String> filterFields = new HashSet<>();
-    switch (type) {
-      case Internal:
-        break;
-      case Public:
-      default:
-        filterFields.add("actionId");
-        filterFields.add("objectId");
-        break;
-    }
-
-    FilterProvider filter = new SimpleFilterProvider()
-            .addFilter("statusFilter",
-                    SimpleBeanPropertyFilter.serializeAllExcept(filterFields));
-
-    mapper.setFilterProvider(filter);
-
+  private ObjectMapper getMapper() {
     return mapper;
   }
 
   public String toJSON() throws RaptorComponent.ParserException {
-    return this.toJSON(ViewType.Public);
-  }
-
-  public String toJSON(ViewType type) {
-    return toJsonNode(type).toString();
+      try {
+          return getMapper().writeValueAsString(this);
+      } catch (JsonProcessingException ex) {
+          throw new RaptorComponent.ParserException(ex);
+      }
   }
 
   public ObjectNode toJsonNode() {
-    return toJsonNode(ViewType.Public);
-  }
-
-  public ObjectNode toJsonNode(ViewType type) {
-    return getMapper(type).convertValue(this, ObjectNode.class);
+    return getMapper().convertValue(this, ObjectNode.class);
   }
 
   public static ActionStatus parseJSON(String rawStatus) throws IOException {

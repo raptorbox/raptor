@@ -38,7 +38,6 @@ import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Stream;
-import org.createnet.raptor.models.objects.serializer.ServiceObjectView;
 import org.createnet.raptor.search.raptor.search.Indexer;
 import org.mapdb.DBException;
 
@@ -142,7 +141,7 @@ public class StorageService implements RaptorService {
             obj.id = ServiceObject.generateUUID();
         }
 
-        JsonNode json = obj.toJsonNode(ServiceObjectView.Internal);
+        JsonNode json = obj.toJsonNode();
         getObjectConnection().set(obj.id, json, 0);
         return obj.id;
     }
@@ -304,7 +303,7 @@ public class StorageService implements RaptorService {
 
         ActionStatus actionStatus = new ActionStatus(action, status);
 
-        getActionConnection().set(getActionId(action), actionStatus.toJsonNode(ActionStatus.ViewType.Internal), defaultDataTTL);
+        getActionConnection().set(getActionId(action), actionStatus.toJsonNode(), defaultDataTTL);
 
         return actionStatus;
     }
