@@ -105,7 +105,7 @@ public class AclDeviceService {
     if (user == null) {
       return false;
     }
-    if (device == null) {
+    if (device == null && permission != RaptorPermission.LIST) {
       return false;
     }
     if (permission == null) {

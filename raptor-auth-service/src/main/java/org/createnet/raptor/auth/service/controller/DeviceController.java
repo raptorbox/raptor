@@ -99,10 +99,13 @@ public class DeviceController {
                 if (isCreate) {
                     response.result = true;
                 } else {
-
-                    Device device = deviceService.getByUuid(body.objectId);
-                    if (device == null) {
-                        return ResponseEntity.notFound().build();
+                    
+                    Device device = null;
+                    if(permission != RaptorPermission.LIST) {
+                        device = deviceService.getByUuid(body.objectId);
+                        if (device == null) {
+                            return ResponseEntity.notFound().build();
+                        }
                     }
 
                     response.result = aclDeviceService.check(device, user, permission);

@@ -131,6 +131,12 @@ public class IndexerService implements RaptorService {
         q.ids.addAll(ids);
         return searchObject(q);
     }
+    
+    public ServiceObject getObject(String id) throws ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+        ServiceObject obj = getObjects(Arrays.asList(id)).get(0);
+        if(obj == null) throw new Indexer.IndexerException("Object "+ id +" not found");        
+        return obj;
+    }
 
     public void indexObject(ServiceObject obj, boolean isNew) throws ConfigurationException, Indexer.IndexerException, RaptorComponent.ParserException, Authentication.AuthenticationException {
         Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
@@ -342,6 +348,11 @@ public class IndexerService implements RaptorService {
         return data.size() > 0 ? data.get(0) : null;
     }
 
+    public List<String> getChildrenList(String id) throws Indexer.SearchException, Indexer.IndexerException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException {
+        ServiceObject obj = getObject(id);
+        return getChildrenList(obj);
+    }
+    
     public List<String> getChildrenList(ServiceObject parentObject) throws Indexer.SearchException, Indexer.IndexerException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException {
         TreeQuery query = new TreeQuery();
         query.queryType = TreeQuery.TreeQueryType.Children;

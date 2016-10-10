@@ -64,10 +64,6 @@ abstract public class AbstractApi {
 
         ServiceObject obj = objs.get(0);
 
-        if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
-            throw new ForbiddenException("Cannot access object");
-        }
-
         return obj;
     }
 

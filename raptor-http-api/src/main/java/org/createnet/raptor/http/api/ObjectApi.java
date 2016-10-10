@@ -272,7 +272,7 @@ public class ObjectApi extends AbstractApi {
   })  
   public List<String> search(ObjectQuery query) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, Indexer.SearchException, IOException, Indexer.IndexerException {
 
-    if (!auth.isAllowed(Authorization.Permission.Read)) {
+    if (!auth.isAllowed(Authorization.Permission.List)) {
       throw new ForbiddenException("Cannot search for objects");
     }
 
