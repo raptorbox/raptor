@@ -18,34 +18,35 @@ package org.createnet.raptor.auth.service.entity.repository;
 import java.util.List;
 import org.createnet.raptor.auth.service.entity.Token;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-
+@Repository
 public interface TokenRepository extends CrudRepository<Token, Long> {
 
-  Token findByToken(String token);
+    Token findByToken(String token);
 
-  List<Token> findByUserId(String userId);
+    List<Token> findByUserId(String userId);
 
-  List<Token> findByUserUuid(String userUuid);
+    List<Token> findByUserUuid(String userUuid);
 
-  @Override
-  Token findOne(Long id);
+    @Override
+    Token findOne(Long id);
 
-  @Transactional
-  @Override
-  public void delete(Token entity);
+    @Transactional
+    @Override
+    public void delete(Token token);
 
-  @Transactional
-  @Override
-  public void delete(Long id);
+    @Transactional
+    @Override
+    public void delete(Long id);
 
-  @Transactional
-  @Override
-  public <S extends Token> S save(S entity);
+    @Transactional
+    @Override
+    public <S extends Token> S save(S token);
 
 }
