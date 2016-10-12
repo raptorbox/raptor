@@ -15,20 +15,12 @@
  */
 package org.createnet.raptor.models.data;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
@@ -37,12 +29,7 @@ import org.createnet.raptor.models.objects.ServiceObject;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-@JsonFilter("statusFilter")
 public class ActionStatus {
-
-  public enum ViewType {
-    Internal, Public
-  }
 
   public String id;
   public String status;

@@ -33,6 +33,8 @@ import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.search.raptor.search.Indexer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -40,6 +42,8 @@ import org.createnet.raptor.search.raptor.search.Indexer;
  */
 abstract public class AbstractApi {
 
+    final private Logger logger = LoggerFactory.getLogger(AbstractApi.class);
+    
     @Inject
     protected EventEmitterService emitter;
 
@@ -57,6 +61,7 @@ abstract public class AbstractApi {
 
     protected ServiceObject loadObject(String id) throws ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
         
+        logger.debug("Load object {}", id);
         List<ServiceObject> objs = indexer.getObjects(Arrays.asList(id));
         if (objs.isEmpty()) {
             throw new NotFoundException("Object " + id + " not found");

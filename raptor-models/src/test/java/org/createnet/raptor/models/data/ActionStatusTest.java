@@ -55,12 +55,7 @@ public class ActionStatusTest extends TestUtils {
     String statusPublic = status.toJSON();
     JsonNode statusPublicJson = ServiceObject.getMapper().readTree(statusPublic);
     
-    assertFalse(statusPublicJson.has("actionId"));
-    
-    String statusInternal = status.toJSON();
-    JsonNode statusInternalJson = ServiceObject.getMapper().readTree(statusInternal);
-    
-    assertTrue(statusInternalJson.has("actionId"));
+    assertTrue(statusPublicJson.has("actionId"));
     
   }
 
