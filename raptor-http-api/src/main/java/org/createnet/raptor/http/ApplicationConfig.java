@@ -28,6 +28,7 @@ import org.createnet.raptor.http.service.EventEmitterService;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.RaptorApplicationEventListener;
 import org.createnet.raptor.http.service.StorageService;
+import org.createnet.raptor.http.service.TreeService;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -64,6 +65,10 @@ public class ApplicationConfig extends ResourceConfig {
 
       bind(EventEmitterService.class)
               .to(EventEmitterService.class)
+              .in(Singleton.class);
+
+      bind(TreeService.class)
+              .to(TreeService.class)
               .in(Singleton.class);
 
     }

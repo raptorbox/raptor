@@ -18,11 +18,8 @@ package org.createnet.raptor.cli.command;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import javax.inject.Inject;
-import org.createnet.raptor.config.exception.ConfigurationException;
-import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.StorageService;
-import org.createnet.raptor.search.raptor.search.Indexer;
 
 /**
  *

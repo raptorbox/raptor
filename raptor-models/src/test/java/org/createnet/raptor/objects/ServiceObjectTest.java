@@ -62,6 +62,9 @@ public class ServiceObjectTest extends TestUtils {
     
     assertTrue(serviceObject.name.equals("Phone"));
     
+    assertTrue(serviceObject.parentId == null);
+    assertTrue(serviceObject.path == null);
+    
     assertTrue(serviceObject.streams.size() == 1);
     assertTrue(serviceObject.streams.get("mylocation").channels.get("position").type.toLowerCase().equals("geo_point"));
     

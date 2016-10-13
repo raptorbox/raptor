@@ -46,5 +46,10 @@ public interface RaptorService {
      * Teardown the service
      */
     public void shutdown() throws ServiceException;
+    
+    /**
+     * Reset internal state of a service, causing a reinitialization
+     */
+    public void reset() throws ServiceException;
 
 }

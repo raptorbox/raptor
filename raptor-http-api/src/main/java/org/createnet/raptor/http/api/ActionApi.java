@@ -41,7 +41,7 @@ import org.createnet.raptor.http.service.EventEmitterService;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Action;
-import org.createnet.raptor.search.raptor.search.Indexer;
+import org.createnet.raptor.search.Indexer;
 
 /**
  *

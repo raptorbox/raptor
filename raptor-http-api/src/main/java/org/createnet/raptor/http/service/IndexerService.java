@@ -15,36 +15,30 @@
  */
 package org.createnet.raptor.http.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
-import org.createnet.raptor.models.exception.RecordsetException;
-import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
-import org.createnet.raptor.models.objects.ServiceObjectNode;
 import org.createnet.raptor.models.objects.Stream;
 import org.jvnet.hk2.annotations.Service;
-import org.createnet.raptor.search.raptor.search.Indexer;
-import org.createnet.raptor.search.raptor.search.IndexerConfiguration;
-import org.createnet.raptor.search.raptor.search.IndexerProvider;
-import org.createnet.raptor.search.raptor.search.query.Query;
-import org.createnet.raptor.search.raptor.search.query.impl.es.DataQuery;
-import org.createnet.raptor.search.raptor.search.query.impl.es.LastUpdateQuery;
-import org.createnet.raptor.search.raptor.search.query.impl.es.ObjectListQuery;
-import org.createnet.raptor.search.raptor.search.query.impl.es.ObjectQuery;
-import org.createnet.raptor.search.raptor.search.query.impl.es.TreeQuery;
+import org.createnet.raptor.search.Indexer;
+import org.createnet.raptor.search.impl.IndexerConfiguration;
+import org.createnet.raptor.search.IndexerProvider;
+import org.createnet.raptor.search.query.Query;
+import org.createnet.raptor.search.query.impl.es.DataQuery;
+import org.createnet.raptor.search.query.impl.es.LastUpdateQuery;
+import org.createnet.raptor.search.query.impl.es.ObjectListQuery;
+import org.createnet.raptor.search.query.impl.es.ObjectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 @Service
-public class IndexerService implements RaptorService {
+public class IndexerService extends AbstractRaptorService {
 
     private final Logger logger = LoggerFactory.getLogger(IndexerService.class);
 
@@ -141,7 +135,9 @@ public class IndexerService implements RaptorService {
     }
 
     public void indexObject(ServiceObject obj, boolean isNew) {
+
         Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
+
         record.id = obj.id;
         record.body = obj.toJSON();
 
@@ -233,15 +229,25 @@ public class IndexerService implements RaptorService {
         getIndexer().save(record);
     }
 
-    public void saveObjects(List<ServiceObject> ids) {
+    public void saveObjects(List<ServiceObject> ids, Boolean isNew) {
 
         List<Indexer.IndexOperation> ops = new ArrayList();
         for (ServiceObject obj : ids) {
             Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
             record.id = obj.id;
-            record.isNew(true);
+            if (isNew != null) {
+                record.isNew(isNew);
+            }
             record.body = obj.toJSON();
-            Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.UPSERT, record);
+
+            Indexer.IndexOperation.Type opType;
+            if(isNew == null)
+                opType = Indexer.IndexOperation.Type.UPSERT;
+            else
+                opType = isNew ? Indexer.IndexOperation.Type.CREATE : Indexer.IndexOperation.Type.UPDATE;
+            
+            Indexer.IndexOperation op = new Indexer.IndexOperation(opType, record);
+            ops.add(op);
         }
 
         getIndexer().batch(ops);

@@ -19,9 +19,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import org.createnet.raptor.config.exception.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,47 +33,66 @@ public class ConfigurationLoader {
 
     protected final Logger logger = LoggerFactory.getLogger(ConfigurationLoader.class);
 
-    static final private String defaultPath = "/etc/raptor/";
-    private File basePathFile;
+    static final ConfigurationLoader instance = new ConfigurationLoader();
 
-    public static String getConfigPath() {
+    static final private String raptorPath = "/etc/raptor/";
+    static private String defaultPath;
+
+    private String configPath;
+    private File configPathFile;
+
+    public ConfigurationLoader() {
         String configDir = System.getProperty("configDir", null);
-        return configDir == null ? defaultPath : configDir;
+        defaultPath = configDir == null ? raptorPath : configDir;
+        logger.debug("Default configuration directory set to {}", defaultPath);
     }
 
-    public String getBasePath() {
-
-        if (basePathFile == null) {
-            basePathFile = new File(getConfigPath());
-            if (!basePathFile.exists()) {
-                throw new RuntimeException("Configuration directory does not exists: " + basePathFile.getPath());
-            }
-        }
-
-        return basePathFile.getAbsolutePath();
+    public String getConfigPath() {
+        return configPath == null ? defaultPath : configPath;
     }
-    final private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+
+    public void setConfigPath(String configPath) {
+        logger.debug("Configuration directory set to {}", configPath);
+        cache.clear();
+        this.configPath = configPath;
+    }
+
+    final private static ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
     final private Map<String, Configuration> cache = new HashMap();
 
     protected File getFile(String filename) {
-        return new File(getBasePath() + "/" + filename + ".yml");
+        return Paths.get(getConfigPath(), filename + ".yml").toFile();
     }
 
-    public Configuration getInstance(String name, Class<? extends Configuration> clazz) {
+    public Configuration loadConfiguration(String name, Class<? extends Configuration> clazz) {
 
         Configuration config = cache.get(name);
         if (config == null) {
+            logger.debug("Parsing configuration file `{}`", name);
             try {
-                config = mapper.readValue(getFile(name), clazz);
+                File configFile = getFile(name);
+                if(!configFile.exists()) {
+                    logger.error("configuration file `{}` does not exists", name);
+                    throw new IOException("File does not exists: " + configFile.getAbsolutePath());
+                }
+                config = mapper.readValue(configFile, clazz);
             } catch (IOException ex) {
-                logger.error("Failed to read configuration", ex);
+                logger.error("Failed to read configuration: {}", ex.getMessage(), ex);
                 throw new RuntimeException(ex);
             }
             cache.put(name, config);
         }
 
         return config;
+    }
+
+    public static Configuration getConfiguration(String name, Class<? extends Configuration> clazz) {
+        return getLoader().loadConfiguration(name, clazz);
+    }
+
+    public static ConfigurationLoader getLoader() {
+        return instance;
     }
 
 }

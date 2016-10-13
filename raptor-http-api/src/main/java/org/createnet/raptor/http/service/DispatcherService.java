@@ -16,14 +16,12 @@
 package org.createnet.raptor.http.service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.io.IOException;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import javax.inject.Inject;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.dispatcher.Dispatcher;
-import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.events.Emitter;
 import org.createnet.raptor.events.Event;
 import org.createnet.raptor.http.events.ActionEvent;
@@ -41,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 @Service
-public class DispatcherService implements RaptorService {
+public class DispatcherService extends AbstractRaptorService {
 
     private final Logger logger = LoggerFactory.getLogger(DispatcherService.class);
 

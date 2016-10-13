@@ -41,14 +41,14 @@ import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.createnet.raptor.search.raptor.search.Indexer;
+import org.createnet.raptor.search.Indexer;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.events.ObjectEvent;
 import org.createnet.raptor.http.service.EventEmitterService;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Channel;
 import org.createnet.raptor.models.objects.Stream;
-import org.createnet.raptor.search.raptor.search.query.impl.es.ObjectQuery;
+import org.createnet.raptor.search.query.impl.es.ObjectQuery;
 
 /**
  *

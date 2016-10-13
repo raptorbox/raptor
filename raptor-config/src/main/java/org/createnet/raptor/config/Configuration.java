@@ -18,6 +18,9 @@ package org.createnet.raptor.config;
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
+ * 
+ * @TODO configuration should carry a reference to the source file if any
+ * 
  */
 public interface Configuration {
 }

@@ -7,14 +7,14 @@ elasticsearch:
     host: 127.0.0.1
     port: 9300
   indices:
-    source: /etc/raptor/indices.json
+    source: indices.json
     names:
       object:
-        index: sodescriptions
-        type: serviceobject
+        index: test_objects
+        type: object
       data:
-        index: soupdates
+        index: test_data
         type: update
       subscriptions:
-        index: subscriptions
+        index: test_sub
         type: subscription

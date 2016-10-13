@@ -1,5 +1,5 @@
 {
-    "soupdates": {
+    "test_data": {
         "mappings": {
             "update": {
                 "_ttl": {
@@ -11,50 +11,50 @@
                 },
                 "dynamic": true,
                 "dynamic_templates": [{
-                    "geo_point_location": {
-                        "path_match": "channels.location.current-value",
-                        "mapping": {
-                            "store": "no",
-                            "index": "not_analyzed",
-                            "type": "geo_point",
-                            "ignore_malformed": true
+                        "geo_point_location": {
+                            "path_match": "channels.location.current-value",
+                            "mapping": {
+                                "store": "no",
+                                "index": "not_analyzed",
+                                "type": "geo_point",
+                                "ignore_malformed": true
+                            }
                         }
-                    }
-                }, {
-                    "string": {
-                        "path_match": "channels.*.current-value",
-                        "match_mapping_type": "string",
-                        "mapping": {
-                            "store": "yes",
-                            "index": "not_analyzed",
-                            "type": "string",
-                            "date_detection": false,
-                            "ignore_malformed": true
+                    }, {
+                        "string": {
+                            "path_match": "channels.*.current-value",
+                            "match_mapping_type": "string",
+                            "mapping": {
+                                "store": "yes",
+                                "index": "not_analyzed",
+                                "type": "string",
+                                "date_detection": false,
+                                "ignore_malformed": true
+                            }
                         }
-                    }
-                }, {
-                    "double": {
-                        "path_match": "channels.*.current-value",
-                        "match_mapping_type": "double",
-                        "mapping": {
-                            "store": "yes",
-                            "index": "not_analyzed",
-                            "type": "double",
-                            "ignore_malformed": true
+                    }, {
+                        "double": {
+                            "path_match": "channels.*.current-value",
+                            "match_mapping_type": "double",
+                            "mapping": {
+                                "store": "yes",
+                                "index": "not_analyzed",
+                                "type": "double",
+                                "ignore_malformed": true
+                            }
                         }
-                    }
-                }, {
-                    "integer": {
-                        "path_match": "channels.*.current-value",
-                        "match_mapping_type": "integer",
-                        "mapping": {
-                            "store": "yes",
-                            "index": "not_analyzed",
-                            "type": "double",
-                            "ignore_malformed": true
+                    }, {
+                        "integer": {
+                            "path_match": "channels.*.current-value",
+                            "match_mapping_type": "integer",
+                            "mapping": {
+                                "store": "yes",
+                                "index": "not_analyzed",
+                                "type": "double",
+                                "ignore_malformed": true
+                            }
                         }
-                    }
-                }],
+                    }],
                 "properties": {
                     "id": {
                         "type": "string",
@@ -83,7 +83,7 @@
             }
         }
     },
-    "subscriptions": {
+    "test_sub": {
         "mappings": {
             "subscription": {
                 "_all": {
@@ -96,17 +96,17 @@
                     ]
                 },
                 "dynamic_templates": [{
-                    "all_strings_to_avoid_collisions": {
-                        "match": "*",
-                        "mapping": {
-                            "store": "no",
-                            "index": "not_analyzed",
-                            "include_in_all": false,
-                            "type": "string",
-                            "analyzer": "whitespace"
+                        "all_strings_to_avoid_collisions": {
+                            "match": "*",
+                            "mapping": {
+                                "store": "no",
+                                "index": "not_analyzed",
+                                "include_in_all": false,
+                                "type": "string",
+                                "analyzer": "whitespace"
+                            }
                         }
-                    }
-                }],
+                    }],
                 "properties": {
                     "callback": {
                         "type": "string"
@@ -127,7 +127,7 @@
             }
         }
     },
-    "sodescriptions": {
+    "test_objects": {
         "settings": {
             "analysis": {
                 "analyzer": {
@@ -144,7 +144,7 @@
             }
         },
         "mappings": {
-            "serviceobject": {
+            "object": {
                 "_all": {
                     "enabled": false
                 },
@@ -192,5 +192,5 @@
                 }
             }
         }
-    }
+    }    
 }

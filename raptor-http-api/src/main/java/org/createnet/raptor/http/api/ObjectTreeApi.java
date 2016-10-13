@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.DELETE;
@@ -30,15 +31,10 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
-import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.createnet.raptor.db.Storage;
-import org.createnet.raptor.search.raptor.search.Indexer;
-import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.models.objects.ServiceObjectNode;
 
 /**
@@ -103,52 +99,22 @@ public class ObjectTreeApi extends AbstractApi {
         ,
         @ApiResponse(code = 404, message = "Not Found")
     })
-    public List<ServiceObject> setChildren(@PathParam("id") String id, final List<String> newChildren) {
+    public List<ServiceObject> setChildren(@PathParam("id") String id, final List<String> childrenIds) {
 
-        logger.debug("Setting {} new children", newChildren.size());
-
-        List<String> toLoad = new ArrayList(newChildren);
-        toLoad.add(id);
-
-        List<ServiceObject> objs = indexer.getObjects(toLoad);
-        List<ServiceObject> newChildrenObject = new ArrayList();
-
-        ServiceObject parentObject = objs.stream().filter((ServiceObject o) -> {
-            boolean isParent = o.id.equals(id);
-            if (!isParent) {
-                o.parentId = id;
-                newChildrenObject.add(o);
-            }
-            return isParent;
-        }).collect(Collectors.toList()).get(0);
-
-        // save old and new children with modified properties
-        final List<ServiceObject> toSave = new ArrayList<>(newChildrenObject);
-
-        // reset old references
-        List<ServiceObject> oldChildrenObject = tree.getChildren(parentObject);
-        logger.debug("Previous children size: {}", oldChildrenObject.size());
-        oldChildrenObject.stream().forEach(o -> {
-            if (!newChildren.contains(o.id)) {
-                o.parentId = null;
-                toSave.add(o);
-            }
-        });
-
-        if (parentObject == null) {
-            throw new NotFoundException("Cannot load parent object");
-        }
+        ServiceObject parentObject = loadObject(id);
 
         if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
             throw new ForbiddenException("Cannot update object");
         }
 
-        indexer.saveObjects(toSave);
+        List<ServiceObject> list = tree.setChildren(id, childrenIds);
+
+        // @TODO: Move to event emitter
+        List<ServiceObject> toSave = new ArrayList(list);
+        toSave.add(parentObject);
         storage.saveObjects(toSave);
 
-        tree.setChildrenList(parentObject, newChildren);
-
-        return children(id);
+        return list;
     }
 
     @PUT
@@ -163,14 +129,20 @@ public class ObjectTreeApi extends AbstractApi {
     })
     public List<ServiceObject> addChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) {
 
-        List<String> children = tree.getChildrenList(id);
+        ServiceObject parentObject = loadObject(id);
 
-        if (children.contains(childrenId)) {
-            return children(id);
+        if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
+            throw new ForbiddenException("Cannot update object");
         }
 
-        children.add(childrenId);
-        return setChildren(id, children);
+        List<ServiceObject> list = tree.addChildren(id, Arrays.asList(childrenId));
+
+        // @TODO: Move to event emitter
+        List<ServiceObject> toSave = new ArrayList(list);
+        toSave.add(parentObject);
+        storage.saveObjects(toSave);
+
+        return list;
     }
 
     @DELETE
@@ -184,12 +156,22 @@ public class ObjectTreeApi extends AbstractApi {
         @ApiResponse(code = 404, message = "Not Found")
     })
     public List<ServiceObject> removeChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) {
-        List<String> children = tree.getChildrenList(id);
-        if (!children.contains(childrenId)) {
-            return children(id);
+
+        ServiceObject parentObject = loadObject(id);
+
+        if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
+            throw new ForbiddenException("Cannot update object");
         }
-        children.remove(childrenId);
-        return setChildren(id, children);
+
+        List<ServiceObject> list = tree.removeChildren(id, Arrays.asList(childrenId));
+
+        // @TODO: Move to event emitter
+        List<ServiceObject> toSave = new ArrayList(list);
+        toSave.add(parentObject);
+        storage.saveObjects(toSave);
+
+        return list;
+
     }
 
 }

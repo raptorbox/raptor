@@ -39,92 +39,90 @@ import static org.junit.Assert.*;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class RaptorSecurityManagerTest {
-  
-  final private RaptorSecurityManager manager = new RaptorSecurityManager();
-  
-  String roleUser = "user";
-  String roleAdmin = "admin";
-  
-  public RaptorSecurityManagerTest() {
-  }
-  
-  @BeforeClass
-  public static void setUpClass() {
-  }
-  
-  @AfterClass
-  public static void tearDownClass() {
-  }
-  
-  @Before
-  public void setUp() {
-    
-    // inject DI
-    ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
-    ServiceLocator serviceLocator = locatorFactory.create("BrokerLocator");
-    ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());
 
-    serviceLocator.inject(manager);
-    
-    
-    
-    BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
-    
-    brokerConfiguration.artemisConfiguration = "file:///etc/raptor/broker.xml";   
-    
-    BrokerConfiguration.BrokerUser user = new BrokerConfiguration.BrokerUser(roleUser, roleUser);
-    user.addRole(roleUser);
-    
-    brokerConfiguration.users.add(user);
-    
-    user = new BrokerConfiguration.BrokerUser(roleAdmin, roleAdmin);
-    user.addRole(roleAdmin);
-    brokerConfiguration.users.add(user);
-    
-    manager.setBrokerConfiguration(brokerConfiguration);
-  }
-  
-  @After
-  public void tearDown() {
-  }
+    final private RaptorSecurityManager manager = new RaptorSecurityManager();
 
-  @Test
-  public void testLocalUser() {
-    assertTrue(manager.validateUser(roleUser, roleUser));
-    assertTrue(manager.validateUser(roleAdmin, roleAdmin));
+    String roleUser = "user";
+    String roleAdmin = "admin";
+
+    public RaptorSecurityManagerTest() {
+    }
+
+    @BeforeClass
+    public static void setUpClass() {
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+    }
+
+    @Before
+    public void setUp() {
+
+        // inject DI
+        ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
+        ServiceLocator serviceLocator = locatorFactory.create("BrokerLocator");
+        ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());
+
+        serviceLocator.inject(manager);
+
+        BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
+
+        brokerConfiguration.artemisConfiguration = "file:///etc/raptor/broker.xml";
+
+        BrokerConfiguration.BrokerUser user = new BrokerConfiguration.BrokerUser(roleUser, roleUser);
+        user.addRole(roleUser);
+
+        brokerConfiguration.users.add(user);
+
+        user = new BrokerConfiguration.BrokerUser(roleAdmin, roleAdmin);
+        user.addRole(roleAdmin);
+        brokerConfiguration.users.add(user);
+
+        manager.setBrokerConfiguration(brokerConfiguration);
+    }
+
+    @After
+    public void tearDown() {
+    }
+
+    @Test
+    public void testLocalUser() {
+        assertTrue(manager.validateUser(roleUser, roleUser));
+        assertTrue(manager.validateUser(roleAdmin, roleAdmin));
 //    assertFalse(manager.validateUser("thief", "dude"));
-  }
+    }
 
-  @Test
-  public void testLocalUserRoles() {
-    
-    Set<Role> roles = new HashSet();
-    
-    roles.add(new Role(roleAdmin, true, true, true, true, true, true, true));
-    
-    String address = "$sys.mqtt.myobject.something";
-    
-    assertFalse(
-        manager.validateUserAndRole(
-            roleUser, roleUser, 
-            roles, 
-            CheckType.CONSUME, 
-            address, 
-            null
-        )
-    );
-    
-    address = "$sys.mqtt.anything";
-    
-    assertTrue(
-        manager.validateUserAndRole(
-            roleAdmin, roleAdmin, 
-            roles, 
-            CheckType.CREATE_NON_DURABLE_QUEUE, 
-            address, 
-            null
-        )
-    );
-  }
-  
+    @Test
+    public void testLocalUserRoles() {
+
+        Set<Role> roles = new HashSet();
+
+        roles.add(new Role(roleAdmin, true, true, true, true, true, true, true));
+
+        String address = "$sys.mqtt.myobject.something";
+
+        assertFalse(
+                manager.validateUserAndRole(
+                        roleUser, roleUser,
+                        roles,
+                        CheckType.CONSUME,
+                        address,
+                        null
+                )
+        );
+
+        address = "$sys.mqtt.anything";
+
+        assertTrue(
+                manager.validateUserAndRole(
+                        roleAdmin, roleAdmin,
+                        roles,
+                        CheckType.CREATE_NON_DURABLE_QUEUE,
+                        address,
+                        null
+                )
+        );
+    }
+
 }

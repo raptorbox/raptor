@@ -15,18 +15,13 @@
  */
 package org.createnet.raptor.http.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
-import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.ServiceObjectNode;
-import org.createnet.raptor.search.raptor.search.Indexer;
-import org.createnet.raptor.search.raptor.search.query.impl.es.TreeQuery;
+import org.createnet.raptor.search.query.impl.es.TreeQuery;
 import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,18 +31,10 @@ import org.slf4j.LoggerFactory;
  * @author l
  */
 @Service
-public class TreeService implements RaptorService {
+public class TreeService extends AbstractRaptorService {
 
     private final static Logger logger = LoggerFactory.getLogger(TreeService.class);
 
-    @PostConstruct
-    @Override
-    public void initialize() {}
-
-    @PreDestroy
-    @Override
-    public void shutdown() {}    
-    
     @Inject
     IndexerService indexer;
 
@@ -67,109 +54,142 @@ public class TreeService implements RaptorService {
 
     }
 
-    public List<String> getChildrenList(String id) {
+    public List<ServiceObject> getChildrenList(String id) {
         ServiceObject obj = indexer.getObject(id);
-        return getChildrenList(obj);
+        return getChildren(obj);
     }
 
-    public List<String> getChildrenList(ServiceObject parentObject) {
+    public List<ServiceObject> getChildren(ServiceObject parentObject) {
+
         TreeQuery query = new TreeQuery();
+
         query.queryType = TreeQuery.TreeQueryType.Children;
         query.parentId = parentObject.parentId;
         query.id = parentObject.id;
         indexer.setQueryIndex(query, IndexerService.IndexNames.object);
 
         List<String> list = indexer.getIndexer().search(query);
-
-        List<String> children = new ArrayList<>();
+        List<ServiceObject> children = new ArrayList<>();
         for (String raw : list) {
-            try {
-                TreeQuery.TreeRecordBody record = ServiceObject.getMapper().readValue(raw, TreeQuery.TreeRecordBody.class);
-                children.add(record.id);
-            } catch (IOException ex) {
-                logger.error("Cannot parse group record");
-                throw new RaptorComponent.ParserException(ex);
-            }
+            ServiceObject child = ServiceObject.fromJSON(raw);
+            children.add(child);
         }
 
         return children;
-
     }
 
-    public List<ServiceObject> getChildren(ServiceObject parentObject) {
-        List<String> ids = getChildrenList(parentObject);
+    public List<ServiceObject> addChildren(String parentId, List<String> childrenIds) {
 
-        List<ServiceObject> list = new ArrayList();
+        List<String> toload = new ArrayList(childrenIds);
+        toload.add(parentId);
 
-        if (!ids.isEmpty()) {
-            list = indexer.getObjects(ids);
-        }
+        final ServiceObject parentObject = new ServiceObject();
+        List<ServiceObject> children = indexer.getObjects(toload).stream().filter((final ServiceObject o) -> {
+            boolean isParent = !o.id.equals(parentId);
+            if (isParent) {
+                parentObject.parse(o);
+            }
+            return !isParent;
+        }).collect(Collectors.toList());
 
-        return list;
-
+        return addChildren(parentObject, children);
     }
 
-    public void setChildrenList(ServiceObject obj, List<String> list) {
+    public List<ServiceObject> addChildren(ServiceObject parentObject, List<ServiceObject> children) {
 
-        logger.debug("Storing {} children for {}", list.size(), obj != null ? obj.id : "<root>");
+        List<ServiceObject> ids = getChildren(parentObject);
 
-        List<String> previousList = getChildrenList(obj);
-
-        List<Indexer.IndexOperation> ops = new ArrayList();
-
-        // drop ALL the oldies
-        List<String> toRemoveList = new ArrayList(previousList);
-        if (!toRemoveList.isEmpty()) {
-            for (String removeId : toRemoveList) {
-                Indexer.IndexRecord record = indexer.getIndexRecord(IndexerService.IndexNames.object);
-                record.id = removeId;
-                Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.DELETE, record);
-                ops.add(op);
+        children.forEach((c) -> {
+            if (!ids.contains(c)) {
+                ids.add(c);
             }
-        }
+        });
 
-        // insert the new ones
-        for (String childId : list) {
+        setChildren(parentObject, ids);
 
-            Indexer.IndexRecord record = indexer.getIndexRecord(IndexerService.IndexNames.object);
-            record.id = childId;
-            record.isNew(true);
+        return ids;
+    }
 
-            TreeQuery.TreeRecordBody treeRecord = new TreeQuery.TreeRecordBody();
-            treeRecord.id = childId;
-            String parentId = obj != null ? obj.id : null;
-            treeRecord.parentId = parentId;
-            treeRecord.path = (parentId == null ? "" : parentId + "/") + childId;
-            try {
-                record.body = ServiceObject.getMapper().writeValueAsString(treeRecord);
-            } catch (JsonProcessingException ex) {
-                throw new TreeException(ex);
+    public List<ServiceObject> removeChildren(String parentId, List<String> childrenIds) {
+
+        List<String> toload = new ArrayList(childrenIds);
+        toload.add(parentId);
+
+        final ServiceObject parentObject = new ServiceObject();
+        List<ServiceObject> children = indexer.getObjects(toload).stream().filter((final ServiceObject o) -> {
+            boolean isParent = !o.id.equals(parentId);
+            if (isParent) {
+                parentObject.parse(o);
             }
-            Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.CREATE, record);
-            ops.add(op);
-        }
+            return !isParent;
+        }).collect(Collectors.toList());
 
-        try {
-            indexer.getIndexer().batch(ops);
-        } catch (Indexer.IndexerException ex) {
-            throw new TreeException(ex);
-        }
+        return removeChildren(parentObject, children);
+    }
 
+    public List<ServiceObject> removeChildren(ServiceObject parentObject, List<ServiceObject> children) {
+
+        List<ServiceObject> ids = getChildren(parentObject);
+
+        children.forEach((c) -> {
+            if (ids.contains(c)) {
+                ids.remove(c);
+            }
+        });
+
+        setChildren(parentObject, ids);
+        return ids;
+    }
+
+    
+    public List<ServiceObject> setChildren(String parentId, List<String> childrenIds) {
+
+        List<String> toload = new ArrayList(childrenIds);
+        toload.add(parentId);
+
+        final ServiceObject parentObject = new ServiceObject();
+        List<ServiceObject> children = indexer.getObjects(toload).stream().filter((final ServiceObject o) -> {
+            boolean isParent = !o.id.equals(parentId);
+            if (isParent) {
+                parentObject.parse(o);
+            }
+            return !isParent;
+        }).collect(Collectors.toList());
+        
+        return setChildren(parentObject, children);
+    }
+    
+    public List<ServiceObject> setChildren(ServiceObject obj, List<ServiceObject> list) {
+
+        generateObjectPath(obj);
+
+        logger.debug("Storing {} children at {}", list.size(), obj.path());
+        
+        list.stream().forEach((c) -> {
+            c.parentId = obj.getId();
+            c.path = (obj.isRoot() ? "" : "/") + obj.getId();
+        });
+
+        List<ServiceObject> toSave = new ArrayList(list);
+        List<ServiceObject> previousList = getChildren(obj);
+
+        previousList.stream().forEach((c) -> {
+            if (!list.contains(c)) {
+                c.parentId = null;
+                c.path = null;
+                toSave.add(c);
+            }
+        });
+
+        indexer.saveObjects(toSave, false);
         lookupGroupItem(obj.id, list.size());
+
         logger.debug("Store children list completed");
+        return list;
     }
 
     public ServiceObjectNode loadTree(ServiceObject obj) {
         return loadTree(new ServiceObjectNode(obj));
-    }
-
-    protected ServiceObject getObject(String id) {
-        return indexer.getObject(id);
-
-    }
-
-    protected List<ServiceObject> getObjects(List<String> ids) {
-        return indexer.getObjects(ids);
     }
 
     public ServiceObjectNode loadTree(ServiceObjectNode node) {
@@ -182,7 +202,7 @@ public class TreeService implements RaptorService {
 
             ServiceObject parent;
 
-            parent = getObject(node.getCurrent().parentId);
+            parent = indexer.getObject(node.getCurrent().parentId);
             node.setParent(new ServiceObjectNode(parent));
 
             if (parent.parentId != null) {
@@ -208,6 +228,10 @@ public class TreeService implements RaptorService {
         return node;
     }
 
+    public ServiceObjectNode loadRoot(ServiceObject obj) {
+        return loadRoot(new ServiceObjectNode(obj));
+    }
+
     public ServiceObjectNode loadRoot(ServiceObjectNode node) {
 
         logger.debug("Loading root path for node {}", node.getCurrent().id);
@@ -216,7 +240,7 @@ public class TreeService implements RaptorService {
 
             logger.debug("Loading parent {}", node.getCurrent().parentId);
 
-            ServiceObject parent = getObject(node.getCurrent().parentId);
+            ServiceObject parent = indexer.getObject(node.getCurrent().parentId);
             node.setParent(new ServiceObjectNode(parent));
 
             if (parent.parentId != null) {
@@ -225,6 +249,15 @@ public class TreeService implements RaptorService {
         }
 
         return node;
+    }
+
+    public void generateObjectPath(ServiceObject obj) {
+        if(obj.parentId != null) {
+            ServiceObjectNode rootNode = loadRoot(obj);
+            String path = rootNode.path();
+            obj.path = path;
+            logger.debug("Generated new path {}", path);
+        }
     }
 
     /**
@@ -236,7 +269,8 @@ public class TreeService implements RaptorService {
         while (curr > 0) {
             try {
 
-                List<String> objs = getChildrenList(new ServiceObject(parentId));
+                List<ServiceObject> objs = getChildren(new ServiceObject(parentId));
+
                 if (objs.size() == childLength) {
                     logger.warn("Object {} avail in index after {}ms", parentId, (max - curr) * wait);
                     return true;

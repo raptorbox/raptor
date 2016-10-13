@@ -17,6 +17,7 @@ package org.createnet.raptor.search.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -29,12 +30,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import org.createnet.raptor.search.raptor.search.AbstractIndexer;
-import org.createnet.raptor.search.raptor.search.Indexer;
-import org.createnet.raptor.search.raptor.search.Indexer.IndexerException;
-import org.createnet.raptor.search.raptor.search.impl.es.ElasticSearchIndexAdmin;
-import org.createnet.raptor.search.raptor.search.query.Query;
+import org.createnet.raptor.search.AbstractIndexer;
+import org.createnet.raptor.search.Indexer;
+import org.createnet.raptor.search.Indexer.IndexerException;
+import org.createnet.raptor.search.impl.es.ElasticSearchIndexAdmin;
+import org.createnet.raptor.search.query.Query;
 import org.elasticsearch.action.bulk.BackoffPolicy;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -75,7 +75,6 @@ public class ElasticSearchIndexer extends AbstractIndexer {
      *
      * @param file
      * @return
-     * @throws IOException
      */
     public static Map<String, String> loadIndicesFromFile(String file) {
         // Load indices.json to configuration
@@ -336,9 +335,13 @@ public class ElasticSearchIndexer extends AbstractIndexer {
         logger.debug("Setup client, force {}", forceSetup);
 
         Map<String, String> indices = configuration.elasticsearch.indices.definitions;
-
+        
         if (indices.isEmpty()) {
             String filepath = configuration.elasticsearch.indices.source;
+            File file = new File(filepath);
+            if(!file.exists()) {
+                throw new IndexerException("Indices file not found " + configuration.elasticsearch.indices.source);
+            }
             indices.putAll(ElasticSearchIndexer.loadIndicesFromFile(filepath));
         }
 
@@ -431,69 +434,4 @@ public class ElasticSearchIndexer extends AbstractIndexer {
         }
     }
 
-//  public static void main(String[] argv)  {
-//
-//    // enable ES logging
-//    ESLoggerFactory.getRootLogger().setLevel("DEBUG");
-//
-//    final Logger mainLogger = LoggerFactory.getLogger("main");
-//
-//    IndexerConfiguration configuration = new IndexerConfiguration();
-//
-//    configuration.type = "elasticsearch";
-//
-//    configuration.elasticsearch.type = "transport";
-//
-//    configuration.elasticsearch.transport.host = "raptor.local";
-//    configuration.elasticsearch.transport.port = 9300;
-//
-//    configuration.elasticsearch.indices.source = "/etc/raptor/indices.json";
-//
-////    String indexFile = "indices.json";
-//    String dataFile = "data.json";
-//    ClassLoader classLoader = ElasticSearchIndexer.class.getClassLoader();
-//
-////    String filepath = classLoader.getResource(indexFile).getPath();
-//    String filepath = configuration.elasticsearch.indices.source;
-//    Map<String, String> indices = ElasticSearchIndexer.loadIndicesFromFile(filepath);
-//
-//    configuration.elasticsearch.indices.definitions.putAll(indices);
-//
-//    Map<String, String> clientConfig = new HashMap();
-//    clientConfig.put("cluster.name", "raptor");
-//
-//    configuration.elasticsearch.clientConfig.putAll(clientConfig);
-//
-//    Indexer indexer = new ElasticSearchIndexer();
-//    indexer.initialize(configuration);
-//
-//    indexer.open();
-//    indexer.setup(true);
-//
-//    String dataFilepath = classLoader.getResource(dataFile).getPath();
-//    String data = new String(Files.readAllBytes(Paths.get(dataFilepath)));
-//
-////    for (int i = 0; i < 100; i++) {
-////      mainLogger.debug("Push {}", i);
-////      try {
-////        UUID uuid = UUID.randomUUID();
-////        IndexRecord record = new IndexRecord("soupdates", "update", uuid.toString(), data);
-////        ops.add(new IndexOperation(IndexOperation.Type.SAVE, record));
-////        indexer.save(record);
-////      } catch (IndexerException ex) {
-////        mainLogger.error("Error indexing", ex);
-////      } finally {
-////        mainLogger.debug("Completed");
-////      }
-////    }
-////    List<Indexer.IndexOperation> ops = new ArrayList();
-////    for (int i = 0; i < 10000; i++) {
-////      mainLogger.debug("Push {}", i);
-////      UUID uuid = UUID.randomUUID();
-////      IndexRecord record = new IndexRecord("soupdates", "update", uuid.toString(), data);
-////      ops.add(new IndexOperation(IndexOperation.Type.CREATE, record));
-////    }
-////    indexer.batch(ops);
-////    indexer.close();
-//  }
 }

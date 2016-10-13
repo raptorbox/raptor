@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.search.raptor.search.impl.es;
+package org.createnet.raptor.search.impl.es;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import org.createnet.raptor.search.impl.ElasticSearchIndexer;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
@@ -48,7 +46,7 @@ public class ElasticSearchIndexAdmin {
 
     }
 
-    final protected Logger logger = LoggerFactory.getLogger(ElasticSearchIndexer.class);
+    final protected Logger logger = LoggerFactory.getLogger(ElasticSearchIndexAdmin.class);
     private Client client;
 
     public Client getClient() throws IndexAdminException {
@@ -70,7 +68,7 @@ public class ElasticSearchIndexAdmin {
         } catch (InterruptedException | ExecutionException ex) {
             throw new IndexAdminException(ex);
         }
-        logger.debug("Index does {} exists", res.isExists() ? "" : "not");
+        logger.debug("Index {} does {} exists", name , res.isExists() ? "" : "not");
         return res.isExists();
     }
 

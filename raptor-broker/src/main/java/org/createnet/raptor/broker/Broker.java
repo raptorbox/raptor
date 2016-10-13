@@ -19,7 +19,6 @@ import org.apache.activemq.artemis.core.server.embedded.EmbeddedActiveMQ;
 import org.createnet.raptor.broker.configuration.BrokerConfiguration;
 import org.createnet.raptor.broker.security.RaptorSecurityManager;
 import org.createnet.raptor.config.ConfigurationLoader;
-import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.ApplicationConfig;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.ServiceLocatorFactory;
@@ -34,7 +33,6 @@ import org.slf4j.LoggerFactory;
 public class Broker {
   
   final protected Logger logger = LoggerFactory.getLogger(Broker.class);
-  final private ConfigurationLoader configLoader = new ConfigurationLoader();
   
   public static void main(final String[] args) {
     
@@ -101,7 +99,7 @@ public class Broker {
   private BrokerConfiguration getBrokerConfiguration() {
     
     if(brokerConfiguration == null)
-      brokerConfiguration = (BrokerConfiguration) configLoader.getInstance("broker", BrokerConfiguration.class);
+      brokerConfiguration = (BrokerConfiguration) ConfigurationLoader.getConfiguration("broker", BrokerConfiguration.class);
     
     return brokerConfiguration;
   }

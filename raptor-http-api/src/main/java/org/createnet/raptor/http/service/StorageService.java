@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 @Service
-public class StorageService implements RaptorService {
+public class StorageService extends AbstractRaptorService{
 
     /**
      * Maximum duration time for a record in the database eg. 90 days

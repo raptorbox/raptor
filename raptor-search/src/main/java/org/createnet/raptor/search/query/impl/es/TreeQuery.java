@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.search.raptor.search.query.impl.es;
+package org.createnet.raptor.search.query.impl.es;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.createnet.raptor.search.raptor.search.query.AbstractQuery;
+import org.createnet.raptor.search.query.AbstractQuery;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -27,14 +27,8 @@ import org.elasticsearch.index.query.QueryBuilders;
  */
 public class TreeQuery extends AbstractQuery {
     
-    public static class TreeRecordBody {
-        public String parentId;
-        public String id;
-        public String path;
-    }
-    
     public static enum TreeQueryType {
-        Parent, Children, Root
+        Parent, Children, Root, Tree
     }
 
     public String id;
@@ -66,19 +60,21 @@ public class TreeQuery extends AbstractQuery {
 
         switch (queryType) {
             case Parent:
-                boolQuery.must(QueryBuilders.termQuery("objectId", parentId));
+                boolQuery.must(QueryBuilders.termQuery("id", parentId));
                 break;
-            case Children:
-
+            case Tree:
                 String queryPath = id + "/*";
                 if(parentId != null) {
                     queryPath = parentId + "/" + queryPath;
                 }
+                
                 boolQuery.must(QueryBuilders.wildcardQuery("path", queryPath));
-
+                break;
+            case Children:
+                boolQuery.must(QueryBuilders.termQuery("parentId", id));
                 break;
             case Root:
-                boolQuery.mustNot(QueryBuilders.existsQuery("parentId"));
+                boolQuery.mustNot(QueryBuilders.existsQuery("path"));
                 break;
         }
 

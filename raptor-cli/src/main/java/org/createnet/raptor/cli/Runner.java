@@ -41,7 +41,7 @@ public class Runner {
 
     static {
         // initialize logback config path
-        String configPath = ConfigurationLoader.getConfigPath();
+        String configPath = ConfigurationLoader.getLoader().getConfigPath();
         File filePath = new File(configPath + "/logback.xml");
         if (filePath.exists()) {
             System.setProperty("logback.configurationFile", filePath.getAbsolutePath());

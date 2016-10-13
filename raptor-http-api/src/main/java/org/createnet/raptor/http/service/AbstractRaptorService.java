@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Luca Capra <lcapra@create-net.org>.
+ * Copyright 2016 Luca Capra <luca.capra@create-net.org>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.http.configuration;
-
-import org.createnet.raptor.config.Configuration;
+package org.createnet.raptor.http.service;
 
 /**
  *
- * @author Luca Capra <lcapra@create-net.org>
+ * @author Luca Capra <luca.capra@create-net.org>
  */
-public class IndexerConfiguration extends org.createnet.raptor.search.impl.IndexerConfiguration implements Configuration {
-  
+abstract public class AbstractRaptorService implements RaptorService {
+
+    @Override
+    public void initialize() {
+    }
+
+    @Override
+    public void shutdown() {
+    }
+
+    @Override
+    public void reset() {
+        shutdown();
+        initialize();
+    }
+
 }
