@@ -37,7 +37,7 @@ import org.createnet.raptor.models.objects.RaptorComponent;
 public class RecordSetDeserializer extends JsonDeserializer<RecordSet> {
 
   @Override
-  public RecordSet deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+  public RecordSet deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
     JsonNode tree = jp.getCodec().readTree(jp);
 

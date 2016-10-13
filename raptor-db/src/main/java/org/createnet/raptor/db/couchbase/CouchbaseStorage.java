@@ -36,112 +36,112 @@ import org.slf4j.LoggerFactory;
  */
 public class CouchbaseStorage extends AbstractStorage {
 
-  final protected Logger logger = LoggerFactory.getLogger(CouchbaseStorage.class);
+    final protected Logger logger = LoggerFactory.getLogger(CouchbaseStorage.class);
 
-  protected Cluster cluster;
+    protected Cluster cluster;
 
-  protected Cluster connectCluster() {
+    protected Cluster connectCluster() {
 
-    if (cluster == null) {
-      // Connect to localhost
-      logger.debug("Connecting to couchbase cluster");
-      cluster = CouchbaseCluster.create(getConfiguration().couchbase.nodes);
+        if (cluster == null) {
+            // Connect to localhost
+            logger.debug("Connecting to couchbase cluster");
+            cluster = CouchbaseCluster.create(getConfiguration().couchbase.nodes);
+        }
+
+        return cluster;
     }
 
-    return cluster;
-  }
+    protected void connectBuckets() {
 
-  protected void connectBuckets() throws StorageException {
+        Map<String, String> buckets = getConfiguration().couchbase.buckets;
 
-    Map<String, String> buckets = getConfiguration().couchbase.buckets;
+        ClusterManager clusterManager = getClusterManager();
 
-    ClusterManager clusterManager = getClusterManager();
+        Iterator<Map.Entry<String, String>> it = buckets.entrySet().iterator();
+        while (it.hasNext()) {
 
-    Iterator<Map.Entry<String, String>> it = buckets.entrySet().iterator();
-    while (it.hasNext()) {
+            Map.Entry<String, String> item = it.next();
 
-      Map.Entry<String, String> item = it.next();
+            String bucketId = item.getKey();
+            String bucketName = item.getValue();
 
-      String bucketId = item.getKey();
-      String bucketName = item.getValue();
+            if (getConnection(bucketName) != null) {
+                continue;
+            }
 
-      if (getConnection(bucketName) != null) {
-        continue;
-      }
+            boolean exists = clusterManager.hasBucket(bucketName);
 
-      boolean exists = clusterManager.hasBucket(bucketName);
+            if (!exists) {
+                logger.debug("Skipped connection to non-existan bucket {}", bucketName);
+                continue;
+            }
 
-      if (!exists) {
-        logger.debug("Skipped connection to non-existan bucket {}", bucketName);
-        continue;
-      }
-      
-      if (getConnection(bucketId) != null) {
-        logger.debug("Connection already initiated for {}", bucketName);
-        continue;
-      }
+            if (getConnection(bucketId) != null) {
+                logger.debug("Connection already initiated for {}", bucketName);
+                continue;
+            }
 
-      logger.debug("Connecting bucket {}", bucketName);
+            logger.debug("Connecting bucket {}", bucketName);
 
-      Bucket bucket = cluster.openBucket(bucketName, getConfiguration().couchbase.bucketDefaults.password, 15, TimeUnit.SECONDS);
-      Connection conn = new CouchbaseConnection(bucketId, bucket);
+            Bucket bucket = cluster.openBucket(bucketName, getConfiguration().couchbase.bucketDefaults.password, 15, TimeUnit.SECONDS);
+            Connection conn = new CouchbaseConnection(bucketId, bucket);
 
-      conn.initialize(getConfiguration());
+            conn.initialize(getConfiguration());
 
-      addConnection(conn);
-    }
-  }
-
-  @Override
-  public void connect() throws StorageException {
-    connectCluster();
-    connectBuckets();
-  }
-
-  @Override
-  public void destroy() {
-    
-    Map<String, String> buckets = getConfiguration().couchbase.buckets;
-    
-    ClusterManager clusterManager = getClusterManager();
-    for (Map.Entry<String, String> el : buckets.entrySet()) {
-      
-      logger.debug("Removing bucket {}", el.getValue());
-
-      removeConnection(el.getKey());
-
-      clusterManager.removeBucket(el.getValue());
-      
+            addConnection(conn);
+        }
     }
 
-  }
+    @Override
+    public void connect() {
+        connectCluster();
+        connectBuckets();
+    }
 
-  @Override
-  public void disconnect() {
+    @Override
+    public void destroy() {
 
-    logger.debug("Disconnecting from couchbase");
+        Map<String, String> buckets = getConfiguration().couchbase.buckets;
 
-    super.disconnect();
-    // Disconnect and clear all allocated resources
-    cluster.disconnect();
-  }
+        ClusterManager clusterManager = getClusterManager();
+        for (Map.Entry<String, String> el : buckets.entrySet()) {
 
-  @Override
-  public void setup(boolean forceSetup) throws StorageException {
+            logger.debug("Removing bucket {}", el.getValue());
 
-    logger.debug("Setup database");
+            removeConnection(el.getKey());
 
-    connectCluster();
+            clusterManager.removeBucket(el.getValue());
 
-    Map<String, String> buckets = getConfiguration().couchbase.buckets;
+        }
 
-    ClusterManager clusterManager = getClusterManager();
-    for (Map.Entry<String, String> el : buckets.entrySet()) {
+    }
 
-      String bucketId = el.getKey();
-      String bucketName = el.getValue();
+    @Override
+    public void disconnect() {
 
-      boolean exists = clusterManager.hasBucket(bucketName);
+        logger.debug("Disconnecting from couchbase");
+
+        super.disconnect();
+        // Disconnect and clear all allocated resources
+        cluster.disconnect();
+    }
+
+    @Override
+    public void setup(boolean forceSetup) {
+
+        logger.debug("Setup database");
+
+        connectCluster();
+
+        Map<String, String> buckets = getConfiguration().couchbase.buckets;
+
+        ClusterManager clusterManager = getClusterManager();
+        for (Map.Entry<String, String> el : buckets.entrySet()) {
+
+            String bucketId = el.getKey();
+            String bucketName = el.getValue();
+
+            boolean exists = clusterManager.hasBucket(bucketName);
 
 //      if (exists && forceSetup) {
 //        logger.debug("Drop bucket {}", bucketName);
@@ -155,48 +155,46 @@ public class CouchbaseStorage extends AbstractStorage {
 //        exists = false;
 //      }
 //      if (!exists) {      
-      
-      if (exists) {
-        logger.debug("Bucket {} exists, skip creation", bucketName);
-      }     
-      else {
+            if (exists) {
+                logger.debug("Bucket {} exists, skip creation", bucketName);
+            } else {
 
-        StorageConfiguration.Couchbase.BucketDefaults bucketDef = getConfiguration().couchbase.bucketDefaults;
+                StorageConfiguration.Couchbase.BucketDefaults bucketDef = getConfiguration().couchbase.bucketDefaults;
 
-        logger.debug("Creating bucket {}", bucketName);
-        
-        BucketSettings bucketSettings = new DefaultBucketSettings.Builder()
-                .type(BucketType.COUCHBASE)
-                .name(bucketName)
-                .password(bucketDef.password)
-                .quota(bucketDef.quota) // megabytes
-                .replicas(bucketDef.replica)
-                .indexReplicas(bucketDef.indexReplica)
-                .enableFlush(bucketDef.enableFlush)
-                .build();
+                logger.debug("Creating bucket {}", bucketName);
 
-        clusterManager.insertBucket(bucketSettings);
-      }
+                BucketSettings bucketSettings = new DefaultBucketSettings.Builder()
+                        .type(BucketType.COUCHBASE)
+                        .name(bucketName)
+                        .password(bucketDef.password)
+                        .quota(bucketDef.quota) // megabytes
+                        .replicas(bucketDef.replica)
+                        .indexReplicas(bucketDef.indexReplica)
+                        .enableFlush(bucketDef.enableFlush)
+                        .build();
+
+                clusterManager.insertBucket(bucketSettings);
+            }
+        }
+
+        connectBuckets();
+
+        for (Map.Entry<String, Connection> entry : getConnections().entrySet()) {
+            String bucketId = entry.getKey();
+            Connection conn = entry.getValue();
+            conn.connect();
+            conn.setup(forceSetup);
+        }
+
+        logger.debug("Setup completed");
     }
 
-    connectBuckets();
+    private ClusterManager getClusterManager() {
+        String adminUsername = getConfiguration().couchbase.username;
+        String adminPassword = getConfiguration().couchbase.password;
 
-    for (Map.Entry<String, Connection> entry : getConnections().entrySet()) {
-      String bucketId = entry.getKey();
-      Connection conn = entry.getValue();
-      conn.connect();
-      conn.setup(forceSetup);
+        ClusterManager clusterManager = cluster.clusterManager(adminUsername, adminPassword);
+        return clusterManager;
     }
-
-    logger.debug("Setup completed");
-  }
-
-  private ClusterManager getClusterManager() {
-    String adminUsername = getConfiguration().couchbase.username;
-    String adminPassword = getConfiguration().couchbase.password;
-
-    ClusterManager clusterManager = cluster.clusterManager(adminUsername, adminPassword);
-    return clusterManager;
-  }
 
 }

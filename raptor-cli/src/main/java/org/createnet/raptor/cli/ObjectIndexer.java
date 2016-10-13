@@ -42,7 +42,7 @@ public class ObjectIndexer {
 
   final private int batchSize = 500;
 
-  public class ObjectIndexerException extends Exception {
+  public class ObjectIndexerException extends RuntimeException {
 
     public ObjectIndexerException(String message) {
       super(message);
@@ -59,7 +59,7 @@ public class ObjectIndexer {
     this.indexer = indexer;
   }
 
-  public void sync() throws ObjectIndexerException {
+  public void sync() {
         
     int offset = 0;
     int limit = batchSize;
@@ -84,7 +84,7 @@ public class ObjectIndexer {
 
   }
 
-  protected void runBatch(List<ServiceObject> list) throws ObjectIndexerException {
+  protected void runBatch(List<ServiceObject> list) {
 
     try {
       
@@ -126,7 +126,7 @@ public class ObjectIndexer {
 
   }
 
-  protected List<ServiceObject> getObjects(int offset, int limit) throws ObjectIndexerException {
+  protected List<ServiceObject> getObjects(int offset, int limit) {
     try {
 
       BaseQuery query = new BaseQuery();

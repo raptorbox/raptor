@@ -33,7 +33,7 @@ import org.createnet.raptor.models.objects.Stream;
 public class ServiceObjectDeserializer extends JsonDeserializer<ServiceObject> {
 
   @Override
-  public ServiceObject deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+  public ServiceObject deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
     ServiceObject serviceObject = new ServiceObject();
 

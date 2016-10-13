@@ -15,13 +15,16 @@
  */
 package org.createnet.raptor.auth.authorization.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.logging.Level;
 import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.AuthHttpClient;
 import org.createnet.raptor.auth.authorization.AbstractAuthorization;
 import org.createnet.raptor.auth.entity.AuthorizationRequest;
+import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +41,7 @@ public class TokenAuthorization extends AbstractAuthorization {
   final private AuthHttpClient client = new AuthHttpClient();
 
   @Override
-  public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) throws AuthorizationException {
+  public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) {
 
     try {
       
@@ -67,13 +70,18 @@ public class TokenAuthorization extends AbstractAuthorization {
     client.setConfig(configuration);
   }
 
-  protected String request(String accessToken, String id, String permission) throws IOException, AuthHttpClient.ClientException {
+  protected String request(String accessToken, String id, String permission) {
 
     AuthorizationRequest authzreq = new AuthorizationRequest();
     authzreq.permission = permission;
     authzreq.objectId = id;
 
-    String payload = mapper.writeValueAsString(authzreq);
+    String payload;
+      try {
+          payload = mapper.writeValueAsString(authzreq);
+      } catch (JsonProcessingException ex) {
+          throw new RaptorComponent.ParserException(ex);
+      }
     
     return client.check(accessToken, payload);
   }

@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import org.createnet.raptor.models.data.types.StringRecord;
 import org.createnet.raptor.models.data.types.TypesManager;
 import org.createnet.raptor.models.exception.RecordsetException;
@@ -57,292 +58,295 @@ import org.slf4j.LoggerFactory;
 @JsonFilter("publicFieldsFilter")
 public class RecordSet {
 
-  public Date lastUpdate;
-  final public Map<String, IRecord> channels = new HashMap();
-  
-  public String userId;
-  public String streamId;
-  public String objectId;
-  
-  @JsonIgnore
-  private final Logger logger = LoggerFactory.getLogger(RecordSet.class);
-  
-  @JsonIgnore
-  private Stream stream;
+    public Date lastUpdate;
+    final public Map<String, IRecord> channels = new HashMap();
 
-  
-  public RecordSet() {
-    this.lastUpdate = new Date();
-  }
-  
-  public RecordSet(Stream stream) {
-    this();
-    this.setStream(stream);
-  }
+    public String userId;
+    public String streamId;
+    public String objectId;
 
-  public RecordSet(Stream stream, JsonNode row) throws RecordsetException {
-    this(stream);
-    parseJson(stream, row);
-  }
+    @JsonIgnore
+    private final Logger logger = LoggerFactory.getLogger(RecordSet.class);
 
-  public RecordSet(Stream stream, String body) throws RecordsetException {
-    this(stream);
-    ObjectMapper mapper = ServiceObject.getMapper();
-    try {
-      parseJson(stream, mapper.readTree(body));
-    } catch (IOException ex) {
-      throw new RecordsetException(ex);
+    @JsonIgnore
+    private Stream stream;
+
+    public RecordSet() {
+        this.lastUpdate = new Date();
     }
-  }
 
-  public RecordSet(ArrayList<IRecord> records) {
-    this();
-    for (IRecord record : records) {
-      this.channels.put(record.getName(), record);
+    public RecordSet(Stream stream) {
+        this();
+        this.setStream(stream);
     }
-  }
 
-  public RecordSet(ArrayList<IRecord> records, Date date) {
-
-    for (IRecord record : records) {
-      this.channels.put(record.getName(), record);
+    public RecordSet(Stream stream, JsonNode row) {
+        this(stream);
+        parseJson(stream, row);
     }
-    
-    this.lastUpdate = date;
-  }
 
-  public static IRecord createRecord(Stream stream, String key, Object value) throws RaptorComponent.ParserException {
-
-    IRecord record = null;
-    Channel channel = null;
-    
-    if (stream != null) {
-
-      if (!stream.channels.isEmpty() && !stream.channels.containsKey(key)) {
-        return null;
-      }
-
-      channel = stream.channels.get(key);
-    } 
-    else {
-
-      //try parse value
-      for (Map.Entry<String, Record> item : TypesManager.getTypes().entrySet()) {
-
+    public RecordSet(Stream stream, String body) {
+        this(stream);
+        ObjectMapper mapper = ServiceObject.getMapper();
         try {
+            parseJson(stream, mapper.readTree(body));
+        } catch (IOException ex) {
+            throw new RecordsetException(ex);
+        }
+    }
 
-          Record recordType = item.getValue();
-          value = recordType.parseValue(value);
+    public RecordSet(ArrayList<IRecord> records) {
+        this();
+        for (IRecord record : records) {
+            this.channels.put(record.getName(), record);
+        }
+    }
 
-          channel = new Channel();
-          channel.name = key;
-          channel.type = recordType.getType();
+    public RecordSet(ArrayList<IRecord> records, Date date) {
 
-          break;
-
-        } catch (RaptorComponent.ParserException e) {
-//          int v = 0;
+        for (IRecord record : records) {
+            this.channels.put(record.getName(), record);
         }
 
-      }
-
+        this.lastUpdate = date;
     }
 
-    if (channel != null) {
+    public static IRecord createRecord(Stream stream, String key, Object value) {
 
-      switch (channel.type.toLowerCase()) {
-        case "string":
-          record = new StringRecord();
-          break;
-        case "boolean":
-          record = new BooleanRecord();
-          break;
-        case "number":
-          record = new NumberRecord();
-          break;
-        case "geo_point":
-          record = new GeoPointRecord();
-          break;
-        default:
-          throw new RaptorComponent.ParserException("Data type not supported: " + channel.type);
-      }
+        IRecord record = null;
+        Channel channel = null;
 
-      record.setValue(value);
-      record.setChannel(channel);
-    }
+        if (stream != null) {
 
-    return record;
-  }
+            if (!stream.channels.isEmpty() && !stream.channels.containsKey(key)) {
+                return null;
+            }
 
-  public ObjectNode toJsonNode() throws JsonProcessingException, IOException {
-    return ServiceObject.getMapper().convertValue(this, ObjectNode.class);
-  }
-  
-  public String toJson() throws JsonProcessingException, IOException {
-    return toJsonNode().toString();
-  }
-
-  @Override
-  public String toString() {
-    try {
-      return toJson();
-    } catch (IOException ex) {
-      logger.error("Cannot serialize RecordSet: {}", ex.getMessage());
-    }
-    return "{}";
-  }
-  
-  
-  public Date getLastUpdate() {
-    if (lastUpdate == null) {
-      setLastUpdate(new Date());
-    }
-    return lastUpdate;
-  }
-
-  public Long getLastUpdateTime() {
-    return getLastUpdate().toInstant().getEpochSecond();
-  }
-
-  public void setLastUpdate(Date lastUpdate) {
-    this.lastUpdate = lastUpdate;
-  }
-
-  public Map getRecords() {
-    return channels;
-  }
-
-  public void setRecords(List<IRecord> records) {
-    this.channels.clear();
-
-    for (IRecord record : records) {
-      this.channels.put(record.getName(), record);
-    }
-  }
-
-  private void parseJson(Stream stream, JsonNode row) throws RecordsetException {
-
-
-    JsonNode channels = row;
-    if (row.has("channels")) {
-      
-      if (row.has("lastUpdate")) {
-        Date date = Date.from(Instant.ofEpochSecond(row.get("lastUpdate").asLong()));
-        this.setLastUpdate(date);
-      }
-      
-      channels = row.get("channels");
-    }
-
-    for (Iterator<Map.Entry<String, JsonNode>> iterator = channels.fields(); iterator.hasNext();) {
-
-      Map.Entry<String, JsonNode> item = iterator.next();
-
-      String channelName = item.getKey();
-      JsonNode nodeValue = item.getValue();
-
-      // allow short-hand without current-value
-      JsonNode valObj = nodeValue;
-      if (nodeValue.has("current-value")) {
-        valObj = nodeValue.get("current-value");
-      }
-
-      try {
-        if (stream != null && (stream.channels != null && !stream.channels.isEmpty())) {
-          if (stream.channels.containsKey(channelName)) {
-            this.addRecord(stream, channelName, valObj);
-          }
+            channel = stream.channels.get(key);
         } else {
-          // definition is unknown, add all channels to the record set
-          this.addRecord(stream, channelName, valObj);
+
+            //try parse value
+            for (Map.Entry<String, Record> item : TypesManager.getTypes().entrySet()) {
+
+                try {
+
+                    Record recordType = item.getValue();
+                    value = recordType.parseValue(value);
+
+                    channel = new Channel();
+                    channel.name = key;
+                    channel.type = recordType.getType();
+
+                    break;
+
+                } catch (RaptorComponent.ParserException e) {
+//          int v = 0;
+                }
+
+            }
+
         }
-      } catch (Exception e) {
-        throw new RecordsetException(e);
-      }
+
+        if (channel != null) {
+
+            switch (channel.type.toLowerCase()) {
+                case "string":
+                    record = new StringRecord();
+                    break;
+                case "boolean":
+                    record = new BooleanRecord();
+                    break;
+                case "number":
+                    record = new NumberRecord();
+                    break;
+                case "geo_point":
+                    record = new GeoPointRecord();
+                    break;
+                default:
+                    throw new RaptorComponent.ParserException("Data type not supported: " + channel.type);
+            }
+
+            record.setValue(value);
+            record.setChannel(channel);
+        }
+
+        return record;
+    }
+
+    public ObjectNode toJsonNode() {
+        try {
+            return ServiceObject.getMapper().convertValue(this, ObjectNode.class);
+        } catch (IllegalArgumentException ex) {
+            throw new RaptorComponent.ParserException(ex);
+        }
+    }
+
+    public String toJson() {
+        return toJsonNode().toString();
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return toJson();
+        } catch (RaptorComponent.ParserException ex) {
+            logger.error("Cannot serialize RecordSet: {}", ex.getMessage());
+        }
+        return "{}";
+    }
+
+    public Date getLastUpdate() {
+        if (lastUpdate == null) {
+            setLastUpdate(new Date());
+        }
+        return lastUpdate;
+    }
+
+    public Long getLastUpdateTime() {
+        return getLastUpdate().toInstant().getEpochSecond();
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    public Map getRecords() {
+        return channels;
+    }
+
+    public void setRecords(List<IRecord> records) {
+        this.channels.clear();
+
+        for (IRecord record : records) {
+            this.channels.put(record.getName(), record);
+        }
+    }
+
+    private void parseJson(Stream stream, JsonNode row)  {
+
+        JsonNode channels = row;
+        if (row.has("channels")) {
+
+            if (row.has("lastUpdate")) {
+                Date date = Date.from(Instant.ofEpochSecond(row.get("lastUpdate").asLong()));
+                this.setLastUpdate(date);
+            }
+
+            channels = row.get("channels");
+        }
+
+        for (Iterator<Map.Entry<String, JsonNode>> iterator = channels.fields(); iterator.hasNext();) {
+
+            Map.Entry<String, JsonNode> item = iterator.next();
+
+            String channelName = item.getKey();
+            JsonNode nodeValue = item.getValue();
+
+            // allow short-hand without current-value
+            JsonNode valObj = nodeValue;
+            if (nodeValue.has("current-value")) {
+                valObj = nodeValue.get("current-value");
+            }
+
+            try {
+                if (stream != null && (stream.channels != null && !stream.channels.isEmpty())) {
+                    if (stream.channels.containsKey(channelName)) {
+                        this.addRecord(stream, channelName, valObj);
+                    }
+                } else {
+                    // definition is unknown, add all channels to the record set
+                    this.addRecord(stream, channelName, valObj);
+                }
+            } catch (Exception e) {
+                throw new RecordsetException(e);
+            }
+
+        }
 
     }
 
-  }
+    protected IRecord addRecord(Stream stream, String channelName, Object value) {
 
-  protected IRecord addRecord(Stream stream, String channelName, Object value) throws RaptorComponent.ParserException {
+        IRecord record = RecordSet.createRecord(stream, channelName, value);
+        if (record != null) {
+            record.setRecordSet(this);
+            this.channels.put(record.getName(), record);
+        }
 
-    IRecord record = RecordSet.createRecord(stream, channelName, value);
-    if (record != null) {
-      record.setRecordSet(this);
-      this.channels.put(record.getName(), record);
+        return record;
     }
 
-    return record;
-  }
-
-  /**
-   * @param channelName
-   * @return IRecord
-   */
-  public IRecord getByChannelName(String channelName) {
-    return channels.get(channelName);
-  }
-
-  /**
-   * @param channel
-   * @return IRecord
-   */
-  public IRecord getByChannel(Channel channel) {
-    return getByChannelName(channel.name);
-  }
-
-  public static RecordSet fromJSON(String raw) throws IOException {
-    return ServiceObject.getMapper().readValue(raw, RecordSet.class);
-  }
-  
-  public static RecordSet fromJSON(JsonNode raw) throws IOException {
-    return ServiceObject.getMapper().convertValue(raw, RecordSet.class);
-  }
-
-  public void setStream(Stream stream) {
-    
-    this.stream = stream;
-    
-    if(stream != null) {
-      
-      this.streamId = stream.name;      
-      
-      if(stream.getServiceObject() != null) {
-        
-        this.objectId = stream.getServiceObject().getId();
-        
-        if(this.userId == null) {
-          this.userId = stream.getServiceObject().getUserId();
-        }        
-
-      }
-      
+    /**
+     * @param channelName
+     * @return IRecord
+     */
+    public IRecord getByChannelName(String channelName) {
+        return channels.get(channelName);
     }
-    
-  }
-  
-  public Stream getStream() {
-    return this.stream;
-  }
-  
-  public void validate() throws RaptorComponent.ValidationException {
-    
-    if(getStream() != null) {
-      
+
+    /**
+     * @param channel
+     * @return IRecord
+     */
+    public IRecord getByChannel(Channel channel) {
+        return getByChannelName(channel.name);
+    }
+
+    public static RecordSet fromJSON(String raw) {
+        try {
+            return ServiceObject.getMapper().readValue(raw, RecordSet.class);
+        } catch (IOException ex) {
+            throw new RaptorComponent.ParserException(ex);
+        }
+    }
+
+    public static RecordSet fromJSON(JsonNode raw) {
+        return ServiceObject.getMapper().convertValue(raw, RecordSet.class);
+    }
+
+    public void setStream(Stream stream) {
+
+        this.stream = stream;
+
+        if (stream != null) {
+
+            this.streamId = stream.name;
+
+            if (stream.getServiceObject() != null) {
+
+                this.objectId = stream.getServiceObject().getId();
+
+                if (this.userId == null) {
+                    this.userId = stream.getServiceObject().getUserId();
+                }
+
+            }
+
+        }
+
+    }
+
+    public Stream getStream() {
+        return this.stream;
+    }
+
+    public void validate() {
+
+        if (getStream() != null) {
+
 //      for (String channelName : stream.channels.keySet()) {
 //        if (!channels.containsKey(channelName)) {
 //          throw new RaptorComponent.ValidationException("Missing channel: " + channelName);
 //        }
 //      }
-      
-      for (String channelName : channels.keySet()) {
-        if (!getStream().channels.containsKey(channelName)) {
-          throw new RaptorComponent.ValidationException("Objet model does not define this channel: " + channelName);
+            for (String channelName : channels.keySet()) {
+                if (!getStream().channels.containsKey(channelName)) {
+                    throw new RaptorComponent.ValidationException("Objet model does not define this channel: " + channelName);
+                }
+            }
+
         }
-      }
 
     }
 
-  }
-  
 }

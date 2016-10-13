@@ -31,49 +31,49 @@ import org.slf4j.LoggerFactory;
  */
 public class ConfigurationLoader {
 
-  protected final Logger logger = LoggerFactory.getLogger(ConfigurationLoader.class);
+    protected final Logger logger = LoggerFactory.getLogger(ConfigurationLoader.class);
 
-  static final private String defaultPath = "/etc/raptor/";
-  private File basePathFile;
+    static final private String defaultPath = "/etc/raptor/";
+    private File basePathFile;
 
-  public static String getConfigPath() {
-    String configDir = System.getProperty("configDir", null);
-    return configDir == null ? defaultPath : configDir;
-  }
-
-  public String getBasePath() {
-
-    if (basePathFile == null) {
-      basePathFile = new File(getConfigPath());
-      if (!basePathFile.exists()) {
-        throw new RuntimeException("Configuration directory does not exists: " + basePathFile.getPath());
-      }
+    public static String getConfigPath() {
+        String configDir = System.getProperty("configDir", null);
+        return configDir == null ? defaultPath : configDir;
     }
 
-    return basePathFile.getAbsolutePath();
-  }
-  final private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    public String getBasePath() {
 
-  final private Map<String, Configuration> cache = new HashMap();
+        if (basePathFile == null) {
+            basePathFile = new File(getConfigPath());
+            if (!basePathFile.exists()) {
+                throw new RuntimeException("Configuration directory does not exists: " + basePathFile.getPath());
+            }
+        }
 
-  protected File getFile(String filename) {
-    return new File(getBasePath() + "/" + filename + ".yml");
-  }
+        return basePathFile.getAbsolutePath();
+    }
+    final private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
-  public Configuration getInstance(String name, Class<? extends Configuration> clazz) throws ConfigurationException {
+    final private Map<String, Configuration> cache = new HashMap();
 
-    Configuration config = cache.get(name);
-    if (config == null) {
-      try {
-        config = mapper.readValue(getFile(name), clazz);
-      } catch (IOException ex) {
-        logger.error("Failed to read configuration", ex);
-        throw new RuntimeException(ex);
-      }
-      cache.put(name, config);
+    protected File getFile(String filename) {
+        return new File(getBasePath() + "/" + filename + ".yml");
     }
 
-    return config;
-  }
+    public Configuration getInstance(String name, Class<? extends Configuration> clazz) {
+
+        Configuration config = cache.get(name);
+        if (config == null) {
+            try {
+                config = mapper.readValue(getFile(name), clazz);
+            } catch (IOException ex) {
+                logger.error("Failed to read configuration", ex);
+                throw new RuntimeException(ex);
+            }
+            cache.put(name, config);
+        }
+
+        return config;
+    }
 
 }

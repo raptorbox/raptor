@@ -22,6 +22,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.createnet.raptor.models.objects.ServiceObject;
 
 /**
@@ -29,32 +31,41 @@ import org.createnet.raptor.models.objects.ServiceObject;
  * @author Luca Capra <lcapra@create-net.org>
  */
 abstract public class TestUtils {
+
+    protected JsonNode jsonServiceObject = null;
+    protected ServiceObject serviceObject;
+
+    protected final ObjectMapper mapper = ServiceObject.getMapper();
+
+    final protected String defaultStreamName = "mylocation";
+
+    protected void loadObject() {
+        jsonServiceObject = loadData("model");
+        serviceObject = new ServiceObject();
+    }
+
+    ;
   
-  protected JsonNode jsonServiceObject = null;
-  protected ServiceObject serviceObject;
-  
-  protected final ObjectMapper mapper = ServiceObject.getMapper();
-  
-  final protected String defaultStreamName = "mylocation";  
-  
-  protected void loadObject() throws IOException {
-    jsonServiceObject = loadData("model");
-    serviceObject = new ServiceObject();
-  };
-  
-  protected JsonNode loadData(String filename) throws IOException {
-    
-    String filepath = filename + ".json";
-    URL res = getClass().getClassLoader().getResource(filepath);
-    
-    if(res == null) throw new IOException("Cannot load " + filepath);
-    
-    String strpath = res.getPath();
-    
-    Path path = Paths.get(strpath);
-    byte[] content = Files.readAllBytes(path);
-    
-    return mapper.readTree(content);  
-  };
-  
+  protected JsonNode loadData(String filename) {
+
+        try {
+            String filepath = filename + ".json";
+            URL res = getClass().getClassLoader().getResource(filepath);
+
+            if (res == null) {
+                throw new IOException("Cannot load " + filepath);
+            }
+
+            String strpath = res.getPath();
+
+            Path path = Paths.get(strpath);
+            byte[] content = Files.readAllBytes(path);
+
+            return mapper.readTree(content);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+;
+
 }

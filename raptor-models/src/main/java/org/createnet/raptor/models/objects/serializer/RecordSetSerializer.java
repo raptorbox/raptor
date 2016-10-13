@@ -31,7 +31,7 @@ import org.createnet.raptor.models.data.RecordSet;
 public class RecordSetSerializer extends JsonSerializer<RecordSet> {
 
   @Override
-  public void serialize(RecordSet r, JsonGenerator jg, SerializerProvider sp) throws IOException, JsonProcessingException {
+  public void serialize(RecordSet r, JsonGenerator jg, SerializerProvider sp) throws IOException {
 
     jg.writeStartObject();
 

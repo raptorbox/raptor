@@ -25,6 +25,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -34,125 +36,134 @@ import org.slf4j.LoggerFactory;
 @JsonSerialize(using = StreamSerializer.class)
 public class Stream extends StreamContainer {
 
-  org.slf4j.Logger logger = LoggerFactory.getLogger(Stream.class);
+    org.slf4j.Logger logger = LoggerFactory.getLogger(Stream.class);
 
-  public String name;
-  public String type;
-  public String description;
+    public String name;
+    public String type;
+    public String description;
 
-  final public Map<String, Channel> channels = new HashMap();
+    final public Map<String, Channel> channels = new HashMap();
 
-  public Stream(String json, ServiceObject object) throws IOException {
-    initialize();
-    JsonNode tree = mapper.readTree(json);
-    parse(tree, object);
-  }
+    public Stream(String json, ServiceObject object) {
 
-  public Stream(JsonNode json, ServiceObject object) {
-    initialize();
-    parse(json, object);
-  }
-
-  public Stream(String name, JsonNode json, ServiceObject object) {
-    initialize();
-    this.name = name;
-    parse(json, object);
-  }
-
-  public Stream(String json) throws IOException {
-    initialize();
-    JsonNode tree = mapper.readTree(json);
-    parse(tree, null);
-  }
-
-  public Stream(JsonNode json) {
-    initialize();
-    parse(json, null);
-  }
-
-  public Stream() {
-    initialize();
-  }
-
-  protected void initialize() {
-  }
-
-  protected void parse(JsonNode json, ServiceObject object) {
-    this.setServiceObject(object);
-    parse(json);
-  }
-
-  protected void parseChannels(JsonNode jsonChannels) {
-    
-    if (jsonChannels.isObject()) {
-
-      Iterator<String> fieldNames = jsonChannels.fieldNames();
-      while (fieldNames.hasNext()) {
-
-        String channelName = fieldNames.next();
-        JsonNode jsonChannel = jsonChannels.get(channelName);
-
-        Channel channel = new Channel(channelName, jsonChannel);
-        channel.setStream(this);
-        channels.put(channel.name, channel);
-      }
+        initialize();
+        try {
+            JsonNode tree = mapper.readTree(json);
+            parse(tree, object);
+        } catch (IOException ex) {
+            throw new ParserException(ex);
+        }
     }
 
-    if (jsonChannels.isArray()) {
-      for (JsonNode jsonChannel : jsonChannels) {
-        Channel channel = new Channel(jsonChannel);
-        channel.setStream(this);
-        channels.put(channel.name, channel);
-      }
-    }
-  }
-
-  protected void parse(JsonNode json) {
-
-    if (!json.has("channels")) {
-      parseChannels(json);
-      return;
+    public Stream(JsonNode json, ServiceObject object) {
+        initialize();
+        parse(json, object);
     }
 
-    if (json.has("name")) {
-      name = json.get("name").asText();
+    public Stream(String name, JsonNode json, ServiceObject object) {
+        initialize();
+        this.name = name;
+        parse(json, object);
     }
 
-    if (json.has("type")) {
-      type = json.get("type").asText();
+    public Stream(String json) {
+        initialize();
+        try {
+            JsonNode tree = mapper.readTree(json);
+            parse(tree, null);
+        } catch (IOException ex) {
+            throw new ParserException(ex);
+        }
     }
 
-    if (json.has("description")) {
-      description = json.get("description").asText();
+    public Stream(JsonNode json) {
+        initialize();
+        parse(json, null);
     }
 
-    if (json.has("channels")) {
-      parseChannels(json.get("channels"));
+    public Stream() {
+        initialize();
     }
 
-  }
+    protected void initialize() {
+    }
 
-  @Override
-  public void parse(String json) throws ParserException {
-    try {
-      parse(mapper.readTree(json));
-    } catch (IOException ex) {
-      throw new ParserException(ex);
+    protected void parse(JsonNode json, ServiceObject object) {
+        this.setServiceObject(object);
+        parse(json);
     }
-  }
 
-  @Override
-  public void validate() throws ValidationException {
-    if (this.name == null || this.name.isEmpty()) {
-      throw new ValidationException("Stream name is required");
+    protected void parseChannels(JsonNode jsonChannels) {
+
+        if (jsonChannels.isObject()) {
+
+            Iterator<String> fieldNames = jsonChannels.fieldNames();
+            while (fieldNames.hasNext()) {
+
+                String channelName = fieldNames.next();
+                JsonNode jsonChannel = jsonChannels.get(channelName);
+
+                Channel channel = new Channel(channelName, jsonChannel);
+                channel.setStream(this);
+                channels.put(channel.name, channel);
+            }
+        }
+
+        if (jsonChannels.isArray()) {
+            for (JsonNode jsonChannel : jsonChannels) {
+                Channel channel = new Channel(jsonChannel);
+                channel.setStream(this);
+                channels.put(channel.name, channel);
+            }
+        }
     }
-    if (this.channels.isEmpty()) {
-      throw new ValidationException("Stream must have at least a channel");
-    } else {
-      for (Map.Entry<String, Channel> item : this.channels.entrySet()) {
-        item.getValue().validate();
-      }
+
+    protected void parse(JsonNode json) {
+
+        if (!json.has("channels")) {
+            parseChannels(json);
+            return;
+        }
+
+        if (json.has("name")) {
+            name = json.get("name").asText();
+        }
+
+        if (json.has("type")) {
+            type = json.get("type").asText();
+        }
+
+        if (json.has("description")) {
+            description = json.get("description").asText();
+        }
+
+        if (json.has("channels")) {
+            parseChannels(json.get("channels"));
+        }
+
     }
-  }
+
+    @Override
+    public void parse(String json) {
+        try {
+            parse(mapper.readTree(json));
+        } catch (IOException ex) {
+            throw new ParserException(ex);
+        }
+    }
+
+    @Override
+    public void validate() {
+        if (this.name == null || this.name.isEmpty()) {
+            throw new ValidationException("Stream name is required");
+        }
+        if (this.channels.isEmpty()) {
+            throw new ValidationException("Stream must have at least a channel");
+        } else {
+            for (Map.Entry<String, Channel> item : this.channels.entrySet()) {
+                item.getValue().validate();
+            }
+        }
+    }
 
 }

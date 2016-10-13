@@ -26,21 +26,21 @@ import org.createnet.raptor.auth.cache.AbstractCache;
 public class NoCache extends AbstractCache {
 
   @Override
-  public Boolean get(String userId, String id, Authorization.Permission op) throws PermissionCacheException {
+  public Boolean get(String userId, String id, Authorization.Permission op) {
     return null;
   }
 
   @Override
-  public void set(String userId, String id, Authorization.Permission op, boolean result) throws PermissionCacheException {
+  public void set(String userId, String id, Authorization.Permission op, boolean result) {
   }
 
   
   @Override
-  public void set(Authentication.UserInfo user) throws PermissionCacheException {
+  public void set(Authentication.UserInfo user) {
   }
 
   @Override
-  public Authentication.UserInfo get(String userId) throws PermissionCacheException {
+  public Authentication.UserInfo get(String userId) {
     return null;
   }
 

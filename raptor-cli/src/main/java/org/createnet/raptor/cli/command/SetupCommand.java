@@ -47,15 +47,9 @@ public class SetupCommand implements Command {
   }
 
   @Override
-  public void run() throws CommandException {
-
-    try {
-      indexer.getIndexer().setup(force);
-      storage.getStorage().setup(force);
-    } catch (Indexer.IndexerException | ConfigurationException | Storage.StorageException ex) {
-      throw new CommandException(ex);
-    }
-
+  public void run() {
+    indexer.getIndexer().setup(force);
+    storage.getStorage().setup(force);
   }
   
 }

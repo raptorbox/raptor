@@ -37,7 +37,7 @@ public interface Storage {
     return ConnectionId.valueOf(name);
   }
   
-  public static class StorageException extends Exception {
+  public static class StorageException extends RuntimeException {
 
     public StorageException(Throwable e) {
       super(e);

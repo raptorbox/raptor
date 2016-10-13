@@ -55,11 +55,13 @@ public class ObjectTreeApi extends AbstractApi {
     @Path("/{id}/tree")
     @ApiOperation(value = "Return the tree rapresentation of the object", notes = "")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Ok"),
-        @ApiResponse(code = 403, message = "Forbidden"),
+        @ApiResponse(code = 200, message = "Ok")
+        ,
+        @ApiResponse(code = 403, message = "Forbidden")
+        ,
         @ApiResponse(code = 404, message = "Not Found")
     })
-    public List<ServiceObject> tree(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Indexer.IndexerException, Authentication.AuthenticationException {
+    public List<ServiceObject> tree(@PathParam("id") String id) {
 
         ServiceObject obj = loadObject(id);
 
@@ -67,7 +69,7 @@ public class ObjectTreeApi extends AbstractApi {
             throw new ForbiddenException("Cannot read object");
         }
 
-        ServiceObjectNode node = indexer.loadTree(obj);
+        ServiceObjectNode node = tree.loadTree(obj);
         return node.objects();
     }
 
@@ -80,7 +82,7 @@ public class ObjectTreeApi extends AbstractApi {
         ,
         @ApiResponse(code = 404, message = "Not Found")
     })
-    public List<ServiceObject> children(@PathParam("id") String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Indexer.IndexerException, Authentication.AuthenticationException {
+    public List<ServiceObject> children(@PathParam("id") String id) {
 
         ServiceObject obj = loadObject(id);
 
@@ -88,7 +90,7 @@ public class ObjectTreeApi extends AbstractApi {
             throw new ForbiddenException("Cannot read object");
         }
 
-        List<ServiceObject> list = indexer.getChildren(obj);
+        List<ServiceObject> list = tree.getChildren(obj);
         return list;
     }
 
@@ -101,7 +103,7 @@ public class ObjectTreeApi extends AbstractApi {
         ,
         @ApiResponse(code = 404, message = "Not Found")
     })
-    public List<ServiceObject> setChildren(@PathParam("id") String id, final List<String> newChildren) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Indexer.IndexerException, Authentication.AuthenticationException, RaptorComponent.ValidationException {
+    public List<ServiceObject> setChildren(@PathParam("id") String id, final List<String> newChildren) {
 
         logger.debug("Setting {} new children", newChildren.size());
 
@@ -124,7 +126,7 @@ public class ObjectTreeApi extends AbstractApi {
         final List<ServiceObject> toSave = new ArrayList<>(newChildrenObject);
 
         // reset old references
-        List<ServiceObject> oldChildrenObject = indexer.getChildren(parentObject);
+        List<ServiceObject> oldChildrenObject = tree.getChildren(parentObject);
         logger.debug("Previous children size: {}", oldChildrenObject.size());
         oldChildrenObject.stream().forEach(o -> {
             if (!newChildren.contains(o.id)) {
@@ -144,7 +146,7 @@ public class ObjectTreeApi extends AbstractApi {
         indexer.saveObjects(toSave);
         storage.saveObjects(toSave);
 
-        indexer.setChildrenList(parentObject, newChildren);
+        tree.setChildrenList(parentObject, newChildren);
 
         return children(id);
     }
@@ -159,9 +161,9 @@ public class ObjectTreeApi extends AbstractApi {
         ,
         @ApiResponse(code = 404, message = "Not Found")
     })
-    public List<ServiceObject> addChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Indexer.IndexerException, Authentication.AuthenticationException, RaptorComponent.ValidationException {
+    public List<ServiceObject> addChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) {
 
-        List<String> children = indexer.getChildrenList(id);
+        List<String> children = tree.getChildrenList(id);
 
         if (children.contains(childrenId)) {
             return children(id);
@@ -181,8 +183,8 @@ public class ObjectTreeApi extends AbstractApi {
         ,
         @ApiResponse(code = 404, message = "Not Found")
     })
-    public List<ServiceObject> removeChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Indexer.IndexerException, Authentication.AuthenticationException, RaptorComponent.ValidationException {
-        List<String> children = indexer.getChildrenList(id);
+    public List<ServiceObject> removeChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) {
+        List<String> children = tree.getChildrenList(id);
         if (!children.contains(childrenId)) {
             return children(id);
         }

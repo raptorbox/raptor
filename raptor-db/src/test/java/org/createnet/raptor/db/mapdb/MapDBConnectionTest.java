@@ -55,7 +55,7 @@ public class MapDBConnectionTest {
   public MapDBConnectionTest() {
   }
  
-  private void populateObjectData(long dataLength) throws IOException, Storage.StorageException {
+  private void populateObjectData(long dataLength) throws IOException {
 
     ObjectNode obj = loadData("model");
 

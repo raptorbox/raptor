@@ -89,7 +89,7 @@ public class AuthProvider implements Authorization, Authentication {
   }
 
   @Override
-  public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) throws AuthorizationException {
+  public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) {
     
     try {
     
@@ -118,7 +118,7 @@ public class AuthProvider implements Authorization, Authentication {
   }
 
   @Override
-  public UserInfo getUser(String accessToken) throws AuthenticationException {
+  public UserInfo getUser(String accessToken) {
     
     if(accessToken == null) {
       throw new AuthenticationException("accessToken not provided");
@@ -151,7 +151,7 @@ public class AuthProvider implements Authorization, Authentication {
   }
 
   @Override
-  public void sync(String accessToken, ServiceObject obj, SyncOperation op) throws AuthenticationException {
+  public void sync(String accessToken, ServiceObject obj, SyncOperation op) {
     authenticationInstance.sync(accessToken, obj, op);
   }
 

@@ -68,12 +68,12 @@ public class IndexerService implements RaptorService {
     private Indexer indexer;
 
     public enum IndexNames {
-        object, data, subscriptions, groups
+        object, data, subscriptions
     }
 
     @PostConstruct
     @Override
-    public void initialize() throws ServiceException {
+    public void initialize() {
         try {
             getIndexer();
         } catch (Indexer.IndexerException | ConfigurationException e) {
@@ -83,7 +83,7 @@ public class IndexerService implements RaptorService {
 
     @PreDestroy
     @Override
-    public void shutdown() throws ServiceException {
+    public void shutdown() {
         try {
             getIndexer().close();
             indexer = null;
@@ -92,7 +92,7 @@ public class IndexerService implements RaptorService {
         }
     }
 
-    public Indexer getIndexer() throws Indexer.IndexerException, ConfigurationException {
+    public Indexer getIndexer() {
 
         if (indexer == null) {
             indexer = new IndexerProvider();
@@ -104,35 +104,35 @@ public class IndexerService implements RaptorService {
         return indexer;
     }
 
-    protected IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor getIndexDescriptor(IndexNames name) throws ConfigurationException {
+    protected IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor getIndexDescriptor(IndexNames name) {
         return configuration.getIndexer().elasticsearch.indices.names.get(name.toString());
     }
 
-    public Indexer.IndexRecord getIndexRecord(IndexNames name) throws ConfigurationException {
+    public Indexer.IndexRecord getIndexRecord(IndexNames name) {
         IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = getIndexDescriptor(name);
         return new Indexer.IndexRecord(desc.index, desc.type);
     }
 
-    private void setQueryIndex(Query query, IndexNames name) throws ConfigurationException {
+    public void setQueryIndex(Query query, IndexNames name) {
         IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = getIndexDescriptor(name);
         query.setIndex(desc.index);
         query.setType(desc.type);
     }
 
     @Deprecated
-    public List<ServiceObject> getObjects(String userId) throws ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+    public List<ServiceObject> getObjects(String userId) {
         ObjectQuery q = new ObjectQuery();
         q.setUserId(userId);
         return searchObject(q);
     }
 
-    public List<ServiceObject> getObjects(List<String> ids) throws ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+    public List<ServiceObject> getObjects(List<String> ids) {
         ObjectListQuery q = new ObjectListQuery();
         q.ids.addAll(ids);
         return searchObject(q);
     }
 
-    public ServiceObject getObject(String id) throws ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+    public ServiceObject getObject(String id) {
         ServiceObject obj = getObjects(Arrays.asList(id)).get(0);
         if (obj == null) {
             throw new Indexer.IndexerException("Object " + id + " not found");
@@ -140,7 +140,7 @@ public class IndexerService implements RaptorService {
         return obj;
     }
 
-    public void indexObject(ServiceObject obj, boolean isNew) throws ConfigurationException, Indexer.IndexerException, RaptorComponent.ParserException, Authentication.AuthenticationException {
+    public void indexObject(ServiceObject obj, boolean isNew) {
         Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
         record.id = obj.id;
         record.body = obj.toJSON();
@@ -177,40 +177,14 @@ public class IndexerService implements RaptorService {
         return false;
     }
 
-    /**
-     * @TODO Remove on upgrade to ES 5.x
-     */
-    @Deprecated
-    protected boolean lookupGroupItem(String parentId, int childLength) {
-        int max = 10, curr = max, wait = 500; //ms
-        while (curr > 0) {
-            try {
-
-                List<String> objs = getChildrenList(new ServiceObject(parentId));
-                if (objs.size() == childLength) {
-                    logger.warn("Object {} avail in index after {}ms", parentId, (max - curr) * wait);
-                    return true;
-                }
-
-                logger.debug("Expecting {} chidlren, found {}. Waiting for index update", childLength, objs.size());
-                Thread.sleep(wait);
-
-            } catch (Exception ex) {
-            } finally {
-                curr--;
-            }
-        }
-        return false;
-    }
-
-    public void deleteObject(ServiceObject obj) throws ConfigurationException, Indexer.IndexerException, IOException, RecordsetException {
+    public void deleteObject(ServiceObject obj) {
         Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
         record.id = obj.id;
         getIndexer().delete(record);
         deleteData(obj.streams.values());
     }
 
-    public List<ServiceObject> searchObject(Query query) throws Indexer.SearchException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+    public List<ServiceObject> searchObject(Query query) {
 
         setQueryIndex(query, IndexNames.object);
 
@@ -224,7 +198,7 @@ public class IndexerService implements RaptorService {
         return list;
     }
 
-    public RecordSet searchLastUpdate(Stream stream) throws ConfigurationException, Indexer.SearchException, RecordsetException, Indexer.IndexerException {
+    public RecordSet searchLastUpdate(Stream stream) {
 
         LastUpdateQuery lastUpdateQuery = new LastUpdateQuery(stream.getServiceObject().id, stream.name);
         setQueryIndex(lastUpdateQuery, IndexNames.data);
@@ -242,7 +216,7 @@ public class IndexerService implements RaptorService {
         return new RecordSet(stream, results.get(0));
     }
 
-    public void indexData(Stream stream, RecordSet recordSet) throws ConfigurationException, IOException, Indexer.IndexerException, Authentication.AuthenticationException {
+    public void indexData(Stream stream, RecordSet recordSet) {
 
         Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
         record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getLastUpdate().getTime();
@@ -259,7 +233,7 @@ public class IndexerService implements RaptorService {
         getIndexer().save(record);
     }
 
-    public void saveObjects(List<ServiceObject> ids) throws Indexer.IndexerException, ConfigurationException, RaptorComponent.ParserException {
+    public void saveObjects(List<ServiceObject> ids) {
 
         List<Indexer.IndexOperation> ops = new ArrayList();
         for (ServiceObject obj : ids) {
@@ -277,7 +251,7 @@ public class IndexerService implements RaptorService {
         }
     }
 
-    public List<RecordSet> getStreamData(Stream stream) throws ConfigurationException, Indexer.IndexerException, RecordsetException {
+    public List<RecordSet> getStreamData(Stream stream) {
 
         DataQuery query = new DataQuery();
         setQueryIndex(query, IndexNames.data);
@@ -297,7 +271,7 @@ public class IndexerService implements RaptorService {
         return results;
     }
 
-    public void deleteData(Stream stream) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
+    public void deleteData(Stream stream) {
 
         List<Indexer.IndexOperation> deletes = new ArrayList();
         List<RecordSet> results = getStreamData(stream);
@@ -315,7 +289,7 @@ public class IndexerService implements RaptorService {
 
     }
 
-    public ResultSet searchData(Stream stream, DataQuery query) throws Indexer.SearchException, RecordsetException, Indexer.IndexerException, ConfigurationException {
+    public ResultSet searchData(Stream stream, DataQuery query) {
 
         setQueryIndex(query, IndexNames.data);
         List<String> res = getIndexer().search(query);
@@ -328,17 +302,17 @@ public class IndexerService implements RaptorService {
         return resultset;
     }
 
-    public void deleteData(Collection<Stream> changedStreams) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
+    public void deleteData(Collection<Stream> changedStreams) {
         for (Stream changedStream : changedStreams) {
             deleteData(changedStream);
         }
     }
 
-    public ResultSet fetchData(Stream stream) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
+    public ResultSet fetchData(Stream stream) {
         return fetchData(stream, 0);
     }
 
-    public ResultSet fetchData(Stream stream, long limit) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
+    public ResultSet fetchData(Stream stream, long limit) {
 
         // query for all the data
         DataQuery query = new DataQuery();
@@ -352,131 +326,9 @@ public class IndexerService implements RaptorService {
         return data;
     }
 
-    public RecordSet fetchLastUpdate(Stream stream) throws ConfigurationException, IOException, Indexer.IndexerException, RecordsetException {
+    public RecordSet fetchLastUpdate(Stream stream) {
         ResultSet data = fetchData(stream, 1);
         return data.size() > 0 ? data.get(0) : null;
     }
 
-    public List<String> getChildrenList(String id) throws Indexer.SearchException, Indexer.IndexerException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException {
-        ServiceObject obj = getObject(id);
-        return getChildrenList(obj);
-    }
-
-    public List<String> getChildrenList(ServiceObject parentObject) throws Indexer.SearchException, Indexer.IndexerException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException {
-
-        TreeQuery query = new TreeQuery();
-        query.queryType = TreeQuery.TreeQueryType.Children;
-        query.parentId = parentObject.parentId;
-        query.id = parentObject.id;
-        setQueryIndex(query, IndexNames.groups);
-
-        List<String> list = getIndexer().search(query);
-
-        List<String> children = new ArrayList<>();
-        for (String raw : list) {
-            try {
-                TreeQuery.TreeRecordBody record = ServiceObject.getMapper().readValue(raw, TreeQuery.TreeRecordBody.class);
-                children.add(record.id);
-            } catch (IOException ex) {
-                logger.error("Cannot parse group record");
-                throw new RaptorComponent.ParserException(ex);
-            }
-        }
-
-        return children;
-    }
-
-    public List<ServiceObject> getChildren(ServiceObject parentObject) throws Indexer.SearchException, Indexer.IndexerException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException {
-
-        List<String> ids = getChildrenList(parentObject);
-
-        List<ServiceObject> list = new ArrayList();
-        if (!ids.isEmpty()) {
-            list = getObjects(ids);
-        }
-
-        return list;
-    }
-
-    public void setChildrenList(ServiceObject obj, List<String> list) throws ConfigurationException, RaptorComponent.ParserException, Indexer.IndexerException, Indexer.SearchException, Authentication.AuthenticationException {
-
-        logger.debug("Storing {} children for {}", list.size(), obj != null ? obj.id : "<root>");
-
-        List<String> previousList = getChildrenList(obj);
-
-        List<Indexer.IndexOperation> ops = new ArrayList();
-
-        // drop ALL the oldies
-        List<String> toRemoveList = new ArrayList(previousList);
-        if (!toRemoveList.isEmpty()) {
-            for (String removeId : toRemoveList) {
-                Indexer.IndexRecord record = getIndexRecord(IndexNames.groups);
-                record.id = removeId;
-                Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.DELETE, record);
-                ops.add(op);
-            }
-        }
-
-        // insert the new ones
-        for (String childId : list) {
-
-            Indexer.IndexRecord record = getIndexRecord(IndexNames.groups);
-            record.id = childId;
-            record.isNew(true);
-
-            TreeQuery.TreeRecordBody treeRecord = new TreeQuery.TreeRecordBody();
-            treeRecord.id = childId;
-            String parentId = obj != null ? obj.id : null;
-            treeRecord.parentId = parentId;
-            treeRecord.path = (parentId == null ? "" : parentId + "/") + childId;
-            try {
-                record.body = ServiceObject.getMapper().writeValueAsString(treeRecord);
-            } catch (JsonProcessingException ex) {
-                throw new RaptorComponent.ParserException(ex);
-            }
-            Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.CREATE, record);
-            ops.add(op);
-        }
-
-        getIndexer().batch(ops);
-        lookupGroupItem(obj.id, list.size());
-        logger.debug("Store children list completed");
-    }
-
-    public ServiceObjectNode loadTree(ServiceObject obj) throws ConfigurationException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
-        return loadTree(new ServiceObjectNode(obj));
-    }
-
-    public ServiceObjectNode loadTree(ServiceObjectNode node) throws ConfigurationException, ConfigurationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
-
-        logger.debug("Loading tree for node {}", node.getCurrent().id);
-
-        if (node.getCurrent().parentId != null && node.getParent() == null) {
-
-            logger.debug("Loading parent {}", node.getCurrent().parentId);
-
-            ServiceObject parent = getObject(node.getCurrent().parentId);
-            node.setParent(new ServiceObjectNode(parent));
-
-            if (parent.parentId != null) {
-                loadTree(node.getParent());
-            }
-        }
-
-        if (node.getChildren().isEmpty()) {
-            List<ServiceObject> list = getChildren(node.getCurrent());
-            for (ServiceObject serviceObject : list) {
-
-                logger.debug("Loading child {}", serviceObject.id);
-
-                ServiceObjectNode child = new ServiceObjectNode(serviceObject);
-                child.setParent(node);
-
-                loadTree(child);
-                node.getChildren().add(child);
-            }
-        }
-
-        return node;
-    }
 }

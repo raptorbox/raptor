@@ -15,18 +15,13 @@
  */
 package org.createnet.raptor.http.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import org.createnet.raptor.auth.authentication.Authentication;
-import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.db.Storage;
@@ -35,10 +30,8 @@ import org.createnet.raptor.http.configuration.StorageConfiguration;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.data.RecordSet;
-import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Stream;
-import org.createnet.raptor.search.raptor.search.Indexer;
 import org.mapdb.DBException;
 
 import org.slf4j.Logger;
@@ -68,7 +61,7 @@ public class StorageService implements RaptorService {
 
     @PostConstruct
     @Override
-    public void initialize() throws ServiceException {
+    public void initialize() {
         try {
             getStorage();
         } catch (Storage.StorageException | ConfigurationException | DBException e) {
@@ -78,7 +71,7 @@ public class StorageService implements RaptorService {
 
     @PreDestroy
     @Override
-    public void shutdown() throws ServiceException {
+    public void shutdown() {
         try {
             getStorage().disconnect();
             storage = null;
@@ -91,7 +84,7 @@ public class StorageService implements RaptorService {
         objects, data, subscriptions, actuations
     }
 
-    public Storage getStorage() throws Storage.StorageException, ConfigurationException {
+    public Storage getStorage() {
 
         if (storage == null) {
             logger.debug("Initializing storage instance");
@@ -105,7 +98,7 @@ public class StorageService implements RaptorService {
         return storage;
     }
 
-    protected Storage.Connection getConnection(String name) throws Storage.StorageException, ConfigurationException {
+    protected Storage.Connection getConnection(String name) {
         Storage.Connection conn = getStorage().getConnection(name);
         if (conn == null) {
             throw new Storage.StorageException("Cannot load connection for " + name);
@@ -113,19 +106,19 @@ public class StorageService implements RaptorService {
         return conn;
     }
 
-    public Storage.Connection getObjectConnection() throws ConfigurationException, Storage.StorageException {
+    public Storage.Connection getObjectConnection() {
         return getConnection(ConnectionId.objects.toString());
     }
 
-    public Storage.Connection getDataConnection() throws ConfigurationException, Storage.StorageException {
+    public Storage.Connection getDataConnection() {
         return getStorage().getConnection(ConnectionId.data.toString());
     }
 
-    public Storage.Connection getActionConnection() throws ConfigurationException, Storage.StorageException {
+    public Storage.Connection getActionConnection() {
         return getStorage().getConnection(ConnectionId.actuations.toString());
     }
 
-    public ServiceObject getObject(String id) throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException {
+    public ServiceObject getObject(String id) {
         JsonNode json = getObjectConnection().get(id);
         if (json == null) {
             return null;
@@ -133,7 +126,7 @@ public class StorageService implements RaptorService {
         return ServiceObject.fromJSON(json);
     }
 
-    public String saveObject(ServiceObject obj) throws ConfigurationException, Storage.StorageException, RaptorComponent.ParserException, RaptorComponent.ValidationException, Authentication.AuthenticationException {
+    public String saveObject(ServiceObject obj) {
 
         obj.validate();
 
@@ -146,7 +139,7 @@ public class StorageService implements RaptorService {
         return obj.id;
     }
 
-    public void saveObjects(List<ServiceObject> objs) throws ConfigurationException, Storage.StorageException, RaptorComponent.ParserException, RaptorComponent.ValidationException, Authentication.AuthenticationException {
+    public void saveObjects(List<ServiceObject> objs) {
 
         List<ServiceObject> saved = objs.stream().map((ServiceObject o) -> {
             try {
@@ -154,11 +147,11 @@ public class StorageService implements RaptorService {
                 return o;
             } catch (Exception ex) {
                 logger.error("Error saving {}: {}", o.id, ex.getMessage());
-                return null;                
+                return null;
             }
         })
-        .filter(o -> o != null)
-        .collect(Collectors.toList());
+                .filter(o -> o != null)
+                .collect(Collectors.toList());
 
         if (saved.size() != objs.size()) {
             throw new Storage.StorageException("Failed storing objects");
@@ -166,7 +159,7 @@ public class StorageService implements RaptorService {
 
     }
 
-    public void deleteObject(ServiceObject obj) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException, Indexer.IndexerException, RecordsetException {
+    public void deleteObject(ServiceObject obj) {
 
         // cleanup data
         deleteData(obj.streams.values());
@@ -181,11 +174,11 @@ public class StorageService implements RaptorService {
         return stream.getServiceObject().id + "-" + stream.name + "-" + record.getLastUpdate().getTime();
     }
 
-//  public ResultSet fetchData(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
+//  public ResultSet fetchData(Stream stream) {
 //    return fetchData(stream, defaultRecordLimit, 0);
 //  }
 //
-//  public ResultSet fetchData(Stream stream, int limit, int offset) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
+//  public ResultSet fetchData(Stream stream, int limit, int offset) {
 //
 //    ResultSet resultset = new ResultSet(stream);
 //
@@ -232,11 +225,11 @@ public class StorageService implements RaptorService {
 //
 //    return resultset;
 //  }
-//  public RecordSet fetchLastUpdate(Stream stream) throws RecordsetException, ConfigurationException, Storage.StorageException, Authentication.AuthenticationException {
+//  public RecordSet fetchLastUpdate(Stream stream) {
 //    ResultSet resultset = fetchData(stream, 1, 0);
 //    return resultset.isEmpty() ? null : resultset.get(0);
 //  }
-    public void saveData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException, JsonProcessingException, IOException, Authentication.AuthenticationException {
+    public void saveData(Stream stream, RecordSet record) {
 
         record.setStream(stream);
         record.userId = stream.getServiceObject().getUserId();
@@ -244,11 +237,11 @@ public class StorageService implements RaptorService {
         getDataConnection().set(getDataId(stream, record), record.toJsonNode(), defaultDataTTL);
     }
 
-    public void deleteData(Stream stream, RecordSet record) throws ConfigurationException, Storage.StorageException {
+    public void deleteData(Stream stream, RecordSet record) {
         getDataConnection().delete(getDataId(stream, record));
     }
 
-//  public List<RecordSet> listData() throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException {
+//  public List<RecordSet> listData() {
 //
 //    List<JsonNode> results = getDataConnection().list(
 //            BaseQuery.queryBy("userId", auth.getUser().getUserId())
@@ -261,7 +254,7 @@ public class StorageService implements RaptorService {
 //
 //    return list;
 //  }
-    public void deleteData(Stream stream) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException, Indexer.IndexerException, RecordsetException {
+    public void deleteData(Stream stream) {
 
         List<RecordSet> records = indexer.getStreamData(stream);
 
@@ -271,7 +264,7 @@ public class StorageService implements RaptorService {
 
     }
 
-    public void deleteData(Collection<Stream> streams) throws ConfigurationException, Storage.StorageException, Authentication.AuthenticationException, IOException, Indexer.IndexerException, RecordsetException {
+    public void deleteData(Collection<Stream> streams) {
 
         if (streams.isEmpty()) {
             return;
@@ -290,7 +283,7 @@ public class StorageService implements RaptorService {
         return action.getServiceObject().id + "-" + action.name;
     }
 
-    public ActionStatus getActionStatus(Action action) throws IOException, ConfigurationException, Storage.StorageException {
+    public ActionStatus getActionStatus(Action action) {
 
         JsonNode rawStatus = getActionConnection().get(getActionId(action));
 
@@ -299,7 +292,7 @@ public class StorageService implements RaptorService {
         return actionStatus;
     }
 
-    public ActionStatus saveActionStatus(Action action, String status) throws ConfigurationException, Storage.StorageException {
+    public ActionStatus saveActionStatus(Action action, String status) {
 
         ActionStatus actionStatus = new ActionStatus(action, status);
 
@@ -308,11 +301,11 @@ public class StorageService implements RaptorService {
         return actionStatus;
     }
 
-    public void deleteActionStatus(Action action) throws ConfigurationException, Storage.StorageException {
+    public void deleteActionStatus(Action action) {
         getActionConnection().delete(getActionId(action));
     }
 
-    public void deleteActionStatus(Collection<Action> changedActions) throws ConfigurationException, Storage.StorageException {
+    public void deleteActionStatus(Collection<Action> changedActions) {
         if (!changedActions.isEmpty()) {
             // drop action data
             for (Action changedAction : changedActions) {

@@ -29,7 +29,7 @@ import org.createnet.raptor.models.objects.Action;
 public class ActionSerializer extends JsonSerializer<Action> {
 
     @Override
-    public void serialize(Action t, JsonGenerator jg, SerializerProvider sp) throws IOException, JsonProcessingException {
+    public void serialize(Action t, JsonGenerator jg, SerializerProvider sp) throws IOException {
 
         jg.writeStartObject();
         

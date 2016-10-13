@@ -29,67 +29,68 @@ import static org.junit.Assert.*;
  */
 public class EmitterTest {
 
-  private Emitter emitter;
-  
-  
-  public EmitterTest() {
-  }
-  
-  @BeforeClass
-  public static void setUpClass() {
-  }
-  
-  @AfterClass
-  public static void tearDownClass() {
-  }
-  
-  @Before
-  public void setUp() {
-    emitter = new Emitter();
-  }
-  
-  @After
-  public void tearDown() {
-    emitter = null;
-  }
+    private Emitter emitter;
 
-  @Test
-  public void testOn() {
-    
-    emitter.on("assertTrue", new Emitter.Callback() {
-      @Override
-      public void run(Event event) throws Emitter.EmitterException {
-        assertTrue(true);
-      }
-    });
-    
-    emitter.trigger("assertTrue", new AbstractEvent(){});
-    
-  }
-  
-  @Test
-  public void testOff() {
-    
-    Emitter.Callback cb = new Emitter.Callback() {
-      @Override
-      public void run(Event event) throws Emitter.EmitterException {
-        assertTrue(true);
-      }
-    };
-    
-    emitter.on("assertTrue", cb);
-    
-    emitter.trigger("assertTrue", new AbstractEvent(){});
-    
-    emitter.off("assertTrue", cb);
+    public EmitterTest() {
+    }
 
-    assertFalse(emitter.hasCallbacks("assertTrue"));
-    
-    emitter.on("assertTrue", cb);
-    emitter.off("assertTrue");
-    
-    assertFalse(emitter.hasCallbacks("assertTrue"));
-    
-  }
-  
+    @BeforeClass
+    public static void setUpClass() {
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+    }
+
+    @Before
+    public void setUp() {
+        emitter = new Emitter();
+    }
+
+    @After
+    public void tearDown() {
+        emitter = null;
+    }
+
+    @Test
+    public void testOn() {
+
+        emitter.on("assertTrue", new Emitter.Callback() {
+            @Override
+            public void run(Event event) {
+                assertTrue(true);
+            }
+        });
+
+        emitter.trigger("assertTrue", new AbstractEvent() {
+        });
+
+    }
+
+    @Test
+    public void testOff() {
+
+        Emitter.Callback cb = new Emitter.Callback() {
+            @Override
+            public void run(Event event) {
+                assertTrue(true);
+            }
+        };
+
+        emitter.on("assertTrue", cb);
+
+        emitter.trigger("assertTrue", new AbstractEvent() {
+        });
+
+        emitter.off("assertTrue", cb);
+
+        assertFalse(emitter.hasCallbacks("assertTrue"));
+
+        emitter.on("assertTrue", cb);
+        emitter.off("assertTrue");
+
+        assertFalse(emitter.hasCallbacks("assertTrue"));
+
+    }
+
 }

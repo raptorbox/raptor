@@ -25,51 +25,51 @@ import org.createnet.raptor.models.objects.RaptorComponent;
  */
 public class BooleanRecord extends Record<Boolean> {
 
-  protected boolean value;
+    protected boolean value;
 
-  @Override
-  public String getType() {
-    return "boolean";
-  }
-
-  @Override
-  public Boolean getValue() {
-    return value;
-  }
-
-  @Override
-  public void setValue(Object value) throws RaptorComponent.ParserException {
-    this.value = parseValue(value);
-  }
-
-  @Override
-  public Boolean parseValue(Object value) throws RaptorComponent.ParserException {
-    try {
-
-      if(value instanceof Boolean) {
-        return (Boolean) value;
-      }
-      
-      if (value instanceof JsonNode) {
-        JsonNode node = (JsonNode) value;
-        if (node.isBoolean()) {
-          return node.asBoolean();
-        }
-      }
-
-      if (value instanceof String) {
-        return Boolean.parseBoolean((String) value);
-      }
-
-      return (Boolean) value;
-    } catch (Exception e) {
-      throw new RaptorComponent.ParserException(e);
+    @Override
+    public String getType() {
+        return "boolean";
     }
-  }
 
-  @Override
-  public Class<Boolean> getClassType() {
-    return Boolean.class;
-  }
+    @Override
+    public Boolean getValue() {
+        return value;
+    }
+
+    @Override
+    public void setValue(Object value) {
+        this.value = parseValue(value);
+    }
+
+    @Override
+    public Boolean parseValue(Object value) {
+        try {
+
+            if (value instanceof Boolean) {
+                return (Boolean) value;
+            }
+
+            if (value instanceof JsonNode) {
+                JsonNode node = (JsonNode) value;
+                if (node.isBoolean()) {
+                    return node.asBoolean();
+                }
+            }
+
+            if (value instanceof String) {
+                return Boolean.parseBoolean((String) value);
+            }
+
+            return (Boolean) value;
+        } catch (Exception e) {
+            throw new RaptorComponent.ParserException(e);
+        }
+    }
+
+    @Override
+    public Class<Boolean> getClassType() {
+        return Boolean.class;
+    }
 
 }

@@ -39,223 +39,219 @@ import org.slf4j.LoggerFactory;
 @Parameters(separators = "=", commandDescription = "Index record from storage")
 public class IndexCommand implements Command {
 
-  protected static String TYPE_DEFINITION = "objects";
-  protected static String TYPE_DATA = "data";
+    protected static String TYPE_DEFINITION = "objects";
+    protected static String TYPE_DATA = "data";
 
-  final private Logger logger = LoggerFactory.getLogger(IndexCommand.class);
+    final private Logger logger = LoggerFactory.getLogger(IndexCommand.class);
 
-  @Inject
-  StorageService storage;
+    @Inject
+    StorageService storage;
 
-  @Inject
-  IndexerService indexer;
+    @Inject
+    IndexerService indexer;
 
-  @Parameter(names = {"-b", "--batch-size"}, description = "Number of records to index per operation")
-  public int batchSize = 500;
+    @Parameter(names = {"-b", "--batch-size"}, description = "Number of records to index per operation")
+    public int batchSize = 500;
 
-  @Parameter(names = {"-t", "--type"}, description = "Type of data to index, may be `data` or `definition`")
-  public List<String> dataType = new ArrayList();
+    @Parameter(names = {"-t", "--type"}, description = "Type of data to index, may be `data` or `definition`")
+    public List<String> dataType = new ArrayList();
 
-  public class SyncObject {
+    public class SyncObject {
 
-    public boolean completed = false;
-    final public List<Indexer.IndexRecord> items = new ArrayList();
+        public boolean completed = false;
+        final public List<Indexer.IndexRecord> items = new ArrayList();
 
-    private void setItems(List<Indexer.IndexRecord> objects) {
-      items.addAll(objects);
-    }
-  }
-
-  public class ObjectIndexerException extends Exception {
-
-    public ObjectIndexerException(String message) {
-      super(message);
+        private void setItems(List<Indexer.IndexRecord> objects) {
+            items.addAll(objects);
+        }
     }
 
-    public ObjectIndexerException(Throwable cause) {
-      super(cause);
-    }
+    public class ObjectIndexerException extends RuntimeException {
 
-  }
-
-  public void sync() throws ObjectIndexerException, ConfigurationException {
-
-    int offset = 0;
-    int limit = batchSize;
-
-    int completed = 0;
-    int types = 0;
-
-    logger.debug("Syncing definition, batch size at {}", batchSize);
-
-    Map<String, SyncObject> recordsMap = new HashMap();
-
-    if (dataType.contains(TYPE_DATA)) {
-      recordsMap.put(TYPE_DATA, new SyncObject());
-      // add type
-    }
-
-    if (dataType.contains(TYPE_DEFINITION)) {
-      recordsMap.put(TYPE_DEFINITION, new SyncObject());
-    }
-
-    types = recordsMap.size();
-
-    while (true) {
-
-      if (recordsMap.containsKey(TYPE_DATA)) {
-        recordsMap.get(TYPE_DATA).setItems(getData(offset, limit));
-      }
-
-      if (recordsMap.containsKey(TYPE_DEFINITION)) {
-        recordsMap.get(TYPE_DEFINITION).setItems(getObjects(offset, limit));
-      }
-
-      for (Map.Entry<String, SyncObject> entry : recordsMap.entrySet()) {
-
-        String key = entry.getKey();
-        SyncObject value = entry.getValue();
-
-        List<Indexer.IndexRecord> list = value.items;
-
-        logger.debug("Retrieved {} records", list.size());
-
-        if (list.isEmpty()) {
-          logger.debug("Records list is empty, completed sync on {}", key);
-          value.completed = true;
-          completed++;
-          break;
+        public ObjectIndexerException(String message) {
+            super(message);
         }
 
-        runBatch(list);
-        value.items.clear();
-      }
-
-      if (types == completed) {
-        logger.debug("Completed");
-        break;
-      }
-
-      offset += limit;
-    }
-
-  }
-
-  protected void runBatch(List<Indexer.IndexRecord> list) throws ObjectIndexerException, ConfigurationException {
-
-    try {
-
-      logger.debug("Start index batch");
-      List<Indexer.IndexOperation> batchList = new ArrayList();
-
-      int i = 0;
-      for (Indexer.IndexRecord indexRecord : list) {
-
-        Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.UPSERT, indexRecord);
-        batchList.add(op);
-
-        i++;
-
-        if (i == batchSize) {
-          i = 0;
-          logger.debug("Send batch operation of {} elements", batchSize);
-          indexer.getIndexer().batch(batchList);
-          batchList.clear();
+        public ObjectIndexerException(Throwable cause) {
+            super(cause);
         }
 
-      }
-
-      if (!batchList.isEmpty()) {
-        logger.debug("Send batch operation of {} elements", batchList.size());
-        indexer.getIndexer().batch(batchList);
-        batchList.clear();
-      }
-
-    } catch (Indexer.IndexerException e) {
-      logger.debug("Exception while indexing", e);
-      throw new ObjectIndexerException(e);
     }
 
-  }
+    public void sync() {
 
-  protected List<Indexer.IndexRecord> getObjects(int offset, int limit) throws ObjectIndexerException {
-    try {
+        int offset = 0;
+        int limit = batchSize;
 
-      BaseQuery query = new BaseQuery();
+        int completed = 0;
+        int types = 0;
 
-      query.offset = offset;
-      query.limit = limit;
+        logger.debug("Syncing definition, batch size at {}", batchSize);
 
-      logger.debug("Loading {} objects from offset {}", limit, offset);
+        Map<String, SyncObject> recordsMap = new HashMap();
 
-      List<JsonNode> objList = storage.getObjectConnection().list(query);
-      List<Indexer.IndexRecord> list = new ArrayList();
+        if (dataType.contains(TYPE_DATA)) {
+            recordsMap.put(TYPE_DATA, new SyncObject());
+            // add type
+        }
 
-      for (JsonNode rawobj : objList) {
+        if (dataType.contains(TYPE_DEFINITION)) {
+            recordsMap.put(TYPE_DEFINITION, new SyncObject());
+        }
 
-        Indexer.IndexRecord indexRecord = indexer.getIndexRecord(IndexerService.IndexNames.object);
+        types = recordsMap.size();
 
-        indexRecord.id = rawobj.get("id").asText();
-        indexRecord.body = rawobj.toString();
+        while (true) {
 
-        list.add(indexRecord);
-      }
+            if (recordsMap.containsKey(TYPE_DATA)) {
+                recordsMap.get(TYPE_DATA).setItems(getData(offset, limit));
+            }
 
-      return list;
-    } catch (ConfigurationException | Storage.StorageException ex) {
-      logger.debug("Exception while loading objects", ex);
-      throw new ObjectIndexerException(ex);
+            if (recordsMap.containsKey(TYPE_DEFINITION)) {
+                recordsMap.get(TYPE_DEFINITION).setItems(getObjects(offset, limit));
+            }
+
+            for (Map.Entry<String, SyncObject> entry : recordsMap.entrySet()) {
+
+                String key = entry.getKey();
+                SyncObject value = entry.getValue();
+
+                List<Indexer.IndexRecord> list = value.items;
+
+                logger.debug("Retrieved {} records", list.size());
+
+                if (list.isEmpty()) {
+                    logger.debug("Records list is empty, completed sync on {}", key);
+                    value.completed = true;
+                    completed++;
+                    break;
+                }
+
+                runBatch(list);
+                value.items.clear();
+            }
+
+            if (types == completed) {
+                logger.debug("Completed");
+                break;
+            }
+
+            offset += limit;
+        }
+
     }
-  }
 
-  private List<Indexer.IndexRecord> getData(int offset, int limit) throws ObjectIndexerException {
-    try {
-
-      BaseQuery query = new BaseQuery();
-      query.offset = offset;
-      query.limit = limit;
-
-      logger.debug("Loading {} data records from offset {}", limit, offset);
-
-      List<JsonNode> objList = storage.getDataConnection().list(query);
-      List<Indexer.IndexRecord> list = new ArrayList();
-
-      for (JsonNode rawobj : objList) {
-
-        Indexer.IndexRecord indexRecord = indexer.getIndexRecord(IndexerService.IndexNames.data);
+    protected void runBatch(List<Indexer.IndexRecord> list) {
 
         try {
-          indexRecord.id = rawobj.get("objectId").asText() + "-" + rawobj.get("streamId").asText() + "-" + rawobj.get("lastUpdate").asText();
-        } catch (NullPointerException ex) {
-          logger.warn("NPE on record {}", rawobj.toString());
-          continue;
+
+            logger.debug("Start index batch");
+            List<Indexer.IndexOperation> batchList = new ArrayList();
+
+            int i = 0;
+            for (Indexer.IndexRecord indexRecord : list) {
+
+                Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.UPSERT, indexRecord);
+                batchList.add(op);
+
+                i++;
+
+                if (i == batchSize) {
+                    i = 0;
+                    logger.debug("Send batch operation of {} elements", batchSize);
+                    indexer.getIndexer().batch(batchList);
+                    batchList.clear();
+                }
+
+            }
+
+            if (!batchList.isEmpty()) {
+                logger.debug("Send batch operation of {} elements", batchList.size());
+                indexer.getIndexer().batch(batchList);
+                batchList.clear();
+            }
+
+        } catch (Indexer.IndexerException e) {
+            logger.debug("Exception while indexing", e);
+            throw new ObjectIndexerException(e);
         }
 
-        indexRecord.body = rawobj.toString();
-        indexRecord.isNew(true);
-
-        list.add(indexRecord);
-      }
-
-      return list;
-    } catch (ConfigurationException | Storage.StorageException ex) {
-      logger.debug("Exception while loading data records", ex);
-      throw new ObjectIndexerException(ex);
     }
-  }
 
-  @Override
-  public String getName() {
-    return "index";
-  }
+    protected List<Indexer.IndexRecord> getObjects(int offset, int limit) {
+        try {
 
-  @Override
-  public void run() throws CommandException {
-    try {
-      sync();
-    } catch (ObjectIndexerException | ConfigurationException ex) {
-      throw new CommandException(ex);
+            BaseQuery query = new BaseQuery();
+
+            query.offset = offset;
+            query.limit = limit;
+
+            logger.debug("Loading {} objects from offset {}", limit, offset);
+
+            List<JsonNode> objList = storage.getObjectConnection().list(query);
+            List<Indexer.IndexRecord> list = new ArrayList();
+
+            for (JsonNode rawobj : objList) {
+
+                Indexer.IndexRecord indexRecord = indexer.getIndexRecord(IndexerService.IndexNames.object);
+
+                indexRecord.id = rawobj.get("id").asText();
+                indexRecord.body = rawobj.toString();
+
+                list.add(indexRecord);
+            }
+
+            return list;
+        } catch (ConfigurationException | Storage.StorageException ex) {
+            logger.debug("Exception while loading objects", ex);
+            throw new ObjectIndexerException(ex);
+        }
     }
-  }
+
+    private List<Indexer.IndexRecord> getData(int offset, int limit) {
+        try {
+
+            BaseQuery query = new BaseQuery();
+            query.offset = offset;
+            query.limit = limit;
+
+            logger.debug("Loading {} data records from offset {}", limit, offset);
+
+            List<JsonNode> objList = storage.getDataConnection().list(query);
+            List<Indexer.IndexRecord> list = new ArrayList();
+
+            for (JsonNode rawobj : objList) {
+
+                Indexer.IndexRecord indexRecord = indexer.getIndexRecord(IndexerService.IndexNames.data);
+
+                try {
+                    indexRecord.id = rawobj.get("objectId").asText() + "-" + rawobj.get("streamId").asText() + "-" + rawobj.get("lastUpdate").asText();
+                } catch (NullPointerException ex) {
+                    logger.warn("NPE on record {}", rawobj.toString());
+                    continue;
+                }
+
+                indexRecord.body = rawobj.toString();
+                indexRecord.isNew(true);
+
+                list.add(indexRecord);
+            }
+
+            return list;
+        } catch (ConfigurationException | Storage.StorageException ex) {
+            logger.debug("Exception while loading data records", ex);
+            throw new ObjectIndexerException(ex);
+        }
+    }
+
+    @Override
+    public String getName() {
+        return "index";
+    }
+
+    @Override
+    public void run() {
+        sync();
+    }
 
 }

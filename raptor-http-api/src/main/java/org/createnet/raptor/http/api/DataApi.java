@@ -21,6 +21,7 @@ import java.util.Collection;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -53,195 +54,185 @@ import org.createnet.raptor.search.raptor.search.query.impl.es.DataQuery;
 @Path("/{id}/streams")
 public class DataApi extends AbstractApi {
 
-  final private Logger logger = LoggerFactory.getLogger(DataApi.class);
+    final private Logger logger = LoggerFactory.getLogger(DataApi.class);
 
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  public Collection<Stream> list(@PathParam("id") String id)
-          throws Storage.StorageException, RaptorComponent.ParserException, ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, IOException, Indexer.IndexerException {
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<Stream> list(@PathParam("id") String id) {
 
-    ServiceObject obj = loadObject(id);
+        ServiceObject obj = loadObject(id);
 
-    if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
-      throw new ForbiddenException("Cannot fetch data");
-    }
-    
-    logger.debug("Load streams for object {}", obj.id);
+        if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
+            throw new ForbiddenException("Cannot fetch data");
+        }
 
-    return obj.streams.values();
-  }
+        logger.debug("Load streams for object {}", obj.id);
 
-  @GET
-  @Path("{stream}")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response fetch(
-          
-          @PathParam("id") String id,
-          @PathParam("stream") String streamName,
-          
-          @QueryParam("limit") int limit,
-          @QueryParam("offset") int offset
-          
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, IOException, Indexer.IndexerException {
-
-    ServiceObject obj = loadObject(id);
-    Stream stream = loadStream(streamName, obj);
-
-    if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
-      throw new ForbiddenException("Cannot fetch data");
-    }
-    
-    if(!obj.settings.storeEnabled()) {
-      return Response.noContent().build();
+        return obj.streams.values();
     }
 
-    ResultSet data = indexer.fetchData(stream);
+    @GET
+    @Path("{stream}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response fetch(
+            @PathParam("id") String id,
+            @PathParam("stream") String streamName,
+            @QueryParam("limit") int limit,
+            @QueryParam("offset") int offset
+    ) {
 
-    logger.debug("Fetched {} records for stream {} in object {}", data.size(), streamName, obj.id);
+        ServiceObject obj = loadObject(id);
+        Stream stream = loadStream(streamName, obj);
 
-    return Response.ok(data.toJson()).build();
-  }
-  
-  @DELETE
-  @Path("{stream}")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response delete(
-          @PathParam("id") String id,
-          @PathParam("stream") String streamName
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, IOException, Indexer.IndexerException {
+        if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
+            throw new ForbiddenException("Cannot fetch data");
+        }
 
-    ServiceObject obj = loadObject(id);
-    Stream stream = loadStream(streamName, obj);
+        if (!obj.settings.storeEnabled()) {
+            return Response.noContent().build();
+        }
 
-    if (!auth.isAllowed(obj, Authorization.Permission.Push)) {
-      throw new ForbiddenException("Cannot delete data");
-    }
-    
-    if(!obj.settings.storeEnabled()) {
-      return Response.noContent().build();
-    }
-    
-    storage.deleteData(stream);
-    indexer.deleteData(stream);
+        ResultSet data = indexer.fetchData(stream);
 
-    logger.debug("Delete all records for stream {} in object {}", streamName, obj.id);
+        logger.debug("Fetched {} records for stream {} in object {}", data.size(), streamName, obj.id);
 
-    return Response.noContent().build();
-  }
-
-  @GET
-  @Path("{stream}/lastUpdate")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response fetchLastUpdate(
-          @PathParam("id") String id,
-          @PathParam("stream") String streamName
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException, IOException, Indexer.IndexerException {
-
-    ServiceObject obj = loadObject(id);
-    Stream stream = loadStream(streamName, obj);
-
-    if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
-      throw new ForbiddenException("Cannot fetch data");
-    }
-    
-    if(!obj.settings.storeEnabled()) {
-      return Response.noContent().build();
-    }
-    
-    RecordSet data = indexer.fetchLastUpdate(stream);
-    
-    logger.debug("Fetched lastUpdate record for stream {} in object {}", streamName, obj.id);
-
-    if (data == null) {
-      return Response.noContent().build();
+        return Response.ok(data.toJson()).build();
     }
 
-    return Response.ok(data.toJson()).build();
-  }
+    @DELETE
+    @Path("{stream}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response delete(
+            @PathParam("id") String id,
+            @PathParam("stream") String streamName
+    ) {
 
-  @PUT
-  @Path("{stream}")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response save(
-          @PathParam("id") String id,
-          @PathParam("stream") String streamName,
-          RecordSet record
-          
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException, Indexer.IndexerException, IOException {
-    
-    ServiceObject obj = loadObject(id);
-    Stream stream = loadStream(streamName, obj);
-    
-    if (!auth.isAllowed(obj, Authorization.Permission.Push)) {
-      throw new ForbiddenException("Cannot push data");
+        ServiceObject obj = loadObject(id);
+        Stream stream = loadStream(streamName, obj);
+
+        if (!auth.isAllowed(obj, Authorization.Permission.Push)) {
+            throw new ForbiddenException("Cannot delete data");
+        }
+
+        if (!obj.settings.storeEnabled()) {
+            return Response.noContent().build();
+        }
+
+        storage.deleteData(stream);
+        indexer.deleteData(stream);
+
+        logger.debug("Delete all records for stream {} in object {}", streamName, obj.id);
+
+        return Response.noContent().build();
     }
-    
-    if(obj.settings.storeEnabled()) {
-      
-      logger.debug("Storing data for {} on {}", obj.id, stream.name);
-      
-      // set the stream, enforcing channels constrain on serialization
-      // this avoid records that do not comply with the stored model
-      record.setStream(stream);
-      record.validate();
-      
-      // save data
-      storage.saveData(stream, record);
+
+    @GET
+    @Path("{stream}/lastUpdate")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response fetchLastUpdate(
+            @PathParam("id") String id,
+            @PathParam("stream") String streamName
+    ) {
+
+        ServiceObject obj = loadObject(id);
+        Stream stream = loadStream(streamName, obj);
+
+        if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
+            throw new ForbiddenException("Cannot fetch data");
+        }
+
+        if (!obj.settings.storeEnabled()) {
+            return Response.noContent().build();
+        }
+
+        RecordSet data = indexer.fetchLastUpdate(stream);
+
+        logger.debug("Fetched lastUpdate record for stream {} in object {}", streamName, obj.id);
+
+        if (data == null) {
+            return Response.noContent().build();
+        }
+
+        return Response.ok(data.toJson()).build();
+    }
+
+    @PUT
+    @Path("{stream}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response save(
+            @PathParam("id") String id,
+            @PathParam("stream") String streamName,
+            RecordSet record
+    ) {
+
+        ServiceObject obj = loadObject(id);
+        Stream stream = loadStream(streamName, obj);
+
+        if (!auth.isAllowed(obj, Authorization.Permission.Push)) {
+            throw new ForbiddenException("Cannot push data");
+        }
+
+        if (obj.settings.storeEnabled()) {
+
+            logger.debug("Storing data for {} on {}", obj.id, stream.name);
+
+            // set the stream, enforcing channels constrain on serialization
+            // this avoid records that do not comply with the stored model
+            record.setStream(stream);
+            record.validate();
+
+            // save data
+            storage.saveData(stream, record);
 //      profiler.log("Saved record");
-      
-      // index data (with objectId and stream props)
-      try {
-        indexer.indexData(stream, record);
-      }
-      catch(ConfigurationException | IOException | Indexer.IndexerException ex) {
-        logger.error("Failed to index record for {}", obj.id);
-        storage.deleteData(stream, record);
-        throw ex;
-      }
 
-    }
-    else {
-      logger.debug("Skipped data storage for {}", obj.id);
-    }
-       
-    emitter.trigger(EventEmitterService.EventName.push, new DataEvent(stream, record, auth.getAccessToken()));
-    
-    // send update on the data topic
-    dispatcher.pushData(stream, record);
-    
-    logger.debug("Stored record for stream {} in object {}", streamName, obj.id);
-    
-    return Response.accepted().build();
-  }
-  
-  
-  @POST
-  @Path("{stream}/search")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response search(
-          @PathParam("id") String id,
-          @PathParam("stream") String streamName,
-          DataQuery query
-          
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, Indexer.SearchException, Indexer.IndexerException, IOException {
+            // index data (with objectId and stream props)
+            try {
+                indexer.indexData(stream, record);
+            } catch (Exception ex) {
+                logger.error("Failed to index record for {}", obj.id);
+                storage.deleteData(stream, record);
+                throw new InternalServerErrorException();
+            }
 
-    ServiceObject obj = loadObject(id);
-    Stream stream = loadStream(streamName, obj);
+        } else {
+            logger.debug("Skipped data storage for {}", obj.id);
+        }
 
-    if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
-      throw new ForbiddenException("Cannot search data");
+        emitter.trigger(EventEmitterService.EventName.push, new DataEvent(stream, record, auth.getAccessToken()));
+
+        // send update on the data topic
+        dispatcher.pushData(stream, record);
+
+        logger.debug("Stored record for stream {} in object {}", streamName, obj.id);
+
+        return Response.accepted().build();
     }
-    
-    if(!obj.settings.storeEnabled()) {
-      return Response.noContent().build();
+
+    @POST
+    @Path("{stream}/search")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response search(
+            @PathParam("id") String id,
+            @PathParam("stream") String streamName,
+            DataQuery query
+    ) {
+
+        ServiceObject obj = loadObject(id);
+        Stream stream = loadStream(streamName, obj);
+
+        if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
+            throw new ForbiddenException("Cannot search data");
+        }
+
+        if (!obj.settings.storeEnabled()) {
+            return Response.noContent().build();
+        }
+
+        ResultSet results = indexer.searchData(stream, query);
+
+        logger.debug("Search data for stream {} in object {} has {} results", streamName, obj.id, results.size());
+
+        return Response.ok().entity(results).build();
     }
-    
-    ResultSet results = indexer.searchData(stream, query);
-    
-    logger.debug("Search data for stream {} in object {} has {} results", streamName, obj.id, results.size());
-    
-    return Response.ok().entity(results).build();
-  }
-  
-  
+
 }

@@ -29,94 +29,92 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 abstract public class AbstractStorage implements Storage {
-    
-  final protected Logger logger = LoggerFactory.getLogger(AbstractStorage.class);
 
-  protected StorageConfiguration config;
-  final protected Map<String, Connection> connections = new HashMap<>();
+    final protected Logger logger = LoggerFactory.getLogger(AbstractStorage.class);
 
-  static  public String generateId() {
-    return UUID.randomUUID().toString();
-  }
+    protected StorageConfiguration config;
+    final protected Map<String, Connection> connections = new HashMap<>();
 
-  public Map<String, Connection> getConnections() {
-    return connections;
-  }
-
-  public void addConnection(Connection conn) {
-    connections.put(conn.getId(), conn);
-  }
-  
-  public void removeConnection(String id) {
-    if(connections.containsKey(id)) {
-      try {
-        logger.warn("Disconnecting {}", id);
-        connections.get(id).disconnect();
-      }
-      catch(Exception e) {
-        logger.warn("Exception disconnecting {}", id, e);
-      }
-      connections.remove(id);
+    static public String generateId() {
+        return UUID.randomUUID().toString();
     }
-  }
 
-  @Override
-  public Connection getConnection(String id) {
-    return connections.get(id);
-  }
-
-  @Override
-  public void disconnect() {
-    Iterator<Map.Entry<String, Connection>> it = getConnections().entrySet().iterator();
-    while (it.hasNext()) {
-      Map.Entry<String, Connection> item = it.next();
-      item.getValue().disconnect();
+    public Map<String, Connection> getConnections() {
+        return connections;
     }
-  }
 
-  @Override
-  public void initialize(StorageConfiguration configuration) throws StorageException {
-    this.config = configuration;
-  }
-
-  @Override
-  public void destroy() {
-    // does nothing by default
-  }
- 
-  protected StorageConfiguration getConfiguration() {
-    return config;
-  }
-
-  public void set(String connectionId, String id, JsonNode data, int ttl) throws StorageException {
-    getConnection(connectionId).set(id, data, ttl);
-  }
-
-  public JsonNode get(String connectionId, String id) throws StorageException {
-    return getConnection(connectionId).get(id);
-  }
-
-  public void delete(String connectionId, String id) throws StorageException {
-    getConnection(connectionId).delete(id);
-  }  
-
-  /**
-   * Call destroy() on all connections
-   */
-  public void destroyAll() {
-    for (Connection conn : connections.values()) {
-      conn.destroy();
+    public void addConnection(Connection conn) {
+        connections.put(conn.getId(), conn);
     }
-  }
-  
-  /**
-   * Call connect() on all connections
-   */
-  public void connectAll() throws StorageException {
-    for (Connection conn : connections.values()) {
-      conn.connect();
-    }
-  }
 
-  
+    public void removeConnection(String id) {
+        if (connections.containsKey(id)) {
+            try {
+                logger.warn("Disconnecting {}", id);
+                connections.get(id).disconnect();
+            } catch (Exception e) {
+                logger.warn("Exception disconnecting {}", id, e);
+            }
+            connections.remove(id);
+        }
+    }
+
+    @Override
+    public Connection getConnection(String id) {
+        return connections.get(id);
+    }
+
+    @Override
+    public void disconnect() {
+        Iterator<Map.Entry<String, Connection>> it = getConnections().entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, Connection> item = it.next();
+            item.getValue().disconnect();
+        }
+    }
+
+    @Override
+    public void initialize(StorageConfiguration configuration) {
+        this.config = configuration;
+    }
+
+    @Override
+    public void destroy() {
+        // does nothing by default
+    }
+
+    protected StorageConfiguration getConfiguration() {
+        return config;
+    }
+
+    public void set(String connectionId, String id, JsonNode data, int ttl) {
+        getConnection(connectionId).set(id, data, ttl);
+    }
+
+    public JsonNode get(String connectionId, String id) {
+        return getConnection(connectionId).get(id);
+    }
+
+    public void delete(String connectionId, String id) {
+        getConnection(connectionId).delete(id);
+    }
+
+    /**
+     * Call destroy() on all connections
+     */
+    public void destroyAll() {
+        for (Connection conn : connections.values()) {
+            conn.destroy();
+        }
+    }
+
+    /**
+     * Call connect() on all connections
+     */
+    public void connectAll() {
+        for (Connection conn : connections.values()) {
+            conn.connect();
+        }
+    }
+
 }

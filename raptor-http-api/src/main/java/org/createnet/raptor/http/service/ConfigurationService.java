@@ -37,19 +37,19 @@ public class ConfigurationService extends ConfigurationLoader {
   
   final private Logger logger = LoggerFactory.getLogger(ConfigurationService.class);
 
-  public StorageConfiguration getStorage() throws ConfigurationException {
+  public StorageConfiguration getStorage()  {
     return (StorageConfiguration) getInstance("storage", StorageConfiguration.class);
   }
   
-  public AuthConfiguration getAuth() throws ConfigurationException {
+  public AuthConfiguration getAuth()  {
     return (AuthConfiguration) getInstance("auth", AuthConfiguration.class);
   }
   
-  public IndexerConfiguration getIndexer() throws ConfigurationException {
+  public IndexerConfiguration getIndexer() {
     return (IndexerConfiguration) getInstance("indexer", IndexerConfiguration.class);
   }
   
-  public DispatcherConfiguration getDispatcher() throws ConfigurationException {
+  public DispatcherConfiguration getDispatcher() {
     return (DispatcherConfiguration) getInstance("dispatcher", DispatcherConfiguration.class);
   }
   

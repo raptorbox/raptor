@@ -45,240 +45,239 @@ import org.slf4j.LoggerFactory;
  */
 public class CouchbaseConnection extends AbstractConnection {
 
-  private final Logger logger = LoggerFactory.getLogger(CouchbaseConnection.class);
+    private final Logger logger = LoggerFactory.getLogger(CouchbaseConnection.class);
 
-  final Bucket bucket;
+    final Bucket bucket;
 
-  public CouchbaseConnection(String id, Bucket bucket) {
-    this.id = id;
-    this.bucket = bucket;
-  }
-
-  @Override
-  public void disconnect() {
-    bucket.close();
-  }
-
-  @Override
-  public void destroy() {
-  }
-
-  @Override
-  public void connect() {
-  }
-
-  @Override
-  public void set(String id, JsonNode data, int ttlDays) {
-
-    JsonObject obj = JsonObject.fromJson(data.toString());
-
-    int ttl = ttlDays;
-    if (ttlDays > 0) {
-      Calendar c = Calendar.getInstance();
-      c.setTime(new Date());
-      c.add(Calendar.DATE, ttlDays);
-      ttl = (int) (c.getTime().getTime() / 1000);
+    public CouchbaseConnection(String id, Bucket bucket) {
+        this.id = id;
+        this.bucket = bucket;
     }
 
-    JsonDocument doc = JsonDocument.create(id, ttl, obj);
-    bucket.upsert(doc);
-  }
-
-  public void set(String id, JsonNode data) {
-    set(id, data, 0);
-  }
-
-  @Override
-  public JsonNode get(String id) {
-    JsonDocument doc = bucket.get(id);
-    if (doc == null) {
-      return null;
-    }
-    try {
-      return Storage.mapper.readTree(doc.content().toString());
-    } catch (IOException ex) {
-      logger.error("Cannot parse response JSON: {}", ex.getMessage());
-      return null;
-    }
-  }
-
-  @Override
-  public void delete(String id) {
-    try {
-      bucket.remove(id);
-    }
-    catch(DocumentDoesNotExistException ex) {
-      logger.debug("Cannot remove doc, doesn't exists {}", id);
-    }
-      
-  }
-
-  @Override
-  public List<JsonNode> list(ListQuery query) throws Storage.StorageException {
-
-    String selectQuery = "SELECT * FROM `" + bucket.name() + "`";
-
-    if (!query.getParams().isEmpty()) {
-      selectQuery += " WHERE ";
-      for (ListQuery.QueryParam param : query.getParams()) {
-        selectQuery += " `" + param.key + "` " + param.operation + " \"" + param.value + "\" AND";
-      }
-      selectQuery = selectQuery.substring(0, selectQuery.length() - 3);
+    @Override
+    public void disconnect() {
+        bucket.close();
     }
 
-    if (query.getSort() != null) {
-      ListQuery.SortBy sort = query.getSort();
-      selectQuery += " ORDER BY " + sort.getField() + " " + sort.getSort();
+    @Override
+    public void destroy() {
     }
 
-    if (query.getLimit() > 0) {
-      selectQuery += " LIMIT " + query.getLimit();
+    @Override
+    public void connect() {
     }
 
-    if (query.getOffset() > 0) {
-      selectQuery += " OFFSET " + query.getOffset();
-    }
+    @Override
+    public void set(String id, JsonNode data, int ttlDays) {
 
-    logger.debug("Performing N1QL query: {}", selectQuery);
+        JsonObject obj = JsonObject.fromJson(data.toString());
 
-    N1qlParams ryow = N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS);
-    
-    ListQuery.QueryOptions queryOptions = query.getQueryOptions();
-    N1qlQueryResult results = null;
-    int i = queryOptions.retries;
-    while (i > 0) {
-      try {
-        results = bucket.query(N1qlQuery.simple(selectQuery, ryow), queryOptions.timeout, queryOptions.timeoutUnit);
-        break;
-      } catch (RuntimeException ex) {
-        logger.error("Runtime exception on couchbase.list: {}", ex.getMessage());
-        results = null;
-      } finally {
-        i--;
-      }
-    }
-
-    if (results == null) {
-      logger.warn("Couchbase query failed");
-      throw new Storage.StorageException("List query cannot be completed");
-    }
-
-    List<JsonNode> list = new ArrayList();
-    if (!results.errors().isEmpty()) {
-      String errors = "";
-      for (JsonObject err : results.errors()) {
-        errors += "\n - " + err.toString();
-      }
-      throw new Storage.StorageException("N1QL query exception: " + errors);
-    }
-
-    Iterator<N1qlQueryRow> it = results.allRows().iterator();
-    while (it.hasNext()) {
-      N1qlQueryRow row = it.next();
-      String raw = row.value().get(bucket.name()).toString();
-      JsonNode node;
-      try {
-        node = Storage.mapper.readTree(raw);
-        list.add(node);        
-      } catch (IOException ex) {
-        logger.warn("Cannot parse record: {}" , raw);
-        continue;
-      }
-    }
-
-    return list;
-  }
-
-  protected String getIndexName(List<String> fieldsList) {
-    String indexName = "by";
-    for (String fieldName : fieldsList) {
-      indexName += fieldName.replace("_", "").replace("-", "");
-    }
-    return indexName;
-  }
-
-  @Override
-  public void setup(boolean forceSetup) throws Storage.StorageException {
-
-    logger.debug("{} Setup connection {}, force {}", bucket.name(), this.id, forceSetup);
-
-    List<List<String>> indexFields = getConfiguration().couchbase.bucketsIndex.getOrDefault(this.id, new ArrayList());
-
-    // @TODO: find a way to query N1QL to check if index exists
-    if (forceSetup) {
-
-      logger.debug("{} Drop primary index", bucket.name());
-
-      N1qlQueryResult result = bucket.query(N1qlQuery.simple(
-              Index.dropPrimaryIndex(bucket.name())
-      ));
-      
-      checkErrors(result, 5000); // ignore {"msg":"GSI index #primary not found.","code":5000}
-      
-      if (!indexFields.isEmpty()) {
-        for (List<String> fieldsList : indexFields) {
-
-          String indexName = getIndexName(fieldsList);
-
-          logger.debug("{} Drop secondary index {}", bucket.name(), indexName);
-          result = bucket.query(N1qlQuery.simple(
-                  Index.dropIndex(bucket.name(), indexName)
-          ));
-          
-          checkErrors(result, 5000); // ignore {"msg":"GSI index #primary not found.","code":5000}
-          
+        int ttl = ttlDays;
+        if (ttlDays > 0) {
+            Calendar c = Calendar.getInstance();
+            c.setTime(new Date());
+            c.add(Calendar.DATE, ttlDays);
+            ttl = (int) (c.getTime().getTime() / 1000);
         }
-      }
 
-      logger.debug("{} Create primary index", bucket.name());
-      bucket.query(N1qlQuery.simple(
-              Index.createPrimaryIndex().on(bucket.name())
-      ));
+        JsonDocument doc = JsonDocument.create(id, ttl, obj);
+        bucket.upsert(doc);
+    }
 
-      if (!indexFields.isEmpty()) {
-        for (List<String> fieldsList : indexFields) {
+    public void set(String id, JsonNode data) {
+        set(id, data, 0);
+    }
 
-          String fieldsNames = "";
-
-          String indexName = getIndexName(fieldsList);
-          for (String fieldName : fieldsList) {
-            fieldsNames += "`" + fieldName + "`,";
-          }
-
-          String indexQuery = "CREATE INDEX `" + indexName
-                  + "` ON `" + bucket.name()
-                  + "` (" + fieldsNames.substring(0, fieldsNames.length() - 1) + ")";
-
-          logger.debug("{} Create secondary index {}", bucket.name(), indexName);
-          logger.debug("{} N1QL query: {}", bucket.name(), indexQuery);
-
-          result = bucket.query(N1qlQuery.simple(indexQuery));
-
-          checkErrors(result, 5000); // ignore  {"msg":"GSI CreateIndex() - cause: Index userIdobjectId already exist.","code":5000}
-
+    @Override
+    public JsonNode get(String id) {
+        JsonDocument doc = bucket.get(id);
+        if (doc == null) {
+            return null;
         }
-      }
+        try {
+            return Storage.mapper.readTree(doc.content().toString());
+        } catch (IOException ex) {
+            logger.error("Cannot parse response JSON: {}", ex.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public void delete(String id) {
+        try {
+            bucket.remove(id);
+        } catch (DocumentDoesNotExistException ex) {
+            logger.debug("Cannot remove doc, doesn't exists {}", id);
+        }
 
     }
-  }
 
-  private void checkErrors(N1qlQueryResult result, int skipCode) throws Storage.StorageException {
-    if (!result.errors().isEmpty()) {
-      String errors = "[ ";
-      List<JsonObject> errorsList = result.errors();
-      for (JsonObject err : errorsList) {
-        
-        int code = err.getInt("code");
-        if(errorsList.size() ==1 && (code != 0 && code == skipCode)) {
-          logger.warn("{} Ignored error on index setup: {}", bucket.name(), err.toString());
-          return;
+    @Override
+    public List<JsonNode> list(ListQuery query) {
+
+        String selectQuery = "SELECT * FROM `" + bucket.name() + "`";
+
+        if (!query.getParams().isEmpty()) {
+            selectQuery += " WHERE ";
+            for (ListQuery.QueryParam param : query.getParams()) {
+                selectQuery += " `" + param.key + "` " + param.operation + " \"" + param.value + "\" AND";
+            }
+            selectQuery = selectQuery.substring(0, selectQuery.length() - 3);
         }
-        
-        errors += err.toString() + ", ";
-      }
-      errors += "]";
-      throw new Storage.StorageException("Error on index for " + bucket.name() + ": " + errors);
+
+        if (query.getSort() != null) {
+            ListQuery.SortBy sort = query.getSort();
+            selectQuery += " ORDER BY " + sort.getField() + " " + sort.getSort();
+        }
+
+        if (query.getLimit() > 0) {
+            selectQuery += " LIMIT " + query.getLimit();
+        }
+
+        if (query.getOffset() > 0) {
+            selectQuery += " OFFSET " + query.getOffset();
+        }
+
+        logger.debug("Performing N1QL query: {}", selectQuery);
+
+        N1qlParams ryow = N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS);
+
+        ListQuery.QueryOptions queryOptions = query.getQueryOptions();
+        N1qlQueryResult results = null;
+        int i = queryOptions.retries;
+        while (i > 0) {
+            try {
+                results = bucket.query(N1qlQuery.simple(selectQuery, ryow), queryOptions.timeout, queryOptions.timeoutUnit);
+                break;
+            } catch (RuntimeException ex) {
+                logger.error("Runtime exception on couchbase.list: {}", ex.getMessage());
+                results = null;
+            } finally {
+                i--;
+            }
+        }
+
+        if (results == null) {
+            logger.warn("Couchbase query failed");
+            throw new Storage.StorageException("List query cannot be completed");
+        }
+
+        List<JsonNode> list = new ArrayList();
+        if (!results.errors().isEmpty()) {
+            String errors = "";
+            for (JsonObject err : results.errors()) {
+                errors += "\n - " + err.toString();
+            }
+            throw new Storage.StorageException("N1QL query exception: " + errors);
+        }
+
+        Iterator<N1qlQueryRow> it = results.allRows().iterator();
+        while (it.hasNext()) {
+            N1qlQueryRow row = it.next();
+            String raw = row.value().get(bucket.name()).toString();
+            JsonNode node;
+            try {
+                node = Storage.mapper.readTree(raw);
+                list.add(node);
+            } catch (IOException ex) {
+                logger.warn("Cannot parse record: {}", raw);
+                continue;
+            }
+        }
+
+        return list;
     }
-  }
+
+    protected String getIndexName(List<String> fieldsList) {
+        String indexName = "by";
+        for (String fieldName : fieldsList) {
+            indexName += fieldName.replace("_", "").replace("-", "");
+        }
+        return indexName;
+    }
+
+    @Override
+    public void setup(boolean forceSetup) {
+
+        logger.debug("{} Setup connection {}, force {}", bucket.name(), this.id, forceSetup);
+
+        List<List<String>> indexFields = getConfiguration().couchbase.bucketsIndex.getOrDefault(this.id, new ArrayList());
+
+        // @TODO: find a way to query N1QL to check if index exists
+        if (forceSetup) {
+
+            logger.debug("{} Drop primary index", bucket.name());
+
+            N1qlQueryResult result = bucket.query(N1qlQuery.simple(
+                    Index.dropPrimaryIndex(bucket.name())
+            ));
+
+            checkErrors(result, 5000); // ignore {"msg":"GSI index #primary not found.","code":5000}
+
+            if (!indexFields.isEmpty()) {
+                for (List<String> fieldsList : indexFields) {
+
+                    String indexName = getIndexName(fieldsList);
+
+                    logger.debug("{} Drop secondary index {}", bucket.name(), indexName);
+                    result = bucket.query(N1qlQuery.simple(
+                            Index.dropIndex(bucket.name(), indexName)
+                    ));
+
+                    checkErrors(result, 5000); // ignore {"msg":"GSI index #primary not found.","code":5000}
+
+                }
+            }
+
+            logger.debug("{} Create primary index", bucket.name());
+            bucket.query(N1qlQuery.simple(
+                    Index.createPrimaryIndex().on(bucket.name())
+            ));
+
+            if (!indexFields.isEmpty()) {
+                for (List<String> fieldsList : indexFields) {
+
+                    String fieldsNames = "";
+
+                    String indexName = getIndexName(fieldsList);
+                    for (String fieldName : fieldsList) {
+                        fieldsNames += "`" + fieldName + "`,";
+                    }
+
+                    String indexQuery = "CREATE INDEX `" + indexName
+                            + "` ON `" + bucket.name()
+                            + "` (" + fieldsNames.substring(0, fieldsNames.length() - 1) + ")";
+
+                    logger.debug("{} Create secondary index {}", bucket.name(), indexName);
+                    logger.debug("{} N1QL query: {}", bucket.name(), indexQuery);
+
+                    result = bucket.query(N1qlQuery.simple(indexQuery));
+
+                    checkErrors(result, 5000); // ignore  {"msg":"GSI CreateIndex() - cause: Index userIdobjectId already exist.","code":5000}
+
+                }
+            }
+
+        }
+    }
+
+    private void checkErrors(N1qlQueryResult result, int skipCode) {
+        if (!result.errors().isEmpty()) {
+            String errors = "[ ";
+            List<JsonObject> errorsList = result.errors();
+            for (JsonObject err : errorsList) {
+
+                int code = err.getInt("code");
+                if (errorsList.size() == 1 && (code != 0 && code == skipCode)) {
+                    logger.warn("{} Ignored error on index setup: {}", bucket.name(), err.toString());
+                    return;
+                }
+
+                errors += err.toString() + ", ";
+            }
+            errors += "]";
+            throw new Storage.StorageException("Error on index for " + bucket.name() + ": " + errors);
+        }
+    }
 
 }

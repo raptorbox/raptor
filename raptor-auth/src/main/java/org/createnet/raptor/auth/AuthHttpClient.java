@@ -106,7 +106,7 @@ public class AuthHttpClient {
         return httpclient;
     }
 
-    public class ClientException extends Exception {
+    public class ClientException extends RuntimeException {
 
         private int code = 0;
         private String reason;
@@ -172,7 +172,7 @@ public class AuthHttpClient {
         return prefix + token;
     }
 
-    public String check(String accessToken, String payload) throws ClientException, IOException {
+    public String check(String accessToken, String payload){
 
         logger.debug("Http client check request");
 
@@ -232,7 +232,7 @@ public class AuthHttpClient {
         return response;
     }
 
-    public void sync(String accessToken, String body) throws ClientException {
+    public void sync(String accessToken, String body) {
 
         logger.debug("Http client sync request");
 

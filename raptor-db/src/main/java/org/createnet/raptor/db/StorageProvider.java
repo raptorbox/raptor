@@ -26,53 +26,53 @@ import org.createnet.raptor.db.none.NoneStorage;
  */
 public class StorageProvider extends AbstractStorage {
 
-  private Storage instance;
+    private Storage instance;
 
-  @Override
-  public void initialize(StorageConfiguration configuration) throws StorageException {
+    @Override
+    public void initialize(StorageConfiguration configuration) {
 
-    super.initialize(configuration);
+        super.initialize(configuration);
 
-    switch (configuration.type) {
-      case "couchbase":
-        instance = new CouchbaseStorage();
-        break;
-      case "mapdb":
-        instance = new MapDBStorage();
-        break;
-      case "none":
-        instance = new NoneStorage();
-        break;
-      default:
-        throw new StorageException("Storage type `"+ configuration.type +"` is not supported");
+        switch (configuration.type) {
+            case "couchbase":
+                instance = new CouchbaseStorage();
+                break;
+            case "mapdb":
+                instance = new MapDBStorage();
+                break;
+            case "none":
+                instance = new NoneStorage();
+                break;
+            default:
+                throw new StorageException("Storage type `" + configuration.type + "` is not supported");
+        }
+
+        instance.initialize(configuration);
     }
-    
-    instance.initialize(configuration);
-  }
 
-  @Override
-  public void setup(boolean forceSetup) throws StorageException {
-    instance.setup(forceSetup);
-  }
+    @Override
+    public void setup(boolean forceSetup) {
+        instance.setup(forceSetup);
+    }
 
-  @Override
-  public void connect() throws StorageException {
-    instance.connect();
-  }
+    @Override
+    public void connect() {
+        instance.connect();
+    }
 
-  @Override
-  public void disconnect() {
-    instance.disconnect();
-  }
+    @Override
+    public void disconnect() {
+        instance.disconnect();
+    }
 
-  @Override
-  public Connection getConnection(String id) {
-    return instance.getConnection(id);
-  }
+    @Override
+    public Connection getConnection(String id) {
+        return instance.getConnection(id);
+    }
 
-  @Override
-  public void destroy() {
-    instance.destroy();
-  }
+    @Override
+    public void destroy() {
+        instance.destroy();
+    }
 
 }

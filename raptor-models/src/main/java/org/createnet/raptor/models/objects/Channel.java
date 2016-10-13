@@ -43,7 +43,7 @@ public class Channel extends StreamContainer {
   }
 
   @Override
-  public void validate() throws ValidationException {
+  public void validate() {
 
     if (name == null) {
       throw new ValidationException("Channel name is empty");
@@ -60,7 +60,7 @@ public class Channel extends StreamContainer {
   }
 
   @Override
-  public void parse(String json) throws ParserException {
+  public void parse(String json) {
     try {
       parse(mapper.readTree(json));
     } catch (IOException ex) {

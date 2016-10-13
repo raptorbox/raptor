@@ -24,7 +24,7 @@ import org.createnet.raptor.models.objects.ServiceObject;
  */
 public interface Authorization {
 
-  public class AuthorizationException extends Exception {
+  public class AuthorizationException extends RuntimeException {
 
     public AuthorizationException(Throwable t) {
       super(t);

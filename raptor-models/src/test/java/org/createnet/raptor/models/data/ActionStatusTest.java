@@ -46,7 +46,7 @@ public class ActionStatusTest extends TestUtils {
   }
 
   @Test
-  public void testParseActionStatus() throws IOException, RaptorComponent.ParserException  {
+  public void testParseActionStatus() throws IOException  {
     
     JsonNode json = loadData("actionStatus");
     

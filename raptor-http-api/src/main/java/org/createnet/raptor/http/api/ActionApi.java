@@ -50,98 +50,98 @@ import org.createnet.raptor.search.raptor.search.Indexer;
 @Path("/{id}/actuations")
 public class ActionApi extends AbstractApi {
 
-  final private Logger logger = LoggerFactory.getLogger(ActionApi.class);
+    final private Logger logger = LoggerFactory.getLogger(ActionApi.class);
 
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  public Collection<Action> list(
-          @PathParam("id") String id
-  ) throws ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException  {
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<Action> list(
+            @PathParam("id") String id
+    ) {
 
-    ServiceObject obj = loadObject(id);
+        ServiceObject obj = loadObject(id);
 
-    logger.debug("Load actions for object {}", obj.id);
+        logger.debug("Load actions for object {}", obj.id);
 
-    return obj.actions.values();
-  }
-
-  @GET
-  @Path("{actionId}")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response getStatus(
-          @PathParam("id") String id,
-          @PathParam("actionId") String actionId
-  ) throws ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException, IOException, Storage.StorageException  {
-
-    ServiceObject obj = loadObject(id);
-    Action action = loadAction(actionId, obj);
-
-    if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
-      throw new ForbiddenException("Cannot fetch data");
+        return obj.actions.values();
     }
 
-    ActionStatus actionStatus = storage.getActionStatus(action);
+    @GET
+    @Path("{actionId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getStatus(
+            @PathParam("id") String id,
+            @PathParam("actionId") String actionId
+    ) {
 
-    logger.debug("Fetched action {} status for object {}", action.name, obj.id);
+        ServiceObject obj = loadObject(id);
+        Action action = loadAction(actionId, obj);
 
-    if (actionStatus == null) {
-      return Response.noContent().build();
+        if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
+            throw new ForbiddenException("Cannot fetch data");
+        }
+
+        ActionStatus actionStatus = storage.getActionStatus(action);
+
+        logger.debug("Fetched action {} status for object {}", action.name, obj.id);
+
+        if (actionStatus == null) {
+            return Response.noContent().build();
+        }
+
+        return Response.ok(actionStatus.toString()).build();
     }
 
-    return Response.ok(actionStatus.toString()).build();
-  }
+    @POST
+    @Path("{actionId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String updateStatus(
+            @PathParam("id") String id,
+            @PathParam("actionId") String actionId,
+            String body
+    ) {
 
-  @POST
-  @Path("{actionId}")
-  @Produces(MediaType.APPLICATION_JSON)
-  @Consumes(MediaType.TEXT_PLAIN)
-  public String updateStatus(
-          @PathParam("id") String id,
-          @PathParam("actionId") String actionId,
-          String body
-  ) throws RaptorComponent.ParserException, ConfigurationException, Storage.StorageException, RaptorComponent.ValidationException, Authorization.AuthorizationException, Authentication.AuthenticationException, JsonProcessingException, RecordsetException, IOException, Indexer.IndexerException {
+        ServiceObject obj = loadObject(id);
+        Action action = loadAction(actionId, obj);
 
-    ServiceObject obj = loadObject(id);
-    Action action = loadAction(actionId, obj);
+        if (!auth.isAllowed(obj, Authorization.Permission.Execute)) {
+            throw new ForbiddenException("Cannot fetch data");
+        }
 
-    if (!auth.isAllowed(obj, Authorization.Permission.Execute)) {
-      throw new ForbiddenException("Cannot fetch data");
+        ActionStatus actionStatus = storage.saveActionStatus(action, body);
+
+        emitter.trigger(EventEmitterService.EventName.execute, new ActionEvent(action, actionStatus));
+
+        // trigger action over mqtt
+        dispatcher.actionTrigger(action, actionStatus.status);
+
+        logger.debug("Saved action {} status for object {}", action.name, obj.id);
+
+        return actionStatus.toString();
     }
 
-    ActionStatus actionStatus = storage.saveActionStatus(action, body);
+    @DELETE
+    @Path("{actionId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteStatus(
+            @PathParam("id") String id,
+            @PathParam("actionId") String actionId
+    ) {
 
-    emitter.trigger(EventEmitterService.EventName.execute, new ActionEvent(action, actionStatus));
+        ServiceObject obj = loadObject(id);
+        Action action = loadAction(actionId, obj);
 
-    // trigger action over mqtt
-    dispatcher.actionTrigger(action, actionStatus.status);
+        if (!auth.isAllowed(obj, Authorization.Permission.Update)) {
+            throw new ForbiddenException("Cannot fetch data");
+        }
 
-    logger.debug("Saved action {} status for object {}", action.name, obj.id);
+        storage.deleteActionStatus(action);
 
-    return actionStatus.toString();
-  }
+        emitter.trigger(EventEmitterService.EventName.deleteAction, new ActionEvent(action, null));
 
-  @DELETE
-  @Path("{actionId}")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response deleteStatus(
-          @PathParam("id") String id,
-          @PathParam("actionId") String actionId
-  ) throws ConfigurationException, Storage.StorageException, Authorization.AuthorizationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
+        logger.debug("Aborted action {} status for object {}", action.name, obj.id);
 
-    ServiceObject obj = loadObject(id);
-    Action action = loadAction(actionId, obj);
-
-    if (!auth.isAllowed(obj, Authorization.Permission.Update)) {
-      throw new ForbiddenException("Cannot fetch data");
+        return Response.accepted().build();
     }
-
-    storage.deleteActionStatus(action);
-
-    emitter.trigger(EventEmitterService.EventName.deleteAction, new ActionEvent(action, null));
-
-    logger.debug("Aborted action {} status for object {}", action.name, obj.id);
-
-    return Response.accepted().build();
-  }
 
 }

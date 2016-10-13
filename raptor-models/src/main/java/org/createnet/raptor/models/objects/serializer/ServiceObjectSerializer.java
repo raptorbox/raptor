@@ -30,7 +30,7 @@ import org.createnet.raptor.models.objects.ServiceObject;
 public class ServiceObjectSerializer extends JsonSerializer<ServiceObject> {
 
     @Override
-    public void serialize(ServiceObject t, JsonGenerator jg, SerializerProvider sp) throws IOException, JsonProcessingException {
+    public void serialize(ServiceObject t, JsonGenerator jg, SerializerProvider sp) throws IOException {
 
         jg.writeStartObject();
 

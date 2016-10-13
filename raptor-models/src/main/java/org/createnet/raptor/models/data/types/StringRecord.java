@@ -38,12 +38,12 @@ public class StringRecord extends Record<String> {
     }
 
     @Override
-    public void setValue(Object value) throws RaptorComponent.ParserException {
+    public void setValue(Object value) {
         this.value = parseValue(value);
     }
     
     @Override
-    public String parseValue(Object value) throws RaptorComponent.ParserException {
+    public String parseValue(Object value) {
       try {
         
         if(value instanceof String) {

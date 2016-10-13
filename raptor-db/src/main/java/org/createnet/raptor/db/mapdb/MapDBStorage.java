@@ -24,40 +24,40 @@ import org.createnet.raptor.db.AbstractStorage;
  */
 public class MapDBStorage extends AbstractStorage {
 
-  @Override
-  public void setup(boolean forceSetup) throws StorageException {
-    
-    if (config.mapdb.storage.equals("file")) {
-      File dir = new File(config.mapdb.storePath);
-      if (!dir.exists()) {
-        if (!dir.mkdirs()) {
-          throw new StorageException("Cannot create directory " + config.mapdb.storePath);
+    @Override
+    public void setup(boolean forceSetup) {
+
+        if (config.mapdb.storage.equals("file")) {
+            File dir = new File(config.mapdb.storePath);
+            if (!dir.exists()) {
+                if (!dir.mkdirs()) {
+                    throw new StorageException("Cannot create directory " + config.mapdb.storePath);
+                }
+            }
         }
-      }
+
+        for (ConnectionId connId : ConnectionId.values()) {
+
+            if (getConnections().containsKey(connId.name())) {
+                continue;
+            }
+
+            MapDBConnection conn = new MapDBConnection(connId);
+            conn.initialize(config);
+            conn.setup(forceSetup);
+            addConnection(conn);
+        }
+
     }
 
-    for (ConnectionId connId : ConnectionId.values()) {
-      
-      if(getConnections().containsKey(connId.name())) {
-        continue;
-      }
-
-      MapDBConnection conn = new MapDBConnection(connId);
-      conn.initialize(config);
-      conn.setup(forceSetup);
-      addConnection(conn);
+    @Override
+    public void connect() {
+        connectAll();
     }
 
-  }
-
-  @Override
-  public void connect() throws StorageException {
-    connectAll();
-  }
-  
-  @Override
-  public void disconnect() {
-    super.disconnect();
-  }
+    @Override
+    public void disconnect() {
+        super.disconnect();
+    }
 
 }

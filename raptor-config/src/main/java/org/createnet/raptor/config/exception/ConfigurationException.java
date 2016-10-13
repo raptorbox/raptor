@@ -20,7 +20,7 @@ package org.createnet.raptor.config.exception;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class ConfigurationException extends Exception {
+public class ConfigurationException extends RuntimeException {
 
   public ConfigurationException(Throwable ex) {
     super(ex);

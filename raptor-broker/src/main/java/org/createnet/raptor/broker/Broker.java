@@ -36,7 +36,7 @@ public class Broker {
   final protected Logger logger = LoggerFactory.getLogger(Broker.class);
   final private ConfigurationLoader configLoader = new ConfigurationLoader();
   
-  public static void main(final String[] args) throws BrokerException, ConfigurationException {
+  public static void main(final String[] args) {
     
     final Broker broker = new Broker();
     broker.initialize();
@@ -47,7 +47,7 @@ public class Broker {
   
   private BrokerConfiguration brokerConfiguration;
  
-  public class BrokerException extends Exception {
+  public class BrokerException extends RuntimeException {
     public BrokerException(Throwable t) {
       super(t);
     }
@@ -58,7 +58,7 @@ public class Broker {
   
   public Broker() {}
 
-  public void initialize() throws ConfigurationException {
+  public void initialize() {
     
     ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
     ServiceLocator serviceLocator = locatorFactory.create("BrokerLocator");
@@ -69,7 +69,7 @@ public class Broker {
     setupServer();
   }
 
-  protected void setupServer() throws ConfigurationException {
+  protected void setupServer() {
     
     securityManager.setBrokerConfiguration(getBrokerConfiguration());
     
@@ -77,7 +77,7 @@ public class Broker {
     server.setConfigResourcePath(getConfigPath());
   }
   
-  public void start() throws BrokerException {
+  public void start() {
        
     try {
       logger.debug("Starting broker");
@@ -88,7 +88,7 @@ public class Broker {
     }
   }
   
-  public void stop() throws BrokerException {
+  public void stop() {
     
     try {
       logger.debug("Stopping broker");
@@ -98,7 +98,7 @@ public class Broker {
     }
   }
 
-  private BrokerConfiguration getBrokerConfiguration() throws ConfigurationException {
+  private BrokerConfiguration getBrokerConfiguration() {
     
     if(brokerConfiguration == null)
       brokerConfiguration = (BrokerConfiguration) configLoader.getInstance("broker", BrokerConfiguration.class);
@@ -106,7 +106,7 @@ public class Broker {
     return brokerConfiguration;
   }
   
-  private String getConfigPath() throws ConfigurationException {
+  private String getConfigPath() {
      
     if(brokerConfiguration.artemisConfiguration == null)
       throw new RuntimeException("broker.xml path not specified");

@@ -21,30 +21,30 @@ package org.createnet.raptor.http.service;
  */
 public interface RaptorService {
 
-  public class ServiceException extends Exception {
+    public class ServiceException extends RuntimeException {
 
-    public ServiceException(String message) {
-      super(message);
+        public ServiceException(String message) {
+            super(message);
+        }
+
+        public ServiceException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public ServiceException(Exception e) {
+            super(e);
+        }
+
     }
 
-    public ServiceException(String message, Throwable cause) {
-      super(message, cause);
-    }
+    /**
+     * Warm up the service
+     */
+    public void initialize() throws ServiceException;
 
-    public ServiceException(Exception e) {
-      super(e);
-    }
+    /**
+     * Teardown the service
+     */
+    public void shutdown() throws ServiceException;
 
-  }
-
-  /**
-   * Warm up the service
-   */
-  public void initialize() throws ServiceException;
-
-  /**
-   * Teardown the service
-   */
-  public void shutdown() throws ServiceException;
-  
 }

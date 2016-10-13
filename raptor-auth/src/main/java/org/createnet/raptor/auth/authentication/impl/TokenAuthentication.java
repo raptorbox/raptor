@@ -18,6 +18,7 @@ package org.createnet.raptor.auth.authentication.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.logging.Level;
 import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.AuthHttpClient;
 import org.createnet.raptor.auth.authentication.AbstractAuthentication;
@@ -41,7 +42,7 @@ public class TokenAuthentication extends AbstractAuthentication {
   final private AuthHttpClient client = new AuthHttpClient();
 
   @Override
-  public Authentication.UserInfo getUser(String accessToken) throws AuthenticationException {
+  public Authentication.UserInfo getUser(String accessToken) {
 
     try {
 
@@ -55,8 +56,6 @@ public class TokenAuthentication extends AbstractAuthentication {
 
       return new Authentication.UserInfo(response.userId, accessToken, response.details);
 
-    } catch (IOException ex) {
-      throw new AuthenticationException(ex);
     } catch (AuthHttpClient.ClientException ex) {
       logger.debug("Failed to load user: {} ({})", ex.getReason(), ex.getCode());
       throw new AuthenticationException(ex);
@@ -70,7 +69,7 @@ public class TokenAuthentication extends AbstractAuthentication {
   }
 
   @Override
-  public void sync(String accessToken, ServiceObject obj, SyncOperation op) throws AuthenticationException {
+  public void sync(String accessToken, ServiceObject obj, SyncOperation op) {
     try {
       logger.debug("Syncing object op:{} for id:{}", op.name(), obj.id);
 
@@ -89,13 +88,17 @@ public class TokenAuthentication extends AbstractAuthentication {
     }
   }
 
-  protected AuthorizationResponse getUserRequest(String accessToken) throws IOException, AuthHttpClient.ClientException {
+  protected AuthorizationResponse getUserRequest(String accessToken) {
     
-    AuthorizationRequest areq = new AuthorizationRequest(AuthorizationRequest.Operation.User);
-    
-    String payload = mapper.writeValueAsString(areq);
-    String response = client.check(accessToken, payload);
-    return mapper.readValue(response, AuthorizationResponse.class);
+      try {
+          AuthorizationRequest areq = new AuthorizationRequest(AuthorizationRequest.Operation.User);
+          
+          String payload = mapper.writeValueAsString(areq);
+          String response = client.check(accessToken, payload);
+          return mapper.readValue(response, AuthorizationResponse.class);
+      } catch (IOException ex) {
+          throw new AuthenticationException(ex);
+      }
   }
 
 }

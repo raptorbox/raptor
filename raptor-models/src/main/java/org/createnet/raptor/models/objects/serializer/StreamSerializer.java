@@ -29,7 +29,7 @@ import org.createnet.raptor.models.objects.Stream;
 public class StreamSerializer extends JsonSerializer<Stream> {
 
     @Override
-    public void serialize(Stream t, JsonGenerator jg, SerializerProvider sp) throws IOException, JsonProcessingException {
+    public void serialize(Stream t, JsonGenerator jg, SerializerProvider sp) throws IOException {
 
         jg.writeStartObject();
         

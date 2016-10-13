@@ -19,14 +19,14 @@ package org.createnet.raptor.client.exception;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class ClientException extends Exception {
+public class ClientException extends RuntimeException {
 
-  public ClientException(String message) {
-    super(message);
-  }
+    public ClientException(String message) {
+        super(message);
+    }
 
-  public ClientException(Throwable cause) {
-    super(cause);
-  }
-  
+    public ClientException(Throwable cause) {
+        super(cause);
+    }
+
 }

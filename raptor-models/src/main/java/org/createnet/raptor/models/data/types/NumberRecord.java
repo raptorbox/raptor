@@ -24,11 +24,11 @@ import org.createnet.raptor.models.objects.RaptorComponent;
 /**
  *
  * @author Luca Capra <luca.capra@gmail.com>
- */   
+ */
 public class NumberRecord extends Record<Number> {
-    
+
     protected Number value;
-    
+
     @Override
     public Number getValue() {
         return value;
@@ -40,56 +40,57 @@ public class NumberRecord extends Record<Number> {
     }
 
     @Override
-    public void setValue(Object value) throws RaptorComponent.ParserException {
+    public void setValue(Object value) {
         Number n = parseValue(value);
         this.value = n;
     }
 
     @Override
-    public Number parseValue(Object value) throws RaptorComponent.ParserException {
+    public Number parseValue(Object value) {
         try {
-          
-          if(value instanceof Number) {
-            return (Number) value;
-          }
-          
-          if(value instanceof JsonNode) {
-            
-            JsonNode node = (JsonNode) value;
-            
-            if(node.isNumber()) {
-              
-              if(node.isInt() || node.isShort())
-                return (Number) node.asInt();
-              
-              if(node.isDouble() || node.isFloat())
-                return (Number) node.asDouble();
-              
-              if(node.isLong())
-                return (Number) node.asLong();
-            }
-            
-            if(node.isTextual()) {
-              value = node.asText();
-            }
-            
-          }
-          
-          NumberFormat formatter = NumberFormat.getInstance();
-          ParsePosition pos = new ParsePosition(0);
-          Number numVal = formatter.parse((String) value, pos);
 
-          return numVal;
-        }
-        catch(Exception e) {
-          throw new RaptorComponent.ParserException(e);
-        }
-    }    
+            if (value instanceof Number) {
+                return (Number) value;
+            }
 
-  @Override
-  public Class<Number> getClassType() {
-    return Number.class;
-  }
-    
+            if (value instanceof JsonNode) {
+
+                JsonNode node = (JsonNode) value;
+
+                if (node.isNumber()) {
+
+                    if (node.isInt() || node.isShort()) {
+                        return (Number) node.asInt();
+                    }
+
+                    if (node.isDouble() || node.isFloat()) {
+                        return (Number) node.asDouble();
+                    }
+
+                    if (node.isLong()) {
+                        return (Number) node.asLong();
+                    }
+                }
+
+                if (node.isTextual()) {
+                    value = node.asText();
+                }
+
+            }
+
+            NumberFormat formatter = NumberFormat.getInstance();
+            ParsePosition pos = new ParsePosition(0);
+            Number numVal = formatter.parse((String) value, pos);
+
+            return numVal;
+        } catch (Exception e) {
+            throw new RaptorComponent.ParserException(e);
+        }
+    }
+
+    @Override
+    public Class<Number> getClassType() {
+        return Number.class;
+    }
+
 }
-

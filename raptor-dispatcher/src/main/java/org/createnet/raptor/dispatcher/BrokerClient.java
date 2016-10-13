@@ -94,7 +94,7 @@ public class BrokerClient {
     return connection;
   }
 
-  public void sendMessage(String topic, String message) throws DispatchException {
+  public void sendMessage(String topic, String message)  {
     try {
       
       MqttClient conn = getConnection();

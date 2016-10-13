@@ -29,7 +29,7 @@ import org.createnet.raptor.models.data.ResultSet;
 public class ResultSetSerializer extends JsonSerializer<ResultSet> {
 
     @Override
-    public void serialize(ResultSet t, JsonGenerator jg, SerializerProvider sp) throws IOException, JsonProcessingException {
+    public void serialize(ResultSet t, JsonGenerator jg, SerializerProvider sp) throws IOException {
         jg.writeTree(t.toJsonNode());
     }
     

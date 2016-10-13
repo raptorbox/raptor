@@ -28,6 +28,7 @@ import org.createnet.raptor.http.service.DispatcherService;
 import org.createnet.raptor.http.service.EventEmitterService;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.StorageService;
+import org.createnet.raptor.http.service.TreeService;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
@@ -43,7 +44,7 @@ import org.slf4j.LoggerFactory;
 abstract public class AbstractApi {
 
     final private Logger logger = LoggerFactory.getLogger(AbstractApi.class);
-    
+
     @Inject
     protected EventEmitterService emitter;
 
@@ -59,8 +60,11 @@ abstract public class AbstractApi {
     @Inject
     protected AuthService auth;
 
-    protected ServiceObject loadObject(String id) throws ConfigurationException, Authorization.AuthorizationException, Authentication.AuthenticationException, RaptorComponent.ParserException, Indexer.IndexerException {
-        
+    @Inject
+    protected TreeService tree;
+
+    protected ServiceObject loadObject(String id) {
+
         logger.debug("Load object {}", id);
         List<ServiceObject> objs = indexer.getObjects(Arrays.asList(id));
         if (objs.isEmpty()) {

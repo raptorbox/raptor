@@ -26,20 +26,19 @@ import javax.ws.rs.container.ContainerResponseFilter;
  */
 public class CORSResponseFilter implements ContainerResponseFilter {
 
-  @Override
-  public void filter(ContainerRequestContext request, ContainerResponseContext response)
-          throws IOException {
+    @Override
+    public void filter(ContainerRequestContext request, ContainerResponseContext response) {
 
-    response.getHeaders().add("Powered-By", "Raptor");
-    
-    String origin = request.getHeaderString("Origin");
-    
-    response.getHeaders().add("Access-Control-Allow-Credentials", "true");    
-    response.getHeaders().add("Access-Control-Allow-Origin", origin);
-    
-    response.getHeaders().add("Access-Control-Allow-Headers", "Authorization,Content-Type");
-    response.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
-    response.getHeaders().add("Access-Control-Max-Age", "3600");
+        response.getHeaders().add("Powered-By", "Raptor");
 
-  }
+        String origin = request.getHeaderString("Origin");
+
+        response.getHeaders().add("Access-Control-Allow-Credentials", "true");
+        response.getHeaders().add("Access-Control-Allow-Origin", origin);
+
+        response.getHeaders().add("Access-Control-Allow-Headers", "Authorization,Content-Type");
+        response.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+        response.getHeaders().add("Access-Control-Max-Age", "3600");
+
+    }
 }

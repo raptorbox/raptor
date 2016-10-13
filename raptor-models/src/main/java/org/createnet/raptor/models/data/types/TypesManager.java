@@ -18,6 +18,8 @@ package org.createnet.raptor.models.data.types;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.createnet.raptor.models.data.Record;
 
 /**
@@ -25,42 +27,51 @@ import org.createnet.raptor.models.data.Record;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class TypesManager {
-  
-  static private Map<String, Record> types = new LinkedHashMap();
-  
-  static public void addType(String name, Class<? extends Record> type) 
-          throws InstantiationException, IllegalAccessException {
-    
-    getTypes().put(name, type.newInstance());
-  }
-  
-  static public Map<String, Record> getTypes() {
-    
-    // push defaults
-    if (types.isEmpty()) {
 
-      Record instance;
+    static private Map<String, Record> types = new LinkedHashMap();
 
-      // Number
-      instance = new NumberRecord();
-      types.put(instance.getType(), instance);
+    public static class BadTypeException extends RuntimeException {
 
-      // Boolean
-      instance = new BooleanRecord();
-      types.put(instance.getType(), instance);
+        public BadTypeException(Throwable cause) {
+            super(cause);
+        }
 
-      // Boolean
-      instance = new GeoPointRecord();
-      types.put(instance.getType(), instance);
-
-      // String
-      instance = new StringRecord();
-      types.put(instance.getType(), instance);
-      
     }
 
-    return types;
-  }  
-  
-  
+    static public void addType(String name, Class<? extends Record> type) {
+        try {
+            getTypes().put(name, type.newInstance());
+        } catch (InstantiationException | IllegalAccessException ex) {
+            throw new BadTypeException(ex);
+        }
+    }
+
+    static public Map<String, Record> getTypes() {
+
+        // push defaults
+        if (types.isEmpty()) {
+
+            Record instance;
+
+            // Number
+            instance = new NumberRecord();
+            types.put(instance.getType(), instance);
+
+            // Boolean
+            instance = new BooleanRecord();
+            types.put(instance.getType(), instance);
+
+            // Boolean
+            instance = new GeoPointRecord();
+            types.put(instance.getType(), instance);
+
+            // String
+            instance = new StringRecord();
+            types.put(instance.getType(), instance);
+
+        }
+
+        return types;
+    }
+
 }

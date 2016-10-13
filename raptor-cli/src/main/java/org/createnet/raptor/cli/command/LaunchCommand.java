@@ -55,7 +55,7 @@ public class LaunchCommand implements Command {
   }
 
   @Override
-  public void run() throws CommandException {
+  public void run() {
 
     boolean all = (!http && !broker);
 

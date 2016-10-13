@@ -18,6 +18,8 @@ package org.createnet.raptor.models.objects;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -37,9 +39,14 @@ public class Subscription extends StreamContainer {
     public String createdAt;
     public String expire;
 
-    public Subscription(String json, Stream stream) throws IOException {
+    public Subscription(String json, Stream stream) {
         initialize();
-        JsonNode tree = mapper.readTree(json);
+        JsonNode tree;
+        try {
+            tree = mapper.readTree(json);
+        } catch (IOException ex) {
+            throw new ParserException(ex);
+        }
         parse(tree, stream);
     }
 
@@ -48,9 +55,14 @@ public class Subscription extends StreamContainer {
         parse(json, stream);
     }
     
-    public Subscription(String json) throws IOException {
+    public Subscription(String json) {
         initialize();
-        JsonNode tree = mapper.readTree(json);
+        JsonNode tree;
+        try {
+            tree = mapper.readTree(json);
+        } catch (IOException ex) {
+            throw new ParserException(ex);
+        }
         parse(tree, null);
     }
 
@@ -93,7 +105,7 @@ public class Subscription extends StreamContainer {
     }
     
     @Override
-    public void validate() throws ValidationException {
+    public void validate() {
         throw new ValidationException("Not implemented");
     }
     

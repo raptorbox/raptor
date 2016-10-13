@@ -45,12 +45,12 @@ public class GeoPointRecord extends Record<GeoPoint> {
     }
 
     @Override
-    public void setValue(Object value)  throws RaptorComponent.ParserException {
+    public void setValue(Object value)  {
         this.value = parseValue(value);
     }
 
     @Override
-    public GeoPoint parseValue(Object raw)  throws RaptorComponent.ParserException {
+    public GeoPoint parseValue(Object raw)  {
       try {
         
         String val;

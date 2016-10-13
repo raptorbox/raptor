@@ -17,6 +17,7 @@ package org.createnet.raptor.search.raptor.search.impl.es;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 import org.createnet.raptor.search.impl.ElasticSearchIndexer;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -35,55 +36,72 @@ import org.slf4j.LoggerFactory;
  */
 public class ElasticSearchIndexAdmin {
 
-  public class IndexAdminException extends Exception {
+    public class IndexAdminException extends RuntimeException {
 
-    public IndexAdminException(String message) {
-      super(message);
+        public IndexAdminException(String message) {
+            super(message);
+        }
+
+        public IndexAdminException(Throwable cause) {
+            super(cause);
+        }
+
     }
 
-  }
+    final protected Logger logger = LoggerFactory.getLogger(ElasticSearchIndexer.class);
+    private Client client;
 
-  final protected Logger logger = LoggerFactory.getLogger(ElasticSearchIndexer.class);
-  private Client client;
-
-  public Client getClient() throws IndexAdminException {
-    if (client == null) {
-      throw new IndexAdminException("ES client must be set");
+    public Client getClient() throws IndexAdminException {
+        if (client == null) {
+            throw new IndexAdminException("ES client must be set");
+        }
+        return client;
     }
-    return client;
-  }
 
-  public void setClient(Client client) {
-    this.client = client;
-  }
+    public void setClient(Client client) {
+        this.client = client;
+    }
 
-  public boolean exists(String name) throws InterruptedException, ExecutionException, IndexAdminException {
-    Future<IndicesExistsResponse> req = getClient().admin().indices().exists(new IndicesExistsRequest(name));
-    IndicesExistsResponse res = req.get();
-    logger.debug("Index does {} exists", res.isExists() ? "" : "not");
-    return res.isExists();
-  }
+    public boolean exists(String name) {
+        Future<IndicesExistsResponse> req = getClient().admin().indices().exists(new IndicesExistsRequest(name));
+        IndicesExistsResponse res;
+        try {
+            res = req.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            throw new IndexAdminException(ex);
+        }
+        logger.debug("Index does {} exists", res.isExists() ? "" : "not");
+        return res.isExists();
+    }
 
-  public void delete(String name) throws InterruptedException, ExecutionException, IndexAdminException {
-    
-    DeleteIndexRequest deleteIndexReq = new DeleteIndexRequest(name);
-    Future<DeleteIndexResponse> reqCreate = client.admin().indices().delete(deleteIndexReq);
-    DeleteIndexResponse resDelete = reqCreate.get();
-    
-    logger.debug("Delete index {}", name);
-  }
+    public void delete(String name) {
 
-  public void create(String name, String definition) throws InterruptedException, ExecutionException {
-    
-    Settings indexSettings = Settings.settingsBuilder()
-            .loadFromSource(definition).build();
-    
-    CreateIndexRequest createIndexReq = new CreateIndexRequest(name, indexSettings);
-    Future<CreateIndexResponse> reqCreate = client.admin().indices().create(createIndexReq);
-    
-    CreateIndexResponse resCreate = reqCreate.get();
-    
-    logger.debug("Created index {}", name);
-  }
+        DeleteIndexRequest deleteIndexReq = new DeleteIndexRequest(name);
+        Future<DeleteIndexResponse> reqCreate = client.admin().indices().delete(deleteIndexReq);
+        try {
+            DeleteIndexResponse resDelete = reqCreate.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            throw new IndexAdminException(ex);
+        }
+
+        logger.debug("Delete index {}", name);
+    }
+
+    public void create(String name, String definition) {
+
+        Settings indexSettings = Settings.settingsBuilder()
+                .loadFromSource(definition).build();
+
+        CreateIndexRequest createIndexReq = new CreateIndexRequest(name, indexSettings);
+        Future<CreateIndexResponse> reqCreate = client.admin().indices().create(createIndexReq);
+
+        try {
+            CreateIndexResponse resCreate = reqCreate.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            throw new IndexAdminException(ex);
+        }
+
+        logger.debug("Created index {}", name);
+    }
 
 }

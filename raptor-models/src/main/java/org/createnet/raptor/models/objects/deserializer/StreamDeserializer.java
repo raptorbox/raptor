@@ -30,7 +30,7 @@ import org.createnet.raptor.models.objects.Stream;
 public class StreamDeserializer extends JsonDeserializer<Stream> {
 
     @Override
-    public Stream deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public Stream deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
         JsonNode tree = jp.getCodec().readTree(jp);
         return new Stream(tree);
     }

@@ -21,7 +21,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import javax.inject.Inject;
-import org.createnet.raptor.auth.authentication.Authentication;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.dispatcher.Dispatcher;
 import org.createnet.raptor.config.exception.ConfigurationException;
@@ -32,7 +31,6 @@ import org.createnet.raptor.http.events.DataEvent;
 import org.createnet.raptor.http.events.ObjectEvent;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Action;
-import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
 import org.slf4j.Logger;
@@ -45,186 +43,179 @@ import org.slf4j.LoggerFactory;
 @Service
 public class DispatcherService implements RaptorService {
 
-  private final Logger logger = LoggerFactory.getLogger(DispatcherService.class);
+    private final Logger logger = LoggerFactory.getLogger(DispatcherService.class);
 
-  @Inject
-  ConfigurationService configuration;
+    @Inject
+    ConfigurationService configuration;
 
-  @Inject
-  EventEmitterService emitter;
+    @Inject
+    EventEmitterService emitter;
 
-  Emitter.Callback emitterCallback = new Emitter.Callback() {
+    Emitter.Callback emitterCallback = new Emitter.Callback() {
+        @Override
+        public void run(Event event) {
+
+            logger.debug("Processing dispatcher event {} (parent: {})", event.getEvent(), event.getParentEvent());
+
+            switch (event.getParentEvent()) {
+                case "create":
+                case "update":
+                case "delete":
+                    ObjectEvent objEvent = (ObjectEvent) event;
+
+                    if (!objEvent.getObject().settings.eventsEnabled()) {
+                        return;
+                    }
+
+                    notifyObjectEvent(objEvent.getEvent(), objEvent.getObject());
+                    break;
+                case "push":
+                    // notify data event
+                    DataEvent dataEvent = (DataEvent) event;
+
+                    if (!dataEvent.getStream().getServiceObject().settings.eventsEnabled()) {
+                        return;
+                    }
+
+                    notifyDataEvent(dataEvent.getStream(), dataEvent.getRecord());
+                    break;
+                case "execute":
+                case "deleteAction":
+                    // notify event
+                    ActionEvent actionEvent = (ActionEvent) event;
+
+                    if (!actionEvent.getAction().getServiceObject().settings.eventsEnabled()) {
+                        return;
+                    }
+
+                    String op = event.getEvent().equals("execute") ? "execute" : "delete";
+                    notifyActionEvent(op, actionEvent.getAction(), actionEvent.getActionStatus().status);
+                    break;
+            }
+
+        }
+    };
+
+    @PostConstruct
     @Override
-    public void run(Event event) throws Emitter.EmitterException {
+    public void initialize() {
+        try {
+            getDispatcher();
+        } catch (Exception e) {
+            throw new ServiceException(e);
+        }
+    }
 
-      try {
+    @PreDestroy
+    @Override
+    public void shutdown() {
+        try {
+            removeEmitterCallback();
+            getDispatcher().close();
+            dispatcher = null;
+        } catch (Exception e) {
+            throw new ServiceException(e);
+        }
+    }
 
-        logger.debug("Processing dispatcher event {} (parent: {})", event.getEvent(), event.getParentEvent());
+    public enum MessageType {
+        object, stream, actuation
+    }
 
-        switch (event.getParentEvent()) {
-          case "create":
-          case "update":
-          case "delete":
-            ObjectEvent objEvent = (ObjectEvent) event;
+    public enum ObjectOperation {
+        create, update, delete, push
+    }
 
-            if (!objEvent.getObject().settings.eventsEnabled()) {
-              return;
-            }
+    public enum ActionOperation {
+        execute, delete
+    }
 
-            notifyObjectEvent(objEvent.getEvent(), objEvent.getObject());
-            break;
-          case "push":
-            // notify data event
-            DataEvent dataEvent = (DataEvent) event;
+    private Dispatcher dispatcher;
 
-            if (!dataEvent.getStream().getServiceObject().settings.eventsEnabled()) {
-              return;
-            }
+    public DispatcherService() {
+    }
 
-            notifyDataEvent(dataEvent.getStream(), dataEvent.getRecord());
-            break;
-          case "execute":
-          case "deleteAction":
-            // notify event
-            ActionEvent actionEvent = (ActionEvent) event;
+    public Dispatcher getDispatcher() {
+        if (dispatcher == null) {
+            dispatcher = new Dispatcher();
+            dispatcher.initialize(configuration.getDispatcher());
+            addEmitterCallback();
+        }
+        return dispatcher;
+    }
 
-            if (!actionEvent.getAction().getServiceObject().settings.eventsEnabled()) {
-              return;
-            }
+    protected ObjectNode createObjectMessage(ServiceObject obj) {
 
-            String op = event.getEvent().equals("execute") ? "execute" : "delete";
-            notifyActionEvent(op, actionEvent.getAction(), actionEvent.getActionStatus().status);
-            break;
+        ObjectNode message = ServiceObject.getMapper().createObjectNode();
+
+        message.put("userId", obj.getUserId());
+        message.set("object", obj.toJsonNode());
+
+        return message;
+    }
+
+    public void notifyObjectEvent(String op, ServiceObject obj) {
+
+        String topic = obj.id + "/events";
+
+        ObjectNode message = createObjectMessage(obj);
+
+        message.put("type", MessageType.object.toString());
+        message.put("op", op);
+
+        getDispatcher().add(topic, message.toString());
+    }
+
+    public void notifyDataEvent(Stream stream, RecordSet record) {
+
+        String topic = stream.getServiceObject().id + "/events";
+
+        ObjectNode message = createObjectMessage(stream.getServiceObject());
+
+        message.put("type", MessageType.stream.toString());
+        message.put("op", "data");
+        message.put("streamId", stream.name);
+        message.set("data", record.toJsonNode());
+
+        getDispatcher().add(topic, message.toString());
+    }
+
+    public void notifyActionEvent(String op, Action action, String status) {
+
+        String topic = action.getServiceObject().id + "/events";
+
+        ObjectNode message = createObjectMessage(action.getServiceObject());
+
+        message.put("type", MessageType.actuation.toString());
+        message.put("op", op);
+
+        message.put("actionId", action.name);
+
+        if (status != null) {
+            message.put("data", status);
         }
 
-      } catch (ConfigurationException | IOException e) {
-        logger.error("Failed to dispatch message", e);
-      }
-
-    }
-  };
-   
-    
-  @PostConstruct
-  @Override
-  public void initialize() throws ServiceException {
-    try {
-      getDispatcher();
-    } catch (Exception e) {
-      throw new ServiceException(e);
-    }
-  }
-
-  @PreDestroy
-  @Override
-  public void shutdown() throws ServiceException {
-    try {
-      removeEmitterCallback();
-      getDispatcher().close();
-      dispatcher = null;
-    } catch (Exception e) {
-      throw new ServiceException(e);
-    }
-  }
-
-  public enum MessageType {
-    object, stream, actuation
-  }
-
-  public enum ObjectOperation {
-    create, update, delete, push
-  }
-
-  public enum ActionOperation {
-    execute, delete
-  }
-
-  private Dispatcher dispatcher;
-
-  public DispatcherService() {
-  }
-
-  public Dispatcher getDispatcher() throws ConfigurationException {
-    if (dispatcher == null) {
-      dispatcher = new Dispatcher();
-      dispatcher.initialize(configuration.getDispatcher());
-      addEmitterCallback();
-    }
-    return dispatcher;
-  }
-
-  protected ObjectNode createObjectMessage(ServiceObject obj) {
-
-    ObjectNode message = ServiceObject.getMapper().createObjectNode();
-
-    message.put("userId", obj.getUserId());
-    message.set("object", obj.toJsonNode());
-
-    return message;
-  }
-
-  public void notifyObjectEvent(String op, ServiceObject obj) throws ConfigurationException {
-
-    String topic = obj.id + "/events";
-
-    ObjectNode message = createObjectMessage(obj);
-
-    message.put("type", MessageType.object.toString());
-    message.put("op", op);
-
-    getDispatcher().add(topic, message.toString());
-  }
-
-  public void notifyDataEvent(Stream stream, RecordSet record) throws IOException, ConfigurationException {
-
-    String topic = stream.getServiceObject().id + "/events";
-
-    ObjectNode message = createObjectMessage(stream.getServiceObject());
-    
-    message.put("type", MessageType.stream.toString());
-    message.put("op", "data");
-    message.put("streamId", stream.name);
-    message.set("data", record.toJsonNode());
-
-    getDispatcher().add(topic, message.toString());
-  }
-
-  public void notifyActionEvent(String op, Action action, String status) throws IOException, ConfigurationException {
-
-    String topic = action.getServiceObject().id + "/events";
-
-    ObjectNode message = createObjectMessage(action.getServiceObject());
-
-    message.put("type", MessageType.actuation.toString());
-    message.put("op", op);
-
-    message.put("actionId", action.name);
-
-    if (status != null) {
-      message.put("data", status);
+        getDispatcher().add(topic, message.toString());
     }
 
-    getDispatcher().add(topic, message.toString());
-  }
+    public void pushData(Stream stream, RecordSet records) {
+        String topic = stream.getServiceObject().id + "/streams/" + stream.name + "/updates";
+        getDispatcher().add(topic, records.toJson());
+    }
 
-  public void pushData(Stream stream, RecordSet records) throws ConfigurationException, IOException {
-    String topic = stream.getServiceObject().id + "/streams/" + stream.name + "/updates";
-    getDispatcher().add(topic, records.toJson());
-  }
+    public void actionTrigger(Action action, String status) {
+        String topic = action.getServiceObject().id + "/actuations/" + action.name;
+        getDispatcher().add(topic, status);
+    }
 
-  public void actionTrigger(Action action, String status) throws ConfigurationException {
-    String topic = action.getServiceObject().id + "/actuations/" + action.name;
-    getDispatcher().add(topic, status);
-  }
+    private void addEmitterCallback() {
+        logger.debug("Register dispatcher event trigger");
+        emitter.on(EventEmitterService.EventName.all, emitterCallback);
+    }
 
-  private void addEmitterCallback() {
-    logger.debug("Register dispatcher event trigger");
-    emitter.on(EventEmitterService.EventName.all, emitterCallback);
-  }
-
-  private void removeEmitterCallback() {
-    logger.debug("Unregister dispatcher event trigger");
-    emitter.off(EventEmitterService.EventName.all, emitterCallback);
-  }
+    private void removeEmitterCallback() {
+        logger.debug("Unregister dispatcher event trigger");
+        emitter.off(EventEmitterService.EventName.all, emitterCallback);
+    }
 
 }

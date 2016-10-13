@@ -29,32 +29,31 @@ import org.slf4j.LoggerFactory;
  */
 public class LoggerResponseFilter implements ContainerResponseFilter {
 
-  final private Logger logger = LoggerFactory.getLogger(LoggerResponseFilter.class);
+    final private Logger logger = LoggerFactory.getLogger(LoggerResponseFilter.class);
 
-  @Override
-  public void filter(ContainerRequestContext request, ContainerResponseContext response)
-          throws IOException {
+    @Override
+    public void filter(ContainerRequestContext request, ContainerResponseContext response) {
 
-    Principal p = request.getSecurityContext().getUserPrincipal();
-    String authName = p == null ? "-" : p.getName();
+        Principal p = request.getSecurityContext().getUserPrincipal();
+        String authName = p == null ? "-" : p.getName();
 
-    if (response.getStatus() > 400) {
-      logger.warn("API request error {} {}: [{}] {} /{}",
-              response.getStatus(),
-              response.getStatusInfo().getReasonPhrase(),
-              authName,
-              request.getMethod(),
-              request.getUriInfo().getPath()
-      );
-    } else {
-      logger.info("API request ({}) [{}] {} /{}",
-              response.getStatus(),
-              authName,
-              request.getMethod(),
-              request.getUriInfo().getPath()
-      );
+        if (response.getStatus() > 400) {
+            logger.warn("API request error {} {}: [{}] {} /{}",
+                    response.getStatus(),
+                    response.getStatusInfo().getReasonPhrase(),
+                    authName,
+                    request.getMethod(),
+                    request.getUriInfo().getPath()
+            );
+        } else {
+            logger.info("API request ({}) [{}] {} /{}",
+                    response.getStatus(),
+                    authName,
+                    request.getMethod(),
+                    request.getUriInfo().getPath()
+            );
+
+        }
 
     }
-
-  }
 }

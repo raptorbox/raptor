@@ -19,7 +19,7 @@ package org.createnet.raptor.models.exception;
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-public class RecordsetException extends Exception
+public class RecordsetException extends RuntimeException
 {
 
     public RecordsetException(Throwable ex) {

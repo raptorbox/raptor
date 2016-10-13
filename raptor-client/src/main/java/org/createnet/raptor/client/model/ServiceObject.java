@@ -30,81 +30,81 @@ public class ServiceObject
         extends org.createnet.raptor.models.objects.ServiceObject
         implements RaptorComponent {
 
-  private RaptorClient client;
+    private RaptorClient client;
 
-  public ServiceObject() {
-  }
-
-  public ServiceObject(String id) {
-    this.id = id;
-  }
-
-  public ServiceObject load(String id) throws ClientException {
-
-    try {
-
-      HttpResponse<ServiceObject> objResponse = Unirest
-              .get(getClient().url(RaptorClient.Routes.LOAD))
-              .routeParam("id", id)
-              .asObject(ServiceObject.class);
-
-      ServiceObject obj = objResponse.getBody();
-      return obj;
-
-    } catch (UnirestException ex) {
-      throw new ClientException(ex);
+    public ServiceObject() {
     }
 
-  }
-
-  public ServiceObject update() throws ClientException {
-
-    try {
-
-      HttpResponse<ServiceObject> objResponse = Unirest
-              .get(getClient().url(RaptorClient.Routes.UPDATE))
-              .routeParam("id", id)
-              .asObject(ServiceObject.class);
-
-      return this;
-
-    } catch (UnirestException ex) {
-      throw new ClientException(ex);
+    public ServiceObject(String id) {
+        this.id = id;
     }
 
-  }
-  
-  public ServiceObject delete() throws ClientException {
+    public ServiceObject load(String id) {
 
-    try {
+        try {
 
-      HttpResponse<ServiceObject> objResponse = Unirest
-              .get(getClient().url(RaptorClient.Routes.UPDATE))
-              .routeParam("id", id)
-              .asObject(ServiceObject.class);
+            HttpResponse<ServiceObject> objResponse = Unirest
+                    .get(getClient().url(RaptorClient.Routes.LOAD))
+                    .routeParam("id", id)
+                    .asObject(ServiceObject.class);
 
-      return getClient().createObject();
+            ServiceObject obj = objResponse.getBody();
+            return obj;
 
-    } catch (UnirestException ex) {
-      throw new ClientException(ex);
+        } catch (UnirestException ex) {
+            throw new ClientException(ex);
+        }
+
     }
 
-  }
+    public ServiceObject update() {
 
-  public ServiceObject load() throws ClientException {
-    if (this.getId() == null) {
-      throw new ClientException("ServiceObject is missing id, cannot load");
+        try {
+
+            HttpResponse<ServiceObject> objResponse = Unirest
+                    .get(getClient().url(RaptorClient.Routes.UPDATE))
+                    .routeParam("id", id)
+                    .asObject(ServiceObject.class);
+
+            return this;
+
+        } catch (UnirestException ex) {
+            throw new ClientException(ex);
+        }
+
     }
-    return load(this.getId());
-  }
-  
-  public RaptorClient getClient() {
-    return this.client;
-  }
 
-  @Override
-  public void setClient(RaptorClient client) {
-    this.client = client;
-  }
+    public ServiceObject delete() {
+
+        try {
+
+            HttpResponse<ServiceObject> objResponse = Unirest
+                    .get(getClient().url(RaptorClient.Routes.UPDATE))
+                    .routeParam("id", id)
+                    .asObject(ServiceObject.class);
+
+            return getClient().createObject();
+
+        } catch (UnirestException ex) {
+            throw new ClientException(ex);
+        }
+
+    }
+
+    public ServiceObject load() {
+        if (this.getId() == null) {
+            throw new ClientException("ServiceObject is missing id, cannot load");
+        }
+        return load(this.getId());
+    }
+
+    public RaptorClient getClient() {
+        return this.client;
+    }
+
+    @Override
+    public void setClient(RaptorClient client) {
+        this.client = client;
+    }
 
 }

@@ -64,7 +64,7 @@ public class ObjectQueryTest {
    * Test of validate method, of class ObjectQuery.
    */
 //  @Test
-//  public void testValidate() throws Exception, Query.QueryException {
+//  public void testValidate() throws Query.QueryException {
 //    System.out.println("validate");
 //    ObjectQuery instance = mapper.readValue(content, ObjectQuery.class);
 //    instance.validate();

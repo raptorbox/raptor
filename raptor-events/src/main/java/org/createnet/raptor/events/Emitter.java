@@ -40,7 +40,7 @@ public class Emitter {
   final private BlockingQueue<Runnable> queue = new LinkedBlockingQueue();
   final private ExecutorService executorService = new ThreadPoolExecutor(1, 10, 30, TimeUnit.SECONDS, queue);
 
-  public class EmitterException extends Exception {
+  public class EmitterException extends RuntimeException {
 
     public EmitterException() {
     }

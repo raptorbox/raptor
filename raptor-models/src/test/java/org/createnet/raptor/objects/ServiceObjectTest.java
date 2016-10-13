@@ -56,7 +56,7 @@ public class ServiceObjectTest extends TestUtils {
    * @throws org.createnet.raptor.models.objects.RaptorComponent.ParserException
    */
   @Test
-  public void testParse() throws RaptorComponent.ParserException {
+  public void testParse() {
     
     serviceObject.parse(jsonServiceObject.toString());
     
@@ -71,7 +71,7 @@ public class ServiceObjectTest extends TestUtils {
   }
   
   @Test
-  public void testSerializeToJsonNode() throws RaptorComponent.ParserException {
+  public void testSerializeToJsonNode()  {
     
     serviceObject.parse(jsonServiceObject.toString());
     
@@ -82,7 +82,7 @@ public class ServiceObjectTest extends TestUtils {
   }
   
   @Test
-  public void testSerializeViewPublic() throws RaptorComponent.ParserException, IOException {
+  public void testSerializeViewPublic() throws IOException {
     
     serviceObject.parse(jsonServiceObject.toString());
     

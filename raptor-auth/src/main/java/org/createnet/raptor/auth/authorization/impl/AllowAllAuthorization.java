@@ -27,7 +27,7 @@ public class AllowAllAuthorization extends AbstractAuthorization {
   static final public String defaultUserId = "default-user";
 
   @Override
-  public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) throws AuthorizationException {
+  public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) {
     return !accessToken.isEmpty();
   }
 

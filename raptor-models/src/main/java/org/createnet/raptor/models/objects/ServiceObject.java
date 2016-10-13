@@ -122,7 +122,7 @@ public class ServiceObject extends ServiceObjectContainer {
   }
   
   @Override
-  public void validate() throws ValidationException {
+  public void validate() {
 
     if (this.name == null) {
       throw new ValidationException("name field missing");
@@ -152,12 +152,12 @@ public class ServiceObject extends ServiceObjectContainer {
 
   }
 
-  public void parse(JsonNode json) throws ParserException {
+  public void parse(JsonNode json) {
     parse(json.toString());
   }
 
   @Override
-  public void parse(String json) throws ParserException {
+  public void parse(String json) {
 
     ServiceObject serviceObject;
     try {
@@ -198,7 +198,7 @@ public class ServiceObject extends ServiceObjectContainer {
     isNew = (id == null);
   }
 
-  public static ServiceObject fromJSON(String json) throws ParserException {
+  public static ServiceObject fromJSON(String json) {
     try {
       return mapper.readValue(json, ServiceObject.class);
     } catch (IOException e) {
@@ -210,6 +210,7 @@ public class ServiceObject extends ServiceObjectContainer {
     return mapper.convertValue(json, ServiceObject.class);
   }
 
+  @JsonIgnore
   public boolean isNew() {
     return isNew;
   }
@@ -219,7 +220,7 @@ public class ServiceObject extends ServiceObjectContainer {
     return node;
   }
 
-  public String toJSON() throws ParserException {
+  public String toJSON() {
     String json = null;
     try {
       json = getMapper().writeValueAsString(this);

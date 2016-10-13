@@ -39,115 +39,118 @@ import org.createnet.raptor.cli.command.Command;
  */
 public class Runner {
 
-  static {
-    // initialize logback config path
-    String configPath = ConfigurationLoader.getConfigPath();
-    File filePath = new File(configPath + "/logback.xml");
-    if (filePath.exists()) {
-      System.setProperty("logback.configurationFile", filePath.getAbsolutePath());
-    } else {
-      System.out.println("Logback configuration file does not esists at " + filePath.getAbsolutePath());
-    }
-  }
-
-  static final private Logger logger = LoggerFactory.getLogger(Runner.class);
-  protected ServiceLocator serviceLocator;
-  protected JCommander cmd;
-
-  // add here commands!
-  final protected Class[] availCommands = new Class[]{
-    SetupCommand.class,
-    IndexCommand.class,
-    LaunchCommand.class,
-  };
-
-  final protected Map<String, Command> commands = new HashMap();
-
-  public static void main(String[] args) throws Command.CommandException {
-    final Runner app = new Runner();
-    app.initialize(args);
-    app.run();
-  }
-
-  private void initialize(String[] args) throws Command.CommandException {
-    
-    cmd = new JCommander(this);
-
-    ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
-
-    serviceLocator = locatorFactory.create("CliLocator");
-    ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());    
-    
-    for (Class availCommand : availCommands) {
-      try {
-
-        Command c = (Command) availCommand.newInstance();
-        logger.debug("Added command {}", c.getName());
-        serviceLocator.inject(c);
-        commands.put(c.getName(), c);
-        cmd.addCommand(c.getName(), c);
-
-      } catch (InstantiationException | IllegalAccessException ex) {
-        throw new Command.CommandException(ex);
-      }
-    }
-    
-    cmd.parse(args);
-  }
-
-  private void run() {
-
-    String subcommand = cmd.getParsedCommand();
-
-    if (commands.containsKey(subcommand)) {
-      
-      try {
-        logger.info("Running command {}", subcommand);
-        commands.get(subcommand).run();
-      } catch (Command.CommandException ex) {
-        logger.error("Execption running command: {}", ex.getMessage());
-        throw new RuntimeException(ex);
-      }
-      return;
+    static {
+        // initialize logback config path
+        String configPath = ConfigurationLoader.getConfigPath();
+        File filePath = new File(configPath + "/logback.xml");
+        if (filePath.exists()) {
+            System.setProperty("logback.configurationFile", filePath.getAbsolutePath());
+        } else {
+            System.out.println("Logback configuration file does not esists at " + filePath.getAbsolutePath());
+        }
     }
 
-    cmd.usage();
-  }
+    static final private Logger logger = LoggerFactory.getLogger(Runner.class);
+    protected ServiceLocator serviceLocator;
+    protected JCommander cmd;
 
-  // from http://stackoverflow.com/a/24064448/833499 
-  public static boolean isRoot() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
+    // add here commands!
+    final protected Class[] availCommands = new Class[]{
+        SetupCommand.class,
+        IndexCommand.class,
+        LaunchCommand.class,};
 
-    String osName = System.getProperty("os.name").toLowerCase();
-    String className = null;
+    final protected Map<String, Command> commands = new HashMap();
 
-    if (osName.contains("windows")) {
-      className = "com.sun.security.auth.module.NTSystem";
-    } else if (osName.contains("linux")) {
-      className = "com.sun.security.auth.module.UnixSystem";
-    } else if (osName.contains("solaris") || osName.contains("sunos")) {
-      className = "com.sun.security.auth.module.SolarisSystem";
+    public static void main(String[] args) {
+        final Runner app = new Runner();
+        app.initialize(args);
+        app.run();
     }
 
-    if (className != null) {
-      Class<?> c = Class.forName(className);
-      Method method = c.getDeclaredMethod("getUsername");
-      Object o = c.newInstance();
-      String name = (String) method.invoke(o);
+    private void initialize(String[] args) {
 
-      return name.equals("root") || name.equals("Administrator");
+        cmd = new JCommander(this);
+
+        ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
+
+        serviceLocator = locatorFactory.create("CliLocator");
+        ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());
+
+        for (Class availCommand : availCommands) {
+            try {
+
+                Command c = (Command) availCommand.newInstance();
+                logger.debug("Added command {}", c.getName());
+                serviceLocator.inject(c);
+                commands.put(c.getName(), c);
+                cmd.addCommand(c.getName(), c);
+
+            } catch (InstantiationException | IllegalAccessException ex) {
+                throw new Command.CommandException(ex);
+            }
+        }
+
+        cmd.parse(args);
     }
 
-    return false;
-  }
+    private void run() {
 
-  private void checkUser() {
-    try {
-      if (!Runner.isRoot()) {
-        logger.debug("Current user is not root");
-      }
-    } catch (Exception e) {
-      logger.error("Cannot get current username: ", e.getMessage());
+        String subcommand = cmd.getParsedCommand();
+
+        if (commands.containsKey(subcommand)) {
+
+            try {
+                logger.info("Running command {}", subcommand);
+                commands.get(subcommand).run();
+            } catch (Command.CommandException ex) {
+                logger.error("Execption running command: {}", ex.getMessage());
+                throw new RuntimeException(ex);
+            }
+            return;
+        }
+
+        cmd.usage();
     }
-  }
+
+    // from http://stackoverflow.com/a/24064448/833499 
+    public static boolean isRoot() {
+
+        try {
+            String osName = System.getProperty("os.name").toLowerCase();
+            String className = null;
+
+            if (osName.contains("windows")) {
+                className = "com.sun.security.auth.module.NTSystem";
+            } else if (osName.contains("linux")) {
+                className = "com.sun.security.auth.module.UnixSystem";
+            } else if (osName.contains("solaris") || osName.contains("sunos")) {
+                className = "com.sun.security.auth.module.SolarisSystem";
+            }
+
+            if (className != null) {
+                Class<?> c = Class.forName(className);
+                Method method = c.getDeclaredMethod("getUsername");
+                Object o = c.newInstance();
+                String name = (String) method.invoke(o);
+
+                return name.equals("root") || name.equals("Administrator");
+            }
+
+            return false;
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private void checkUser() {
+        try {
+            if (!Runner.isRoot()) {
+                logger.debug("Current user is not root");
+            }
+        } catch (Exception e) {
+            logger.error("Cannot get current username: ", e.getMessage());
+        }
+    }
 
 }

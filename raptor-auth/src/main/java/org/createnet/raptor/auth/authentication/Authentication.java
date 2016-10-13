@@ -29,7 +29,7 @@ public interface Authentication {
   
   public enum SyncOperation { CREATE, DELETE }
 
-  public class AuthenticationException extends Exception {
+  public class AuthenticationException extends RuntimeException {
     public AuthenticationException(Throwable t) {
       super(t);
     }

@@ -104,7 +104,7 @@ public class RaptorClient implements RaptorComponent {
     return config.url + path;
   }
 
-  public ServiceObject load(String id) throws ClientException {
+  public ServiceObject load(String id) {
     return createObject().load(id);
   }
 
@@ -114,7 +114,7 @@ public class RaptorClient implements RaptorComponent {
     return obj;
   }
 
-  public MqttClient getMqttClient() throws ClientException {
+  public MqttClient getMqttClient() {
     if (mqttClient == null) {
       try {
 
@@ -142,7 +142,7 @@ public class RaptorClient implements RaptorComponent {
     return mqttClient;
   }
 
-  public void unsubscribe(String topic) throws ClientException {
+  public void unsubscribe(String topic) {
     try {
       getMqttClient().unsubscribe(topic);
     } catch (MqttException ex) {
@@ -150,7 +150,7 @@ public class RaptorClient implements RaptorComponent {
     }
   }
   
-  public void subscribe(String topic, MessageEventListener listener) throws ClientException {
+  public void subscribe(String topic, MessageEventListener listener) {
     try {
       
       logger.debug("Subscribing to MQTT topic {}", topic);
@@ -161,7 +161,7 @@ public class RaptorClient implements RaptorComponent {
           logger.warn("Connection to MQTT server lost", thrwbl);
           try {
             getMqttClient().connect();
-          } catch (MqttException | ClientException ex) {
+          } catch (MqttException ex) {
             logger.error("Failed to reconnect", ex);
           }
         }

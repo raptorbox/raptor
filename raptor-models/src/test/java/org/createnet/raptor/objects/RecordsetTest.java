@@ -43,7 +43,7 @@ public class RecordsetTest extends TestUtils {
   }
   
   @Before
-  public void setUp() throws IOException {
+  public void setUp() {
     loadObject();    
   }
   
@@ -58,7 +58,7 @@ public class RecordsetTest extends TestUtils {
    * @throws com.fasterxml.jackson.core.JsonProcessingException
    */
   @Test
-  public void testParseRecord() throws RecordsetException, JsonProcessingException, IOException {
+  public void testParseRecord() throws IOException {
     
     JsonNode data = loadData("record");
     
@@ -77,7 +77,7 @@ public class RecordsetTest extends TestUtils {
   }
   
   @Test
-  public void testParseStreamData() throws RecordsetException, JsonProcessingException, IOException {
+  public void testParseStreamData() throws IOException {
     
     JsonNode data1 = loadData("record1");
     RecordSet records = mapper.readValue(data1.toString(), RecordSet.class);
@@ -91,7 +91,7 @@ public class RecordsetTest extends TestUtils {
   }
   
   @Test
-  public void testParseResultSet() throws RecordsetException, JsonProcessingException, IOException {
+  public void testParseResultSet() throws IOException {
         
     JsonNode resultset = loadData("resultset");
     ResultSet results = mapper.readValue(resultset.toString(), ResultSet.class);
@@ -104,7 +104,7 @@ public class RecordsetTest extends TestUtils {
   }
   
   @Test(expected=RaptorComponent.ValidationException.class)
-  public void testParseRecordSet() throws RecordsetException, JsonProcessingException, IOException, RaptorComponent.ValidationException, RaptorComponent.ParserException {
+  public void testParseRecordSet() throws IOException {
     
    
     JsonNode resultset = loadData("resultset");

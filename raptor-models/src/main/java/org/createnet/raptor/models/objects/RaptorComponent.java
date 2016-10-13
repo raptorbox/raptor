@@ -21,7 +21,7 @@ package org.createnet.raptor.models.objects;
  */
 public interface RaptorComponent {
     
-    public class ValidationException extends Exception {
+    public class ValidationException extends RuntimeException {
 
         public ValidationException(String message, Throwable cause) {
             super(message, cause);
@@ -37,7 +37,7 @@ public interface RaptorComponent {
     
     }
 
-    public class ParserException extends Exception {
+    public class ParserException extends RuntimeException {
 
         public ParserException(String message, Throwable cause) {
             super(message, cause);

@@ -21,7 +21,7 @@ package org.createnet.raptor.search.raptor.search.query;
  */
 public interface Query {
  
-  public class QueryException extends Exception {
+  public class QueryException extends RuntimeException {
 
     public QueryException(String m) {
       super(m);

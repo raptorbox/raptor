@@ -27,39 +27,39 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class RaptorApplicationEventListener implements ApplicationEventListener {
-  
-  protected static final Logger logger = LoggerFactory.getLogger(RaptorApplicationEventListener.class);
-  
-  @Override
-  public void onEvent(ApplicationEvent applicationEvent) {
-    switch (applicationEvent.getType()) {
-      case INITIALIZATION_FINISHED:
-        logger.debug("Raptor HTTP API app started.");
-        break;
-    }
-  }
 
-  @Override
-  public RequestEventListener onRequest(RequestEvent requestEvent) {
-    return new RaptorRequestEventListener();
-  }
-
-  public static class RaptorRequestEventListener implements RequestEventListener {
-
-    private volatile long methodStartTime;
+    protected static final Logger logger = LoggerFactory.getLogger(RaptorApplicationEventListener.class);
 
     @Override
-    public void onEvent(RequestEvent requestEvent) {
-      switch (requestEvent.getType()) {
-        case RESOURCE_METHOD_START:
-          methodStartTime = System.currentTimeMillis();
-          break;
-        case RESOURCE_METHOD_FINISHED:
-          long methodExecution = System.currentTimeMillis() - methodStartTime;
-          final String methodName = requestEvent.getUriInfo().getMatchedResourceMethod().getInvocable().getHandlingMethod().getName();
-          logger.debug("Method '{}' executed. Processing time: {} ms", methodName, methodExecution);
-          break;
-      }
+    public void onEvent(ApplicationEvent applicationEvent) {
+        switch (applicationEvent.getType()) {
+            case INITIALIZATION_FINISHED:
+                logger.debug("Raptor HTTP API app started.");
+                break;
+        }
     }
-  }
+
+    @Override
+    public RequestEventListener onRequest(RequestEvent requestEvent) {
+        return new RaptorRequestEventListener();
+    }
+
+    public static class RaptorRequestEventListener implements RequestEventListener {
+
+        private volatile long methodStartTime;
+
+        @Override
+        public void onEvent(RequestEvent requestEvent) {
+            switch (requestEvent.getType()) {
+                case RESOURCE_METHOD_START:
+                    methodStartTime = System.currentTimeMillis();
+                    break;
+                case RESOURCE_METHOD_FINISHED:
+                    long methodExecution = System.currentTimeMillis() - methodStartTime;
+                    final String methodName = requestEvent.getUriInfo().getMatchedResourceMethod().getInvocable().getHandlingMethod().getName();
+                    logger.debug("Method '{}' executed. Processing time: {} ms", methodName, methodExecution);
+                    break;
+            }
+        }
+    }
 }
