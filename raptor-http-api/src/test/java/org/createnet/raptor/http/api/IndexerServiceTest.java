@@ -127,22 +127,61 @@ public class IndexerServiceTest {
     }
 
     protected List<ServiceObject> addChild(String id) {
+        return addChild("a", id);
+    }
 
-        ServiceObject a = new ServiceObject("a");
-        ServiceObject f = new ServiceObject(id);
+    protected List<ServiceObject> addChild(String pid, String cid) {
 
-        indexer.saveObjects(Arrays.asList(a, f), null);
+        ServiceObject a = new ServiceObject(pid);
+        ServiceObject f = new ServiceObject(cid);
 
+        indexer.saveObjects(Arrays.asList(a, f));
         tree.addChildren(a, Arrays.asList(f));
 
         return tree.getChildren(a);
     }
 
     @Test
+    public void testPath() throws InterruptedException {
+
+        List<String> ids = Arrays.asList("x1", "x2", "x3", "x4", "x5", "x6");
+        List<ServiceObject> objects = ids.stream()
+                        .map(s -> new ServiceObject(s))
+                        .collect(Collectors.toList());
+
+        List<ServiceObject> list = null;
+        indexer.saveObjects(objects, null);
+        
+        for (int i = 0; i < objects.size(); i++) {
+
+            ServiceObject curr = objects.get(i);
+            ServiceObject prev = null;
+            if (i > 0) {
+                prev = objects.get(i - 1);
+                list = tree.addChildren(prev, Arrays.asList(curr));
+            }
+            
+            Thread.sleep(500);
+        }
+        
+        String expectedPath = String.join("/", ids);
+        
+        ServiceObject x6 = list.get(0);
+        String actualPath = x6.path() + "/" + x6.id;
+        
+        Assert.assertNotNull(list);
+        Assert.assertEquals(
+                expectedPath,
+                actualPath
+        );
+
+    }
+
+    @Test
     public void testAddChild() {
 
         String id = "f";
-        List<ServiceObject> children = addChild(id);
+        List<ServiceObject> children = addChild("add", id);
 
         Assert.assertEquals(
                 1,
@@ -158,8 +197,8 @@ public class IndexerServiceTest {
     public void testRemoveChild() {
 
         String id = "g";
-        List<ServiceObject> children1 = addChild(id);
-        List<ServiceObject> children2 = tree.removeChildren("a", Arrays.asList(id));
+        List<ServiceObject> children1 = addChild("rm", id);
+        List<ServiceObject> children2 = tree.removeChildren("rm", Arrays.asList(id));
 
         Assert.assertEquals(
                 0,

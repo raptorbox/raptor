@@ -229,6 +229,10 @@ public class IndexerService extends AbstractRaptorService {
         getIndexer().save(record);
     }
 
+    public void saveObjects(List<ServiceObject> ids) {
+        saveObjects(ids, null);
+    }
+
     public void saveObjects(List<ServiceObject> ids, Boolean isNew) {
 
         List<Indexer.IndexOperation> ops = new ArrayList();

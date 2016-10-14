@@ -159,22 +159,23 @@ public class TreeService extends AbstractRaptorService {
         return setChildren(parentObject, children);
     }
     
-    public List<ServiceObject> setChildren(ServiceObject obj, List<ServiceObject> list) {
+    public List<ServiceObject> setChildren(ServiceObject parentObject, List<ServiceObject> children) {
 
-        generateObjectPath(obj);
-
-        logger.debug("Storing {} children at {}", list.size(), obj.path());
+        logger.debug("Storing {} children at {}", children.size(), parentObject.path());
         
-        list.stream().forEach((c) -> {
-            c.parentId = obj.getId();
-            c.path = (obj.isRoot() ? "" : "/") + obj.getId();
+        generateObjectPath(parentObject);
+        
+        children.stream().forEach((c) -> {
+            c.parentId = parentObject.getId();
+            c.path = parentObject.path();
+            logger.debug("Storing child {}.{} path: {}", c.parentId, c.id, c.path);
         });
-
-        List<ServiceObject> toSave = new ArrayList(list);
-        List<ServiceObject> previousList = getChildren(obj);
+        
+        List<ServiceObject> toSave = new ArrayList(children);
+        List<ServiceObject> previousList = getChildren(parentObject);
 
         previousList.stream().forEach((c) -> {
-            if (!list.contains(c)) {
+            if (!children.contains(c)) {
                 c.parentId = null;
                 c.path = null;
                 toSave.add(c);
@@ -182,10 +183,10 @@ public class TreeService extends AbstractRaptorService {
         });
 
         indexer.saveObjects(toSave, false);
-        lookupGroupItem(obj.id, list.size());
+        lookupGroupItem(parentObject.id, children.size());
 
-        logger.debug("Store children list completed");
-        return list;
+        logger.debug("Store children list completed for {}", parentObject.path());
+        return children;
     }
 
     public ServiceObjectNode loadTree(ServiceObject obj) {

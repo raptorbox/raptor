@@ -123,6 +123,11 @@ public class ServiceObjectNode {
     public String path() {
         return String.join("/", tree().stream().map(n -> n.getCurrent().id).collect(Collectors.toList()));
     }
+    
+    @Override
+    public String toString() {
+        return getCurrent().parentId + "." + getCurrent().id + " [" +path() + "]";
+    }
 
     public final Optional<ServiceObjectNode> getChild(String id) {
         final Optional<ServiceObjectNode> o = getChildren().stream().filter(n -> n.getCurrent().id.equals(id)).findFirst();
