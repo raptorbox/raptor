@@ -156,7 +156,7 @@ public class IndexerService extends AbstractRaptorService {
      */
     @Deprecated
     protected boolean lookupObject(String objectId) {
-        int max = 5, curr = max, wait = 500; //ms
+        int max = 5, curr = max, wait = 200; //ms
         while (curr > 0) {
             try {
                 List<ServiceObject> objs = getObjects(Arrays.asList(objectId));

@@ -265,7 +265,7 @@ public class TreeService extends AbstractRaptorService {
      */
     @Deprecated
     protected boolean lookupGroupItem(String parentId, int childLength) {
-        int max = 10, curr = max, wait = 500; //ms
+        int max = 50, curr = max, wait = 100; //ms
         while (curr > 0) {
             try {
 

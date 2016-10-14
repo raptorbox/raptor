@@ -102,7 +102,7 @@ public class IndexerServiceTest {
     }
 
     @Test
-    public void testAddChild() {
+    public void testSetChild() {
 
         ServiceObject a = new ServiceObject("a");
         ServiceObject b = new ServiceObject("b");
@@ -113,16 +113,61 @@ public class IndexerServiceTest {
 
         tree.setChildren(a, Arrays.asList(b, c));
         List<ServiceObject> a_objs = tree.getChildren(a);
-        
+
         Assert.assertEquals(2, a_objs.size());
         Assert.assertEquals(1, a_objs.stream().filter(o -> o.id.equals("b")).collect(Collectors.toList()).size());
-        
+
         tree.setChildren(c, Arrays.asList(d));
 
         List<ServiceObject> c_objs = tree.getChildren(c);
 
         Assert.assertEquals(1, c_objs.size());
         Assert.assertEquals("d", c_objs.get(0).id);
+
+    }
+
+    protected List<ServiceObject> addChild(String id) {
+
+        ServiceObject a = new ServiceObject("a");
+        ServiceObject f = new ServiceObject(id);
+
+        indexer.saveObjects(Arrays.asList(a, f), null);
+
+        tree.addChildren(a, Arrays.asList(f));
+
+        return tree.getChildren(a);
+    }
+
+    @Test
+    public void testAddChild() {
+
+        String id = "f";
+        List<ServiceObject> children = addChild(id);
+
+        Assert.assertEquals(
+                1,
+                children.stream()
+                        .filter(c -> c.id.equals(id))
+                        .collect(Collectors.toList())
+                        .size()
+        );
+
+    }
+
+    @Test
+    public void testRemoveChild() {
+
+        String id = "g";
+        List<ServiceObject> children1 = addChild(id);
+        List<ServiceObject> children2 = tree.removeChildren("a", Arrays.asList(id));
+
+        Assert.assertEquals(
+                0,
+                children2.stream()
+                        .filter(c -> c.id.equals(id))
+                        .collect(Collectors.toList())
+                        .size()
+        );
 
     }
 }
