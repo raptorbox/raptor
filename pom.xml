@@ -13,18 +13,20 @@
   <modules>
     
     <module>raptor-models</module>    
+    <module>raptor-events</module>    
     <module>raptor-config</module>
     <module>raptor-dispatcher</module>    
     <module>raptor-auth</module>    
     <module>raptor-db</module>
     <module>raptor-search</module>
+
     
     <module>raptor-http-api</module>
     <module>raptor-broker</module>
     
-    <module>raptor-cli</module>
-    <module>raptor-events</module>
+    
     <module>raptor-client</module>
+    <module>raptor-cli</module>    
     <module>raptor-auth-service</module>
   </modules>
   

@@ -48,28 +48,6 @@ public class ObjectTreeApi extends AbstractApi {
     final private Logger logger = LoggerFactory.getLogger(ObjectTreeApi.class);
 
     @GET
-    @Path("/{id}/tree")
-    @ApiOperation(value = "Return the tree rapresentation of the object", notes = "")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Ok")
-        ,
-        @ApiResponse(code = 403, message = "Forbidden")
-        ,
-        @ApiResponse(code = 404, message = "Not Found")
-    })
-    public List<ServiceObject> tree(@PathParam("id") String id) {
-
-        ServiceObject obj = loadObject(id);
-
-        if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
-            throw new ForbiddenException("Cannot read object");
-        }
-
-        ServiceObjectNode node = tree.loadTree(obj);
-        return node.objects();
-    }
-
-    @GET
     @ApiOperation(value = "Return the device children if any", notes = "")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Ok")

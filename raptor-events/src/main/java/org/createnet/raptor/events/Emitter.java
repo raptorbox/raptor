@@ -97,6 +97,7 @@ public class Emitter {
     } catch (InterruptedException ex) {
       logger.debug("Emitter did not complete in time", ex);
     }
+    
   }
 
   public boolean hasCallbacks(String name) {

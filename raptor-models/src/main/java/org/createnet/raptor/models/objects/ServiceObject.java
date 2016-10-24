@@ -251,4 +251,9 @@ public class ServiceObject extends ServiceObjectContainer {
 
     }
 
+    @Override
+    public ServiceObject getServiceObject() {
+        return this;
+    }
+
 }

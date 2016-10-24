@@ -15,18 +15,14 @@
  */
 package org.createnet.raptor.models.objects;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.createnet.raptor.models.objects.serializer.StreamSerializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -36,7 +32,7 @@ import org.slf4j.LoggerFactory;
 @JsonSerialize(using = StreamSerializer.class)
 public class Stream extends StreamContainer {
 
-    org.slf4j.Logger logger = LoggerFactory.getLogger(Stream.class);
+    Logger logger = LoggerFactory.getLogger(Stream.class);
 
     public String name;
     public String type;

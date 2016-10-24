@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.models.objects;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Map;
 import org.createnet.raptor.models.data.Record;
@@ -26,24 +25,26 @@ import org.createnet.raptor.models.events.ServiceObjectEventListener;
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-abstract class ServiceObjectContainer extends RaptorContainer {
+public abstract class ServiceObjectContainer extends RaptorContainer {
 
     @JsonIgnore
     protected ServiceObjectEventListener listener;
-    
+
     @JsonIgnore
     protected ServiceObject serviceObject;
-    
+
     protected Map<String, Record> getTypes() {
-      return TypesManager.getTypes();
+        return TypesManager.getTypes();
     }
-    
+
     @Override
     public RaptorComponent getContainer() {
-        if(getServiceObject() == null) return null;
+        if (getServiceObject() == null) {
+            return null;
+        }
         return getServiceObject().getContainer();
     }
-    
+
     public void setServiceObject(ServiceObject _serviceObject) {
         this.serviceObject = _serviceObject;
 //        if(_serviceObject != null) {
@@ -62,12 +63,12 @@ abstract class ServiceObjectContainer extends RaptorContainer {
 
     public void setListener(ServiceObjectEventListener listener) {
         this.listener = listener;
-    }    
-    
+    }
+
     @Override
     abstract public void validate() throws ValidationException;
 
     @Override
     abstract public void parse(String json) throws ParserException;
-    
+
 }

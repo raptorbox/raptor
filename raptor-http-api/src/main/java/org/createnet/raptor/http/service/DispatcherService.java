@@ -15,7 +15,8 @@
  */
 package org.createnet.raptor.http.service;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
@@ -29,7 +30,9 @@ import org.createnet.raptor.http.events.DataEvent;
 import org.createnet.raptor.http.events.ObjectEvent;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Action;
+import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.ServiceObjectContainer;
 import org.createnet.raptor.models.objects.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +44,82 @@ import org.slf4j.LoggerFactory;
 @Service
 public class DispatcherService extends AbstractRaptorService {
 
-    private final Logger logger = LoggerFactory.getLogger(DispatcherService.class);
+    private final static Logger logger = LoggerFactory.getLogger(DispatcherService.class);
+
+    public interface DispatcherPayload {
+
+        @Override
+        public String toString();
+    }
+
+    public static class DataPayload implements DispatcherPayload {
+
+        final private String c;
+
+        public DataPayload(String c) {
+            this.c = c;
+        }
+
+        @Override
+        public String toString() {
+            return c;
+        }
+    }
+
+    public static class ObjectPayload implements DispatcherPayload {
+
+        final public String userId;
+        final public JsonNode object;
+        final public String path;
+        final public String type;
+        final public String op;
+
+        public ObjectPayload(ServiceObject obj, String op) {
+            userId = obj.userId;
+            object = obj.toJsonNode();
+            path = obj.path();
+            type = MessageType.object.name();
+            this.op = op;
+        }
+
+        @Override
+        public String toString() {
+            try {
+                return ServiceObject.getMapper().writeValueAsString(this);
+            } catch (JsonProcessingException ex) {
+                logger.warn("Cannot serialize event payload message for obj {}: {}", object.get("id").asText(), ex.getMessage());
+                throw new RaptorComponent.ParserException(ex);
+            }
+        }
+
+    }
+
+    public static class StreamPayload extends ObjectPayload {
+
+        final public String streamId;
+        final public JsonNode data;
+
+        public StreamPayload(Stream stream, String op, JsonNode data) {
+            super(stream.getServiceObject(), op);
+            this.streamId = stream.name;
+            this.data = data;
+        }
+
+    }
+
+    public static class ActionPayload extends ObjectPayload {
+
+        final public String actionId;
+        final public String data;
+
+        public ActionPayload(Action action, String op, String data) {
+            super(action.getServiceObject(), op);
+            this.data = data;
+
+            this.actionId = action.name;
+        }
+
+    }
 
     @Inject
     ConfigurationService configuration;
@@ -68,6 +146,7 @@ public class DispatcherService extends AbstractRaptorService {
                     notifyObjectEvent(objEvent.getEvent(), objEvent.getObject());
                     break;
                 case "push":
+
                     // notify data event
                     DataEvent dataEvent = (DataEvent) event;
 
@@ -75,7 +154,12 @@ public class DispatcherService extends AbstractRaptorService {
                         return;
                     }
 
+                    // send update on the data topic
+                    pushData(dataEvent.getStream(), dataEvent.getRecord());
+
+                    //notify data event
                     notifyDataEvent(dataEvent.getStream(), dataEvent.getRecord());
+
                     break;
                 case "execute":
                 case "deleteAction":
@@ -86,8 +170,13 @@ public class DispatcherService extends AbstractRaptorService {
                         return;
                     }
 
+                    // invoke action over mqtt
+                    actionTrigger(actionEvent.getAction(), actionEvent.getActionStatus().status);
+
+                    // notify of action event
                     String op = event.getEvent().equals("execute") ? "execute" : "delete";
                     notifyActionEvent(op, actionEvent.getAction(), actionEvent.getActionStatus().status);
+
                     break;
             }
 
@@ -99,6 +188,7 @@ public class DispatcherService extends AbstractRaptorService {
     public void initialize() {
         try {
             getDispatcher();
+            addEmitterCallback();
         } catch (Exception e) {
             throw new ServiceException(e);
         }
@@ -137,73 +227,76 @@ public class DispatcherService extends AbstractRaptorService {
         if (dispatcher == null) {
             dispatcher = new Dispatcher();
             dispatcher.initialize(configuration.getDispatcher());
-            addEmitterCallback();
         }
         return dispatcher;
     }
 
-    protected ObjectNode createObjectMessage(ServiceObject obj) {
+    protected String getEventsTopic(ServiceObjectContainer c) {
 
-        ObjectNode message = ServiceObject.getMapper().createObjectNode();
+        ServiceObject obj = c.getServiceObject();
+        if (obj == null) {
+            throw new RaptorComponent.ParserException("ServiceObject is null");
+        }
 
-        message.put("userId", obj.getUserId());
-        message.set("object", obj.toJsonNode());
-
-        return message;
+        return c.getServiceObject().getId() + "/events";
     }
 
-    public void notifyObjectEvent(String op, ServiceObject obj) {
-
-        String topic = obj.id + "/events";
-
-        ObjectNode message = createObjectMessage(obj);
-
-        message.put("type", MessageType.object.toString());
-        message.put("op", op);
-
+    public void notifyEvent(String topic, DispatcherPayload message) {
         getDispatcher().add(topic, message.toString());
+    }
+
+    protected void notifyTreeEvent(ServiceObjectContainer c, DispatcherPayload payload) {
+
+        ServiceObject obj = c.getServiceObject();
+        if (obj == null) {
+            throw new RaptorComponent.ParserException("ServiceObject is null");
+        }
+
+        String topic = obj.path() + "/events";
+        notifyEvent(topic, payload);
+    }
+
+    protected void notifyObjectEvent(String op, ServiceObject obj) {
+
+        String topic = getEventsTopic(obj);
+        ObjectPayload payload = new ObjectPayload(obj, op);
+
+        notifyEvent(topic, payload);
+        notifyTreeEvent(obj, payload);
     }
 
     public void notifyDataEvent(Stream stream, RecordSet record) {
 
-        String topic = stream.getServiceObject().id + "/events";
+        String topic = getEventsTopic(stream);
+        StreamPayload payload = new StreamPayload(stream, "data", record.toJsonNode());
 
-        ObjectNode message = createObjectMessage(stream.getServiceObject());
-
-        message.put("type", MessageType.stream.toString());
-        message.put("op", "data");
-        message.put("streamId", stream.name);
-        message.set("data", record.toJsonNode());
-
-        getDispatcher().add(topic, message.toString());
+        notifyEvent(topic, payload);
+        notifyTreeEvent(stream, payload);
     }
 
-    public void notifyActionEvent(String op, Action action, String status) {
+    protected void notifyActionEvent(String op, Action action, String status) {
 
-        String topic = action.getServiceObject().id + "/events";
+        String topic = getEventsTopic(action);
 
-        ObjectNode message = createObjectMessage(action.getServiceObject());
-
-        message.put("type", MessageType.actuation.toString());
-        message.put("op", op);
-
-        message.put("actionId", action.name);
-
+        String data = null;
         if (status != null) {
-            message.put("data", status);
+            data = status;
         }
 
-        getDispatcher().add(topic, message.toString());
+        ActionPayload payload = new ActionPayload(action, op, data);
+
+        notifyEvent(topic, payload);
+        notifyTreeEvent(action, payload);        
     }
 
     public void pushData(Stream stream, RecordSet records) {
         String topic = stream.getServiceObject().id + "/streams/" + stream.name + "/updates";
-        getDispatcher().add(topic, records.toJson());
+        notifyEvent(topic, new DataPayload(records.toJson()));
     }
 
     public void actionTrigger(Action action, String status) {
         String topic = action.getServiceObject().id + "/actuations/" + action.name;
-        getDispatcher().add(topic, status);
+        notifyEvent(topic, new DataPayload(status));
     }
 
     private void addEmitterCallback() {

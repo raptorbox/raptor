@@ -82,7 +82,7 @@ public class IndexerProvider extends AbstractIndexer {
     }
 
     @Override
-    public List<String> search(Query query) throws SearchException {
+    public List<IndexRecord> search(Query query) throws SearchException {
         return indexer.search(query);
     }
 

@@ -144,6 +144,6 @@ public interface Indexer {
 
     public void batch(List<IndexOperation> list) throws IndexerException;
 
-    public List<String> search(Query query) throws SearchException;
+    public List<IndexRecord> search(Query query) throws SearchException;
 
 }

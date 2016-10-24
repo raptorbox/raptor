@@ -49,9 +49,6 @@ abstract public class AbstractApi {
     protected IndexerService indexer;
 
     @Inject
-    protected DispatcherService dispatcher;
-
-    @Inject
     protected AuthService auth;
 
     @Inject
@@ -75,7 +72,7 @@ abstract public class AbstractApi {
         Stream stream = obj.streams.getOrDefault(streamId, null);
 
         if (stream == null) {
-            throw new NotFoundException("Stream " + streamId + "not found");
+            throw new NotFoundException("Stream " + streamId + " not found");
         }
 
         return stream;

@@ -20,9 +20,11 @@ import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.createnet.raptor.http.ApplicationConfig;
+import org.createnet.raptor.http.service.CacheService;
 import org.createnet.raptor.http.service.ConfigurationService;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.TreeService;
@@ -47,12 +49,27 @@ public class IndexerServiceTest {
     IndexerService indexer;
 
     @Inject
+    CacheService cache;
+
+    @Inject
     ConfigurationService config;
 
     @Inject
     TreeService tree;
 
     public IndexerServiceTest() {
+    }
+
+    @BeforeClass
+    public static void setUpClass() {
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+    }
+
+    @Before
+    public void setUp() {
 
         ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
         ServiceLocator serviceLocator = locatorFactory.create("ObjectApiTest");
@@ -69,25 +86,17 @@ public class IndexerServiceTest {
                 config.getIndexer().elasticsearch.indices.source
         ).toFile().getAbsolutePath();
 
+        cache.reset();
         indexer.reset();
         tree.reset();
     }
 
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-
-    }
-
     @After
     public void tearDown() {
+    }
+
+    protected String rndName(String prefix) {
+        return prefix + "_" + UUID.randomUUID();
     }
 
     @Test
@@ -104,10 +113,15 @@ public class IndexerServiceTest {
     @Test
     public void testSetChild() {
 
-        ServiceObject a = new ServiceObject("a");
-        ServiceObject b = new ServiceObject("b");
-        ServiceObject c = new ServiceObject("c");
-        ServiceObject d = new ServiceObject("d");
+        ServiceObject a = new ServiceObject(rndName("a"));
+
+        String nameB = rndName("b");
+        ServiceObject b = new ServiceObject(nameB);
+
+        ServiceObject c = new ServiceObject(rndName("c"));
+
+        String nameD = rndName("b");
+        ServiceObject d = new ServiceObject(nameD);
 
         indexer.saveObjects(Arrays.asList(a, b, c, d), null);
 
@@ -115,19 +129,15 @@ public class IndexerServiceTest {
         List<ServiceObject> a_objs = tree.getChildren(a);
 
         Assert.assertEquals(2, a_objs.size());
-        Assert.assertEquals(1, a_objs.stream().filter(o -> o.id.equals("b")).collect(Collectors.toList()).size());
+        Assert.assertEquals(1, a_objs.stream().filter(o -> o.id.equals(nameB)).collect(Collectors.toList()).size());
 
         tree.setChildren(c, Arrays.asList(d));
 
         List<ServiceObject> c_objs = tree.getChildren(c);
 
         Assert.assertEquals(1, c_objs.size());
-        Assert.assertEquals("d", c_objs.get(0).id);
+        Assert.assertEquals(nameD, c_objs.get(0).id);
 
-    }
-
-    protected List<ServiceObject> addChild(String id) {
-        return addChild("a", id);
     }
 
     protected List<ServiceObject> addChild(String pid, String cid) {
@@ -146,12 +156,12 @@ public class IndexerServiceTest {
 
         List<String> ids = Arrays.asList("x1", "x2", "x3", "x4", "x5", "x6");
         List<ServiceObject> objects = ids.stream()
-                        .map(s -> new ServiceObject(s))
-                        .collect(Collectors.toList());
+                .map(s -> new ServiceObject(s))
+                .collect(Collectors.toList());
 
         List<ServiceObject> list = null;
         indexer.saveObjects(objects, null);
-        
+
         for (int i = 0; i < objects.size(); i++) {
 
             ServiceObject curr = objects.get(i);
@@ -160,15 +170,15 @@ public class IndexerServiceTest {
                 prev = objects.get(i - 1);
                 list = tree.addChildren(prev, Arrays.asList(curr));
             }
-            
-            Thread.sleep(500);
+
+            Thread.sleep(600);
         }
-        
+
         String expectedPath = String.join("/", ids);
-        
+
         ServiceObject x6 = list.get(0);
         String actualPath = x6.path() + "/" + x6.id;
-        
+
         Assert.assertNotNull(list);
         Assert.assertEquals(
                 expectedPath,
@@ -180,8 +190,8 @@ public class IndexerServiceTest {
     @Test
     public void testAddChild() {
 
-        String id = "f";
-        List<ServiceObject> children = addChild("add", id);
+        String id = rndName("f");
+        List<ServiceObject> children = addChild(rndName("add"), id);
 
         Assert.assertEquals(
                 1,
@@ -196,9 +206,11 @@ public class IndexerServiceTest {
     @Test
     public void testRemoveChild() {
 
-        String id = "g";
-        List<ServiceObject> children1 = addChild("rm", id);
-        List<ServiceObject> children2 = tree.removeChildren("rm", Arrays.asList(id));
+        String pid = rndName("rm");
+        String id = rndName("g");
+
+        List<ServiceObject> children1 = addChild(pid, id);
+        List<ServiceObject> children2 = tree.removeChildren(pid, Arrays.asList(id));
 
         Assert.assertEquals(
                 0,

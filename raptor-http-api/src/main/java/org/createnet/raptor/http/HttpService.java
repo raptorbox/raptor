@@ -17,7 +17,10 @@ package org.createnet.raptor.http;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Iterator;
 import javax.ws.rs.core.UriBuilder;
+import org.createnet.raptor.http.service.RaptorService;
+import org.createnet.raptor.models.objects.RaptorComponent;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.slf4j.Logger;
@@ -29,65 +32,66 @@ import org.slf4j.LoggerFactory;
  */
 public class HttpService {
 
-  final private Logger logger = LoggerFactory.getLogger(HttpService.class);
+    final private Logger logger = LoggerFactory.getLogger(HttpService.class);
 
-  protected String defaultURI = "http://127.0.0.1:8080/";
+    protected String defaultURI = "http://127.0.0.1:8080/";
 
-  private HttpServer server;
+    private HttpServer server;
 
-  public void start(String uri) throws Exception {
-    startServer(uri);
-  }
-
-  public void start() throws Exception {
-    startServer();
-  }
-
-  public void stop() throws Exception {
-    stopServer();
-  }
-
-  private HttpServer startServer() throws Exception {
-    return startServer(getURI());
-  }
-
-  private HttpServer startServer(String uri) throws IOException, Exception {
-
-    URI serviceURI = UriBuilder.fromUri(uri).build();
-
-    logger.debug("Starting HTTP service");
-    HttpServer server;
-    try {
-
-      server = GrizzlyHttpServerFactory.createHttpServer(serviceURI, new ApplicationConfig());
-
-    } catch (Exception e) {
-      logger.error("Cannot start http service: {}", e.getMessage(), e);
-      throw new RuntimeException(e);
+    public void start(String uri) throws Exception {
+        startServer(uri);
     }
 
-    server.start();
+    public void start() throws Exception {
+        startServer();
+    }
 
-    logger.info("HTTP service running at {}", serviceURI.toString());
+    public void stop() throws Exception {
+        stopServer();
+    }
 
-    return server;
-  }
+    private HttpServer startServer() throws Exception {
+        return startServer(getURI());
+    }
 
-  private void stopServer() throws Exception {
-    server.shutdown();
-    logger.debug("Stopped HTTP service");
-  }
+    private HttpServer startServer(String uri) throws IOException, Exception {
 
-  @SuppressWarnings("ResultOfMethodCallIgnored")
-  public static void main(String[] args) throws Exception {
+        URI serviceURI = UriBuilder.fromUri(uri).build();
 
-    HttpService launcher = new HttpService();
-    HttpServer server = launcher.startServer();
-  }
+        logger.debug("Starting HTTP service");
+        HttpServer server;
+        try {
+            
+            ApplicationConfig appconfig = new ApplicationConfig();
+            server = GrizzlyHttpServerFactory.createHttpServer(serviceURI, appconfig);
 
-  private String getURI() {
-    String uri = System.getProperty("uri");
-    return uri == null ? defaultURI : uri;
-  }
+        } catch (Exception e) {
+            logger.error("Cannot start http service: {}", e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+
+        server.start();
+
+        logger.info("HTTP service running at {}", serviceURI.toString());
+
+        return server;
+    }
+
+    private void stopServer() throws Exception {
+        server.shutdown();
+        logger.debug("Stopped HTTP service");
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static void main(String[] args) throws Exception {
+
+        HttpService launcher = new HttpService();
+        HttpServer server = launcher.startServer();
+    }
+
+    private String getURI() {
+        String uri = System.getProperty("uri");
+        return uri == null ? defaultURI : uri;
+    }
 
 }

@@ -53,6 +53,9 @@ public class IndexerService extends AbstractRaptorService {
 
     @Inject
     ConfigurationService configuration;
+    
+    @Inject
+    CacheService cache;
 
     /**
      * Limit of records that can be fetched per request
@@ -113,14 +116,20 @@ public class IndexerService extends AbstractRaptorService {
         query.setType(desc.type);
     }
 
-    @Deprecated
-    public List<ServiceObject> getObjects(String userId) {
+    public List<ServiceObject> getObjectsByUser(String userId) {
         ObjectQuery q = new ObjectQuery();
         q.setUserId(userId);
         return searchObject(q);
     }
 
     public List<ServiceObject> getObjects(List<String> ids) {
+        
+        List<ServiceObject> cached = ids.stream().map(id -> cache.getObject(id)).filter(o -> o != null).collect(Collectors.toList());
+        
+        if(cached.size() == ids.size()) {
+            return cached;
+        }
+        
         ObjectListQuery q = new ObjectListQuery();
         q.ids.addAll(ids);
         return searchObject(q);
@@ -141,41 +150,48 @@ public class IndexerService extends AbstractRaptorService {
         record.id = obj.id;
         record.body = obj.toJSON();
 
+        // add to cache
+        cache.setObject(obj);
+        
         // force creation
         record.isNew(isNew);
         getIndexer().save(record);
-
-        if (!lookupObject(obj.id)) {
-            throw new Indexer.IndexerException("Index timeout while processing " + obj.id);
-        }
+        
+//        if (!lookupObject(obj.id)) {
+//            throw new Indexer.IndexerException("Index timeout while processing " + obj.id);
+//        }
 
     }
 
-    /**
-     * @TODO Remove on upgrade to ES 5.x
-     */
-    @Deprecated
-    protected boolean lookupObject(String objectId) {
-        int max = 5, curr = max, wait = 200; //ms
-        while (curr > 0) {
-            try {
-                List<ServiceObject> objs = getObjects(Arrays.asList(objectId));
-                if (!objs.isEmpty()) {
-                    logger.warn("Object {} avail in index after {}ms", objectId, (max - curr) * wait);
-                    return true;
-                }
-                Thread.sleep(wait);
-            } catch (Exception ex) {
-            } finally {
-                curr--;
-            }
-        }
-        return false;
-    }
+//    /**
+//     * @TODO Remove on upgrade to ES 5.x
+//     */
+//    @Deprecated
+//    protected boolean lookupObject(String objectId) {
+//        int max = 5, curr = max, wait = 200; //ms
+//        while (curr > 0) {
+//            try {
+//                List<ServiceObject> objs = getObjects(Arrays.asList(objectId));
+//                if (!objs.isEmpty()) {
+//                    logger.warn("Object {} avail in index after {}ms", objectId, (max - curr) * wait);
+//                    return true;
+//                }
+//                Thread.sleep(wait);
+//            } catch (Exception ex) {
+//                logger.debug("Detected exception loading objects: {}", ex.getMessage());
+//            } finally {
+//                curr--;
+//            }
+//        }
+//        return false;
+//    }
 
     public void deleteObject(ServiceObject obj) {
         Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
         record.id = obj.id;
+        
+        cache.removeObject(obj.id);
+        
         getIndexer().delete(record);
         deleteData(obj.streams.values());
     }
@@ -184,11 +200,12 @@ public class IndexerService extends AbstractRaptorService {
 
         setQueryIndex(query, IndexNames.object);
 
-        List<String> results = getIndexer().search(query);
+        List<Indexer.IndexRecord> results = getIndexer().search(query);
         List<ServiceObject> list = new ArrayList();
-
-        for (String result : results) {
-            list.add(ServiceObject.fromJSON(result));
+        
+        for (Indexer.IndexRecord result : results) {
+            ServiceObject obj = ServiceObject.fromJSON(result.body);
+            list.add(obj);
         }
 
         return list;
@@ -203,13 +220,13 @@ public class IndexerService extends AbstractRaptorService {
         lastUpdateQuery.setLimit(1);
         lastUpdateQuery.setSort(new Query.SortBy("lastUpdate", Query.Sort.DESC));
 
-        List<String> results = getIndexer().search(lastUpdateQuery);
+        List<Indexer.IndexRecord> results = getIndexer().search(lastUpdateQuery);
 
         if (results.isEmpty()) {
             return null;
         }
 
-        return new RecordSet(stream, results.get(0));
+        return new RecordSet(stream, results.get(0).body);
     }
 
     public void indexData(Stream stream, RecordSet recordSet) {
@@ -243,7 +260,10 @@ public class IndexerService extends AbstractRaptorService {
                 record.isNew(isNew);
             }
             record.body = obj.toJSON();
-
+            
+            // add cache
+            cache.setObject(obj);
+            
             Indexer.IndexOperation.Type opType;
             if(isNew == null)
                 opType = Indexer.IndexOperation.Type.UPSERT;
@@ -256,9 +276,9 @@ public class IndexerService extends AbstractRaptorService {
 
         getIndexer().batch(ops);
 
-        if (!ids.isEmpty()) {
-            lookupObject(ids.get(0).id);
-        }
+//        if (!ids.isEmpty()) {
+//            lookupObject(ids.get(0).id);
+//        }
     }
 
     public List<RecordSet> getStreamData(Stream stream) {
@@ -270,11 +290,11 @@ public class IndexerService extends AbstractRaptorService {
         query.matchfield = "streamId";
         query.matchstring = stream.name;
 
-        List<String> rawResults = getIndexer().search(query);
+        List<Indexer.IndexRecord> records = getIndexer().search(query);
         List<RecordSet> results = new ArrayList();
 
-        for (String result : rawResults) {
-            RecordSet recordSet = new RecordSet(stream, result);
+        for (Indexer.IndexRecord record : records) {
+            RecordSet recordSet = new RecordSet(stream, record.body);
             results.add(recordSet);
         }
 
@@ -302,11 +322,11 @@ public class IndexerService extends AbstractRaptorService {
     public ResultSet searchData(Stream stream, DataQuery query) {
 
         setQueryIndex(query, IndexNames.data);
-        List<String> res = getIndexer().search(query);
+        List<Indexer.IndexRecord> records = getIndexer().search(query);
 
         ResultSet resultset = new ResultSet(stream);
-        for (String raw : res) {
-            resultset.add(new RecordSet(stream, raw));
+        for (Indexer.IndexRecord record : records) {
+            resultset.add(new RecordSet(stream, record.body));
         }
 
         return resultset;

@@ -34,57 +34,77 @@ import org.slf4j.LoggerFactory;
 @Parameters(separators = "=", commandDescription = "Launch service(s)")
 public class LaunchCommand implements Command {
 
-  final private Logger logger = LoggerFactory.getLogger(LaunchCommand.class);
-  final private ExecutorService executor = Executors.newFixedThreadPool(2);
+    final private Logger logger = LoggerFactory.getLogger(LaunchCommand.class);
+    final private ExecutorService executor = Executors.newFixedThreadPool(3);
 
-  @Inject
-  StorageService storage;
+    @Inject
+    StorageService storage;
 
-  @Inject
-  IndexerService indexer;
+    @Inject
+    IndexerService indexer;
 
-  @Parameter(names = "--broker", description = "Launch the broker")
-  public Boolean broker = false;
+    @Parameter(names = "--broker", description = "Launch the broker")
+    public Boolean broker = false;
 
-  @Parameter(names = "--http", description = "Launch the http api")
-  public Boolean http = false;
+    @Parameter(names = "--http", description = "Launch the http api")
+    public Boolean http = false;
+    
+    // this have deps problem, need to investigate
+//    @Parameter(names = "--auth", description = "Launch the authentication api")
+//    public Boolean auth = false;
 
-  @Override
-  public String getName() {
-    return "launch";
-  }
-
-  @Override
-  public void run() {
-
-    boolean all = (!http && !broker);
-
-    if (http || all) {
-      executor.submit(() -> {
-        HttpService http = new HttpService();
-        try {
-          logger.info("Starting HTTP API");
-          http.start();
-        } catch (Exception ex) {
-          logger.error("Error starting http service: {}", ex.getMessage(), ex);
-          Thread.currentThread().interrupt();
-        }
-      });
+    @Override
+    public String getName() {
+        return "launch";
     }
 
-    if (broker || all) {
-      executor.submit(() -> {
-        Broker broker = new Broker();
-        try {
-          logger.info("Starting broker");
-          broker.initialize();
-          broker.start();
-        } catch (Exception ex) {
-          logger.error("Error starting broker service: {}", ex.getMessage());
-          Thread.currentThread().interrupt();
+    @Override
+    public void run() {
+
+        boolean all = (
+                !http 
+                && !broker 
+//                && !auth
+                );
+
+//        if (auth || all) {
+//            executor.submit(() -> {
+//                try {
+//                    logger.info("Starting authentication service");
+//                    SpringApplication.run(Application.class, new String[]{});
+//                } catch (Exception ex) {
+//                    logger.error("Error starting authentication service: {}", ex.getMessage(), ex);
+//                    Thread.currentThread().interrupt();
+//                }
+//            });
+//        }
+
+        if (http || all) {
+            executor.submit(() -> {
+                HttpService http = new HttpService();
+                try {
+                    logger.info("Starting HTTP API");
+                    http.start();
+                } catch (Exception ex) {
+                    logger.error("Error starting http service: {}", ex.getMessage(), ex);
+                    Thread.currentThread().interrupt();
+                }
+            });
         }
-      });
+
+        if (broker || all) {
+            executor.submit(() -> {
+                Broker broker = new Broker();
+                try {
+                    logger.info("Starting broker");
+                    broker.initialize();
+                    broker.start();
+                } catch (Exception ex) {
+                    logger.error("Error starting broker service: {}", ex.getMessage());
+                    Thread.currentThread().interrupt();
+                }
+            });
+        }
     }
-  }
 
 }

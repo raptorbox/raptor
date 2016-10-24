@@ -335,11 +335,11 @@ public class ElasticSearchIndexer extends AbstractIndexer {
         logger.debug("Setup client, force {}", forceSetup);
 
         Map<String, String> indices = configuration.elasticsearch.indices.definitions;
-        
+
         if (indices.isEmpty()) {
             String filepath = configuration.elasticsearch.indices.source;
             File file = new File(filepath);
-            if(!file.exists()) {
+            if (!file.exists()) {
                 throw new IndexerException("Indices file not found " + configuration.elasticsearch.indices.source);
             }
             indices.putAll(ElasticSearchIndexer.loadIndicesFromFile(filepath));
@@ -394,7 +394,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
     }
 
     @Override
-    public List<String> search(Query query) throws SearchException {
+    public List<IndexRecord> search(Query query) throws SearchException {
 
         try {
 
@@ -423,9 +423,11 @@ public class ElasticSearchIndexer extends AbstractIndexer {
 
             SearchHit[] results = response.getHits().getHits();
 
-            List<String> list = new ArrayList();
+            List<IndexRecord> list = new ArrayList();
             for (SearchHit hit : results) {
-                list.add(hit.getSourceAsString());
+                list.add(
+                        new IndexRecord(hit.getIndex(), hit.getType(), hit.getId(), hit.getSourceAsString())
+                );
             }
 
             return list;

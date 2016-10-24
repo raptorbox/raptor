@@ -16,12 +16,17 @@
 package org.createnet.raptor.http.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.ServiceObjectNode;
+import org.createnet.raptor.search.Indexer;
 import org.createnet.raptor.search.query.impl.es.TreeQuery;
+import org.ehcache.Cache;
 import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +42,23 @@ public class TreeService extends AbstractRaptorService {
 
     @Inject
     IndexerService indexer;
+
+    @Inject
+    CacheService cache;
+
+    protected Cache<String, String> getCache() {
+        return cache.getCache("tree");
+    }
+
+    @PostConstruct
+    @Override
+    public void initialize() throws ServiceException {
+    }
+
+    @PreDestroy
+    @Override
+    public void shutdown() throws ServiceException {
+    }
 
     public class TreeException extends RuntimeException {
 
@@ -68,10 +90,17 @@ public class TreeService extends AbstractRaptorService {
         query.id = parentObject.id;
         indexer.setQueryIndex(query, IndexerService.IndexNames.object);
 
-        List<String> list = indexer.getIndexer().search(query);
+        List<Indexer.IndexRecord> list = indexer.getIndexer().search(query);
         List<ServiceObject> children = new ArrayList<>();
-        for (String raw : list) {
-            ServiceObject child = ServiceObject.fromJSON(raw);
+
+        //load from cache
+        if (getCache().containsKey(parentObject.id)) {
+            List<String> childrendIds = Arrays.asList(getCache().get(parentObject.id).split(","));
+            return indexer.getObjects(childrendIds);
+        }
+
+        for (Indexer.IndexRecord record : list) {
+            ServiceObject child = ServiceObject.fromJSON(record.body);
             children.add(child);
         }
 
@@ -141,7 +170,6 @@ public class TreeService extends AbstractRaptorService {
         return ids;
     }
 
-    
     public List<ServiceObject> setChildren(String parentId, List<String> childrenIds) {
 
         List<String> toload = new ArrayList(childrenIds);
@@ -155,22 +183,30 @@ public class TreeService extends AbstractRaptorService {
             }
             return !isParent;
         }).collect(Collectors.toList());
-        
+
         return setChildren(parentObject, children);
     }
-    
+
     public List<ServiceObject> setChildren(ServiceObject parentObject, List<ServiceObject> children) {
 
         logger.debug("Storing {} children at {}", children.size(), parentObject.path());
-        
+
+        List<String> childrenIds = new ArrayList();
+
         generateObjectPath(parentObject);
-        
+
         children.stream().forEach((c) -> {
+
             c.parentId = parentObject.getId();
             c.path = parentObject.path();
+
+            if (!childrenIds.contains(c.id)) {
+                childrenIds.add(c.id);
+            }
+
             logger.debug("Storing child {}.{} path: {}", c.parentId, c.id, c.path);
         });
-        
+
         List<ServiceObject> toSave = new ArrayList(children);
         List<ServiceObject> previousList = getChildren(parentObject);
 
@@ -183,7 +219,7 @@ public class TreeService extends AbstractRaptorService {
         });
 
         indexer.saveObjects(toSave, false);
-        lookupGroupItem(parentObject.id, children.size());
+        getCache().put(parentObject.id, String.join(",", childrenIds));
 
         logger.debug("Store children list completed for {}", parentObject.path());
         return children;
@@ -253,7 +289,7 @@ public class TreeService extends AbstractRaptorService {
     }
 
     public void generateObjectPath(ServiceObject obj) {
-        if(obj.parentId != null) {
+        if (obj.parentId != null) {
             ServiceObjectNode rootNode = loadRoot(obj);
             String path = rootNode.path();
             obj.path = path;
@@ -264,28 +300,27 @@ public class TreeService extends AbstractRaptorService {
     /**
      * @TODO Remove on upgrade to ES 5.x
      */
-    @Deprecated
-    protected boolean lookupGroupItem(String parentId, int childLength) {
-        int max = 50, curr = max, wait = 100; //ms
-        while (curr > 0) {
-            try {
-
-                List<ServiceObject> objs = getChildren(new ServiceObject(parentId));
-
-                if (objs.size() == childLength) {
-                    logger.warn("Object {} avail in index after {}ms", parentId, (max - curr) * wait);
-                    return true;
-                }
-
-                logger.debug("Expecting {} chidlren, found {}. Waiting for index update", childLength, objs.size());
-                Thread.sleep(wait);
-
-            } catch (Exception ex) {
-            } finally {
-                curr--;
-            }
-        }
-        return false;
-    }
-
+//    @Deprecated
+//    protected boolean lookupGroupItem(String parentId, int childLength) {
+//        int max = 25, curr = max, wait = 150; //ms
+//        while (curr > 0) {
+//            try {
+//
+//                List<ServiceObject> objs = getChildren(new ServiceObject(parentId));
+//
+//                if (objs.size() == childLength) {
+//                    logger.warn("Object {} avail in index after {}ms", parentId, (max - curr) * wait);
+//                    return true;
+//                }
+//
+//                logger.debug("Expecting {} chidlren, found {}. Waiting for index update", childLength, objs.size());
+//                Thread.sleep(wait);
+//
+//            } catch (Exception ex) {
+//            } finally {
+//                curr--;
+//            }
+//        }
+//        return false;
+//    }
 }

@@ -15,8 +15,6 @@
  */
 package org.createnet.raptor.http.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.io.IOException;
 import java.util.Collection;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -28,20 +26,14 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
-import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.createnet.raptor.db.Storage;
-import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.events.ActionEvent;
 import org.createnet.raptor.http.service.EventEmitterService;
 import org.createnet.raptor.models.data.ActionStatus;
-import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Action;
-import org.createnet.raptor.search.Indexer;
 
 /**
  *
@@ -109,11 +101,7 @@ public class ActionApi extends AbstractApi {
         }
 
         ActionStatus actionStatus = storage.saveActionStatus(action, body);
-
         emitter.trigger(EventEmitterService.EventName.execute, new ActionEvent(action, actionStatus));
-
-        // trigger action over mqtt
-        dispatcher.actionTrigger(action, actionStatus.status);
 
         logger.debug("Saved action {} status for object {}", action.name, obj.id);
 

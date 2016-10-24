@@ -62,7 +62,7 @@ public class ObjectApi extends AbstractApi {
     final private Logger logger = LoggerFactory.getLogger(ObjectApi.class);
 
     @GET
-    @ApiOperation(value = "List available devices definition", notes = "")
+    @ApiOperation(value = "List all the available devices definition", notes = "")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Ok")
         ,
@@ -75,7 +75,7 @@ public class ObjectApi extends AbstractApi {
         }
 
         // TODO: List device which access is allowed
-        List<ServiceObject> list = indexer.getObjects(auth.getUser().getUserId());
+        List<ServiceObject> list = indexer.getObjectsByUser(auth.getUser().getUserId());
         List<String> idList = new ArrayList();
         list.stream().forEach((obj) -> {
             idList.add(obj.id);

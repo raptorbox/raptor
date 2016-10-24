@@ -15,8 +15,6 @@
  */
 package org.createnet.raptor.http.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.io.IOException;
 import java.util.Collection;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
@@ -30,20 +28,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
-import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.createnet.raptor.db.Storage;
-import org.createnet.raptor.search.Indexer;
-import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.events.DataEvent;
 import org.createnet.raptor.http.service.EventEmitterService;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
-import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.search.query.impl.es.DataQuery;
 
@@ -63,7 +55,7 @@ public class DataApi extends AbstractApi {
         ServiceObject obj = loadObject(id);
 
         if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
-            throw new ForbiddenException("Cannot fetch data");
+            throw new ForbiddenException("Cannot load stream list");
         }
 
         logger.debug("Load streams for object {}", obj.id);
@@ -85,7 +77,7 @@ public class DataApi extends AbstractApi {
         Stream stream = loadStream(streamName, obj);
 
         if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
-            throw new ForbiddenException("Cannot fetch data");
+            throw new ForbiddenException("Cannot access data");
         }
 
         if (!obj.settings.storeEnabled()) {
@@ -183,7 +175,7 @@ public class DataApi extends AbstractApi {
 
             // save data
             storage.saveData(stream, record);
-//      profiler.log("Saved record");
+//            profiler.log("Saved record");
 
             // index data (with objectId and stream props)
             try {
@@ -199,9 +191,6 @@ public class DataApi extends AbstractApi {
         }
 
         emitter.trigger(EventEmitterService.EventName.push, new DataEvent(stream, record, auth.getAccessToken()));
-
-        // send update on the data topic
-        dispatcher.pushData(stream, record);
 
         logger.debug("Stored record for stream {} in object {}", streamName, obj.id);
 

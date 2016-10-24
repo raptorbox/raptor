@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.models.objects;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.createnet.raptor.models.events.StreamEventListener;
 
@@ -23,12 +22,11 @@ import org.createnet.raptor.models.events.StreamEventListener;
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-abstract class StreamContainer extends ServiceObjectContainer
-{
-    
+abstract class StreamContainer extends ServiceObjectContainer {
+
     @JsonIgnore
     protected StreamEventListener listener;
-    
+
     @JsonIgnore
     protected Stream stream;
 
@@ -36,16 +34,18 @@ abstract class StreamContainer extends ServiceObjectContainer
     public RaptorComponent getContainer() {
         return stream.getServiceObject().getContainer();
     }
-    
+
     public Stream getStream() {
         return stream;
     }
 
     public void setStream(Stream stream) {
         this.stream = stream;
-        if(stream != null) this.setServiceObject(stream.getServiceObject());
+        if (stream != null) {
+            this.setServiceObject(stream.getServiceObject());
+        }
     }
- 
+
     @Override
     public StreamEventListener getListener() {
         return listener;
@@ -59,5 +59,5 @@ abstract class StreamContainer extends ServiceObjectContainer
     protected boolean hasListener() {
         return getListener() != null;
     }
-    
+
 }
