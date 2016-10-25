@@ -188,7 +188,7 @@ public class TreeService extends AbstractRaptorService {
         children.stream().forEach((c) -> {
 
             c.parentId = parentObject.getId();
-            c.path = parentObject.path();
+            c.path = parentObject.isRoot() ? parentObject.id : parentObject.path();
 
             if (!childrenIds.contains(c.id)) {
                 childrenIds.add(c.id);
@@ -204,14 +204,14 @@ public class TreeService extends AbstractRaptorService {
             if (!children.contains(c)) {
                 c.parentId = null;
                 c.path = null;
-                toSave.add(c);
-            }
+                toSave.add(c); 
+           }
         });
 
         indexer.saveObjects(toSave, false);
         getCache().put(parentObject.id, String.join(",", childrenIds));
 
-        logger.debug("Store children list completed for {}", parentObject.path());
+        logger.debug("Store children list completed for {}", parentObject.isRoot() ? parentObject.id : parentObject.path());
         return children;
     }
 

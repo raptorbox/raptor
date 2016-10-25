@@ -126,6 +126,7 @@ public class ServiceObject extends ServiceObjectContainer {
         return path;
     }
 
+    @JsonIgnore
     public boolean isRoot() {
         return parentId == null;
     }

@@ -128,7 +128,7 @@ public class DispatcherService extends AbstractRaptorService {
 
     @Inject
     EventEmitterService emitter;
-    
+
     Emitter.Callback emitterCallback = new Emitter.Callback() {
         @Override
         public void run(Event event) {
@@ -190,7 +190,7 @@ public class DispatcherService extends AbstractRaptorService {
     public void initialize() {
         try {
             logger.debug("Initializing dispatcher");
-            addEmitterCallback();            
+            addEmitterCallback();
             getDispatcher();
         } catch (Exception e) {
             logger.debug("Failed dispatcher initialization");
@@ -208,8 +208,8 @@ public class DispatcherService extends AbstractRaptorService {
         } catch (Exception e) {
             throw new ServiceException(e);
         }
-    }    
-    
+    }
+
     public enum MessageType {
         object, stream, actuation
     }
@@ -241,13 +241,13 @@ public class DispatcherService extends AbstractRaptorService {
         if (obj == null) {
             throw new RaptorComponent.ParserException("ServiceObject is null");
         }
-        
+
         String id = obj.getId();
-        if(id == null) {
+        if (id == null) {
             throw new RaptorComponent.ParserException("ServiceObject.id is null");
         }
 
-        return  id + "/events";
+        return id + "/events";
     }
 
     public void notifyEvent(String topic, DispatcherPayload message) {
@@ -262,11 +262,11 @@ public class DispatcherService extends AbstractRaptorService {
         }
 
         String path = obj.path();
-        if(path == null) {
+        if (path == null) {
             logger.debug("Object {} (pid:{}) path is empty", obj.id, obj.parentId);
             return;
         }
-        
+
         notifyEvent(path + "/events", payload);
     }
 
@@ -300,7 +300,7 @@ public class DispatcherService extends AbstractRaptorService {
         ActionPayload payload = new ActionPayload(action, op, data);
 
         notifyEvent(topic, payload);
-        notifyTreeEvent(action, payload);        
+        notifyTreeEvent(action, payload);
     }
 
     public void pushData(Stream stream, RecordSet records) {
