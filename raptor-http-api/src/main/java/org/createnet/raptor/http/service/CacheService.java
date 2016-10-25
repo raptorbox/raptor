@@ -106,7 +106,6 @@ public class CacheService extends AbstractRaptorService {
 
     public void setObject(ServiceObject obj) {
         logger.debug("Store cache for {}", obj.id);
-        logger.warn("CACHED.SET {}", obj.toJSON());
         getObjectCache().put(obj.getId(), obj.toJSON());
     }
 
@@ -114,7 +113,6 @@ public class CacheService extends AbstractRaptorService {
         if (getObjectCache().containsKey(id)) {
             logger.debug("Load cache for {}", id);
             String cached = getObjectCache().get(id);
-            logger.warn("CACHED.GET {}", cached);
             try {
                 return ServiceObject.fromJSON(cached);
             } catch (RaptorComponent.ParserException ex) {

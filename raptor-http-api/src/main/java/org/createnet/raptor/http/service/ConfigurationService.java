@@ -52,6 +52,7 @@ public class ConfigurationService extends ConfigurationLoader {
         return (DispatcherConfiguration) getConfiguration("dispatcher", DispatcherConfiguration.class);
     }
 
+    @Override
     public void setConfigPath(String path) {
         getLoader().setConfigPath(path);
     }

@@ -181,8 +181,8 @@ public class IndexerServiceTest {
 
         Assert.assertNotNull(list);
         Assert.assertEquals(
-                expectedPath,
-                actualPath
+                expectedPath.toString(),
+                actualPath.toString()
         );
 
     }

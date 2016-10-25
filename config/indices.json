@@ -129,7 +129,7 @@
     },
 
 
-    
+
     "sodescriptions": {
         "settings": {
             "analysis": {
@@ -148,13 +148,6 @@
         },
         "mappings": {
             "serviceobject": {
-                "_all": {
-                    "enabled": true
-                },
-                "dynamic": false,
-                "_source": {
-                    "enabled": true
-                },
                 "properties": {
                     "id": {
                         "type": "string",

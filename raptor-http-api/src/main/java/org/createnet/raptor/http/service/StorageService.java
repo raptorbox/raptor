@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.db.Storage;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
+@Singleton
 @Service
 public class StorageService extends AbstractRaptorService{
 
@@ -63,6 +65,7 @@ public class StorageService extends AbstractRaptorService{
     @Override
     public void initialize() {
         try {
+            logger.debug("Initializing storage");
             getStorage();
         } catch (Storage.StorageException | ConfigurationException | DBException e) {
             throw new ServiceException(e);
@@ -87,7 +90,6 @@ public class StorageService extends AbstractRaptorService{
     public Storage getStorage() {
 
         if (storage == null) {
-            logger.debug("Initializing storage instance");
             storage = new StorageProvider();
             StorageConfiguration conf = configuration.getStorage();
             storage.initialize(conf);

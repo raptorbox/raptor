@@ -87,7 +87,7 @@ public class AuthProvider implements Authorization, Authentication {
     authorizationInstance.initialize(configuration);
 
   }
-
+  
   @Override
   public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) {
     

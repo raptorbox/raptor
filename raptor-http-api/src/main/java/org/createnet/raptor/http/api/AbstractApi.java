@@ -50,6 +50,9 @@ abstract public class AbstractApi {
 
     @Inject
     protected AuthService auth;
+    
+    @Inject
+    protected DispatcherService dispatcher;
 
     @Inject
     protected TreeService tree;

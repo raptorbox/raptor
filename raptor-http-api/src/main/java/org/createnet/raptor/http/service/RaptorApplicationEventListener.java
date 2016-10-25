@@ -15,10 +15,12 @@
  */
 package org.createnet.raptor.http.service;
 
+import javax.inject.Singleton;
 import org.glassfish.jersey.server.monitoring.ApplicationEvent;
 import org.glassfish.jersey.server.monitoring.ApplicationEventListener;
 import org.glassfish.jersey.server.monitoring.RequestEvent;
 import org.glassfish.jersey.server.monitoring.RequestEventListener;
+import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +28,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
+@Singleton
+@Service
 public class RaptorApplicationEventListener implements ApplicationEventListener {
 
     protected static final Logger logger = LoggerFactory.getLogger(RaptorApplicationEventListener.class);

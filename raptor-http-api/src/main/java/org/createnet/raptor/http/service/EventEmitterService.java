@@ -17,6 +17,7 @@ package org.createnet.raptor.http.service;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.inject.Singleton;
 import org.createnet.raptor.events.Emitter;
 import org.createnet.raptor.events.Event;
 import org.jvnet.hk2.annotations.Service;
@@ -26,6 +27,7 @@ import org.jvnet.hk2.annotations.Service;
  * @author Luca Capra <lcapra@create-net.org>
  */
 @Service
+@Singleton
 public class EventEmitterService extends Emitter {
 
   final ExecutorService executor = Executors.newCachedThreadPool();  

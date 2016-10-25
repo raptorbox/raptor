@@ -17,10 +17,7 @@ package org.createnet.raptor.http;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Iterator;
 import javax.ws.rs.core.UriBuilder;
-import org.createnet.raptor.http.service.RaptorService;
-import org.createnet.raptor.models.objects.RaptorComponent;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.slf4j.Logger;

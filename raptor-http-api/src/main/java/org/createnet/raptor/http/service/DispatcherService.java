@@ -21,6 +21,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.dispatcher.Dispatcher;
 import org.createnet.raptor.events.Emitter;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 @Service
+@Singleton
 public class DispatcherService extends AbstractRaptorService {
 
     private final static Logger logger = LoggerFactory.getLogger(DispatcherService.class);
@@ -126,7 +128,7 @@ public class DispatcherService extends AbstractRaptorService {
 
     @Inject
     EventEmitterService emitter;
-
+    
     Emitter.Callback emitterCallback = new Emitter.Callback() {
         @Override
         public void run(Event event) {
@@ -187,9 +189,11 @@ public class DispatcherService extends AbstractRaptorService {
     @Override
     public void initialize() {
         try {
+            logger.debug("Initializing dispatcher");
+            addEmitterCallback();            
             getDispatcher();
-            addEmitterCallback();
         } catch (Exception e) {
+            logger.debug("Failed dispatcher initialization");
             throw new ServiceException(e);
         }
     }
@@ -204,8 +208,8 @@ public class DispatcherService extends AbstractRaptorService {
         } catch (Exception e) {
             throw new ServiceException(e);
         }
-    }
-
+    }    
+    
     public enum MessageType {
         object, stream, actuation
     }
@@ -237,8 +241,13 @@ public class DispatcherService extends AbstractRaptorService {
         if (obj == null) {
             throw new RaptorComponent.ParserException("ServiceObject is null");
         }
+        
+        String id = obj.getId();
+        if(id == null) {
+            throw new RaptorComponent.ParserException("ServiceObject.id is null");
+        }
 
-        return c.getServiceObject().getId() + "/events";
+        return  id + "/events";
     }
 
     public void notifyEvent(String topic, DispatcherPayload message) {
@@ -252,8 +261,13 @@ public class DispatcherService extends AbstractRaptorService {
             throw new RaptorComponent.ParserException("ServiceObject is null");
         }
 
-        String topic = obj.path() + "/events";
-        notifyEvent(topic, payload);
+        String path = obj.path();
+        if(path == null) {
+            logger.debug("Object {} (pid:{}) path is empty", obj.id, obj.parentId);
+            return;
+        }
+        
+        notifyEvent(path + "/events", payload);
     }
 
     protected void notifyObjectEvent(String op, ServiceObject obj) {

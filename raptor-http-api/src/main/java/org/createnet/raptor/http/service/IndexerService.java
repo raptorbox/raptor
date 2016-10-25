@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
@@ -47,6 +48,7 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@create-net.org>
  */
 @Service
+@Singleton
 public class IndexerService extends AbstractRaptorService {
 
     private final Logger logger = LoggerFactory.getLogger(IndexerService.class);
@@ -72,6 +74,7 @@ public class IndexerService extends AbstractRaptorService {
     @Override
     public void initialize() {
         try {
+            logger.debug("Initializing indexer");
             getIndexer();
         } catch (Indexer.IndexerException | ConfigurationException e) {
             throw new ServiceException(e);

@@ -50,16 +50,6 @@ public class TreeService extends AbstractRaptorService {
         return cache.getCache("tree");
     }
 
-    @PostConstruct
-    @Override
-    public void initialize() throws ServiceException {
-    }
-
-    @PreDestroy
-    @Override
-    public void shutdown() throws ServiceException {
-    }
-
     public class TreeException extends RuntimeException {
 
         public TreeException(String message) {

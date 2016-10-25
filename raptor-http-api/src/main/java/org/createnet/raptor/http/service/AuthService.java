@@ -16,20 +16,23 @@
 package org.createnet.raptor.http.service;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
 import org.createnet.raptor.auth.AuthProvider;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authentication.Authentication.UserInfo;
 import org.createnet.raptor.auth.authorization.Authorization;
-import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.models.objects.ServiceObject;
+import org.jvnet.hk2.annotations.Service;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
+@Singleton
+@Service
 public class AuthService {
 
   @Inject
@@ -48,7 +51,7 @@ public class AuthService {
 
   private AuthProvider auth;
 
-  protected AuthProvider getProvider()  {
+  synchronized protected AuthProvider getProvider()  {
 
     if (auth == null) {
       auth = new AuthProvider();
