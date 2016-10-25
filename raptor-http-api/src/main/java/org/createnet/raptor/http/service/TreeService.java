@@ -104,7 +104,7 @@ public class TreeService extends AbstractRaptorService {
 
         final ServiceObject parentObject = new ServiceObject();
         List<ServiceObject> children = indexer.getObjects(toload).stream().filter((final ServiceObject o) -> {
-            boolean isParent = !o.id.equals(parentId);
+            boolean isParent = o.id.equals(parentId);
             if (isParent) {
                 parentObject.parse(o);
             }
