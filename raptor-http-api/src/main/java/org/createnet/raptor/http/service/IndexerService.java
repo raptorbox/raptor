@@ -53,7 +53,7 @@ public class IndexerService extends AbstractRaptorService {
 
     @Inject
     ConfigurationService configuration;
-    
+
     @Inject
     CacheService cache;
 
@@ -123,13 +123,18 @@ public class IndexerService extends AbstractRaptorService {
     }
 
     public List<ServiceObject> getObjects(List<String> ids) {
-        
-        List<ServiceObject> cached = ids.stream().map(id -> cache.getObject(id)).filter(o -> o != null).collect(Collectors.toList());
-        
-        if(cached.size() == ids.size()) {
+
+        List<ServiceObject> cached = ids.stream()
+                .map((id) -> {
+                    return cache.getObject(id);
+                })
+                .filter(o -> o != null)
+                .collect(Collectors.toList());
+
+        if (cached.size() == ids.size()) {
             return cached;
         }
-        
+
         ObjectListQuery q = new ObjectListQuery();
         q.ids.addAll(ids);
         return searchObject(q);
@@ -152,46 +157,19 @@ public class IndexerService extends AbstractRaptorService {
 
         // add to cache
         cache.setObject(obj);
-        
+
         // force creation
         record.isNew(isNew);
         getIndexer().save(record);
-        
-//        if (!lookupObject(obj.id)) {
-//            throw new Indexer.IndexerException("Index timeout while processing " + obj.id);
-//        }
 
     }
-
-//    /**
-//     * @TODO Remove on upgrade to ES 5.x
-//     */
-//    @Deprecated
-//    protected boolean lookupObject(String objectId) {
-//        int max = 5, curr = max, wait = 200; //ms
-//        while (curr > 0) {
-//            try {
-//                List<ServiceObject> objs = getObjects(Arrays.asList(objectId));
-//                if (!objs.isEmpty()) {
-//                    logger.warn("Object {} avail in index after {}ms", objectId, (max - curr) * wait);
-//                    return true;
-//                }
-//                Thread.sleep(wait);
-//            } catch (Exception ex) {
-//                logger.debug("Detected exception loading objects: {}", ex.getMessage());
-//            } finally {
-//                curr--;
-//            }
-//        }
-//        return false;
-//    }
 
     public void deleteObject(ServiceObject obj) {
         Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
         record.id = obj.id;
-        
-        cache.removeObject(obj.id);
-        
+
+        cache.clearObject(obj.id);
+
         getIndexer().delete(record);
         deleteData(obj.streams.values());
     }
@@ -202,7 +180,7 @@ public class IndexerService extends AbstractRaptorService {
 
         List<Indexer.IndexRecord> results = getIndexer().search(query);
         List<ServiceObject> list = new ArrayList();
-        
+
         for (Indexer.IndexRecord result : results) {
             ServiceObject obj = ServiceObject.fromJSON(result.body);
             list.add(obj);
@@ -260,25 +238,22 @@ public class IndexerService extends AbstractRaptorService {
                 record.isNew(isNew);
             }
             record.body = obj.toJSON();
-            
+
             // add cache
             cache.setObject(obj);
-            
+
             Indexer.IndexOperation.Type opType;
-            if(isNew == null)
+            if (isNew == null) {
                 opType = Indexer.IndexOperation.Type.UPSERT;
-            else
+            } else {
                 opType = isNew ? Indexer.IndexOperation.Type.CREATE : Indexer.IndexOperation.Type.UPDATE;
-            
+            }
+
             Indexer.IndexOperation op = new Indexer.IndexOperation(opType, record);
             ops.add(op);
         }
 
         getIndexer().batch(ops);
-
-//        if (!ids.isEmpty()) {
-//            lookupObject(ids.get(0).id);
-//        }
     }
 
     public List<RecordSet> getStreamData(Stream stream) {

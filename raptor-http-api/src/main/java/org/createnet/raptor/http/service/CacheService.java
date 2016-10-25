@@ -107,15 +107,12 @@ public class CacheService extends AbstractRaptorService {
     public void setObject(ServiceObject obj) {
         logger.debug("Store cache for {}", obj.id);
         logger.warn("CACHED.SET {}", obj.toJSON());
-        if(obj.streams.isEmpty()) {
-            throw new RuntimeException();
-        }
         getObjectCache().put(obj.getId(), obj.toJSON());
     }
 
     public ServiceObject getObject(String id) {
-        logger.debug("Load cache for {}", id);
         if (getObjectCache().containsKey(id)) {
+            logger.debug("Load cache for {}", id);
             String cached = getObjectCache().get(id);
             logger.warn("CACHED.GET {}", cached);
             try {
@@ -128,38 +125,34 @@ public class CacheService extends AbstractRaptorService {
         return null;
     }
 
-    public void clearObject(String objectId) {
-        getObjectCache().remove(objectId);
-    }
-    
     public void clearObjects() {
         getObjectCache().clear();
     }
 
-    public void removeObject(String id) {
-        logger.debug("Remove cache for {}", id);
+    public void clearObject(String id) {
         if (getObjectCache().containsKey(id)) {
+            logger.debug("Remove cache for {}", id);
             getObjectCache().remove(id);
         }
     }
-    
+
     public String getChildren(String parentId) {
         logger.debug("Load cache children for {}", parentId);
         return getTreeCache().get(parentId);
     }
-    
+
     public void setChildren(String parentId, String list) {
         logger.debug("Store cache children for {}", parentId);
         getTreeCache().put(parentId, list);
     }
-    
+
     public void clearChildren(String parentId) {
         logger.debug("Remove cache children for {}", parentId);
         getTreeCache().remove(parentId);
     }
-    
+
     public void clearChildren() {
         getTreeCache().clear();
     }
-    
+
 }

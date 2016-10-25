@@ -127,6 +127,9 @@
             }
         }
     },
+
+
+    
     "sodescriptions": {
         "settings": {
             "analysis": {
@@ -146,13 +149,11 @@
         "mappings": {
             "serviceobject": {
                 "_all": {
-                    "enabled": false
+                    "enabled": true
                 },
                 "dynamic": false,
                 "_source": {
-                    "includes": [
-                        "id", "userId", "createdAt"
-                    ]
+                    "enabled": true
                 },
                 "properties": {
                     "id": {
@@ -193,4 +194,6 @@
             }
         }
     }
+
+
 }
