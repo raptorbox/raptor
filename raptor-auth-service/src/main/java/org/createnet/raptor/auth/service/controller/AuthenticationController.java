@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import org.createnet.raptor.auth.entity.LoginResponse;
 import org.createnet.raptor.auth.service.entity.Token;
 import org.createnet.raptor.auth.service.entity.User;
 import org.createnet.raptor.auth.service.services.TokenService;
@@ -57,7 +58,7 @@ public class AuthenticationController {
     public String password;
   }
 
-  protected static class JwtResponse {
+  protected static class JwtResponse extends LoginResponse {
     public JwtResponse(User user, String token) {
       this.user = user;
       this.token = token;
