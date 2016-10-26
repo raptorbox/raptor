@@ -82,33 +82,29 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         return (user != null && user.login(password)) ? user : null;
     }
 
-    @Override
-    public boolean validateUser(String user, String password, X509Certificate[] certificates) {
+    protected Authentication.UserInfo login(String username, String password) {
+        try {
 
-        logger.debug("Authenticate user {} with token {}", user, password);
+            Authentication.UserInfo user = auth.login(username, password);
+            if (user != null) {
+                logger.debug("Login successful for user {}", user.getUserId());
+                return user;
+            }
 
-        if ((getLocalUser(user, password) != null)) {
-            logger.debug("Match on local user {}", user);
-            return true;
+        } catch (ConfigurationException | Authentication.AuthenticationException e) {
+            logger.error("Login failed");
         }
-
-        boolean result = getUser(password) != null;
-
-        if (!result) {
-            logger.debug("Login failed for {}:{}", user, password);
-        }
-
-        return result;
+        return null;
     }
 
-    @Override
-    public boolean validateUserAndRole(String username, String password, Set<Role> roles, CheckType checkType, String address, RemotingConnection connection) {
+    protected Authentication.UserInfo authenticate(String username, String password) {
 
-        logger.debug("Authenticate user {} with token {} and roles {} on topic {}", username, password, roles, address);
+        logger.debug("Authenticate user {} with password {}", username, password);
 
         Authentication.UserInfo user = null;
+        
         // 1. if no username, try with apiKey authentication
-        if (username.isEmpty()) {
+        if (username == null || username.isEmpty()) {
             user = getUser(password);
         } else {
             // 2. try to login from local configuration file
@@ -118,9 +114,31 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
                 user = new Authentication.UserInfo(username, password);
                 user.setRoles(localUser.getRoles());
             } else {
-                // @TODO 3. try to login as user to the auth api
+                // 3. try to login as user to the auth api
+                user = login(username, password);
             }
         }
+
+        if (user == null) {
+            logger.debug("Login failed for {}:{}", username, password);
+            return null;
+        }
+
+        return user;
+    }
+
+    @Override
+    public boolean validateUser(String user, String password, X509Certificate[] certificates) {
+        boolean isAuthenticated = authenticate(user, password) != null;
+        return isAuthenticated;
+    }
+
+    @Override
+    public boolean validateUserAndRole(String username, String password, Set<Role> roles, CheckType checkType, String address, RemotingConnection connection) {
+
+        logger.debug("Authenticate user {} with password {} and roles {} on topic {}", username, password, roles, address);
+
+        Authentication.UserInfo user = authenticate(username, password);
 
         if (user == null) {
             logger.debug("User `{}` login failed", username);
@@ -133,7 +151,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
             return true;
         }
 
-        boolean isMqttTopic = (address.contains("$sys.mqtt.queue.qos2")
+        boolean isMqttTopic = (address.contains("$sys.mqtt.queue.qos")
                 || address.contains("$sys.mqtt.#"));
         boolean isJmsQueue = (address.contains("jms.queue"));
 
@@ -166,17 +184,17 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
             int soidIndex = 0;
             String objectId = topicTokens[soidIndex];
-            
+
             try {
-                
+
                 ServiceObject obj = indexer.getObject(objectId);
-                if(obj == null) {
+                if (obj == null) {
                     logger.warn("Object not found, id: `{}`", objectId);
                     return false;
                 }
-                
+
                 logger.debug("Check access permission of user {} to object {}", user.getUserId(), objectId);
-                
+
                 // @NOTE: this was the subscribe permission but has been migrted to Pull to simplify the flow
                 boolean allowed = auth.isAllowed(user.getAccessToken(), obj, Authorization.Permission.Pull);
                 return allowed;
@@ -199,7 +217,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     @Override
     public boolean validateUserAndRole(String user, String password, Set<Role> roles, CheckType checkType) {
         logger.warn("validateUserAndRole(user, password, roles, checkType): NOT IMPLEMENTED");
-        return roles.contains(Roles.admin) && validateUser(user, password);
+        return roles.contains(Roles.admin.name()) && validateUser(user, password);
     }
 
     public void setBrokerConfiguration(BrokerConfiguration brokerConfiguration) {

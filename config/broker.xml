@@ -23,7 +23,6 @@ under the License.
     <jms xmlns="urn:activemq:jms">
         <queue name="DLQ"/>
         <queue name="ExpiryQueue"/>
-
     </jms>
 
     <core xmlns="urn:activemq:core">
@@ -45,17 +44,11 @@ under the License.
         <journal-type>ASYNCIO</journal-type>
 
         <paging-directory>./data/paging</paging-directory>
-
         <bindings-directory>./data/bindings</bindings-directory>
-
         <journal-directory>./data/journal</journal-directory>
-
         <large-messages-directory>./data/large-messages</large-messages-directory>
-
         <journal-min-files>2</journal-min-files>
-
         <journal-pool-files>-1</journal-pool-files>
-
         <wild-card-routing-enabled>true</wild-card-routing-enabled>
 
         <connectors>
@@ -67,7 +60,7 @@ under the License.
         <acceptors>
             <!-- Default ActiveMQ Artemis Acceptor.  Multi-protocol adapter.  Currently supports ActiveMQ Artemis Core, OpenWire, STOMP, AMQP, MQTT, and HornetQ Core. -->
             <!-- performance tests have shown that openWire performs best with these buffer sizes -->
-            <!-- <acceptor name="artemis">tcp://127.0.0.1:61616?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576</acceptor> -->
+            <acceptor name="artemis">tcp://127.0.0.1:61616?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576</acceptor>
 
             <!-- AMQP Acceptor.  Listens on default AMQP port for AMQP traffic.-->
             <acceptor name="amqp">tcp://127.0.0.1:5672?protocols=AMQP</acceptor>
