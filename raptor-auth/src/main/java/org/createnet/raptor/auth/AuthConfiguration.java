@@ -43,6 +43,7 @@ public class AuthConfiguration {
     public Truststore truststore = new Truststore();
     public String checkUrl;
     public String syncUrl;
+    public String loginUrl;
   }
   
 }

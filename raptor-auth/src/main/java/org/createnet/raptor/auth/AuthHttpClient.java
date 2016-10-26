@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.auth;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -25,13 +24,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.List;
 import javax.net.ssl.SSLContext;
 import org.apache.http.Consts;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.config.Registry;
@@ -66,6 +61,7 @@ public class AuthHttpClient {
 //              .setConnectionRequestTimeout(defaultTimeout)
 //              .setRedirectsEnabled(true)
 //              .build();
+
     private CloseableHttpClient httpclient;
 
     private CloseableHttpClient getHttpClient() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException, UnrecoverableKeyException, CertificateException, IOException {
@@ -150,6 +146,7 @@ public class AuthHttpClient {
 
     private String checkUrl;
     private String syncUrl;
+    private String loginUrl;
 
     public AuthHttpClient() {
     }
@@ -160,6 +157,7 @@ public class AuthHttpClient {
 
         this.syncUrl = configuration.token.syncUrl;
         this.checkUrl = configuration.token.checkUrl;
+        this.loginUrl = configuration.token.loginUrl;
 
     }
 
@@ -282,7 +280,7 @@ public class AuthHttpClient {
 
         logger.debug("Http client login request");
 
-        HttpPost httpost = new HttpPost(syncUrl);
+        HttpPost httpost = new HttpPost(loginUrl);
 
         httpost.addHeader("Accept", "application/json");
         httpost.addHeader("Content-Type", "application/json");

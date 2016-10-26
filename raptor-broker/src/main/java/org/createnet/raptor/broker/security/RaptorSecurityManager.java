@@ -99,21 +99,24 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
     protected Authentication.UserInfo authenticate(String username, String password) {
 
-        logger.debug("Authenticate user {} with password {}", username, password);
+        logger.debug("Authenticate user {}", username);
 
         Authentication.UserInfo user = null;
-        
+
         // 1. if no username, try with apiKey authentication
         if (username == null || username.isEmpty()) {
             user = getUser(password);
         } else {
+
             // 2. try to login from local configuration file
             BrokerConfiguration.BrokerUser localUser = getLocalUser(username, password);
             if (localUser != null) {
                 logger.debug("Local user {} found", username);
                 user = new Authentication.UserInfo(username, password);
                 user.setRoles(localUser.getRoles());
-            } else {
+            }
+
+            if (user == null) {
                 // 3. try to login as user to the auth api
                 user = login(username, password);
             }
