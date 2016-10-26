@@ -172,7 +172,7 @@ public class AuthHttpClient {
         return prefix + token;
     }
 
-    public String check(String accessToken, String payload){
+    public String check(String accessToken, String payload) {
 
         logger.debug("Http client check request");
 
@@ -276,6 +276,63 @@ public class AuthHttpClient {
             logger.debug("Http request release connection for sync");
             httpost.releaseConnection();
         }
+    }
+
+    public String login(String body) {
+
+        logger.debug("Http client login request");
+
+        HttpPost httpost = new HttpPost(syncUrl);
+
+        httpost.addHeader("Accept", "application/json");
+        httpost.addHeader("Content-Type", "application/json");
+
+        StringEntity entity = new StringEntity(body, Consts.UTF_8);
+        httpost.setEntity(entity);
+        httpost.setConfig(requestConfig);
+
+        CloseableHttpClient httpclient;
+        try {
+            httpclient = getHttpClient();
+        } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException | UnrecoverableKeyException ex) {
+            logger.error("Cannot get client", ex);
+            throw new ClientException(ex);
+        }
+
+        try (CloseableHttpResponse httpResponse = httpclient.execute(httpost)) {
+
+            if (httpResponse.getStatusLine().getStatusCode() >= 400) {
+                logger.warn("client.check() returned a faulty response: {} {}", httpResponse.getStatusLine().getStatusCode(), httpResponse.getStatusLine().getReasonPhrase());
+                throw new ClientException(
+                        httpResponse.getStatusLine().getStatusCode(),
+                        httpResponse.getStatusLine().getReasonPhrase()
+                );
+            }
+
+            InputStream inputStream = httpResponse.getEntity().getContent();
+            ByteArrayOutputStream result = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) != -1) {
+                result.write(buffer, 0, length);
+            }
+
+            //close the response
+            httpResponse.close();
+
+            String response = result.toString(Consts.UTF_8.toString());
+            logger.debug("Http client response for check: {}", response);
+
+            return response;
+
+        } catch (IOException ex) {
+            logger.error("Http client error for check", ex);
+            throw new ClientException(ex);
+        } finally {
+            logger.debug("release client connection");
+            httpost.releaseConnection();
+        }
+
     }
 
 }

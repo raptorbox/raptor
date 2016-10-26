@@ -35,124 +35,147 @@ import org.slf4j.LoggerFactory;
  */
 public class AuthProvider implements Authorization, Authentication {
 
-  protected final Logger logger = LoggerFactory.getLogger(AuthProvider.class);
+    protected final Logger logger = LoggerFactory.getLogger(AuthProvider.class);
 
-  protected String accessToken;
-  protected String userId;
+    protected String accessToken;
+    protected String userId;
 
-  protected Authorization authorizationInstance;
-  protected Authentication authenticationInstance;
+    protected Authorization authorizationInstance;
+    protected Authentication authenticationInstance;
 
-  protected AuthCache cache;
+    protected AuthCache cache;
 
-  protected AuthConfiguration configuration;
-  
-  final public static ObjectMapper mapper = new ObjectMapper();
-  
-  @Override
-  public void initialize(AuthConfiguration configuration) {
+    protected AuthConfiguration configuration;
 
-    this.configuration = configuration;
-    
-    String cacheType = (String) configuration.cache;
-    switch (cacheType) {
+    final public static ObjectMapper mapper = new ObjectMapper();
+
+    @Override
+    public void initialize(AuthConfiguration configuration) {
+
+        this.configuration = configuration;
+
+        String cacheType = (String) configuration.cache;
+        switch (cacheType) {
 //      case "redis":
 //        break;
-      case "memory":
-        cache = new MemoryCache();
-        break;
-      case "no_cache":
-      default:
-        cache = new NoCache();
-        break;
+            case "memory":
+                cache = new MemoryCache();
+                break;
+            case "no_cache":
+            default:
+                cache = new NoCache();
+                break;
+        }
+
+        String authType = (String) configuration.type;
+        switch (authType) {
+            case "token":
+                authenticationInstance = new TokenAuthentication();
+                authorizationInstance = new TokenAuthorization();
+                break;
+            case "allow_all":
+            default:
+                authenticationInstance = new AllowAllAuthentication();
+                authorizationInstance = new AllowAllAuthorization();
+                break;
+        }
+
+        cache.initialize(configuration);
+        cache.setup();
+
+        authenticationInstance.initialize(configuration);
+        authorizationInstance.initialize(configuration);
+
     }
 
-    String authType = (String) configuration.type;
-    switch (authType) {
-      case "token":
-        authenticationInstance = new TokenAuthentication();
-        authorizationInstance = new TokenAuthorization();
-        break;
-      case "allow_all":
-      default:
-        authenticationInstance = new AllowAllAuthentication();
-        authorizationInstance = new AllowAllAuthorization();
-        break;
-    }
-    
-    cache.initialize(configuration);
-    cache.setup();
-    
-    authenticationInstance.initialize(configuration);
-    authorizationInstance.initialize(configuration);
+    @Override
+    public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) {
 
-  }
-  
-  @Override
-  public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) {
-    
-    try {
-    
-      UserInfo user = getUser(accessToken);
-      String id = obj == null ? null : obj.getId();
-      
-      Boolean cachedValue = cache.get(user.getUserId(), id, op);
-      if(cachedValue != null) {
-        logger.debug("Reusing permission cache for userId {} objectId {} permission {} = {}", user.getUserId(), id, op.toString(), cachedValue);
-        return cachedValue;
-      }
-      
-      logger.debug("Requesting {} permission for object {}", op, id);
-      
-      boolean isauthorized = authorizationInstance.isAuthorized(accessToken, obj, op);
-      
-      cache.set(user.getUserId(), id, op, isauthorized);
-      
-      logger.debug("Permission check for user {} object {} permission {} = {}", user.getUserId(), id, op.toString(), isauthorized ? "yes" : "no");
-      
-      return isauthorized;
-      
-    } catch (AuthCache.PermissionCacheException | AuthenticationException ex) {
-      throw new AuthorizationException(ex);
-    }
-  }
+        try {
 
-  @Override
-  public UserInfo getUser(String accessToken) {
-    
-    if(accessToken == null) {
-      throw new AuthenticationException("accessToken not provided");
-    }
-    
-    try {
+            UserInfo user = getUser(accessToken);
+            String id = obj == null ? null : obj.getId();
 
-      UserInfo cachedValue = cache.get(accessToken);
-      if(cachedValue != null) {
-        logger.debug("Reusing cached user details for userId {}", cachedValue.getUserId());
-        return cachedValue;
-      }
-      
-    } catch (AuthCache.PermissionCacheException e) {
-      logger.warn("Exception loading user cache for {}, query source auth system", accessToken);
-    }
-      
-    logger.debug("Loading user details for token {}", accessToken);
-    UserInfo user = authenticationInstance.getUser(accessToken);
-    
-    logger.debug("token ok, loaded user {}", user.getUserId());
-    
-    try {
-      cache.set(user);
-    } catch (AuthCache.PermissionCacheException ex) {
-      logger.warn("Error storing cache for user {}", user.getUserId());
-    }
-    
-    return user;
-  }
+            Boolean cachedValue = cache.get(user.getUserId(), id, op);
+            if (cachedValue != null) {
+                logger.debug("Reusing permission cache for userId {} objectId {} permission {} = {}", user.getUserId(), id, op.toString(), cachedValue);
+                return cachedValue;
+            }
 
-  @Override
-  public void sync(String accessToken, ServiceObject obj, SyncOperation op) {
-    authenticationInstance.sync(accessToken, obj, op);
-  }
+            logger.debug("Requesting {} permission for object {}", op, id);
+
+            boolean isauthorized = authorizationInstance.isAuthorized(accessToken, obj, op);
+
+            cache.set(user.getUserId(), id, op, isauthorized);
+
+            logger.debug("Permission check for user {} object {} permission {} = {}", user.getUserId(), id, op.toString(), isauthorized ? "yes" : "no");
+
+            return isauthorized;
+
+        } catch (AuthCache.PermissionCacheException | AuthenticationException ex) {
+            throw new AuthorizationException(ex);
+        }
+    }
+
+    protected UserInfo getCache(String token) {
+        try {
+
+            UserInfo cachedValue = cache.get(accessToken);
+            if (cachedValue != null) {
+                logger.debug("Reusing cached user details for userId {}", cachedValue.getUserId());
+                return cachedValue;
+            }
+
+        } catch (AuthCache.PermissionCacheException e) {
+            logger.warn("Exception loading user cache for {}, query source auth system", accessToken);
+        }
+
+        return null;
+    }
+
+    protected void setCache(UserInfo user) {
+        try {
+            cache.set(user);
+        } catch (AuthCache.PermissionCacheException ex) {
+            logger.warn("Error storing cache for user {}", user.getUserId());
+        }
+    }
+
+    @Override
+    public UserInfo getUser(String accessToken) {
+
+        if (accessToken == null) {
+            throw new AuthenticationException("accessToken not provided");
+        }
+
+        UserInfo cached = getCache(accessToken);
+        if (cached != null) {
+            return cached;
+        }
+
+        logger.debug("Loading user details for token {}", accessToken);
+        UserInfo user = authenticationInstance.getUser(accessToken);
+
+        logger.debug("token ok, loaded user {}", user.getUserId());
+
+        setCache(user);
+
+        return user;
+    }
+
+    @Override
+    public void sync(String accessToken, ServiceObject obj, SyncOperation op) {
+        authenticationInstance.sync(accessToken, obj, op);
+    }
+
+    @Override
+    public UserInfo login(String username, String password) {
+        
+        UserInfo user = authenticationInstance.login(username, password);
+        
+        setCache(user);
+        
+        return user;
+    }
 
 }

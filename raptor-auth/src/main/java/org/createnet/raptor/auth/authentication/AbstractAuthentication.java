@@ -34,5 +34,6 @@ abstract public class AbstractAuthentication implements Authentication {
   @Override
   public void sync(String accessToken, ServiceObject obj, SyncOperation op) {
   }
+
   
 }

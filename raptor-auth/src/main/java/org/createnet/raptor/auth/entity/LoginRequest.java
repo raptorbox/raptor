@@ -15,21 +15,17 @@
  */
 package org.createnet.raptor.auth.entity;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class AuthorizationResponse {
-  
-  public boolean result;
-  
-  public String userId;
-  public List<String> roles = new ArrayList();
-  public String token = null;
+public class LoginRequest {
+    public String username;
+    public String password;
 
-  public JsonNode details;
+    public LoginRequest(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+    
 }

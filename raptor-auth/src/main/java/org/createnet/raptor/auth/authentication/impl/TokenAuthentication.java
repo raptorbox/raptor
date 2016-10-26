@@ -26,6 +26,8 @@ import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.entity.SyncRequest;
 import org.createnet.raptor.auth.entity.AuthorizationRequest;
 import org.createnet.raptor.auth.entity.AuthorizationResponse;
+import org.createnet.raptor.auth.entity.LoginRequest;
+import org.createnet.raptor.auth.entity.LoginResponse;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,69 +38,105 @@ import org.slf4j.LoggerFactory;
  */
 public class TokenAuthentication extends AbstractAuthentication {
 
-  final private Logger logger = LoggerFactory.getLogger(TokenAuthentication.class);
+    final private Logger logger = LoggerFactory.getLogger(TokenAuthentication.class);
 
-  ObjectMapper mapper = new ObjectMapper();
-  final private AuthHttpClient client = new AuthHttpClient();
+    ObjectMapper mapper = new ObjectMapper();
+    final private AuthHttpClient client = new AuthHttpClient();
 
-  @Override
-  public Authentication.UserInfo getUser(String accessToken) {
+    @Override
+    public Authentication.UserInfo getUser(String accessToken) {
 
-    try {
+        try {
 
-      logger.debug("Loading user by token {}", accessToken);
+            logger.debug("Loading user by token {}", accessToken);
 
-      AuthorizationResponse response = getUserRequest(accessToken);
+            AuthorizationResponse response = getUserRequest(accessToken);
 
-      if (response.userId == null) {
-        throw new AuthenticationException("User id not found in response");
-      }
+            if (response.userId == null) {
+                throw new AuthenticationException("User id not found in response");
+            }
 
-      return new Authentication.UserInfo(response.userId, accessToken, response.details);
+            return new Authentication.UserInfo(response.userId, accessToken, response.details);
 
-    } catch (AuthHttpClient.ClientException ex) {
-      logger.debug("Failed to load user: {} ({})", ex.getReason(), ex.getCode());
-      throw new AuthenticationException(ex);
+        } catch (AuthHttpClient.ClientException ex) {
+            logger.debug("Failed to load user: {} ({})", ex.getReason(), ex.getCode());
+            throw new AuthenticationException(ex);
+        }
     }
-  }
 
-  @Override
-  public void initialize(AuthConfiguration configuration) {
-    super.initialize(configuration);
-    client.setConfig(configuration);
-  }
+    @Override
+    public UserInfo login(String username, String password) throws AuthenticationException {
 
-  @Override
-  public void sync(String accessToken, ServiceObject obj, SyncOperation op) {
-    try {
-      logger.debug("Syncing object op:{} for id:{}", op.name(), obj.id);
+        try {
+            
+            logger.debug("Loading user by login {}", username);
 
-      SyncRequest synreq = new SyncRequest();
-      synreq.userId = obj.getUserId();
-      synreq.objectId = obj.getId();
-      synreq.created = obj.createdAt;
-      synreq.operation = op.name().toLowerCase();
+            LoginResponse response = loginUserRequest(username, password);
 
-      String payload = mapper.writeValueAsString(synreq);
+            if (response.token == null) {
+                throw new AuthenticationException("Token not provided in the response");
+            }
 
-      client.sync(accessToken, payload);
+            return getUser(response.token);
 
-    } catch (AuthHttpClient.ClientException | JsonProcessingException ex) {
-      throw new AuthenticationException(ex);
+        } catch (AuthHttpClient.ClientException ex) {
+            logger.debug("Failed to login user: {} ({})", ex.getReason(), ex.getCode());
+            throw new AuthenticationException(ex);
+        }        
     }
-  }
 
-  protected AuthorizationResponse getUserRequest(String accessToken) {
-    
-      try {
-          AuthorizationRequest areq = new AuthorizationRequest(AuthorizationRequest.Operation.User);
-          
-          String payload = mapper.writeValueAsString(areq);
-          String response = client.check(accessToken, payload);
-          return mapper.readValue(response, AuthorizationResponse.class);
-      } catch (IOException ex) {
-          throw new AuthenticationException(ex);
-      }
-  }
+    @Override
+    public void initialize(AuthConfiguration configuration) {
+        super.initialize(configuration);
+        client.setConfig(configuration);
+    }
+
+    @Override
+    public void sync(String accessToken, ServiceObject obj, SyncOperation op) {
+        try {
+            logger.debug("Syncing object op:{} for id:{}", op.name(), obj.id);
+
+            SyncRequest synreq = new SyncRequest();
+            synreq.userId = obj.getUserId();
+            synreq.objectId = obj.getId();
+            synreq.created = obj.createdAt;
+            synreq.operation = op.name().toLowerCase();
+
+            String payload = mapper.writeValueAsString(synreq);
+
+            client.sync(accessToken, payload);
+
+        } catch (AuthHttpClient.ClientException | JsonProcessingException ex) {
+            throw new AuthenticationException(ex);
+        }
+    }
+
+    protected AuthorizationResponse getUserRequest(String accessToken) {
+
+        try {
+            AuthorizationRequest areq = new AuthorizationRequest(AuthorizationRequest.Operation.User);
+
+            String payload = mapper.writeValueAsString(areq);
+            String response = client.check(accessToken, payload);
+            return mapper.readValue(response, AuthorizationResponse.class);
+        } catch (IOException ex) {
+            throw new AuthenticationException(ex);
+        }
+    }
+
+    protected LoginResponse loginUserRequest(String username, String password) {
+
+        try {
+            
+            LoginRequest lreq = new LoginRequest(username, password);
+
+            String payload = mapper.writeValueAsString(lreq);
+            String response = client.login(payload);
+            
+            return mapper.readValue(response, LoginResponse.class);
+        } catch (IOException ex) {
+            throw new AuthenticationException(ex);
+        }
+    }
 
 }

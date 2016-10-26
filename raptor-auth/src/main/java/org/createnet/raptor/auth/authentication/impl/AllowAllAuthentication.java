@@ -24,10 +24,17 @@ import org.createnet.raptor.auth.authorization.impl.AllowAllAuthorization;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class AllowAllAuthentication extends AbstractAuthentication {
+    
+    final static UserInfo defaultUser = new Authentication.UserInfo(AllowAllAuthorization.defaultUserId, AllowAllAuthorization.defaultAccessToken);
+    
+    @Override
+    public Authentication.UserInfo getUser(String accessToken) {
+        return defaultUser;
+    }
 
-  @Override
-  public Authentication.UserInfo getUser(String accessToken)  {
-    return new Authentication.UserInfo(AllowAllAuthorization.defaultUserId, AllowAllAuthorization.defaultAccessToken);
-  }
-  
+    @Override
+    public UserInfo login(String username, String password) throws AuthenticationException {
+        return defaultUser;
+    }
+
 }

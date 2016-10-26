@@ -107,7 +107,7 @@ public interface Authentication {
   
   public void initialize(AuthConfiguration configuration);
   public UserInfo getUser(String accessToken) throws AuthenticationException;
-  
+  public UserInfo login(String username, String password) throws AuthenticationException;
   public void sync(String accessToken, ServiceObject obj, SyncOperation op) throws AuthenticationException;
   
 }

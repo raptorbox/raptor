@@ -23,13 +23,6 @@ import java.util.List;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class AuthorizationResponse {
-  
-  public boolean result;
-  
-  public String userId;
-  public List<String> roles = new ArrayList();
+public class LoginResponse {
   public String token = null;
-
-  public JsonNode details;
 }
