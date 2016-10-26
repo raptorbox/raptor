@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.auth.entity;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,5 +24,28 @@ import java.util.List;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class LoginResponse {
-  public String token = null;
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Role {
+
+        public long id;
+        public String name;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class User {
+
+        public String uuid;
+        public String username;
+        public List<Role> roles = new ArrayList();
+        public String firstname;
+        public String lastname;
+        public String email;
+        public String enabled;
+        long created;
+    }
+
+    public String token = null;
+    public User user = new User();
+
 }

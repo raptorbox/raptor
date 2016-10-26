@@ -58,7 +58,7 @@ public class AuthenticationController {
     public String password;
   }
 
-  protected static class JwtResponse extends LoginResponse {
+  protected static class JwtResponse {
     public JwtResponse(User user, String token) {
       this.user = user;
       this.token = token;
