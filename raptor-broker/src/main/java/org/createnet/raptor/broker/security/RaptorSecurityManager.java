@@ -27,11 +27,10 @@ import org.apache.activemq.artemis.spi.core.security.ActiveMQSecurityManager2;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.broker.configuration.BrokerConfiguration;
-import org.createnet.raptor.broker.util.TopicChecker;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.http.service.AuthService;
-import org.createnet.raptor.http.service.StorageService;
+import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
@@ -43,167 +42,174 @@ import org.slf4j.LoggerFactory;
  */
 public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
-  private BrokerConfiguration brokerConfiguration;
-  final private TopicChecker topicChecker = new TopicChecker();
+    private BrokerConfiguration brokerConfiguration;
 
-  protected enum Roles {
-    user, admin
-  }
-
-  private final Logger logger = LoggerFactory.getLogger(RaptorSecurityManager.class);
-
-  private final Map<String, BrokerConfiguration.BrokerUser> localUsers = new HashMap();
-
-  @Inject
-  AuthService auth;
-
-  @Inject
-  StorageService storage;
-
-  public RaptorSecurityManager() {
-
-  }
-
-  protected Authentication.UserInfo getUser(String token) {
-    try {
-
-      Authentication.UserInfo user = auth.getUser(token);
-      if (user != null) {
-        logger.debug("Authenticated user {}", user.getUserId());
-        return user;
-      }
-
-    } catch (ConfigurationException | Authentication.AuthenticationException e) {
-      logger.error("Authentication failed");
-    }
-    return null;
-  }
-  
-  protected BrokerConfiguration.BrokerUser getLocalUser(String username, String password) {
-    BrokerConfiguration.BrokerUser user = localUsers.getOrDefault(username, null);
-    return (user != null && user.login(password)) ? user : null;
-  }
-  
-  @Override
-  public boolean validateUser(String user, String password, X509Certificate[] certificates) {
-    
-    logger.debug("Authenticate user {} with token {}", user, password);
-    
-    if((getLocalUser(user, password) != null )) {
-      logger.debug("Match on local user {}", user);
-      return true;
-    }
-    
-    boolean result = getUser(password) != null;
-    
-    if(!result) {
-      logger.debug("Login failed for {}:{}", user, password);
-    }
-    
-    return result;
-  }
-
-  @Override
-  public boolean validateUserAndRole(String username, String password, Set<Role> roles, CheckType checkType, String address, RemotingConnection connection) {
-
-    logger.debug("Authenticate user {} with token {} and roles {} on topic {}", username, password, roles, address);
-
-    Authentication.UserInfo user;
-    BrokerConfiguration.BrokerUser localUser = getLocalUser(username, password);
-    
-    if(localUser != null) {
-      logger.debug("Local user {} found", username);
-      user = new Authentication.UserInfo(username, password);
-      user.setRoles(localUser.getRoles());
-    }
-    else user = getUser(password);
-
-    if(user == null) {
-      logger.debug("User {} login failed", username);
-      return false;
-    }
-    
-    boolean isAdmin = user.hasRole(Roles.admin.toString());
-    
-    if(isAdmin) {
-      return true;
+    protected enum Roles {
+        user, admin
     }
 
-    boolean isMqttTopic = (address.contains("$sys.mqtt.queue.qos2")
-            || address.contains("$sys.mqtt.#"));
-    boolean isJmsQueue = (address.contains("jms.queue"));
-    
-    if (isMqttTopic || isJmsQueue) {
-      
-      switch (checkType) {
+    private final Logger logger = LoggerFactory.getLogger(RaptorSecurityManager.class);
 
-        case CREATE_DURABLE_QUEUE:
-        case DELETE_DURABLE_QUEUE:
+    private final Map<String, BrokerConfiguration.BrokerUser> localUsers = new HashMap();
 
-        case CREATE_NON_DURABLE_QUEUE:
-        case DELETE_NON_DURABLE_QUEUE:
+    @Inject
+    AuthService auth;
 
-        case CONSUME:
-        case SEND:
+    @Inject
+    IndexerService indexer;
 
-          return true;
-        case MANAGE:
-          if (isAdmin) {
+    public RaptorSecurityManager() {
+
+    }
+
+    protected Authentication.UserInfo getUser(String token) {
+        try {
+
+            Authentication.UserInfo user = auth.getUser(token);
+            if (user != null) {
+                logger.debug("Authenticated user {}", user.getUserId());
+                return user;
+            }
+
+        } catch (ConfigurationException | Authentication.AuthenticationException e) {
+            logger.error("Authentication failed");
+        }
+        return null;
+    }
+
+    protected BrokerConfiguration.BrokerUser getLocalUser(String username, String password) {
+        BrokerConfiguration.BrokerUser user = localUsers.getOrDefault(username, null);
+        return (user != null && user.login(password)) ? user : null;
+    }
+
+    @Override
+    public boolean validateUser(String user, String password, X509Certificate[] certificates) {
+
+        logger.debug("Authenticate user {} with token {}", user, password);
+
+        if ((getLocalUser(user, password) != null)) {
+            logger.debug("Match on local user {}", user);
             return true;
-          }
-      }
-      
-      return false;
-    }
-    
-    logger.debug("Validating topic {}", address);
-    String[] topicTokens = address.split("\\.");
-    if (topicTokens.length >= 2) {
-      
-      int soidIndex = 0;
-      String objectId = topicTokens[soidIndex];
-      
-      boolean validUUID = topicChecker.checkUUID(objectId);
-      if(!validUUID) {
-        logger.debug("Object ID length mismatch ({}: {})", objectId.length(), objectId);
-        return false;
-      }
-           
-      try {
-        ServiceObject obj = storage.getObject(objectId);
-        logger.debug("Check access permission of user {} to object {}", user.getUserId(), objectId);
-        boolean allowed = auth.isAllowed(user.getAccessToken(), obj, Authorization.Permission.Subscribe);
-        return allowed;
-      } catch (Authorization.AuthorizationException | Storage.StorageException | RaptorComponent.ParserException | ConfigurationException ex) {
-        logger.error("Failed to subscribe", ex);
-        return false;
-      }
+        }
+
+        boolean result = getUser(password) != null;
+
+        if (!result) {
+            logger.debug("Login failed for {}:{}", user, password);
+        }
+
+        return result;
     }
 
-    return false;
-  }
+    @Override
+    public boolean validateUserAndRole(String username, String password, Set<Role> roles, CheckType checkType, String address, RemotingConnection connection) {
 
-  @Override
-  public boolean validateUser(String user, String password) {
-    logger.debug("Authenticate user {} with token {}", user, password);
-    return validateUser(user, password, null);
-  }
+        logger.debug("Authenticate user {} with token {} and roles {} on topic {}", username, password, roles, address);
 
-  @Override
-  public boolean validateUserAndRole(String user, String password, Set<Role> roles, CheckType checkType) {
-    logger.debug("validateUserAndRole(user, password, roles, checkType): NOT IMPLEMENTED");
-//    logger.warn("Authenticate user {} with token {} and roles {} on {}", user, password, roles, checkType);
-    return roles.contains(Roles.admin) && validateUser(user, password);
-  }
+        Authentication.UserInfo user = null;
+        // 1. if no username, try with apiKey authentication
+        if (username.isEmpty()) {
+            user = getUser(password);
+        } else {
+            // 2. try to login from local configuration file
+            BrokerConfiguration.BrokerUser localUser = getLocalUser(username, password);
+            if (localUser != null) {
+                logger.debug("Local user {} found", username);
+                user = new Authentication.UserInfo(username, password);
+                user.setRoles(localUser.getRoles());
+            } else {
+                // @TODO 3. try to login as user to the auth api
+            }
+        }
 
-  public void setBrokerConfiguration(BrokerConfiguration brokerConfiguration) {
-    
-    localUsers.clear();
-    for (BrokerConfiguration.BrokerUser user: brokerConfiguration.users) {
-      localUsers.put(user.name, user);
-    }    
-    
-    this.brokerConfiguration = brokerConfiguration;
-  }
+        if (user == null) {
+            logger.debug("User `{}` login failed", username);
+            return false;
+        }
+
+        boolean isAdmin = user.hasRole(Roles.admin.toString());
+
+        if (isAdmin) {
+            return true;
+        }
+
+        boolean isMqttTopic = (address.contains("$sys.mqtt.queue.qos2")
+                || address.contains("$sys.mqtt.#"));
+        boolean isJmsQueue = (address.contains("jms.queue"));
+
+        if (isMqttTopic || isJmsQueue) {
+
+            switch (checkType) {
+
+                case CREATE_DURABLE_QUEUE:
+                case DELETE_DURABLE_QUEUE:
+
+                case CREATE_NON_DURABLE_QUEUE:
+                case DELETE_NON_DURABLE_QUEUE:
+
+                case CONSUME:
+                case SEND:
+
+                    return true;
+                case MANAGE:
+                    if (isAdmin) {
+                        return true;
+                    }
+            }
+
+            return false;
+        }
+
+        logger.debug("Validating topic {}", address);
+        String[] topicTokens = address.split("\\.");
+        if (topicTokens.length >= 2) {
+
+            int soidIndex = 0;
+            String objectId = topicTokens[soidIndex];
+            
+            try {
+                
+                ServiceObject obj = indexer.getObject(objectId);
+                if(obj == null) {
+                    logger.warn("Object not found, id: `{}`", objectId);
+                    return false;
+                }
+                
+                logger.debug("Check access permission of user {} to object {}", user.getUserId(), objectId);
+                
+                // @NOTE: this was the subscribe permission but has been migrted to Pull to simplify the flow
+                boolean allowed = auth.isAllowed(user.getAccessToken(), obj, Authorization.Permission.Pull);
+                return allowed;
+
+            } catch (Authorization.AuthorizationException | Storage.StorageException | RaptorComponent.ParserException | ConfigurationException ex) {
+                logger.error("Failed to subscribe: {}", ex.getMessage(), ex);
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean validateUser(String user, String password) {
+        logger.debug("Authenticate user {} with token {}", user, password);
+        return validateUser(user, password, null);
+    }
+
+    @Override
+    public boolean validateUserAndRole(String user, String password, Set<Role> roles, CheckType checkType) {
+        logger.warn("validateUserAndRole(user, password, roles, checkType): NOT IMPLEMENTED");
+        return roles.contains(Roles.admin) && validateUser(user, password);
+    }
+
+    public void setBrokerConfiguration(BrokerConfiguration brokerConfiguration) {
+
+        localUsers.clear();
+        for (BrokerConfiguration.BrokerUser user : brokerConfiguration.users) {
+            localUsers.put(user.name, user);
+        }
+
+        this.brokerConfiguration = brokerConfiguration;
+    }
 
 }

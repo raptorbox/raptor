@@ -28,6 +28,7 @@ under the License.
 
     <core xmlns="urn:activemq:core">
 
+        <!--
         <remoting-incoming-interceptors>
             <class-name>org.createnet.raptor.broker.interceptors.StompInterceptor</class-name>
             <class-name>org.createnet.raptor.broker.interceptors.IncomingInterceptor</class-name>
@@ -36,6 +37,7 @@ under the License.
         <remoting-outgoing-interceptors>
            <class-name>org.createnet.raptor.broker.interceptors.OutgoingInterceptor</class-name>
         </remoting-outgoing-interceptors>
+      -->
 
         <persistence-enabled>true</persistence-enabled>
 
@@ -65,7 +67,7 @@ under the License.
         <acceptors>
             <!-- Default ActiveMQ Artemis Acceptor.  Multi-protocol adapter.  Currently supports ActiveMQ Artemis Core, OpenWire, STOMP, AMQP, MQTT, and HornetQ Core. -->
             <!-- performance tests have shown that openWire performs best with these buffer sizes -->
-            <acceptor name="artemis">tcp://127.0.0.1:61616?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576</acceptor>
+            <acceptor name="artemis">tcp://127.0.0.1:61616?protocols=CORE,tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576</acceptor>
 
             <!-- AMQP Acceptor.  Listens on default AMQP port for AMQP traffic.-->
             <!--<acceptor name="amqp">tcp://0.0.0.0:5672?protocols=AMQP</acceptor>-->

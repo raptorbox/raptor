@@ -144,10 +144,13 @@ public class IndexerService extends AbstractRaptorService {
     }
 
     public ServiceObject getObject(String id) {
-        ServiceObject obj = getObjects(Arrays.asList(id)).get(0);
-        if (obj == null) {
-            throw new Indexer.IndexerException("Object " + id + " not found");
+
+        List<ServiceObject> objs = getObjects(Arrays.asList(id));
+        if (objs.isEmpty()) {
+            return null;
         }
+
+        ServiceObject obj = objs.get(0);
         return obj;
     }
 

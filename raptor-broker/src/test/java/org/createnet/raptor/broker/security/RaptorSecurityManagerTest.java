@@ -17,11 +17,8 @@ package org.createnet.raptor.broker.security;
 
 import java.util.HashSet;
 import java.util.Set;
-import javax.security.cert.X509Certificate;
 import org.apache.activemq.artemis.core.security.CheckType;
 import org.apache.activemq.artemis.core.security.Role;
-import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
-import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.broker.configuration.BrokerConfiguration;
 import org.createnet.raptor.http.ApplicationConfig;
 import org.glassfish.hk2.api.ServiceLocator;
@@ -100,7 +97,7 @@ public class RaptorSecurityManagerTest {
 
         roles.add(new Role(roleAdmin, true, true, true, true, true, true, true));
 
-        String address = "$sys.mqtt.myobject.something";
+        String address = "myobject.something";
 
         assertFalse(
                 manager.validateUserAndRole(
@@ -112,7 +109,7 @@ public class RaptorSecurityManagerTest {
                 )
         );
 
-        address = "$sys.mqtt.anything";
+        address = "anything";
 
         assertTrue(
                 manager.validateUserAndRole(
