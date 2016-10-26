@@ -67,10 +67,10 @@ under the License.
         <acceptors>
             <!-- Default ActiveMQ Artemis Acceptor.  Multi-protocol adapter.  Currently supports ActiveMQ Artemis Core, OpenWire, STOMP, AMQP, MQTT, and HornetQ Core. -->
             <!-- performance tests have shown that openWire performs best with these buffer sizes -->
-            <acceptor name="artemis">tcp://127.0.0.1:61616?protocols=CORE,tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576</acceptor>
+            <!-- <acceptor name="artemis">tcp://127.0.0.1:61616?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576</acceptor> -->
 
             <!-- AMQP Acceptor.  Listens on default AMQP port for AMQP traffic.-->
-            <!--<acceptor name="amqp">tcp://0.0.0.0:5672?protocols=AMQP</acceptor>-->
+            <acceptor name="amqp">tcp://127.0.0.1:5672?protocols=AMQP</acceptor>
 
             <!-- STOMP Acceptor. -->
             <!-- <acceptor name="stomp">tcp://0.0.0.0:61623?protocols=STOMP</acceptor> -->
@@ -79,7 +79,7 @@ under the License.
             <!--<acceptor name="hornetq">tcp://0.0.0.0:5445?protocols=HORNETQ,STOMP</acceptor>-->
 
             <!-- MQTT Acceptor -->
-            <acceptor name="multiprotocol">tcp://0.0.0.0:1883?protocols=MQTT,STOMP</acceptor>
+            <acceptor name="mqtt">tcp://0.0.0.0:1883?protocols=MQTT</acceptor>
         </acceptors>
 
         <address-settings>
