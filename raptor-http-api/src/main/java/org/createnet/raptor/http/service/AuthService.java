@@ -81,6 +81,10 @@ public class AuthService {
     return getProvider().getUser(accessToken);
   }
 
+  public UserInfo login(String username, String password)  {
+    return getProvider().login(username, password);
+  }
+
   public String getAccessToken() {
     if (securityContext == null) {
       return null;
