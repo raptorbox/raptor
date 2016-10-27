@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.auth.service;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.createnet.raptor.auth.service.entity.repository.UserRepository;
 import org.createnet.raptor.auth.service.entity.User;
 import java.util.Collection;
@@ -53,6 +54,7 @@ public class RaptorUserDetailsService implements UserDetailsService {
       super(user);
     }
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
       return this.getRoles();
@@ -63,16 +65,19 @@ public class RaptorUserDetailsService implements UserDetailsService {
       return super.getUsername();
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
       return isEnabled();
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
       return isEnabled();
     }
 
+    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
       return isEnabled();

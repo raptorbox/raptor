@@ -47,28 +47,34 @@ import org.springframework.web.bind.annotation.RestController;
 @PreAuthorize("isAuthenticated()")
 public class DevicePermissionController {
 
-  static public class PermissionRequest {
-    public String permission;
-    public String user;
-    public PermissionRequest() {}
-  }
+    static public class PermissionRequest {
 
-  static public class PermissionRequestBatch {
-    public List<String> permissions;
-    public String user;
-    public PermissionRequestBatch() {}
-  }
+        public String permission;
+        public String user;
 
-  private static final Logger logger = LoggerFactory.getLogger(DevicePermissionController.class);
+        public PermissionRequest() {
+        }
+    }
 
-  @Autowired
-  private DeviceService deviceService;
+    static public class PermissionRequestBatch {
 
-  @Autowired
-  private UserService userService;
+        public List<String> permissions;
+        public String user;
 
-  @Autowired
-  private AclDeviceService aclDeviceService;
+        public PermissionRequestBatch() {
+        }
+    }
+
+    private static final Logger logger = LoggerFactory.getLogger(DevicePermissionController.class);
+
+    @Autowired
+    private DeviceService deviceService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private AclDeviceService aclDeviceService;
 
 //  @RequestMapping(value = "/{deviceUuid}/permission", method = RequestMethod.POST)
 //  public ResponseEntity<?> addPermission(
@@ -97,77 +103,78 @@ public class DevicePermissionController {
 //    return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
 //  }
 
-  @RequestMapping(value = "/{deviceUuid}/permission/{userUuid}", method = RequestMethod.GET)
-  public ResponseEntity<?> listPermissions(
-          @PathVariable("deviceUuid") String deviceUuid,
-          @PathVariable("userUuid") String userUuid
-  ) {
+    @RequestMapping(value = "/{deviceUuid}/permission/{userUuid}", method = RequestMethod.GET)
+    public ResponseEntity<?> listPermissions(
+            @PathVariable("deviceUuid") String deviceUuid,
+            @PathVariable("userUuid") String userUuid
+    ) {
 
-    Device device = deviceService.getByUuid(deviceUuid);
-    if (device == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Device not found");
+        Device device = deviceService.getByUuid(deviceUuid);
+        if (device == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Device not found");
+        }
+
+        User user = userService.getByUuid(userUuid);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        List<String> permissions = RaptorPermission.toLabel(aclDeviceService.list(device, user));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
     }
 
-    User user = userService.getByUuid(userUuid);
-    if (user == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+    @RequestMapping(value = "/{deviceUuid}/permission", method = RequestMethod.GET)
+    public ResponseEntity<?> listOwnPermissions(
+            @PathVariable("deviceUuid") String deviceUuid,
+            @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser
+    ) {
+
+        Device device = deviceService.getByUuid(deviceUuid);
+        if (device == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Device not found");
+        }
+
+        User user = userService.getByUuid(currentUser.getUuid());
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        List<String> permissions = RaptorPermission.toLabel(aclDeviceService.list(device, user));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
     }
 
-    List<String> permissions = RaptorPermission.toLabel(aclDeviceService.list(device, user));
-    return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
-  }
+    @RequestMapping(value = "/{deviceUuid}/permission", method = RequestMethod.PUT)
+    public ResponseEntity<?> setPermission(
+            @RequestBody PermissionRequestBatch body,
+            @PathVariable("deviceUuid") String deviceUuid
+    ) {
 
-  @RequestMapping(value = "/{deviceUuid}/permission", method = RequestMethod.GET)
-  public ResponseEntity<?> listOwnPermissions(
-          @PathVariable("deviceUuid") String deviceUuid,
-          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser
-  ) {
+        Device device = deviceService.getByUuid(deviceUuid);
+        if (device == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Device not found");
+        }
 
-    Device device = deviceService.getByUuid(deviceUuid);
-    if (device == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Device not found");
+        User user = userService.getByUuid(body.user);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        List<Permission> permissions = body.permissions
+                .stream()
+                .map((String s) -> {
+                    Permission p = RaptorPermission.fromLabel(s);
+                    if (p == null) {
+                        throw new PermissionNotFoundException("Permission not found ");
+                    }
+                    return p;
+                })
+                .distinct()
+                .collect(Collectors.toList());
+
+        aclDeviceService.set(device, user, permissions);
+        List<String> settedPermissions = RaptorPermission.toLabel(aclDeviceService.list(device, user));
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(settedPermissions);
     }
-
-    User user = userService.getByUuid(currentUser.getUuid());
-    if (user == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-    }
-
-    List<String> permissions = RaptorPermission.toLabel(aclDeviceService.list(device, user));
-    return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
-  }
-
-  @RequestMapping(value = "/{deviceUuid}/permission", method = RequestMethod.PUT)
-  public ResponseEntity<?> setPermission(
-          @RequestBody PermissionRequestBatch body,
-          @PathVariable("deviceUuid") String deviceUuid
-  ) {
-
-    Device device = deviceService.getByUuid(deviceUuid);
-    if (device == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Device not found");
-    }
-
-    User user = userService.getByUuid(body.user);
-    if (user == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-    }
-
-    List<Permission> permissions = body.permissions
-            .stream()
-            .map((String s) -> {
-              Permission p = RaptorPermission.fromLabel(s);
-              if (p == null) {
-                throw new PermissionNotFoundException("Permission not found ");
-              }
-              return p;
-            })
-            .collect(Collectors.toList());
-
-    aclDeviceService.set(device, user, permissions);
-    List<String> settedPermissions = RaptorPermission.toLabel(aclDeviceService.list(device, user));
-
-    return ResponseEntity.status(HttpStatus.ACCEPTED).body(settedPermissions);
-  }
 
 }

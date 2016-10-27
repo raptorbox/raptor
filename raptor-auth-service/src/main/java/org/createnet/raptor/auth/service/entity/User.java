@@ -174,6 +174,16 @@ public class User implements Serializable {
     this.password = password;
   }
 
+  @JsonProperty("roles")
+  public Object[] listRoles() {
+    return roles.stream().map(r -> r.getName()).toArray();
+  }
+  
+  @JsonProperty("roles")
+  public void setListRoles(List<String> list) {
+    list.forEach(r -> addRole(new Role(r)));
+  }
+  
   public List<Role> getRoles() {
     return roles;
   }
