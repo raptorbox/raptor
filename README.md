@@ -20,7 +20,7 @@ To setup the basic services required use [Docker Compose](https://docs.docker.co
 
 We are actively working to structure and expand the documentation!
 
-### Querying the HTTP API
+#### Querying the HTTP API
 
 To get started there is a swagger based API documentation available at those addresses (once the appliance is up and running)
 
@@ -58,9 +58,11 @@ curl -XGET -H "Content-Type: application/json" \
 http://localhost:8090/
 ```
 
-### Accessing the MQTT broker
+#### Accessing the MQTT broker
 
-To access the broker open an MQTT (or Websocket) connection to `http://localhost:1883` using your username or password. (You can either set the username as empty and set your API Key as password)
+To access the broker open an MQTT (or Websocket) connection to `http://localhost:1883` using your username or password.
+
+API Key based access is supported by setting an empty username and the API Key as password. Currently this feature is not completely working due to [this issue](https://issues.apache.org/jira/browse/ARTEMIS-826)
 
 You can use any library supporting MQTTv3.1.1 like [mqtt.js](https://github.com/mqttjs/MQTT.js) or [Eclipse PAHO](https://eclipse.org/paho/)
 
