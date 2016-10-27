@@ -23,6 +23,7 @@ import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.auth.authorization.impl.AllowAllAuthorization;
 import org.createnet.raptor.auth.authorization.impl.TokenAuthorization;
 import org.createnet.raptor.auth.cache.AuthCache;
+import org.createnet.raptor.auth.cache.impl.EHCache;
 import org.createnet.raptor.auth.cache.impl.MemoryCache;
 import org.createnet.raptor.auth.cache.impl.NoCache;
 import org.createnet.raptor.models.objects.ServiceObject;
@@ -56,8 +57,9 @@ public class AuthProvider implements Authorization, Authentication {
 
         String cacheType = (String) configuration.cache;
         switch (cacheType) {
-//      case "redis":
-//        break;
+            case "ehcache":
+                cache = new EHCache();
+                break;
             case "memory":
                 cache = new MemoryCache();
                 break;

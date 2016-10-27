@@ -20,30 +20,52 @@ package org.createnet.raptor.auth;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class AuthConfiguration {
-  
-  public enum Type {
-    token, allow_all
-  }
-  
-  public enum Cache {
-    memory, none
-  }
-  
-  public String type;
-  public String cache;
-  public Token token = new Token();
-  
-  static public class Token {
-    
-    static public class Truststore {
-      public String path;
-      public String password;
+
+    public String type;
+    public String cache;
+    final public Token token = new Token();
+    final public EHCache ehcache = new EHCache();
+
+    public enum Type {
+        token, allow_all
     }
-    
-    public Truststore truststore = new Truststore();
-    public String checkUrl;
-    public String syncUrl;
-    public String loginUrl;
-  }
-  
+
+    public enum Cache {
+        memory, none, ehcache
+    }
+
+    static public class Token {
+
+        static public class Truststore {
+
+            public String path;
+            public String password;
+        }
+
+        final public Truststore truststore = new Truststore();
+        public String checkUrl;
+        public String syncUrl;
+        public String loginUrl;
+    }
+
+    static public class EHCache {
+
+        static public class Authorization {
+
+            public int duration = 10;
+            public int heapSize = 500;
+            public int inMemorySize = 10;
+        }
+
+        static public class Authentication {
+
+            public int duration = 20;
+            public int heapSize = 200;
+            public int inMemorySize = 10;
+        }
+
+        final public Authorization authorization = new Authorization();
+        final public Authentication authentication = new Authentication();
+    }
+
 }

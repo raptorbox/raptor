@@ -23,7 +23,7 @@ import org.createnet.raptor.auth.AuthConfiguration;
  */
 abstract public class AbstractCache implements AuthCache {
 
-  private AuthConfiguration configuration;
+  protected AuthConfiguration configuration;
 
   @Override
   public void clear() {

@@ -1,7 +1,8 @@
 #auth: token, allow_all
 type: token
-#cache: memory, none
+#cache: memory, none, ehcache
 cache: memory
+
 token:
   truststore:
     path: /etc/raptor/truststore
@@ -9,3 +10,13 @@ token:
   checkUrl: http://localhost:8090/auth/check
   syncUrl: http://localhost:8090/auth/sync
   loginUrl: http://localhost:8090/auth/login
+
+ehcache:
+  authorization:
+    heapSize: 500 #entries
+    duration: 10 #seconds
+    inMemorySize: 5 #MB
+  authentication:
+    heapSize: 200 #entries
+    duration: 30 #seconds
+    inMemorySize: 10 #MB
