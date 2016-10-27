@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -257,4 +258,24 @@ public class ServiceObject extends ServiceObjectContainer {
         return this;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof ServiceObject) {
+            ServiceObject sobj = (ServiceObject) obj;
+            if(this.id != null && sobj.id != null) {
+                return sobj.id.equals(this.id);
+            }
+        }
+        return super.equals(obj); 
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + Objects.hashCode(this.id);
+        return hash;
+    }
+
+    
+    
 }
