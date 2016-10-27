@@ -55,7 +55,7 @@ For example to list all the registered objects
 ```
 curl -XGET -H "Content-Type: application/json" \
 -H "Authorization: Bearer <the whole token>" \
-http://localhost:8090/
+http://localhost:8080/
 ```
 
 #### Accessing the MQTT broker
