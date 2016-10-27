@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiResponses;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
@@ -77,12 +78,22 @@ public class ObjectTreeApi extends AbstractApi {
     public List<ServiceObject> setChildren(@PathParam("id") String id, final List<String> childrenIds) {
 
         ServiceObject parentObject = loadObject(id);
+        List<ServiceObject> childrenObjects = childrenIds.stream().map((String cid) -> {
+            
+            ServiceObject child = loadObject(cid);
+
+            if (!auth.isAllowed(child, Authorization.Permission.Update)) {
+                throw new ForbiddenException("Cannot update object");
+            }
+
+            return child;
+        }).collect(Collectors.toList());
 
         if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
             throw new ForbiddenException("Cannot update object");
         }
 
-        List<ServiceObject> list = tree.setChildren(id, childrenIds);
+        List<ServiceObject> list = tree.setChildren(parentObject, childrenObjects);
 
         // @TODO: Move to event emitter
         List<ServiceObject> toSave = new ArrayList(list);
@@ -105,12 +116,17 @@ public class ObjectTreeApi extends AbstractApi {
     public List<ServiceObject> addChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) {
 
         ServiceObject parentObject = loadObject(id);
+        ServiceObject childObject = loadObject(childrenId);
 
         if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
             throw new ForbiddenException("Cannot update object");
         }
+        
+        if (!auth.isAllowed(childObject, Authorization.Permission.Update)) {
+            throw new ForbiddenException("Cannot update object");
+        }
 
-        List<ServiceObject> list = tree.addChildren(id, Arrays.asList(childrenId));
+        List<ServiceObject> list = tree.addChildren(parentObject, Arrays.asList(childObject));
 
         // @TODO: Move to event emitter
         List<ServiceObject> toSave = new ArrayList(list);
@@ -133,12 +149,17 @@ public class ObjectTreeApi extends AbstractApi {
     public List<ServiceObject> removeChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) {
 
         ServiceObject parentObject = loadObject(id);
+        ServiceObject childObject = loadObject(childrenId);
 
         if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
-            throw new ForbiddenException("Cannot update object");
+            throw new ForbiddenException("Cannot update parent object");
+        }
+        
+        if (!auth.isAllowed(childObject, Authorization.Permission.Update)) {
+            throw new ForbiddenException("Cannot update child object");
         }
 
-        List<ServiceObject> list = tree.removeChildren(id, Arrays.asList(childrenId));
+        List<ServiceObject> list = tree.removeChildren(parentObject, Arrays.asList(childObject));
 
         // @TODO: Move to event emitter
         List<ServiceObject> toSave = new ArrayList(list);
