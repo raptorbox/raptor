@@ -80,10 +80,10 @@ public class AclManagerService implements AclManager {
         addPermissions(clazz, identifier, sid, Arrays.asList(permission));
     }
 
-    @Retryable(maxAttempts = 3, value = AclManagerException.class, backoff = @Backoff(delay = 150, multiplier = 2))
+    @Retryable(maxAttempts = 3, value = AclManagerException.class, backoff = @Backoff(delay = 500, multiplier = 2))
     public <T> void addPermissions(Class<T> clazz, Serializable identifier, Sid sid, List<Permission> permissions) {
         try {
-            log.debug("Storing ACL id:{} - {}", identifier, String.join(",", RaptorPermission.toLabel(permissions)));
+            log.debug("Storing ACL {} {} {}:{}", sid, String.join(",", RaptorPermission.toLabel(permissions)), clazz, identifier);
             ObjectIdentity identity = new ObjectIdentityImpl(clazz, identifier);
             MutableAcl acl = isNewAcl(identity);
             permissions.stream().forEach((Permission p) -> {
@@ -91,7 +91,7 @@ public class AclManagerService implements AclManager {
             });
             aclService.updateAcl(acl);
         } catch (DataIntegrityViolationException | DeadlockLoserDataAccessException ex) {
-            log.warn("Storing ACL id:{} FAILED - {}", identifier, ex.getMessage());
+            log.debug("Storing ACL FAILED for {} {} {}:{}", sid, String.join(",", RaptorPermission.toLabel(permissions)), clazz, identifier);
             throw new AclManagerException(ex);
         }
     }
@@ -119,21 +119,15 @@ public class AclManagerService implements AclManager {
         boolean isGranted = false;
 
         try {
+            log.debug("Check if {} can {} on {}:{}", sid, RaptorPermission.toLabel(permission), clazz, identifier);
             isGranted = acl.isGranted(Arrays.asList(permission), Arrays.asList(sid), false);
         } catch (NotFoundException e) {
-            log.info("Unable to find an ACE for the given object", e);
+            log.info("Unable to find an ACE for {} on {}:{} - {}", RaptorPermission.toLabel(permission), clazz, identifier, e.getMessage());
         } catch (UnloadedSidException e) {
-            log.error("Unloaded Sid", e);
+            log.error("Unloaded Sid for {} on {}:{} - {}", RaptorPermission.toLabel(permission), clazz, identifier, e.getMessage(), e);
         }
 
         return isGranted;
-    }
-
-    private void sleep(int val) {
-        try {
-            Thread.sleep(val);
-        } catch (InterruptedException ex1) {
-        }
     }
 
     private MutableAcl isNewAcl(ObjectIdentity identity) {

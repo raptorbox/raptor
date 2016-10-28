@@ -1,6 +1,7 @@
 
 SET foreign_key_checks = 0;
 
+drop table if exists authorities;
 drop table if exists roles;
 drop table if exists users;
 drop table if exists users_roles;
@@ -19,6 +20,7 @@ create table if not exists roles (id bigint not null auto_increment, name varcha
 create table if not exists tokens (id bigint not null auto_increment, created datetime not null, enabled bit not null, expires bigint, name varchar(255) not null, secret varchar(255), token varchar(255) not null, type varchar(255), device_id bigint, user_id bigint, primary key (id));
 create table if not exists users (id bigint not null auto_increment, created datetime not null, email varchar(128) not null, enabled bit not null, firstname varchar(64), last_password_reset datetime not null, lastname varchar(64), password varchar(128) not null, username varchar(128) not null, uuid varchar(255) not null, primary key (id));
 create table if not exists users_roles (user_id bigint not null, role_id bigint not null);
+create table if not exists authorities (username varchar(128) not null, authority varchar(255) not null);
 
 alter table users add constraint idx_username unique (username);
 alter table devices add constraint fk_devices_users_id foreign key (owner_id) references users (id);
@@ -30,6 +32,11 @@ alter table tokens add constraint fk_tokens_user_id_users_id foreign key (user_i
 
 alter table users_roles add constraint fk_users_roles_role_id_roles_id foreign key (role_id) references roles (id);
 alter table users_roles add constraint fk_users_roles_user_id_users_id foreign key (user_id) references users (id);
+
+alter table authorities add constraint idx_auth_username unique (username, authority);
+alter table authorities add constraint fk_auth_users foreign key (username) references users (username);
+
+
 
 CREATE TABLE if not exists acl_sid (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,

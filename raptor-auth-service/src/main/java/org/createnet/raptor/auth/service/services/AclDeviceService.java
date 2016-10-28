@@ -75,7 +75,7 @@ public class AclDeviceService {
         return aclManagerService.isPermissionGranted(Device.class, device.getId(), new UserSid(user), permission);
     }
 
-    @Retryable(maxAttempts = 2, value = AclManagerService.AclManagerException.class, backoff = @Backoff(delay = 150, multiplier = 2))
+    @Retryable(maxAttempts = 3, value = AclManagerService.AclManagerException.class, backoff = @Backoff(delay = 500, multiplier = 3))
     public void register(Device device) {
 
         User owner = device.getOwner();

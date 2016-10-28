@@ -99,9 +99,9 @@ public class DeviceController {
                 if (isCreate) {
                     response.result = true;
                 } else {
-                    
+
                     Device device = null;
-                    if(permission != RaptorPermission.LIST) {
+                    if (permission != RaptorPermission.LIST) {
                         device = deviceService.getByUuid(body.objectId);
                         if (device == null) {
                             return ResponseEntity.notFound().build();
