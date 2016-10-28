@@ -76,7 +76,7 @@ public class DeviceService {
     /**
      * @TODO check user permissions and roles
      */
-
+    
     if(!req.userId.equals(user.getUuid())) {
       if(!user.isSuperAdmin()) {
         if(!aclDeviceService.isGranted(device, user, RaptorPermission.ADMINISTRATION)) {

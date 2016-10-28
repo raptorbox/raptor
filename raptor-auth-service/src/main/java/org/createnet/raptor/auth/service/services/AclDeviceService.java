@@ -59,7 +59,11 @@ public class AclDeviceService {
     }
 
     public void set(Device device, User user, List<Permission> permissions) {
-        aclManagerService.setPermissions(Device.class, device.getId(), new UserSid(user), permissions);
+        Long pid = null; 
+        if(device.hasParent()) {
+            pid = device.getParent().getId();
+        }
+        aclManagerService.setPermissions(Device.class, device.getId(), new UserSid(user), permissions, pid);
     }
 
     public List<Permission> list(Device device, User user) {
@@ -94,7 +98,7 @@ public class AclDeviceService {
             }
             
             try {
-                aclManagerService.addPermissions(Device.class, device.getId(), sid, newPerms);
+                aclManagerService.addPermissions(Device.class, device.getId(), sid, newPerms, device.getParentId());
             }
             catch(AclManagerService.AclManagerException ex) {
                 logger.warn("Failed to store default permission for {} ({}): {}", device.getId(), sid ,ex.getMessage());

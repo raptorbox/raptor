@@ -74,28 +74,52 @@ public class AclManagerService implements AclManager {
     private JdbcTemplate jdbcTemplate;
 
     private final SidRetrievalStrategy sidRetrievalStrategy = new SidRetrievalStrategyImpl();
+    
+    public MutableAcl getACL(Class clazz, Serializable identifier) {
+        ObjectIdentity identity = new ObjectIdentityImpl(clazz, identifier);
+        MutableAcl acl = isNewAcl(identity);
+        return acl;
+    }
 
     @Override
     public <T> void addPermission(Class<T> clazz, Serializable identifier, Sid sid, Permission permission) {
-        addPermissions(clazz, identifier, sid, Arrays.asList(permission));
+        addPermissions(clazz, identifier, sid, Arrays.asList(permission), null);
+    }
+    
+    public <T> void addPermission(Class<T> clazz, Serializable identifier, Sid sid, Permission permission, Long parentId) {
+        addPermissions(clazz, identifier, sid, Arrays.asList(permission), parentId);
     }
 
-    @Retryable(maxAttempts = 3, value = AclManagerException.class, backoff = @Backoff(delay = 500, multiplier = 2))
     public <T> void addPermissions(Class<T> clazz, Serializable identifier, Sid sid, List<Permission> permissions) {
+        addPermissions(clazz, identifier, sid, permissions, null);
+    }
+    
+    @Retryable(maxAttempts = 3, value = AclManagerException.class, backoff = @Backoff(delay = 500, multiplier = 2))
+    public <T> void addPermissions(Class<T> clazz, Serializable identifier, Sid sid, List<Permission> permissions, Long parentId) {
         try {
+            
             log.debug("Storing ACL {} {} {}:{}", sid, String.join(",", RaptorPermission.toLabel(permissions)), clazz, identifier);
-            ObjectIdentity identity = new ObjectIdentityImpl(clazz, identifier);
-            MutableAcl acl = isNewAcl(identity);
+
+            MutableAcl acl = getACL(clazz, identifier);
             permissions.stream().forEach((Permission p) -> {
                 isPermissionGranted(p, sid, acl);
             });
+            
+            if(parentId != null) {
+                log.debug("Setting parent ACL to {}", parentId);
+                MutableAcl parentAcl = getACL(clazz, parentId);
+                acl.setEntriesInheriting(true);
+                acl.setParent(parentAcl);
+            }
+            
             aclService.updateAcl(acl);
-        } catch (DataIntegrityViolationException | DeadlockLoserDataAccessException ex) {
+
+        } catch (NotFoundException ex) {
             log.debug("Storing ACL FAILED for {} {} {}:{}", sid, String.join(",", RaptorPermission.toLabel(permissions)), clazz, identifier);
             throw new AclManagerException(ex);
         }
     }
-
+    
     @Override
     public <T> void removePermission(Class<T> clazz, Serializable identifier, Sid sid, Permission permission) {
         ObjectIdentity identity = new ObjectIdentityImpl(clazz.getCanonicalName(), identifier);
@@ -186,15 +210,15 @@ public class AclManagerService implements AclManager {
         return permissionsList;
     }
 
-    public void setPermissions(Class<?> clazz, Long identifier, UserSid userSid, List<Permission> permissions) {
+    public void setPermissions(Class<?> clazz, Long identifier, UserSid userSid, List<Permission> permissions, Long parentId) {
 
         ObjectIdentity identity = new ObjectIdentityImpl(clazz, identifier);
-
+        
         List<Permission> currentPermissions = getPermissionList(userSid.getUser(), identity);
         currentPermissions.forEach((Permission permission) -> {
             removePermission(clazz, identifier, userSid, permission);
         });
 
-        addPermissions(clazz, identifier, userSid, permissions);
+        addPermissions(clazz, identifier, userSid, permissions, parentId);
     }
 }

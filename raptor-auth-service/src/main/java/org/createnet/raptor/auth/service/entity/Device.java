@@ -91,6 +91,11 @@ public class Device {
   public Device getParent() {
     return parent;
   }
+  
+  @JsonIgnore
+  public Long getParentId() {
+    return hasParent() ? getParent().getId() : null;
+  }
 
   public void setParent(Device parent) {
     this.parent = parent;
