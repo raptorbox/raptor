@@ -1,5 +1,7 @@
 # Raptor
 
+[![Build Status](https://travis-ci.org/muka/raptor.svg?branch=master)](https://travis-ci.org/muka/raptor)
+
 Welcome to the Raptor IoT broker repository.
 
 ### What is this?
