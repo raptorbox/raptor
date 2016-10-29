@@ -26,7 +26,7 @@ To get started there is a swagger based API documentation available at those add
 
 The default access credentials are username: `admin` and password: `admin`
 
-- [Data and Object management API](http://localhost:8080/auth/swagger.yaml)
+- [Data and Object management API](http://localhost:8080/swagger.yaml)
 - [User and Permission API](http://localhost:8090/auth/swagger.yaml)
 
 The first operation is to login with an user and get an apiToken
