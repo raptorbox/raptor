@@ -87,10 +87,10 @@ public class AclDeviceService {
         Sid sid = new UserSid(owner);
 
         logger.debug("Found {} permissions for {}", permissions.size(), owner.getUuid());
+        
         if (permissions.isEmpty()) {
-
-            logger.debug("Set default permission");
             
+            logger.debug("Set default permission");
             List<Permission> newPerms =  Arrays.stream(defaultPermissions).collect(Collectors.toList());
             
             if (owner.getId().equals(device.getOwner().getId())) {
@@ -104,8 +104,10 @@ public class AclDeviceService {
                 logger.warn("Failed to store default permission for {} ({}): {}", device.getId(), sid ,ex.getMessage());
                 throw ex;
             }
-            
+
             permissions.addAll(newPerms);
+        } else {
+            aclManagerService.setParent(device.getClass(), device.getId(), device.getParentId());
         }
 
         String perms = String.join(", ", RaptorPermission.toLabel(permissions));

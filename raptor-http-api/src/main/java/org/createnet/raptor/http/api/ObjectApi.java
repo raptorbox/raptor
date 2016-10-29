@@ -117,18 +117,11 @@ public class ObjectApi extends AbstractApi {
             throw new InternalServerErrorException("Failed to index device");
         }
 
-        try {
-
-            auth.sync(auth.getAccessToken(), obj, Authentication.SyncOperation.CREATE);
-
-        } catch (Authentication.AuthenticationException | ConfigurationException ex) {
-
-            logger.error("Error syncing object to auth system: {}", ex.getMessage());
+        boolean sync = syncObject(obj, Authentication.SyncOperation.CREATE);
+        if (!sync) {
             logger.error("Auth sync failed, aborting creation of object {}", obj.id);
-
             storage.deleteObject(obj);
             indexer.deleteObject(obj);
-
             throw new InternalServerErrorException("Failed to sync device");
         }
 
@@ -193,6 +186,11 @@ public class ObjectApi extends AbstractApi {
         storedObj.actions.clear();
         storedObj.addActions(obj.actions.values());
 
+        boolean sync = syncObject(obj, Authentication.SyncOperation.UPDATE);
+        if (!sync) {
+            throw new InternalServerErrorException("Failed to sync device");
+        }
+        
         storage.saveObject(storedObj);
         indexer.indexObject(storedObj, false);
 
@@ -200,7 +198,7 @@ public class ObjectApi extends AbstractApi {
         storage.deleteData(changedStreams);
         indexer.deleteData(changedStreams);
         storage.deleteActionStatus(changedActions);
-
+              
         emitter.trigger(EventEmitterService.EventName.update, new ObjectEvent(storedObj, auth.getAccessToken()));
 
         logger.debug("Updated object {} for {}", storedObj.id, auth.getUser().getUserId());
@@ -247,13 +245,12 @@ public class ObjectApi extends AbstractApi {
             throw new ForbiddenException("Cannot delete object");
         }
 
-        try {
-            auth.sync(auth.getAccessToken(), obj, Authentication.SyncOperation.DELETE);
-        } catch (Authentication.AuthenticationException | ConfigurationException ex) {
+        boolean sync = syncObject(obj, Authentication.SyncOperation.DELETE);
+        if (!sync) {
             logger.error("Auth sync failed, aborting deletion of object {}", obj.id);
             throw new InternalServerErrorException("Failed to sync device");
-        }
-
+        }        
+        
         storage.deleteObject(obj);
         indexer.deleteObject(obj);
 

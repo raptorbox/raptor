@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
+import org.createnet.raptor.auth.authentication.Authentication;
+import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.service.AuthService;
 import org.createnet.raptor.http.service.DispatcherService;
 import org.createnet.raptor.http.service.EventEmitterService;
@@ -92,4 +94,14 @@ abstract public class AbstractApi {
         return action;
     }
 
+    protected boolean syncObject(ServiceObject obj, Authentication.SyncOperation op) {
+        try {
+            auth.sync(auth.getAccessToken(), obj, op);
+        } catch (Exception ex) {
+            logger.error("Error syncing object to auth system: {}", ex.getMessage());
+            return false;
+        }
+        return true;
+    }    
+    
 }

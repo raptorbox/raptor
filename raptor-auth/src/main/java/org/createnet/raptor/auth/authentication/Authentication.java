@@ -27,7 +27,7 @@ import org.createnet.raptor.models.objects.ServiceObject;
  */
 public interface Authentication {
   
-  public enum SyncOperation { CREATE, DELETE }
+  public enum SyncOperation { CREATE, UPDATE, DELETE }
 
   public class AuthenticationException extends RuntimeException {
     public AuthenticationException(Throwable t) {

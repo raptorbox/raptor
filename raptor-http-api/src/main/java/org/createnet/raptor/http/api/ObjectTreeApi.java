@@ -26,10 +26,12 @@ import java.util.stream.Collectors;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
@@ -79,18 +81,28 @@ public class ObjectTreeApi extends AbstractApi {
 
         ServiceObject parentObject = loadObject(id);
         List<ServiceObject> childrenObjects = childrenIds.stream().map((String cid) -> {
-            
+
             ServiceObject child = loadObject(cid);
 
             if (!auth.isAllowed(child, Authorization.Permission.Update)) {
                 throw new ForbiddenException("Cannot update object");
             }
 
+            // set parent in memory
+            child.parentId = parentObject.id;
+
             return child;
         }).collect(Collectors.toList());
 
         if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
             throw new ForbiddenException("Cannot update object");
+        }
+
+        for (ServiceObject childObject : childrenObjects) {
+            boolean sync = syncObject(childObject, Authentication.SyncOperation.UPDATE);
+            if (!sync) {
+                throw new InternalServerErrorException("Failed to sync to auth system object " + childObject.id);
+            }
         }
 
         List<ServiceObject> list = tree.setChildren(parentObject, childrenObjects);
@@ -121,11 +133,19 @@ public class ObjectTreeApi extends AbstractApi {
         if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
             throw new ForbiddenException("Cannot update object");
         }
-        
+
         if (!auth.isAllowed(childObject, Authorization.Permission.Update)) {
             throw new ForbiddenException("Cannot update object");
         }
 
+        
+        childObject.parentId = parentObject.id;
+        
+        boolean sync = syncObject(childObject, Authentication.SyncOperation.UPDATE);
+        if (!sync) {
+            throw new InternalServerErrorException("Failed to sync to auth system object " + childObject.id);
+        }
+        
         List<ServiceObject> list = tree.addChildren(parentObject, Arrays.asList(childObject));
 
         // @TODO: Move to event emitter
@@ -154,11 +174,18 @@ public class ObjectTreeApi extends AbstractApi {
         if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
             throw new ForbiddenException("Cannot update parent object");
         }
-        
+
         if (!auth.isAllowed(childObject, Authorization.Permission.Update)) {
             throw new ForbiddenException("Cannot update child object");
         }
 
+        childObject.parentId = null;
+        
+        boolean sync = syncObject(childObject, Authentication.SyncOperation.UPDATE);
+        if (!sync) {
+            throw new InternalServerErrorException("Failed to sync to auth system object " + childObject.id);
+        }
+        
         List<ServiceObject> list = tree.removeChildren(parentObject, Arrays.asList(childObject));
 
         // @TODO: Move to event emitter

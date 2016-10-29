@@ -80,7 +80,6 @@ public class DeviceService {
     if(!req.userId.equals(user.getUuid())) {
       if(!user.isSuperAdmin()) {
         if(!aclDeviceService.isGranted(device, user, RaptorPermission.ADMINISTRATION)) {
-          
           throw new AccessDeniedException("Cannot operate on that object");
         }        
       }

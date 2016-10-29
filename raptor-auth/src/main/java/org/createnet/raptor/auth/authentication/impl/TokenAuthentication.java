@@ -18,7 +18,6 @@ package org.createnet.raptor.auth.authentication.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.logging.Level;
 import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.AuthHttpClient;
 import org.createnet.raptor.auth.authentication.AbstractAuthentication;
@@ -99,6 +98,7 @@ public class TokenAuthentication extends AbstractAuthentication {
             SyncRequest synreq = new SyncRequest();
             synreq.userId = obj.getUserId();
             synreq.objectId = obj.getId();
+            synreq.parentId = obj.getParentId();
             synreq.created = obj.createdAt;
             synreq.operation = op.name().toLowerCase();
 
