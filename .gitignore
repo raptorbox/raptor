@@ -1,8 +1,7 @@
 raptor*/target/*
 .vagrant
-raptor-parent/target/
 nb*
+data/*
 tmp
 data
 */*.log
-/raptor-auth-service/raptor-auth-service/target/

@@ -16,6 +16,8 @@
 package org.createnet.raptor.http.service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.hash.Hashing;
+import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +42,7 @@ import org.createnet.raptor.search.query.impl.es.DataQuery;
 import org.createnet.raptor.search.query.impl.es.LastUpdateQuery;
 import org.createnet.raptor.search.query.impl.es.ObjectListQuery;
 import org.createnet.raptor.search.query.impl.es.ObjectQuery;
+import org.glassfish.grizzly.utils.Charsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,15 +62,24 @@ public class IndexerService extends AbstractRaptorService {
     @Inject
     CacheService cache;
 
-    /**
-     * Limit of records that can be fetched per request
-     */
-    private final int defaultRecordLimit = 1000;
+    private IndexerConfiguration config = null;
 
     private Indexer indexer;
 
     public enum IndexNames {
         object, data, subscriptions
+    }
+
+    /**
+     * Limit of records that can be fetched per request
+     */
+    private final int defaultLimit = 1000;
+
+    public Integer getDefaultLimit() {
+        if (config != null && config.recordFetchLimit != null) {
+            return config.recordFetchLimit;
+        }
+        return defaultLimit;
     }
 
     @PostConstruct
@@ -85,18 +97,45 @@ public class IndexerService extends AbstractRaptorService {
     @Override
     public void shutdown() {
         try {
-            getIndexer().close();
             indexer = null;
+            config = null;
+            getIndexer().close();
         } catch (Indexer.IndexerException | ConfigurationException e) {
             throw new ServiceException(e);
         }
+    }
+
+    public Query setQueryIndex(Query query, IndexNames name) {
+        IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = getIndexDescriptor(name);
+        query.setIndex(desc.index);
+        query.setType(desc.type);
+        return query;
+    }
+
+    public Query setCursor(Query query, Integer limit, Integer offset) {
+
+        Integer queryLimit = getDefaultLimit();
+        if (limit != null && (limit <= getDefaultLimit() && limit > 0)) {
+            queryLimit = limit;
+        }
+
+        Integer queryOffset = 0;
+        if (offset != null && offset > 0) {
+            queryOffset = offset;
+        }
+
+        query.setOffset(queryOffset);
+        query.setLimit(queryLimit);
+
+        return query;
     }
 
     public Indexer getIndexer() {
 
         if (indexer == null) {
             indexer = new IndexerProvider();
-            indexer.initialize(configuration.getIndexer());
+            config = configuration.getIndexer();
+            indexer.initialize(config);
             indexer.open();
             indexer.setup(false);
         }
@@ -111,12 +150,6 @@ public class IndexerService extends AbstractRaptorService {
     public Indexer.IndexRecord getIndexRecord(IndexNames name) {
         IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = getIndexDescriptor(name);
         return new Indexer.IndexRecord(desc.index, desc.type);
-    }
-
-    public void setQueryIndex(Query query, IndexNames name) {
-        IndexerConfiguration.ElasticSearch.Indices.IndexDescriptor desc = getIndexDescriptor(name);
-        query.setIndex(desc.index);
-        query.setType(desc.type);
     }
 
     public List<ServiceObject> getObjectsByUser(String userId) {
@@ -202,7 +235,7 @@ public class IndexerService extends AbstractRaptorService {
 
         lastUpdateQuery.setOffset(0);
         lastUpdateQuery.setLimit(1);
-        lastUpdateQuery.setSort(new Query.SortBy("timestamp", Query.Sort.DESC));
+        lastUpdateQuery.setSort(new Query.SortBy(Query.Fields.timestamp, Query.Sort.DESC));
 
         List<Indexer.IndexRecord> results = getIndexer().search(lastUpdateQuery);
 
@@ -212,92 +245,138 @@ public class IndexerService extends AbstractRaptorService {
 
         return new RecordSet(stream, results.get(0).body);
     }
-
-    public void indexData(Stream stream, RecordSet recordSet) {
+    
+    protected String getDataId(RecordSet rs) {
+        
+        if(rs.objectId == null) {
+            throw new Indexer.IndexerException("RecordSet.objectId cannot be null");
+        }
+        
+        if(rs.streamId == null) {
+            throw new Indexer.IndexerException("RecordSet.streamId cannot be null");
+        }
+        
+        String time = "" + rs.getTimestamp().getTime();
+        
+        return String.join("-", new String[] { rs.objectId, rs.streamId, time });
+    }
+    
+    public void saveData(RecordSet recordSet) {
 
         Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
-        record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getTimestamp().getTime();
         record.isNew(true);
+        
+        record.id = getDataId(recordSet);
+        record.body = recordSet.toJson();
 
-        ObjectNode data = (ObjectNode) recordSet.toJsonNode();
-
-        data.put("streamId", stream.name);
-        data.put("objectId", stream.getServiceObject().getId());
-        data.put("userId", stream.getServiceObject().getUserId());
-
-        record.body = data.toString();
-
-        getIndexer().save(record);
+        getIndexer().save(record);    
     }
+    
+    public void saveData(List<RecordSet> records) {
+        
+        if(records.size() == 1) {
+            saveData(records.get(0));
+            return;
+        }
+        
+        List<Indexer.IndexOperation> ops = new ArrayList();
+        records.stream().forEach((RecordSet record) -> {
+            
+            Indexer.IndexRecord r = getIndexRecord(IndexNames.data);
+            r.id = getDataId(record);
+            r.body = record.toJson();
 
+            Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.CREATE, r);
+            ops.add(op);
+        });
+        
+        getIndexer().batch(ops);
+    }
+    
     public void saveObjects(List<ServiceObject> ids) {
         saveObjects(ids, null);
     }
 
     public void saveObjects(List<ServiceObject> ids, Boolean isNew) {
-
+        
+        if(ids.size() == 1) {
+            indexObject(ids.get(0), isNew);
+            return;
+        }
+        
         List<Indexer.IndexOperation> ops = new ArrayList();
-        for (ServiceObject obj : ids) {
+        ids.stream().forEachOrdered((obj) -> {
             Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
             record.id = obj.id;
             if (isNew != null) {
                 record.isNew(isNew);
             }
+            
             record.body = obj.toJSON();
-
+            
             // add cache
             cache.setObject(obj);
-
             Indexer.IndexOperation.Type opType;
             if (isNew == null) {
                 opType = Indexer.IndexOperation.Type.UPSERT;
             } else {
                 opType = isNew ? Indexer.IndexOperation.Type.CREATE : Indexer.IndexOperation.Type.UPDATE;
             }
-
             Indexer.IndexOperation op = new Indexer.IndexOperation(opType, record);
             ops.add(op);
-        }
+        });
 
         getIndexer().batch(ops);
     }
 
-    public List<RecordSet> getStreamData(Stream stream) {
+    public List<RecordSet> getStreamData(Stream stream, Integer limit, Integer offset) {
 
         DataQuery query = new DataQuery();
         setQueryIndex(query, IndexNames.data);
 
-        query.match = true;
-        query.matchfield = "streamId";
-        query.matchstring = stream.name;
+        query
+                .setMatch(Query.Fields.streamId, stream.name);
 
         List<Indexer.IndexRecord> records = getIndexer().search(query);
         List<RecordSet> results = new ArrayList();
 
-        for (Indexer.IndexRecord record : records) {
-            RecordSet recordSet = new RecordSet(stream, record.body);
-            results.add(recordSet);
-        }
+        records.stream().forEachOrdered((record) -> {
+            results.add(new RecordSet(stream, record.body));
+        });
 
         return results;
     }
 
+    /**
+     * @param stream
+     *
+     * @TODO Migrate to delete by query in ES, see
+     * https://github.com/muka/raptor/issues/33
+     */
     public void deleteData(Stream stream) {
 
-        List<Indexer.IndexOperation> deletes = new ArrayList();
-        List<RecordSet> results = getStreamData(stream);
+        int offset = 0, limit = getDefaultLimit();
 
-        for (RecordSet recordSet : results) {
+        List<RecordSet> results = getStreamData(stream, limit, offset);
+        while (!results.isEmpty()) {
 
-            Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
-            record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getTimestamp().getTime();
+            List<Indexer.IndexOperation> deletes = new ArrayList();
+            results.stream().forEach((recordSet) -> {
+                Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
+                record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getTimestamp().getTime();
+                deletes.add(new Indexer.IndexOperation(Indexer.IndexOperation.Type.DELETE, record));
+            });
 
-            Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.DELETE, record);
-            deletes.add(op);
+            getIndexer().batch(deletes);
+
+            offset += limit;
+            results = getStreamData(stream, limit, offset);
         }
+    }
 
-        getIndexer().batch(deletes);
-
+    public ResultSet searchData(Stream stream, DataQuery query, Integer limit, Integer offset) {
+        setCursor(query, limit, offset);
+        return searchData(stream, query);
     }
 
     public ResultSet searchData(Stream stream, DataQuery query) {
@@ -306,31 +385,31 @@ public class IndexerService extends AbstractRaptorService {
         List<Indexer.IndexRecord> records = getIndexer().search(query);
 
         ResultSet resultset = new ResultSet(stream);
-        for (Indexer.IndexRecord record : records) {
+        records.forEach((record) -> {
             resultset.add(new RecordSet(stream, record.body));
-        }
+        });
 
         return resultset;
     }
 
     public void deleteData(Collection<Stream> changedStreams) {
-        for (Stream changedStream : changedStreams) {
+        changedStreams.forEach((changedStream) -> {
             deleteData(changedStream);
-        }
+        });
     }
 
     public ResultSet fetchData(Stream stream) {
-        return fetchData(stream, 0);
+        return fetchData(stream, getDefaultLimit(), 0);
     }
 
-    public ResultSet fetchData(Stream stream, long limit) {
+    public ResultSet fetchData(Stream stream, Integer limit, Integer offset) {
 
         // query for all the data
         DataQuery query = new DataQuery();
         setQueryIndex(query, IndexNames.data);
+        setCursor(query, limit, offset);
 
-        query.setLimit(defaultRecordLimit);
-        query.setSort(new Query.SortBy("timestamp", Query.Sort.DESC));
+        query.setSort(new Query.SortBy(Query.Fields.timestamp, Query.Sort.DESC));
         query.timeRange(Instant.EPOCH);
 
         ResultSet data = searchData(stream, query);
@@ -338,7 +417,7 @@ public class IndexerService extends AbstractRaptorService {
     }
 
     public RecordSet fetchLastUpdate(Stream stream) {
-        ResultSet data = fetchData(stream, 1);
+        ResultSet data = fetchData(stream, 1, 0);
         return data.size() > 0 ? data.get(0) : null;
     }
 

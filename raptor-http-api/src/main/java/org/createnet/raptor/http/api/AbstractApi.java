@@ -20,7 +20,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 import org.createnet.raptor.auth.authentication.Authentication;
-import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.http.service.AuthService;
 import org.createnet.raptor.http.service.DispatcherService;
 import org.createnet.raptor.http.service.EventEmitterService;

@@ -18,6 +18,8 @@ package org.createnet.raptor.http.api;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -28,7 +30,10 @@ import org.createnet.raptor.http.service.CacheService;
 import org.createnet.raptor.http.service.ConfigurationService;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.TreeService;
+import org.createnet.raptor.models.data.RecordSet;
+import org.createnet.raptor.models.objects.Channel;
 import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Stream;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.ServiceLocatorFactory;
 import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
@@ -220,5 +225,29 @@ public class IndexerServiceTest {
                         .size()
         );
 
+    }
+    
+    @Test
+    public void testRemoveData() {
+        
+        Channel c = new Channel();
+        c.name = "string";
+        c.type = "string";
+
+        Stream stream = new Stream();
+        stream.name = "test";
+        stream.channels.put("string", c);
+        
+        List<RecordSet> records = new ArrayList();
+        for (int i = 0; i < 5000; i++) {
+            
+            RecordSet rs = new RecordSet(stream);
+            rs.getRecords().put("string", "foo bar #" + Instant.now().toEpochMilli());            
+
+            records.add(rs);
+        }
+
+        indexer.saveData(records);
+        
     }
 }

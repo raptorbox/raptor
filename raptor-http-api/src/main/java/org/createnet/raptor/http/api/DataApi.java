@@ -67,27 +67,29 @@ public class DataApi extends AbstractApi {
     @GET
     @Path("{stream}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response fetch(
+    public Response fetchLastUpdate(
             @PathParam("id") String id,
-            @PathParam("stream") String streamName,
-            @QueryParam("limit") int limit,
-            @QueryParam("offset") int offset
+            @PathParam("stream") String streamName
     ) {
 
         ServiceObject obj = loadObject(id);
         Stream stream = loadStream(streamName, obj);
 
         if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
-            throw new ForbiddenException("Cannot access data");
+            throw new ForbiddenException("Cannot fetch data");
         }
 
         if (!obj.settings.storeEnabled()) {
             return Response.noContent().build();
         }
 
-        ResultSet data = indexer.fetchData(stream);
+        RecordSet data = indexer.fetchLastUpdate(stream);
 
-        logger.debug("Fetched {} records for stream {} in object {}", data.size(), streamName, obj.id);
+        logger.debug("Fetched lastUpdate record for stream {} in object {}", streamName, obj.id);
+
+        if (data == null) {
+            return Response.noContent().build();
+        }
 
         return Response.ok(data.toJson()).build();
     }
@@ -117,36 +119,6 @@ public class DataApi extends AbstractApi {
         logger.debug("Delete all records for stream {} in object {}", streamName, obj.id);
 
         return Response.noContent().build();
-    }
-
-    @GET
-    @Path("{stream}/lastUpdate")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response fetchLastUpdate(
-            @PathParam("id") String id,
-            @PathParam("stream") String streamName
-    ) {
-
-        ServiceObject obj = loadObject(id);
-        Stream stream = loadStream(streamName, obj);
-
-        if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
-            throw new ForbiddenException("Cannot fetch data");
-        }
-
-        if (!obj.settings.storeEnabled()) {
-            return Response.noContent().build();
-        }
-
-        RecordSet data = indexer.fetchLastUpdate(stream);
-
-        logger.debug("Fetched lastUpdate record for stream {} in object {}", streamName, obj.id);
-
-        if (data == null) {
-            return Response.noContent().build();
-        }
-
-        return Response.ok(data.toJson()).build();
     }
 
     @PUT
@@ -183,7 +155,7 @@ public class DataApi extends AbstractApi {
 
             // index data (with objectId and stream props)
             try {
-                indexer.indexData(stream, record);
+                indexer.saveData(record);
             } catch (Exception ex) {
                 logger.error("Failed to index record for {}", obj.id);
                 storage.deleteData(stream, record);
@@ -207,6 +179,8 @@ public class DataApi extends AbstractApi {
     public Response search(
             @PathParam("id") String id,
             @PathParam("stream") String streamName,
+            @QueryParam("limit") Integer limit,
+            @QueryParam("offset") Integer offset,
             DataQuery query
     ) {
 
@@ -221,11 +195,39 @@ public class DataApi extends AbstractApi {
             return Response.noContent().build();
         }
 
-        ResultSet results = indexer.searchData(stream, query);
+        ResultSet results = indexer.searchData(stream, query, limit, offset);
 
         logger.debug("Search data for stream {} in object {} has {} results", streamName, obj.id, results.size());
 
         return Response.ok().entity(results).build();
+    }
+
+    @GET
+    @Path("{stream}/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response fetch(
+            @PathParam("id") String id,
+            @PathParam("stream") String streamName,
+            @QueryParam("limit") Integer limit,
+            @QueryParam("offset") Integer offset
+    ) {
+
+        ServiceObject obj = loadObject(id);
+        Stream stream = loadStream(streamName, obj);
+
+        if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
+            throw new ForbiddenException("Cannot access data");
+        }
+
+        if (!obj.settings.storeEnabled()) {
+            return Response.noContent().build();
+        }
+
+        ResultSet data = indexer.fetchData(stream, limit, offset);
+
+        logger.debug("Fetched {} records for stream {} in object {}", data.size(), streamName, obj.id);
+
+        return Response.ok(data.toJson()).build();
     }
 
 }

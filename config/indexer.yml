@@ -1,3 +1,7 @@
+
+# maximum limit of data record to be fetched per request. default: 1000
+recordFetchLimit: 1000
+
 type: elasticsearch
 elasticsearch:
   type: transport

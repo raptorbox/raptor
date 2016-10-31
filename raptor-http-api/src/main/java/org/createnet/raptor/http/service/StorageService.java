@@ -189,11 +189,19 @@ public class StorageService extends AbstractRaptorService{
     }
 
     public void deleteData(Stream stream) {
-
-        List<RecordSet> records = indexer.getStreamData(stream);
-
-        for (RecordSet record : records) {
-            deleteData(stream, record);
+        
+        int offset = 0, 
+            limit = indexer.getDefaultLimit();
+        
+        List<RecordSet> records = indexer.getStreamData(stream, limit, offset);
+        while(!records.isEmpty()) {
+            
+            for (RecordSet record : records) {
+                deleteData(stream, record);
+            }
+            
+            offset += limit;
+            records = indexer.getStreamData(stream, limit, offset);
         }
 
     }
