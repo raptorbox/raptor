@@ -40,7 +40,7 @@ public class RecordSetDeserializer extends JsonDeserializer<RecordSet> {
 
         JsonNode tree = jp.getCodec().readTree(jp);
         RecordSet recordset = new RecordSet();
-        
+
         if (tree.has("userId")) {
             recordset.userId = tree.get("userId").asText();
         }
@@ -50,7 +50,7 @@ public class RecordSetDeserializer extends JsonDeserializer<RecordSet> {
         if (tree.has("streamId")) {
             recordset.streamId = tree.get("streamId").asText();
         }
-        
+
         long time = System.currentTimeMillis();
 
         if (tree.has("channels")) {
@@ -70,7 +70,7 @@ public class RecordSetDeserializer extends JsonDeserializer<RecordSet> {
         }
 
         recordset.setTimestamp(new Date(time));
-        
+
         if (tree.isObject()) {
 
             Iterator<String> it = tree.fieldNames();
@@ -80,9 +80,7 @@ public class RecordSetDeserializer extends JsonDeserializer<RecordSet> {
                 JsonNode channelNode = tree.get(channelName);
 
                 if (channelNode.isObject()) {
-                    if (channelNode.has("value")) {
-                        channelNode = channelNode.get("value");
-                    } else if (channelNode.has("current-value")) {
+                    if (channelNode.has("current-value")) {
                         channelNode = channelNode.get("current-value");
                     }
                 }
