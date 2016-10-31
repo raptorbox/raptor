@@ -18,7 +18,9 @@ before_install:
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
-  - docker-compose -f docker-compose.dev.yml up 
+  - docker-compose -f docker-compose.dev.yml pull
+  - docker-compose -f docker-compose.dev.yml build
+  - docker-compose -f docker-compose.dev.yml start
 
 # after_success:
 # after_failure:
