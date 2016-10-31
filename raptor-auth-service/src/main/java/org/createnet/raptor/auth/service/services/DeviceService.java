@@ -37,92 +37,91 @@ import org.springframework.stereotype.Service;
 @Service
 public class DeviceService {
 
-  protected static final Logger logger = LoggerFactory.getLogger(DeviceService.class);
+    protected static final Logger logger = LoggerFactory.getLogger(DeviceService.class);
 
-  @Autowired
-  private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-  @Autowired
-  private DeviceRepository deviceRepository;
+    @Autowired
+    private DeviceRepository deviceRepository;
 
-  @Autowired
-  private AclDeviceService aclDeviceService;
+    @Autowired
+    private AclDeviceService aclDeviceService;
 
-  public Device save(Device device) {
-    
-    deviceRepository.save(device);
-    aclDeviceService.register(device);
-    
-    return device;
-  }
+    public Device save(Device device) {
 
-  public Device getByUuid(String uuid) {
-    return deviceRepository.findByUuid(uuid);
-  }
+        deviceRepository.save(device);
+        aclDeviceService.register(device);
 
-  public Device get(Long id) {
-    return deviceRepository.findOne(id);
-  }
-
-  public Device sync(User user, SyncRequest req) {
-
-    Permission p = RaptorPermission.fromLabel(req.operation);
-    
-    Device device = null;
-    if (req.objectId != null) {
-      device = deviceRepository.findByUuid(req.objectId);
-    }
-    
-    /**
-     * @TODO check user permissions and roles
-     */
-    
-    if(!req.userId.equals(user.getUuid())) {
-      if(!user.isSuperAdmin()) {
-        if(!aclDeviceService.isGranted(device, user, RaptorPermission.ADMINISTRATION)) {
-          throw new AccessDeniedException("Cannot operate on that object");
-        }        
-      }
-    }
-    
-    // delete device record
-    if(p == RaptorPermission.DELETE) {
-      
-      if (device == null) {
-        throw new DeviceNotFoundException();
-      }
-      
-      deviceRepository.delete(device);
-      return null;
-    }
-    
-    // create or update device record
-    if (device == null) {
-      device = new Device();
-      device.setUuid(req.objectId);
+        return device;
     }
 
-    if (req.userId == null) {
-      device.setOwner(user);
-    } else {
-      User owner = userRepository.findByUuid(req.userId);
-      if (owner == null) {
-        throw new UserNotFoundException();
-      }
-      device.setOwner(owner);
+    public Device getByUuid(String uuid) {
+        return deviceRepository.findByUuid(uuid);
     }
 
-    if (req.parentId != null) {
-      Device parentDevice = deviceRepository.findByUuid(req.parentId);
-      if (parentDevice == null) {
-        throw new DeviceNotFoundException();
-      }
-      device.setParent(parentDevice);
+    public Device get(Long id) {
+        return deviceRepository.findOne(id);
     }
-    
-    Device dev = save(device);   
-    
-    return dev;
-  }
+
+    public Device sync(User user, SyncRequest req) {
+
+        Permission p = RaptorPermission.fromLabel(req.operation);
+
+        Device device = null;
+        if (req.objectId != null) {
+            device = deviceRepository.findByUuid(req.objectId);
+        }
+
+        /**
+         * @TODO check user permissions and roles
+         */
+        if (!req.userId.equals(user.getUuid())) {
+            if (!user.isSuperAdmin()) {
+                if (!aclDeviceService.isGranted(device, user, RaptorPermission.ADMINISTRATION)) {
+                    throw new AccessDeniedException("Cannot operate on that object");
+                }
+            }
+        }
+
+        // delete device record
+        if (p == RaptorPermission.DELETE) {
+
+            if (device == null) {
+                throw new DeviceNotFoundException();
+            }
+
+            deviceRepository.delete(device);
+            return null;
+        }
+
+        // create or update device record
+        if (device == null) {
+            device = new Device();
+            device.setUuid(req.objectId);
+        }
+
+        if (req.userId == null) {
+            device.setOwner(user);
+        } else {
+            User owner = userRepository.findByUuid(req.userId);
+            if (owner == null) {
+                throw new UserNotFoundException();
+            }
+            device.setOwner(owner);
+        }
+
+        if (req.parentId != null) {
+            Device parentDevice = deviceRepository.findByUuid(req.parentId);
+            if (parentDevice == null) {
+                throw new DeviceNotFoundException();
+            }
+            device.setParent(parentDevice);
+        }
+
+        Device dev = save(device);
+
+        return dev;
+    }
 
 }

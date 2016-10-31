@@ -106,7 +106,7 @@ public class RecordSet {
 
         this.lastUpdate = date;
     }
-    
+
     public RecordSet(ArrayList<IRecord> records, Date date, String userId) {
         this(records, date);
         this.userId = userId;
@@ -223,7 +223,7 @@ public class RecordSet {
         }
     }
 
-    private void parseJson(Stream stream, JsonNode row)  {
+    private void parseJson(Stream stream, JsonNode row) {
 
         JsonNode channels = row;
         if (row.has("channels")) {
@@ -246,7 +246,7 @@ public class RecordSet {
             JsonNode valObj = nodeValue;
 
             // allow short-hand without [current-]value
-            if(nodeValue.isObject()) {
+            if (nodeValue.isObject()) {
                 if (nodeValue.has("value")) {
                     valObj = nodeValue.get("value");
                 } else if (nodeValue.has("current-value")) {

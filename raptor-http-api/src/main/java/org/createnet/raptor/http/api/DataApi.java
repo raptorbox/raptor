@@ -28,6 +28,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
@@ -164,14 +165,17 @@ public class DataApi extends AbstractApi {
             throw new ForbiddenException("Cannot push data");
         }
 
+        Authentication.UserInfo currentUser = auth.getUser();
+
+        // set the stream, enforcing channels constrain on serialization
+        // this avoid records that do not comply with the stored model
+        record.userId = currentUser.getUserId();
+        record.setStream(stream);
+        record.validate();
+
         if (obj.settings.storeEnabled()) {
 
             logger.debug("Storing data for {} on {}", obj.id, stream.name);
-
-            // set the stream, enforcing channels constrain on serialization
-            // this avoid records that do not comply with the stored model
-            record.setStream(stream);
-            record.validate();
 
             // save data
             storage.saveData(stream, record);
@@ -192,7 +196,7 @@ public class DataApi extends AbstractApi {
 
         emitter.trigger(EventEmitterService.EventName.push, new DataEvent(stream, record, auth.getAccessToken()));
 
-        logger.debug("Stored record for stream {} in object {}", streamName, obj.id);
+        logger.debug("Received record for stream {} in object {}", streamName, obj.id);
 
         return Response.accepted().build();
     }
