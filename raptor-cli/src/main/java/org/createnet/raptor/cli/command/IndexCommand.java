@@ -225,7 +225,16 @@ public class IndexCommand implements Command {
                 Indexer.IndexRecord indexRecord = indexer.getIndexRecord(IndexerService.IndexNames.data);
 
                 try {
-                    indexRecord.id = rawobj.get("objectId").asText() + "-" + rawobj.get("streamId").asText() + "-" + rawobj.get("lastUpdate").asText();
+                
+                    String timestamp = ""+System.currentTimeMillis();
+                    if(rawobj.has("timestamp")) {
+                        timestamp = rawobj.get("timestamp").asText();
+                    } else if(rawobj.has("lastUpdate")) {
+                        timestamp = rawobj.get("lastUpdate").asText();
+                    }
+                    
+                    
+                    indexRecord.id = rawobj.get("objectId").asText() + "-" + rawobj.get("streamId").asText() + "-" + timestamp;
                 } catch (NullPointerException ex) {
                     logger.warn("NPE on record {}", rawobj.toString());
                     continue;

@@ -27,7 +27,7 @@ abstract public class Record<E> implements IRecord<E> {
     
     protected Channel channel;
     protected E value;
-    protected Date lastUpdate;
+    protected Date timestamp;
     
     protected RecordSet recordset;
     
@@ -59,29 +59,29 @@ abstract public class Record<E> implements IRecord<E> {
     }
 
     @Override
-    public Date getLastUpdate() {
+    public Date getTimestamp() {
         
-        if(lastUpdate != null) {
-            return lastUpdate;
+        if(timestamp != null) {
+            return timestamp;
         }
         
         if(recordset != null) {
-            return recordset.getLastUpdate();
+            return recordset.getTimestamp();
         }
         
         // force value
-        setLastUpdate(new Date());
-        return lastUpdate;
+        setTimestamp(new Date());
+        return timestamp;
     }
     
     @Override
-    public Long getLastUpdateTime() {
-        return (Long)(getLastUpdate().getTime() / 1000);
+    public Long getTimestampTime() {
+        return (Long)(getTimestamp().getTime() / 1000);
     }
 
     @Override
-    public void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override

@@ -83,7 +83,7 @@ public class RecordsetTest extends TestUtils {
     JsonNode json = mapper.readTree(strjson);
     
     assertTrue(json.has("channels"));
-    assertTrue(json.has("lastUpdate"));
+    assertTrue(json.has("timestamp"));
     
   }
   

@@ -170,7 +170,7 @@ public class CouchbaseConnectionTest {
         int time = getTime();
 
         ObjectNode record = record = loadData("record");
-        record.put("lastUpdate", time);
+        record.put("timestamp", time);
 
         String id = getStreamId(record, time);
 
@@ -181,7 +181,7 @@ public class CouchbaseConnectionTest {
         assertNotNull(json);
 
         assertTrue(json.has("channels"));
-        assertEquals(json.get("lastUpdate").asInt(), time);
+        assertEquals(json.get("timestamp").asInt(), time);
 
         instance.delete(id);
 
@@ -196,7 +196,7 @@ public class CouchbaseConnectionTest {
         int time = getTime();
 
         ObjectNode record = record = loadData("record");
-        record.put("lastUpdate", time);
+        record.put("timestamp", time);
 
         String id = getStreamId(record, time);
 
@@ -221,7 +221,7 @@ public class CouchbaseConnectionTest {
     public void testList() {
 
         int count = 5;
-        int lastUpdate = createRecords(5);
+        int timestamp = createRecords(5);
 
         // list records by userId + streamId
         BaseQuery query = BaseQuery.queryBy(
@@ -242,7 +242,7 @@ public class CouchbaseConnectionTest {
     public void testListLimit() throws Exception {
 
         int count = 5;
-        int lastUpdate = createRecords(5);
+        int timestamp = createRecords(5);
 
         // list records by userId + streamId
         BaseQuery query = BaseQuery.queryBy(
@@ -251,17 +251,17 @@ public class CouchbaseConnectionTest {
         );
 
         query.limit = 1;
-        query.setSort("lastUpdate", ListQuery.Sort.DESC);
+        query.setSort("timestamp", ListQuery.Sort.DESC);
 
         List<JsonNode> result = instance.list(query);
 
-        assertEquals(result.get(0).get("lastUpdate").asInt(), lastUpdate);
+        assertEquals(result.get(0).get("timestamp").asInt(), timestamp);
 
     }
 
     private int createRecords(int count) {
 
-        int lastUpdate = 0;
+        int timestamp = 0;
 
         for (int i = 0; i < count; i++) {
 
@@ -269,13 +269,13 @@ public class CouchbaseConnectionTest {
 
             ObjectNode record = record = loadData("record");
 
-            lastUpdate = time + (i * 100);
+            timestamp = time + (i * 100);
 
-            record.put("lastUpdate", lastUpdate);
+            record.put("timestamp", timestamp);
             record.put("userId", userId);
             record.put("streamId", streamId);
 
-            String id = getStreamId(record, lastUpdate);
+            String id = getStreamId(record, timestamp);
             instance.set(id, record, 0);
 
             JsonNode res = instance.get(id);
@@ -283,7 +283,7 @@ public class CouchbaseConnectionTest {
 
         }
 
-        return lastUpdate;
+        return timestamp;
     }
 
 }

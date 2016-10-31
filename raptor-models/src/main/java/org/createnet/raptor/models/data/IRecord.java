@@ -25,8 +25,8 @@ import org.createnet.raptor.models.objects.RaptorComponent;
  */
 public interface IRecord<K> {
     
-    public Date getLastUpdate();
-    public void setLastUpdate(Date date);
+    public Date getTimestamp();
+    public void setTimestamp(Date date);
     
     public String getType();
     public Class<K> getClassType();
@@ -40,7 +40,7 @@ public interface IRecord<K> {
     public Channel getChannel();
     public void setChannel(Channel channel);
 
-    public Long getLastUpdateTime();
+    public Long getTimestampTime();
     
     public RecordSet getRecordSet();
     public void setRecordSet(RecordSet recordset);

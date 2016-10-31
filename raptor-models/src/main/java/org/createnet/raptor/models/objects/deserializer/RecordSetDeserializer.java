@@ -46,7 +46,12 @@ public class RecordSetDeserializer extends JsonDeserializer<RecordSet> {
 
         if (tree.has("channels")) {
 
-            if (tree.has("lastUpdate")) {
+            if (tree.has("timestamp")) {
+                long time1 = tree.get("timestamp").asLong();
+                if (time1 > 0) {
+                    time = time1 * 1000;
+                }
+            } else if (tree.has("lastUpdate")) {
                 long time1 = tree.get("lastUpdate").asLong();
                 if (time1 > 0) {
                     time = time1 * 1000;
@@ -55,7 +60,7 @@ public class RecordSetDeserializer extends JsonDeserializer<RecordSet> {
             tree = tree.get("channels");
         }
 
-        recordset.setLastUpdate(new Date(time));
+        recordset.setTimestamp(new Date(time));
 
         if (tree.isObject()) {
 

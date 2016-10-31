@@ -66,7 +66,7 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
 
     jg.writeEndObject();
 
-    jg.writeNumberField("lastUpdate", r.getLastUpdateTime());
+    jg.writeNumberField("timestamp", r.getTimestampTime());
 
     if (r.userId != null) {
       jg.writeStringField("userId", r.userId);

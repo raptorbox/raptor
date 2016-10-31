@@ -81,15 +81,15 @@ public class MapDBConnectionTest {
       String objId = "test1";
       String userId = "test-user";
 
-      Long lastUpdate = Instant.now().getEpochSecond() + i;
+      Long timestamp = Instant.now().getEpochSecond() + i;
 
       record.put("streamId", streamId);
       record.put("objectId", objId);
       record.put("userId", userId);
 
-      record.put("lastUpdate", lastUpdate);
+      record.put("timestamp", timestamp);
 
-      String key = String.join("-", new String[]{objId, streamId, lastUpdate.toString()});
+      String key = String.join("-", new String[]{objId, streamId, timestamp.toString()});
       dataStore.set(key, record, 0);
 
     }

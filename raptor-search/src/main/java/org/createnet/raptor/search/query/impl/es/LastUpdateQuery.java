@@ -46,7 +46,7 @@ public class LastUpdateQuery extends AbstractQuery {
     query.must(QueryBuilders.termQuery("objectId", objectId));
     query.must(QueryBuilders.termQuery("stream", streamName));
     
-//    FieldSortBuilder sort = SortBuilders.fieldSort("lastUpdate");
+//    FieldSortBuilder sort = SortBuilders.fieldSort("timestamp");
 //    sort.order(SortOrder.DESC);
   
     query.filter(QueryBuilders.matchAllQuery());

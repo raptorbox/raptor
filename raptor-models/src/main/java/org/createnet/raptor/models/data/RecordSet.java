@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RecordSet {
 
-    public Date lastUpdate;
+    public Date timestamp;
     final public Map<String, IRecord> channels = new HashMap();
 
     public String userId;
@@ -68,7 +68,7 @@ public class RecordSet {
     private Stream stream;
 
     public RecordSet() {
-        this.lastUpdate = new Date();
+        this.timestamp = new Date();
     }
 
     public RecordSet(Stream stream) {
@@ -104,7 +104,7 @@ public class RecordSet {
             this.channels.put(record.getName(), record);
         }
 
-        this.lastUpdate = date;
+        this.timestamp = date;
     }
 
     public RecordSet(ArrayList<IRecord> records, Date date, String userId) {
@@ -196,19 +196,19 @@ public class RecordSet {
         return "{}";
     }
 
-    public Date getLastUpdate() {
-        if (lastUpdate == null) {
-            setLastUpdate(new Date());
+    public Date getTimestamp() {
+        if (timestamp == null) {
+            setTimestamp(new Date());
         }
-        return lastUpdate;
+        return timestamp;
     }
 
-    public Long getLastUpdateTime() {
-        return getLastUpdate().toInstant().getEpochSecond();
+    public Long getTimestampTime() {
+        return getTimestamp().toInstant().getEpochSecond();
     }
 
-    public void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 
     public Map getRecords() {
@@ -228,9 +228,12 @@ public class RecordSet {
         JsonNode channels = row;
         if (row.has("channels")) {
 
-            if (row.has("lastUpdate")) {
+            if (row.has("timestamp")) {
+                Date date = Date.from(Instant.ofEpochSecond(row.get("timestamp").asLong()));
+                this.setTimestamp(date);
+            } else if (row.has("lastUpdate")) {
                 Date date = Date.from(Instant.ofEpochSecond(row.get("lastUpdate").asLong()));
-                this.setLastUpdate(date);
+                this.setTimestamp(date);
             }
 
             channels = row.get("channels");

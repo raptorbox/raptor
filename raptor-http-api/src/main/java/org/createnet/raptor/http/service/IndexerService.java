@@ -202,7 +202,7 @@ public class IndexerService extends AbstractRaptorService {
 
         lastUpdateQuery.setOffset(0);
         lastUpdateQuery.setLimit(1);
-        lastUpdateQuery.setSort(new Query.SortBy("lastUpdate", Query.Sort.DESC));
+        lastUpdateQuery.setSort(new Query.SortBy("timestamp", Query.Sort.DESC));
 
         List<Indexer.IndexRecord> results = getIndexer().search(lastUpdateQuery);
 
@@ -216,7 +216,7 @@ public class IndexerService extends AbstractRaptorService {
     public void indexData(Stream stream, RecordSet recordSet) {
 
         Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
-        record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getLastUpdate().getTime();
+        record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getTimestamp().getTime();
         record.isNew(true);
 
         ObjectNode data = (ObjectNode) recordSet.toJsonNode();
@@ -290,7 +290,7 @@ public class IndexerService extends AbstractRaptorService {
         for (RecordSet recordSet : results) {
 
             Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
-            record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getLastUpdate().getTime();
+            record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getTimestamp().getTime();
 
             Indexer.IndexOperation op = new Indexer.IndexOperation(Indexer.IndexOperation.Type.DELETE, record);
             deletes.add(op);
@@ -330,7 +330,7 @@ public class IndexerService extends AbstractRaptorService {
         setQueryIndex(query, IndexNames.data);
 
         query.setLimit(defaultRecordLimit);
-        query.setSort(new Query.SortBy("lastUpdate", Query.Sort.DESC));
+        query.setSort(new Query.SortBy("timestamp", Query.Sort.DESC));
         query.timeRange(Instant.EPOCH);
 
         ResultSet data = searchData(stream, query);

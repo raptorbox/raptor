@@ -84,7 +84,7 @@ public class DataQuery extends AbstractQuery {
     }
 
     if (timerange && numericrange && numericrangefield != null
-            && (!numericrangefield.contains("lastUpdate"))) {
+            && (!numericrangefield.contains("timestamp"))) {
       return;
     }
 
@@ -105,7 +105,7 @@ public class DataQuery extends AbstractQuery {
 
     if (timerange) {
       RangeQueryBuilder rangeFilter
-              = QueryBuilders.rangeQuery("lastUpdate")
+              = QueryBuilders.rangeQuery("timestamp")
               .from((long) timerangefrom).to((long) timerangeto)
               .includeLower(true).includeUpper(true);
       //filter.append(rangeFilter.toString());

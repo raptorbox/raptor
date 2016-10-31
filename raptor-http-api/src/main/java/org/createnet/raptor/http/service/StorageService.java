@@ -173,64 +173,9 @@ public class StorageService extends AbstractRaptorService{
 
     // Data 
     protected String getDataId(Stream stream, RecordSet record) {
-        return stream.getServiceObject().id + "-" + stream.name + "-" + record.getLastUpdate().getTime();
+        return stream.getServiceObject().id + "-" + stream.name + "-" + record.getTimestamp().getTime();
     }
 
-//  public ResultSet fetchData(Stream stream) {
-//    return fetchData(stream, defaultRecordLimit, 0);
-//  }
-//
-//  public ResultSet fetchData(Stream stream, int limit, int offset) {
-//
-//    ResultSet resultset = new ResultSet(stream);
-//
-//    BaseQuery query = BaseQuery.queryBy("userId", auth.getUser().getUserId());
-//    query.params.add(new ListQuery.QueryParam("streamId", stream.name));
-//    query.params.add(new ListQuery.QueryParam("objectId", stream.getServiceObject().id));
-//
-//    query.setSort("lastUpdate", ListQuery.Sort.DESC);
-//    
-//    if(offset > 0)
-//      query.offset = offset;
-//    
-//    if (limit > 0) {
-//      query.limit = limit > defaultRecordLimit ? defaultRecordLimit : limit;
-//    }
-//
-//    List<JsonNode> results = getDataConnection().list(query);
-//
-//    long parseError = 0;
-//    RecordsetException lastException = null;
-//    JsonNode lastRecord = null;
-//    for (JsonNode raw : results) {
-//      try {
-//        resultset.add(raw);
-//      } catch (RecordsetException ex) {
-//        parseError++;
-//        lastException = ex;
-//        lastRecord = raw;
-//      }
-//    }
-//
-//    if (parseError > 0) {
-//      logger.debug("Skipped {} records due to parser error", parseError);
-//
-//      if (lastException != null) {
-//        logger.error("Last exception", lastException);
-//      }
-//
-//      if (lastRecord != null) {
-//        logger.error("Last raw record: {}", lastRecord);
-//      }
-//
-//    }
-//
-//    return resultset;
-//  }
-//  public RecordSet fetchLastUpdate(Stream stream) {
-//    ResultSet resultset = fetchData(stream, 1, 0);
-//    return resultset.isEmpty() ? null : resultset.get(0);
-//  }
     public void saveData(Stream stream, RecordSet record) {
 
         record.setStream(stream);
@@ -243,19 +188,6 @@ public class StorageService extends AbstractRaptorService{
         getDataConnection().delete(getDataId(stream, record));
     }
 
-//  public List<RecordSet> listData() {
-//
-//    List<JsonNode> results = getDataConnection().list(
-//            BaseQuery.queryBy("userId", auth.getUser().getUserId())
-//    );
-//
-//    List<RecordSet> list = new ArrayList();
-//    for (JsonNode raw : results) {
-//      list.add(RecordSet.fromJSON(raw));
-//    }
-//
-//    return list;
-//  }
     public void deleteData(Stream stream) {
 
         List<RecordSet> records = indexer.getStreamData(stream);

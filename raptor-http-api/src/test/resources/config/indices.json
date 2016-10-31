@@ -61,7 +61,7 @@
                         "analyzer": "whitespace",
                         "index": "not_analyzed"
                     },
-                    "lastUpdate": {
+                    "timestamp": {
                         "type": "date",
                         "index": "not_analyzed"
                     },
