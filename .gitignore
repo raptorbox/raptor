@@ -5,3 +5,4 @@ data/*
 tmp
 data
 */*.log
+/target/
