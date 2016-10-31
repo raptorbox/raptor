@@ -18,7 +18,6 @@ package org.createnet.raptor.search.query.impl.es;
 import java.time.Instant;
 import org.createnet.raptor.search.query.AbstractQuery;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.createnet.raptor.search.query.Query;
 import org.elasticsearch.common.unit.DistanceUnit;
@@ -127,7 +126,7 @@ public class DataQuery extends AbstractQuery {
     if (geodistance) {
 
       GeoDistanceQueryBuilder geodistanceFilter
-              = QueryBuilders.geoDistanceQuery("channels.location.current-value")
+              = QueryBuilders.geoDistanceQuery("channels.location")
               .distance(geodistancevalue, DistanceUnit.fromString(geodistanceunit))
               .point(pointlat, pointlon);
 
@@ -138,7 +137,7 @@ public class DataQuery extends AbstractQuery {
     if (geoboundingbox) {
 
       GeoBoundingBoxQueryBuilder geodbboxFilter
-              = QueryBuilders.geoBoundingBoxQuery("channels.location.current-value")
+              = QueryBuilders.geoBoundingBoxQuery("channels.location")
               .topLeft(geoboxupperleftlat, geoboxupperleftlon)
               .bottomRight(geoboxbottomrightlat, geoboxbottomrightlon);
 

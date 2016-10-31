@@ -4,19 +4,17 @@
       "position": [11.45, 45.11],
       "ratio": 91.9,
       "name": "My place",
-      "happy": {
-        "current-value": true
-      }
+      "happy": true
     },
-    "lastUpdate": 1463124861
+    "lastUpdate": 1463124861,
+    "userId": "foobar9000"
+        
   },
   {
     "position": [11.45, 45.11],
     "ratio": 91.9,
     "name": "My place",
-    "happy": {
-      "current-value": true
-    }
+    "happy": true
   }
 
 ]

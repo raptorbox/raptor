@@ -1,18 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package org.createnet.raptor.objects;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import org.createnet.raptor.models.data.IRecord;
 import org.createnet.raptor.models.data.types.BooleanRecord;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
-import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.utils.TestUtils;
@@ -64,7 +58,9 @@ public class RecordsetTest extends TestUtils {
     
     Stream stream = serviceObject.streams.get("mylocation");
     RecordSet records = mapper.readValue(data.toString(), RecordSet.class);
-            
+    
+    records.userId = "Mr. foobar";
+    
     IRecord channel = records.getByChannelName("happy");
     assertTrue(channel instanceof BooleanRecord);
     assertTrue(channel.getValue().equals(true));
@@ -72,7 +68,8 @@ public class RecordsetTest extends TestUtils {
     String strjson = records.toJson();
     JsonNode json =  mapper.readTree(strjson);
     
-    assertTrue(json.get("channels").get("happy").get("current-value").isBoolean());
+    assertTrue(json.get("channels").get("happy").isBoolean());
+    assertTrue(!json.get("userId").isNull());
     
   }
   

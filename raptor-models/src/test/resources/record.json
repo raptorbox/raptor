@@ -2,7 +2,5 @@
   "position": [11.45, 45.11],
   "ratio": 91.9,
   "name": "My place",
-  "happy": {
-    "current-value": true
-  }
+  "happy": true
 }

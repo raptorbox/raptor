@@ -16,7 +16,6 @@
 package org.createnet.raptor.models.objects.deserializer;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -36,64 +35,68 @@ import org.createnet.raptor.models.objects.RaptorComponent;
  */
 public class RecordSetDeserializer extends JsonDeserializer<RecordSet> {
 
-  @Override
-  public RecordSet deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+    @Override
+    public RecordSet deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
-    JsonNode tree = jp.getCodec().readTree(jp);
+        JsonNode tree = jp.getCodec().readTree(jp);
 
-    RecordSet recordset = new RecordSet();
+        RecordSet recordset = new RecordSet();
 
-    long time = System.currentTimeMillis();
+        long time = System.currentTimeMillis();
 
-    if (tree.has("channels")) {
+        if (tree.has("channels")) {
 
-      if (tree.has("lastUpdate")) {
-        long time1 = tree.get("lastUpdate").asLong();
-        if(time1 > 0) {
-          time = time1 * 1000;
+            if (tree.has("lastUpdate")) {
+                long time1 = tree.get("lastUpdate").asLong();
+                if (time1 > 0) {
+                    time = time1 * 1000;
+                }
+            }
+            tree = tree.get("channels");
         }
-      }
-      tree = tree.get("channels");
+
+        recordset.setLastUpdate(new Date(time));
+
+        if (tree.isObject()) {
+
+            Iterator<String> it = tree.fieldNames();
+            while (it.hasNext()) {
+
+                String channelName = it.next();
+                JsonNode channelNode = tree.get(channelName);
+
+                if (channelNode.isObject()) {
+                    if (channelNode.has("value")) {
+                        channelNode = channelNode.get("value");
+                    } else if (channelNode.has("current-value")) {
+                        channelNode = channelNode.get("current-value");
+                    }
+                }
+
+                for (Map.Entry<String, Record> item : TypesManager.getTypes().entrySet()) {
+                    try {
+
+                        Record recordType = item.getValue();
+                        Object val = recordType.parseValue(channelNode);
+
+                        Record instance = (Record) recordType.getClass().newInstance();
+                        instance.setValue(val);
+                        Channel channel = new Channel();
+
+                        channel.name = channelName;
+                        channel.type = instance.getType();
+                        instance.setChannel(channel);
+
+                        recordset.channels.put(channelName, instance);
+                        break;
+
+                    } catch (RaptorComponent.ParserException | InstantiationException | IllegalAccessException e) {
+                    }
+                }
+
+            }
+        }
+
+        return recordset;
     }
-
-    recordset.setLastUpdate(new Date(time));
-    
-    if (tree.isObject()) {
-      
-      Iterator<String> it = tree.fieldNames();
-      while (it.hasNext()) {
-        
-        String channelName = it.next();
-        JsonNode channelNode = tree.get(channelName);
-
-        if (channelNode.isObject() && channelNode.has("current-value")) {
-          channelNode = channelNode.get("current-value");
-        }
-
-        for (Map.Entry<String, Record> item : TypesManager.getTypes().entrySet()) {
-          try {
-
-            Record recordType = item.getValue();
-            Object val = recordType.parseValue(channelNode);
-
-            Record instance = (Record) recordType.getClass().newInstance();
-            instance.setValue(val);
-            Channel channel = new Channel();
-            
-            channel.name = channelName;
-            channel.type = instance.getType();
-            instance.setChannel(channel);
-            
-            recordset.channels.put(channelName, instance);
-            break;
-            
-          } catch (RaptorComponent.ParserException | InstantiationException | IllegalAccessException e) {
-          }
-        }
-
-      }
-    }
-
-    return recordset;
-  }
 }

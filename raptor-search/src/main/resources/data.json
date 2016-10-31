@@ -1,14 +1,8 @@
 {
   "channels": {
-    "color": {
-      "current-value": "red"
-    },
-    "size": {
-      "current-value": 100
-    },
-    "live": {
-      "current-value": true
-    }
+    "color": "red",
+    "size": 100,
+    "live": true
   },
   "lastUpdate": 1234567890
 }

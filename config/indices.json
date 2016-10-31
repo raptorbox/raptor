@@ -12,7 +12,7 @@
                 "dynamic": true,
                 "dynamic_templates": [{
                     "geo_point_location": {
-                        "path_match": "channels.location.current-value",
+                        "path_match": "channels.location",
                         "mapping": {
                             "store": "no",
                             "index": "not_analyzed",
@@ -22,7 +22,7 @@
                     }
                 }, {
                     "string": {
-                        "path_match": "channels.*.current-value",
+                        "path_match": "channels.*",
                         "match_mapping_type": "string",
                         "mapping": {
                             "store": "yes",
@@ -34,7 +34,7 @@
                     }
                 }, {
                     "double": {
-                        "path_match": "channels.*.current-value",
+                        "path_match": "channels.*",
                         "match_mapping_type": "double",
                         "mapping": {
                             "store": "yes",
@@ -45,7 +45,7 @@
                     }
                 }, {
                     "integer": {
-                        "path_match": "channels.*.current-value",
+                        "path_match": "channels.*",
                         "match_mapping_type": "integer",
                         "mapping": {
                             "store": "yes",

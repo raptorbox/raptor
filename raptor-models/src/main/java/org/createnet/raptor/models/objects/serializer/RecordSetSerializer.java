@@ -16,7 +16,6 @@
 package org.createnet.raptor.models.objects.serializer;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
@@ -56,10 +55,12 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
       if (channel.getValue() == null) {
         continue;
       }
-
-      jg.writeObjectFieldStart(channelName);
-      jg.writeObjectField("current-value", channel.getValue());
-      jg.writeEndObject();
+      
+      jg.writeObjectField(channelName, channel.getValue());
+      
+//      jg.writeObjectFieldStart(channelName);
+//      jg.writeObjectField("current-value", channel.getValue());
+//      jg.writeEndObject();
 
     }
 

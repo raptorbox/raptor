@@ -15,13 +15,11 @@
  */
 package org.createnet.raptor.models.data;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.createnet.raptor.models.data.types.NumberRecord;
 import org.createnet.raptor.models.data.types.BooleanRecord;
 import org.createnet.raptor.models.data.types.GeoPointRecord;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -35,7 +33,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import org.createnet.raptor.models.data.types.StringRecord;
 import org.createnet.raptor.models.data.types.TypesManager;
 import org.createnet.raptor.models.exception.RecordsetException;
@@ -55,7 +52,6 @@ import org.slf4j.LoggerFactory;
 @JsonSerialize(using = RecordSetSerializer.class)
 @JsonDeserialize(using = RecordSetDeserializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonFilter("publicFieldsFilter")
 public class RecordSet {
 
     public Date lastUpdate;
@@ -109,6 +105,11 @@ public class RecordSet {
         }
 
         this.lastUpdate = date;
+    }
+    
+    public RecordSet(ArrayList<IRecord> records, Date date, String userId) {
+        this(records, date);
+        this.userId = userId;
     }
 
     public static IRecord createRecord(Stream stream, String key, Object value) {
@@ -242,10 +243,15 @@ public class RecordSet {
             String channelName = item.getKey();
             JsonNode nodeValue = item.getValue();
 
-            // allow short-hand without current-value
             JsonNode valObj = nodeValue;
-            if (nodeValue.has("current-value")) {
-                valObj = nodeValue.get("current-value");
+
+            // allow short-hand without [current-]value
+            if(nodeValue.isObject()) {
+                if (nodeValue.has("value")) {
+                    valObj = nodeValue.get("value");
+                } else if (nodeValue.has("current-value")) {
+                    valObj = nodeValue.get("current-value");
+                }
             }
 
             try {
