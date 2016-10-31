@@ -26,7 +26,8 @@ import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
 
 /**
- *
+ * Serialize a RecordSet object to JSON
+ * 
  * @author Luca Capra <luca.capra@gmail.com>
  */
 public class RecordSetSerializer extends JsonSerializer<RecordSet> {

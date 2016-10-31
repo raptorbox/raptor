@@ -106,7 +106,7 @@ public class ObjectApi extends AbstractApi {
         storage.saveObject(obj);
 
         try {
-            indexer.indexObject(obj, true);
+            indexer.saveObject(obj, true);
         } catch (Indexer.IndexerException ex) {
 
             logger.error("Indexing error occured", ex);
@@ -192,7 +192,7 @@ public class ObjectApi extends AbstractApi {
         }
         
         storage.saveObject(storedObj);
-        indexer.indexObject(storedObj, false);
+        indexer.saveObject(storedObj, false);
 
         // clean up data for changed stream and actions
         storage.deleteData(changedStreams);

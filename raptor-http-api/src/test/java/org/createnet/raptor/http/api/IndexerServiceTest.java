@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Luca Capra <lcapra@create-net.org>.
+ * Copyright 2016 CREATE-NET
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ public class IndexerServiceTest {
         ServiceObject obj = new ServiceObject();
         obj.name = "test1";
 
-        indexer.indexObject(obj, true);
+        indexer.saveObject(obj, true);
 
         Assert.assertNotNull(obj.id);
     }

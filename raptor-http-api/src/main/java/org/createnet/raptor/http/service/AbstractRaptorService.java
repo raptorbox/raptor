@@ -16,7 +16,6 @@
 package org.createnet.raptor.http.service;
 
 /**
- *
  * @author Luca Capra <luca.capra@create-net.org>
  */
 abstract public class AbstractRaptorService implements RaptorService {

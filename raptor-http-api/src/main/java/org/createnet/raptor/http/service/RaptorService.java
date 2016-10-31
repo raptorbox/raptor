@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Luca Capra <lcapra@create-net.org>.
+ * Copyright 2016 CREATE-NET
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 package org.createnet.raptor.http.service;
 
 /**
- *
+ * A service exposes an API component set of features
+ * 
  * @author Luca Capra <lcapra@create-net.org>
  */
 public interface RaptorService {
@@ -48,7 +49,7 @@ public interface RaptorService {
     public void shutdown() throws ServiceException;
     
     /**
-     * Reset internal state of a service, causing a reinitialization
+     * Reset the internal state of a service and reinitialization
      */
     public void reset() throws ServiceException;
 
