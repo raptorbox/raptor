@@ -157,7 +157,7 @@ public class DataApi extends AbstractApi {
             try {
                 indexer.saveData(record);
             } catch (Exception ex) {
-                logger.error("Failed to index record for {}", obj.id);
+                logger.error("Failed to index record for {}: {}", obj.id, ex.getMessage(), ex);
                 storage.deleteData(stream, record);
                 throw new InternalServerErrorException();
             }
