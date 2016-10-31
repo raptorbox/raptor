@@ -35,153 +35,168 @@ import org.elasticsearch.index.query.RangeQueryBuilder;
  */
 public class DataQuery extends AbstractQuery {
 
-  public DataQuery() {}
-  
-  public List<DataQuery> queryList = new ArrayList();
-  
-  public boolean timerange = false;
-  public boolean numericrange = false;
-
-  public double numericrangefrom = Double.MIN_VALUE;
-  public double numericrangeto = Double.MAX_VALUE;
-
-  public double timerangefrom = Double.MIN_VALUE;
-  public double timerangeto = Double.MAX_VALUE;
-
-  public String numericrangefield;
-
-  public boolean limit = false;
-  public int limitcount;
-
-  public boolean geodistance = false;
-
-  public double pointlat;
-  public double pointlon;
-
-  public double geodistancevalue;
-  public String geodistanceunit = "km";
-
-  public boolean geoboundingbox = false;
-
-  public double geoboxupperleftlat;
-  public double geoboxupperleftlon;
-  public double geoboxbottomrightlat;
-  public double geoboxbottomrightlon;
-
-  public boolean match = false;
-  public String matchfield;
-  public String matchstring;
-
-  @Override
-  public void validate() throws Query.QueryException {
-
-    if (timerange) {
-      return;
+    public DataQuery() {
     }
 
-    if (numericrange && numericrangefield != null) {
-      return;
+    public List<DataQuery> queryList = new ArrayList();
+
+    public boolean timerange = false;
+    public boolean numericrange = false;
+
+    public double numericrangefrom = Double.MIN_VALUE;
+    public double numericrangeto = Double.MAX_VALUE;
+
+    public double timerangefrom = Double.MIN_VALUE;
+    public double timerangeto = Double.MAX_VALUE;
+
+    public String numericrangefield;
+
+    public boolean limit = false;
+    public int limitcount;
+
+    public boolean geodistance = false;
+
+    public double pointlat;
+    public double pointlon;
+
+    public double geodistancevalue;
+    public String geodistanceunit = "km";
+
+    public boolean geoboundingbox = false;
+
+    public double geoboxupperleftlat;
+    public double geoboxupperleftlon;
+    public double geoboxbottomrightlat;
+    public double geoboxbottomrightlon;
+
+    public boolean match = false;
+    public String matchfield;
+    public String matchstring;
+
+    @Override
+    public void validate() throws Query.QueryException {
+
+        if (timerange) {
+            return;
+        }
+
+        if (numericrange && numericrangefield != null) {
+            return;
+        }
+
+        if (timerange && numericrange && numericrangefield != null
+                && (!numericrangefield.contains("timestamp"))) {
+            return;
+        }
+
+        if (geodistance ^ geoboundingbox) {
+            return;
+        }
+
+        if (match && (matchfield != null && matchstring != null)) {
+            return;
+        }
+
+        throw new Query.QueryException("Query is empty");
     }
 
-    if (timerange && numericrange && numericrangefield != null
-            && (!numericrangefield.contains("timestamp"))) {
-      return;
+    protected List<QueryBuilder> buildQuery() {
+
+        ArrayList<QueryBuilder> queries = new ArrayList();
+
+        if (timerange) {
+            RangeQueryBuilder rangeFilter
+                    = QueryBuilders.rangeQuery("timestamp")
+                            .from((long) timerangefrom).to((long) timerangeto)
+                            .includeLower(true).includeUpper(true);
+            //filter.append(rangeFilter.toString());
+            queries.add(rangeFilter);
+        }
+
+        if (numericrange) {
+
+            RangeQueryBuilder numericrangeFilter
+                    = QueryBuilders.rangeQuery(numericrangefield)
+                            .from(numericrangefrom).includeLower(true)
+                            .to(numericrangeto).includeUpper(true);
+
+            //filter.append(numericrangeFilter());
+            queries.add(numericrangeFilter);
+        }
+
+        if (geodistance) {
+
+            GeoDistanceQueryBuilder geodistanceFilter
+                    = QueryBuilders.geoDistanceQuery("channels.location")
+                            .distance(geodistancevalue, DistanceUnit.fromString(geodistanceunit))
+                            .point(pointlat, pointlon);
+
+            //filter.append(geodistanceFilter.toString());
+            queries.add(geodistanceFilter);
+        }
+
+        if (geoboundingbox) {
+
+            GeoBoundingBoxQueryBuilder geodbboxFilter
+                    = QueryBuilders.geoBoundingBoxQuery("channels.location")
+                            .topLeft(geoboxupperleftlat, geoboxupperleftlon)
+                            .bottomRight(geoboxbottomrightlat, geoboxbottomrightlon);
+
+            //filter.append(geodbboxFilter());
+            queries.add(geodbboxFilter);
+        }
+
+        if (match) {
+            MatchQueryBuilder matchFilter = QueryBuilders.matchQuery(matchfield, matchstring);
+            queries.add(matchFilter);
+        }
+
+        return queries;
     }
 
-    if (geodistance ^ geoboundingbox) {
-      return;
-    }
-
-    if (match && (matchfield != null && matchstring != null)) {
-      return;
-    }
-
-    throw new Query.QueryException("Query is empty");
-  }
-
-  protected List<QueryBuilder> buildQuery() {
-    
-    ArrayList<QueryBuilder> queries = new ArrayList();
-
-    if (timerange) {
-      RangeQueryBuilder rangeFilter
-              = QueryBuilders.rangeQuery("timestamp")
-              .from((long) timerangefrom).to((long) timerangeto)
-              .includeLower(true).includeUpper(true);
-      //filter.append(rangeFilter.toString());
-      queries.add(rangeFilter);
-    }
-
-    if (numericrange) {
-
-      RangeQueryBuilder numericrangeFilter
-              = QueryBuilders.rangeQuery(numericrangefield)
-              .from(numericrangefrom).includeLower(true)
-              .to(numericrangeto).includeUpper(true);
-
-      //filter.append(numericrangeFilter());
-      queries.add(numericrangeFilter);
-    }
-
-    if (geodistance) {
-
-      GeoDistanceQueryBuilder geodistanceFilter
-              = QueryBuilders.geoDistanceQuery("channels.location")
-              .distance(geodistancevalue, DistanceUnit.fromString(geodistanceunit))
-              .point(pointlat, pointlon);
-
-      //filter.append(geodistanceFilter.toString());
-      queries.add(geodistanceFilter);
-    }
-
-    if (geoboundingbox) {
-
-      GeoBoundingBoxQueryBuilder geodbboxFilter
-              = QueryBuilders.geoBoundingBoxQuery("channels.location")
-              .topLeft(geoboxupperleftlat, geoboxupperleftlon)
-              .bottomRight(geoboxbottomrightlat, geoboxbottomrightlon);
-
-      //filter.append(geodbboxFilter());
-      queries.add(geodbboxFilter);
-    }
-
-    if (match) {
-      MatchQueryBuilder matchFilter = QueryBuilders.matchQuery(matchfield, matchstring);
-      queries.add(matchFilter);
-    }
-    
-    return queries;
-  }
-
-  @Override
-  public String format() throws QueryException {
-
-    validate();
-
-    List<QueryBuilder> queries = buildQuery();
-    
-    BoolQueryBuilder qb = QueryBuilders.boolQuery();
-    
-    for(QueryBuilder qbpart : queries) {
-      qb.must(qbpart);
+    public DataQuery setMatch(Fields field, String value) {
+        match = true;
+        matchfield = field.name();
+        matchstring = value;
+        return this;
     }
     
-    if (!qb.hasClauses()) {
-      throw new QueryException("Query is empty");
+    public DataQuery setMatch(String field, String value) {
+        match = true;
+        matchfield = field;
+        matchstring = value;
+        return this;
     }
 
-    return qb.toString();
-  }
+    @Override
+    public String format() throws QueryException {
 
-  public DataQuery timeRange(Instant from) {
-    return timeRange(from, Instant.now());
-  }
-  
-  public DataQuery timeRange(Instant from, Instant to) {
-    this.timerange = true;
-    this.timerangefrom = from.getEpochSecond();
-    this.timerangeto = to.getEpochSecond();
-    return this;
-  }
+        validate();
+
+        List<QueryBuilder> queries = buildQuery();
+
+        BoolQueryBuilder qb = QueryBuilders.boolQuery();
+
+        for (QueryBuilder qbpart : queries) {
+            qb.must(qbpart);
+        }
+
+        if (!qb.hasClauses()) {
+            throw new QueryException("Query is empty");
+        }
+
+        return qb.toString();
+    }
+
+    public DataQuery timeRange(Instant from) {
+        return timeRange(from, Instant.now());
+    }
+
+    public DataQuery timeRange(Instant from, Instant to) {
+        this.timerange = true;
+        this.timerangefrom = from.getEpochSecond();
+        this.timerangeto = to.getEpochSecond();
+        return this;
+    }
 
 }

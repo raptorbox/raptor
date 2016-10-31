@@ -24,8 +24,9 @@ public abstract class AbstractQuery implements Query {
     private String index;
     private String type;
 
-    private int limit;
-    private int offset;
+    private Integer limit = null;
+    private Integer offset = null;
+
     private Query.SortBy sort;
 
     @Override
@@ -61,11 +62,11 @@ public abstract class AbstractQuery implements Query {
         this.type = type;
     }
 
-    public void setLimit(int limit) {
+    public void setLimit(Integer limit) {
         this.limit = limit;
     }
 
-    public void setOffset(int offset) {
+    public void setOffset(Integer offset) {
         this.offset = offset;
     }
 

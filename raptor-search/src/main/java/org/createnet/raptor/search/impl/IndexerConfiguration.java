@@ -24,51 +24,53 @@ import java.util.Map;
  */
 public class IndexerConfiguration {
 
-  public IndexerConfiguration() {
-  }
-
-  public String type;
-  public ElasticSearch elasticsearch = new ElasticSearch();
-  
-  static public class ElasticSearch {
-
-    public ElasticSearch() {
+    public IndexerConfiguration() {
     }
+    
+    public Integer recordFetchLimit = 1000;
     
     public String type;
-    public Map<String, String> clientConfig = new HashMap();
-    public Transport transport = new Transport();
-    public Indices indices = new Indices();
-        
-    static public class Transport {
+    public ElasticSearch elasticsearch = new ElasticSearch();
 
-      public Transport() {
-      }
-      
-      public String host;
-      public int port;
-    }
-    
-    static public class Indices {
+    static public class ElasticSearch {
 
-      public Indices() {
-      }
-      
-      public String source;
-      public Map<String, String> definitions = new HashMap();      
-      public Map<String, IndexDescriptor> names = new HashMap();      
-      
-      static public class IndexDescriptor {
-
-        public IndexDescriptor() {
+        public ElasticSearch() {
         }
-        
-        public String index; 
-        public String type; 
-      }      
-      
+
+        public String type;
+        public Map<String, String> clientConfig = new HashMap();
+        public Transport transport = new Transport();
+        public Indices indices = new Indices();
+
+        static public class Transport {
+
+            public Transport() {
+            }
+
+            public String host;
+            public int port;
+        }
+
+        static public class Indices {
+
+            public Indices() {
+            }
+
+            public String source;
+            public Map<String, String> definitions = new HashMap();
+            public Map<String, IndexDescriptor> names = new HashMap();
+
+            static public class IndexDescriptor {
+
+                public IndexDescriptor() {
+                }
+
+                public String index;
+                public String type;
+            }
+
+        }
+
     }
-    
-  }
-  
+
 }

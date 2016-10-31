@@ -20,41 +20,55 @@ package org.createnet.raptor.search.query;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public interface Query {
- 
-  public class QueryException extends RuntimeException {
-
-    public QueryException(String m) {
-      super(m);
-    }
-  }
-  
-  public enum Sort {
-    ASC, DESC
-  }
-  
-  public class SortBy {
-
-    public SortBy(String field, Sort sort) {
-      this.sort = sort;
-      this.field = field;
+    
+    public enum Fields {
+        timestamp, channels, userId, objectId, streamId, actionId
     }
     
-    public Sort sort;
-    public String field;
-  }  
-    
-  public String getIndex();
-  public String getType();
-  
-  public void setIndex(String index);
-  public void setType(String type);
-  
-  public SortBy getSort();
-  public Integer getLimit();
-  public Integer getOffset();
-  
+    public class QueryException extends RuntimeException {
 
-  public void validate() throws QueryException;
-  public String format() throws QueryException;
-  
+        public QueryException(String m) {
+            super(m);
+        }
+    }
+
+    public enum Sort {
+        ASC, DESC
+    }
+
+    public class SortBy {
+
+        public SortBy(String field, Sort sort) {
+            this.sort = sort;
+            this.field = field;
+        }
+        public SortBy(Fields field, Sort sort) {
+            this.sort = sort;
+            this.field = field.name();
+        }
+
+        public Sort sort;
+        public String field;
+    }
+
+    public String getIndex();
+
+    public String getType();
+
+    public void setIndex(String index);
+
+    public void setType(String type);
+
+    public SortBy getSort();
+
+    public Integer getLimit();
+    public void setLimit(Integer limit);
+
+    public Integer getOffset();
+    public void setOffset(Integer offset);
+
+    public void validate() throws QueryException;
+
+    public String format() throws QueryException;
+
 }
