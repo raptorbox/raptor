@@ -1,7 +1,9 @@
 
 
 language: java
+
 script: mvn verify
+
 jdk:
   - oraclejdk8
 
@@ -18,9 +20,12 @@ before_install:
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
-  - docker-compose -f docker-compose.dev.yml pull
-  - docker-compose -f docker-compose.dev.yml build
-  - docker-compose -f docker-compose.dev.yml start
+
+before_script:
+  - docker-compose -f docker-compose.dev.yml up -d
+
+after_script:
+  - docker-compose -f docker-compose.dev.yml down
 
 # after_success:
 # after_failure:
