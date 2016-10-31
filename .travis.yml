@@ -7,6 +7,11 @@ script: mvn verify
 jdk:
   - oraclejdk8
 
+addons:
+  hosts:
+    - raptor.local
+    - api.raptor.local
+
 sudo: required
 
 services:
