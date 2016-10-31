@@ -211,7 +211,7 @@ public class RecordSet {
         this.timestamp = timestamp;
     }
 
-    public Map getRecords() {
+    public Map<String, IRecord> getRecords() {
         return channels;
     }
 

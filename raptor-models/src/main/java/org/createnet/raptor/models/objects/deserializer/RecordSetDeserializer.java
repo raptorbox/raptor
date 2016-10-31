@@ -39,9 +39,18 @@ public class RecordSetDeserializer extends JsonDeserializer<RecordSet> {
     public RecordSet deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
         JsonNode tree = jp.getCodec().readTree(jp);
-
         RecordSet recordset = new RecordSet();
-
+        
+        if (tree.has("userId")) {
+            recordset.userId = tree.get("userId").asText();
+        }
+        if (tree.has("objectId")) {
+            recordset.objectId = tree.get("objectId").asText();
+        }
+        if (tree.has("streamId")) {
+            recordset.streamId = tree.get("streamId").asText();
+        }
+        
         long time = System.currentTimeMillis();
 
         if (tree.has("channels")) {
@@ -61,7 +70,7 @@ public class RecordSetDeserializer extends JsonDeserializer<RecordSet> {
         }
 
         recordset.setTimestamp(new Date(time));
-
+        
         if (tree.isObject()) {
 
             Iterator<String> it = tree.fieldNames();

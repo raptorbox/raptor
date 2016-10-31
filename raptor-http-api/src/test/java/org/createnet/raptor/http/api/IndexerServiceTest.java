@@ -30,6 +30,7 @@ import org.createnet.raptor.http.service.CacheService;
 import org.createnet.raptor.http.service.ConfigurationService;
 import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.http.service.TreeService;
+import org.createnet.raptor.models.data.IRecord;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Channel;
 import org.createnet.raptor.models.objects.ServiceObject;
@@ -90,10 +91,13 @@ public class IndexerServiceTest {
                 file.getAbsolutePath(),
                 config.getIndexer().elasticsearch.indices.source
         ).toFile().getAbsolutePath();
-
+        
         cache.reset();
         indexer.reset();
         tree.reset();
+        
+        indexer.getIndexer().open();
+        indexer.getIndexer().setup(true);
     }
 
     @After
@@ -230,24 +234,30 @@ public class IndexerServiceTest {
     @Test
     public void testRemoveData() {
         
+        ServiceObject obj = new ServiceObject(rndName("test remove"));
+        
         Channel c = new Channel();
-        c.name = "string";
+        c.name = "foochannel";
         c.type = "string";
 
         Stream stream = new Stream();
         stream.name = "test";
         stream.channels.put("string", c);
+        stream.setServiceObject(obj);
         
         List<RecordSet> records = new ArrayList();
         for (int i = 0; i < 5000; i++) {
             
+            String val = "foo bar #" + Instant.now().toEpochMilli();
+            
             RecordSet rs = new RecordSet(stream);
-            rs.getRecords().put("string", "foo bar #" + Instant.now().toEpochMilli());            
+            IRecord rval = RecordSet.createRecord(stream, c.name, val);
+            rs.getRecords().put(c.name, rval);
 
             records.add(rs);
         }
 
         indexer.saveData(records);
-        
+        indexer.deleteData(stream);
     }
 }
