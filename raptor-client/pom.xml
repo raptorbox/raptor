@@ -48,8 +48,11 @@
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
       <version>20160212</version>
-    </dependency>    
-            
-            
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>raptor-search</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>

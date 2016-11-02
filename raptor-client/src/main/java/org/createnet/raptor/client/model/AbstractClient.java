@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 CREATE-NET
+ * Copyright 2016 Luca Capra <luca.capra@create-net.org>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,28 @@ import org.createnet.raptor.client.RaptorClient;
 import org.createnet.raptor.client.RaptorComponent;
 
 /**
- * Represent a virtual object
  *
- * @author Luca Capra <lcapra@create-net.org>
+ * @author Luca Capra <luca.capra@create-net.org>
  */
-public class Stream
-        extends org.createnet.raptor.models.objects.Stream
-        implements RaptorComponent {
+abstract class AbstractClient implements RaptorComponent {
+
+    protected String buildQueryString(Integer offset, Integer limit) {
+        String qs = null;
+        if (offset != null) {
+            qs = "?offset=" + offset;
+        }
+        if (limit != null) {
+            if (qs == null) {
+                qs = "?";
+            } else {
+                qs += "&";
+            }
+            qs += "limit=" + limit;
+        }
+        return qs == null ? "" : qs;
+    }
 
     private RaptorClient client;
-
-    public Stream() {
-    }
 
     @Override
     public RaptorClient getClient() {

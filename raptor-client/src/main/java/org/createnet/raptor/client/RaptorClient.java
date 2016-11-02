@@ -26,7 +26,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import org.createnet.raptor.client.event.MessageEventListener;
 import org.createnet.raptor.client.exception.ClientException;
-import org.createnet.raptor.client.model.ServiceObject;
+import org.createnet.raptor.models.objects.ServiceObject;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -38,11 +38,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Client class for MQTT and HTTP operations
- * 
+ *
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class RaptorClient implements IClient, RaptorComponent {
-    
+
     static {
 
         // Only one time
@@ -82,11 +82,12 @@ public class RaptorClient implements IClient, RaptorComponent {
     public enum Event {
         DATA, OBJECT
     }
-    
+
     /**
      * JSON serializable configuration
      */
     public static class RaptorConfig {
+
         public String username;
         public String password;
         public String apiKey;
@@ -99,13 +100,18 @@ public class RaptorClient implements IClient, RaptorComponent {
     public static class Routes {
 
         final static public String LIST = "/";
-        final static public String FIND = "/search";
+        final static public String SEARCH = "/search";
 
         final static public String CREATE = "/";
-        final static public String UPDATE = "/{id}";
-        final static public String LOAD = "/{id}";
-        final static public String DELETE = "/{id}";
-        
+        final static public String UPDATE = "/{0}";
+        final static public String LOAD = "/{0}";
+        final static public String DELETE = "/{0}";
+
+        final static public String PUSH = "/{0}/streams/{1}";
+        final static public String LAST_UPDATE = "/{0}/streams/{1}";
+        final static public String PULL = "/{0}/streams/{1}/list";
+        final static public String SEARCH_DATA = "/{0}/streams/{1}/search";
+
     }
 
     public RaptorClient(RaptorConfig config) {
@@ -121,27 +127,20 @@ public class RaptorClient implements IClient, RaptorComponent {
     public void setClient(RaptorClient client) {
         this.client = client;
     }
-    
+
     /**
      * Add the configured base url to path
+     *
      * @param path base path to create url from
      * @return a full url
      */
     public String url(String path) {
         return config.url + path;
     }
-    
-    /**
-     * Proxy a call to ServiceObject.load
-     * @param id device id to load
-     * @return a ServiceObject instance
-     */
-    public ServiceObject load(String id) {
-        return createObject().load(id);
-    }
 
     /**
      * Creates a ServiceObject instance with container reference set
+     *
      * @return the new ServiceObject instance
      */
     public ServiceObject createObject() {
@@ -152,7 +151,7 @@ public class RaptorClient implements IClient, RaptorComponent {
 
     /**
      * Return and lazily creates an MQTT client
-     * 
+     *
      * @return the MQTT client instance
      */
     public MqttClient getMqttClient() {
@@ -183,12 +182,11 @@ public class RaptorClient implements IClient, RaptorComponent {
         return mqttClient;
     }
 
- 
     /**
      * Unsubscribe from an MQTT topic
-     * 
+     *
      * @param topic the topic to listen for
-     */    
+     */
     @Override
     public void unsubscribe(String topic) {
         try {
@@ -197,10 +195,11 @@ public class RaptorClient implements IClient, RaptorComponent {
             throw new ClientException(ex);
         }
     }
-    
+
     /**
-     * Subscribe to an MQTT topic emitting a callback as specified in MessageEventListener
-     * 
+     * Subscribe to an MQTT topic emitting a callback as specified in
+     * MessageEventListener
+     *
      * @param topic the topic to listen for
      * @param listener the listener implementation
      */
@@ -242,10 +241,10 @@ public class RaptorClient implements IClient, RaptorComponent {
             throw new ClientException(ex);
         }
     }
-    
+
     /**
      * Perform a PUT request to the API
-     * 
+     *
      * @param url path of request
      * @param body content to be sent
      * @return the request response
@@ -260,16 +259,16 @@ public class RaptorClient implements IClient, RaptorComponent {
             return objResponse.getBody();
         } catch (UnirestException ex) {
             throw new ClientException(ex);
-        }        
+        }
     }
-    
+
     /**
      * Perform a POST request to the API
-     * 
+     *
      * @param url path of request
      * @param body content to be sent
      * @return the request response
-     */    
+     */
     @Override
     public JsonNode post(String url, JsonNode body) {
         try {
@@ -280,15 +279,15 @@ public class RaptorClient implements IClient, RaptorComponent {
             return objResponse.getBody();
         } catch (UnirestException ex) {
             throw new ClientException(ex);
-        }        
+        }
     }
-    
+
     /**
      * Perform a GET request to the API
-     * 
+     *
      * @param url path of request
      * @return the request response
-     */    
+     */
     @Override
     public JsonNode get(String url) {
         try {
@@ -298,15 +297,15 @@ public class RaptorClient implements IClient, RaptorComponent {
             return objResponse.getBody();
         } catch (UnirestException ex) {
             throw new ClientException(ex);
-        }        
+        }
     }
-    
+
     /**
      * Perform a DELETE request to the API
-     * 
+     *
      * @param url path of request
      * @return the request response
-     */    
+     */
     @Override
     public JsonNode delete(String url) {
         try {
@@ -316,7 +315,7 @@ public class RaptorClient implements IClient, RaptorComponent {
             return objResponse.getBody();
         } catch (UnirestException ex) {
             throw new ClientException(ex);
-        }        
+        }
     }
-    
+
 }

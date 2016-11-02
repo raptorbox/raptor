@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.search.query;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
@@ -70,5 +72,7 @@ public interface Query {
     public void validate() throws QueryException;
 
     public String format() throws QueryException;
-
+    
+    public JsonNode toJSON() throws QueryException;
+    
 }

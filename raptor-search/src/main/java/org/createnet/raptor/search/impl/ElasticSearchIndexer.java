@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ElasticSearchIndexer extends AbstractIndexer {
 
-    final protected ObjectMapper mapper = new ObjectMapper();
+    final protected ObjectMapper mapper = Indexer.getObjectMapper();
     protected Client client;
     final protected Logger logger = LoggerFactory.getLogger(ElasticSearchIndexer.class);
     final private ElasticSearchIndexAdmin indexAdmin = new ElasticSearchIndexAdmin();

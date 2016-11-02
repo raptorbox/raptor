@@ -15,6 +15,9 @@
  */
 package org.createnet.raptor.search.query;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import org.createnet.raptor.search.Indexer;
+
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
@@ -54,18 +57,22 @@ public abstract class AbstractQuery implements Query {
         return sort;
     }
 
+    @Override
     public void setIndex(String index) {
         this.index = index;
     }
 
+    @Override
     public void setType(String type) {
         this.type = type;
     }
 
+    @Override
     public void setLimit(Integer limit) {
         this.limit = limit;
     }
 
+    @Override
     public void setOffset(Integer offset) {
         this.offset = offset;
     }
@@ -74,4 +81,9 @@ public abstract class AbstractQuery implements Query {
         this.sort = sort;
     }
 
+    @Override
+    public JsonNode toJSON() throws QueryException {
+        return Indexer.getObjectMapper().convertValue(this, JsonNode.class);
+    }
+    
 }

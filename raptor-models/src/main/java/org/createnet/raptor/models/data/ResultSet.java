@@ -38,10 +38,20 @@ public class ResultSet extends ArrayList<RecordSet> {
     @JsonIgnore
     private final Logger logger = LoggerFactory.getLogger(ResultSet.class);
 
+    /**
+     * Get the stream referencing this ResultSet records
+     *
+     * @return a stream instance
+     */
     public Stream getStream() {
         return stream;
     }
 
+    /**
+     * Set the stream referencing this ResultSet records
+     *
+     * @param stream a stream instance
+     */
     public void setStream(Stream stream) {
         this.stream = stream;
     }
@@ -49,17 +59,24 @@ public class ResultSet extends ArrayList<RecordSet> {
     public ResultSet() {
     }
 
+    public ResultSet(Stream stream) {
+        setStream(stream);
+    }
+
     public ResultSet(Stream stream, String jsonString) {
-        this.stream = stream;
+        this(stream);
         if (jsonString != null) {
             parse(jsonString);
         }
     }
 
-    public ResultSet(Stream stream) {
-        this(stream, null);
+    public ResultSet(Stream stream, JsonNode jsonString) {
+        this(stream);
+        if (jsonString != null) {
+            parse(jsonString);
+        }
     }
-
+    
     private void parse(String jsonString) {
 
         ObjectMapper mapper = ServiceObject.getMapper();
@@ -72,6 +89,10 @@ public class ResultSet extends ArrayList<RecordSet> {
             return;
         }
 
+        parse(json);
+    }
+
+    private void parse(JsonNode json) {
         if (json.isArray()) {
             for (JsonNode row : json) {
                 this.add(new RecordSet(this.getStream(), row));
@@ -79,33 +100,59 @@ public class ResultSet extends ArrayList<RecordSet> {
         }
 
     }
-
+    
+    /**
+     * Add a record from a raw string
+     * @param raw the string with json to add
+     * @return operation result
+     */
     public boolean add(String raw) {
         RecordSet recordset = new RecordSet(stream, raw);
         return this.add(recordset);
     }
 
+    /**
+     * Add a record from a raw JsonNode
+     * @param raw the string with JsonNode to add
+     * @return operation result
+     */
     public boolean add(JsonNode raw) {
         RecordSet recordset = new RecordSet(stream, raw);
         return this.add(recordset);
     }
-
+    
+    /**
+     * Return the string JSON ResultSet
+     * @return string JSON ResultSet
+     */
     public String toJson() {
         return toJsonNode().toString();
     }
 
+    /**
+     * Return the JsonNode representation of the ResultSet
+     * @return JsonNode representation of the ResultSet
+     */
     public ArrayNode toJsonNode() {
         ObjectMapper mapper = ServiceObject.getMapper();
         ArrayNode list = mapper.createArrayNode();
-        for (RecordSet record : this) {
+        this.forEach((record) -> {
             list.add(record.toJsonNode());
-        }
+        });
         return list;
     }
 
     @Override
     public String toString() {
         return toJson();
+    }
+
+    public static ResultSet fromJSON(Stream stream, JsonNode raw) {
+        return new ResultSet(stream, raw);
+    }
+
+    public static ResultSet fromJSON(Stream stream, String raw) {
+        return new ResultSet(stream, raw);
     }
 
 }

@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.search;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.createnet.raptor.search.impl.IndexerConfiguration;
 import org.createnet.raptor.search.query.Query;
@@ -24,7 +25,13 @@ import org.createnet.raptor.search.query.Query;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public interface Indexer {
-
+    
+    final static ObjectMapper mapper = new ObjectMapper();
+    
+    public static ObjectMapper getObjectMapper() {
+        return mapper;
+    }
+    
     public class IndexerException extends RuntimeException {
 
         public IndexerException(Exception ex) {
