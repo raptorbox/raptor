@@ -15,14 +15,15 @@
  */
 package org.createnet.raptor.client.model;
 
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import com.fasterxml.jackson.databind.JsonNode;
+import java.util.HashMap;
+import java.util.Map;
 import org.createnet.raptor.client.RaptorClient;
 import org.createnet.raptor.client.RaptorComponent;
 import org.createnet.raptor.client.exception.ClientException;
 
 /**
+ * Represent a virtual object
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
@@ -32,6 +33,9 @@ public class ServiceObject
 
     private RaptorClient client;
 
+    final public Map<String, Action> actions = new HashMap();
+    final public Map<String, Stream> streams = new HashMap();    
+    
     public ServiceObject() {
     }
 
@@ -39,58 +43,71 @@ public class ServiceObject
         this.id = id;
     }
 
+    /**
+     * Load a ServiceObject from a JsonNode object
+     *
+     * @param json the object to read from
+     * @return a ServiceObject instance
+     */
+    public static ServiceObject fromJSON(JsonNode json) {
+        return (ServiceObject) org.createnet.raptor.models.objects.ServiceObject.fromJSON(json);
+    }
+
+    /**
+     * Load a ServiceObject from a String
+     *
+     * @param json the object to read from
+     * @return a ServiceObject instance
+     */
+    public static ServiceObject fromJSON(String json) {
+        return (ServiceObject) org.createnet.raptor.models.objects.ServiceObject.fromJSON(json);
+    }
+
+    /**
+     * Load an object definition
+     *
+     * @param id unique id of the object
+     * @return the ServiceObject instance
+     */
     public ServiceObject load(String id) {
-
-        try {
-
-            HttpResponse<ServiceObject> objResponse = Unirest
-                    .get(getClient().url(RaptorClient.Routes.LOAD))
-                    .routeParam("id", id)
-                    .asObject(ServiceObject.class);
-
-            ServiceObject obj = objResponse.getBody();
-            return obj;
-
-        } catch (UnirestException ex) {
-            throw new ClientException(ex);
-        }
-
+        parse(
+                getClient().get(
+                        RaptorComponent.format(RaptorClient.Routes.LOAD, id)
+                )
+        );
+        return this;
     }
 
+    /**
+     * Update a ServiceObject instance
+     *
+     * @return the updated ServiceObject instance
+     */
     public ServiceObject update() {
-
-        try {
-
-            HttpResponse<ServiceObject> objResponse = Unirest
-                    .get(getClient().url(RaptorClient.Routes.UPDATE))
-                    .routeParam("id", id)
-                    .asObject(ServiceObject.class);
-
-            return this;
-
-        } catch (UnirestException ex) {
-            throw new ClientException(ex);
-        }
-
+        parse(
+                getClient().put(
+                        RaptorComponent.format(RaptorClient.Routes.UPDATE, this.getId()),
+                        this.toJsonNode()
+                )
+        );
+        return this;
     }
 
-    public ServiceObject delete() {
-
-        try {
-
-            HttpResponse<ServiceObject> objResponse = Unirest
-                    .get(getClient().url(RaptorClient.Routes.UPDATE))
-                    .routeParam("id", id)
-                    .asObject(ServiceObject.class);
-
-            return getClient().createObject();
-
-        } catch (UnirestException ex) {
-            throw new ClientException(ex);
-        }
-
+    /**
+     * Delete a ServiceObject instance and all of its data
+     */
+    public void delete() {
+        getClient().delete(
+                RaptorComponent.format(RaptorClient.Routes.DELETE, this.getId())
+        );
+        this.id = null;
     }
 
+    /**
+     * Load a ServiceObject definition
+     *
+     * @return the ServiceObject instance
+     */
     public ServiceObject load() {
         if (this.getId() == null) {
             throw new ClientException("ServiceObject is missing id, cannot load");
@@ -98,6 +115,7 @@ public class ServiceObject
         return load(this.getId());
     }
 
+    @Override
     public RaptorClient getClient() {
         return this.client;
     }

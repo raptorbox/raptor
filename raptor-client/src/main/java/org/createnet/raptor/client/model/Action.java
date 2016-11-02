@@ -13,22 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client;
+package org.createnet.raptor.client.model;
 
-import java.text.MessageFormat;
+import org.createnet.raptor.client.RaptorClient;
+import org.createnet.raptor.client.RaptorComponent;
 
 /**
+ * Represent a virtual object
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public interface RaptorComponent extends org.createnet.raptor.models.objects.RaptorComponent {
+public class Action
+        extends org.createnet.raptor.models.objects.Stream
+        implements RaptorComponent {
 
-    public static String format(String text, Object... args) {
-        return MessageFormat.format(text, args);
+    private RaptorClient client;
+
+    public Action() {
     }
 
-    public RaptorClient getClient();
+    @Override
+    public RaptorClient getClient() {
+        return this.client;
+    }
 
-    public void setClient(RaptorClient client);
+    @Override
+    public void setClient(RaptorClient client) {
+        this.client = client;
+    }
 
 }

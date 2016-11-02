@@ -16,8 +16,11 @@
 package org.createnet.raptor.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,12 +37,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Client class for MQTT and HTTP operations
+ * 
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class RaptorClient implements RaptorComponent {
-
+public class RaptorClient implements IClient, RaptorComponent {
+    
     static {
+
         // Only one time
         Unirest.setObjectMapper(new ObjectMapper() {
 
@@ -77,13 +82,20 @@ public class RaptorClient implements RaptorComponent {
     public enum Event {
         DATA, OBJECT
     }
-
+    
+    /**
+     * JSON serializable configuration
+     */
     public static class RaptorConfig {
-
+        public String username;
+        public String password;
         public String apiKey;
-        public String url = "https://api.raptorbox.eu";
+        public String url = "https://api.raptor.local";
     }
 
+    /**
+     * List of base path for Raptor API
+     */
     public static class Routes {
 
         final static public String LIST = "/";
@@ -93,27 +105,56 @@ public class RaptorClient implements RaptorComponent {
         final static public String UPDATE = "/{id}";
         final static public String LOAD = "/{id}";
         final static public String DELETE = "/{id}";
-
+        
     }
 
     public RaptorClient(RaptorConfig config) {
         this.config = config;
     }
 
+    @Override
+    public RaptorClient getClient() {
+        return this;
+    }
+
+    @Override
+    public void setClient(RaptorClient client) {
+        this.client = client;
+    }
+    
+    /**
+     * Add the configured base url to path
+     * @param path base path to create url from
+     * @return a full url
+     */
     public String url(String path) {
         return config.url + path;
     }
-
+    
+    /**
+     * Proxy a call to ServiceObject.load
+     * @param id device id to load
+     * @return a ServiceObject instance
+     */
     public ServiceObject load(String id) {
         return createObject().load(id);
     }
 
+    /**
+     * Creates a ServiceObject instance with container reference set
+     * @return the new ServiceObject instance
+     */
     public ServiceObject createObject() {
         ServiceObject obj = new ServiceObject();
         obj.setContainer(this);
         return obj;
     }
 
+    /**
+     * Return and lazily creates an MQTT client
+     * 
+     * @return the MQTT client instance
+     */
     public MqttClient getMqttClient() {
         if (mqttClient == null) {
             try {
@@ -142,6 +183,13 @@ public class RaptorClient implements RaptorComponent {
         return mqttClient;
     }
 
+ 
+    /**
+     * Unsubscribe from an MQTT topic
+     * 
+     * @param topic the topic to listen for
+     */    
+    @Override
     public void unsubscribe(String topic) {
         try {
             getMqttClient().unsubscribe(topic);
@@ -149,7 +197,14 @@ public class RaptorClient implements RaptorComponent {
             throw new ClientException(ex);
         }
     }
-
+    
+    /**
+     * Subscribe to an MQTT topic emitting a callback as specified in MessageEventListener
+     * 
+     * @param topic the topic to listen for
+     * @param listener the listener implementation
+     */
+    @Override
     public void subscribe(String topic, MessageEventListener listener) {
         try {
 
@@ -187,15 +242,81 @@ public class RaptorClient implements RaptorComponent {
             throw new ClientException(ex);
         }
     }
-
+    
+    /**
+     * Perform a PUT request to the API
+     * 
+     * @param url path of request
+     * @param body content to be sent
+     * @return the request response
+     */
     @Override
-    public RaptorClient getClient() {
-        return this;
+    public JsonNode put(String url, JsonNode body) {
+        try {
+            HttpResponse<JsonNode> objResponse = Unirest
+                    .put(getClient().url(url))
+                    .body(body)
+                    .asObject(JsonNode.class);
+            return objResponse.getBody();
+        } catch (UnirestException ex) {
+            throw new ClientException(ex);
+        }        
     }
-
+    
+    /**
+     * Perform a POST request to the API
+     * 
+     * @param url path of request
+     * @param body content to be sent
+     * @return the request response
+     */    
     @Override
-    public void setClient(RaptorClient client) {
-        this.client = client;
+    public JsonNode post(String url, JsonNode body) {
+        try {
+            HttpResponse<JsonNode> objResponse = Unirest
+                    .post(getClient().url(url))
+                    .body(body)
+                    .asObject(JsonNode.class);
+            return objResponse.getBody();
+        } catch (UnirestException ex) {
+            throw new ClientException(ex);
+        }        
     }
-
+    
+    /**
+     * Perform a GET request to the API
+     * 
+     * @param url path of request
+     * @return the request response
+     */    
+    @Override
+    public JsonNode get(String url) {
+        try {
+            HttpResponse<JsonNode> objResponse = Unirest
+                    .get(getClient().url(url))
+                    .asObject(JsonNode.class);
+            return objResponse.getBody();
+        } catch (UnirestException ex) {
+            throw new ClientException(ex);
+        }        
+    }
+    
+    /**
+     * Perform a DELETE request to the API
+     * 
+     * @param url path of request
+     * @return the request response
+     */    
+    @Override
+    public JsonNode delete(String url) {
+        try {
+            HttpResponse<JsonNode> objResponse = Unirest
+                    .delete(getClient().url(url))
+                    .asObject(JsonNode.class);
+            return objResponse.getBody();
+        } catch (UnirestException ex) {
+            throw new ClientException(ex);
+        }        
+    }
+    
 }
