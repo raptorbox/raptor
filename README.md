@@ -10,6 +10,8 @@ Raptor is a complete open-source solution for Rapid Prototyping of application f
 
 It is composed of an HTTP API and a MQTT broker (+AMQP and others) to create reactive stream of data of your devices
 
+You can learn more in the introduction section of the [documentation](http://muka.github.io/raptor/)
+
 ### Setup
 
 To setup the basic services required use [Docker Compose](https://docs.docker.com/compose/)
