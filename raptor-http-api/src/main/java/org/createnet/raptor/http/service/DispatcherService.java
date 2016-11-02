@@ -309,7 +309,7 @@ public class DispatcherService extends AbstractRaptorService {
     }
 
     public void actionTrigger(Action action, String status) {
-        String topic = action.getServiceObject().id + "/actuations/" + action.name;
+        String topic = action.getServiceObject().id + "/actions/" + action.name;
         notifyEvent(topic, new DataPayload(status));
     }
 

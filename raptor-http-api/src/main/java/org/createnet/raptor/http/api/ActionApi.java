@@ -39,7 +39,7 @@ import org.createnet.raptor.models.objects.Action;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-@Path("/{id}/actuations")
+@Path("/{id}/actions")
 public class ActionApi extends AbstractApi {
 
     final private Logger logger = LoggerFactory.getLogger(ActionApi.class);
