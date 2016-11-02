@@ -1,7 +1,6 @@
-Introduction
-===
+# Introduction
 
-Raptor is a platform offering a set of tools to easily and quickly connect your devices,  making data they generate  accessible from the cloud and offering mechanisms to interact with them remotely in order to build your connected solutions and applications.
+Raptor is a platform offering a set of tools to easily and quickly connect your devices, making data they generate accessible from the cloud and offering mechanisms to interact with them remotely in order to build your connected solutions and applications.
 
 ![Features](img/RaptorFeatures.png)
 

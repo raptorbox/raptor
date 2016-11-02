@@ -1,114 +1,107 @@
+# Data Model
 
 Raptor uses a well-defined data model to define a device and all of its possible interactions
 
-Device
----
+## Device
 
 Imagine we want to control a Drone within Raptor.
 
 To start we need to identify some key fields to describe our device to the platform
 
-```json
+```
 {
     "name": "Drone",
     "description": "My drone",
     "customFields": {
-        "model": "aero/202111"
+        "model": "aero-202111"
     }
 }
 ```
 
-**Fields**
+###Fields
 
-- **name** is *required* and is used to identify the device
 
-- **description** is a textual description of the device to help users to identify the device and will be used in searches too
+- `name` is _required_ and is used to identify the device
 
-- **customFields** is an object of key / values properties which may be useful to define further details of the device. In the example we put the model but may be any other data
+- `description` is a textual description of the device to help users to identify the device and will be used in searches too
 
----
-Streams
----
+- `customFields` is an object of key / values properties which may be useful to define further details of the device. In the example we put the model but may be any other data
 
-Streams are datasets, you can imagine them as tables where defined channels are columns
+## Streams
+
+Streams are datasets, you can imagine them as tables. A channel stay in a stream and is the minimum information to give sense to the data. Imagine to a channel as a column of our table.
 
 Let's have an example with a **location table** which store the movement of our Drone
 
-Position     | Altitude      | Heading
------------- | ------------- | ------------
-11.25, 52.11 | 114.2         | 241.9
+Position     | Altitude | Heading
+------------ | -------- | -------
+11.25, 52.11 | 114.2    | 241.9
 
 Our Drone is at a geo-referenced `Position` and at a certain `Altitude` with a degree of `Heading`.
 
 We can now easily migrate to the Raptor json data model
 
-The *streams* field contains a list of stream definitions indexed by name
+The _streams_ field contains a list of stream definitions indexed by name
 
 In our example the stream name is `location`
 
-```json
+```
 {
     "streams": {
         "location": {
-            "channels": {},
-            "description": "GPS outdoor location",
-            "type": "sensor"
-        }
+
+        },          
+        "another stream": {}
     }
 }
 ```
 
-**Fields**
-
-- **description** is the human readable presentation of the stream
-
-- **type** the type of stream. It can be any value (eg `open-data`), most commonly `sensor`
-
-- **channels** is a *required* field and contains the list of data fields definitions for this stream
-
----
-Channels
----
+## Channels
 
 Channels are the single unit of data for a stream. An example can be the GPS `position` and `heading` or `temperature` or `pressure` for a weather device.
 
-A sample definition of a channel is
+A sample extended definition is
 
-
-```json
+```
 {
-    "channels": {
-        "position": {
-            "type": "geo_point",
-            "unit": "degrees"
-        }
-    }
+  "position": {
+      "type": "geo_point",
+      "unit": "degrees"
+  }
 }
 ```
 
 The channel name is specified as key in the channels object, in this case `position`
 
-**Fields**
+###Fields
 
-- **type** is a predefined value and can be one of
-    - `number` any number like `-1`, `1.5`, `1.23e-7`
-    - `string` any UTF-8 string like `µ€llò ←→ wørld ™`
-    - `boolean` one of `true` or `false`
-    - `geo_point` a point coordinate in a format of
-        - a string like `lon, lat`
-        - a json array like `[lon, lat]`
-        - a json object like `{ "lon": n.n, "lat": n.n }`
-        - a geohash `drm3btev3e86`
+- `type` is a predefined value and can be one of
 
-- **unit** is a descriptive string value for the type of the data, eg `degrees`, `miles`, `celsius`,  `meters`
+  - `number` any number like `-1`, `1.5`, `1.23e-7`
+  - `string` any UTF-8 string like `µ€llò ←→ wørld ™`
+  - `boolean` one of `true` or `false`
+  - `geo_point` a point coordinate in a format of
 
----
-Actuations
----
+    - a string like `lon, lat`
+    - a json array like `[lon, lat]`
+    - a json object like `{ "lon": n.n, "lat": n.n }`
+    - a geohash `drm3btev3e86`
+
+- `unit` is a descriptive string value for the type of the data, eg `degrees`, `miles`, `celsius`, `meters`
+
+A minimum channel definition can be composed of just the `channel name` and the `type`
+
+```
+{
+  "position": "geo_point"
+}
+```
+
+## Actuations
 
 Let's add an action to invoke and then track the status on a connected device
 
-```json
+```
 {
     "actions": [
         {
@@ -121,19 +114,40 @@ Let's add an action to invoke and then track the status on a connected device
 
 The `actions` fields is a list as array of objects with just two fields
 
-**Fields**
+###Fields
 
-- **name**  a code-name of the action, it will be used in further api call
 
-- **description**  the human presentation of the action
+- `name` a unique name of the action, it will be used in the API call
 
----
-The complete example model
----
+- `description` for the human presentation of the action
 
-Your model should look like this at the end. Now `POST /`-ing it to the api will result in a new device created and ready to use
+--------------------------------------------------------------------------------
 
-```json
+## A complete example definition
+
+The common form is the "shrinked" one, where all the details hidden
+
+Follows a definition of a Drone
+
+```
+{
+    "name": "Drone",
+    "streams": {
+        "location": {
+          "position": "geo_point",
+          "altitude": "number",
+          "heading": "number",
+        },
+    },
+    "actions": [
+      "fly-home"
+    ]
+}
+```
+
+The same can be expressed in an expanded way
+
+```
 {
     "name": "Drone",
     "description": "My drone",
@@ -164,24 +178,6 @@ Your model should look like this at the end. Now `POST /`-ing it to the api will
             "name": "fly-home",
             "description": "Force the drone to fly back to its deck"
         }
-    ]
-}
-```
-
-the model can be shortened to
-
-```json
-{
-    "name": "Drone",
-    "streams": {
-        "location": {
-          "position": "geo_point",
-          "altitude": "number",
-          "heading": "number",
-        },
-    },
-    "actions": [
-      "fly-home"
     ]
 }
 ```

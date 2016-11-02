@@ -1,5 +1,4 @@
-Architecture
-===
+# Architecture
 
 The following picture depicts an high level view of Raptor architecture.
 
