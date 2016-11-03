@@ -20,17 +20,46 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import org.createnet.raptor.client.RaptorClient;
 import org.createnet.raptor.client.RaptorComponent;
+import org.createnet.raptor.client.event.MessageEventListener;
 import org.createnet.raptor.client.exception.ClientException;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.search.query.impl.es.ObjectQuery;
 
 /**
- * Represent a virtual object
+ * Methods to interact with Raptor API
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class ServiceObjectClient extends AbstractClient {
+    
+    public interface ServiceObjectCallback {
+        public void execute(ServiceObject obj, String event);
+    }
+    
+    protected String getTopic(ServiceObject obj) {
+        return obj.id + "/events";
+    }
+    
+    /**
+     * Subscribe for events
+     * @param obj the object to listen for
+     * @param callback The callback to fire on event arrival
+     */
+    public void subscribe(ServiceObject obj, ServiceObjectCallback callback) {
+        getClient().subscribe(getTopic(obj), (MessageEventListener.Message message) -> {
+            callback.execute(obj, message.content);
+        });
+    }
 
+    /**
+     * Unsubscribe a Stream for data updates
+     * 
+     * @param obj obj from which to unsubscribe events
+     */
+    public void unsubscribe(ServiceObject obj) {
+        getClient().unsubscribe(getTopic(obj));
+    }
+    
     /**
      * Create an object definition
      *

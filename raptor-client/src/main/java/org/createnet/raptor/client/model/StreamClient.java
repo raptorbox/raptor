@@ -32,7 +32,6 @@ import org.createnet.raptor.search.query.impl.es.DataQuery;
 public class StreamClient extends AbstractClient {
 
     public interface StreamCallback {
-
         /**
          * Run when a stream receive data
          *

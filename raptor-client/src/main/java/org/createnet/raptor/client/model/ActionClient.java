@@ -20,6 +20,7 @@ import java.util.List;
 import org.createnet.raptor.client.RaptorClient;
 import org.createnet.raptor.client.RaptorComponent;
 import org.createnet.raptor.models.data.ActionStatus;
+import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.ServiceObject;
 
 /**

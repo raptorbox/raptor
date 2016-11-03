@@ -44,9 +44,9 @@ import org.slf4j.LoggerFactory;
 public class RaptorClient implements IClient, RaptorComponent {
 
     static {
-        
+
         Unirest.setDefaultHeader("content-type", "application/json");
-        
+
         // Only one time
         Unirest.setObjectMapper(new ObjectMapper() {
 
@@ -73,7 +73,7 @@ public class RaptorClient implements IClient, RaptorComponent {
         });
 
     }
-
+    
     final protected Logger logger = LoggerFactory.getLogger(RaptorClient.class);
 
     protected MqttClient mqttClient;
@@ -84,7 +84,7 @@ public class RaptorClient implements IClient, RaptorComponent {
     public enum Event {
         DATA, OBJECT
     }
-
+    
     /**
      * JSON serializable configuration
      */
@@ -113,11 +113,11 @@ public class RaptorClient implements IClient, RaptorComponent {
         final static public String LAST_UPDATE = PUSH;
         final static public String PULL = PUSH + "/list";
         final static public String SEARCH_DATA = PUSH + "/search";
-        
+
         final static public String INVOKE = "/{0}/actions/{1}";
         final static public String ACTION_STATUS = INVOKE;
         final static public String ACTION_LIST = "/{0}/actions";
-        
+
         final static public String SUBSCRIBE_STREAM = PUSH;
 
     }
@@ -328,17 +328,21 @@ public class RaptorClient implements IClient, RaptorComponent {
 
     /**
      * Send a text payload (specific for invoking actions)
+     *
      * @param path path of request
      * @param payload the raw content to send
      */
     public void post(String path, String payload) {
         try {
-            HttpResponse<String> objResponse = Unirest.post(getClient().url(path)).body(payload).asString();
+            HttpResponse<String> objResponse = Unirest
+                    .post(getClient().url(path))
+                    .header("content-type", "text/plain")
+                    .body(payload)
+                    .asString();
 
         } catch (UnirestException ex) {
             throw new ClientException(ex);
-        }        
+        }
     }
-    
-    
+
 }
