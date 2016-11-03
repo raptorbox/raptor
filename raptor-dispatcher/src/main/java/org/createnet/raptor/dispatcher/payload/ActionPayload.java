@@ -29,8 +29,8 @@ public class ActionPayload extends ObjectPayload {
     public ActionPayload(Action action, String op, String data) {
         super(action.getServiceObject(), op);
         this.data = data;
-
         this.actionId = action.name;
+        this.type = MessageType.action.name();
     }
 
 }

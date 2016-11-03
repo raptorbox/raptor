@@ -22,7 +22,8 @@ package org.createnet.raptor.dispatcher.payload;
 public interface DispatcherPayload {
 
     public enum MessageType {
-        object, stream, actuation
+        object, stream, action, data, 
+        user, permission, role
     }
     
     /**

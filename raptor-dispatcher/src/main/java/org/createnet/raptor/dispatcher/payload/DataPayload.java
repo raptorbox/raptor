@@ -25,6 +25,7 @@ public class DataPayload extends AbstractPayload {
 
     public DataPayload(String c) {
         this.c = c;
+        this.type = MessageType.data.name();
     }
 
     @Override

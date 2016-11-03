@@ -31,6 +31,7 @@ public class StreamPayload extends ObjectPayload {
             super(stream.getServiceObject(), op);
             this.streamId = stream.name;
             this.data = data;
+            this.type = MessageType.stream.name();
         }
 
     }

@@ -78,17 +78,17 @@ public class ServiceObjectClient extends AbstractClient {
                 DispatcherPayload payload = null;
                 if (json.has("type")) {
                     Class<? extends DispatcherPayload> clazz = null;
-                    switch (json.get("type").asText()) {
-                        case "object":
+                    switch (DispatcherPayload.MessageType.valueOf(json.get("type").asText())) {
+                        case object:
                             clazz = ObjectPayload.class;
                             break;
-                        case "data":
+                        case data:
                             clazz = DataPayload.class;
                             break;
-                        case "stream":
+                        case stream:
                             clazz = StreamPayload.class;
                             break;
-                        case "action":
+                        case action:
                             clazz = ActionPayload.class;
                             break;
                     }

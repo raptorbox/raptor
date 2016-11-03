@@ -29,8 +29,6 @@ public class ObjectPayload extends AbstractPayload {
     final public String userId;
     final public JsonNode object;
     final public String path;
-    final public String type;
-    final public String op;
 
     public ObjectPayload(ServiceObject obj, String op) {
         userId = obj.userId;
