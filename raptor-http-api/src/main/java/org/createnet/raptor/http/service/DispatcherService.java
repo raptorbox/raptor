@@ -15,8 +15,6 @@
  */
 package org.createnet.raptor.http.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
@@ -24,6 +22,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.dispatcher.Dispatcher;
+import org.createnet.raptor.dispatcher.payload.ActionPayload;
+import org.createnet.raptor.dispatcher.payload.DataPayload;
+import org.createnet.raptor.dispatcher.payload.DispatcherPayload;
+import org.createnet.raptor.dispatcher.payload.ObjectPayload;
+import org.createnet.raptor.dispatcher.payload.StreamPayload;
 import org.createnet.raptor.events.Emitter;
 import org.createnet.raptor.events.Event;
 import org.createnet.raptor.http.events.ActionEvent;
@@ -47,81 +50,6 @@ import org.slf4j.LoggerFactory;
 public class DispatcherService extends AbstractRaptorService {
 
     private final static Logger logger = LoggerFactory.getLogger(DispatcherService.class);
-
-    public interface DispatcherPayload {
-
-        @Override
-        public String toString();
-    }
-
-    public static class DataPayload implements DispatcherPayload {
-
-        final private String c;
-
-        public DataPayload(String c) {
-            this.c = c;
-        }
-
-        @Override
-        public String toString() {
-            return c;
-        }
-    }
-
-    public static class ObjectPayload implements DispatcherPayload {
-
-        final public String userId;
-        final public JsonNode object;
-        final public String path;
-        final public String type;
-        final public String op;
-
-        public ObjectPayload(ServiceObject obj, String op) {
-            userId = obj.userId;
-            object = obj.toJsonNode();
-            path = obj.path();
-            type = MessageType.object.name();
-            this.op = op;
-        }
-
-        @Override
-        public String toString() {
-            try {
-                return ServiceObject.getMapper().writeValueAsString(this);
-            } catch (JsonProcessingException ex) {
-                logger.warn("Cannot serialize event payload message for obj {}: {}", object.get("id").asText(), ex.getMessage());
-                throw new RaptorComponent.ParserException(ex);
-            }
-        }
-
-    }
-
-    public static class StreamPayload extends ObjectPayload {
-
-        final public String streamId;
-        final public JsonNode data;
-
-        public StreamPayload(Stream stream, String op, JsonNode data) {
-            super(stream.getServiceObject(), op);
-            this.streamId = stream.name;
-            this.data = data;
-        }
-
-    }
-
-    public static class ActionPayload extends ObjectPayload {
-
-        final public String actionId;
-        final public String data;
-
-        public ActionPayload(Action action, String op, String data) {
-            super(action.getServiceObject(), op);
-            this.data = data;
-
-            this.actionId = action.name;
-        }
-
-    }
 
     @Inject
     ConfigurationService configuration;
@@ -208,10 +136,6 @@ public class DispatcherService extends AbstractRaptorService {
         } catch (Exception e) {
             throw new ServiceException(e);
         }
-    }
-
-    public enum MessageType {
-        object, stream, actuation
     }
 
     public enum ObjectOperation {
