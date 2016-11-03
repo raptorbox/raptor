@@ -49,11 +49,11 @@ public class ActionApi extends AbstractApi {
     public Collection<Action> list(
             @PathParam("id") String id
     ) {
-
         ServiceObject obj = loadObject(id);
-
+        if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
+            throw new ForbiddenException("Cannot load object");
+        }
         logger.debug("Load actions for object {}", obj.id);
-
         return obj.actions.values();
     }
 
@@ -68,8 +68,8 @@ public class ActionApi extends AbstractApi {
         ServiceObject obj = loadObject(id);
         Action action = loadAction(actionId, obj);
 
-        if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
-            throw new ForbiddenException("Cannot fetch data");
+        if (!auth.isAllowed(obj, Authorization.Permission.Execute)) {
+            throw new ForbiddenException("Cannot access action status");
         }
 
         ActionStatus actionStatus = storage.getActionStatus(action);
@@ -87,7 +87,7 @@ public class ActionApi extends AbstractApi {
     @Path("{actionId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
-    public String updateStatus(
+    public String setStatus(
             @PathParam("id") String id,
             @PathParam("actionId") String actionId,
             String body
@@ -97,7 +97,7 @@ public class ActionApi extends AbstractApi {
         Action action = loadAction(actionId, obj);
 
         if (!auth.isAllowed(obj, Authorization.Permission.Execute)) {
-            throw new ForbiddenException("Cannot fetch data");
+            throw new ForbiddenException("Cannot modify action status");
         }
 
         ActionStatus actionStatus = storage.saveActionStatus(action, body);
@@ -119,15 +119,14 @@ public class ActionApi extends AbstractApi {
         ServiceObject obj = loadObject(id);
         Action action = loadAction(actionId, obj);
 
-        if (!auth.isAllowed(obj, Authorization.Permission.Update)) {
-            throw new ForbiddenException("Cannot fetch data");
+        if (!auth.isAllowed(obj, Authorization.Permission.Execute)) {
+            throw new ForbiddenException("Cannot modify action status");
         }
 
         storage.deleteActionStatus(action);
-
         emitter.trigger(EventEmitterService.EventName.deleteAction, new ActionEvent(action, null));
 
-        logger.debug("Aborted action {} status for object {}", action.name, obj.id);
+        logger.debug("removed action {} status for object {}", action.name, obj.id);
 
         return Response.accepted().build();
     }

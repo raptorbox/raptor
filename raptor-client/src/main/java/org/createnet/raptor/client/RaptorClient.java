@@ -44,7 +44,9 @@ import org.slf4j.LoggerFactory;
 public class RaptorClient implements IClient, RaptorComponent {
 
     static {
-
+        
+        Unirest.setDefaultHeader("content-type", "application/json");
+        
         // Only one time
         Unirest.setObjectMapper(new ObjectMapper() {
 
@@ -102,15 +104,19 @@ public class RaptorClient implements IClient, RaptorComponent {
         final static public String LIST = "/";
         final static public String SEARCH = "/search";
 
-        final static public String CREATE = "/";
+        final static public String CREATE = LIST;
         final static public String UPDATE = "/{0}";
-        final static public String LOAD = "/{0}";
-        final static public String DELETE = "/{0}";
+        final static public String LOAD = UPDATE;
+        final static public String DELETE = UPDATE;
 
         final static public String PUSH = "/{0}/streams/{1}";
-        final static public String LAST_UPDATE = "/{0}/streams/{1}";
-        final static public String PULL = "/{0}/streams/{1}/list";
-        final static public String SEARCH_DATA = "/{0}/streams/{1}/search";
+        final static public String LAST_UPDATE = PUSH;
+        final static public String PULL = PUSH + "/list";
+        final static public String SEARCH_DATA = PUSH + "/search";
+        
+        final static public String INVOKE = "/{0}/actions/{1}";
+        final static public String ACTION_STATUS = INVOKE;
+        final static public String ACTION_LIST = "/{0}/actions";
 
     }
 
@@ -318,4 +324,19 @@ public class RaptorClient implements IClient, RaptorComponent {
         }
     }
 
+    /**
+     * Send a text payload (specific for invoking actions)
+     * @param path path of request
+     * @param payload the raw content to send
+     */
+    public void post(String path, String payload) {
+        try {
+            HttpResponse<String> objResponse = Unirest.post(getClient().url(path)).body(payload).asString();
+
+        } catch (UnirestException ex) {
+            throw new ClientException(ex);
+        }        
+    }
+    
+    
 }

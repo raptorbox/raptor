@@ -17,8 +17,6 @@ package org.createnet.raptor.client.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import org.createnet.raptor.client.RaptorClient;
 import org.createnet.raptor.client.RaptorComponent;

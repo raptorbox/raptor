@@ -24,7 +24,7 @@ import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.search.query.impl.es.DataQuery;
 
 /**
- * Represent a virtual object
+ * Represent a service object data stream
  *
  * @author Luca Capra <lcapra@create-net.org>
  */

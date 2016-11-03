@@ -22,6 +22,7 @@ import org.createnet.raptor.models.objects.deserializer.ServiceObjectDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +35,6 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Luca Capra <luca.capra@gmail.com>
  */
-//@JsonSerialize(using = ServiceObjectSerializer.class)
 @JsonDeserialize(using = ServiceObjectDeserializer.class)
 public class ServiceObject extends ServiceObjectContainer {
 
@@ -58,29 +58,11 @@ public class ServiceObject extends ServiceObjectContainer {
     final public Settings settings = new Settings();
 
     final public Map<String, Stream> streams = new HashMap();
-    final public Map<String, Subscription> subscriptions = new HashMap();
     final public Map<String, Action> actions = new HashMap();
 
-    public void addStreams(Collection<Stream> streams) {
-        streams.stream().forEach((stream) -> {
-
-            stream.setServiceObject(this);
-
-            stream.channels.values().stream().forEach((channel) -> {
-                channel.setServiceObject(this);
-            });
-
-            this.streams.put(stream.name, stream);
-        });
-    }
-
-    public void addActions(Collection<Action> values) {
-        values.stream().forEach((action) -> {
-            action.setServiceObject(this);
-            this.actions.put(action.name, action);
-        });
-    }
-
+    /**
+     * A serializable class containing the settings for a ServiceObject
+     */
     static public class Settings {
 
         public boolean storeData = true;
@@ -95,6 +77,11 @@ public class ServiceObject extends ServiceObjectContainer {
         }
     }
 
+    /**
+     * Generates a UUID v4
+     *
+     * @return the UUID v4 as string
+     */
     public static String generateUUID() {
         return UUID.randomUUID().toString();
     }
@@ -132,8 +119,11 @@ public class ServiceObject extends ServiceObjectContainer {
         return parentId == null;
     }
 
+    /**
+     * Set the current time in seconds
+     */
     public void setUpdateTime() {
-        updatedAt = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+        updatedAt = Instant.now().getEpochSecond();
     }
 
     @Override
@@ -147,30 +137,34 @@ public class ServiceObject extends ServiceObjectContainer {
             throw new ValidationException("id field missing");
         }
 
-        if (!this.streams.isEmpty()) {
-            for (Map.Entry<String, Stream> item : this.streams.entrySet()) {
+        if (!this.getStreams().isEmpty()) {
+            this.getStreams().entrySet().forEach((item) -> {
                 item.getValue().validate();
-            }
+            });
         }
 
-        if (!this.actions.isEmpty()) {
-            for (Map.Entry<String, Action> item : this.actions.entrySet()) {
+        if (!this.getActions().isEmpty()) {
+            this.getActions().entrySet().forEach((item) -> {
                 item.getValue().validate();
-            }
-        }
-
-        if (!this.subscriptions.isEmpty()) {
-            for (Map.Entry<String, Subscription> item : this.subscriptions.entrySet()) {
-                item.getValue().validate();
-            }
+            });
         }
 
     }
 
+    /**
+     * Merge an object representation to the current instance
+     *
+     * @param json the JsonNode object representation
+     */
     public void parse(JsonNode json) {
         parse(json.toString());
     }
 
+    /**
+     * Merge an object to the current instance
+     *
+     * @param serviceObject the object to merge from
+     */
     public void parse(ServiceObject serviceObject) {
 
         id = serviceObject.id;
@@ -187,22 +181,16 @@ public class ServiceObject extends ServiceObjectContainer {
         customFields.clear();
         customFields.putAll(serviceObject.customFields);
 
-        streams.clear();
-        serviceObject.streams.entrySet().stream().forEach((el) -> {
+        getStreams().clear();
+        serviceObject.getStreams().entrySet().stream().forEach((el) -> {
             el.getValue().setServiceObject(this);
-            streams.put(el.getKey(), el.getValue());
+            getStreams().put(el.getKey(), el.getValue());
         });
 
-        subscriptions.clear();
-        serviceObject.subscriptions.entrySet().stream().forEach((el) -> {
+        getActions().clear();
+        serviceObject.getActions().entrySet().stream().forEach((el) -> {
             el.getValue().setServiceObject(this);
-            subscriptions.put(el.getKey(), el.getValue());
-        });
-
-        actions.clear();
-        serviceObject.actions.entrySet().stream().forEach((el) -> {
-            el.getValue().setServiceObject(this);
-            actions.put(el.getKey(), el.getValue());
+            getActions().put(el.getKey(), el.getValue());
         });
 
         isNew = (id == null);
@@ -210,8 +198,6 @@ public class ServiceObject extends ServiceObjectContainer {
 
     @Override
     public void parse(String json) {
-
-        ServiceObject serviceObject;
         try {
             parse(mapper.readValue(json, ServiceObject.class));
         } catch (IOException ex) {
@@ -219,6 +205,12 @@ public class ServiceObject extends ServiceObjectContainer {
         }
     }
 
+    /**
+     * Map a JSON string properties to a ServiceObject instance
+     *
+     * @param json the json data
+     * @return the ServiceObject instance
+     */
     public static ServiceObject fromJSON(String json) {
         try {
             return mapper.readValue(json, ServiceObject.class);
@@ -227,6 +219,12 @@ public class ServiceObject extends ServiceObjectContainer {
         }
     }
 
+    /**
+     * Map JsonNode properties to a ServiceObject instance
+     *
+     * @param json the JsonNode data
+     * @return the ServiceObject instance
+     */
     public static ServiceObject fromJSON(JsonNode json) {
         return mapper.convertValue(json, ServiceObject.class);
     }
@@ -236,23 +234,103 @@ public class ServiceObject extends ServiceObjectContainer {
         return isNew;
     }
 
+    /**
+     * Return the JsonNode representing the object
+     *
+     * @return the JsonNode representing the object
+     */
     public ObjectNode toJsonNode() {
         ObjectNode node = getMapper().convertValue(this, ObjectNode.class);
         return node;
     }
 
+    /**
+     * Return the JSON string representing the object
+     *
+     * @return the JSON representation
+     */
     public String toJSON() {
-        String json = null;
         try {
-            json = getMapper().writeValueAsString(this);
+            String json = getMapper().writeValueAsString(this);
             return json;
-
         } catch (JsonProcessingException ex) {
             throw new ParserException(ex);
         }
-
     }
 
+    /**
+     * Return the Stream list
+     *
+     * @return a Map of Stream instances
+     */
+    public Map<String, Stream> getStreams() {
+        return this.streams;
+    }
+
+    /**
+     * Return a Stream by name
+     *
+     * @param name the name of the stream
+     * @return a Stream instance
+     */
+    public Stream getStream(String name) {
+        return getStreams().getOrDefault(name, null);
+    }
+
+    /**
+     * Return the Action list
+     *
+     * @return a Map of Action instances
+     */
+    public Map<String, Action> getActions() {
+        return this.actions;
+    }
+
+    /**
+     * Return an Action
+     *
+     * @param name the name of the Action
+     * @return a Map of Action instances
+     */
+    public Action getAction(String name) {
+        return getActions().getOrDefault(name, null);
+    }
+
+    /**
+     * Add a list of streams to the object
+     *
+     * @param streams list of streams
+     */
+    public void addStreams(Collection<Stream> streams) {
+        streams.stream().forEach((stream) -> {
+
+            stream.setServiceObject(this);
+
+            stream.channels.values().stream().forEach((channel) -> {
+                channel.setServiceObject(this);
+            });
+
+            this.streams.put(stream.name, stream);
+        });
+    }
+
+    /**
+     * Add a list of actions to the object
+     *
+     * @param values list of actions
+     */
+    public void addActions(Collection<Action> values) {
+        values.stream().forEach((action) -> {
+            action.setServiceObject(this);
+            this.actions.put(action.name, action);
+        });
+    }
+
+    /**
+     * Return the current ServiceObject instance
+     *
+     * @return self-instance
+     */
     @Override
     public ServiceObject getServiceObject() {
         return this;
@@ -260,13 +338,13 @@ public class ServiceObject extends ServiceObjectContainer {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof ServiceObject) {
+        if (obj instanceof ServiceObject) {
             ServiceObject sobj = (ServiceObject) obj;
-            if(this.id != null && sobj.id != null) {
+            if (this.id != null && sobj.id != null) {
                 return sobj.id.equals(this.id);
             }
         }
-        return super.equals(obj); 
+        return super.equals(obj);
     }
 
     @Override
@@ -276,6 +354,4 @@ public class ServiceObject extends ServiceObjectContainer {
         return hash;
     }
 
-    
-    
 }
