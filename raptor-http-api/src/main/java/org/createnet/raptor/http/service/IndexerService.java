@@ -458,7 +458,7 @@ public class IndexerService extends AbstractRaptorService {
      *
      * @param stream the stream for which to delete the data
      *
-     * @TODO https://github.com/muka/raptor/issues/33
+     * @TODO https://github.com/raptorbox/raptor/issues/33
      */
     public void deleteData(Stream stream) {
 

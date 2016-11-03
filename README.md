@@ -1,6 +1,6 @@
 # Raptor
 
-[![Build Status](https://travis-ci.org/muka/raptor.svg?branch=master)](https://travis-ci.org/muka/raptor)
+[![Build Status](https://travis-ci.org/raptorbox/raptor.svg?branch=master)](https://travis-ci.org/raptorbox/raptor)
 
 [![Coverage Status](https://coveralls.io/repos/github/raptorbox/raptor/badge.svg?branch=master)](https://coveralls.io/github/raptorbox/raptor?branch=master)
 
@@ -78,8 +78,8 @@ We are working to expand the support of SDK and libraries in different languages
 
 Here the list of available ones:
 
-- [javascript sdk](https://github.com/muka/raptorjs)
-- [java sdk](https://github.com/muka/raptor/raptor-client) (work in progess)
+- [javascript sdk](https://github.com/raptorbox/raptorjs)
+- [java sdk](https://github.com/raptorbox/raptor/raptor-client) (work in progess)
 
 ### Credits
 
