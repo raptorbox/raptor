@@ -1,6 +1,6 @@
 # Raptor
 
-[![Build Status](https://travis-ci.org/raptorbox/raptor.svg?branch=master)](https://travis-ci.org/raptorbox/raptor) [![Coverage Status](https://coveralls.io/repos/github/raptorbox/raptor/badge.svg?branch=master)](https://coveralls.io/github/raptorbox/raptor?branch=master) [![Project Stats](https://www.openhub.net/p/raptorbox/widgets/project_thin_badge.gif)](https://www.openhub.net/p/raptorbox
+[![Build Status](https://travis-ci.org/raptorbox/raptor.svg?branch=master)](https://travis-ci.org/raptorbox/raptor) [![Coverage Status](https://coveralls.io/repos/github/raptorbox/raptor/badge.svg?branch=master)](https://coveralls.io/github/raptorbox/raptor?branch=master) [![Project Stats](https://www.openhub.net/p/raptorbox/widgets/project_thin_badge.gif)](https://www.openhub.net/p/raptorbox)
 
 Welcome to the Raptor IoT broker repository.
 
