@@ -27,8 +27,8 @@ public class DataEvent  extends ObjectEvent {
   final private Stream stream;
   final private RecordSet record;
   
-  public DataEvent(Stream stream, RecordSet record, String accessToken) {
-    super(stream.getServiceObject(), accessToken);
+  public DataEvent(Stream stream, RecordSet record) {
+    super(stream.getServiceObject());
     this.stream = stream;
     this.record = record;
   }

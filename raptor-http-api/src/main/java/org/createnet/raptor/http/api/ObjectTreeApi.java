@@ -58,13 +58,13 @@ public class ObjectTreeApi extends AbstractApi {
     })
     public List<ServiceObject> children(@PathParam("id") String id) {
 
-        ServiceObject obj = loadObject(id);
+        ServiceObject obj = objectManager.load(id);
 
         if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
             throw new ForbiddenException("Cannot read object");
         }
 
-        List<ServiceObject> list = tree.getChildren(obj);
+        List<ServiceObject> list = objectManager.tree(obj);
         return list;
     }
 
@@ -79,10 +79,15 @@ public class ObjectTreeApi extends AbstractApi {
     })
     public List<ServiceObject> setChildren(@PathParam("id") String id, final List<String> childrenIds) {
 
-        ServiceObject parentObject = loadObject(id);
+        ServiceObject parentObject = objectManager.load(id);
+        
+        if (!auth.isAllowed(parentObject, Authorization.Permission.Read)) {
+            throw new ForbiddenException("Cannot load parent object");
+        }
+        
         List<ServiceObject> childrenObjects = childrenIds.stream().map((String cid) -> {
 
-            ServiceObject child = loadObject(cid);
+            ServiceObject child = objectManager.load(cid);
 
             if (!auth.isAllowed(child, Authorization.Permission.Update)) {
                 throw new ForbiddenException("Cannot update object");
@@ -94,10 +99,6 @@ public class ObjectTreeApi extends AbstractApi {
             return child;
         }).collect(Collectors.toList());
 
-        if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
-            throw new ForbiddenException("Cannot update object");
-        }
-
         for (ServiceObject childObject : childrenObjects) {
             boolean sync = syncObject(childObject, Authentication.SyncOperation.UPDATE);
             if (!sync) {
@@ -105,13 +106,7 @@ public class ObjectTreeApi extends AbstractApi {
             }
         }
 
-        List<ServiceObject> list = tree.setChildren(parentObject, childrenObjects);
-
-        // @TODO: Move to event emitter
-        List<ServiceObject> toSave = new ArrayList(list);
-        toSave.add(parentObject);
-        storage.saveObjects(toSave);
-
+        List<ServiceObject> list = objectManager.setChildren(parentObject, childrenObjects);
         return list;
     }
 
@@ -127,8 +122,8 @@ public class ObjectTreeApi extends AbstractApi {
     })
     public List<ServiceObject> addChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) {
 
-        ServiceObject parentObject = loadObject(id);
-        ServiceObject childObject = loadObject(childrenId);
+        ServiceObject parentObject = objectManager.load(id);
+        ServiceObject childObject = objectManager.load(childrenId);
 
         if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
             throw new ForbiddenException("Cannot update object");
@@ -138,7 +133,6 @@ public class ObjectTreeApi extends AbstractApi {
             throw new ForbiddenException("Cannot update object");
         }
 
-        
         childObject.parentId = parentObject.id;
         
         boolean sync = syncObject(childObject, Authentication.SyncOperation.UPDATE);
@@ -146,12 +140,7 @@ public class ObjectTreeApi extends AbstractApi {
             throw new InternalServerErrorException("Failed to sync to auth system object " + childObject.id);
         }
         
-        List<ServiceObject> list = tree.addChildren(parentObject, Arrays.asList(childObject));
-
-        // @TODO: Move to event emitter
-        List<ServiceObject> toSave = new ArrayList(list);
-        toSave.add(parentObject);
-        storage.saveObjects(toSave);
+        List<ServiceObject> list = objectManager.addChildren(parentObject, Arrays.asList(childObject));
 
         return list;
     }
@@ -168,8 +157,8 @@ public class ObjectTreeApi extends AbstractApi {
     })
     public List<ServiceObject> removeChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) {
 
-        ServiceObject parentObject = loadObject(id);
-        ServiceObject childObject = loadObject(childrenId);
+        ServiceObject parentObject = objectManager.load(id);
+        ServiceObject childObject = objectManager.load(childrenId);
 
         if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
             throw new ForbiddenException("Cannot update parent object");
@@ -186,13 +175,8 @@ public class ObjectTreeApi extends AbstractApi {
             throw new InternalServerErrorException("Failed to sync to auth system object " + childObject.id);
         }
         
-        List<ServiceObject> list = tree.removeChildren(parentObject, Arrays.asList(childObject));
-
-        // @TODO: Move to event emitter
-        List<ServiceObject> toSave = new ArrayList(list);
-        toSave.add(parentObject);
-        storage.saveObjects(toSave);
-
+        List<ServiceObject> list = objectManager.removeChildren(parentObject, Arrays.asList(childObject));
+        
         return list;
 
     }

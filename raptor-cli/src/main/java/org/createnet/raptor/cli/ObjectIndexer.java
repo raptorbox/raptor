@@ -21,11 +21,11 @@ import java.util.List;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.query.BaseQuery;
 import org.createnet.raptor.config.exception.ConfigurationException;
-import org.createnet.raptor.service.tools.IndexerService;
-import org.createnet.raptor.service.tools.StorageService;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.search.Indexer;
+import org.createnet.raptor.service.tools.IndexerService;
+import org.createnet.raptor.service.tools.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

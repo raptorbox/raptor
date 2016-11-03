@@ -27,6 +27,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.createnet.raptor.auth.authorization.Authorization;
+import org.createnet.raptor.events.Event.EventName;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,10 +50,13 @@ public class ActionApi extends AbstractApi {
     public Collection<Action> list(
             @PathParam("id") String id
     ) {
-        ServiceObject obj = loadObject(id);
+
+        ServiceObject obj = objectManager.load(id);
+
         if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
             throw new ForbiddenException("Cannot load object");
         }
+
         logger.debug("Load actions for object {}", obj.id);
         return obj.actions.values();
     }
@@ -61,26 +65,23 @@ public class ActionApi extends AbstractApi {
     @Path("{actionId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStatus(
-            @PathParam("id") String id,
+            @PathParam("id") String objectId,
             @PathParam("actionId") String actionId
     ) {
 
-        ServiceObject obj = loadObject(id);
-        Action action = loadAction(actionId, obj);
+        Action action = actionManager.load(objectId, actionId);
+        ServiceObject obj = action.getServiceObject();
 
         if (!auth.isAllowed(obj, Authorization.Permission.Execute)) {
             throw new ForbiddenException("Cannot access action status");
         }
 
-        ActionStatus actionStatus = storage.getActionStatus(action);
-
-        logger.debug("Fetched action {} status for object {}", action.name, obj.id);
-
+        ActionStatus actionStatus = actionManager.getStatus(action);
         if (actionStatus == null) {
             return Response.noContent().build();
         }
 
-        return Response.ok(actionStatus.toString()).build();
+        return Response.ok(actionStatus).build();
     }
 
     @POST
@@ -88,22 +89,20 @@ public class ActionApi extends AbstractApi {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
     public String setStatus(
-            @PathParam("id") String id,
+            @PathParam("id") String objectId,
             @PathParam("actionId") String actionId,
             String body
     ) {
 
-        ServiceObject obj = loadObject(id);
-        Action action = loadAction(actionId, obj);
+        
+        Action action = actionManager.load(objectId, actionId);
+        ServiceObject obj = action.getServiceObject();
 
         if (!auth.isAllowed(obj, Authorization.Permission.Execute)) {
             throw new ForbiddenException("Cannot modify action status");
         }
-
-        ActionStatus actionStatus = storage.saveActionStatus(action, body);
-        emitter.trigger(EventEmitterService.EventName.execute, new ActionEvent(action, actionStatus));
-
-        logger.debug("Saved action {} status for object {}", action.name, obj.id);
+        
+        ActionStatus actionStatus = actionManager.setStatus(action, body);
 
         return actionStatus.toString();
     }
@@ -112,21 +111,18 @@ public class ActionApi extends AbstractApi {
     @Path("{actionId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteStatus(
-            @PathParam("id") String id,
+            @PathParam("id") String objectId,
             @PathParam("actionId") String actionId
     ) {
 
-        ServiceObject obj = loadObject(id);
-        Action action = loadAction(actionId, obj);
-
+        Action action = actionManager.load(objectId, actionId);
+        ServiceObject obj = action.getServiceObject();
+        
         if (!auth.isAllowed(obj, Authorization.Permission.Execute)) {
             throw new ForbiddenException("Cannot modify action status");
         }
-
-        storage.deleteActionStatus(action);
-        emitter.trigger(EventEmitterService.EventName.deleteAction, new ActionEvent(action, null));
-
-        logger.debug("removed action {} status for object {}", action.name, obj.id);
+        
+        actionManager.removeStatus(action);
 
         return Response.accepted().build();
     }

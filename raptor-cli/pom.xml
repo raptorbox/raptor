@@ -81,6 +81,11 @@
       <artifactId>raptor-auth-service</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>raptor-service</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
   
   

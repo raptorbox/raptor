@@ -17,15 +17,11 @@ package org.createnet.raptor.http.api;
 
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
+import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.service.tools.AuthService;
-import org.createnet.raptor.service.tools.DispatcherService;
-import org.createnet.raptor.service.tools.EventEmitterService;
-import org.createnet.raptor.service.tools.IndexerService;
-import org.createnet.raptor.service.tools.StorageService;
-import org.createnet.raptor.service.tools.TreeService;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.ServiceObject;
-import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.service.core.ActionManagerService;
 import org.createnet.raptor.service.core.ObjectManagerService;
 import org.createnet.raptor.service.core.StreamManagerService;
 import org.slf4j.Logger;
@@ -46,33 +42,26 @@ abstract public class AbstractApi {
     protected StreamManagerService streamManager;
     
     @Inject
-    protected EventEmitterService emitter;
-
+    protected ActionManagerService actionManager;
+   
     @Inject
-    protected StorageService storage;
-
-    @Inject
-    protected IndexerService indexer;
-
-    @Inject
-    protected AuthService auth;
+    protected AuthService auth;    
     
-    @Inject
-    protected DispatcherService dispatcher;
-
-    @Inject
-    protected TreeService tree;
-
-    protected Action loadAction(String actionId, ServiceObject obj) {
-
-        Action action = obj.actions.getOrDefault(actionId, null);
-
-        if (action == null) {
-            throw new NotFoundException("Action " + actionId + "not found");
+    /**
+     * @param obj
+     * @param op
+     * @return 
+     * @deprecated move the auth api to listen on broker events
+     */
+    @Deprecated
+    protected boolean syncObject(ServiceObject obj, Authentication.SyncOperation op) {
+        try {
+            auth.sync(auth.getAccessToken(), obj, op);
+        } catch (Exception ex) {
+            logger.error("Error syncing object to auth system: {}", ex.getMessage());
+            return false;
         }
-
-        return action;
-    }
- 
+        return true;
+    }    
     
 }

@@ -13,28 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.events.type;
-
-import org.createnet.raptor.events.AbstractEvent;
-import org.createnet.raptor.models.objects.ServiceObject;
+package org.createnet.raptor.service.exception;
 
 /**
  *
- * @author Luca Capra <lcapra@create-net.org>
+ * @author Luca Capra <luca.capra@create-net.org>
  */
-public class ObjectEvent extends AbstractEvent {
-  
-  protected ServiceObject obj;
-  
-  public ObjectEvent() {
-  }
-  
-  public ObjectEvent(ServiceObject obj) {
-    this.obj = obj;
-  }
+public class StreamNotFoundException extends ObjectNotFoundException {
 
-  public ServiceObject getObject() {
-    return obj;
-  }
-  
+    public StreamNotFoundException() {
+    }
+
+    public StreamNotFoundException(String message) {
+        super(message);
+    }
+
+    public StreamNotFoundException(Throwable cause) {
+        super(cause);
+    }
+    
 }

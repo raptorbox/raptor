@@ -20,10 +20,7 @@ import java.util.Set;
 import org.apache.activemq.artemis.core.security.CheckType;
 import org.apache.activemq.artemis.core.security.Role;
 import org.createnet.raptor.broker.configuration.BrokerConfiguration;
-import org.createnet.raptor.http.ApplicationConfig;
-import org.glassfish.hk2.api.ServiceLocator;
-import org.glassfish.hk2.api.ServiceLocatorFactory;
-import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
+import org.createnet.raptor.service.RaptorService;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -56,12 +53,8 @@ public class RaptorSecurityManagerTest {
     @Before
     public void setUp() {
 
-        // inject DI
-        ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
-        ServiceLocator serviceLocator = locatorFactory.create("BrokerLocator");
-        ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());
 
-        serviceLocator.inject(manager);
+        RaptorService.inject(manager);
 
         BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
 

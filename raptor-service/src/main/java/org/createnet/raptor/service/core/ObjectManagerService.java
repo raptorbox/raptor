@@ -15,29 +15,20 @@
  */
 package org.createnet.raptor.service.core;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response;
-import org.createnet.raptor.auth.authentication.Authentication;
-import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.events.Event;
 import org.createnet.raptor.events.type.ObjectEvent;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Channel;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
-import org.createnet.raptor.search.Indexer;
 import org.createnet.raptor.search.query.impl.es.ObjectQuery;
 import org.createnet.raptor.service.AbstractRaptorService;
 import org.createnet.raptor.service.exception.ObjectNotFoundException;
-import org.createnet.raptor.service.tools.AuthService;
 import org.createnet.raptor.service.tools.DispatcherService;
 import org.createnet.raptor.service.tools.EventEmitterService;
 import org.createnet.raptor.service.tools.IndexerService;
@@ -65,23 +56,20 @@ public class ObjectManagerService extends AbstractRaptorService {
     protected IndexerService indexer;
 
     @Inject
-    protected AuthService auth;
-
-    @Inject
     protected DispatcherService dispatcher;
 
     @Inject
     protected TreeService tree;
 
     private final static Logger logger = LoggerFactory.getLogger(ObjectManagerService.class);
-    
+
     /**
      * Load an object definition by ID, without checking for permissions
-     * 
+     *
      * @param id object id to load
-     * @return object definition 
+     * @return object definition
      */
-    public ServiceObject loadById(String id) {
+    public ServiceObject load(String id) {
 
         logger.debug("Load object {}", id);
 
@@ -90,38 +78,26 @@ public class ObjectManagerService extends AbstractRaptorService {
             throw new ObjectNotFoundException("Object " + id + " not found");
         }
 
+        logger.debug("Loaded object {}", id);
         return objs.get(0);
     }
-    
+
     /**
      * Return a list of definitions a user own
-     * 
+     *
+     * @param userId id of the owning user
      * @param offset offset to start from
      * @param limit limit of record per call
      * @return the list of objects
      */
-    public List<ServiceObject> list(Integer offset, Integer limit) {
-
-        if (!auth.isAllowed(Authorization.Permission.List)) {
-            throw new ForbiddenException("Cannot list objects");
-        }
+    public List<ServiceObject> list(String userId, Integer offset, Integer limit) {
 
         List<ServiceObject> list = indexer.getObjectsByUser(
-                auth.getUser().getUserId(), offset, limit
+                userId, offset, limit
         );
 
         // TODO: Add to list device which access is allowed
         return list;
-    }
-
-    protected boolean syncObject(ServiceObject obj, Authentication.SyncOperation op) {
-        try {
-            auth.sync(auth.getAccessToken(), obj, op);
-        } catch (Exception ex) {
-            logger.error("Error syncing object to auth system: {}", ex.getMessage());
-            return false;
-        }
-        return true;
     }
 
     private List<Stream> getChangedStreams(ServiceObject storedObj, ServiceObject obj) {
@@ -174,73 +150,37 @@ public class ObjectManagerService extends AbstractRaptorService {
         });
         return changedAction;
     }
-    
+
     /**
      * Creates a new object and store it
+     *
      * @param obj the object definition to create
+     * @return the create object
      */
-    public void create(ServiceObject obj) {
-
-        if (!auth.isAllowed(Authorization.Permission.Create)) {
-            throw new ForbiddenException("Cannot create object");
-        }
+    public ServiceObject create(ServiceObject obj) {
 
         obj.id = null;
-        obj.userId = auth.getUser().getUserId();
 
         storage.saveObject(obj);
+        indexer.saveObject(obj, true);
 
-        try {
-            indexer.saveObject(obj, true);
-        } catch (Indexer.IndexerException ex) {
+        emitter.trigger(Event.EventName.create, new ObjectEvent(obj));
 
-            logger.error("Indexing error occured", ex);
-            logger.warn("Removing object {} from storage", obj.id);
+        logger.debug("Created new object {} for {}", obj.id, obj.userId);
 
-            storage.deleteObject(obj);
-
-            throw new InternalServerErrorException("Failed to index device");
-        }
-
-        boolean sync = syncObject(obj, Authentication.SyncOperation.CREATE);
-        if (!sync) {
-            logger.error("Auth sync failed, aborting creation of object {}", obj.id);
-            storage.deleteObject(obj);
-            indexer.deleteObject(obj);
-            throw new InternalServerErrorException("Failed to sync device");
-        }
-
-        emitter.trigger(Event.EventName.create, new ObjectEvent(obj, auth.getAccessToken()));
-
-        logger.debug("Created new object {} for {}", obj.id, auth.getUser().getUserId());
+        return obj;
     }
-    
+
     /**
-     * Updates a object definition, removing data from stream and action accordingly
-     * @param id
+     * Updates a object definition, removing data from stream and action
+     * accordingly
+     *
      * @param obj
-     * @return 
+     * @return
      */
-    public ServiceObject update(String id, ServiceObject obj) {
+    public ServiceObject update(ServiceObject obj) {
 
-        ServiceObject storedObj = loadById(id);
-
-        if (obj.id == null || obj.id.isEmpty()) {
-            obj.id = storedObj.id;
-        }
-
-        if (!storedObj.id.equals(obj.id)) {
-            throw new NotFoundException("Request id does not match payload defined id");
-        }
-
-        if (!auth.isAllowed(obj, Authorization.Permission.Update)) {
-            throw new ForbiddenException("Cannot update object");
-        }
-
-        if (!storedObj.userId.equals(auth.getUser().getUserId())) {
-            logger.warn("User {} tried to update object {} owned by {}", auth.getUser().getUserId(), storedObj.id, storedObj.userId);
-            throw new NotFoundException();
-        }
+        ServiceObject storedObj = load(obj.id);
 
         logger.debug("Updating object {}", obj.id);
 
@@ -264,11 +204,6 @@ public class ObjectManagerService extends AbstractRaptorService {
         storedObj.actions.clear();
         storedObj.addActions(obj.actions.values());
 
-        boolean sync = syncObject(obj, Authentication.SyncOperation.UPDATE);
-        if (!sync) {
-            throw new InternalServerErrorException("Failed to sync device");
-        }
-
         storage.saveObject(storedObj);
         indexer.saveObject(storedObj, false);
 
@@ -277,75 +212,94 @@ public class ObjectManagerService extends AbstractRaptorService {
         indexer.deleteData(changedStreams);
         storage.deleteActionStatus(changedActions);
 
-        emitter.trigger(Event.EventName.update, new ObjectEvent(storedObj, auth.getAccessToken()));
+        emitter.trigger(Event.EventName.update, new ObjectEvent(storedObj));
 
-        logger.debug("Updated object {} for {}", storedObj.id, auth.getUser().getUserId());
-
-        return obj;
-    }
-
-    /**
-     * Load an object definition by ID
-     *
-     * @param id the id of the object to load
-     * @return the ServiceObject instance
-     */
-    public ServiceObject load(String id) {
-
-        logger.debug("Load object {}", id);
-
-        ServiceObject obj = loadById(id);
-
-        if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
-            throw new ForbiddenException("Cannot read object");
-        }
+        logger.debug("Updated object {} for {}", storedObj.id, obj.userId);
 
         return obj;
     }
 
     /**
      * Delete an object definition
+     *
      * @param id the id of the object to delete
      */
     public void delete(String id) {
 
-        ServiceObject obj = loadById(id);
+        ServiceObject obj = load(id);
 
-        if (!auth.isAllowed(obj, Authorization.Permission.Delete)) {
-            throw new ForbiddenException("Cannot delete object");
-        }
-
-        boolean sync = syncObject(obj, Authentication.SyncOperation.DELETE);
-        if (!sync) {
-            logger.error("Auth sync failed, aborting deletion of object {}", obj.id);
-            throw new InternalServerErrorException("Failed to sync device");
-        }        
-        
         storage.deleteObject(obj);
         indexer.deleteObject(obj);
 
-        emitter.trigger(Event.EventName.delete, new ObjectEvent(obj, auth.getAccessToken()));
+        emitter.trigger(Event.EventName.delete, new ObjectEvent(obj));
 
         logger.debug("Deleted object {}", id);
 
     }
-    
+
     /**
-     * Search for objects 
-     * 
+     * Search for objects
+     *
      * @param query Query parameters to match in the definition
      * @return the matching definitions
      */
     public List<ServiceObject> search(ObjectQuery query) {
-
-        if (!auth.isAllowed(Authorization.Permission.List)) {
-            throw new ForbiddenException("Cannot search for objects");
-        }
-
-        query.setUserId(auth.getUser().getUserId());
-
         List<ServiceObject> list = indexer.searchObject(query);
         return list;
     }
 
+    /**
+     * Return the object tree
+     *
+     * @param obj the object to load the tree from
+     * @return the tree of definition
+     */
+    public List<ServiceObject> tree(ServiceObject obj) {
+        return tree.getChildren(obj);
+    }
+
+    /**
+     * Set the children of an object
+     *
+     * @param parentObject parent object
+     * @param childrenObjects list of object to set as children
+     * @return the list of children
+     */
+    public List<ServiceObject> setChildren(ServiceObject parentObject, List<ServiceObject> childrenObjects) {
+
+        List<ServiceObject> list = tree.setChildren(parentObject, childrenObjects);
+
+        // @TODO: Move to event emitter
+        List<ServiceObject> toSave = new ArrayList(list);
+        toSave.add(parentObject);
+
+        storage.saveObjects(toSave);
+
+        return list;
+    }
+
+    public List<ServiceObject> addChildren(ServiceObject parentObject, List<ServiceObject> childObjects) {
+
+        List<ServiceObject> list = tree.addChildren(parentObject, childObjects);
+
+        // @TODO: Move to event emitter
+        List<ServiceObject> toSave = new ArrayList(list);
+        toSave.add(parentObject);
+        storage.saveObjects(toSave);
+
+        return list;
+    }
+
+    public List<ServiceObject> removeChildren(ServiceObject parentObject, List<ServiceObject> childObjects) {
+
+        List<ServiceObject> list = tree.removeChildren(parentObject, childObjects);
+
+        // @TODO: Move to event emitter
+        List<ServiceObject> toSave = new ArrayList(list);
+        toSave.add(parentObject);
+        storage.saveObjects(toSave);
+        
+        return list;
+    }
+    
 }

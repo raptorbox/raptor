@@ -16,6 +16,9 @@
 package org.createnet.raptor.service;
 
 import javax.inject.Singleton;
+import org.createnet.raptor.service.core.ActionManagerService;
+import org.createnet.raptor.service.core.ObjectManagerService;
+import org.createnet.raptor.service.core.StreamManagerService;
 import org.createnet.raptor.service.tools.AuthService;
 import org.createnet.raptor.service.tools.CacheService;
 import org.createnet.raptor.service.tools.ConfigurationService;
@@ -67,6 +70,20 @@ public class ServiceBinder extends AbstractBinder {
         bind(CacheService.class)
                 .to(CacheService.class)
                 .in(Singleton.class);
+        
+        // Data & Object managers
+        
+        bind(ObjectManagerService.class)
+                .to(ObjectManagerService.class)
+                .in(Singleton.class);
+        bind(StreamManagerService.class)
+                .to(StreamManagerService.class)
+                .in(Singleton.class);
+        bind(ActionManagerService.class)
+                .to(ActionManagerService.class)
+                .in(Singleton.class);
 
+        
+        
     }
 }

@@ -75,7 +75,7 @@ public class Runner {
         ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
 
         serviceLocator = locatorFactory.create("CliLocator");
-        ServiceLocatorUtilities.bind(serviceLocator, new ServiceBinder.AppBinder());
+        ServiceLocatorUtilities.bind(serviceLocator, new ServiceBinder());
 
         for (Class availCommand : availCommands) {
             try {

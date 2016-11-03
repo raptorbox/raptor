@@ -50,6 +50,11 @@
       <version>${junit}</version>
       <scope>test</scope>
     </dependency>
-    
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson}</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>
 </project>
