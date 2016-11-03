@@ -19,14 +19,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.net.URI;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -91,6 +89,9 @@ public class ObjectApi extends AbstractApi {
 
         obj.userId = auth.getUser().getUserId();
 
+        obj.validate();
+        
+        
         try {
             obj = objectManager.create(obj);
         } catch (Indexer.IndexerException ex) {
@@ -126,27 +127,16 @@ public class ObjectApi extends AbstractApi {
     @ApiResponse(code = 403, message = "Forbidden")
     })
     public ServiceObject update(
-            @PathParam("id") String id,
+            @PathParam("id") String objectId,
             ServiceObject obj
     ) {
 
-        ServiceObject storedObj = objectManager.load(id);
+        ServiceObject storedObj = objectManager.load(objectId);
+        
+        obj.id = objectId;
 
-        if (obj.id == null || obj.id.isEmpty()) {
-            obj.id = storedObj.id;
-        }
-
-        if (!storedObj.id.equals(obj.id)) {
-            throw new NotFoundException("Request id does not match payload defined id");
-        }
-
-        if (!auth.isAllowed(obj, Authorization.Permission.Update)) {
+        if (!auth.isAllowed(storedObj, Authorization.Permission.Update)) {
             throw new ForbiddenException("Cannot update object");
-        }
-
-        if (!storedObj.userId.equals(auth.getUser().getUserId())) {
-            logger.warn("User {} tried to update object {} owned by {}", auth.getUser().getUserId(), storedObj.id, storedObj.userId);
-            throw new NotFoundException();
         }
 
         obj = objectManager.update(obj);

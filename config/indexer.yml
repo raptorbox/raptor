@@ -14,11 +14,8 @@ elasticsearch:
     source: /etc/raptor/indices.json
     names:
       object:
-        index: sodescriptions
+        index: objects
         type: serviceobject
       data:
-        index: soupdates
-        type: update
-      subscriptions:
-        index: subscriptions
-        type: subscription
+        index: data
+        type: record

@@ -16,10 +16,8 @@
 package org.createnet.raptor.http.api;
 
 import javax.inject.Inject;
-import javax.ws.rs.NotFoundException;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.service.tools.AuthService;
-import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.service.core.ActionManagerService;
 import org.createnet.raptor.service.core.ObjectManagerService;

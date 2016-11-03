@@ -1,11 +1,7 @@
 {
-    "soupdates": {
+    "data": {
         "mappings": {
-            "update": {
-                "_ttl": {
-                    "enabled": true,
-                    "default": "3M"
-                },
+            "record": {
                 "_all": {
                     "enabled": true
                 },
@@ -61,7 +57,7 @@
                         "analyzer": "whitespace",
                         "index": "not_analyzed"
                     },
-                    "lastUpdate": {
+                    "timestamp": {
                         "type": "date",
                         "index": "not_analyzed"
                     },
@@ -83,54 +79,8 @@
             }
         }
     },
-    "subscriptions": {
-        "mappings": {
-            "subscription": {
-                "_all": {
-                    "enabled": false
-                },
-                "dynamic": true,
-                "_source": {
-                    "includes": [
-                        "meta.*"
-                    ]
-                },
-                "dynamic_templates": [{
-                    "all_strings_to_avoid_collisions": {
-                        "match": "*",
-                        "mapping": {
-                            "store": "no",
-                            "index": "not_analyzed",
-                            "include_in_all": false,
-                            "type": "string",
-                            "analyzer": "whitespace"
-                        }
-                    }
-                }],
-                "properties": {
-                    "callback": {
-                        "type": "string"
-                    },
-                    "source": {
-                        "type": "string"
-                    },
-                    "destination": {
-                        "type": "string"
-                    },
-                    "stream": {
-                        "type": "string"
-                    },
-                    "customFields": {
-                        "enabled": false
-                    }
-                }
-            }
-        }
-    },
 
-
-
-    "sodescriptions": {
+    "objects": {
         "settings": {
             "analysis": {
                 "analyzer": {
@@ -187,6 +137,5 @@
             }
         }
     }
-
 
 }

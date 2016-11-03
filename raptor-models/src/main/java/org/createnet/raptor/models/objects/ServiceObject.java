@@ -131,7 +131,7 @@ public class ServiceObject extends ServiceObjectContainer {
         if (this.name == null) {
             throw new ValidationException("name field missing");
         }
-
+        
         if (!this.isNew() && this.id == null) {
             throw new ValidationException("id field missing");
         }

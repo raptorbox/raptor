@@ -51,6 +51,10 @@ public interface Indexer {
         public SearchException(Query.QueryException ex) {
             super(ex);
         }
+        
+        public SearchException(Exception ex) {
+            super(ex);
+        }
     };
 
     public class IndexRecordValidationException extends IndexerException {

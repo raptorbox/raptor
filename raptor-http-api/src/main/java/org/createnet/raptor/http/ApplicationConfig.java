@@ -34,13 +34,15 @@ public class ApplicationConfig extends BaseAppConfig {
 
         String resourcePackage = "org.createnet.raptor.http.api";
         packages(resourcePackage);
-
+        
+        
         register(AuthorizationRequestFilter.class);
         register(CORSResponseFilter.class);
         register(LoggerResponseFilter.class);
         register(ApiExceptionMapper.class);
         register(RaptorApplicationEventListener.class);
-
+        
+        registerDefault();
         registerSwagger(resourcePackage);
         
     }

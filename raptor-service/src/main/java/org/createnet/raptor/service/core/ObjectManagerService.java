@@ -17,6 +17,8 @@ package org.createnet.raptor.service.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
@@ -100,18 +102,16 @@ public class ObjectManagerService extends AbstractRaptorService {
         return list;
     }
 
-    private List<Stream> getChangedStreams(ServiceObject storedObj, ServiceObject obj) {
+    synchronized private List<Stream> getChangedStreams(ServiceObject storedObj, ServiceObject obj) {
 
         List<Stream> changedStream = new ArrayList();
 
         // loop previous stream list and find missing streams
-        for (Map.Entry<String, Stream> item : storedObj.streams.entrySet()) {
+        for (Iterator<Stream> it = storedObj.getStreams().values().iterator(); it.hasNext();) {
 
-            String streamName = item.getKey();
-            Stream stream = item.getValue();
-
+            Stream stream = it.next();
             // stream found
-            if (obj.streams.containsKey(streamName)) {
+            if (obj.streams.containsKey(stream.name)) {
 
                 // loop stream and find changed channels
                 for (Map.Entry<String, Channel> channelItem : stream.channels.entrySet()) {
@@ -119,9 +119,9 @@ public class ObjectManagerService extends AbstractRaptorService {
                     String channelName = channelItem.getKey();
                     Channel channel = channelItem.getValue();
 
-                    if (storedObj.streams.get(streamName).channels.containsKey(channelName)) {
+                    if (storedObj.streams.get(stream.name).channels.containsKey(channelName)) {
                         // check if channel definition changed
-                        if (!storedObj.streams.get(streamName).channels.get(channelName).type.equals(channel.type)) {
+                        if (!storedObj.streams.get(stream.name).channels.get(channelName).type.equals(channel.type)) {
                             changedStream.add(stream);
                             break;
                         }
@@ -135,15 +135,14 @@ public class ObjectManagerService extends AbstractRaptorService {
             } else {
                 // drop stream
                 changedStream.add(stream);
-                storedObj.streams.remove(streamName);
+                it.remove();
             }
-
         }
 
         return changedStream;
     }
 
-    private List<Action> getChangedActions(ServiceObject storedObj, ServiceObject obj) {
+    synchronized private List<Action> getChangedActions(ServiceObject storedObj, ServiceObject obj) {
         List<Action> changedAction = new ArrayList();
         obj.actions.values().stream().filter((action) -> (!storedObj.actions.containsKey(action.name))).forEachOrdered((action) -> {
             changedAction.add(action);
@@ -179,7 +178,10 @@ public class ObjectManagerService extends AbstractRaptorService {
      * @return
      */
     public ServiceObject update(ServiceObject obj) {
-
+        
+        // ensure incoming obj is valid
+        obj.validate();
+        
         ServiceObject storedObj = load(obj.id);
 
         logger.debug("Updating object {}", obj.id);
@@ -203,7 +205,16 @@ public class ObjectManagerService extends AbstractRaptorService {
 
         storedObj.actions.clear();
         storedObj.addActions(obj.actions.values());
-
+        
+        if(obj.name != null)
+            storedObj.name = obj.name;
+        
+        if(obj.description != null)
+            storedObj.description = obj.description;
+        
+        storedObj.settings.eventsEnabled = obj.settings.eventsEnabled;
+        storedObj.settings.storeData = obj.settings.storeData;
+        
         storage.saveObject(storedObj);
         indexer.saveObject(storedObj, false);
 
@@ -213,7 +224,7 @@ public class ObjectManagerService extends AbstractRaptorService {
         storage.deleteActionStatus(changedActions);
 
         emitter.trigger(Event.EventName.update, new ObjectEvent(storedObj));
-
+        
         logger.debug("Updated object {} for {}", storedObj.id, obj.userId);
 
         return obj;

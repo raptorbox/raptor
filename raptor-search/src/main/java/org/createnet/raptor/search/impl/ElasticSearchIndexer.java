@@ -434,6 +434,9 @@ public class ElasticSearchIndexer extends AbstractIndexer {
         } catch (Query.QueryException ex) {
             throw new SearchException(ex);
         }
+        catch(Exception e)  {
+            throw new SearchException(e);
+        }
     }
 
 }

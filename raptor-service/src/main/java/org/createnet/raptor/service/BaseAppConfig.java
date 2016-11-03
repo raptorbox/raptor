@@ -16,17 +16,7 @@
 package org.createnet.raptor.service;
 
 import io.swagger.jaxrs.config.BeanConfig;
-import javax.inject.Singleton;
-import org.createnet.raptor.service.tools.AuthService;
-import org.createnet.raptor.service.tools.CacheService;
-import org.createnet.raptor.service.tools.ConfigurationService;
-import org.createnet.raptor.service.tools.DispatcherService;
-import org.createnet.raptor.service.tools.EventEmitterService;
-import org.createnet.raptor.service.tools.IndexerService;
 import org.createnet.raptor.service.tools.RaptorApplicationEventListener;
-import org.createnet.raptor.service.tools.StorageService;
-import org.createnet.raptor.service.tools.TreeService;
-import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 
 /**
@@ -35,15 +25,11 @@ import org.glassfish.jersey.server.ResourceConfig;
  */
 abstract public class BaseAppConfig extends ResourceConfig {
 
-    public BaseAppConfig() {
-
-        super();
-
+    public void registerDefault() {
         register(RaptorApplicationEventListener.class);
         register(new ServiceBinder());
-        
     }
-        
+    
     public void registerSwagger(String resourcePackage) {
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
