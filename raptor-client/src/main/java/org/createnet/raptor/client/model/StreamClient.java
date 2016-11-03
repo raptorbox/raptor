@@ -18,6 +18,7 @@ package org.createnet.raptor.client.model;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.client.RaptorClient;
 import org.createnet.raptor.client.RaptorComponent;
+import org.createnet.raptor.client.event.MessageEventListener;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Stream;
@@ -29,6 +30,42 @@ import org.createnet.raptor.search.query.impl.es.DataQuery;
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class StreamClient extends AbstractClient {
+
+    public interface StreamCallback {
+
+        /**
+         * Run when a stream receive data
+         *
+         * @param stream The stream receiving update
+         * @param record The record sent over stream
+         */
+        public void execute(Stream stream, RecordSet record);
+    }
+
+    protected String getTopic(Stream stream) {
+        String path = RaptorComponent.format(RaptorClient.Routes.SUBSCRIBE_STREAM, stream.getServiceObject().getId(), stream.name);
+        return path;
+    }
+    
+    /**
+     * Subscribe a Stream for data updates
+     * @param stream The stream to listen data for
+     * @param callback The callback to fire on data arrival
+     */
+    public void subscribe(Stream stream, StreamCallback callback) {
+        getClient().subscribe(getTopic(stream), (MessageEventListener.Message message) -> {
+            RecordSet record = RecordSet.fromJSON(message.content);
+            callback.execute(stream, record);
+        });
+    }
+
+    /**
+     * Unsubscribe a Stream for data updates
+     * @param stream The stream to unsubscribe from
+     */
+    public void unsubscribe(Stream stream) {
+        getClient().unsubscribe(getTopic(stream));
+    }
 
     /**
      * Send stream data

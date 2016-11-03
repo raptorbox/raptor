@@ -117,6 +117,8 @@ public class RaptorClient implements IClient, RaptorComponent {
         final static public String INVOKE = "/{0}/actions/{1}";
         final static public String ACTION_STATUS = INVOKE;
         final static public String ACTION_LIST = "/{0}/actions";
+        
+        final static public String SUBSCRIBE_STREAM = PUSH;
 
     }
 

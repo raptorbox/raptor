@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +50,7 @@ public class ServiceObject extends ServiceObjectContainer {
     public String name;
     public String description = "";
 
-    public Long createdAt = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+    public Long createdAt = Instant.now().getEpochSecond();
     public Long updatedAt = createdAt;
 
     final public Map<String, Object> customFields = new HashMap();
