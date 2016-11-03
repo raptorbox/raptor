@@ -24,6 +24,8 @@ To setup the basic services required use [Docker Compose](https://docs.docker.co
 
 We are actively working to structure and expand the documentation!
 
+To have a start we have an [alpha documentation site](http://raptorbox.github.io/raptor/README.md)
+
 #### Querying the HTTP API
 
 To get started there is a swagger based API documentation available at those addresses (once the appliance is up and running)

@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import org.createnet.raptor.models.objects.RaptorComponent;
+import org.createnet.raptor.service.exception.ObjectNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +73,17 @@ public class ApiExceptionMapper implements ExceptionMapper<Exception> {
               .type("application/json")
               .build();
     }
-
+    
+    if (e instanceof ObjectNotFoundException) {
+      logger.error("Not found: {}", e.getMessage());
+      return Response
+              .status(Response.Status.NOT_FOUND)
+              .entity(new JsonErrorResponse(Response.Status.NOT_FOUND.getStatusCode(), e.getMessage()))
+              .type("application/json")
+              .build();
+    }
+    
+    
     logger.error("Unhandled exception stack: {}", e.getMessage(), e);
 
     return Response

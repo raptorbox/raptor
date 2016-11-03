@@ -13,35 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.events;
+package org.createnet.raptor.events.type;
+
+import org.createnet.raptor.models.data.ActionStatus;
+import org.createnet.raptor.models.objects.Action;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public interface Event {
+public class ActionEvent  extends ObjectEvent {
+  
+  final private Action action;
+  final private ActionStatus status;
+  
+  public ActionEvent(Action action, ActionStatus status, String accessToken) {
+    super(action.getServiceObject(), accessToken);
+    this.action = action;
+    this.status = status;
+  }
 
-    public enum EventName {
+  public Action getAction() {
+    return action;
+  }
 
-        create, update, delete,
-        push, pull,
-        execute, deleteAction,
-        subscribe,
-        object, data,
-        all,
-        
-    }
-
-    public String getEvent();
-
-    public void setEvent(String name);
-
-    public String getParentEvent();
-
-    public void setParentEvent(String name);
-
-    public String getUserId();
-
-    public void setUserId(String name);
-
+  public ActionStatus getActionStatus() {
+    return status;
+  }
+  
 }

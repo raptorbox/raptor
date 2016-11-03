@@ -25,7 +25,7 @@ import org.createnet.raptor.cli.command.IndexCommand;
 import org.createnet.raptor.cli.command.LaunchCommand;
 import org.createnet.raptor.cli.command.SetupCommand;
 import org.createnet.raptor.config.ConfigurationLoader;
-import org.createnet.raptor.http.ApplicationConfig;
+import org.createnet.raptor.service.ServiceBinder;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.ServiceLocatorFactory;
 import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
@@ -75,7 +75,7 @@ public class Runner {
         ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
 
         serviceLocator = locatorFactory.create("CliLocator");
-        ServiceLocatorUtilities.bind(serviceLocator, new ApplicationConfig.AppBinder());
+        ServiceLocatorUtilities.bind(serviceLocator, new ServiceBinder.AppBinder());
 
         for (Class availCommand : availCommands) {
             try {

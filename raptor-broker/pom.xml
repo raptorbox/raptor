@@ -61,7 +61,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>raptor-http-api</artifactId>
+            <artifactId>raptor-service</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -29,10 +29,10 @@ import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.broker.configuration.BrokerConfiguration;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.db.Storage;
-import org.createnet.raptor.http.service.AuthService;
-import org.createnet.raptor.http.service.IndexerService;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.service.tools.AuthService;
+import org.createnet.raptor.service.tools.IndexerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

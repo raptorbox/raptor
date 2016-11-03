@@ -20,34 +20,21 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.createnet.raptor.auth.authentication.Authentication;
-import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.createnet.raptor.search.Indexer;
-import org.createnet.raptor.config.exception.ConfigurationException;
-import org.createnet.raptor.http.events.ObjectEvent;
-import org.createnet.raptor.http.service.EventEmitterService;
-import org.createnet.raptor.models.objects.Action;
-import org.createnet.raptor.models.objects.Channel;
-import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.search.query.impl.es.ObjectQuery;
 
 /**
@@ -68,20 +55,11 @@ public class ObjectApi extends AbstractApi {
         ,
     @ApiResponse(code = 403, message = "Forbidden")
     })
-    public List<String> list() {
-
-        if (!auth.isAllowed(Authorization.Permission.List)) {
-            throw new ForbiddenException("Cannot list objects");
-        }
-
-        // TODO: List device which access is allowed
-        List<ServiceObject> list = indexer.getObjectsByUser(auth.getUser().getUserId());
-        List<String> idList = new ArrayList();
-        list.stream().forEach((obj) -> {
-            idList.add(obj.id);
-        });
-
-        return idList;
+    public List<ServiceObject> list(
+            @QueryParam("limit") Integer limit,
+            @QueryParam("offset") Integer offset
+    ) {
+        return objectManager.list(offset, limit);
     }
 
     @POST
@@ -95,40 +73,7 @@ public class ObjectApi extends AbstractApi {
     @ApiResponse(code = 500, message = "Internal error")
     })
     public Response create(ServiceObject obj) {
-
-        if (!auth.isAllowed(Authorization.Permission.Create)) {
-            throw new ForbiddenException("Cannot create object");
-        }
-
-        obj.id = null;
-        obj.userId = auth.getUser().getUserId();
-
-        storage.saveObject(obj);
-
-        try {
-            indexer.saveObject(obj, true);
-        } catch (Indexer.IndexerException ex) {
-
-            logger.error("Indexing error occured", ex);
-            logger.warn("Removing object {} from storage", obj.id);
-
-            storage.deleteObject(obj);
-
-            throw new InternalServerErrorException("Failed to index device");
-        }
-
-        boolean sync = syncObject(obj, Authentication.SyncOperation.CREATE);
-        if (!sync) {
-            logger.error("Auth sync failed, aborting creation of object {}", obj.id);
-            storage.deleteObject(obj);
-            indexer.deleteObject(obj);
-            throw new InternalServerErrorException("Failed to sync device");
-        }
-
-        emitter.trigger(EventEmitterService.EventName.create, new ObjectEvent(obj, auth.getAccessToken()));
-
-        logger.debug("Created new object {} for {}", obj.id, auth.getUser().getUserId());
-
+        objectManager.create(obj);
         return Response.created(URI.create("/" + obj.id)).entity(obj.toJSON()).build();
     }
 
@@ -143,67 +88,12 @@ public class ObjectApi extends AbstractApi {
         ,
     @ApiResponse(code = 403, message = "Forbidden")
     })
-    public String update(@PathParam("id") String id, ServiceObject obj) {
-
-        ServiceObject storedObj = loadObject(id);
-
-        if (obj.id == null || obj.id.isEmpty()) {
-            obj.id = storedObj.id;
-        }
-
-        if (!storedObj.id.equals(obj.id)) {
-            throw new NotFoundException("Request id does not match payload defined id");
-        }
-
-        if (!auth.isAllowed(obj, Authorization.Permission.Update)) {
-            throw new ForbiddenException("Cannot update object");
-        }
-
-        if (!storedObj.userId.equals(auth.getUser().getUserId())) {
-            logger.warn("User {} tried to update object {} owned by {}", auth.getUser().getUserId(), storedObj.id, storedObj.userId);
-            throw new NotFoundException();
-        }
-
-        logger.debug("Updating object {}", obj.id);
-
-        // @TODO: handle proper object update, ensuring stream data integrity
-        storedObj.customFields.clear();
-        storedObj.customFields.putAll(obj.customFields);
-
-        // update settings
-        storedObj.settings.storeData = obj.settings.storeData;
-        storedObj.settings.eventsEnabled = obj.settings.eventsEnabled;
-
-        // merge stream definitions
-        List<Stream> changedStreams = getChangedStreams(storedObj, obj);
-
-        storedObj.streams.clear();
-        storedObj.addStreams(obj.streams.values());
-
-        // merge action definitions
-        List<Action> changedActions = getChangedActions(storedObj, obj);
-
-        storedObj.actions.clear();
-        storedObj.addActions(obj.actions.values());
-
-        boolean sync = syncObject(obj, Authentication.SyncOperation.UPDATE);
-        if (!sync) {
-            throw new InternalServerErrorException("Failed to sync device");
-        }
-        
-        storage.saveObject(storedObj);
-        indexer.saveObject(storedObj, false);
-
-        // clean up data for changed stream and actions
-        storage.deleteData(changedStreams);
-        indexer.deleteData(changedStreams);
-        storage.deleteActionStatus(changedActions);
-              
-        emitter.trigger(EventEmitterService.EventName.update, new ObjectEvent(storedObj, auth.getAccessToken()));
-
-        logger.debug("Updated object {} for {}", storedObj.id, auth.getUser().getUserId());
-
-        return obj.toJSON();
+    public ServiceObject update(
+            @PathParam("id") String id,
+            ServiceObject obj
+    ) {
+        objectManager.update(id, obj);
+        return obj;
     }
 
     @GET
@@ -214,17 +104,8 @@ public class ObjectApi extends AbstractApi {
         ,
     @ApiResponse(code = 403, message = "Forbidden")
     })
-    public String load(@PathParam("id") String id) {
-
-        logger.debug("Load object {}", id);
-
-        ServiceObject obj = loadObject(id);
-
-        if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
-            throw new ForbiddenException("Cannot read object");
-        }
-
-        return obj.toJSON();
+    public ServiceObject load(@PathParam("id") String id) {
+        return objectManager.load(id);
     }
 
     @DELETE
@@ -238,26 +119,7 @@ public class ObjectApi extends AbstractApi {
     @ApiResponse(code = 500, message = "Internal error")
     })
     public Response delete(@PathParam("id") String id) {
-
-        ServiceObject obj = loadObject(id);
-
-        if (!auth.isAllowed(obj, Authorization.Permission.Delete)) {
-            throw new ForbiddenException("Cannot delete object");
-        }
-
-        boolean sync = syncObject(obj, Authentication.SyncOperation.DELETE);
-        if (!sync) {
-            logger.error("Auth sync failed, aborting deletion of object {}", obj.id);
-            throw new InternalServerErrorException("Failed to sync device");
-        }        
-        
-        storage.deleteObject(obj);
-        indexer.deleteObject(obj);
-
-        emitter.trigger(EventEmitterService.EventName.delete, new ObjectEvent(obj, auth.getAccessToken()));
-
-        logger.debug("Deleted object {}", id);
-
+        objectManager.delete(id);
         return Response.status(Response.Status.OK).build();
     }
 
@@ -271,73 +133,8 @@ public class ObjectApi extends AbstractApi {
         ,
     @ApiResponse(code = 403, message = "Forbidden")
     })
-    public List<String> search(ObjectQuery query) {
-
-        if (!auth.isAllowed(Authorization.Permission.List)) {
-            throw new ForbiddenException("Cannot search for objects");
-        }
-
-        query.setUserId(auth.getUser().getUserId());
-
-        List<ServiceObject> list = indexer.searchObject(query);
-
-        List<String> results = new ArrayList();
-        for (ServiceObject serviceObject : list) {
-            results.add(serviceObject.getId());
-        }
-
-        return results;
-    }
-
-    private List<Stream> getChangedStreams(ServiceObject storedObj, ServiceObject obj) {
-
-        List<Stream> changedStream = new ArrayList();
-
-        // loop previous stream list and find missing streams
-        for (Map.Entry<String, Stream> item : storedObj.streams.entrySet()) {
-
-            String streamName = item.getKey();
-            Stream stream = item.getValue();
-
-            // stream found
-            if (obj.streams.containsKey(streamName)) {
-
-                // loop stream and find changed channels
-                for (Map.Entry<String, Channel> channelItem : stream.channels.entrySet()) {
-
-                    String channelName = channelItem.getKey();
-                    Channel channel = channelItem.getValue();
-
-                    if (storedObj.streams.get(streamName).channels.containsKey(channelName)) {
-                        // check if channel definition changed
-                        if (!storedObj.streams.get(streamName).channels.get(channelName).type.equals(channel.type)) {
-                            changedStream.add(stream);
-                            break;
-                        }
-                    } else {
-                        // channel has gone, drop stream
-                        changedStream.add(stream);
-                        break;
-                    }
-
-                }
-            } else {
-                // drop stream
-                changedStream.add(stream);
-                storedObj.streams.remove(streamName);
-            }
-
-        }
-
-        return changedStream;
-    }
-
-    private List<Action> getChangedActions(ServiceObject storedObj, ServiceObject obj) {
-        List<Action> changedAction = new ArrayList();
-        obj.actions.values().stream().filter((action) -> (!storedObj.actions.containsKey(action.name))).forEachOrdered((action) -> {
-            changedAction.add(action);
-        });
-        return changedAction;
+    public List<ServiceObject> search(ObjectQuery query) {
+        return objectManager.search(query);
     }
 
 }

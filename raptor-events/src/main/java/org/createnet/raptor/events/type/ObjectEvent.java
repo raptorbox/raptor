@@ -13,35 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.events;
+package org.createnet.raptor.events.type;
+
+import org.createnet.raptor.events.AbstractEvent;
+import org.createnet.raptor.models.objects.ServiceObject;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public interface Event {
+public class ObjectEvent extends AbstractEvent {
+  
+  protected ServiceObject obj;
+  protected String accessToken;
+  
+  public ObjectEvent() {
+  }
+  
+  public ObjectEvent(ServiceObject obj, String accessToken) {
+    this.obj = obj;
+    this.accessToken = accessToken;
+  }
 
-    public enum EventName {
+  public ServiceObject getObject() {
+    return obj;
+  }
 
-        create, update, delete,
-        push, pull,
-        execute, deleteAction,
-        subscribe,
-        object, data,
-        all,
-        
-    }
-
-    public String getEvent();
-
-    public void setEvent(String name);
-
-    public String getParentEvent();
-
-    public void setParentEvent(String name);
-
-    public String getUserId();
-
-    public void setUserId(String name);
-
+  public String getAccessToken() {
+    return accessToken;
+  }
+  
 }

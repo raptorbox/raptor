@@ -15,48 +15,47 @@
  */
 package org.createnet.raptor.events;
 
-
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
 public class AbstractEvent implements Event {
-  
-  private String userId;
-  private String event;
-  private String parentEvent;
-  
-  @Override
-  public String getEvent() {
-    return event;
-  }
-  
-  @Override
-  public void setEvent(String event) {
-    this.event = event;
-  }
-  
-  @Override
-  public String getParentEvent() {
-    if(parentEvent == null) {
-      return event;
+
+    private String userId;
+    private String event;
+    private String parentEvent;
+
+    @Override
+    public String getEvent() {
+        return event;
     }
-    return parentEvent;
-  }
-  
-  @Override
-  public void setParentEvent(String event) {
-    this.parentEvent = event;
-  }
 
-  @Override
-  public String getUserId() {
-    return userId;
-  }
+    @Override
+    public void setEvent(String event) {
+        this.event = event;
+    }
 
-  @Override
-  public void setUserId(String name) {
-    userId = name;
-  }
-  
+    @Override
+    public String getParentEvent() {
+        if (parentEvent == null) {
+            return event;
+        }
+        return parentEvent;
+    }
+
+    @Override
+    public void setParentEvent(String event) {
+        this.parentEvent = event;
+    }
+
+    @Override
+    public String getUserId() {
+        return userId;
+    }
+
+    @Override
+    public void setUserId(String name) {
+        userId = name;
+    }
+
 }

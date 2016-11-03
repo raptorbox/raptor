@@ -22,8 +22,8 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 import org.createnet.raptor.broker.Broker;
 import org.createnet.raptor.http.HttpService;
-import org.createnet.raptor.http.service.IndexerService;
-import org.createnet.raptor.http.service.StorageService;
+import org.createnet.raptor.service.tools.IndexerService;
+import org.createnet.raptor.service.tools.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

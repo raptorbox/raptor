@@ -30,8 +30,8 @@ import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.createnet.raptor.http.events.ActionEvent;
-import org.createnet.raptor.http.service.EventEmitterService;
+import org.createnet.raptor.events.type.ActionEvent;
+import org.createnet.raptor.service.tools.EventEmitterService;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.objects.Action;
 

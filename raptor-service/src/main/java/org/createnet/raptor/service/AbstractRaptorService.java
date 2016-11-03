@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 CREATE-NET
+ * Copyright 2016 Luca Capra <luca.capra@create-net.org>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,35 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.events;
+package org.createnet.raptor.service;
 
 /**
- *
- * @author Luca Capra <lcapra@create-net.org>
+ * @author Luca Capra <luca.capra@create-net.org>
  */
-public interface Event {
+abstract public class AbstractRaptorService implements RaptorService {
 
-    public enum EventName {
-
-        create, update, delete,
-        push, pull,
-        execute, deleteAction,
-        subscribe,
-        object, data,
-        all,
-        
+    @Override
+    public void initialize() {
     }
 
-    public String getEvent();
+    @Override
+    public void shutdown() {
+    }
 
-    public void setEvent(String name);
-
-    public String getParentEvent();
-
-    public void setParentEvent(String name);
-
-    public String getUserId();
-
-    public void setUserId(String name);
+    @Override
+    public void reset() {
+        shutdown();
+        initialize();
+    }
 
 }

@@ -23,7 +23,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.config.exception.ConfigurationException;
-import org.createnet.raptor.http.service.AuthService;
+import org.createnet.raptor.service.tools.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

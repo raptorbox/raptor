@@ -13,35 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.events;
+package org.createnet.raptor.service.configuration;
+
+import org.createnet.raptor.config.Configuration;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public interface Event {
-
-    public enum EventName {
-
-        create, update, delete,
-        push, pull,
-        execute, deleteAction,
-        subscribe,
-        object, data,
-        all,
-        
-    }
-
-    public String getEvent();
-
-    public void setEvent(String name);
-
-    public String getParentEvent();
-
-    public void setParentEvent(String name);
-
-    public String getUserId();
-
-    public void setUserId(String name);
-
+public class AuthConfiguration extends org.createnet.raptor.auth.AuthConfiguration implements Configuration {
+  
 }

@@ -30,11 +30,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
+import org.createnet.raptor.events.Event.EventName;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.createnet.raptor.http.events.DataEvent;
-import org.createnet.raptor.http.service.EventEmitterService;
+import org.createnet.raptor.events.type.DataEvent;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Stream;
@@ -52,16 +52,7 @@ public class DataApi extends AbstractApi {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Collection<Stream> list(@PathParam("id") String id) {
-
-        ServiceObject obj = loadObject(id);
-
-        if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
-            throw new ForbiddenException("Cannot load stream list");
-        }
-
-        logger.debug("Load streams for object {}", obj.id);
-
-        return obj.streams.values();
+        return streamManager.loadStreams(id);
     }
 
     @GET
@@ -166,7 +157,7 @@ public class DataApi extends AbstractApi {
             logger.debug("Skipped data storage for {}", obj.id);
         }
 
-        emitter.trigger(EventEmitterService.EventName.push, new DataEvent(stream, record, auth.getAccessToken()));
+        emitter.trigger(EventName.push, new DataEvent(stream, record, auth.getAccessToken()));
 
         logger.debug("Received record for stream {} in object {}", streamName, obj.id);
 

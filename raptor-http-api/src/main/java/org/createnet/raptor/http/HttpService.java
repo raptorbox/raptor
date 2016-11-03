@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.http;
 
+import org.createnet.raptor.service.ServiceBinder;
 import java.io.IOException;
 import java.net.URI;
 import javax.ws.rs.core.UriBuilder;

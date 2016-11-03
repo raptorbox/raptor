@@ -15,20 +15,19 @@
  */
 package org.createnet.raptor.http.api;
 
-import java.util.Arrays;
-import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
-import org.createnet.raptor.auth.authentication.Authentication;
-import org.createnet.raptor.http.service.AuthService;
-import org.createnet.raptor.http.service.DispatcherService;
-import org.createnet.raptor.http.service.EventEmitterService;
-import org.createnet.raptor.http.service.IndexerService;
-import org.createnet.raptor.http.service.StorageService;
-import org.createnet.raptor.http.service.TreeService;
+import org.createnet.raptor.service.tools.AuthService;
+import org.createnet.raptor.service.tools.DispatcherService;
+import org.createnet.raptor.service.tools.EventEmitterService;
+import org.createnet.raptor.service.tools.IndexerService;
+import org.createnet.raptor.service.tools.StorageService;
+import org.createnet.raptor.service.tools.TreeService;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.service.core.ObjectManagerService;
+import org.createnet.raptor.service.core.StreamManagerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,13 @@ import org.slf4j.LoggerFactory;
 abstract public class AbstractApi {
 
     final private Logger logger = LoggerFactory.getLogger(AbstractApi.class);
-
+    
+    @Inject
+    protected ObjectManagerService objectManager;
+    
+    @Inject
+    protected StreamManagerService streamManager;
+    
     @Inject
     protected EventEmitterService emitter;
 
@@ -58,30 +63,6 @@ abstract public class AbstractApi {
     @Inject
     protected TreeService tree;
 
-    protected ServiceObject loadObject(String id) {
-
-        logger.debug("Load object {}", id);
-        List<ServiceObject> objs = indexer.getObjects(Arrays.asList(id));
-        if (objs.isEmpty()) {
-            throw new NotFoundException("Object " + id + " not found");
-        }
-
-        ServiceObject obj = objs.get(0);
-
-        return obj;
-    }
-
-    protected Stream loadStream(String streamId, ServiceObject obj) {
-
-        Stream stream = obj.streams.getOrDefault(streamId, null);
-
-        if (stream == null) {
-            throw new NotFoundException("Stream " + streamId + " not found");
-        }
-
-        return stream;
-    }
-
     protected Action loadAction(String actionId, ServiceObject obj) {
 
         Action action = obj.actions.getOrDefault(actionId, null);
@@ -92,15 +73,6 @@ abstract public class AbstractApi {
 
         return action;
     }
-
-    protected boolean syncObject(ServiceObject obj, Authentication.SyncOperation op) {
-        try {
-            auth.sync(auth.getAccessToken(), obj, op);
-        } catch (Exception ex) {
-            logger.error("Error syncing object to auth system: {}", ex.getMessage());
-            return false;
-        }
-        return true;
-    }    
+ 
     
 }
