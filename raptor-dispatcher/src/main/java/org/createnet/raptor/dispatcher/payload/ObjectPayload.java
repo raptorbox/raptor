@@ -24,7 +24,7 @@ import org.createnet.raptor.models.objects.ServiceObject;
  *
  * @author Luca Capra <luca.capra@create-net.org>
  */
-public class ObjectPayload implements DispatcherPayload {
+public class ObjectPayload extends AbstractPayload {
 
     final public String userId;
     final public JsonNode object;

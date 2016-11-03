@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Luca Capra <luca.capra@create-net.org>.
+ * Copyright 2016 CREATE-NET
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,19 @@ package org.createnet.raptor.dispatcher.payload;
  *
  * @author Luca Capra <luca.capra@create-net.org>
  */
-public class DataPayload extends AbstractPayload {
-
-    final private String c;
-
-    public DataPayload(String c) {
-        this.c = c;
+public class AbstractPayload implements DispatcherPayload {
+    
+    public String type;
+    public String op;
+    
+    @Override
+    public MessageType getType() {
+        return type == null ? null : MessageType.valueOf(type);
     }
 
     @Override
-    public String toString() {
-        return c;
+    public String getOp() {
+        return op;
     }
+    
 }

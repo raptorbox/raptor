@@ -23,7 +23,7 @@ import org.createnet.raptor.client.RaptorComponent;
  * @author Luca Capra <luca.capra@create-net.org>
  */
 abstract class AbstractClient implements RaptorComponent {
-
+    
     protected String buildQueryString(Integer offset, Integer limit) {
         String qs = null;
         if (offset != null) {

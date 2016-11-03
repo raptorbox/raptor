@@ -24,7 +24,21 @@ public interface DispatcherPayload {
     public enum MessageType {
         object, stream, actuation
     }
-
+    
+    /**
+     * Return the type of message
+     * 
+     * @return type of message
+     */
+    public MessageType getType();
+    
+    /**
+     * Return the operation label
+     * 
+     * @return label of the operation
+     */    
+    public String getOp();
+    
     @Override
     public String toString();
 }

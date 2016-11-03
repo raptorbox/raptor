@@ -54,5 +54,10 @@
       <artifactId>raptor-search</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>raptor-dispatcher</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>
