@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/muka/raptor.svg?branch=master)](https://travis-ci.org/muka/raptor)
 
+[![Coverage Status](https://coveralls.io/repos/github/raptorbox/raptor/badge.svg?branch=master)](https://coveralls.io/github/raptorbox/raptor?branch=master)
+
 Welcome to the Raptor IoT broker repository.
 
 ### What is this?
