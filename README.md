@@ -1,5 +1,7 @@
 # Raptor
 
+[![Join the chat at https://gitter.im/raptorbox-api/Lobby](https://badges.gitter.im/raptorbox-api/Lobby.svg)](https://gitter.im/raptorbox-api/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/raptorbox/raptor.svg?branch=master)](https://travis-ci.org/raptorbox/raptor) [![Coverage Status](https://coveralls.io/repos/github/raptorbox/raptor/badge.svg?branch=master)](https://coveralls.io/github/raptorbox/raptor?branch=master) [![Project Stats](https://www.openhub.net/p/raptorbox/widgets/project_thin_badge.gif)](https://www.openhub.net/p/raptorbox)
 
 Welcome to the Raptor IoT broker repository.
