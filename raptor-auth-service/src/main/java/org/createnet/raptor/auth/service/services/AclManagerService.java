@@ -88,10 +88,11 @@ public class AclManagerService implements AclManager {
         try {
             
             MutableAcl childAcl = getACL(clazz, childId);
-            MutableAcl parentAcl = getACL(clazz, parentId);
-
-            childAcl.setEntriesInheriting(true);
-            childAcl.setParent(parentAcl);
+            if(parentId != null) {
+                MutableAcl parentAcl = getACL(clazz, parentId);
+                childAcl.setEntriesInheriting(true);
+                childAcl.setParent(parentAcl);
+            }
 
             aclService.updateAcl(childAcl);
         }
