@@ -3,7 +3,7 @@ Raptor docs
 
 ***Work in progress*** documentation is not yet complete, help is welcome!
 
-Welcome to the Raptor IoT broker documentation!
+Welcome to the Raptor IoT platform documentation!
 
 - [Introduction](getting-started/introduction.md): General information
 - [Architecture](getting-started/architecture.md): Solution architecture
