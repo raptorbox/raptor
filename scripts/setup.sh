@@ -1,3 +1,8 @@
+
+echo "Obsolete, please upgrade me to debian package"
+
+exit 1
+
 CBHOST=raptor.local
 CBUSER=admin
 CBPASS=password
