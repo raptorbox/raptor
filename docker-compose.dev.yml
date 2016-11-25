@@ -23,7 +23,7 @@ services:
       - 11210:11210
 
   elasticsearch1:
-    image: elasticsearch:2.4
+    image: elasticsearch:5
     command: elasticsearch -Des.network.host=0.0.0.0 -Des.cluster.name="raptor" -Des.node.name="elasticsearch1"
     volumes:
       - ./data/elasticsearch1:/usr/share/elasticsearch/data
