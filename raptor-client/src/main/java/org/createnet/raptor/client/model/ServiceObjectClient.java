@@ -29,7 +29,7 @@ import org.createnet.raptor.dispatcher.payload.DispatcherPayload;
 import org.createnet.raptor.dispatcher.payload.ObjectPayload;
 import org.createnet.raptor.dispatcher.payload.StreamPayload;
 import org.createnet.raptor.models.objects.ServiceObject;
-import org.createnet.raptor.search.query.impl.es.ObjectQuery;
+import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -28,7 +28,7 @@ import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Channel;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
-import org.createnet.raptor.search.query.impl.es.ObjectQuery;
+import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
 import org.createnet.raptor.service.AbstractRaptorService;
 import org.createnet.raptor.service.exception.ObjectNotFoundException;
 import org.createnet.raptor.service.tools.DispatcherService;

@@ -28,7 +28,7 @@ import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.query.BaseQuery;
 import org.createnet.raptor.service.tools.IndexerService;
 import org.createnet.raptor.service.tools.StorageService;
-import org.createnet.raptor.search.Indexer;
+import org.createnet.raptor.indexer.Indexer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

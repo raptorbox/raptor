@@ -23,7 +23,7 @@ import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
-import org.createnet.raptor.search.query.impl.es.DataQuery;
+import org.createnet.raptor.indexer.query.impl.es.DataQuery;
 import org.createnet.raptor.service.AbstractRaptorService;
 import org.createnet.raptor.service.exception.StreamNotFoundException;
 import org.createnet.raptor.service.tools.DispatcherService;

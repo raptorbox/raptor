@@ -36,10 +36,10 @@ import javax.ws.rs.core.Response;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.models.objects.ServiceObject;
-import org.createnet.raptor.search.Indexer;
+import org.createnet.raptor.indexer.Indexer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.createnet.raptor.search.query.impl.es.ObjectQuery;
+import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
 
 /**
  *

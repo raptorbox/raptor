@@ -22,7 +22,7 @@ import org.createnet.raptor.client.event.MessageEventListener;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Stream;
-import org.createnet.raptor.search.query.impl.es.DataQuery;
+import org.createnet.raptor.indexer.query.impl.es.DataQuery;
 
 /**
  * Represent a service object data stream
