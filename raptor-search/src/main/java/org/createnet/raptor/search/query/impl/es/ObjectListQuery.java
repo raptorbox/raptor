@@ -16,6 +16,7 @@
 package org.createnet.raptor.search.query.impl.es;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import org.createnet.raptor.search.query.AbstractQuery;
@@ -29,7 +30,7 @@ import org.elasticsearch.index.query.QueryBuilders;
  *
  * @author l
  */
-public class ObjectListQuery extends AbstractQuery {
+public class ObjectListQuery extends AbstractESQuery {
 
 //    public String userId;
     final public List<String> ids = new ArrayList();
@@ -42,12 +43,8 @@ public class ObjectListQuery extends AbstractQuery {
 
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
-//        if (userId != null) {
-//            boolQuery.must(QueryBuilders.matchQuery("userId", userId));
-//        }
-
         IdsQueryBuilder idsQuery = QueryBuilders.idsQuery(this.getType());
-        idsQuery.addIds(ids);
+        idsQuery.addIds(ids.stream().toArray(String[]::new));
 
         boolQuery.must(idsQuery);
 

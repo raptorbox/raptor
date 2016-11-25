@@ -24,7 +24,7 @@ import org.elasticsearch.index.query.QueryBuilders;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class LastUpdateQuery extends AbstractQuery {
+public class LastUpdateQuery extends AbstractESQuery {
   
   private final String objectId;
   private final String streamName;

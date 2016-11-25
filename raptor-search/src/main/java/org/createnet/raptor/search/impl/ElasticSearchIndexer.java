@@ -55,8 +55,11 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -183,7 +186,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
         logger.debug("Delete index record {}.{}.{}", record.index, record.type, record.id);
         try {
             DeleteResponse response = client.prepareDelete(record.index, record.type, record.id).get();
-            if (!response.isFound()) {
+            if (response.status() == RestStatus.NOT_FOUND) {
                 throw new IndexerException("Record not found");
             }
         } catch (Exception e) {
@@ -303,25 +306,32 @@ public class ElasticSearchIndexer extends AbstractIndexer {
         String host = configuration.elasticsearch.transport.host;
         int port = configuration.elasticsearch.transport.port;
 
-        try {
+        switch (configuration.elasticsearch.type) {
+            case "transport":
 
-            logger.debug("Connecting to ElasticSearch instance {}:{}", host, port);
+                try {
+                    logger.debug("Connecting to ElasticSearch instance {}:{}", host, port);
 
-            Settings settings = Settings.settingsBuilder()
-                    .put(configuration.elasticsearch.clientConfig)
-                    .build();
+                    Settings settings = Settings.builder()
+                            .put(configuration.elasticsearch.clientConfig)
+                            .build();
 
-            TransportAddress transportAddress = new InetSocketTransportAddress(InetAddress.getByName(host), port);
-            client = TransportClient.builder()
-                    .settings(settings)
-                    .build()
-                    .addTransportAddress(transportAddress);
+                    TransportAddress transportAddress = new InetSocketTransportAddress(InetAddress.getByName(host), port);
 
-            this.indexAdmin.setClient(client);
+                    client = new PreBuiltTransportClient(settings)
+                            .addTransportAddress(transportAddress);
 
-        } catch (UnknownHostException uhe) {
-            throw new IndexerException(uhe);
+                    this.indexAdmin.setClient(client);
+
+                } catch (UnknownHostException uhe) {
+                    throw new IndexerException(uhe);
+                }
+
+                break;
+            default:
+                throw new IndexerException("Unsupported connection type " + configuration.elasticsearch.type);
         }
+
     }
 
     /**
@@ -401,8 +411,8 @@ public class ElasticSearchIndexer extends AbstractIndexer {
             SearchRequestBuilder searchBuilder = client.prepareSearch(query.getIndex())
                     .setTypes(query.getType())
                     .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                    .setQuery(query.format());
-
+                    .setQuery((QueryBuilder)query.getNativeQuery());
+            
             if (query.getLimit() != null && query.getLimit() > 0) {
                 searchBuilder.setSize(query.getLimit());
             }
@@ -433,8 +443,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
             return list;
         } catch (Query.QueryException ex) {
             throw new SearchException(ex);
-        }
-        catch(Exception e)  {
+        } catch (Exception e) {
             throw new SearchException(e);
         }
     }

@@ -16,7 +16,6 @@
 package org.createnet.raptor.search.query.impl.es;
 
 import java.time.Instant;
-import org.createnet.raptor.search.query.AbstractQuery;
 import java.util.ArrayList;
 import java.util.List;
 import org.createnet.raptor.search.query.Query;
@@ -33,7 +32,7 @@ import org.elasticsearch.index.query.RangeQueryBuilder;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class DataQuery extends AbstractQuery {
+public class DataQuery extends AbstractESQuery {
 
     public DataQuery() {
     }
@@ -126,10 +125,9 @@ public class DataQuery extends AbstractQuery {
 
         if (geodistance) {
 
-            GeoDistanceQueryBuilder geodistanceFilter
-                    = QueryBuilders.geoDistanceQuery("channels.location")
-                            .distance(geodistancevalue, DistanceUnit.fromString(geodistanceunit))
-                            .point(pointlat, pointlon);
+            GeoDistanceQueryBuilder geodistanceFilter = QueryBuilders.geoDistanceQuery("channels.location")
+                    .distance(geodistancevalue, DistanceUnit.fromString(geodistanceunit))
+                    .point(pointlat, pointlon);
 
             //filter.append(geodistanceFilter.toString());
             queries.add(geodistanceFilter);
@@ -137,12 +135,11 @@ public class DataQuery extends AbstractQuery {
 
         if (geoboundingbox) {
 
-            GeoBoundingBoxQueryBuilder geodbboxFilter
-                    = QueryBuilders.geoBoundingBoxQuery("channels.location")
-                            .topLeft(geoboxupperleftlat, geoboxupperleftlon)
-                            .bottomRight(geoboxbottomrightlat, geoboxbottomrightlon);
+            GeoBoundingBoxQueryBuilder geodbboxFilter = QueryBuilders.geoBoundingBoxQuery("channels.location");
 
-            //filter.append(geodbboxFilter());
+            geodbboxFilter.topLeft().reset(geoboxupperleftlat, geoboxupperleftlon);
+            geodbboxFilter.bottomRight().reset(geoboxbottomrightlat, geoboxbottomrightlon);
+
             queries.add(geodbboxFilter);
         }
 
@@ -160,7 +157,7 @@ public class DataQuery extends AbstractQuery {
         matchstring = value;
         return this;
     }
-    
+
     public DataQuery setMatch(String field, String value) {
         match = true;
         matchfield = field;
@@ -168,8 +165,7 @@ public class DataQuery extends AbstractQuery {
         return this;
     }
 
-    @Override
-    public String format() throws QueryException {
+    public BoolQueryBuilder getQueryBuilder() throws QueryException {
 
         validate();
 
@@ -180,6 +176,20 @@ public class DataQuery extends AbstractQuery {
         for (QueryBuilder qbpart : queries) {
             qb.must(qbpart);
         }
+
+        return qb;
+    }
+
+    @Override
+    public Object getNativeQuery() throws QueryException {
+        nativeQuery = getQueryBuilder();
+        return super.getNativeQuery();
+    }
+
+    @Override
+    public String format() throws QueryException {
+
+        BoolQueryBuilder qb = getQueryBuilder();
 
         if (!qb.hasClauses()) {
             throw new QueryException("Query is empty");

@@ -72,6 +72,7 @@ public interface Query {
     public void validate() throws QueryException;
 
     public String format() throws QueryException;
+    public Object getNativeQuery() throws QueryException;
     
     public JsonNode toJSON() throws QueryException;
     

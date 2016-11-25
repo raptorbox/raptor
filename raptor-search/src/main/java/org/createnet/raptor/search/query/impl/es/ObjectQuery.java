@@ -27,7 +27,7 @@ import org.elasticsearch.index.query.QueryBuilders;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class ObjectQuery extends AbstractQuery {
+public class ObjectQuery extends AbstractESQuery {
 
   public String search;
 
