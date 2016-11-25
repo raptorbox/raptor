@@ -2,7 +2,9 @@
 
 [![Build Status](https://travis-ci.org/raptorbox/raptor.svg?branch=master)](https://travis-ci.org/raptorbox/raptor) [![Coverage Status](https://coveralls.io/repos/github/raptorbox/raptor/badge.svg?branch=master)](https://coveralls.io/github/raptorbox/raptor?branch=master) [![Project Stats](https://www.openhub.net/p/raptorbox/widgets/project_thin_badge.gif)](https://www.openhub.net/p/raptorbox) [![Join the chat at https://gitter.im/raptorbox-iot/Lobby](https://badges.gitter.im/raptorbox-iot/Lobby.svg)](https://gitter.im/raptorbox-iot/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Welcome to the Raptor IoT platform repository.
+Welcome to the Raptor IoT platform repository!
+
+Were you looking for the [API documentation](http://raptorbox.github.io/)
 
 ### What is this?
 
@@ -10,11 +12,20 @@ Raptor is a complete open-source solution for Rapid Prototyping of application f
 
 It is composed of an HTTP API and a MQTT broker (+AMQP and others) to create reactive stream of data of your devices
 
-You can learn more in the introduction section of the [documentation](http://raptorbox.github.io/raptor/)
+###Prerequisites
+
+- Java SDK 8
+- Maven v3
+- Docker 1.12
+- Docker Compose 1.8
 
 ### Setup
 
-To setup the basic services required use [Docker Compose](https://docs.docker.com/compose/)
+First let's build the the jars with maven and the docker builds. There is an handy script for that in the repo
+
+`./scripts/docker-build.sh`
+
+To start the basic services required we will use [Docker Compose](https://docs.docker.com/compose/)
 
 `docker-compose up`
 
@@ -24,7 +35,7 @@ To setup the basic services required use [Docker Compose](https://docs.docker.co
 
 We are actively working to structure and expand the documentation!
 
-To have a start we have an [alpha documentation site](http://raptorbox.github.io/raptor/README.md)
+To have a start we have the [documentation site](http://raptorbox.github.io)
 
 #### Querying the HTTP API
 
