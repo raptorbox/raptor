@@ -87,7 +87,7 @@ public class ElasticSearchIndexAdmin {
 
     public void create(String name, String definition) {
 
-        Settings indexSettings = Settings.settingsBuilder()
+        Settings indexSettings = Settings.builder()
                 .loadFromSource(definition).build();
 
         CreateIndexRequest createIndexReq = new CreateIndexRequest(name, indexSettings);
