@@ -1,5 +1,18 @@
 
-foppdasks;'sad'
+---
+
+spring:
+  profiles: docker
+  datasource:
+    url: jdbc:mysql://mariadb:3306/raptor
+
+logging:
+  level:
+   root: WARNING
+   org.createnet.raptor: INFO
+
+---
+
 
 spring:
 

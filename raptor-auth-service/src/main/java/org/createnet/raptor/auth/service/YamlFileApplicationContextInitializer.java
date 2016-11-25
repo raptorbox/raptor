@@ -47,9 +47,14 @@ public class YamlFileApplicationContextInitializer implements ApplicationContext
 
         try {
             
+            String context = System.getenv("SPRING_PROFILES_ACTIVE");
+            if (context == null || context.isEmpty()) {
+                context = "default";
+            }
+            
             Resource resource = new FileSystemResource(configFile);
             YamlPropertySourceLoader sourceLoader = new YamlPropertySourceLoader();
-            PropertySource<?> yamlTestProperties = sourceLoader.load("etcProperties", resource, null);
+            PropertySource<?> yamlTestProperties = sourceLoader.load("etcProperties", resource, context);
             applicationContext.getEnvironment().getPropertySources().addFirst(yamlTestProperties);
         } catch (IOException e) {
             throw new RuntimeException(e);

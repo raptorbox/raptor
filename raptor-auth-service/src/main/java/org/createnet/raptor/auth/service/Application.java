@@ -25,7 +25,6 @@ import org.createnet.raptor.auth.service.jwt.JwtAuthenticationTokenFilter;
 import org.createnet.raptor.auth.service.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -37,7 +36,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -60,7 +58,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableCaching
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableRetry
-@PropertySource(value="file:/etc/raptor/auth-service.yml", ignoreResourceNotFound=true)
+//@PropertySource(value="file:/etc/raptor/auth-service.yml", ignoreResourceNotFound=true)
 public class Application {
 
     public static void main(String[] args) {
@@ -70,7 +68,7 @@ public class Application {
             .bannerMode(Banner.Mode.OFF)
             .headless(true)
             .logStartupInfo(false)
-//            .initializers(new YamlFileApplicationContextInitializer())
+            .initializers(new YamlFileApplicationContextInitializer())
             .application()
             .run(args);
         
