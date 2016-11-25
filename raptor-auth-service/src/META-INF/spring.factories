@@ -2,3 +2,4 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 org.createnet.raptor.auth.service.Application, \
 org.createnet.raptor.auth.service.AclConfiguration, \
 org.createnet.raptor.auth.service.SwaggerConfig
+org.createnet.raptor.auth.service.JWTWebSecurityConfigurationAdapter

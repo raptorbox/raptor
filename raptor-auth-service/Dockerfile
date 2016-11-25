@@ -6,6 +6,8 @@ MAINTAINER Luca Capra <lcapra@create-net.org>
 VOLUME ["/etc/raptor"]
 EXPOSE 8090
 
+# ENV SPRING_PROFILES_ACTIVE docker
+
 COPY target/raptor-auth-service-1.0.jar /raptor-auth-service.jar
 
 CMD ["java","-jar","/raptor-auth-service.jar"]
