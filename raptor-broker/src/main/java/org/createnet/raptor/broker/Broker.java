@@ -37,7 +37,6 @@ public class Broker {
         broker.initialize();
 
         broker.start();
-
     }
 
     private BrokerConfiguration brokerConfiguration;

@@ -1,0 +1,11 @@
+# FROM dockerfile/oracle-java8
+
+FROM anapsix/alpine-java
+
+MAINTAINER Luca Capra <lcapra@create-net.org>
+VOLUME ["/etc/raptor"]
+EXPOSE 8090
+
+COPY target/raptor-auth-service-1.0-jar-with-dependencies.jar /raptor-auth-service.jar
+
+CMD ["java","-jar","/raptor-auth-service.jar"]

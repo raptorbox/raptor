@@ -80,7 +80,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
         // Load indices.json to configuration
         Map<String, String> indices = new HashMap();
 
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = Indexer.getObjectMapper();
         JsonNode json;
         try {
             json = mapper.readTree(Files.readAllBytes(Paths.get(file)));

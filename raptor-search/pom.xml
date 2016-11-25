@@ -23,7 +23,7 @@
     <dependency>
       <groupId>org.elasticsearch</groupId>
       <artifactId>elasticsearch</artifactId>
-      <version>${elastic-search}</version>
+      <version>${elasticsearch}</version>
     </dependency>
 
     <dependency>
@@ -50,11 +50,13 @@
       <version>${junit}</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
       <version>${jackson}</version>
       <type>jar</type>
     </dependency>
+
   </dependencies>
 </project>
