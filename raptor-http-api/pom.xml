@@ -15,6 +15,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <mainclass>org.createnet.raptor.http.HttpService</mainclass>
     </properties>
     
     <dependencies> 
@@ -93,6 +94,7 @@
 
     <build>
         <plugins>
+
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
@@ -107,7 +109,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.createnet.raptor.http.HttpService</mainClass>
+                            <mainClass>${mainclass}</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -115,6 +117,23 @@
                     </descriptorRefs>
                 </configuration>
             </plugin>
+            
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>${mainclass}</mainClass>
+                </configuration>
+            </plugin>            
+            
         </plugins>
     </build>
 

@@ -14,7 +14,7 @@
     <packaging>jar</packaging>
     
     <properties>
-        <artemis>1.4.0</artemis>
+        <mainclass>org.createnet.raptor.broker.Broker</mainclass>
     </properties>
 
     <dependencies>
@@ -85,6 +85,7 @@
   
     <build>
         <plugins>
+            
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -97,9 +98,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>org.createnet.raptor.broker.Broker</mainClass>
+                    <mainClass>${mainclass}</mainClass>
                 </configuration>
             </plugin>
+            
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
@@ -114,7 +116,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.createnet.raptor.broker.Broker</mainClass>                            
+                            <mainClass>${mainclass}</mainClass>                            
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -122,6 +124,7 @@
                     </descriptorRefs>
                 </configuration>
             </plugin>
+
         </plugins>
         
     </build>

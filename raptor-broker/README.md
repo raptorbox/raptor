@@ -1,14 +1,14 @@
 Raptor HTTP API
 ===
 
-The Raptor IoT broker HTTP API, used to manage object definitions and store/fetch data
+The Raptor IoT platform broker, used to notify client of platform events
 
 Usage
 ---
 
-Start with maven `mvn exec:java`
+Start with maven `mvn exec:java` and connect then with an mqtt client to `localhost:1883`
 
-visit then `http://localhost:8080/swagger.yaml` for an overview of the API
+*Note* that requires the HTTP API to be up and running
 
 License
 ---
