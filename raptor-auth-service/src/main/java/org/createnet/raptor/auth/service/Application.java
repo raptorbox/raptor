@@ -25,14 +25,19 @@ import org.createnet.raptor.auth.service.jwt.JwtAuthenticationTokenFilter;
 import org.createnet.raptor.auth.service.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringApplication;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -47,6 +52,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
+@Profile("default")
 @SpringBootApplication
 @Configuration
 @EnableAutoConfiguration
@@ -54,130 +60,135 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableCaching
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableRetry
+@PropertySource(value="file:/etc/raptor/auth-service.yml", ignoreResourceNotFound=true)
 public class Application {
 
-  public static void main(String[] args) {
-    SpringApplication.run(Application.class, args);
-  }
+    public static void main(String[] args) {
+        
+        
+        ConfigurableApplicationContext app = new SpringApplicationBuilder(Application.class)
+            .bannerMode(Banner.Mode.OFF)
+            .headless(true)
+            .logStartupInfo(false)
+//            .initializers(new YamlFileApplicationContextInitializer())
+            .application()
+            .run(args);
+        
+    }
 
-  static final protected BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    static final protected BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-  @Value("${raptor.admin.enabled}")
-  private Boolean defaultUserEnabled;
-  @Value("${raptor.admin.username}")
-  private String defaultUserUsername;
-  @Value("${raptor.admin.password}")
-  private String defaultUserPassword;
-  @Value("${raptor.admin.email}")
-  private String defaultUserEmail;
+    @Value("${raptor.admin.enabled}")
+    private Boolean defaultUserEnabled;
+    @Value("${raptor.admin.username}")
+    private String defaultUserUsername;
+    @Value("${raptor.admin.password}")
+    private String defaultUserPassword;
+    @Value("${raptor.admin.email}")
+    private String defaultUserEmail;
 
-  @Autowired
-  private DataSource dataSource;
+    @Autowired
+    private DataSource dataSource;
 
-  @Autowired
-  private UserService userService;
+    @Autowired
+    private UserService userService;
 
-  @Autowired
-  private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
 //  @Autowired
 //  private RoleRepository roleRepository;
-  @Autowired
-  public void init(AuthenticationManagerBuilder auth) throws Exception {
-    auth
-            .jdbcAuthentication()
-            .dataSource(dataSource);
+    @Autowired
+    public void init(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+                .jdbcAuthentication()
+                .dataSource(dataSource);
 
-    createDefaultUser();
-  }
-
-  protected void createDefaultUser() {
-
-    if (defaultUserEnabled != null && defaultUserEnabled == false) {
-      return;
+        createDefaultUser();
     }
 
-    User defaultUser = userRepository.findByUsername(defaultUserUsername);
-    if (defaultUser != null) {
-      userRepository.delete(defaultUser.getId());
-    }
+    protected void createDefaultUser() {
 
-    User adminUser = new User();
+        if (defaultUserEnabled != null && defaultUserEnabled == false) {
+            return;
+        }
 
-    adminUser.setUsername(defaultUserUsername);
-    adminUser.setPassword(passwordEncoder.encode(defaultUserPassword));
-    adminUser.setEmail(defaultUserEmail);
+        User defaultUser = userRepository.findByUsername(defaultUserUsername);
+        if (defaultUser != null) {
+            userRepository.delete(defaultUser.getId());
+        }
+
+        User adminUser = new User();
+
+        adminUser.setUsername(defaultUserUsername);
+        adminUser.setPassword(passwordEncoder.encode(defaultUserPassword));
+        adminUser.setEmail(defaultUserEmail);
 
 //    adminUser.addRole(roleRepository.findByName(Role.Roles.ROLE_SUPER_ADMIN.name()));
-    adminUser.addRole(Role.Roles.super_admin);
+        adminUser.addRole(Role.Roles.super_admin);
 
-    userService.save(adminUser);
+        userService.save(adminUser);
 
-  }
-
-  @Configuration
-  @EnableWebSecurity
-  @EnableGlobalMethodSecurity(prePostEnabled = true)
-  protected static class JWTWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-    @Value("${jwt.route.authentication.path}")
-    private String authenticationPath;
-    
-    @Value("${jwt.route.authentication.refresh}")
-    private String authenticationRefresh;
-
-    @Autowired
-    private JwtAuthenticationEntryPoint unauthorizedHandler;
-
-    @Autowired
-    private RaptorUserDetailsService userDetailsService;
-
-    @Autowired
-    public void configureAuthentication(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-      authenticationManagerBuilder
-              .userDetailsService(this.userDetailsService)
-              .passwordEncoder(passwordEncoder());
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-      return passwordEncoder;
+    @Configuration
+    @EnableWebSecurity
+    @EnableGlobalMethodSecurity(prePostEnabled = true)
+    protected static class JWTWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+
+        @Value("${jwt.route.authentication.path}")
+        private String authenticationPath;
+
+        @Value("${jwt.route.authentication.refresh}")
+        private String authenticationRefresh;
+
+        @Autowired
+        private JwtAuthenticationEntryPoint unauthorizedHandler;
+
+        @Autowired
+        private RaptorUserDetailsService userDetailsService;
+
+        @Autowired
+        public void configureAuthentication(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
+            authenticationManagerBuilder
+                    .userDetailsService(this.userDetailsService)
+                    .passwordEncoder(passwordEncoder());
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            return passwordEncoder;
+        }
+
+        @Bean
+        public JwtAuthenticationTokenFilter authenticationTokenFilterBean() throws Exception {
+            return new JwtAuthenticationTokenFilter();
+        }
+
+        @Override
+        protected void configure(HttpSecurity httpSecurity) throws Exception {
+            httpSecurity
+                    // we don't need CSRF because our token is invulnerable
+                    .csrf().disable()
+                    .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+                    // don't create session
+                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                    .cors().and()
+                    .authorizeRequests()
+                    .antMatchers(authenticationPath).permitAll()
+                    .antMatchers(authenticationRefresh).permitAll()
+                    .antMatchers("/v2/api-docs").permitAll()
+                    // keep this method private to allow sync beetween api and auth
+                    .antMatchers("/sync").hasIpAddress("127.0.0.1")
+                    .anyRequest().authenticated();
+
+            // Custom JWT based security filter
+            httpSecurity.addFilterBefore(authenticationTokenFilterBean(), JsonUsernamePasswordFilter.class);
+
+            // disable page caching
+            httpSecurity.headers().cacheControl();
+        }
     }
-
-    @Bean
-    public JwtAuthenticationTokenFilter authenticationTokenFilterBean() throws Exception {
-      return new JwtAuthenticationTokenFilter();
-    }
-
-    @Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
-      httpSecurity
-              // we don't need CSRF because our token is invulnerable
-              .csrf().disable()
-              .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-              // don't create session
-              .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-              
-              .cors().and()
-              
-              .authorizeRequests()
-              
-              .antMatchers(authenticationPath).permitAll()
-              .antMatchers(authenticationRefresh).permitAll()
-              .antMatchers("/v2/api-docs").permitAll()
-              
-              // keep this method private to allow sync beetween api and auth
-              .antMatchers("/sync").hasIpAddress("127.0.0.1")
-              
-              .anyRequest().authenticated();
-
-      // Custom JWT based security filter
-      httpSecurity.addFilterBefore(authenticationTokenFilterBean(), JsonUsernamePasswordFilter.class);
-
-      // disable page caching
-      httpSecurity.headers().cacheControl();
-    }
-  }
 
 //  @Configuration
 //  @EnableResourceServer

@@ -1,9 +1,10 @@
 
+foppdasks;'sad'
 
 spring:
 
   profiles: default
-    
+
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/raptor
     username: root
@@ -12,7 +13,7 @@ spring:
     testWhileIdle: true
     validationQuery: SELECT 1
     lastInsertQuery: SELECT LAST_INSERT_ID()
-    
+
   jpa:
     show-sql: false
     database-platform: org.hibernate.dialect.MySQL5Dialect
@@ -38,15 +39,15 @@ logging:
     org.createnet.raptor: DEBUG
 
 jwt:
-  
+
   header: Authorization
-  
+
   # A secret used application wide for login token generation, keep it really secret
   secret: Voi che vivete sicuri Nelle vostre tiepide case
-  
+
   # TTL in seconds, 1800 = 30 minutes
   expiration: 1800
-  
+
   route:
     authentication:
       path: /login
