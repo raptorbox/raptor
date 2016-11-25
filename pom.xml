@@ -18,7 +18,7 @@
         <module>raptor-dispatcher</module>    
         <module>raptor-auth</module>    
         <module>raptor-db</module>
-        <module>raptor-search</module>
+        <module>raptor-indexer</module>
         <module>raptor-client</module>        
         <module>raptor-service</module>   
     

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.search.impl.es;
+package org.createnet.raptor.indexer.impl.es;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;

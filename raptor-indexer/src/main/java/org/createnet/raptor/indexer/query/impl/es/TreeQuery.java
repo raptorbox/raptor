@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.search.query.impl.es;
+package org.createnet.raptor.indexer.query.impl.es;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.createnet.raptor.search.query.AbstractQuery;
+import org.createnet.raptor.indexer.query.AbstractQuery;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;

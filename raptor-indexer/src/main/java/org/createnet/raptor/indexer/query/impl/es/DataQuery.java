@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.search.query.impl.es;
+package org.createnet.raptor.indexer.query.impl.es;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import org.createnet.raptor.search.query.Query;
+import org.createnet.raptor.indexer.query.Query;
 import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.GeoBoundingBoxQueryBuilder;

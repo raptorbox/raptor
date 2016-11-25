@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.search;
+package org.createnet.raptor.indexer;
 
-import org.createnet.raptor.search.impl.IndexerConfiguration;
+import org.createnet.raptor.indexer.impl.IndexerConfiguration;
 import org.elasticsearch.common.unit.TimeValue;
 
 /**

@@ -9,7 +9,7 @@
   </parent>
   
   <groupId>org.createnet</groupId>
-  <artifactId>raptor-search</artifactId>
+  <artifactId>raptor-indexer</artifactId>
   <packaging>jar</packaging>
   
   <properties>

@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.search;
+package org.createnet.raptor.indexer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
-import org.createnet.raptor.search.impl.IndexerConfiguration;
-import org.createnet.raptor.search.query.Query;
+import org.createnet.raptor.indexer.impl.IndexerConfiguration;
+import org.createnet.raptor.indexer.query.Query;
 
 /**
  *
