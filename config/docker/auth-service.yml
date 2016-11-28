@@ -1,10 +1,12 @@
 
+# Dockerized version
+
 spring:
 
   profiles: default
 
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/raptor
+    url: jdbc:mysql://mariadb:3306/raptor
     username: root
     password: raptor
     # Keep the connection alive if idle for a long time (needed in production)
