@@ -23,7 +23,7 @@ It is composed of an HTTP API and a MQTT broker (+AMQP and others) to create rea
 
 First let's build the the jars with maven and the docker builds. There is an handy script for that in the repo
 
-`./scripts/docker-build.sh`
+`./scripts/docker-setup.sh`
 
 To start the basic services required we will use [Docker Compose](https://docs.docker.com/compose/)
 
