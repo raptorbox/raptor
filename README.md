@@ -24,7 +24,9 @@ It is composed of an HTTP API and a MQTT broker (+AMQP and others) to create rea
 Install Java SDK 8. for Ubuntu distro (16.10, 16.04, 15.10, 14.04 and 12.04). The installer provides Oracle Java 8 (which includes Java JDK, JRE and the Java browser plugin).
 
 `sudo add-apt-repository ppa:webupd8team/java`
+
 `sudo apt-get update`
+
 `sudo apt-get install oracle-java8-installer`
 
 Install Maven v3
