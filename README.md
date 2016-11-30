@@ -41,7 +41,7 @@ Install Docker Compose 1.9
 - chmod +x /usr/local/bin/docker-compose
 
 
-Then clone the Raptor let's build the the jars with maven and the docker builds. There is an handy script for that in the repo
+Then clone the Raptor repository on your pc and let's build the the jars with maven and the docker builds. There is an handy script for that in the repo
 
 `./scripts/docker-setup.sh`
 
