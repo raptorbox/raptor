@@ -23,13 +23,13 @@ It is composed of an HTTP API and a MQTT broker (+AMQP and others) to create rea
 
 Install Java SDK 8. for Ubuntu distro (16.10, 16.04, 15.10, 14.04 and 12.04). The installer provides Oracle Java 8 (which includes Java JDK, JRE and the Java browser plugin).
 
-- sudo add-apt-repository ppa:webupd8team/java
-- sudo apt-get update
-- sudo apt-get install oracle-java8-installer
+`sudo add-apt-repository ppa:webupd8team/java`
+`sudo apt-get update`
+`sudo apt-get install oracle-java8-installer`
 
 Install Maven v3
 
-- sudo apt-get install maven
+`sudo apt-get install maven`
 
 Install Docker 1.12
 
@@ -37,8 +37,8 @@ Install Docker 1.12
 
 Install Docker Compose 1.9
 
-- curl -L "https://github.com/docker/compose/releases/download/1.9.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-- chmod +x /usr/local/bin/docker-compose
+`curl -L "https://github.com/docker/compose/releases/download/1.9.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose`
+`chmod +x /usr/local/bin/docker-compose`
 
 
 Then clone the Raptor repository on your pc and let's build the the jars with maven and the docker builds. There is an handy script for that in the repo
