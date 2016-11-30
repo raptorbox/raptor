@@ -1,5 +1,7 @@
 #!/bin/sh
 
+mvn clean install -DskipTests=true
+
 cd raptor-http-api
 mvn clean package -DskipTests=true
 cd ..
