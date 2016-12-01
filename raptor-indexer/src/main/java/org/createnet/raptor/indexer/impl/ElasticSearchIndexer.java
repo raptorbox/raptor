@@ -30,11 +30,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import org.createnet.raptor.indexer.AbstractIndexer;
 import org.createnet.raptor.indexer.Indexer;
 import org.createnet.raptor.indexer.Indexer.IndexerException;
 import org.createnet.raptor.indexer.impl.es.ElasticSearchIndexAdmin;
 import org.createnet.raptor.indexer.query.Query;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthAction;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequestBuilder;
 import org.elasticsearch.action.bulk.BackoffPolicy;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -48,6 +52,7 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
@@ -296,12 +301,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
 
     }
 
-    /**
-     *
-     * @throws IndexerException
-     */
-    @Override
-    public void open() throws IndexerException {
+    protected void connect() {
 
         String host = configuration.elasticsearch.transport.host;
         int port = configuration.elasticsearch.transport.port;
@@ -321,6 +321,9 @@ public class ElasticSearchIndexer extends AbstractIndexer {
                     client = new PreBuiltTransportClient(settings)
                             .addTransportAddress(transportAddress);
 
+                    // Wait for status update in case ES is booting
+                    client.admin().cluster().prepareHealth().setWaitForYellowStatus().get();
+
                     this.indexAdmin.setClient(client);
 
                 } catch (UnknownHostException uhe) {
@@ -332,6 +335,35 @@ public class ElasticSearchIndexer extends AbstractIndexer {
                 throw new IndexerException("Unsupported connection type " + configuration.elasticsearch.type);
         }
 
+    }
+
+    /**
+     *
+     * @throws IndexerException
+     */
+    @Override
+    public void open() throws IndexerException {
+        
+        int tries = 0, maxTries = 5, waitFor = 300;
+        
+        while(tries < maxTries) {
+            
+            try {
+                connect();
+                return;
+            }
+            catch(Exception ex) {
+                logger.warn("Connection to cluster failed: {}", ex.getMessage());
+                try {
+                    Thread.sleep(waitFor * tries);
+                } catch (InterruptedException ex1) {
+                    logger.warn("Cannot sleep current thread {}", ex1.getMessage());
+                }
+            }
+            tries++;
+        }
+        
+        throw new IndexerException("Connection failed");
     }
 
     /**
@@ -376,7 +408,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
                     indexAdmin.create(indexName, indexDefinition);
                 }
 
-            } catch (ElasticSearchIndexAdmin.IndexAdminException ex) {
+            } catch (Exception ex) {
                 logger.error("Cannot complete setup phase: {}", ex.getMessage(), ex);
                 throw new IndexerException(ex);
             }
@@ -411,8 +443,8 @@ public class ElasticSearchIndexer extends AbstractIndexer {
             SearchRequestBuilder searchBuilder = client.prepareSearch(query.getIndex())
                     .setTypes(query.getType())
                     .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                    .setQuery((QueryBuilder)query.getNativeQuery());
-            
+                    .setQuery((QueryBuilder) query.getNativeQuery());
+
             if (query.getLimit() != null && query.getLimit() > 0) {
                 searchBuilder.setSize(query.getLimit());
             }
