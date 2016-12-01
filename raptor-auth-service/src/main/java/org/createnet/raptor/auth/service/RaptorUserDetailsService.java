@@ -34,55 +34,62 @@ import org.springframework.stereotype.Service;
 @Service
 public class RaptorUserDetailsService implements UserDetailsService {
 
-  @Autowired
-  private UserRepository userRepository;
-
-  @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    User user = userRepository.findByUsername(username);
-    if (user == null) {
-      throw new UsernameNotFoundException(String.format("User %s does not exist!", username));
-    }
-    return new RaptorUserDetails(user);
-  }
-
-  public final static class RaptorUserDetails extends User implements UserDetails {
-
-    private static final long serialVersionUID = 1L;
-
-    public RaptorUserDetails(User user) {
-      super(user);
-    }
-
-    @JsonIgnore
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-      return this.getRoles();
-    }
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
-    public String getUsername() {
-      return super.getUsername();
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        
+        User user = userRepository.findByEmail(username);
+
+        if (user == null) {
+            user = userRepository.findByUsername(username);
+        }
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found!");
+        }
+        
+        return new RaptorUserDetails(user);
     }
 
-    @JsonIgnore
-    @Override
-    public boolean isAccountNonExpired() {
-      return isEnabled();
-    }
+    public final static class RaptorUserDetails extends User implements UserDetails {
 
-    @JsonIgnore
-    @Override
-    public boolean isAccountNonLocked() {
-      return isEnabled();
-    }
+        private static final long serialVersionUID = 1L;
 
-    @JsonIgnore
-    @Override
-    public boolean isCredentialsNonExpired() {
-      return isEnabled();
-    }
+        public RaptorUserDetails(User user) {
+            super(user);
+        }
 
-  }
+        @JsonIgnore
+        @Override
+        public Collection<? extends GrantedAuthority> getAuthorities() {
+            return this.getRoles();
+        }
+
+        @Override
+        public String getUsername() {
+            return super.getUsername();
+        }
+
+        @JsonIgnore
+        @Override
+        public boolean isAccountNonExpired() {
+            return isEnabled();
+        }
+
+        @JsonIgnore
+        @Override
+        public boolean isAccountNonLocked() {
+            return isEnabled();
+        }
+
+        @JsonIgnore
+        @Override
+        public boolean isCredentialsNonExpired() {
+            return isEnabled();
+        }
+
+    }
 
 }

@@ -51,18 +51,13 @@ public class AuthenticationController {
     
     protected static class JwtRequest {
 
-        public JwtRequest() {
-        }
-
-        public JwtRequest(String username, String password) {
-            this.username = username;
-            this.password = password;
-        }
+        public JwtRequest() {}
 
         public String username;
         public String password;
     }
-
+    
+    
     protected static class JwtResponse {
 
         public JwtResponse(User user, String token) {

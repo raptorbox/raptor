@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.auth.service.controller;
 
-import java.util.Optional;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.auth.service.entity.User;
 import org.createnet.raptor.auth.service.services.UserService;
