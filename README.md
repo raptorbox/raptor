@@ -52,6 +52,10 @@ To start the basic services required we will use [Docker Compose](https://docs.d
 
 `docker-compose up`
 
+***Additional settings***
+
+- ElasticSearch 5.0 requires to set a bigger max virtual memory areas. Set with `sysctl -w vm.max_map_count=262144`
+
 ### Getting started
 
 ***Work in progress!***

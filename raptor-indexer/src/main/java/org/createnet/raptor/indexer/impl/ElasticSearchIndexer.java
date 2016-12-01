@@ -344,7 +344,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
     @Override
     public void open() throws IndexerException {
         
-        int tries = 0, maxTries = 5, waitFor = 300;
+        int tries = 0, maxTries = 5, waitFor = 5000;
         
         while(tries < maxTries) {
             
