@@ -66,7 +66,7 @@ public class Application {
             .logStartupInfo(false)
             .headless(true)
             .web(true)                
-            .initializers(new YamlFileApplicationContextInitializer())
+//            .initializers(new YamlFileApplicationContextInitializer())
             .application()
             .run(args);
         
