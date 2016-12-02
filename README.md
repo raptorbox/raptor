@@ -43,6 +43,9 @@ Install Docker Compose 1.9
 
 `chmod +x /usr/local/bin/docker-compose`
 
+***Additional settings***
+
+- ElasticSearch 5.0 requires to set a bigger max virtual memory areas. Set with `sysctl -w vm.max_map_count=262144`
 
 Then clone the Raptor repository on your pc and let's build the the jars with maven and the docker builds. There is an handy script for that in the repo
 
