@@ -6,11 +6,11 @@ networks:
 
 services:
 
-  raptor-http-api:
+  api:
     build: ./raptor-http-api
     container_name: raptor-http-api
     ports:
-      - 8080:8080
+      - 127.0.0.1:8080:8080
     volumes:
       - ./config:/etc/raptor
     depends_on:
@@ -19,7 +19,7 @@ services:
     networks:
       - raptor_net
 
-  raptor-broker:
+  broker:
     build: ./raptor-broker
     container_name: raptor-broker
     ports:
@@ -31,7 +31,7 @@ services:
     networks:
       - raptor_net
 
-  raptor-auth-service:
+  auth:
     build: ./raptor-auth-service
     container_name: raptor-auth-service
     ports:
@@ -76,5 +76,16 @@ services:
     ports:
       - 9200:9200
       - 9300:9300
+    networks:
+      - raptor_net
+
+  proxy:
+    build: ./docker/proxy
+    ports:
+      - 80:80
+    depends_on:
+      - api
+      - auth
+      - broker
     networks:
       - raptor_net
