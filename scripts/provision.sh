@@ -23,6 +23,8 @@ sudo chmod +x /usr/local/bin/docker-compose
 #Elasticsearch 5 fix
 sysctl -w vm.max_map_count=262144
 
-cd /vagrant
-sudo /vagrant/scripts/docker-setup.sh 2>&1 > /dev/null
+git clone https://github.com/raptorbox/raptor
+
+cd raptor
+sudo ./scripts/docker-setup.sh 2>&1 > /dev/null
 sudo docker-compose up
