@@ -352,7 +352,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
                 if (tries >= maxTries) {
                     break;
                 }
-                
+
                 try {
                     Thread.sleep(waitFor * tries);
                 } catch (InterruptedException ex1) {
@@ -378,7 +378,6 @@ public class ElasticSearchIndexer extends AbstractIndexer {
         logger.debug("Setup client, force {}", forceSetup);
 
         Map<String, String> indices = configuration.elasticsearch.indices.definitions;
-
         if (indices.isEmpty()) {
             String filepath = configuration.elasticsearch.indices.source;
             File file = new File(filepath);
@@ -394,11 +393,11 @@ public class ElasticSearchIndexer extends AbstractIndexer {
             String indexDefinition = el.getValue();
 
             try {
-                
+
                 if (indexDefinition.isEmpty()) {
-                    throw new RuntimeException("Index `"+ indexName +"` definition is empty! Check configurations and indices file");
+                    throw new RuntimeException("Index `" + indexName + "` definition is empty! Check configurations and indices file");
                 }
-                
+
                 boolean indexExists = indexAdmin.exists(indexName);
 
                 if (indexExists) {
