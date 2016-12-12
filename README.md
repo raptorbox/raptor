@@ -6,60 +6,59 @@ Welcome to the Raptor IoT platform repository!
 
 Were you looking for the [API documentation](http://raptorbox.github.io/)
 
-### What is this?
+## What is this?
 
 Raptor is a complete open-source solution for Rapid Prototyping of application for the Internet of Things or IoT
 
 It is composed of an HTTP API and a MQTT broker (+AMQP and others) to create reactive stream of data of your devices
 
-###Prerequisites
+## Setup
+
+### Vagrant setup
+
+If you have vagrant installed on your PC just run `vagrant up` to get the services up and running for you
+
+### Docker setup
+
+***Coming soon***
+
+### Build setup
+
+This section cover the required to build the solution and run it inside `docker-compose`
+
+#### Prerequisites
 
 - Java SDK 8
-- Maven v3
-- Docker 1.12
-- Docker Compose 1.9
+- Maven 3
+- Docker >= 1.12
+- Docker Compose >= 1.9
 
-### Setup
 
-Install Java SDK 8. for Ubuntu distro (16.10, 16.04, 15.10, 14.04 and 12.04). The installer provides Oracle Java 8 (which includes Java JDK, JRE and the Java browser plugin).
+#### Environment setup
 
-`sudo add-apt-repository ppa:webupd8team/java`
-
-`sudo apt-get update`
-
-`sudo apt-get install oracle-java8-installer`
-
-Install Maven v3
-
-`sudo apt-get install maven`
-
-Install Docker 1.12
-
-- https://docs.docker.com/engine/installation/
-
-Install Docker Compose 1.9
-
-`curl -L "https://github.com/docker/compose/releases/download/1.9.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose`
-
-`chmod +x /usr/local/bin/docker-compose`
+- Install Java SDK 8. for Ubuntu distro (16.10, 16.04, 15.10, 14.04 and 12.04). The installer provides Oracle Java 8 (which includes Java JDK, JRE and the Java browser plugin).
+```
+sudo add-apt-repository ppa:webupd8team/java -y &&
+sudo apt-get update
+sudo apt-get install oracle-java8-installer
+```
+- Install Maven `sudo apt-get install maven`
+- Install Docker by following the [official guide](https://docs.docker.com/engine/installation/)
+- Install Docker Compose by following the [official guide](https://docs.docker.com/engine/installation/)
 
 ***Additional settings***
 
 - ElasticSearch 5.0 requires to set a bigger max virtual memory areas. Set with `sysctl -w vm.max_map_count=262144`
 
-Then clone the Raptor repository on your pc and let's build the the jars with maven and the docker builds. There is an handy script for that in the repo
+#### Build sources
 
-`./scripts/docker-setup.sh`
+There is an handy script for that in the repository at `./scripts/docker-setup.sh`
 
-To start the basic services required we will use [Docker Compose](https://docs.docker.com/compose/)
+#### Start development build
 
-`docker-compose up`
+To start the services run  `docker-compose -f docker-compose.dev.yml up`
 
-***Additional settings***
-
-- ElasticSearch 5.0 requires to set a bigger max virtual memory areas. Set with `sysctl -w vm.max_map_count=262144`
-
-### Getting started
+## Getting started
 
 ***Work in progress!***
 
@@ -67,7 +66,7 @@ We are actively working to structure and expand the documentation!
 
 To have a start we have the [documentation site](http://raptorbox.github.io)
 
-#### Querying the HTTP API
+### Querying the HTTP API
 
 To get started there is a swagger based API documentation available at those addresses (once the appliance is up and running)
 
@@ -105,7 +104,7 @@ curl -XGET -H "Content-Type: application/json" \
 http://localhost:8080/
 ```
 
-#### Accessing the MQTT broker
+### Accessing the MQTT broker
 
 To access the broker open an MQTT (or Websocket) connection to `http://localhost:1883` using your username or password.
 
@@ -113,7 +112,7 @@ API Key based access is supported by setting an empty username and the API Key a
 
 You can use any library supporting MQTTv3.1.1 like [mqtt.js](https://github.com/mqttjs/MQTT.js) or [Eclipse PAHO](https://eclipse.org/paho/)
 
-### Libraries and tools
+## Libraries and tools
 
 We are working to expand the support of SDK and libraries in different languages.
 
@@ -122,7 +121,7 @@ Here the list of available ones:
 - [javascript sdk](https://github.com/raptorbox/raptorjs)
 - [java sdk](https://github.com/raptorbox/raptor/raptor-client) (work in progess)
 
-### Credits
+## Credits
 
 Raptor is a project by the [OpenIoT area](http://perfectiot.eu/) of [CREATE-NET](http://create-net.org) in the wonderful Trentino, Italy.
 
@@ -130,7 +129,7 @@ Get in touch if you want to know more about Raptor or our other IoT projects.
 
 We have an [IoT training program](http://perfectiot.eu/iot-training/) too!
 
-###License
+## License
 
 Copyright CREATE-NET <http://create-net.org>
 
