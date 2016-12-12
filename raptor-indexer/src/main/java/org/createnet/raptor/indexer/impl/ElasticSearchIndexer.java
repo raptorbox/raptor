@@ -30,15 +30,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import org.createnet.raptor.indexer.AbstractIndexer;
 import org.createnet.raptor.indexer.Indexer;
 import org.createnet.raptor.indexer.Indexer.IndexerException;
 import org.createnet.raptor.indexer.impl.es.ElasticSearchIndexAdmin;
 import org.createnet.raptor.indexer.query.Query;
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthAction;
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequestBuilder;
 import org.elasticsearch.action.bulk.BackoffPolicy;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -52,8 +48,6 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.NoNodeAvailableException;
-import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
@@ -394,13 +388,17 @@ public class ElasticSearchIndexer extends AbstractIndexer {
             indices.putAll(ElasticSearchIndexer.loadIndicesFromFile(filepath));
         }
 
-        for (Map.Entry<String, String> el : indices.entrySet()) {
+        indices.entrySet().forEach((el) -> {
 
             String indexName = el.getKey();
             String indexDefinition = el.getValue();
 
             try {
-
+                
+                if (indexDefinition.isEmpty()) {
+                    throw new RuntimeException("Index `"+ indexName +"` definition is empty! Check configurations and indices file");
+                }
+                
                 boolean indexExists = indexAdmin.exists(indexName);
 
                 if (indexExists) {
@@ -419,7 +417,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
                 logger.error("Cannot complete setup phase: {}", ex.getMessage(), ex);
                 throw new IndexerException(ex);
             }
-        }
+        });
 
     }
 
