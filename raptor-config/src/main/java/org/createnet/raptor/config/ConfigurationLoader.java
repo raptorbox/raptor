@@ -69,11 +69,11 @@ public class ConfigurationLoader {
 
         Configuration config = cache.get(name);
         if (config == null) {
-            logger.debug("Parsing configuration file `{}`", name);
             try {
                 File configFile = getFile(name);
+                logger.debug("Parsing configuration file `{}` at {}", name, configFile.getAbsolutePath());
                 if(!configFile.exists()) {
-                    logger.error("configuration file `{}` does not exists", name);
+                    logger.error("Configuration file `{}` does not exists", name);
                     throw new IOException("File does not exists: " + configFile.getAbsolutePath());
                 }
                 config = mapper.readValue(configFile, clazz);

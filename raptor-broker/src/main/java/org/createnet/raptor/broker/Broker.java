@@ -34,9 +34,8 @@ public class Broker {
     public static void main(final String[] args) {
 
         final Broker broker = new Broker();
-        broker.initialize();
-
         broker.start();
+        
     }
 
     private BrokerConfiguration brokerConfiguration;
@@ -51,11 +50,7 @@ public class Broker {
     final protected EmbeddedActiveMQ server = new EmbeddedActiveMQ();
     final RaptorSecurityManager securityManager = new RaptorSecurityManager();
 
-    public Broker() {
-    }
-
     public void initialize() {
-
         RaptorService.inject(securityManager);
         setupServer();
     }
@@ -71,7 +66,12 @@ public class Broker {
     public void start() {
 
         try {
+            
+            logger.debug("Initializing broker services");
+            initialize();            
+            
             logger.debug("Starting broker");
+            
             server.start();
         } catch (Exception ex) {
             logger.error("Error launching the borker: {}", ex.getMessage(), ex);

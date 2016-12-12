@@ -343,26 +343,33 @@ public class ElasticSearchIndexer extends AbstractIndexer {
      */
     @Override
     public void open() throws IndexerException {
-        
+
         int tries = 0, maxTries = 5, waitFor = 5000;
-        
-        while(tries < maxTries) {
-            
+
+        while (true) {
+
             try {
                 connect();
                 return;
-            }
-            catch(Exception ex) {
+            } catch (Exception ex) {
+
                 logger.warn("Connection to cluster failed: {}", ex.getMessage());
+
+                if (tries >= maxTries) {
+                    break;
+                }
+                
                 try {
                     Thread.sleep(waitFor * tries);
                 } catch (InterruptedException ex1) {
                     logger.warn("Cannot sleep current thread {}", ex1.getMessage());
                 }
+
             }
+
             tries++;
         }
-        
+
         throw new IndexerException("Connection failed");
     }
 

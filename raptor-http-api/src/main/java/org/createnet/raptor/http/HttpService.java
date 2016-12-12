@@ -58,16 +58,13 @@ public class HttpService {
         logger.debug("Starting HTTP service");
         HttpServer server;
         try {
-            
             ApplicationConfig appconfig = new ApplicationConfig();
             server = GrizzlyHttpServerFactory.createHttpServer(serviceURI, appconfig);
-
+            server.start();
         } catch (Exception e) {
             logger.error("Cannot start http service: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
-
-        server.start();
 
         logger.info("HTTP service running at {}", serviceURI.toString());
 
