@@ -44,7 +44,7 @@ sudo apt-get install oracle-java8-installer
 ```
 - Install Maven `sudo apt-get install maven`
 - Install Docker by following the [official guide](https://docs.docker.com/engine/installation/)
-- Install Docker Compose by following the [official guide](https://docs.docker.com/engine/installation/)
+- Install Docker Compose by following the [official guide](https://docs.docker.com/compose/install/)
 
 ***Additional settings***
 
