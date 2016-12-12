@@ -17,13 +17,13 @@
                         }
                     }
                 }, {
-                    "string": {
+                    "text": {
                         "path_match": "channels.*",
-                        "match_mapping_type": "string",
+                        "match_mapping_type": "text",
                         "mapping": {
                             "store": "yes",
                             "index": "not_analyzed",
-                            "type": "string",
+                            "type": "text",
                             "date_detection": false,
                             "ignore_malformed": true
                         }
@@ -53,27 +53,21 @@
                 }],
                 "properties": {
                     "id": {
-                        "type": "string",
-                        "analyzer": "whitespace",
-                        "index": "not_analyzed"
+                        "type": "keyword"
                     },
                     "timestamp": {
                         "type": "date",
                         "index": "not_analyzed"
                     },
                     "userId": {
-                        "type": "string",
-                        "analyzer": "whitespace",
-                        "index": "not_analyzed"
+                        "type": "keyword"
                     },
                     "channels": {
                         "type": "object",
                         "dynamic": false
                     },
                     "streamId": {
-                        "type": "string",
-                        "analyzer": "whitespace",
-                        "index": "not_analyzed"
+                        "type": "text"
                     }
                 }
             }
@@ -100,21 +94,16 @@
             "serviceobject": {
                 "properties": {
                     "id": {
-                        "type": "string",
-                        "analyzer": "whitespace",
-                        "index": "not_analyzed"
+                        "type": "keyword"
                     },
                     "userId": {
-                        "type": "string",
-                        "analyzer": "whitespace",
-                        "index": "not_analyzed"
+                        "type": "keyword"
                     },
                     "parentId": {
-                        "type": "string",
-                        "index": "not_analyzed"
+                        "type": "keyword"
                     },
                     "path": {
-                        "type": "string",
+                        "type": "text",
                         "analyzer": "path_analyzer"
                     },
                     "createdAt": {
@@ -125,10 +114,10 @@
                         "type": "boolean"
                     },
                     "name": {
-                        "type": "string"
+                        "type": "text"
                     },
                     "description": {
-                        "type": "string"
+                        "type": "text"
                     },
                     "customFields": {
                         "type": "object"

@@ -15,9 +15,14 @@
  */
 package org.createnet.raptor.indexer.impl.es;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import org.createnet.raptor.indexer.Indexer;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
@@ -68,7 +73,7 @@ public class ElasticSearchIndexAdmin {
         } catch (InterruptedException | ExecutionException ex) {
             throw new IndexAdminException(ex);
         }
-        logger.debug("Index {} does {} exists", name , res.isExists() ? "" : "not");
+        logger.debug("Index {} does {} exists", name, res.isExists() ? "" : "not");
         return res.isExists();
     }
 
@@ -85,17 +90,28 @@ public class ElasticSearchIndexAdmin {
         logger.debug("Delete index {}", name);
     }
 
-    public void create(String name, String definition) {
-
-        Settings indexSettings = Settings.builder()
-                .loadFromSource(definition).build();
-
-        CreateIndexRequest createIndexReq = new CreateIndexRequest(name, indexSettings);
-        Future<CreateIndexResponse> reqCreate = client.admin().indices().create(createIndexReq);
+    public void create(String name, JsonNode definition) {
 
         try {
-            CreateIndexResponse resCreate = reqCreate.get();
-        } catch (InterruptedException | ExecutionException ex) {
+
+            CreateIndexRequestBuilder reqb = client.admin().indices().prepareCreate(name);
+
+            if (definition.has("settings")) {
+                reqb.setSettings(
+                    Indexer.getObjectMapper().writeValueAsString(definition.get("settings"))
+                );
+            }
+            
+            Iterator<Map.Entry<String, JsonNode>> nodes = definition.get("mappings").fields();
+            while (nodes.hasNext()) {
+                Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodes.next();
+                reqb.addMapping(entry.getKey(), Indexer.getObjectMapper().writeValueAsString(entry.getValue()));
+            }
+            
+            reqb.get();
+            
+            
+        } catch (Exception ex) {
             throw new IndexAdminException(ex);
         }
 

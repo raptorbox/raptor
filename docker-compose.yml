@@ -70,7 +70,7 @@ services:
 
   elasticsearch1:
     image: elasticsearch:5
-    command: elasticsearch -E cluster.name="raptor"
+    command: elasticsearch -E cluster.name="raptor" -E path.data=/usr/share/elasticsearch/data
     volumes:
       - ./data/elasticsearch1:/usr/share/elasticsearch/data
     ports:

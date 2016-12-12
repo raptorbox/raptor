@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.indexer.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,7 +58,7 @@ public class IndexerConfiguration {
             }
 
             public String source;
-            public Map<String, String> definitions = new HashMap();
+            public Map<String, JsonNode> definitions = new HashMap();
             public Map<String, IndexDescriptor> names = new HashMap();
 
             static public class IndexDescriptor {

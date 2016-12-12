@@ -78,9 +78,9 @@ public class ElasticSearchIndexer extends AbstractIndexer {
      * @param file
      * @return
      */
-    public static Map<String, String> loadIndicesFromFile(String file) {
+    public static Map<String, JsonNode> loadIndicesFromFile(String file) {
         // Load indices.json to configuration
-        Map<String, String> indices = new HashMap();
+        Map<String, JsonNode> indices = new HashMap();
 
         ObjectMapper mapper = Indexer.getObjectMapper();
         JsonNode json;
@@ -93,7 +93,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
         Iterator<String> it = json.fieldNames();
         while (it.hasNext()) {
             String indexName = it.next();
-            indices.put(indexName, json.get(indexName).toString());
+            indices.put(indexName, json.get(indexName));
         }
 
         return indices;
@@ -377,7 +377,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
 
         logger.debug("Setup client, force {}", forceSetup);
 
-        Map<String, String> indices = configuration.elasticsearch.indices.definitions;
+        Map<String, JsonNode> indices = configuration.elasticsearch.indices.definitions;
         if (indices.isEmpty()) {
             String filepath = configuration.elasticsearch.indices.source;
             File file = new File(filepath);
@@ -390,11 +390,11 @@ public class ElasticSearchIndexer extends AbstractIndexer {
         indices.entrySet().forEach((el) -> {
 
             String indexName = el.getKey();
-            String indexDefinition = el.getValue();
+            JsonNode indexDefinition = el.getValue();
 
             try {
 
-                if (indexDefinition.isEmpty()) {
+                if (indexDefinition.isNull()) {
                     throw new RuntimeException("Index `" + indexName + "` definition is empty! Check configurations and indices file");
                 }
 
