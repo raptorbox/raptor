@@ -20,11 +20,11 @@ If you have vagrant installed on your PC just run `vagrant up` to get the servic
 
 ### Docker setup
 
-***Coming soon***
+***Soon*** once a stable release is available, images will be provisioned to dockerhub
 
 ### Build setup
 
-This section cover the required to build the solution and run it inside `docker-compose`
+This section cover the required to build the solution and run it inside `docker`
 
 #### Prerequisites
 
@@ -33,18 +33,14 @@ This section cover the required to build the solution and run it inside `docker-
 - Docker >= 1.12
 - Docker Compose >= 1.9
 
-
 #### Environment setup
 
 - Install Java SDK 8. for Ubuntu distro (16.10, 16.04, 15.10, 14.04 and 12.04). The installer provides Oracle Java 8 (which includes Java JDK, JRE and the Java browser plugin).
-```
-sudo add-apt-repository ppa:webupd8team/java -y &&
-sudo apt-get update
-sudo apt-get install oracle-java8-installer
-```
 - Install Maven `sudo apt-get install maven`
 - Install Docker by following the [official guide](https://docs.docker.com/engine/installation/)
 - Install Docker Compose by following the [official guide](https://docs.docker.com/compose/install/)
+
+A full provisioning script for Ubuntu 16.04 is available at `./scripts/provision.sh`
 
 ***Additional settings***
 
