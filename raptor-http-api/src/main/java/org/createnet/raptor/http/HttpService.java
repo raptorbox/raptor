@@ -31,7 +31,7 @@ public class HttpService {
 
     final private Logger logger = LoggerFactory.getLogger(HttpService.class);
 
-    protected String defaultURI = "http://127.0.0.1:8080/";
+    protected String defaultURI = "http://0.0.0.0:8080/";
 
     private HttpServer server;
 
