@@ -14,8 +14,8 @@ services:
     volumes:
       - ./config:/etc/raptor
     depends_on:
-      - elasticsearch1
-      - couchbase1
+      - elasticsearch
+      - couchbase
     networks:
       - raptor_net
 
@@ -27,7 +27,7 @@ services:
     volumes:
       - ./config:/etc/raptor
     depends_on:
-      - elasticsearch1
+      - elasticsearch
     networks:
       - raptor_net
 
@@ -56,10 +56,10 @@ services:
     networks:
       - raptor_net
 
-  couchbase1:
+  couchbase:
     image: couchbase/server
     volumes:
-      - ./data/couchbase1:/opt/couchbase/var
+      - ./data/couchbase:/opt/couchbase/var
     ports:
       - 8091:8091
       - 8092:8092
@@ -68,11 +68,11 @@ services:
     networks:
       - raptor_net
 
-  elasticsearch1:
+  elasticsearch:
     image: elasticsearch:5
     command: elasticsearch -E cluster.name="raptor" -E path.data=/usr/share/elasticsearch/data
     volumes:
-      - ./data/elasticsearch1:/usr/share/elasticsearch/data
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
       - 9300:9300

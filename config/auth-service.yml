@@ -4,7 +4,7 @@ spring:
   profiles: default
 
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/raptor?createDatabaseIfNotExist=true
+    url: jdbc:mysql://mariadb:3306/raptor?createDatabaseIfNotExist=true
     username: root
     password: raptor
     # Keep the connection alive if idle for a long time (needed in production)
@@ -25,7 +25,7 @@ spring:
 server:
   contextPath: /auth
   port: 8090
-  address: 127.0.0.1
+  address: auth
   error:
     whitelabel:
       enabled: true

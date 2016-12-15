@@ -16,6 +16,7 @@
 package org.createnet.raptor.service;
 
 import io.swagger.jaxrs.config.BeanConfig;
+import io.swagger.models.Info;
 import org.createnet.raptor.service.tools.RaptorApplicationEventListener;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -39,9 +40,12 @@ abstract public class BaseAppConfig extends ResourceConfig {
         beanConfig.setVersion("3.0");
         beanConfig.setSchemes(new String[]{"http", "https"});
         beanConfig.setHost("api.raptor.local");
+        Info info = new Info();
+        info.setTitle("Raptor API");
+        beanConfig.setInfo(info);
         beanConfig.setBasePath("/");
         beanConfig.setResourcePackage(resourcePackage);
-        beanConfig.setScan(true);    
+        beanConfig.setScan(true);
     }
     
 }

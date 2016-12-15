@@ -7,9 +7,9 @@ token:
   truststore:
     path: /etc/raptor/truststore
     password: passwd
-  checkUrl: http://localhost:8090/auth/check
-  syncUrl: http://localhost:8090/auth/sync
-  loginUrl: http://localhost:8090/auth/login
+  checkUrl: http://auth:8090/auth/check
+  syncUrl: http://auth:8090/auth/sync
+  loginUrl: http://auth:8090/auth/login
 
 ehcache:
   authorization:
