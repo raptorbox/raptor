@@ -37,7 +37,23 @@ public class Stream extends StreamContainer {
     public String name;
     public String type;
     public String description;
-
+    
+    public static Stream create(String name, String type, String description) {
+        Stream s = new Stream();
+        s.name = name;
+        s.type = type;
+        s.description = description;
+        return s;
+    }
+    
+    public static Stream create(String name, String type) {
+        return create(name, type, null);
+    }
+    
+    public static Stream create(String name) {
+        return create(name, null, null);
+    }
+        
     final public Map<String, Channel> channels = new HashMap();
 
     public Stream(String json, ServiceObject object) {
@@ -91,7 +107,7 @@ public class Stream extends StreamContainer {
      * @param unit
      * @return
      */
-    public Channel addChannel(String name, String type, String unit) {
+    public Stream addChannel(String name, String type, String unit) {
         Channel channel = Channel.create(name, type, unit);
         return addChannel(channel);
     }
@@ -102,7 +118,7 @@ public class Stream extends StreamContainer {
      * @param type
      * @return
      */
-    public Channel addChannel(String name, String type) {
+    public Stream addChannel(String name, String type) {
         return addChannel(name, type, null);
     }
     
@@ -111,10 +127,10 @@ public class Stream extends StreamContainer {
      * @param channel
      * @return
      */
-    public Channel addChannel(Channel channel) {
+    public Stream addChannel(Channel channel) {
         channel.setContainer(this);
         this.channels.put(channel.name, channel);
-        return channel;
+        return this;
     }
     
     protected void parse(JsonNode json, ServiceObject object) {

@@ -324,7 +324,7 @@ public class ServiceObject extends ServiceObjectContainer {
      * @return 
      */
     public Stream addStream(String name) {
-        Stream stream = new Stream();
+        Stream stream = Stream.create(name);
         addStreams(Arrays.asList(stream));
         return stream;
     }
