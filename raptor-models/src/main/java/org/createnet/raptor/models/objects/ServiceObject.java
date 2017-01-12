@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -299,8 +300,9 @@ public class ServiceObject extends ServiceObjectContainer {
      * Add a list of streams to the object
      *
      * @param streams list of streams
+     * @return 
      */
-    public void addStreams(Collection<Stream> streams) {
+    public ServiceObject addStreams(Collection<Stream> streams) {
         streams.stream().forEach((stream) -> {
 
             stream.setServiceObject(this);
@@ -311,18 +313,46 @@ public class ServiceObject extends ServiceObjectContainer {
 
             this.streams.put(stream.name, stream);
         });
+        
+        return this;
+    }
+        
+    /**
+     * Create a Stream in the object
+     * 
+     * @param name
+     * @return 
+     */
+    public Stream addStream(String name) {
+        Stream stream = new Stream();
+        addStreams(Arrays.asList(stream));
+        return stream;
     }
 
     /**
      * Add a list of actions to the object
      *
      * @param values list of actions
+     * @return 
      */
-    public void addActions(Collection<Action> values) {
+    public ServiceObject addActions(Collection<Action> values) {
         values.stream().forEach((action) -> {
             action.setServiceObject(this);
             this.actions.put(action.name, action);
         });
+        return this;
+    }
+
+    /**
+     * Add an action to the object
+     *
+     * @param name
+     * @return 
+     */
+    public Action addAction(String name) {
+        Action action = Action.create(name);
+        addActions(Arrays.asList(action));
+        return action;
     }
 
     /**

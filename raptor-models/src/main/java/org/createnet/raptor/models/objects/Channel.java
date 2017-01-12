@@ -30,6 +30,19 @@ public class Channel extends StreamContainer {
   public String type;
   public String unit;
 
+  public static Channel create(String name, String type, String unit) {
+      Channel channel = new Channel();
+      channel.name = name;
+      channel.type = type;
+      channel.unit = unit;
+      
+      return channel;
+  }
+  
+  public static Channel create(String name, String type) {
+      return Channel.create(name, type, null);
+  }
+  
   public Channel() {
   }
 

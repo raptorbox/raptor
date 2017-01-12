@@ -84,6 +84,39 @@ public class Stream extends StreamContainer {
     protected void initialize() {
     }
 
+    /**
+     * Add a Channel to the stream
+     * @param name
+     * @param type
+     * @param unit
+     * @return
+     */
+    public Channel addChannel(String name, String type, String unit) {
+        Channel channel = Channel.create(name, type, unit);
+        return addChannel(channel);
+    }
+
+    /**
+     * Add a Channel to the stream
+     * @param name
+     * @param type
+     * @return
+     */
+    public Channel addChannel(String name, String type) {
+        return addChannel(name, type, null);
+    }
+    
+    /**
+     * Add a Channel to the stream
+     * @param channel
+     * @return
+     */
+    public Channel addChannel(Channel channel) {
+        channel.setContainer(this);
+        this.channels.put(channel.name, channel);
+        return channel;
+    }
+    
     protected void parse(JsonNode json, ServiceObject object) {
         this.setServiceObject(object);
         parse(json);

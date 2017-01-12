@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.IOException;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +38,18 @@ public class Action extends ServiceObjectContainer {
     public String name;
     public String description;
 
+    public static Action create(String name, String status) {
+        Action a = new Action();
+        a.name = name;
+        a.status = status;
+        return a;
+    }
+    
+    public static Action create(String name) {
+        return Action.create(name, null);
+    }
+    
     public Action(String json) {
-        ObjectMapper mapper = ServiceObject.getMapper();
         JsonNode tree;
         try {
             tree = mapper.readTree(json);

@@ -89,7 +89,6 @@ public class RaptorClient implements IClient, RaptorComponent {
      * JSON serializable configuration
      */
     public static class RaptorConfig {
-
         public String username;
         public String password;
         public String apiKey;
@@ -119,6 +118,8 @@ public class RaptorClient implements IClient, RaptorComponent {
         final static public String ACTION_LIST = "/{0}/actions";
 
         final static public String SUBSCRIBE_STREAM = PUSH;
+        
+        final static public String LOGIN = "/auth/login";
 
     }
 
