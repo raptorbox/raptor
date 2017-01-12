@@ -71,13 +71,17 @@ public class AuthClient extends AbstractClient {
     
     /**
      * Login with username and password from provided configuration
-     *
-     * @param username
-     * @param password
      */
     public JsonNode login() {
+        
         JsonNode cred = ServiceObject.getMapper().valueToTree(new LoginCredentialsBody(getClient().config.username, getClient().config.password));
         JsonNode node = getClient().post(RaptorClient.Routes.LOGIN, cred);
+        
+        getClient().config.token = node.get("token").asText();
+        getClient().getState().loggedIn();
+                
+        // TODO add user class: 
+        // node.get("user")
         return node;
     }
 

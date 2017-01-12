@@ -22,13 +22,13 @@ import org.createnet.raptor.client.model.StreamClient;
 
 /**
  * Raptor SDK wrapper entry point
- * 
+ *
  * @author Luca Capra <luca.capra@create-net.org>
  */
 public class Raptor {
-    
+
     final protected RaptorClient client;
-    
+
     final private AuthClient auth;
     final private StreamClient stream;
     final private ActionClient action;
@@ -37,36 +37,52 @@ public class Raptor {
     public RaptorClient getClient() {
         return client;
     }
-
+    
+    /**
+     * Get a client for the user manager
+     * @return
+     */
     public AuthClient auth() {
         return auth;
     }
 
+    /**
+     * Get a client to manage data streams
+     * @return
+     */
     public StreamClient stream() {
         return stream;
     }
 
+    /**
+     * Get a client to manage actuations
+     * @return
+     */
     public ActionClient action() {
         return action;
     }
 
+    /**
+     * Get a client to manage object definitions
+     * @return
+     */    
     public ServiceObjectClient serviceObject() {
         return serviceObject;
     }
-    
-    public Raptor(RaptorClient.RaptorConfig config) {
-        
+
+    public Raptor(RaptorClient.ClientConfig config) {
+
         client = new RaptorClient(config);
-        
+
         auth = new AuthClient();
         auth.setClient(client);
-        
+
         stream = new StreamClient();
         stream.setClient(client);
-        
+
         serviceObject = new ServiceObjectClient();
         serviceObject.setClient(client);
-        
+
         action = new ActionClient();
         action.setClient(client);
 

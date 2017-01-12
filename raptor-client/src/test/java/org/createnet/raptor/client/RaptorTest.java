@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.client;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import org.createnet.raptor.models.objects.ServiceObject;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -49,7 +51,48 @@ public class RaptorTest {
 
     @Test
     public void testSomeMethod() {
-        
+
+        RaptorClient.ClientConfig config = new RaptorClient.ClientConfig();
+
+        config.url = "http://localhost";
+        config.username = "admin";
+        config.password = "admin";
+
+        Raptor raptor = new Raptor(config);
+
+        JsonNode result = raptor.auth().login();
+
+        assertTrue(result.has("user"));
+
     }
-    
+
+    @Test
+    public void testCreate() {
+
+        RaptorClient.ClientConfig config = new RaptorClient.ClientConfig();
+
+        config.url = "http://localhost";
+        config.username = "admin";
+        config.password = "admin";
+
+        Raptor raptor = new Raptor(config);
+        JsonNode result = raptor.auth().login();
+
+        assertTrue(result.has("user"));
+        config.token = result.get("token").asText();
+
+        ServiceObject obj = new ServiceObject();
+
+        obj.name = "test1";
+        obj.addStream("enviromental")
+                .addChannel("temperature", "number")
+                .addChannel("pressure", "number");
+        obj.addAction("reset");
+
+        raptor.serviceObject().create(obj);
+
+        assertNotNull(obj.id);
+
+    }
+
 }

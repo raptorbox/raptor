@@ -24,6 +24,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Instant;
 import org.createnet.raptor.client.event.MessageEventListener;
 import org.createnet.raptor.client.exception.ClientException;
 import org.createnet.raptor.models.objects.ServiceObject;
@@ -77,22 +78,39 @@ public class RaptorClient implements IClient, RaptorComponent {
     final protected Logger logger = LoggerFactory.getLogger(RaptorClient.class);
 
     protected MqttClient mqttClient;
-
-    final public RaptorConfig config;
+    
+    final protected State state = new State();
+    
+    final public ClientConfig config;
     protected RaptorClient client;
-
+    
     public enum Event {
         DATA, OBJECT
     }
     
     /**
-     * JSON serializable configuration
+     * Manage the state of the client
      */
-    public static class RaptorConfig {
+    public class State {
+        public boolean loggedIn = false;
+        public Instant lastLogin;
+        
+        public void loggedIn() {
+            loggedIn = true;
+            lastLogin = Instant.now();
+        }
+
+    }
+    
+    /**
+     * Configuration object
+     */
+    public static class ClientConfig {
         public String username;
         public String password;
-        public String apiKey;
-        public String url = "https://api.raptor.local";
+        public String token;
+        public String url = "http://localhost";
+        public int loginExpiration = (60*60*5); // 5min
     }
 
     /**
@@ -123,10 +141,17 @@ public class RaptorClient implements IClient, RaptorComponent {
 
     }
 
-    public RaptorClient(RaptorConfig config) {
+    public RaptorClient(ClientConfig config) {
         this.config = config;
     }
 
+    /**
+     * @return the state of the client
+     */
+    public State getState() {
+        return state;
+    }
+    
     @Override
     public RaptorClient getClient() {
         return this;
@@ -158,12 +183,21 @@ public class RaptorClient implements IClient, RaptorComponent {
         return obj;
     }
 
+    protected void prepareRequest() {
+        
+        if (getClient().config.token != null) {
+            Unirest.setDefaultHeader("Authorization", getClient().config.token);
+        }
+
+    }
+    
     /**
      * Return and lazily creates an MQTT client
      *
      * @return the MQTT client instance
      */
     public MqttClient getMqttClient() {
+
         if (mqttClient == null) {
             try {
 
@@ -261,6 +295,7 @@ public class RaptorClient implements IClient, RaptorComponent {
     @Override
     public JsonNode put(String url, JsonNode body) {
         try {
+            prepareRequest();
             HttpResponse<JsonNode> objResponse = Unirest
                     .put(getClient().url(url))
                     .body(body)
@@ -281,6 +316,7 @@ public class RaptorClient implements IClient, RaptorComponent {
     @Override
     public JsonNode post(String url, JsonNode body) {
         try {
+            prepareRequest();
             HttpResponse<JsonNode> objResponse = Unirest
                     .post(getClient().url(url))
                     .body(body)
@@ -300,6 +336,7 @@ public class RaptorClient implements IClient, RaptorComponent {
     @Override
     public JsonNode get(String url) {
         try {
+            prepareRequest();            
             HttpResponse<JsonNode> objResponse = Unirest
                     .get(getClient().url(url))
                     .asObject(JsonNode.class);
@@ -318,6 +355,7 @@ public class RaptorClient implements IClient, RaptorComponent {
     @Override
     public JsonNode delete(String url) {
         try {
+            prepareRequest();            
             HttpResponse<JsonNode> objResponse = Unirest
                     .delete(getClient().url(url))
                     .asObject(JsonNode.class);

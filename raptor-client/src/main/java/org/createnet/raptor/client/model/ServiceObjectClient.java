@@ -121,7 +121,7 @@ public class ServiceObjectClient extends AbstractClient {
      * @return the ServiceObject instance
      */
     public ServiceObject create(ServiceObject obj) {
-        JsonNode node = getClient().get(RaptorClient.Routes.CREATE);
+        JsonNode node = getClient().post(RaptorClient.Routes.CREATE, obj.toJsonNode());
         if (!node.has("id")) {
             throw new ClientException("Missing ID on object creation");
         }
