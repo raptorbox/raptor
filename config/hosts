@@ -1,2 +1,2 @@
 #raptor named host mapping
-127.0.0.1 couchbase elasticsearch auth api broker proxy
+127.0.0.1 couchbase elasticsearch auth api broker proxy api.raptor.local raptor.local
