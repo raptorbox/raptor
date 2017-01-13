@@ -27,6 +27,7 @@ import java.net.URL;
 import java.time.Instant;
 import org.createnet.raptor.client.event.MessageEventListener;
 import org.createnet.raptor.client.exception.ClientException;
+import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -79,7 +80,8 @@ public class RaptorClient implements IClient, RaptorComponent {
 
     protected MqttClient mqttClient;
     
-    final protected State state = new State();
+    final protected State state;
+    
     
     final public ClientConfig config;
     protected RaptorClient client;
@@ -92,12 +94,28 @@ public class RaptorClient implements IClient, RaptorComponent {
      * Manage the state of the client
      */
     public class State {
-        public boolean loggedIn = false;
-        public Instant lastLogin;
         
-        public void loggedIn() {
+        protected String token;
+        protected boolean loggedIn = false;
+        protected Instant lastLogin;
+        protected User currentUser;
+
+        public State() {
+        
+            this.token=config.token;
+            
+        }
+
+        
+        public void loggedIn(String token, User user) {
             loggedIn = true;
             lastLogin = Instant.now();
+            currentUser = user;
+            this.token = token;
+        }
+
+        public String getToken() {
+            return token;
         }
 
     }
@@ -109,7 +127,7 @@ public class RaptorClient implements IClient, RaptorComponent {
         public String username;
         public String password;
         public String token;
-        public String url = "http://localhost";
+        public String url = "http://api.raptor.local";
         public int loginExpiration = (60*60*5); // 5min
     }
 
@@ -143,6 +161,7 @@ public class RaptorClient implements IClient, RaptorComponent {
 
     public RaptorClient(ClientConfig config) {
         this.config = config;
+        state = new State();
     }
 
     /**
@@ -185,8 +204,8 @@ public class RaptorClient implements IClient, RaptorComponent {
 
     protected void prepareRequest() {
         
-        if (getClient().config.token != null) {
-            Unirest.setDefaultHeader("Authorization", getClient().config.token);
+        if (getClient().getState().getToken() != null) {
+            Unirest.setDefaultHeader("Authorization", "Bearer " + getClient().getState().getToken());
         }
 
     }

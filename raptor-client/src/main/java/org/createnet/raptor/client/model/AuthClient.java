@@ -22,6 +22,7 @@ import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.indexer.query.impl.es.DataQuery;
+import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.ServiceObject;
 
 /**
@@ -55,6 +56,11 @@ public class AuthClient extends AbstractClient {
         
     }
     
+    static public class LoginResponseBody {
+        public String token;
+        public User user;
+    }
+    
     /**
      * Login with username and password
      *
@@ -63,28 +69,21 @@ public class AuthClient extends AbstractClient {
      * 
      * @return request response
      */
-    public JsonNode login(String username, String password) {
+    public LoginResponseBody login(String username, String password) {
+        
         JsonNode cred = ServiceObject.getMapper().valueToTree(new LoginCredentialsBody(username, password));
         JsonNode node = getClient().post(RaptorClient.Routes.LOGIN, cred);
-        return node;
+        
+        return ServiceObject.getMapper().convertValue(node, LoginResponseBody.class);
     }
     
     /**
      * Login with username and password from provided configuration
      */
-    public JsonNode login() {
-
-        JsonNode cred = ServiceObject.getMapper().valueToTree(
-                new LoginCredentialsBody(getClient().config.username, getClient().config.password)
-        );
-        JsonNode node = getClient().post(RaptorClient.Routes.LOGIN, cred);
-        
-        getClient().config.token = node.get("token").asText();
-        getClient().getState().loggedIn();
-                
-        // TODO add user class: 
-        // node.get("user")
-        return node;
+    public LoginResponseBody login() {
+        LoginResponseBody body = login(getClient().config.username, getClient().config.password);
+        getClient().getState().loggedIn(body.token, body.user);
+        return body;
     }
 
     /**
