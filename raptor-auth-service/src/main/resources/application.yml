@@ -2,6 +2,10 @@
 
 spring:
 
+  devtools:
+    restart:
+      enabled: false
+      
   profiles: default
     
   datasource:
@@ -58,3 +62,6 @@ raptor:
     username: admin
     password: admin
     email: admin@raptor.local
+
+
+

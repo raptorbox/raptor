@@ -69,7 +69,7 @@ public class RaptorTest {
     }
 
     @Test
-    public void testCreate() {
+    public void testCreate() throws InterruptedException {
 
         RaptorClient.ClientConfig config = new RaptorClient.ClientConfig();
 

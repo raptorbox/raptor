@@ -88,6 +88,7 @@ public class DeviceController {
 
                 Permission permission = RaptorPermission.fromLabel(body.permission);
                 if (permission == null) {
+                    logger.warn("Permission not found for user {} `{}` on object {}", user.getUuid(), body.permission, body.objectId);
                     return ResponseEntity.notFound().build();
                 }
 
@@ -117,6 +118,8 @@ public class DeviceController {
                 response.result = false;
                 break;
         }
+        
+        logger.debug("Check request result: {}", response.result);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
