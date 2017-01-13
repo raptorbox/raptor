@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.service.entity;
+package org.createnet.raptor.models.auth;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;

@@ -22,7 +22,7 @@ import java.util.List;
 import org.createnet.raptor.auth.service.acl.AclManager;
 import org.createnet.raptor.auth.service.acl.RaptorPermission;
 import org.createnet.raptor.auth.service.acl.UserSid;
-import org.createnet.raptor.auth.service.entity.User;
+import org.createnet.raptor.models.auth.User;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

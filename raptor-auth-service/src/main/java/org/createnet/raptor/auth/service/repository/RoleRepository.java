@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.service.entity.repository;
+package org.createnet.raptor.auth.service.repository;
 
-import org.createnet.raptor.auth.service.entity.Role;
+import org.createnet.raptor.models.auth.Role;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 

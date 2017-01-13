@@ -32,8 +32,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import org.createnet.raptor.auth.service.entity.Token;
-import org.createnet.raptor.auth.service.entity.User;
+import org.createnet.raptor.models.auth.Token;
+import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.services.TokenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

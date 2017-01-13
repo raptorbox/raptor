@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.service.entity;
+package org.createnet.raptor.models.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class Device {
   private Device parent;
 
   @JsonIgnore
-  @OneToMany(mappedBy = "device", fetch = FetchType.EAGER, orphanRemoval = true)
+  @OneToMany(mappedBy = "device", fetch = FetchType.EAGER)
   @Cascade(value = {CascadeType.REMOVE, CascadeType.SAVE_UPDATE})
   final private List<Token> tokens = new ArrayList();
 

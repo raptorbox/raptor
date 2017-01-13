@@ -17,10 +17,10 @@ package org.createnet.raptor.auth.service.services;
 
 import org.createnet.raptor.auth.entity.SyncRequest;
 import org.createnet.raptor.auth.service.acl.RaptorPermission;
-import org.createnet.raptor.auth.service.entity.Device;
-import org.createnet.raptor.auth.service.entity.User;
-import org.createnet.raptor.auth.service.entity.repository.DeviceRepository;
-import org.createnet.raptor.auth.service.entity.repository.UserRepository;
+import org.createnet.raptor.models.auth.Device;
+import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.auth.service.repository.DeviceRepository;
+import org.createnet.raptor.auth.service.repository.UserRepository;
 import org.createnet.raptor.auth.service.exception.DeviceNotFoundException;
 import org.createnet.raptor.auth.service.exception.UserNotFoundException;
 import org.slf4j.Logger;

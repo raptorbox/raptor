@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.service.entity;
+package org.createnet.raptor.models.auth;
 
 import java.util.Set;
 
@@ -55,65 +55,65 @@ public class User implements Serializable {
   @JsonIgnore
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
+  protected Long id;
 
   @NotEmpty
-  private String uuid = UUID.randomUUID().toString();
+  protected String uuid = UUID.randomUUID().toString();
 
   @NotEmpty
   @Column(unique = true, nullable = false, length = 128)
   @Size(min = 4, max = 128)
-  private String username;
+  protected String username;
 
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   @NotEmpty
   @Column(length = 128)
   @Size(min = 4, max = 128)
-  private String password;
+  protected String password;
 
   @JsonIgnore
-  @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, orphanRemoval = true)
+  @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
   @Cascade(value = {CascadeType.REMOVE, CascadeType.SAVE_UPDATE})
-  final private List<Device> devices = new ArrayList();
+  final protected List<Device> devices = new ArrayList();
   
   @JsonIgnore
-  @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, orphanRemoval = true)
+  @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
   @Cascade(value = { CascadeType.REMOVE, CascadeType.SAVE_UPDATE })
-  final private List<Token> tokens = new ArrayList();
+  final protected List<Token> tokens = new ArrayList();
 
   @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "users_roles", joinColumns = {
     @JoinColumn(name = "user_id")}, inverseJoinColumns = {
     @JoinColumn(name = "role_id")})
-  final private List<Role> roles = new ArrayList();
+  final protected List<Role> roles = new ArrayList();
 
   @Column(length = 64)
   @Size(min = 4, max = 64)
-  private String firstname;
+  protected String firstname;
 
   @Column(length = 64)
   @Size(min = 4, max = 64)
-  private String lastname;
+  protected String lastname;
 
   @Column(length = 128)
   @NotNull
   @Email
-  private String email;
+  protected String email;
 
   @Column()
   @NotNull
-  private boolean enabled = true;
+  protected boolean enabled = true;
 
   @JsonIgnore
   @Column(name = "last_password_reset")
   @Temporal(TemporalType.TIMESTAMP)
   @NotNull
-  private Date lastPasswordResetDate = new Date();
+  protected Date lastPasswordResetDate = new Date();
 
   @Column(name = "created")
   @Temporal(TemporalType.TIMESTAMP)
   @NotNull
-  private Date created = new Date();
+  protected Date created = new Date();
 
   public User() {
   }

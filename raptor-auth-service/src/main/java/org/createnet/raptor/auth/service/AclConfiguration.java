@@ -17,7 +17,7 @@ package org.createnet.raptor.auth.service;
 
 import javax.sql.DataSource;
 import org.createnet.raptor.auth.service.acl.RaptorPermission;
-import org.createnet.raptor.auth.service.entity.Role;
+import org.createnet.raptor.models.auth.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;

@@ -16,8 +16,8 @@
 package org.createnet.raptor.auth.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.createnet.raptor.auth.service.entity.repository.UserRepository;
-import org.createnet.raptor.auth.service.entity.User;
+import org.createnet.raptor.auth.service.repository.UserRepository;
+import org.createnet.raptor.models.auth.User;
 import java.util.Collection;
 
 import org.springframework.beans.factory.annotation.Autowired;

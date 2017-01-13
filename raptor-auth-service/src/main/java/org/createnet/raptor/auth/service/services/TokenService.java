@@ -15,9 +15,9 @@
  */
 package org.createnet.raptor.auth.service.services;
 
-import org.createnet.raptor.auth.service.entity.Token;
-import org.createnet.raptor.auth.service.entity.User;
-import org.createnet.raptor.auth.service.entity.repository.TokenRepository;
+import org.createnet.raptor.models.auth.Token;
+import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.auth.service.repository.TokenRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

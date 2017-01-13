@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.client.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.client.RaptorClient;
 import org.createnet.raptor.client.RaptorComponent;
@@ -45,6 +44,7 @@ public class AuthClient extends AbstractClient {
     }
     
     protected class LoginCredentialsBody {
+        
         final public String username;
         final public String password;
 
@@ -73,8 +73,10 @@ public class AuthClient extends AbstractClient {
      * Login with username and password from provided configuration
      */
     public JsonNode login() {
-        
-        JsonNode cred = ServiceObject.getMapper().valueToTree(new LoginCredentialsBody(getClient().config.username, getClient().config.password));
+
+        JsonNode cred = ServiceObject.getMapper().valueToTree(
+                new LoginCredentialsBody(getClient().config.username, getClient().config.password)
+        );
         JsonNode node = getClient().post(RaptorClient.Routes.LOGIN, cred);
         
         getClient().config.token = node.get("token").asText();

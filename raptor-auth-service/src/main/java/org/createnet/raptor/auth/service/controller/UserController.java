@@ -16,7 +16,7 @@
 package org.createnet.raptor.auth.service.controller;
 
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
-import org.createnet.raptor.auth.service.entity.User;
+import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

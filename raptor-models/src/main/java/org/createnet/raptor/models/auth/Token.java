@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.service.entity;
+package org.createnet.raptor.models.auth;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -34,7 +34,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 /**
  *
@@ -52,10 +52,12 @@ public class Token implements Serializable {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
-  @NotEmpty
+  @NotNull
+  @Size(min=1)
   private String name;
 
-  @NotEmpty
+  @NotNull
+  @Size(min=1)
   @Column(unique = true, nullable = false)
   private String token;
   

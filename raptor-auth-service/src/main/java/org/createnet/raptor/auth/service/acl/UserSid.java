@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.auth.service.acl;
 
-import org.createnet.raptor.auth.service.entity.User;
+import org.createnet.raptor.models.auth.User;
 import org.springframework.security.acls.domain.PrincipalSid;
 
 /**

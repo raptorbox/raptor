@@ -16,18 +16,17 @@
 package org.createnet.raptor.auth.service;
 
 import javax.sql.DataSource;
-import org.createnet.raptor.auth.service.entity.Role;
-import org.createnet.raptor.auth.service.entity.User;
-import org.createnet.raptor.auth.service.entity.repository.UserRepository;
+import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.auth.service.repository.UserRepository;
 import org.createnet.raptor.auth.service.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
-import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -56,6 +55,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableCaching
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableRetry
+@EntityScan(basePackageClasses=org.createnet.raptor.models.auth.User.class)
 public class Application {
 
     public static void main(String[] args) {
