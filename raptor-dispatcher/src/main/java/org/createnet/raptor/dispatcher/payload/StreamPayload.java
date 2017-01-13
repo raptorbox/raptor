@@ -24,14 +24,14 @@ import org.createnet.raptor.models.objects.Stream;
  */
 public class StreamPayload extends ObjectPayload {
 
-        final public String streamId;
-        final public JsonNode data;
+    public String streamId;
+    public JsonNode data;
 
-        public StreamPayload(Stream stream, String op, JsonNode data) {
-            super(stream.getServiceObject(), op);
-            this.streamId = stream.name;
-            this.data = data;
-            this.type = MessageType.stream.name();
-        }
-
+    public StreamPayload(Stream stream, String op, JsonNode data) {
+        super(stream.getServiceObject(), op);
+        this.streamId = stream.name;
+        this.data = data;
+        this.type = MessageType.stream.name();
     }
+
+}

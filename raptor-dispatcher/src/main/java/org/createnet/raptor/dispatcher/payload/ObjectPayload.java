@@ -26,13 +26,14 @@ import org.createnet.raptor.models.objects.ServiceObject;
  */
 public class ObjectPayload extends AbstractPayload {
 
-    final public String userId;
-    final public JsonNode object;
-    final public String path;
+    public String userId;
+    public ServiceObject object;
+    public String path;
 
+   
     public ObjectPayload(ServiceObject obj, String op) {
         userId = obj.userId;
-        object = obj.toJsonNode();
+        object = obj;
         path = obj.path();
         type = MessageType.object.name();
         this.op = op;

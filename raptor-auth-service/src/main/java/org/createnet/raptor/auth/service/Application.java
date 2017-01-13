@@ -15,11 +15,15 @@
  */
 package org.createnet.raptor.auth.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.sql.DataSource;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.repository.UserRepository;
+import org.createnet.raptor.auth.service.services.BrokerMessageHandler;
+import org.createnet.raptor.auth.service.services.DeviceService;
 import org.createnet.raptor.auth.service.services.UserService;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.Banner;
@@ -34,6 +38,15 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Profile;
+import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.core.MessageProducer;
+import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
+import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
+import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -55,21 +68,22 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableCaching
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableRetry
-@EntityScan(basePackageClasses=org.createnet.raptor.models.auth.User.class)
+@EntityScan(basePackageClasses = org.createnet.raptor.models.auth.User.class)
 public class Application {
 
-    
+    static final public ObjectMapper mapper = new ObjectMapper();
+
     public static void main(String[] args) {
-        
+
         ConfigurableApplicationContext app = new SpringApplicationBuilder(Application.class)
-            .bannerMode(Banner.Mode.OFF)
-            .logStartupInfo(false)
-            .headless(true)
-            .web(true)                
-//            .initializers(new YamlFileApplicationContextInitializer())
-            .application()
-            .run(args);
-        
+                .bannerMode(Banner.Mode.OFF)
+                .logStartupInfo(false)
+                .headless(true)
+                .web(true)
+                //            .initializers(new YamlFileApplicationContextInitializer())
+                .application()
+                .run(args);
+
     }
 
     static final protected BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -88,6 +102,9 @@ public class Application {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private BrokerMessageHandler messageHandler;
 
     @Autowired
     private UserRepository userRepository;
@@ -110,8 +127,8 @@ public class Application {
                         .maxAge(3600);
             }
         };
-    }    
-    
+    }
+
     protected void createDefaultUser() {
 
         if (defaultUserEnabled != null && defaultUserEnabled == false) {
@@ -134,6 +151,41 @@ public class Application {
 
         userService.save(adminUser);
 
+    }
+
+    // Add inbound MQTT support
+    @Bean
+    public MessageChannel mqttInputChannel() {
+        return new DirectChannel();
+    }
+
+    @Bean
+    public MessageProducer inbound() {
+
+        DefaultMqttPahoClientFactory f = new DefaultMqttPahoClientFactory();
+
+        f.setUserName("system");
+        f.setPassword("system123");
+        f.setServerURIs("tcp://broker:1883");
+        f.setCleanSession(true);
+        f.setPersistence(new MemoryPersistence());
+
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter("raptorauth", f, "+/events");
+        adapter.setCompletionTimeout(5000);
+        adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setQos(0);
+        adapter.setRecoveryInterval(1000);
+        adapter.setOutputChannel(mqttInputChannel());
+
+        return adapter;
+    }
+
+    @Bean
+    @ServiceActivator(inputChannel = "mqttInputChannel")
+    public MessageHandler handler() {
+        return (Message<?> message) -> {            
+            messageHandler.handle(message);
+        };
     }
 
 //  @Configuration

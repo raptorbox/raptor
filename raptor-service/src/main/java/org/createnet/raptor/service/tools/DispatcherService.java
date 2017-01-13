@@ -75,7 +75,7 @@ public class DispatcherService extends AbstractRaptorService {
                         return;
                     }
 
-                    notifyObjectEvent(objEvent.getEvent(), objEvent.getObject());
+                    notifyObjectEvent(objEvent.getParentEvent(), objEvent.getObject());
                     break;
                 case "push":
 

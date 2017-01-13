@@ -21,8 +21,8 @@ package org.createnet.raptor.dispatcher.payload;
  */
 public class DataPayload extends AbstractPayload {
 
-    final private String c;
-
+    private String c;
+    
     public DataPayload(String c) {
         this.c = c;
         this.type = MessageType.data.name();

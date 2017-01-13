@@ -36,7 +36,6 @@ import org.springframework.security.acls.jdbc.BasicLookupStrategy;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.jdbc.LookupStrategy;
 
-
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
@@ -44,65 +43,65 @@ import org.springframework.security.acls.jdbc.LookupStrategy;
 @Configuration
 public class AclConfiguration {
 
-  @Autowired
-  private DataSource dataSource;
+    @Autowired
+    private DataSource dataSource;
 
-  @Autowired
-  private CacheManager cacheManager;
+    @Autowired
+    private CacheManager cacheManager;
 
-  @Value("${spring.datasource.lastInsertQuery}")
-  private String lastInsertQuery;
-  
-  @Bean
-  public LookupStrategy lookupStrategy() {
-    BasicLookupStrategy ls = new BasicLookupStrategy(dataSource, aclCache(), aclAuthorizationStrategy(), auditLogger());
-    ls.setPermissionFactory(new DefaultPermissionFactory(RaptorPermission.class));
-    return ls;
-  }
+    @Value("${spring.datasource.lastInsertQuery}")
+    private String lastInsertQuery;
 
-  @Bean
-  public AclAuthorizationStrategy aclAuthorizationStrategy() {
-    return new AclAuthorizationStrategyImpl(new Role(Role.Roles.super_admin.name()));
-  }
+    @Bean
+    public LookupStrategy lookupStrategy() {
+        BasicLookupStrategy ls = new BasicLookupStrategy(dataSource, aclCache(), aclAuthorizationStrategy(), auditLogger());
+        ls.setPermissionFactory(new DefaultPermissionFactory(RaptorPermission.class));
+        return ls;
+    }
 
-  @Bean
-  public EhCacheBasedAclCache aclCache() {
-    return new EhCacheBasedAclCache(aclEhCacheFactoryBean().getObject(), permissionGrantingStrategy(), aclAuthorizationStrategy());
-  }
+    @Bean
+    public AclAuthorizationStrategy aclAuthorizationStrategy() {
+        return new AclAuthorizationStrategyImpl(new Role(Role.Roles.super_admin.name()));
+    }
 
-  @Bean
-  public EhCacheFactoryBean aclEhCacheFactoryBean() {
-    EhCacheFactoryBean ehCacheFactoryBean = new EhCacheFactoryBean();
-    ehCacheFactoryBean.setCacheManager(aclCacheManager().getObject());
-    ehCacheFactoryBean.setCacheName("aclCache");
-    return ehCacheFactoryBean;
-  }
+    @Bean
+    public EhCacheBasedAclCache aclCache() {
+        return new EhCacheBasedAclCache(aclEhCacheFactoryBean().getObject(), permissionGrantingStrategy(), aclAuthorizationStrategy());
+    }
 
-  @Bean
-  public EhCacheManagerFactoryBean aclCacheManager() {
-    return new EhCacheManagerFactoryBean();
-  }
+    @Bean
+    public EhCacheFactoryBean aclEhCacheFactoryBean() {
+        EhCacheFactoryBean ehCacheFactoryBean = new EhCacheFactoryBean();
+        ehCacheFactoryBean.setCacheManager(aclCacheManager().getObject());
+        ehCacheFactoryBean.setCacheName("aclCache");
+        return ehCacheFactoryBean;
+    }
 
-  @Bean
-  public DefaultPermissionGrantingStrategy permissionGrantingStrategy() {
-    return new DefaultPermissionGrantingStrategy(auditLogger());
-  }
-  
-  /**
-   * @TODO
-   * Add additional support for @setSidIdentityQuery
-   */ 
-  @Bean
-  public JdbcMutableAclService aclService() {
-    JdbcMutableAclService service = new JdbcMutableAclService(dataSource, lookupStrategy(), aclCache());
-    service.setSidIdentityQuery(lastInsertQuery);
-    service.setClassIdentityQuery(lastInsertQuery);
-    return service;
-  }
-  
-  @Bean
-  public AuditLogger auditLogger() {
-    return new ConsoleAuditLogger();
-  }
+    @Bean
+    public EhCacheManagerFactoryBean aclCacheManager() {
+        return new EhCacheManagerFactoryBean();
+    }
+
+    @Bean
+    public DefaultPermissionGrantingStrategy permissionGrantingStrategy() {
+        DefaultPermissionGrantingStrategy pgs = new DefaultPermissionGrantingStrategy(auditLogger());
+        return pgs;
+    }
+
+    /**
+     * @TODO Add additional support for @setSidIdentityQuery
+     */
+    @Bean
+    public JdbcMutableAclService aclService() {
+        JdbcMutableAclService service = new JdbcMutableAclService(dataSource, lookupStrategy(), aclCache());
+        service.setSidIdentityQuery(lastInsertQuery);
+        service.setClassIdentityQuery(lastInsertQuery);
+        return service;
+    }
+
+    @Bean
+    public AuditLogger auditLogger() {
+        return new ConsoleAuditLogger();
+    }
 
 }

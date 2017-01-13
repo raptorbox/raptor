@@ -88,9 +88,7 @@ public class ObjectApi extends AbstractApi {
         }
 
         obj.userId = auth.getUser().getUserId();
-
         obj.validate();
-        
         
         try {
             obj = objectManager.create(obj);
@@ -105,12 +103,12 @@ public class ObjectApi extends AbstractApi {
         }
 
         //move to broker system events
-        boolean sync = syncObject(obj, Authentication.SyncOperation.CREATE);
-        if (!sync) {
-            logger.error("Auth sync failed, aborting creation of object {}", obj.id);
-            objectManager.delete(obj.id);
-            throw new InternalServerErrorException("Failed to sync device");
-        }
+//        boolean sync = syncObject(obj, Authentication.SyncOperation.CREATE);
+//        if (!sync) {
+//            logger.error("Auth sync failed, aborting creation of object {}", obj.id);
+//            objectManager.delete(obj.id);
+//            throw new InternalServerErrorException("Failed to sync device");
+//        }
 
         return obj;
     }

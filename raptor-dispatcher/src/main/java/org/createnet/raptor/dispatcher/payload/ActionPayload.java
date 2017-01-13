@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.dispatcher.payload;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.models.objects.Action;
 
 /**
@@ -23,8 +24,8 @@ import org.createnet.raptor.models.objects.Action;
  */
 public class ActionPayload extends ObjectPayload {
 
-    final public String actionId;
-    final public String data;
+    public String actionId;
+    public String data;
 
     public ActionPayload(Action action, String op, String data) {
         super(action.getServiceObject(), op);
