@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.indexer;
 
-import org.createnet.raptor.indexer.impl.IndexerConfiguration;
 import org.elasticsearch.common.unit.TimeValue;
 
 /**

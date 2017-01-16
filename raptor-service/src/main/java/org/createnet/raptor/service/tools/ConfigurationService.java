@@ -17,11 +17,12 @@ package org.createnet.raptor.service.tools;
 
 import java.io.File;
 import javax.inject.Singleton;
+import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.config.ConfigurationLoader;
-import org.createnet.raptor.service.configuration.AuthConfiguration;
-import org.createnet.raptor.service.configuration.DispatcherConfiguration;
-import org.createnet.raptor.service.configuration.IndexerConfiguration;
-import org.createnet.raptor.service.configuration.StorageConfiguration;
+import org.createnet.raptor.db.config.StorageConfiguration;
+import org.createnet.raptor.dispatcher.DispatcherConfiguration;
+import org.createnet.raptor.indexer.IndexerConfiguration;
+
 import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

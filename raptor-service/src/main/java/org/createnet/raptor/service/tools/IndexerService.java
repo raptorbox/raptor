@@ -33,7 +33,7 @@ import org.createnet.raptor.models.objects.ServiceObject;
 import org.createnet.raptor.models.objects.Stream;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.indexer.Indexer;
-import org.createnet.raptor.indexer.impl.IndexerConfiguration;
+import org.createnet.raptor.indexer.IndexerConfiguration;
 import org.createnet.raptor.indexer.IndexerProvider;
 import org.createnet.raptor.indexer.query.Query;
 import org.createnet.raptor.indexer.query.impl.es.DataQuery;

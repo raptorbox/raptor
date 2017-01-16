@@ -1,5 +1,6 @@
 version: "2"
 services:
+
   mariadb:
     image: mariadb:latest
     container_name: mariadb
@@ -11,22 +12,23 @@ services:
       MYSQL_USERNAME: root
       MYSQL_ROOT_PASSWORD: raptor
 
-  couchbase1:
+  couchbase:
+    container_name: couchbase
     image: couchbase/server
     volumes:
-      - ./data/couchbase1:/opt/couchbase/var
+      - ./data/couchbase:/opt/couchbase/var
     ports:
       - 8091:8091
       - 8092:8092
       - 8093:8093
       - 11210:11210
 
-
-  elasticsearch1:
+  elasticsearch:
+    container_name: elasticsearch
     image: elasticsearch:5
-    command: elasticsearch -E cluster.name="raptor"
+    command: elasticsearch -E cluster.name="raptor" -E path.data=/usr/share/elasticsearch/data
     volumes:
-      - ./data/elasticsearch1:/usr/share/elasticsearch/data
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
       - 9300:9300

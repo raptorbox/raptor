@@ -17,7 +17,6 @@ package org.createnet.raptor.indexer;
 
 import java.util.List;
 import org.createnet.raptor.indexer.impl.ElasticSearchIndexer;
-import org.createnet.raptor.indexer.impl.IndexerConfiguration;
 import org.createnet.raptor.indexer.query.Query;
 
 /**

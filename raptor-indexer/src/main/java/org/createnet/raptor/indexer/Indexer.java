@@ -17,7 +17,6 @@ package org.createnet.raptor.indexer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
-import org.createnet.raptor.indexer.impl.IndexerConfiguration;
 import org.createnet.raptor.indexer.query.Query;
 
 /**

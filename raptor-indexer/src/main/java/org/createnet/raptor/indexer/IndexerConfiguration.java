@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.indexer.impl;
+package org.createnet.raptor.indexer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.Map;
+import org.createnet.raptor.config.Configuration;
 
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class IndexerConfiguration {
+public class IndexerConfiguration implements Configuration {
 
     public IndexerConfiguration() {
     }

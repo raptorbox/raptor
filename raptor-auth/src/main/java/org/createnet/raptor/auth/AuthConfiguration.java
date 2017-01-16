@@ -15,11 +15,13 @@
  */
 package org.createnet.raptor.auth;
 
+import org.createnet.raptor.config.Configuration;
+
 /**
  *
  * @author Luca Capra <lcapra@create-net.org>
  */
-public class AuthConfiguration {
+public class AuthConfiguration implements Configuration {
 
     public String type;
     public String cache;

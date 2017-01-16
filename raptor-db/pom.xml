@@ -62,7 +62,11 @@
       <artifactId>mapdb</artifactId>
       <version>3.0.1</version>
     </dependency>
-
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>raptor-config</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
       
 </project>

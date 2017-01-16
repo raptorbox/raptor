@@ -1,132 +1,79 @@
 {
     "test_data": {
         "mappings": {
-            "update": {
-                "_ttl": {
-                    "enabled": true,
-                    "default": "3M"
-                },
+            "record": {
                 "_all": {
                     "enabled": true
                 },
                 "dynamic": true,
                 "dynamic_templates": [{
-                        "geo_point_location": {
-                            "path_match": "channels.location",
-                            "mapping": {
-                                "store": "no",
-                                "index": "not_analyzed",
-                                "type": "geo_point",
-                                "ignore_malformed": true
-                            }
+                    "geo_point_location": {
+                        "path_match": "channels.location",
+                        "mapping": {
+                            "store": "no",
+                            "index": "not_analyzed",
+                            "type": "geo_point",
+                            "ignore_malformed": true
                         }
-                    }, {
-                        "string": {
-                            "path_match": "channels.*",
-                            "match_mapping_type": "string",
-                            "mapping": {
-                                "store": "yes",
-                                "index": "not_analyzed",
-                                "type": "string",
-                                "date_detection": false,
-                                "ignore_malformed": true
-                            }
+                    }
+                }, {
+                    "text": {
+                        "path_match": "channels.*",
+                        "match_mapping_type": "text",
+                        "mapping": {
+                            "store": "yes",
+                            "index": "not_analyzed",
+                            "type": "text",
+                            "date_detection": false,
+                            "ignore_malformed": true
                         }
-                    }, {
-                        "double": {
-                            "path_match": "channels.*",
-                            "match_mapping_type": "double",
-                            "mapping": {
-                                "store": "yes",
-                                "index": "not_analyzed",
-                                "type": "double",
-                                "ignore_malformed": true
-                            }
+                    }
+                }, {
+                    "double": {
+                        "path_match": "channels.*",
+                        "match_mapping_type": "double",
+                        "mapping": {
+                            "store": "yes",
+                            "index": "not_analyzed",
+                            "type": "double",
+                            "ignore_malformed": true
                         }
-                    }, {
-                        "integer": {
-                            "path_match": "channels.*",
-                            "match_mapping_type": "integer",
-                            "mapping": {
-                                "store": "yes",
-                                "index": "not_analyzed",
-                                "type": "double",
-                                "ignore_malformed": true
-                            }
+                    }
+                }, {
+                    "integer": {
+                        "path_match": "channels.*",
+                        "match_mapping_type": "integer",
+                        "mapping": {
+                            "store": "yes",
+                            "index": "not_analyzed",
+                            "type": "double",
+                            "ignore_malformed": true
                         }
-                    }],
+                    }
+                }],
                 "properties": {
                     "id": {
-                        "type": "string",
-                        "analyzer": "whitespace",
-                        "index": "not_analyzed"
+                        "type": "keyword"
                     },
                     "timestamp": {
                         "type": "date",
                         "index": "not_analyzed"
                     },
                     "userId": {
-                        "type": "string",
-                        "analyzer": "whitespace",
-                        "index": "not_analyzed"
+                        "type": "keyword"
                     },
                     "channels": {
                         "type": "object",
                         "dynamic": false
                     },
                     "streamId": {
-                        "type": "string",
-                        "analyzer": "whitespace",
-                        "index": "not_analyzed"
+                        "type": "text"
                     }
                 }
             }
         }
     },
-    "test_sub": {
-        "mappings": {
-            "subscription": {
-                "_all": {
-                    "enabled": false
-                },
-                "dynamic": true,
-                "_source": {
-                    "includes": [
-                        "meta.*"
-                    ]
-                },
-                "dynamic_templates": [{
-                        "all_strings_to_avoid_collisions": {
-                            "match": "*",
-                            "mapping": {
-                                "store": "no",
-                                "index": "not_analyzed",
-                                "include_in_all": false,
-                                "type": "string",
-                                "analyzer": "whitespace"
-                            }
-                        }
-                    }],
-                "properties": {
-                    "callback": {
-                        "type": "string"
-                    },
-                    "source": {
-                        "type": "string"
-                    },
-                    "destination": {
-                        "type": "string"
-                    },
-                    "stream": {
-                        "type": "string"
-                    },
-                    "customFields": {
-                        "enabled": false
-                    }
-                }
-            }
-        }
-    },
+
     "test_objects": {
         "settings": {
             "analysis": {
@@ -144,33 +91,19 @@
             }
         },
         "mappings": {
-            "object": {
-                "_all": {
-                    "enabled": false
-                },
-                "dynamic": false,
-                "_source": {
-                    "includes": [
-                        "id", "userId", "createdAt"
-                    ]
-                },
+            "serviceobject": {
                 "properties": {
                     "id": {
-                        "type": "string",
-                        "analyzer": "whitespace",
-                        "index": "not_analyzed"
+                        "type": "keyword"
                     },
                     "userId": {
-                        "type": "string",
-                        "analyzer": "whitespace",
-                        "index": "not_analyzed"
+                        "type": "keyword"
                     },
                     "parentId": {
-                        "type": "string",
-                        "index": "not_analyzed"
+                        "type": "keyword"
                     },
                     "path": {
-                        "type": "string",
+                        "type": "text",
                         "analyzer": "path_analyzer"
                     },
                     "createdAt": {
@@ -181,10 +114,10 @@
                         "type": "boolean"
                     },
                     "name": {
-                        "type": "string"
+                        "type": "text"
                     },
                     "description": {
-                        "type": "string"
+                        "type": "text"
                     },
                     "customFields": {
                         "type": "object"
@@ -192,5 +125,6 @@
                 }
             }
         }
-    }    
+    }
+
 }
