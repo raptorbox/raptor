@@ -21,8 +21,9 @@ import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.repository.UserRepository;
 import org.createnet.raptor.auth.service.services.BrokerMessageHandler;
-import org.createnet.raptor.auth.service.services.DeviceService;
 import org.createnet.raptor.auth.service.services.UserService;
+import org.createnet.raptor.config.ConfigurationLoader;
+import org.createnet.raptor.dispatcher.DispatcherConfiguration;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -163,10 +164,12 @@ public class Application {
     public MessageProducer inbound() {
 
         DefaultMqttPahoClientFactory f = new DefaultMqttPahoClientFactory();
-
-        f.setUserName("system");
-        f.setPassword("system123");
-        f.setServerURIs("tcp://broker:1883");
+        
+        DispatcherConfiguration config = (DispatcherConfiguration)ConfigurationLoader.getConfiguration("dispatcher", DispatcherConfiguration.class);
+        
+        f.setUserName(config.username);
+        f.setPassword(config.password);
+        f.setServerURIs(config.uri);
         f.setCleanSession(true);
         f.setPersistence(new MemoryPersistence());
 
