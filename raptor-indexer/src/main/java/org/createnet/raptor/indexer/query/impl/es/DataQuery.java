@@ -99,7 +99,8 @@ public class DataQuery extends AbstractESQuery {
         throw new Query.QueryException("Query is empty");
     }
 
-    protected List<QueryBuilder> buildQuery() {
+    @Override
+    protected QueryBuilder buildQuery() {
 
         ArrayList<QueryBuilder> queries = new ArrayList();
 
@@ -148,7 +149,12 @@ public class DataQuery extends AbstractESQuery {
             queries.add(matchFilter);
         }
 
-        return queries;
+        BoolQueryBuilder qb = QueryBuilders.boolQuery();
+        queries.forEach((qbpart) -> {
+            qb.must(qbpart);
+        });
+        
+        return qb;
     }
 
     public DataQuery setMatch(Fields field, String value) {
@@ -163,39 +169,6 @@ public class DataQuery extends AbstractESQuery {
         matchfield = field;
         matchstring = value;
         return this;
-    }
-
-    public BoolQueryBuilder getQueryBuilder() throws QueryException {
-
-        validate();
-
-        List<QueryBuilder> queries = buildQuery();
-
-        BoolQueryBuilder qb = QueryBuilders.boolQuery();
-
-        for (QueryBuilder qbpart : queries) {
-            qb.must(qbpart);
-        }
-
-        return qb;
-    }
-
-    @Override
-    public Object getNativeQuery() throws QueryException {
-        nativeQuery = getQueryBuilder();
-        return super.getNativeQuery();
-    }
-
-    @Override
-    public String format() throws QueryException {
-
-        BoolQueryBuilder qb = getQueryBuilder();
-
-        if (!qb.hasClauses()) {
-            throw new QueryException("Query is empty");
-        }
-
-        return qb.toString();
     }
 
     public DataQuery timeRange(Instant from) {

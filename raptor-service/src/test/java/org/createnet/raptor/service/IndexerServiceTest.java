@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import org.createnet.raptor.indexer.impl.ElasticSearchIndexer;
 import org.createnet.raptor.service.tools.CacheService;
 import org.createnet.raptor.service.tools.ConfigurationService;
 import org.createnet.raptor.service.tools.IndexerService;
@@ -156,7 +157,7 @@ public class IndexerServiceTest {
     public void testPath() throws InterruptedException {
 
         List<String> ids = Arrays.asList("x1", "x2", "x3", "x4", "x5", "x6");
-        List<ServiceObject> objects = ids.stream()
+        List<ServiceObject> objects = ids.stream().sequential()
                 .map(s -> new ServiceObject(s))
                 .collect(Collectors.toList());
 
@@ -172,7 +173,7 @@ public class IndexerServiceTest {
                 list = tree.addChildren(prev, Arrays.asList(curr));
             }
 
-            Thread.sleep(600);
+            Thread.sleep(1000);
         }
 
         String expectedPath = String.join("/", ids);
@@ -182,8 +183,8 @@ public class IndexerServiceTest {
 
         Assert.assertNotNull(list);
         Assert.assertEquals(
-                expectedPath.toString(),
-                actualPath.toString()
+                expectedPath,
+                actualPath
         );
 
     }

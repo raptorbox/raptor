@@ -16,7 +16,6 @@
 package org.createnet.raptor.indexer.query.impl.es;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.createnet.raptor.indexer.query.AbstractQuery;
 import java.util.Iterator;
 import java.util.Map;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -76,6 +75,7 @@ public class ObjectQuery extends AbstractESQuery {
 //    throw new QueryException("Query is empty");
   }
 
+  @Override
   protected QueryBuilder buildQuery() {
 
     BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
@@ -108,22 +108,8 @@ public class ObjectQuery extends AbstractESQuery {
       }
 
     }
-
+    
     return boolQuery.hasClauses() ? boolQuery : null;
-  }
-
-  @Override
-  public String format() throws QueryException {
-
-    validate();
-
-    QueryBuilder qb = buildQuery();
-
-    if (qb == null) {
-      throw new QueryException("Query is empty");
-    }
-
-    return qb.toString();
   }
 
 }

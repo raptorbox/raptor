@@ -51,6 +51,7 @@ public class TreeQuery extends AbstractESQuery {
     public void validate() throws QueryException {
     }
 
+    @Override
     protected QueryBuilder buildQuery() {
 
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
@@ -78,22 +79,8 @@ public class TreeQuery extends AbstractESQuery {
                 boolQuery.mustNot(QueryBuilders.existsQuery("path"));
                 break;
         }
-
+        
         return boolQuery.hasClauses() ? boolQuery : null;
-    }
-
-    @Override
-    public String format() throws QueryException {
-
-        validate();
-
-        QueryBuilder qb = buildQuery();
-
-        if (qb == null) {
-            throw new QueryException("Query is empty");
-        }
-
-        return qb.toString();
     }
 
 }

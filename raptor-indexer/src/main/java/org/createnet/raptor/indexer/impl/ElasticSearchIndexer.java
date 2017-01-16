@@ -72,7 +72,8 @@ public class ElasticSearchIndexer extends AbstractIndexer {
     protected Client client;
     final protected Logger logger = LoggerFactory.getLogger(ElasticSearchIndexer.class);
     final private ElasticSearchIndexAdmin indexAdmin = new ElasticSearchIndexAdmin();
-
+   
+    
     /**
      *
      * @param file
@@ -99,6 +100,19 @@ public class ElasticSearchIndexer extends AbstractIndexer {
         return indices;
     }
 
+    public Map<String, JsonNode> getIndices() throws IndexerException {
+        Map<String, JsonNode> indices = configuration.elasticsearch.indices.definitions;
+        if (indices.isEmpty()) {
+            String filepath = configuration.elasticsearch.indices.source;
+            File file = new File(filepath);
+            if (!file.exists()) {
+                throw new IndexerException("Indices file not found " + configuration.elasticsearch.indices.source);
+            }
+            indices.putAll(ElasticSearchIndexer.loadIndicesFromFile(filepath));
+        }
+        return indices;
+    }
+    
     /**
      *
      * @param record
@@ -369,6 +383,19 @@ public class ElasticSearchIndexer extends AbstractIndexer {
 
     /**
      *
+     * @throws IndexerException
+     */
+    @Override
+    public void reset() throws IndexerException {
+        getIndices().entrySet().forEach((el) -> {
+            String indexName = el.getKey();
+            JsonNode indexDefinition = el.getValue();
+            removeIndex(indexName);
+        });
+    }
+
+    /**
+     *
      * @param forceSetup
      * @throws IndexerException
      */
@@ -377,16 +404,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
 
         logger.debug("Setup client, force {}", forceSetup);
 
-        Map<String, JsonNode> indices = configuration.elasticsearch.indices.definitions;
-        if (indices.isEmpty()) {
-            String filepath = configuration.elasticsearch.indices.source;
-            File file = new File(filepath);
-            if (!file.exists()) {
-                throw new IndexerException("Indices file not found " + configuration.elasticsearch.indices.source);
-            }
-            indices.putAll(ElasticSearchIndexer.loadIndicesFromFile(filepath));
-        }
-
+        Map<String, JsonNode> indices = getIndices();
         indices.entrySet().forEach((el) -> {
 
             String indexName = el.getKey();
@@ -399,11 +417,10 @@ public class ElasticSearchIndexer extends AbstractIndexer {
                 }
 
                 boolean indexExists = indexAdmin.exists(indexName);
-
                 if (indexExists) {
                     if (forceSetup) {
                         logger.debug("Force setup, dropping index {}", indexName);
-                        indexAdmin.delete(indexName);
+                        removeIndex(indexName);
                         indexExists = false;
                     }
                 }
@@ -418,6 +435,13 @@ public class ElasticSearchIndexer extends AbstractIndexer {
             }
         });
 
+    }
+
+    public void removeIndex(String indexName) {
+        if (indexAdmin.exists(indexName)) {
+            logger.debug("Dropping index {}", indexName);
+            indexAdmin.delete(indexName);
+        }
     }
 
     /**
@@ -443,11 +467,12 @@ public class ElasticSearchIndexer extends AbstractIndexer {
     public List<IndexRecord> search(Query query) throws SearchException {
 
         try {
-
+            
+            QueryBuilder qb = (QueryBuilder) query.getNativeQuery();
             SearchRequestBuilder searchBuilder = client.prepareSearch(query.getIndex())
                     .setTypes(query.getType())
                     .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                    .setQuery((QueryBuilder) query.getNativeQuery());
+                    .setQuery(qb);
 
             if (query.getLimit() != null && query.getLimit() > 0) {
                 searchBuilder.setSize(query.getLimit());

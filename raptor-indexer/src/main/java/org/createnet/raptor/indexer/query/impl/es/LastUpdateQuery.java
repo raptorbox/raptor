@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.indexer.query.impl.es;
 
-import org.createnet.raptor.indexer.query.AbstractQuery;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -52,20 +51,6 @@ public class LastUpdateQuery extends AbstractESQuery {
     query.filter(QueryBuilders.matchAllQuery());
     
     return query.hasClauses() ? query : null;
-  }
-
-  @Override
-  public String format() throws QueryException {
-
-    validate();
-
-    QueryBuilder qb = buildQuery();
-
-    if (qb == null) {
-      throw new QueryException("Query is empty");
-    }
-
-    return qb.toString();
   }
 
 }

@@ -39,7 +39,5 @@ abstract public class AbstractIndexer implements Indexer {
   public void initialize(IndexerConfiguration configuration) throws IndexerException {
     this.configuration = configuration;
   }
-
-  
   
 }

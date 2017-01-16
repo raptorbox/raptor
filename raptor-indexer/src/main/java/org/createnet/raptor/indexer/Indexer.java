@@ -139,21 +139,66 @@ public interface Indexer {
         }
 
     }
-
+    
+    /**
+     * Open a connection to the Indexer service
+     * @throws IndexerException
+     */
     public void open() throws IndexerException;
-
+    
+    /**
+     * Perform initialization operations 
+     * @throws IndexerException
+     */    
     public void initialize(IndexerConfiguration configuration) throws IndexerException;
-
+    
+    /**
+     * Setup the connection
+     * @param forceSetup force the setup, removing previous data eventually
+     * @throws IndexerException
+     */    
     public void setup(boolean forceSetup) throws IndexerException;
-
+    
+    /**
+     * Close the connection to the indexer
+     * @throws IndexerException
+     */
     public void close() throws IndexerException;
-
+    
+    /**
+     * Create a new record
+     * @param record
+     * @throws IndexerException
+     */
     public void save(IndexRecord record) throws IndexerException;
 
+    /**
+     * Delete a record
+     * @param record
+     * @throws IndexerException
+     */
     public void delete(IndexRecord record) throws IndexerException;
 
+    /**
+     * Perform a batch operation
+     * @param list
+     * @throws IndexerException
+     */
     public void batch(List<IndexOperation> list) throws IndexerException;
 
+    /**
+     * Reset the indexer status to a clean status, dropping any data and configuration.
+     * Depending on implementation, it may destroy your data
+     * @throws IndexerException
+     */
+    public void reset() throws IndexerException;
+
+    /**
+     * Perform a search on the indexer dataset
+     * @param query
+     * @return
+     * @throws SearchException
+     */
     public List<IndexRecord> search(Query query) throws SearchException;
 
 }

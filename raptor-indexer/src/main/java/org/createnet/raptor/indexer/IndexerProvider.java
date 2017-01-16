@@ -57,6 +57,11 @@ public class IndexerProvider extends AbstractIndexer {
     public void close() throws IndexerException {
         indexer.close();
     }
+    
+    @Override
+    public void reset() throws IndexerException {
+        indexer.reset();
+    }
 
     @Override
     public void save(IndexRecord record) throws IndexerException {

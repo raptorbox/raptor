@@ -24,11 +24,26 @@ import org.elasticsearch.index.query.QueryBuilder;
  */
 abstract public class AbstractESQuery extends AbstractQuery {
     
-    protected QueryBuilder nativeQuery;
+    abstract QueryBuilder buildQuery();
     
-    @Override
-    public Object getNativeQuery() throws QueryException {
-        return (Object) nativeQuery;
+    protected QueryBuilder getQueryBuilder() throws QueryException {
+        QueryBuilder qb = buildQuery();
+        if (qb == null) {
+            throw new QueryException("Query is empty");
+        }
+        return qb;
     }
     
+    @Override
+    public Object getNativeQuery() throws QueryException {        
+        validate();
+        return (Object) getQueryBuilder();
+    }
+
+    @Override
+    public String format() throws QueryException {
+        validate();
+        return getQueryBuilder().toString();
+    }
+
 }

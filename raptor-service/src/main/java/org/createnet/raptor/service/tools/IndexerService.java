@@ -105,7 +105,7 @@ public class IndexerService extends AbstractRaptorService {
             throw new ServiceException(e);
         }
     }
-
+    
     /**
      * Set the index informations based on well known index types
      *

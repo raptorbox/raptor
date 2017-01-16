@@ -47,6 +47,9 @@ public class CacheService extends AbstractRaptorService {
 
     final private Map<String, Cache<String, String>> instances = new ConcurrentHashMap();
 
+    /**
+     * @return the EHCache CacheManager instance
+     */
     public CacheManager getManager() {
         if (cacheManager == null) {
             cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true);
@@ -63,14 +66,23 @@ public class CacheService extends AbstractRaptorService {
         }
     }
 
+    /**
+     * @return the EHCache Cache instance for objects
+     */
     synchronized public Cache<String, String> getObjectCache() {
         return getCache("objects");
     }
 
+    /**
+     * @return the EHCache Cache instance for an object tree
+     */
     synchronized public Cache<String, String> getTreeCache() {
         return getCache("tree");
     }
 
+    /**
+     * @return the EHCache Cache by name, initializing it if not found
+     */
     synchronized public Cache<String, String> getCache(String name) {
 
         if (instances.containsKey(name)) {
@@ -104,12 +116,26 @@ public class CacheService extends AbstractRaptorService {
         getObjectCache();
         getTreeCache();
     }
+    
+    @Override
+    public void reset() {
+        clearAll();
+    }
 
+    /**
+     * Set the cache for an object definition by ID
+     * @param obj
+     */
     public void setObject(ServiceObject obj) {
         logger.debug("Store cache for {}", obj.id);
         getObjectCache().put(obj.getId(), obj.toJSON());
     }
 
+    /**
+     * Get an object definition by ID
+     * @param id
+     * @return the service object definition
+     */
     public ServiceObject getObject(String id) {
         if (getObjectCache().containsKey(id)) {
             logger.debug("Load cache for {}", id);
@@ -124,10 +150,17 @@ public class CacheService extends AbstractRaptorService {
         return null;
     }
 
+    /**
+     * Clear all objects cache
+     */
     public void clearObjects() {
         getObjectCache().clear();
     }
 
+    /**
+     * Clear an object cache by ID
+     * @param id
+     */
     public void clearObject(String id) {
         if (getObjectCache().containsKey(id)) {
             logger.debug("Remove cache for {}", id);
@@ -135,23 +168,48 @@ public class CacheService extends AbstractRaptorService {
         }
     }
 
+    /**
+     * Get a list of direct children for an object
+     * @param parentId
+     * @return 
+     */
     public String getChildren(String parentId) {
         logger.debug("Load cache children for {}", parentId);
         return getTreeCache().get(parentId);
     }
 
+    /**
+     * Set a list of direct children for an object
+     * @param parentId
+     * @param list
+     */
     public void setChildren(String parentId, String list) {
         logger.debug("Store cache children for {}", parentId);
         getTreeCache().put(parentId, list);
     }
 
+    /**
+     * Clear objects cache
+     */
     public void clearChildren(String parentId) {
         logger.debug("Remove cache children for {}", parentId);
         getTreeCache().remove(parentId);
     }
 
+    /**
+     * Clear objects tree cache
+     */
     public void clearChildren() {
         getTreeCache().clear();
     }
+    
+    /**
+     * Clear all cache
+     */
+    public void clearAll() {
+        clearChildren();
+        clearObjects();
+    }
+    
 
 }
