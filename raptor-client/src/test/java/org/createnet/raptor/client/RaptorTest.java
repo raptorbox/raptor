@@ -50,52 +50,52 @@ public class RaptorTest {
 //    public void tearDown() {
 //    }
 
-    @Test
-    public void testSomeMethod() {
-
-        RaptorClient.ClientConfig config = new RaptorClient.ClientConfig();
-
-//        config.url = "http://localhost";
-        config.username = "admin";
-        config.password = "admin";
-
-        Raptor raptor = new Raptor(config);
-        AuthClient.LoginResponseBody result = raptor.auth().login();
-
-        assertNotNull(result);
-        assertNotNull(result.token);
-        
-
-    }
-
-    @Test
-    public void testCreate() throws InterruptedException {
-
-        RaptorClient.ClientConfig config = new RaptorClient.ClientConfig();
-
-//        config.url = "http://localhost";
-        config.username = "admin";
-        config.password = "admin";
-
-        Raptor raptor = new Raptor(config);
-        AuthClient.LoginResponseBody result = raptor.auth().login();
-
-        assertNotNull(result);
-        assertNotNull(result.user);
-        assertNotNull(result.token);
-        
-        ServiceObject obj = new ServiceObject();
-
-        obj.name = "test1";
-        obj.addStream("enviromental")
-                .addChannel("temperature", "number")
-                .addChannel("pressure", "number");
-        obj.addAction("reset");
-
-        raptor.serviceObject().create(obj);
-
-        assertNotNull(obj.id);
-
-    }
+//    @Test
+//    public void testSomeMethod() {
+//
+//        RaptorClient.ClientConfig config = new RaptorClient.ClientConfig();
+//
+////        config.url = "http://localhost";
+//        config.username = "admin";
+//        config.password = "admin";
+//
+//        Raptor raptor = new Raptor(config);
+//        AuthClient.LoginResponseBody result = raptor.auth().login();
+//
+//        assertNotNull(result);
+//        assertNotNull(result.token);
+//        
+//
+//    }
+//
+//    @Test
+//    public void testCreate() throws InterruptedException {
+//
+//        RaptorClient.ClientConfig config = new RaptorClient.ClientConfig();
+//
+////        config.url = "http://localhost";
+//        config.username = "admin";
+//        config.password = "admin";
+//
+//        Raptor raptor = new Raptor(config);
+//        AuthClient.LoginResponseBody result = raptor.auth().login();
+//
+//        assertNotNull(result);
+//        assertNotNull(result.user);
+//        assertNotNull(result.token);
+//        
+//        ServiceObject obj = new ServiceObject();
+//
+//        obj.name = "test1";
+//        obj.addStream("enviromental")
+//                .addChannel("temperature", "number")
+//                .addChannel("pressure", "number");
+//        obj.addAction("reset");
+//
+//        raptor.serviceObject().create(obj);
+//
+//        assertNotNull(obj.id);
+//
+//    }
 
 }
