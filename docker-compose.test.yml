@@ -7,7 +7,8 @@ networks:
 services:
 
   api:
-    image: raptorbox/api
+    build: ./raptor-http-api
+    container_name: raptor-http-api
     ports:
       - 127.0.0.1:8080:8080
     volumes:
@@ -19,7 +20,8 @@ services:
       - raptor_net
 
   broker:
-    image: raptorbox/broker
+    build: ./raptor-broker
+    container_name: raptor-broker
     ports:
       - 1883:1883
     volumes:
@@ -30,7 +32,8 @@ services:
       - raptor_net
 
   auth:
-    image: raptorbox/auth
+    build: ./raptor-auth-service
+    container_name: raptor-auth-service
     ports:
       - 8090:8090
     volumes:

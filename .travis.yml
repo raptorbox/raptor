@@ -25,7 +25,7 @@ before_install:
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
-  - sudo cp -r ./config /etc/raptor
+  - sudo ln -s `pwd`/config /etc/raptor
 
 before_script:
   - docker-compose -f docker-compose.dev.yml up -d
@@ -34,6 +34,10 @@ after_script:
   - docker-compose -f docker-compose.dev.yml down
 
 after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker push USER/REPO;
+    fi  
   - mvn clean cobertura:cobertura coveralls:report -DrepoToken=$COVERALLS_TOKEN
 
 # after_failure:
