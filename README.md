@@ -119,7 +119,7 @@ Here the list of available ones:
 
 ## Credits
 
-Raptor is a project by the [OpenIoT area](http://perfectiot.eu/) of [CREATE-NET](http://create-net.org) in the wonderful Trentino, Italy.
+Raptor is a project by the [OpenIoT area](http://perfectiot.eu/) of [FBK/CREATE-NET](http://create-net.fbk.eu) in the wonderful Trentino, Italy.
 
 Get in touch if you want to know more about Raptor or our other IoT projects.
 
@@ -127,7 +127,7 @@ We have an [IoT training program](http://perfectiot.eu/iot-training/) too!
 
 ## License
 
-Copyright CREATE-NET <http://create-net.org>
+Copyright FBK/CREATE-NET <http://create-net.fbk.eu>
 
 ```
 Licensed to the Apache Software Foundation (ASF) under one

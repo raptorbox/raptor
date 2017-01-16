@@ -13,7 +13,7 @@ visit then `http://localhost:8080/swagger.yaml` for an overview of the API
 License
 ---
 
-Copyright CREATE-NET <http://create-net.org>
+Copyright FBK/CREATE-NET <http://create-net.fbk.eu>
 
 ```
 Licensed to the Apache Software Foundation (ASF) under one

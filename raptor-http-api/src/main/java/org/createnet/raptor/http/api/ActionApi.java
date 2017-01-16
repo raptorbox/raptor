@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 CREATE-NET
+ * Copyright 2017 FBK/CREATE-NET
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.createnet.raptor.models.objects.Action;
 
 /**
  *
- * @author Luca Capra <lcapra@create-net.org>
+ * @author Luca Capra <lcapra@fbk.eu>
  */
 @Path("/{id}/actions")
 public class ActionApi extends AbstractApi {

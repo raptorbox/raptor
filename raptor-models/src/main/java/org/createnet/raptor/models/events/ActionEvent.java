@@ -9,7 +9,7 @@ import org.createnet.raptor.models.objects.Action;
 
 /**
  *
- * @author Luca Capra <luca.capra@create-net.org>
+ * @author Luca Capra <luca.capra@fbk.eu>
  */
 public class ActionEvent implements IEvent {
 

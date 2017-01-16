@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author Luca Capra <lcapra@create-net.org>
+ * @author Luca Capra <lcapra@fbk.eu>
  */
 public class RecordsetTest extends TestUtils {
   

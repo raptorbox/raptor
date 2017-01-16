@@ -2,7 +2,7 @@
 
 FROM anapsix/alpine-java
 
-MAINTAINER Luca Capra <lcapra@create-net.org>
+MAINTAINER Luca Capra <lcapra@fbk.eu>
 VOLUME ["/etc/raptor"]
 EXPOSE 1883
 

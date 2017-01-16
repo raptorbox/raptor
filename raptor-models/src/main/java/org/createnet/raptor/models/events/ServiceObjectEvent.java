@@ -10,7 +10,7 @@ import org.createnet.raptor.models.objects.ServiceObject;
 
 /**
  *
- * @author Luca Capra <luca.capra@create-net.org>
+ * @author Luca Capra <luca.capra@fbk.eu>
  */
 public class ServiceObjectEvent implements IEvent {
 

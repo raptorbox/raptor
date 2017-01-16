@@ -7,7 +7,7 @@ package org.createnet.raptor.models.events;
 
 /**
  *
- * @author Luca Capra <luca.capra@create-net.org>
+ * @author Luca Capra <luca.capra@fbk.eu>
  */
 public interface ServiceObjectEventListener extends IEventListener {
 

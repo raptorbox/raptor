@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2016 CREATE-NET
+ * Copyright 2017 FBK/CREATE-NET
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ import org.junit.Test;
 
 /**
  *
- * @author Luca Capra <lcapra@create-net.org>
+ * @author Luca Capra <lcapra@fbk.eu>
  */
 public class DispatcherTest {
   

@@ -25,6 +25,6 @@ Launch the IoT Broker. To launch just one component at time use one flag
 
 ##License
 
-(C) CREATE-NET
+(C) FBK/CREATE-NET
 
 Licensed under Apache2

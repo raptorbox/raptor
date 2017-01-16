@@ -13,7 +13,7 @@ Start with maven `mvn exec:java` and connect then with an mqtt client to `localh
 License
 ---
 
-Copyright CREATE-NET <http://create-net.org>
+Copyright FBK/CREATE-NET <http://create-net.fbk.eu>
 
 ```
 Licensed to the Apache Software Foundation (ASF) under one

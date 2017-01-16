@@ -9,7 +9,7 @@ import org.createnet.raptor.db.AbstractStorage;
 
 /**
  *
- * @author Luca Capra <lcapra@create-net.org>
+ * @author Luca Capra <lcapra@fbk.eu>
  */
 public class NoneStorage extends AbstractStorage {
 
