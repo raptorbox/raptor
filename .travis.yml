@@ -35,9 +35,10 @@ after_script:
 
 after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    ./scripts/docker-setup.sh
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-    docker push USER/REPO;
-    fi  
+    ./scripts/docker-publish.sh
+    fi
   - mvn clean cobertura:cobertura coveralls:report -DrepoToken=$COVERALLS_TOKEN
 
 # after_failure:
