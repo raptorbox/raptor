@@ -3,7 +3,7 @@ Raptor Auth Service
 
 ***Documentation is coming soon!***
 
-JWT token based authorization and authentication API which handles login, registration and permission management
+Authorization and authentication API which handles login, registration and permission management
 
 Usage
 ---
@@ -14,7 +14,6 @@ Once running visit `http://localhost:8090/auth/swagger.yaml` to get an overview 
 
 License
 ---
-
 
 Copyright FBK/CREATE-NET <http://create-net.fbk.eu>
 

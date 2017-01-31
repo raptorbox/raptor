@@ -20,7 +20,7 @@ spring:
   jpa:
     show-sql: false
     database-platform: org.hibernate.dialect.MySQL5Dialect
-    # Hibernate ddl auto (create, create-drop, update)
+    # Hibernate ddl auto (none, validate, update, create, create-drop)
     hibernate:
       ddl-auto: validate
       naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy

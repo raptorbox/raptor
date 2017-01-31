@@ -1,19 +1,23 @@
 
-SET foreign_key_checks = 0;
+CREATE DATABASE IF NOT EXISTS raptor;
+USE raptor;
 
-drop table if exists authorities;
-drop table if exists roles;
-drop table if exists users;
-drop table if exists users_roles;
-drop table if exists tokens;
-drop table if exists devices;
 
-drop table if exists acl_sid;
-drop table if exists acl_class;
-drop table if exists acl_object_identity;
-drop table if exists acl_entry;
-
-SET foreign_key_checks = 1;
+-- SET foreign_key_checks = 0;
+-- 
+-- drop table if exists authorities;
+-- drop table if exists roles;
+-- drop table if exists users;
+-- drop table if exists users_roles;
+-- drop table if exists tokens;
+-- drop table if exists devices;
+-- 
+-- drop table if exists acl_sid;
+-- drop table if exists acl_class;
+-- drop table if exists acl_object_identity;
+-- drop table if exists acl_entry;
+-- 
+-- SET foreign_key_checks = 1;
 
 create table if not exists devices (id bigint not null auto_increment, uuid varchar(255) not null, owner_id bigint, parent_id bigint, primary key (id));
 create table if not exists roles (id bigint not null auto_increment, name varchar(255) not null, primary key (id));
@@ -24,10 +28,10 @@ create table if not exists authorities (username varchar(128) not null, authorit
 
 alter table users add constraint idx_username unique (username);
 alter table devices add constraint fk_devices_users_id foreign key (owner_id) references users (id);
-alter table devices add constraint fk_devices_parent_id_devices_id foreign key (parent_id) references devices (id);
+alter table devices add constraint fk_devices_parent_id_devices_id  foreign key (parent_id) references devices (id);
 
-alter table tokens add constraint idx_tokens_token unique (token);
-alter table tokens add constraint fk_tokens_device_id_id foreign key (device_id) references devices (id);
+alter table tokens add constraint idx_tokens_token  unique (token);
+alter table tokens add constraint fk_tokens_device_id_id  foreign key (device_id) references devices (id);
 alter table tokens add constraint fk_tokens_user_id_users_id foreign key (user_id) references users (id);
 
 alter table users_roles add constraint fk_users_roles_role_id_roles_id foreign key (role_id) references roles (id);
@@ -35,8 +39,6 @@ alter table users_roles add constraint fk_users_roles_user_id_users_id foreign k
 
 alter table authorities add constraint idx_auth_username unique (username, authority);
 alter table authorities add constraint fk_auth_users foreign key (username) references users (username);
-
-
 
 CREATE TABLE if not exists acl_sid (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
