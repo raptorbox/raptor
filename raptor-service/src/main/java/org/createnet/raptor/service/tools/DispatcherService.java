@@ -140,14 +140,6 @@ public class DispatcherService extends AbstractRaptorService {
         }
     }
 
-    public enum ObjectOperation {
-        create, update, delete, push
-    }
-
-    public enum ActionOperation {
-        execute, delete
-    }
-
     private Dispatcher dispatcher;
 
     public DispatcherService() {

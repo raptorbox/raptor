@@ -39,11 +39,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Profile;
+import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
+import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
+import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -154,6 +157,22 @@ public class Application {
 
     }
 
+    @Bean
+    public MqttPahoClientFactory mqttClientFactory() {
+
+        DispatcherConfiguration config = (DispatcherConfiguration)ConfigurationLoader.getConfiguration("dispatcher", DispatcherConfiguration.class);
+
+        DefaultMqttPahoClientFactory f = new DefaultMqttPahoClientFactory();        
+        
+        f.setUserName(config.username);
+        f.setPassword(config.password);
+        f.setServerURIs(config.uri);
+        f.setCleanSession(true);
+        f.setPersistence(new MemoryPersistence());
+        
+        return f;
+    }    
+    
     // Add inbound MQTT support
     @Bean
     public MessageChannel mqttInputChannel() {
@@ -162,18 +181,7 @@ public class Application {
 
     @Bean
     public MessageProducer inbound() {
-
-        DefaultMqttPahoClientFactory f = new DefaultMqttPahoClientFactory();
-        
-        DispatcherConfiguration config = (DispatcherConfiguration)ConfigurationLoader.getConfiguration("dispatcher", DispatcherConfiguration.class);
-        
-        f.setUserName(config.username);
-        f.setPassword(config.password);
-        f.setServerURIs(config.uri);
-        f.setCleanSession(true);
-        f.setPersistence(new MemoryPersistence());
-
-        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter("raptorauth", f, "+/events");
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter("raptorauth", mqttClientFactory(), "+/events");
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(0);
@@ -191,6 +199,28 @@ public class Application {
         };
     }
 
+//    // Spring outbound channel
+//    @Bean
+//    @ServiceActivator(inputChannel = "mqttOutboundChannel")
+//    public MessageHandler mqttOutbound() {
+//        MqttPahoMessageHandler messageHandler =
+//                       new MqttPahoMessageHandler("authclient", mqttClientFactory());
+//        messageHandler.setAsync(true);
+//        messageHandler.setDefaultTopic("baz");
+//        return messageHandler;
+//    }
+//
+//    @Bean
+//    public MessageChannel mqttOutboundChannel() {
+//        return new DirectChannel();
+//    }
+//
+//    @MessagingGateway(defaultRequestChannel = "mqttOutboundChannel")
+//    public interface MyGateway {
+//        void sendToMqtt(String data);
+//    }
+
+    
 //  @Configuration
 //  @EnableResourceServer
 //  protected static class ResourceServer extends ResourceServerConfigurerAdapter {
