@@ -125,11 +125,9 @@ public class AuthenticationController {
 
     }
 
-    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "${jwt.route.authentication.refresh}", method = RequestMethod.GET)
     public ResponseEntity<?> refreshToken(
-            HttpServletRequest request,
-            Principal principal
+            HttpServletRequest request
     ) {
 
         String reqToken = request.getHeader(tokenHeader).replace("Bearer ", "");
@@ -140,7 +138,7 @@ public class AuthenticationController {
         }
 
         Token refreshedToken = tokenService.refreshToken(token);
-        return ResponseEntity.ok(new JwtResponse((User) principal, refreshedToken.getToken()));
+        return ResponseEntity.ok(new JwtResponse(refreshedToken.getUser(), refreshedToken.getToken()));
     }
 
 }
