@@ -46,18 +46,18 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class AuthenticationController {
-    
+
     final private static Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
-    
+
     protected static class JwtRequest {
 
-        public JwtRequest() {}
+        public JwtRequest() {
+        }
 
         public String username;
         public String password;
     }
-    
-    
+
     protected static class JwtResponse {
 
         public JwtResponse(User user, String token) {
@@ -82,7 +82,7 @@ public class AuthenticationController {
 
     @RequestMapping(value = "${jwt.route.authentication.path}", method = RequestMethod.POST)
     public ResponseEntity<?> login(@RequestBody JwtRequest authenticationRequest) throws AuthenticationException {
-        
+
         try {
             final Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authenticationRequest.username, authenticationRequest.password)
@@ -95,11 +95,34 @@ public class AuthenticationController {
 
             // Return the token
             return ResponseEntity.ok(new JwtResponse((User) userDetails, token.getToken()));
-        }
-        catch(AuthenticationException ex) {
+        } catch (AuthenticationException ex) {
             logger.error("Authentication exception: {}", ex.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed");
         }
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "${jwt.route.authentication.path}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> logout(
+            HttpServletRequest request,
+            Principal principal
+    ) {
+
+        String reqToken = request.getHeader(tokenHeader).replace("Bearer ", "");
+        Token token = tokenService.read(reqToken);
+
+        if (token == null) {
+            return ResponseEntity.noContent().build();
+        }
+        
+        if (token.getType() != Token.Type.LOGIN) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        
+        tokenService.delete(token);
+        
+        return ResponseEntity.ok(null);
+
     }
 
     @PreAuthorize("isAuthenticated()")
