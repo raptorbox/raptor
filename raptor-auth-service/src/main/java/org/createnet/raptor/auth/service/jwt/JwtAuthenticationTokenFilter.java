@@ -62,7 +62,7 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
           }
         }
         else {
-          logger.debug("JWT Token is not valid name:`{}` id:{} type:{}", token.getName(), token.getId().toString(), token.getType().name());
+          logger.debug("JWT Token is not valid [name:`{}` id:{} type:{}]", token.getName(), token.getId().toString(), token.getType().name());
           if(token.isLoginToken()) {
             tokenService.delete(token);
           }

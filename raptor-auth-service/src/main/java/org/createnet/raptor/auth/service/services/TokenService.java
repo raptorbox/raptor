@@ -114,7 +114,7 @@ public class TokenService {
             tokenUtil.refreshToken(token);
         }
         
-        token.setSecret(null);
+        token.setSecret(Token.Type.LOGIN.name());
         token.setType(Token.Type.LOGIN);
 
         try {
@@ -131,6 +131,11 @@ public class TokenService {
         return tokenRepository.save(token);
     }
 
+    public Token generateToken(Token token) {
+        token.setToken(tokenUtil.generateToken(token));
+        return token;
+    }
+
     public boolean isValid(Token token, String secret) {
         // Cannot read the token claims?
         if (tokenUtil.getClaims(token, secret) == null) {
@@ -143,7 +148,7 @@ public class TokenService {
         if (token == null) {
             return false;
         }
-        return isValid(token, token.getSecret() == null ? this.secret : token.getSecret());
+        return isValid(token, (token.getSecret().equals(Token.Type.LOGIN.name())) ? this.secret : token.getSecret());
     }
 
 }

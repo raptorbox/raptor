@@ -35,6 +35,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  *
@@ -63,6 +64,7 @@ public class Token implements Serializable {
   
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   @Column(unique = false, nullable = true)
+  @NotEmpty
   private String secret;
   
   @Column(unique = false, nullable = false)

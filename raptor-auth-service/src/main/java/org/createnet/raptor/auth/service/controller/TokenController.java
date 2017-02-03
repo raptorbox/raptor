@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.auth.service.controller;
 
+import org.createnet.raptor.auth.service.objects.JsonErrorResponse;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.services.TokenService;
@@ -37,75 +38,88 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TokenController {
 
-  @Autowired
-  private TokenService tokenService;
-  
-  @Autowired
-  private UserService userService;
+    @Autowired
+    private TokenService tokenService;
 
-  @RequestMapping("/user/{uuid}/tokens")
-  public Iterable<Token> getTokens(
-          @AuthenticationPrincipal User user,
-          @PathVariable String uuid
-  ) {
-    // TODO add ACL checks
-    return tokenService.list(uuid);
-  }
+    @Autowired
+    private UserService userService;
 
-  @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
-  @RequestMapping(value = "/user/{uuid}/token/{tid}", method = RequestMethod.GET)
-  public Token get(
-          @AuthenticationPrincipal User user,
-          @PathVariable String uuid,
-          @PathVariable Long tokenId
-  ) {
-    // TODO add ACL checks
-    return tokenService.read(tokenId);
-  }
-  
-  @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
-  @RequestMapping(value = "/user/{uuid}/token/{tid}", method = RequestMethod.PUT)
-  public Token update(
-          @AuthenticationPrincipal User user,
-          @PathVariable String uuid,
-          @PathVariable Long tokenId,
-          @RequestBody Token token
-  ) {
-    token.setId(tokenId);
-    return tokenService.update(token);
-  }
-  
-  @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
-  @RequestMapping(value = "/user/{uuid}/token", method = RequestMethod.POST)
-  public ResponseEntity<Token> create(
-          @AuthenticationPrincipal User currentUser,
-          @PathVariable String uuid,
-          @RequestBody Token rawToken
-  ) {
-    
-    User user = userService.getByUuid(uuid);
-    if(user == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    @RequestMapping("/user/{uuid}/tokens")
+    public Iterable<Token> getTokens(
+            @AuthenticationPrincipal User user,
+            @PathVariable String uuid
+    ) {
+        // TODO add ACL checks
+        return tokenService.list(uuid);
     }
-    
-    
-    
-    Token token = new Token();
-    token.setName(rawToken.getName());
-    token.setEnabled(rawToken.getEnabled());
-    token.setExpires(rawToken.getExpires());
-    token.setSecret(rawToken.getSecret());
-    token.setType(rawToken.getType());
-    token.setUser(user);
-    token.setToken(null);
-    
-    Token token2 = tokenService.create(token);
-    
-    if(token2 == null) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+
+    @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
+    @RequestMapping(value = "/user/{uuid}/token/{tid}", method = RequestMethod.GET)
+    public Token get(
+            @AuthenticationPrincipal User user,
+            @PathVariable String uuid,
+            @PathVariable Long tokenId
+    ) {
+        // TODO add ACL checks
+        return tokenService.read(tokenId);
     }
-    
-    return ResponseEntity.status(HttpStatus.CREATED).body(token2);
-  }
+
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/user/{uuid}/token/{tid}", method = RequestMethod.PUT)
+    public ResponseEntity<?> update(
+            @AuthenticationPrincipal User user,
+            @PathVariable String uuid,
+            @PathVariable Long tokenId,
+            @RequestBody Token token
+    ) {
+        
+        if (token.getSecret().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new JsonErrorResponse(400, "Secret cannot be empty"));
+        }
+        
+        token.setId(tokenId);
+
+        // Generate the JWT token
+        tokenService.generateToken(token);
+        
+        return ResponseEntity.status(HttpStatus.OK).body(tokenService.update(token));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/user/{uuid}/token", method = RequestMethod.POST)
+    public ResponseEntity<?> create(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable String uuid,
+            @RequestBody Token rawToken
+    ) {
+        
+        User user = userService.getByUuid(uuid);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        if (rawToken.getSecret().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new JsonErrorResponse(400, "Secret cannot be empty"));
+        }
+        
+        Token token = new Token();
+        token.setName(rawToken.getName());
+        token.setEnabled(rawToken.getEnabled());
+        token.setExpires(rawToken.getExpires());
+        token.setSecret(rawToken.getSecret());
+        token.setType(rawToken.getType());
+        token.setUser(user);
+        
+        // Generate the JWT token
+        tokenService.generateToken(token);
+
+        Token token2 = tokenService.create(token);
+
+        if (token2 == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(token2);
+    }
 
 }
