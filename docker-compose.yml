@@ -46,7 +46,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./raptor-auth-service/src/main/resources/sql:/docker-entrypoint-initdb.d      
+      - ./raptor-auth-service/src/main/resources/sql:/docker-entrypoint-initdb.d
       - ./data/mariadb:/var/lib/mysql
     environment:
       MYSQL_USERNAME: root
@@ -68,7 +68,7 @@ services:
 
   elasticsearch:
     image: elasticsearch:5
-    command: elasticsearch -E cluster.name="raptor" -E path.data=/usr/share/elasticsearch/data
+    command: elasticsearch -E cluster.name="raptor" -E path.data=/usr/share/elasticsearch/data -E transport.host=0.0.0.0
     volumes:
       - ./data/elasticsearch:/usr/share/elasticsearch/data
     ports:
