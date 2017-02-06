@@ -148,7 +148,10 @@ public class TokenService {
         if (token == null) {
             return false;
         }
-        return isValid(token, (token.getSecret().equals(Token.Type.LOGIN.name())) ? this.secret : token.getSecret());
+
+        // on LOGIN token type use the internal secret
+        String tokenSecret = (token.getSecret().equals(Token.Type.LOGIN.name())) ? this.secret : token.getSecret();
+        return isValid(token, tokenSecret);
     }
 
 }

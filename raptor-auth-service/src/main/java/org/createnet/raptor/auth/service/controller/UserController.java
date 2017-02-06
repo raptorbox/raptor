@@ -40,7 +40,7 @@ public class UserController {
   @Autowired
   private UserService userService;
 
-  @RequestMapping(value = "/users", method = RequestMethod.GET)
+  @RequestMapping(value = "/user", method = RequestMethod.GET)
   public Iterable<User> getUsers() {
     return userService.list();
   }

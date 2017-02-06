@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# ./scripts/docker-setup.sh
+./scripts/docker-setup.sh
 
 cd raptor-auth-service
 docker build . -t raptorbox/auth

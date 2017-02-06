@@ -45,14 +45,14 @@ public class RoleController {
   private RoleService roleService;
 
   @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
-  @RequestMapping(value = "/roles", method = RequestMethod.GET)
+  @RequestMapping(value = "/role", method = RequestMethod.GET)
   public ResponseEntity<?> getUsers() {
     Iterable<Role> list = roleService.list();
     return ResponseEntity.ok(list);
   }
 
   @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
-  @RequestMapping(value = {"/roles/{roleId}"}, method = RequestMethod.PUT)
+  @RequestMapping(value = {"/role/{roleId}"}, method = RequestMethod.PUT)
   public ResponseEntity<?> update(
           @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
           @PathVariable Long roleId,
@@ -79,7 +79,7 @@ public class RoleController {
   }
 
   @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
-  @RequestMapping(value = {"/roles"}, method = RequestMethod.POST)
+  @RequestMapping(value = {"/role"}, method = RequestMethod.POST)
   public ResponseEntity<?> create(
           @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
           @RequestBody Role rawRole
@@ -104,7 +104,7 @@ public class RoleController {
   }
 
   @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
-  @RequestMapping(value = {"/roles/{roleId}"}, method = RequestMethod.DELETE)
+  @RequestMapping(value = {"/role/{roleId}"}, method = RequestMethod.DELETE)
   public ResponseEntity<Role> delete(
           @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
           @PathVariable Long roleId
