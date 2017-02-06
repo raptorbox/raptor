@@ -78,7 +78,7 @@ services:
       - raptor_net
 
   proxy:
-    build: ./docker/proxy
+    image: raptorbox/proxy
     ports:
       - 80:80
     depends_on:

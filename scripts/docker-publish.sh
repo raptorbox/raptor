@@ -15,3 +15,8 @@ cd ..
 cd raptor-broker
 docker build . -t raptorbox/broker
 docker push raptorbox/broker
+
+cd ..
+cd docker/proxy
+docker build . -t raptorbox/proxy
+docker push raptorbox/proxy
