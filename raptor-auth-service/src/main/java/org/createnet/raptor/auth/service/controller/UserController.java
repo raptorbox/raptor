@@ -62,7 +62,7 @@ public class UserController {
     return ResponseEntity.ok(userService.create(rawUser));
   }  
   
-  @RequestMapping(value = {"/user"}, method = RequestMethod.GET)
+  @RequestMapping(value = {"/me"}, method = RequestMethod.GET)
   public User me(
           @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails user
   ) {
