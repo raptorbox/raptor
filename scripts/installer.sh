@@ -10,6 +10,14 @@ if [ $USRID -ne 0 ]; then
   exit 1
 fi
 
+# check git is avail
+if hash git 2>/dev/null; then
+  echo "git found"
+else
+  echo "git is missing, exiting"
+  exit 1
+fi
+
 # check docker is avail
 if hash docker 2>/dev/null; then
   echo "Docker found"
@@ -50,29 +58,26 @@ else
   exit 1
 fi
 
-mkdir /opt/raptor -p
-cd /opt/raptor
-
 # set vm.max_map_count for elasticsearch
 sysctl -w vm.max_map_count=262144
 echo "vm.max_map_count=262144" | tee /etc/sysctl.d/90-raptor.conf
 
-# fetch https://raw.githubusercontent.com/raptorbox/raptor/master/docker-compose.yml
-wget https://raw.githubusercontent.com/raptorbox/raptor/master/docker-compose.yml
+if [ ! -e "/opt/raptor" ]; then
+  git clone https://github.com/raptorbox/raptor /opt/raptor
+fi
 
-# create sql import directory
-mkdir -p raptor-auth-service/src/main/resources/sql
-
-# fetch sql files
-wget -O raptor-auth-service/src/main/resources/sql/01_schema.sql https://raw.githubusercontent.com/raptorbox/raptor/master/raptor-auth-service/src/main/resources/sql/01_schema.sql
-wget -O raptor-auth-service/src/main/resources/sql/02_import.sql https://raw.githubusercontent.com/raptorbox/raptor/master/raptor-auth-service/src/main/resources/sql/02_import.sql
+cd /opt/raptor
+git pull origin master
 
 # fetch and install raptor-cli
-wget https://raw.githubusercontent.com/raptorbox/raptor/master/scripts/raptor-cli.sh
-chmod u+x raptor-cli.sh
-ln -s `pwd`/raptor-cli.sh /usr/bin/raptor
+if [ -L "/usr/bin/raptor" ]; then
+  rm /usr/bin/raptor
+fi
+
+chmod +x scripts/raptor-cli.sh
+ln -s `pwd`/scripts/raptor-cli.sh /usr/bin/raptor
 
 echo "Install completed!"
-echo "run 'raptor up' to start Raptor"
+echo "run 'raptor up -d' to start Raptor"
 
 exit 0
