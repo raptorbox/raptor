@@ -47,18 +47,38 @@ import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
  */
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
-@Api
+@ApiResponses(value = {
+    @ApiResponse(
+            code = 200, 
+            message = "Ok"
+    ),
+    @ApiResponse(
+            code = 401,
+            message = "Not authorized"
+    ),
+    @ApiResponse(
+            code = 403, 
+            message = "Forbidden"
+    ),
+    @ApiResponse(
+            code = 500, 
+            message = "Internal error"
+    )
+})
+@Api(tags = { "Inventory" })
 public class ObjectApi extends AbstractApi {
 
     final private Logger logger = LoggerFactory.getLogger(ObjectApi.class);
 
     @GET
-    @ApiOperation(value = "List all the available devices definition", notes = "")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Ok")
-        ,
-    @ApiResponse(code = 403, message = "Forbidden")
-    })
+    @ApiOperation(
+            value = "List all the available devices definition",
+            notes = "",
+            response = ServiceObject.class,
+            responseContainer = "List",
+            nickname = "listDevice"
+    )
+    @ApiResponses(value = {})
     public List<ServiceObject> list(
             @QueryParam("limit") Integer limit,
             @QueryParam("offset") Integer offset
@@ -73,14 +93,13 @@ public class ObjectApi extends AbstractApi {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Create a new device definition", notes = "")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Ok")
-        ,
-        @ApiResponse(code = 403, message = "Forbidden")
-        ,
-        @ApiResponse(code = 500, message = "Internal error")
-    })
+    @ApiOperation(
+            value = "Create a new device definition",
+            notes = "",
+            response = ServiceObject.class,
+            nickname = "createDevice"
+    )
+    @ApiResponses(value = {})
     public ServiceObject create(ServiceObject obj) {
 
         if (!auth.isAllowed(Authorization.Permission.Create)) {
@@ -89,7 +108,7 @@ public class ObjectApi extends AbstractApi {
 
         obj.userId = auth.getUser().getUserId();
         obj.validate();
-        
+
         try {
             obj = objectManager.create(obj);
         } catch (Indexer.IndexerException ex) {
@@ -109,20 +128,20 @@ public class ObjectApi extends AbstractApi {
 //            objectManager.delete(obj.id);
 //            throw new InternalServerErrorException("Failed to sync device");
 //        }
-
         return obj;
     }
 
     @PUT
     @Path("{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Update a device definition", notes = "")
+    @ApiOperation(
+            value = "Update a device definition",
+            notes = "",
+            response = ServiceObject.class,
+            nickname = "updateDevice"
+    )
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Ok")
-        ,
-    @ApiResponse(code = 404, message = "Not Found")
-        ,
-    @ApiResponse(code = 403, message = "Forbidden")
+        @ApiResponse(code = 404, message = "Not Found")
     })
     public ServiceObject update(
             @PathParam("id") String objectId,
@@ -130,7 +149,7 @@ public class ObjectApi extends AbstractApi {
     ) {
 
         ServiceObject storedObj = objectManager.load(objectId);
-        
+
         obj.id = objectId;
 
         if (!auth.isAllowed(storedObj, Authorization.Permission.Update)) {
@@ -149,36 +168,34 @@ public class ObjectApi extends AbstractApi {
 
     @GET
     @Path("{id}")
-    @ApiOperation(value = "Return a device definition", notes = "")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Ok")
-        ,
-    @ApiResponse(code = 403, message = "Forbidden")
-    })
+    @ApiOperation(
+            value = "Return a device definition",
+            notes = "",
+            response = ServiceObject.class,
+            nickname = "loadDevice"
+    )
+    @ApiResponses(value = {})
     public ServiceObject load(@PathParam("id") String id) {
-        
+
         ServiceObject obj = objectManager.load(id);
-        
+
         if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
             throw new ForbiddenException("Cannot read object");
         }
-        
+
         return obj;
     }
 
     @DELETE
     @Path("{id}")
-    @ApiOperation(value = "Delete a device definition", notes = "")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Ok")
-        ,
-    @ApiResponse(code = 403, message = "Forbidden")
-        ,
-    @ApiResponse(code = 500, message = "Internal error")
-    })
+    @ApiOperation(
+            value = "Delete a device definition",
+            notes = "",
+            nickname = "deleteDevice"
+    )
+    @ApiResponses(value = {})
     public Response delete(@PathParam("id") String id) {
-        
-        
+
         ServiceObject obj = objectManager.load(id);
 
         if (!auth.isAllowed(obj, Authorization.Permission.Delete)) {
@@ -186,13 +203,13 @@ public class ObjectApi extends AbstractApi {
         }
 
         objectManager.delete(id);
-        
+
         boolean sync = syncObject(obj, Authentication.SyncOperation.DELETE);
         if (!sync) {
             logger.error("Auth sync failed, aborting deletion of object {}", obj.id);
             throw new InternalServerErrorException("Failed to sync device");
         }
-        
+
         return Response.status(Response.Status.OK).build();
     }
 
@@ -200,24 +217,25 @@ public class ObjectApi extends AbstractApi {
     @Path("/search")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Search for object definitions", notes = "")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Ok")
-        ,
-    @ApiResponse(code = 403, message = "Forbidden")
-    })
+    @ApiOperation(
+            value = "Search for object definitions",
+            notes = "",
+            response = ServiceObject.class,
+            responseContainer = "List",
+            nickname = "searchDevice"
+    )
+    @ApiResponses(value = {})
     public List<ServiceObject> search(ObjectQuery query) {
-        
-        
+
         if (!auth.isAllowed(Authorization.Permission.List)) {
             throw new ForbiddenException("Cannot search for objects");
         }
-        
+
         //@TODO load accessible objects from auth service api!
         query.setUserId(auth.getUser().getUserId());
-        
+
         List<ServiceObject> list = objectManager.search(query);
-        
+
         return list;
     }
 
