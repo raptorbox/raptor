@@ -15,6 +15,10 @@
  */
 package org.createnet.raptor.auth.service.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.createnet.raptor.auth.service.objects.JsonErrorResponse;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
@@ -36,6 +40,28 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @RestController
+@Api(tags = {"Token"})
+@ApiResponses(value = {
+    @ApiResponse(
+            code = 200,
+            message = "Ok"
+    )
+    ,
+    @ApiResponse(
+            code = 401,
+            message = "Not authorized"
+    )
+    ,
+    @ApiResponse(
+            code = 403,
+            message = "Forbidden"
+    )
+    ,
+    @ApiResponse(
+            code = 500,
+            message = "Internal error"
+    )
+})
 public class TokenController {
 
     @Autowired
@@ -60,6 +86,13 @@ public class TokenController {
 
     @PreAuthorize("isAuthenticated()")
     @RequestMapping("/token")
+    @ApiOperation(
+            value = "List user tokens",
+            notes = "",
+            response = Token.class,
+            responseContainer = "Iterable",
+            nickname = "getUserTokens"
+    )    
     public Iterable<Token> getUserTokens(
             @AuthenticationPrincipal User user
     ) {
@@ -68,6 +101,12 @@ public class TokenController {
 
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/token/{tokenId}", method = RequestMethod.GET)
+    @ApiOperation(
+            value = "Get a token",
+            notes = "",
+            response = Token.class,
+            nickname = "getToken"
+    ) 
     public ResponseEntity<?> get(
             @AuthenticationPrincipal User user,
             @PathVariable Long tokenId
@@ -85,6 +124,12 @@ public class TokenController {
 
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/token/{tokenId}", method = RequestMethod.PUT)
+    @ApiOperation(
+            value = "Update a token",
+            notes = "",
+            response = Token.class,
+            nickname = "updateToken"
+    ) 
     public ResponseEntity<?> update(
             @AuthenticationPrincipal User user,
             @PathVariable Long tokenId,
@@ -110,6 +155,12 @@ public class TokenController {
 
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/token", method = RequestMethod.POST)
+    @ApiOperation(
+            value = "Create a token",
+            notes = "",
+            response = Token.class,
+            nickname = "createToken"
+    )     
     public ResponseEntity<?> create(
             @AuthenticationPrincipal User currentUser,
             @RequestBody Token rawToken
