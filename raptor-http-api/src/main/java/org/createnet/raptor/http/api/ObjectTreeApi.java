@@ -19,7 +19,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +30,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.models.objects.ServiceObject;
@@ -41,21 +42,40 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@Api
 @Path("/{id}/tree")
+@Produces(MediaType.APPLICATION_JSON)
+@ApiResponses(value = {
+    @ApiResponse(
+            code = 200, 
+            message = "Ok"
+    ),
+    @ApiResponse(
+            code = 401,
+            message = "Not authorized"
+    ),
+    @ApiResponse(
+            code = 403, 
+            message = "Forbidden"
+    ),
+    @ApiResponse(
+            code = 500, 
+            message = "Internal error"
+    )
+})
+@Api(tags = { "Inventory" })
 public class ObjectTreeApi extends AbstractApi {
 
     final private Logger logger = LoggerFactory.getLogger(ObjectTreeApi.class);
 
     @GET
-    @ApiOperation(value = "Return the device children if any", notes = "")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Ok")
-        ,
-        @ApiResponse(code = 403, message = "Forbidden")
-        ,
-        @ApiResponse(code = 404, message = "Not Found")
-    })
+    @ApiOperation(
+            value = "Return the device children if any", 
+            notes = "",
+            response = ServiceObject.class,
+            responseContainer = "List",
+            nickname = "getChildren"
+    )
+    @ApiResponses(value = {})
     public List<ServiceObject> children(@PathParam("id") String id) {
 
         ServiceObject obj = objectManager.load(id);
@@ -69,14 +89,14 @@ public class ObjectTreeApi extends AbstractApi {
     }
 
     @POST
-    @ApiOperation(value = "Set a list of devices as children", notes = "")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Ok")
-        ,
-        @ApiResponse(code = 403, message = "Forbidden")
-        ,
-        @ApiResponse(code = 404, message = "Not Found")
-    })
+    @ApiOperation(
+            value = "Set a list of devices as children",
+            notes = "",
+            response = ServiceObject.class,
+            responseContainer = "List",
+            nickname = "setChildren"
+    )
+    @ApiResponses(value = {})    
     public List<ServiceObject> setChildren(@PathParam("id") String id, final List<String> childrenIds) {
 
         ServiceObject parentObject = objectManager.load(id);
@@ -112,14 +132,14 @@ public class ObjectTreeApi extends AbstractApi {
 
     @PUT
     @Path("{childrenId}")
-    @ApiOperation(value = "Add a device as children", notes = "")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Ok")
-        ,
-        @ApiResponse(code = 403, message = "Forbidden")
-        ,
-        @ApiResponse(code = 404, message = "Not Found")
-    })
+    @ApiOperation(
+            value = "Add a device as children",
+            notes = "",
+            response = ServiceObject.class,
+            responseContainer = "List",
+            nickname = "addChildren"
+    )
+    @ApiResponses(value = {})    
     public List<ServiceObject> addChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) {
 
         ServiceObject parentObject = objectManager.load(id);
@@ -147,14 +167,13 @@ public class ObjectTreeApi extends AbstractApi {
 
     @DELETE
     @Path("{childrenId}")
-    @ApiOperation(value = "Remove a device from children list", notes = "")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Ok")
-        ,
-        @ApiResponse(code = 403, message = "Forbidden")
-        ,
-        @ApiResponse(code = 404, message = "Not Found")
-    })
+    @ApiOperation(
+            value = "Remove a device from children list",
+            notes = "",
+            response = ServiceObject.class,
+            responseContainer = "List",
+            nickname = "removeChildren"
+    )
     public List<ServiceObject> removeChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) {
 
         ServiceObject parentObject = objectManager.load(id);
