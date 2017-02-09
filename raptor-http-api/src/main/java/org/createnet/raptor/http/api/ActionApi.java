@@ -15,6 +15,10 @@
  */
 package org.createnet.raptor.http.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.util.Collection;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -27,26 +31,51 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.createnet.raptor.auth.authorization.Authorization;
-import org.createnet.raptor.events.Event.EventName;
 import org.createnet.raptor.models.objects.ServiceObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.createnet.raptor.events.type.ActionEvent;
-import org.createnet.raptor.service.tools.EventEmitterService;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.objects.Action;
+import org.createnet.raptor.models.objects.Stream;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Path("/{id}/actions")
+@Produces(MediaType.APPLICATION_JSON)
+@ApiResponses(value = {
+    @ApiResponse(
+            code = 200, 
+            message = "Ok"
+    ),
+    @ApiResponse(
+            code = 401,
+            message = "Not authorized"
+    ),
+    @ApiResponse(
+            code = 403, 
+            message = "Forbidden"
+    ),
+    @ApiResponse(
+            code = 500, 
+            message = "Internal error"
+    )
+})
+@Api(tags = { "Action" })
 public class ActionApi extends AbstractApi {
 
     final private Logger logger = LoggerFactory.getLogger(ActionApi.class);
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "Return the list of actions definition",
+            notes = "",
+            response = Action.class,
+            responseContainer = "Collection",
+            nickname = "getActionDefinition"
+    )
+    @ApiResponses(value = {})
     public Collection<Action> list(
             @PathParam("id") String id
     ) {
@@ -63,7 +92,13 @@ public class ActionApi extends AbstractApi {
 
     @GET
     @Path("{actionId}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "Return the current state of an action",
+            notes = "",
+            response = ActionStatus.class,
+            nickname = "getActionStatus"
+    )
+    @ApiResponses(value = {})
     public Response getStatus(
             @PathParam("id") String objectId,
             @PathParam("actionId") String actionId
@@ -86,9 +121,15 @@ public class ActionApi extends AbstractApi {
 
     @POST
     @Path("{actionId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.TEXT_PLAIN)
-    public String setStatus(
+    @Consumes(MediaType.TEXT_PLAIN)    
+    @ApiOperation(
+            value = "Set the state of an action",
+            notes = "",
+            response = ActionStatus.class,
+            nickname = "setActionStatus"
+    )
+    @ApiResponses(value = {})
+    public Response setStatus(
             @PathParam("id") String objectId,
             @PathParam("actionId") String actionId,
             String body
@@ -103,13 +144,23 @@ public class ActionApi extends AbstractApi {
         }
         
         ActionStatus actionStatus = actionManager.setStatus(action, body);
-
-        return actionStatus.toString();
+        return Response.ok(actionStatus).build();
     }
 
     @DELETE
     @Path("{actionId}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "Set the state of an action",
+            notes = "",
+            response = ActionStatus.class,
+            nickname = "deleteActionStatus"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                code = 202, 
+                message = "Accepted"
+        )
+    })
     public Response deleteStatus(
             @PathParam("id") String objectId,
             @PathParam("actionId") String actionId
