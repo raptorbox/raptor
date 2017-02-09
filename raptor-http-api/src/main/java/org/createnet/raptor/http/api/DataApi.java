@@ -15,6 +15,10 @@
  */
 package org.createnet.raptor.http.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.util.Collection;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
@@ -42,12 +46,39 @@ import org.createnet.raptor.models.objects.Stream;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Path("/{id}/streams")
+@Produces(MediaType.APPLICATION_JSON)
+@ApiResponses(value = {
+    @ApiResponse(
+            code = 200, 
+            message = "Ok"
+    ),
+    @ApiResponse(
+            code = 401,
+            message = "Not authorized"
+    ),
+    @ApiResponse(
+            code = 403, 
+            message = "Forbidden"
+    ),
+    @ApiResponse(
+            code = 500, 
+            message = "Internal error"
+    )
+})
+@Api(tags = { "Data" })
 public class DataApi extends AbstractApi {
 
     final private Logger logger = LoggerFactory.getLogger(DataApi.class);
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "List the channels defined for stream",
+            notes = "",
+            response = Stream.class,
+            responseContainer = "Collection",
+            nickname = "getStreamDefinition"
+    )
+    @ApiResponses(value = {})
     public Collection<Stream> list(@PathParam("id") String objectId) {
 
         ServiceObject obj = objectManager.load(objectId);
@@ -61,7 +92,13 @@ public class DataApi extends AbstractApi {
 
     @GET
     @Path("{stream}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "Return the last record saved for a stream",
+            notes = "",
+            response = RecordSet.class,
+            nickname = "getLastUpdate"
+    )
+    @ApiResponses(value = {})    
     public Response fetchLastUpdate(
             @PathParam("id") String objectId,
             @PathParam("stream") String streamName
@@ -85,7 +122,17 @@ public class DataApi extends AbstractApi {
 
     @DELETE
     @Path("{stream}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "Remove all the data stored for a stream",
+            notes = "",
+            nickname = "flushData"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                code = 204, 
+                message = "No Content"
+        )
+    })
     public Response delete(
             @PathParam("id") String objectId,
             @PathParam("stream") String streamName
@@ -105,7 +152,17 @@ public class DataApi extends AbstractApi {
 
     @PUT
     @Path("{stream}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "Store a data record",
+            notes = "",
+            nickname = "pushData"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                code = 202, 
+                message = "Accepted"
+        )
+    })
     public Response save(
             @PathParam("id") String objectId,
             @PathParam("stream") String streamName,
@@ -128,7 +185,13 @@ public class DataApi extends AbstractApi {
 
     @POST
     @Path("{stream}/search")
-    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "Search for records",
+            notes = "",
+            nickname = "searchData",
+            response = RecordSet.class
+    )
+    @ApiResponses(value = {})
     public Response search(
             @PathParam("id") String objectId,
             @PathParam("stream") String streamName,
@@ -136,7 +199,6 @@ public class DataApi extends AbstractApi {
             @QueryParam("offset") Integer offset,
             DataQuery query
     ) {
-
 
         Stream stream = streamManager.load(objectId, streamName);
         ServiceObject obj = stream.getServiceObject();
@@ -156,14 +218,19 @@ public class DataApi extends AbstractApi {
 
     @GET
     @Path("{stream}/list")
-    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            value = "Return all the records sorted from the more recent",
+            notes = "The maximum amount of data that can be returned per request is 1000 records. Use the pagination modifiers in the query (`offset` and `limit`) to control the data retrieval. Eg. `?limit=5000&offset=1000`",
+            nickname = "fetchData",
+            response = RecordSet.class
+    )
+    @ApiResponses(value = {})
     public Response fetch(
             @PathParam("id") String objectId,
             @PathParam("stream") String streamName,
             @QueryParam("limit") Integer limit,
             @QueryParam("offset") Integer offset
     ) {
-
         
         Stream stream = streamManager.load(objectId, streamName);
         ServiceObject obj = stream.getServiceObject();
