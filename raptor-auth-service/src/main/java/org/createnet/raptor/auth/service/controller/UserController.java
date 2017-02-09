@@ -15,6 +15,10 @@
  */
 package org.createnet.raptor.auth.service.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.services.UserService;
@@ -35,80 +39,144 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
+@Api(tags = {"User"})
+@ApiResponses(value = {
+    @ApiResponse(
+            code = 200,
+            message = "Ok"
+    )
+    ,
+    @ApiResponse(
+            code = 401,
+            message = "Not authorized"
+    )
+    ,
+    @ApiResponse(
+            code = 403,
+            message = "Forbidden"
+    )
+    ,
+    @ApiResponse(
+            code = 500,
+            message = "Internal error"
+    )
+})
 public class UserController {
 
-  @Autowired
-  private UserService userService;
+    @Autowired
+    private UserService userService;
 
-  @RequestMapping(value = "/user", method = RequestMethod.GET)
-  public Iterable<User> getUsers() {
-    return userService.list();
-  }
-
-
-  @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
-  @RequestMapping(value = {"/user"}, method = RequestMethod.POST)
-  public ResponseEntity<User> create(
-          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
-          @RequestBody User rawUser
-  ) {
-
-    boolean exists = userService.exists(rawUser);
-
-    if (exists) {
-      return ResponseEntity.status(403).body(null);
+    @RequestMapping(value = "/user", method = RequestMethod.GET)
+    @ApiOperation(
+            value = "List available user",
+            notes = "",
+            response = User.class,
+            responseContainer = "Iterable",
+            nickname = "getUsers"
+    )
+    public Iterable<User> getUsers() {
+        return userService.list();
     }
 
-    return ResponseEntity.ok(userService.create(rawUser));
-  }  
-  
-  @RequestMapping(value = {"/me"}, method = RequestMethod.GET)
-  public User me(
-          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails user
-  ) {
-    return (User) user;
-  }
+    @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
+    @RequestMapping(value = {"/user"}, method = RequestMethod.POST)
+    @ApiOperation(
+            value = "Create a new user",
+            notes = "",
+            response = User.class,
+            nickname = "createUser"
+    )
+    public ResponseEntity<User> create(
+            @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
+            @RequestBody User rawUser
+    ) {
 
-  @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
-  @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.GET)
-  public User readUser(
-          @PathVariable String uuid,
-          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser
-  ) {
-    return userService.getByUuid(uuid);
-  }
+        boolean exists = userService.exists(rawUser);
 
-  @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
-  @RequestMapping(value = {"/user"}, method = RequestMethod.PUT)
-  public User updateMe(
-          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
-          @RequestBody User rawUser
-  ) {
-    return userService.update(currentUser.getUuid(), rawUser);
-  }
+        if (exists) {
+            return ResponseEntity.status(403).body(null);
+        }
 
-  @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
-  @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.PUT)
-  public User update(
-          @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
-          @PathVariable String uuid,
-          @RequestBody User rawUser
-  ) {
-    return userService.update(uuid, rawUser);
-  }
-
-  @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
-  @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.DELETE)
-  public ResponseEntity<String> delete(@PathVariable String uuid) {
-
-    User user = userService.getByUuid(uuid);
-    if (user == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found");
+        return ResponseEntity.ok(userService.create(rawUser));
     }
 
-    userService.delete(user);
+    @RequestMapping(value = {"/me"}, method = RequestMethod.GET)
+    @ApiOperation(
+            value = "Get the current user profile",
+            notes = "",
+            response = User.class,
+            nickname = "getProfile"
+    )
+    public User getProfile(
+            @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails user
+    ) {
+        return (User) user;
+    }
 
-    return ResponseEntity.accepted().body(null);
-  }
+
+    @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
+    @RequestMapping(value = {"/me"}, method = RequestMethod.PUT)
+    @ApiOperation(
+            value = "Update an user profile",
+            notes = "",
+            response = User.class,
+            nickname = "updateProfile"
+    )
+    public User updateProfile(
+            @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
+            @RequestBody User rawUser
+    ) {
+        return userService.update(currentUser.getUuid(), rawUser);
+    }    
+    
+    @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
+    @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.GET)
+    @ApiOperation(
+            value = "Get an user profile",
+            notes = "",
+            response = User.class,
+            nickname = "getUser"
+    )
+    public User getUser(
+            @PathVariable String uuid,
+            @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser
+    ) {
+        return userService.getByUuid(uuid);
+    }
+
+    @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
+    @RequestMapping(value = {"/user"}, method = RequestMethod.PUT)
+    @ApiOperation(
+            value = "Update current user profile",
+            notes = "",
+            response = User.class,
+            nickname = "updateUser"
+    )
+    public User updateUser(
+            @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
+            @RequestBody User rawUser
+    ) {
+        return userService.update(currentUser.getUuid(), rawUser);
+    }
+
+    @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
+    @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.DELETE)
+    @ApiOperation(
+            value = "Delete an user profile",
+            notes = "",
+            code = 202,
+            nickname = "deleteUser"
+    )
+    public ResponseEntity<String> delete(@PathVariable String uuid) {
+
+        User user = userService.getByUuid(uuid);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found");
+        }
+
+        userService.delete(user);
+
+        return ResponseEntity.accepted().body(null);
+    }
 
 }
