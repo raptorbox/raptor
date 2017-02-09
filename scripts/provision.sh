@@ -28,7 +28,7 @@ git clone https://github.com/raptorbox/raptor
 
 cd raptor
 sudo ./scripts/docker-build.sh 2>&1 > /dev/null
-sudo docker-compose -f docker-compose.test.yml up -d 
+sudo docker-compose -f docker-compose.test.yml up -d
 
 echo -e "\n\n----------Install completed in" $`pwd` "\n"
 
