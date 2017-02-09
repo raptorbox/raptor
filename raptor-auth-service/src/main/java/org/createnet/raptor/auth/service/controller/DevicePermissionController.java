@@ -15,6 +15,10 @@
  */
 package org.createnet.raptor.auth.service.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
@@ -45,6 +49,28 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @PreAuthorize("isAuthenticated()")
+@Api(tags = {"User", "Permission"})
+@ApiResponses(value = {
+    @ApiResponse(
+            code = 200,
+            message = "Ok"
+    )
+    ,
+    @ApiResponse(
+            code = 401,
+            message = "Not authorized"
+    )
+    ,
+    @ApiResponse(
+            code = 403,
+            message = "Forbidden"
+    )
+    ,
+    @ApiResponse(
+            code = 500,
+            message = "Internal error"
+    )
+})
 public class DevicePermissionController {
 
     static public class PermissionRequest {
@@ -77,6 +103,13 @@ public class DevicePermissionController {
     private AclDeviceService aclDeviceService;
 
     @RequestMapping(value = "/{deviceUuid}/permission/{userUuid}", method = RequestMethod.GET)
+    @ApiOperation(
+            value = "List user permissions on a device",
+            notes = "",
+            response = String.class,
+            responseContainer = "List",
+            nickname = "getUserPermissions"
+    )
     public ResponseEntity<?> listPermissions(
             @PathVariable("deviceUuid") String deviceUuid,
             @PathVariable("userUuid") String userUuid
@@ -97,6 +130,13 @@ public class DevicePermissionController {
     }
 
     @RequestMapping(value = "/{deviceUuid}/permission", method = RequestMethod.GET)
+    @ApiOperation(
+            value = "List current user permissions on a device",
+            notes = "",
+            response = String.class,
+            responseContainer = "List",
+            nickname = "getPermissions"
+    )
     public ResponseEntity<?> listOwnPermissions(
             @PathVariable("deviceUuid") String deviceUuid,
             @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser
@@ -117,6 +157,13 @@ public class DevicePermissionController {
     }
 
     @RequestMapping(value = "/{deviceUuid}/permission", method = RequestMethod.PUT)
+    @ApiOperation(
+            value = "Save user permissions on a device",
+            notes = "",
+            response = String.class,
+            responseContainer = "List",
+            nickname = "setPermissions"
+    )
     public ResponseEntity<?> setPermission(
             @RequestBody PermissionRequestBatch body,
             @PathVariable("deviceUuid") String deviceUuid

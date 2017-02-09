@@ -15,6 +15,10 @@
  */
 package org.createnet.raptor.auth.service.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.security.Principal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,6 +49,28 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @RestController
+@Api(tags = {"User", "Authentication"})
+@ApiResponses(value = {
+    @ApiResponse(
+            code = 200,
+            message = "Ok"
+    )
+    ,
+    @ApiResponse(
+            code = 401,
+            message = "Not authorized"
+    )
+    ,
+    @ApiResponse(
+            code = 403,
+            message = "Forbidden"
+    )
+    ,
+    @ApiResponse(
+            code = 500,
+            message = "Internal error"
+    )
+})
 public class AuthenticationController {
 
     final private static Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
@@ -81,6 +107,12 @@ public class AuthenticationController {
     private TokenService tokenService;
 
     @RequestMapping(value = "${jwt.route.authentication.path}", method = RequestMethod.POST)
+    @ApiOperation(
+            value = "Login an user with provided credentials",
+            notes = "",
+            response = JwtResponse.class,
+            nickname = "login"
+    )
     public ResponseEntity<?> login(@RequestBody JwtRequest authenticationRequest) throws AuthenticationException {
 
         try {
@@ -103,6 +135,11 @@ public class AuthenticationController {
 
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "${jwt.route.authentication.path}", method = RequestMethod.DELETE)
+    @ApiOperation(
+            value = "Logout an user invalidating login the token",
+            notes = "",
+            nickname = "logout"
+    )
     public ResponseEntity<?> logout(
             HttpServletRequest request,
             Principal principal
@@ -114,19 +151,25 @@ public class AuthenticationController {
         if (token == null) {
             return ResponseEntity.noContent().build();
         }
-        
+
         if (token.getType() != Token.Type.LOGIN) {
             return ResponseEntity.badRequest().body(null);
         }
-        
+
         tokenService.delete(token);
-        
+
         return ResponseEntity.ok(null);
 
     }
 
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "${jwt.route.authentication.refresh}", method = RequestMethod.GET)
+    @ApiOperation(
+            value = "Refresh a login token",
+            notes = "The authentication token, provided via `Authorization` header must still be valid.",
+            response = JwtResponse.class,
+            nickname = "refreshToken"
+    )    
     public ResponseEntity<?> refreshToken(
             HttpServletRequest request,
             Principal principal

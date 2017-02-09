@@ -15,6 +15,10 @@
  */
 package org.createnet.raptor.auth.service.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.util.stream.Collectors;
 import org.createnet.raptor.auth.entity.AuthorizationRequest;
 import org.createnet.raptor.auth.entity.AuthorizationResponse;
@@ -45,6 +49,28 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @PreAuthorize("isAuthenticated()")
+@Api(tags = {"User", "Permission"})
+@ApiResponses(value = {
+    @ApiResponse(
+            code = 200,
+            message = "Ok"
+    )
+    ,
+    @ApiResponse(
+            code = 401,
+            message = "Not authorized"
+    )
+    ,
+    @ApiResponse(
+            code = 403,
+            message = "Forbidden"
+    )
+    ,
+    @ApiResponse(
+            code = 500,
+            message = "Internal error"
+    )
+})
 public class DeviceController {
 
     private static final Logger logger = LoggerFactory.getLogger(DeviceController.class);
@@ -59,6 +85,12 @@ public class DeviceController {
     private AclDeviceService aclDeviceService;
 
     @RequestMapping(value = "/check", method = RequestMethod.POST)
+    @ApiOperation(
+            value = "Check user permission on a device",
+            notes = "",
+            response = AuthorizationResponse.class,
+            nickname = "checkPermission"
+    )
     public ResponseEntity<?> checkPermission(
             @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
             @RequestBody AuthorizationRequest body
@@ -118,14 +150,20 @@ public class DeviceController {
                 response.result = false;
                 break;
         }
-        
+
         logger.debug("Check request result: {}", response.result);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @RequestMapping(value = "/sync", method = RequestMethod.POST)
-    public ResponseEntity<?> syncObject(
+    @ApiOperation(
+            value = "Sync user permission on a device",
+            notes = "",
+            code = 202,
+            nickname = "syncPermission"
+    )    
+    public ResponseEntity<?> syncPermission(
             @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
             @RequestBody SyncRequest body
     ) {
