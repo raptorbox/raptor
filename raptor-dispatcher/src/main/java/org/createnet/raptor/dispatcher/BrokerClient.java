@@ -41,7 +41,7 @@ public class BrokerClient {
   private static MqttClient connection = null;
   private DispatcherConfiguration configuration;
     
-  private final String clientName = "raptor-dispatcher";
+  private final String clientName = "raptordispatcher";
   private final int connectionTimeout = 10;
   private final MemoryPersistence clientPersistence = new MemoryPersistence();
   
