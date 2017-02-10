@@ -21,10 +21,15 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.9.0/docker-c
 sudo chmod +x /usr/local/bin/docker-compose
 
 #Elasticsearch 5 fix
-sysctl -w vm.max_map_count=262144
+sudo sysctl -w vm.max_map_count=262144
+echo "vm.max_map_count=262144" | sudo tee /etc/sysctl.d/90-raptor.conf
 
 git clone https://github.com/raptorbox/raptor
 
 cd raptor
-sudo ./scripts/docker-setup.sh 2>&1 > /dev/null
-sudo docker-compose up
+sudo ./scripts/docker-build.sh #2>&1 > /dev/null
+sudo docker-compose -f docker-compose.test.yml up -d
+
+echo -e "\n\n----------Install completed in" $`pwd` "\n"
+
+exit 0

@@ -31,8 +31,10 @@ services:
 
   auth:
     image: raptorbox/auth
-    ports:
-      - 8090:8090
+#    ports:
+#      - 8090:8090
+    expose:
+      - 8090
     volumes:
       - ./config:/etc/raptor
     depends_on:
@@ -43,8 +45,10 @@ services:
   mariadb:
     image: mariadb:latest
     container_name: mariadb
-    ports:
-      - 3306:3306
+#    ports:
+#      - 3306:3306
+    expose:
+      - 3306
     volumes:
       - ./raptor-auth-service/src/main/resources/sql:/docker-entrypoint-initdb.d
       - ./data/mariadb:/var/lib/mysql
@@ -58,11 +62,16 @@ services:
     image: couchbase/server
     volumes:
       - ./data/couchbase:/opt/couchbase/var
-    ports:
-      - 8091:8091
-      - 8092:8092
-      - 8093:8093
-      - 11210:11210
+#    ports:
+#      - 8091:8091
+#      - 8092:8092
+#      - 8093:8093
+#      - 11210:11210
+    expose:
+      - 8091
+      - 8092
+      - 8093
+      - 11210
     networks:
       - raptor_net
 
@@ -71,16 +80,19 @@ services:
     command: elasticsearch -E cluster.name="raptor" -E path.data=/usr/share/elasticsearch/data -E transport.host=0.0.0.0
     volumes:
       - ./data/elasticsearch:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
-      - 9300:9300
+#    ports:
+#      - 9200:9200
+#      - 9300:9300
+    expose:
+      - 9200
+      - 9300
     networks:
       - raptor_net
 
   proxy:
     image: raptorbox/proxy
     ports:
-      - 80:80
+      - 9090:80
     depends_on:
       - api
       - auth
