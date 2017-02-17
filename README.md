@@ -22,7 +22,7 @@ To setup an Up&Running Raptorbox environment, please follow this [guide](https:/
 
 We are actively working to structure and expand the documentation!
 
-To have a start we have the [documentation site](http://raptorbox.github.io)
+You can have a look to the [documentation site](http://raptorbox.github.io)
 
 ### Querying the HTTP API
 
