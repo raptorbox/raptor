@@ -16,11 +16,6 @@ It is composed of an HTTP API and a MQTT broker (+AMQP and others) to create rea
 
 To setup an Up&Running Raptorbox environment, please follow this [guide](https://raptorbox.github.io/documentation/)  
 
-
-### Vagrant setup
-
-If you have vagrant installed on your PC just run `vagrant up` to get the services up and running for you
-
 ## Getting started
 
 ***Work in progress!***
