@@ -14,45 +14,12 @@ It is composed of an HTTP API and a MQTT broker (+AMQP and others) to create rea
 
 ## Setup
 
+to setup a Up&running environment please following this [guide](https://raptorbox.github.io/documentation/)  
+
+
 ### Vagrant setup
 
 If you have vagrant installed on your PC just run `vagrant up` to get the services up and running for you
-
-### Docker setup
-
-***Soon*** once a stable release is available, images will be provisioned to dockerhub
-
-### Build setup
-
-This section cover the required to build the solution and run it inside `docker`
-
-#### Prerequisites
-
-- Java SDK 8
-- Maven 3
-- Docker >= 1.12
-- Docker Compose >= 1.9
-
-#### Environment setup
-
-- Install Java SDK 8. for Ubuntu distro (16.10, 16.04, 15.10, 14.04 and 12.04). The installer provides Oracle Java 8 (which includes Java JDK, JRE and the Java browser plugin).
-- Install Maven `sudo apt-get install maven`
-- Install Docker by following the [official guide](https://docs.docker.com/engine/installation/)
-- Install Docker Compose by following the [official guide](https://docs.docker.com/compose/install/)
-
-A full provisioning script for Ubuntu 16.04 is available at `./scripts/provision.sh`
-
-***Additional settings***
-
-- ElasticSearch 5.0 requires to set a bigger max virtual memory areas. Set with `sysctl -w vm.max_map_count=262144`
-
-#### Build sources
-
-There is an handy script for that in the repository at `./scripts/docker-setup.sh`
-
-#### Start development build
-
-To start the services run  `docker-compose -f docker-compose.dev.yml up`
 
 ## Getting started
 
