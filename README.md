@@ -14,7 +14,7 @@ It is composed of an HTTP API and a MQTT broker (+AMQP and others) to create rea
 
 ## Setup
 
-to setup a Up&running environment please following this [guide](https://raptorbox.github.io/documentation/)  
+To setup an Up&Running Raptorbox environment, please following this [guide](https://raptorbox.github.io/documentation/)  
 
 
 ### Vagrant setup
