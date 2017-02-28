@@ -29,41 +29,17 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>raptor-http-api</artifactId>
       <version>${project.version}</version>
-      
-      <exclusions>
-        <exclusion> 
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-simple</artifactId>
-        </exclusion>
-      </exclusions>
-      
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>raptor-broker</artifactId>
       <version>${project.version}</version>
-      
-      <exclusions>
-        <exclusion> 
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-simple</artifactId>
-        </exclusion>
-      </exclusions>      
-      
-    </dependency>
+     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>raptor-config</artifactId>
       <version>${project.version}</version>
-      
-      <exclusions>
-        <exclusion> 
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-simple</artifactId>
-        </exclusion>
-      </exclusions>
-      
     </dependency>
 
     <dependency>

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.createnet.raptor.auth.service.acl.RaptorPermission;
 import org.createnet.raptor.auth.service.acl.UserSid;
-import org.createnet.raptor.models.auth.Device;
+import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 
 import org.slf4j.Logger;
@@ -38,52 +38,48 @@ import org.springframework.stereotype.Service;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-public class AclDeviceService {
+public class AclTokenService {
 
-    private final Logger logger = LoggerFactory.getLogger(AclDeviceService.class);
+    private final Logger logger = LoggerFactory.getLogger(AclTokenService.class);
 
     @Autowired
     private AclManagerService aclManagerService;
 
     protected Permission[] defaultPermissions = new Permission[] {
-        RaptorPermission.READ,
-        RaptorPermission.WRITE,
+        RaptorPermission.ADMINISTRATION,
     };
 
-    public void add(Device device, User user, Permission permission) {
-        aclManagerService.addPermission(Device.class, device.getId(), new UserSid(user), permission);
+    public void add(Token token, User user, Permission permission) {
+        aclManagerService.addPermission(Token.class, token.getId(), new UserSid(user), permission);
     }
 
-    public void add(Device device, User user, List<Permission> permissions) {
-        aclManagerService.addPermissions(Device.class, device.getId(), new UserSid(user), permissions);
+    public void add(Token token, User user, List<Permission> permissions) {
+        aclManagerService.addPermissions(Token.class, token.getId(), new UserSid(user), permissions);
     }
 
-    public void set(Device device, User user, List<Permission> permissions) {
+    public void set(Token token, User user, List<Permission> permissions) {
         Long pid = null; 
-        if(device.hasParent()) {
-            pid = device.getParent().getId();
-        }
-        aclManagerService.setPermissions(Device.class, device.getId(), new UserSid(user), permissions, pid);
+        aclManagerService.setPermissions(Token.class, token.getId(), new UserSid(user), permissions, pid);
     }
 
-    public List<Permission> list(Device device, User user) {
-        ObjectIdentity oiDevice = new ObjectIdentityImpl(Device.class, device.getId());
-        return aclManagerService.getPermissionList(user, oiDevice);
+    public List<Permission> list(Token token, User user) {
+        ObjectIdentity oitoken = new ObjectIdentityImpl(token.getClass(), token.getId());
+        return aclManagerService.getPermissionList(user, oitoken);
     }
 
-    public void remove(Device device, User user, Permission permission) {
-        aclManagerService.removePermission(Device.class, device.getId(), new UserSid(user), permission);
+    public void remove(Token token, User user, Permission permission) {
+        aclManagerService.removePermission(Token.class, token.getId(), new UserSid(user), permission);
     }
 
-    public boolean isGranted(Device device, User user, Permission permission) {
-        return aclManagerService.isPermissionGranted(Device.class, device.getId(), new UserSid(user), permission);
+    public boolean isGranted(Token token, User user, Permission permission) {
+        return aclManagerService.isPermissionGranted(Token.class, token.getId(), new UserSid(user), permission);
     }
 
     @Retryable(maxAttempts = 3, value = AclManagerService.AclManagerException.class, backoff = @Backoff(delay = 500, multiplier = 3))
-    public void register(Device device) {
+    public void register(Token token) {
 
-        User owner = device.getOwner();
-        List<Permission> permissions = list(device, owner);
+        User owner = token.getUser();
+        List<Permission> permissions = list(token, owner);
         Sid sid = new UserSid(owner);
 
         logger.debug("Found {} permissions for {}", permissions.size(), owner.getUuid());
@@ -93,34 +89,32 @@ public class AclDeviceService {
             logger.debug("Set default permission");
             List<Permission> newPerms =  Arrays.stream(defaultPermissions).collect(Collectors.toList());
             
-            if (owner.getId().equals(device.getOwner().getId())) {
+            if (owner.getId().equals(token.getUser().getId())) {
                 newPerms.add(RaptorPermission.ADMINISTRATION);
             }
             
             try {
-                aclManagerService.addPermissions(Device.class, device.getId(), sid, newPerms, device.getParentId());
+                aclManagerService.addPermissions(Token.class, token.getId(), sid, newPerms);
             }
             catch(AclManagerService.AclManagerException ex) {
-                logger.warn("Failed to store default permission for {} ({}): {}", device.getId(), sid ,ex.getMessage());
+                logger.warn("Failed to store default permission for {} ({}): {}", token.getId(), sid ,ex.getMessage());
                 throw ex;
             }
 
             permissions.addAll(newPerms);
-        } else {
-            aclManagerService.setParent(device.getClass(), device.getId(), device.getParentId());
         }
 
         String perms = String.join(", ", RaptorPermission.toLabel(permissions));
-        logger.debug("Permission set for device {} to {} - {}", device.getUuid(), device.getOwner().getUuid(), perms);
+        logger.debug("Permission set for device {} to {} - {}", token.getName(), token.getUser().getUuid(), perms);
 
     }
 
-    public boolean check(Device device, User user, Permission permission) {
+    public boolean check(Token token, User user, Permission permission) {
 
         if (user == null) {
             return false;
         }
-        if (device == null && permission != RaptorPermission.LIST) {
+        if (token == null && permission != RaptorPermission.LIST) {
             return false;
         }
         if (permission == null) {
@@ -136,18 +130,13 @@ public class AclDeviceService {
         }
 
         // check if user has ADMINISTRATION permission on device 
-        if (isGranted(device, user, RaptorPermission.ADMINISTRATION)) {
+        if (isGranted(token, user, RaptorPermission.ADMINISTRATION)) {
             return true;
         }
 
         // check device specific permission first
-        if (isGranted(device, user, permission)) {
+        if (isGranted(token, user, permission)) {
             return true;
-        }
-
-        // check parent permission if available
-        if (device != null && device.hasParent()) {
-            return check(device.getParent(), user, permission);
         }
 
         return false;

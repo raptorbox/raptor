@@ -1,53 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     
-  <parent>
-    <groupId>org.createnet</groupId>
-    <artifactId>raptor</artifactId>
-    <version>1.0</version>
-  </parent> 
+    <parent>
+        <groupId>org.createnet</groupId>
+        <artifactId>raptor</artifactId>
+        <version>1.0</version>
+    </parent> 
   
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.createnet</groupId>
-  <artifactId>raptor-dispatcher</artifactId>
-  <packaging>jar</packaging>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.createnet</groupId>
+    <artifactId>raptor-dispatcher</artifactId>
+    <packaging>jar</packaging>
     
-  <dependencies>
+    <dependencies>
     
-    <dependency>
-      <groupId>org.eclipse.paho</groupId>
-      <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-      <version>${paho}</version>
-    </dependency>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>${paho}</version>
+        </dependency>
     
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${slf4j}</version>
-    </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j}</version>
+        </dependency>
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-      <version>${junit}</version>
-    </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+            <version>${junit}</version>
+        </dependency>
     
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>${slf4j}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>raptor-models</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>raptor-config</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-  </dependencies>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback}</version>
+        </dependency> 
+        
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>raptor-models</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>raptor-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
   
 </project>

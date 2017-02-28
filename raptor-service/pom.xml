@@ -42,11 +42,12 @@
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j}</version>
         </dependency>
+        
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j}</version>
-        </dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback}</version>
+        </dependency> 
         
         <dependency>
             <groupId>${project.groupId}</groupId>

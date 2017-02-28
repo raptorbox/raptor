@@ -93,6 +93,10 @@
 
   </appender>
 
+  <logger name="io.swagger.jackson" level="warn" />
+  <logger name="io.swagger.converter" level="warn" />
+  <logger name="io.swagger.jaxrs" level="warn" />
+
   <!-- Send logs to both console and file audit -->
   <logger name="org.createnet.raptor" level="DEBUG" additivity="true">
     <appender-ref ref="FILE-AUDIT" />
