@@ -41,7 +41,7 @@ public class BrokerClient {
   private static MqttClient connection = null;
   private DispatcherConfiguration configuration;
     
-  private final String clientName = "raptordispatcher";
+  private final String clientName = "raptor";
   private final int connectionTimeout = 10;
   private final MemoryPersistence clientPersistence = new MemoryPersistence();
   
@@ -69,7 +69,7 @@ public class BrokerClient {
       
       logger.debug("Connecting to broker {}", uri);
       
-      connection = new MqttClient(uri, clientName, clientPersistence);
+      connection = new MqttClient(uri, clientName + System.currentTimeMillis(), clientPersistence);
       
       MqttConnectOptions connOpts = new MqttConnectOptions();
       
