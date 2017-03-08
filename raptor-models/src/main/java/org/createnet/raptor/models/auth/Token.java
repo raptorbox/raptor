@@ -45,151 +45,155 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Table(name = "tokens")
 public class Token implements Serializable {
 
-  public static enum Type {
-    LOGIN, DEFAULT
-  }
-  
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
+    public static enum Type {
+        LOGIN, DEFAULT
+    }
 
-  @NotNull
-  @Size(min=1)
-  private String name;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
-  @NotNull
-  @Size(min=1)
-  @Column(unique = true, nullable = false)
-  private String token;
-  
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-  @Column(unique = false, nullable = true)
-  @NotEmpty
-  private String secret;
-  
-  @Column(unique = false, nullable = false)
-  private boolean enabled = false;
+    @NotNull
+    @Size(min = 1)
+    private String name;
 
-  @JsonIgnore
-  @ManyToOne(fetch = FetchType.EAGER)
-  private User user;
+    @NotNull
+    @Size(min = 1)
+    @Column(unique = true, nullable = false)
+    private String token;
 
-  @JsonIgnore
-  @ManyToOne(fetch = FetchType.EAGER)
-  private Device device;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(unique = false, nullable = true)
+    @NotEmpty
+    private String secret;
 
-  @Column(name = "created")
-  @Temporal(TemporalType.TIMESTAMP)
-  @NotNull  
-  private Date created = new Date();
-  
-  @Column(name = "expires")
-  private Long expires = null;
-  
-  @Enumerated(EnumType.STRING)
-  @Column(name = "type")
-  private Type type = Type.DEFAULT;
-  
-  public Long getId() {
-    return id;
-  }
+    @Column(unique = false, nullable = false)
+    private boolean enabled = false;
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER)
+    private User user;
 
-  public String getName() {
-    return name;
-  }
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Device device;
 
-  public void setName(String name) {
-    this.name = name;
-  }
+    @Column(name = "created")
+    @Temporal(TemporalType.TIMESTAMP)
+    @NotNull
+    private Date created = new Date();
 
-  public String getToken() {
-    return token;
-  }
+    @Column(name = "expires")
+    private Long expires = null;
 
-  public void setToken(String token) {
-    this.token = token;
-  }
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    private Type type = Type.DEFAULT;
 
-  public User getUser() {
-    return user;
-  }
+    public Long getId() {
+        return id;
+    }
 
-  public void setUser(User user) {
-    this.user = user;
-  }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-  public Boolean getEnabled() {
-    return enabled;
-  }
+    public String getName() {
+        return name;
+    }
 
-  public Date getCreated() {
-    return created;
-  }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-  public String getSecret() {
-    return secret;
-  }
+    public String getToken() {
+        return token;
+    }
 
-  public void setSecret(String secret) {
-    this.secret = secret;
-  }
+    public void setToken(String token) {
+        this.token = token;
+    }
 
-  public Instant getExpiresInstant() {
-    if(expires == null)
-      return null;
-    return Instant.now().plusSeconds(expires);
-  }
-  
-  public Long getExpires() {
-    return expires;
-  }
+    public User getUser() {
+        return user;
+    }
 
-  public void setExpires(Long expires) {
-    this.expires = expires;
-  }
-  
-  public boolean isExpired() {
-    return getExpiresInstant() != null && getExpiresInstant().isBefore(Instant.now());
-  }
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-  public boolean isEnabled() {
-    return enabled;
-  }
-  
-  public boolean isValid() {
-    return isEnabled() && !isExpired() && (getUser() != null && getUser().isEnabled());
-  }
+    public Boolean getEnabled() {
+        return enabled;
+    }
 
-  public void setEnabled(Boolean enabled) {
-    this.enabled = enabled;
-  }
+    public Date getCreated() {
+        return created;
+    }
 
-  public void setCreated(Date created) {
-    this.created = created;
-  }
+    public String getSecret() {
+        return secret;
+    }
 
-  public Type getType() {
-    return type;
-  }
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
 
-  public void setType(Type type) {
-    this.type = type;
-  }
-  
-  public boolean isLoginToken() {
-    return this.getType().equals(Type.LOGIN);
-  }
+    public Instant getExpiresInstant() {
+        if (expires == null) {
+            return null;
+        }
+        return Instant.now().plusSeconds(expires);
+    }
 
-  public Device getDevice() {
-    return device;
-  }
+    public Long getExpires() {
+        return expires;
+    }
 
-  public void setDevice(Device device) {
-    this.device = device;
-  }
+    public void setExpires(Long expires) {
+        if (expires == 0) {
+            expires = 622080000L; //20 years, should be enough for our retirement
+        }
+        this.expires = expires;
+    }
+
+    public boolean isExpired() {
+        return getExpiresInstant() != null && getExpiresInstant().isBefore(Instant.now());
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public boolean isValid() {
+        return isEnabled() && !isExpired() && (getUser() != null && getUser().isEnabled());
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public boolean isLoginToken() {
+        return this.getType().equals(Type.LOGIN);
+    }
+
+    public Device getDevice() {
+        return device;
+    }
+
+    public void setDevice(Device device) {
+        this.device = device;
+    }
 
 }
