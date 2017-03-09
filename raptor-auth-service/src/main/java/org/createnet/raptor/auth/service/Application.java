@@ -142,7 +142,8 @@ public class Application {
 
         User defaultUser = userRepository.findByUsername(defaultUserUsername);
         if (defaultUser != null) {
-            userRepository.delete(defaultUser.getId());
+            //userRepository.delete(defaultUser.getId());
+            return;
         }
 
         User adminUser = new User();
@@ -161,19 +162,19 @@ public class Application {
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
 
-        DispatcherConfiguration config = (DispatcherConfiguration)ConfigurationLoader.getConfiguration("dispatcher", DispatcherConfiguration.class);
+        DispatcherConfiguration config = (DispatcherConfiguration) ConfigurationLoader.getConfiguration("dispatcher", DispatcherConfiguration.class);
 
-        DefaultMqttPahoClientFactory f = new DefaultMqttPahoClientFactory();        
-        
+        DefaultMqttPahoClientFactory f = new DefaultMqttPahoClientFactory();
+
         f.setUserName(config.username);
         f.setPassword(config.password);
         f.setServerURIs(config.uri);
         f.setCleanSession(true);
         f.setPersistence(new MemoryPersistence());
-        
+
         return f;
-    }    
-    
+    }
+
     // Add inbound MQTT support
     @Bean
     public MessageChannel mqttInputChannel() {
@@ -195,7 +196,7 @@ public class Application {
     @Bean
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public MessageHandler handler() {
-        return (Message<?> message) -> {            
+        return (Message<?> message) -> {
             messageHandler.handle(message);
         };
     }
@@ -220,8 +221,6 @@ public class Application {
 //    public interface MyGateway {
 //        void sendToMqtt(String data);
 //    }
-
-    
 //  @Configuration
 //  @EnableResourceServer
 //  protected static class ResourceServer extends ResourceServerConfigurerAdapter {
