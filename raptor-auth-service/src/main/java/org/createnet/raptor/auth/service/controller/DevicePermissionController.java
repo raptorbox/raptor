@@ -102,7 +102,7 @@ public class DevicePermissionController {
     @Autowired
     private AclDeviceService aclDeviceService;
 
-    @RequestMapping(value = "/{deviceUuid}/permission/{userUuid}", method = RequestMethod.GET)
+    @RequestMapping(value = "/permission/{deviceUuid}/{userUuid}", method = RequestMethod.GET)
     @ApiOperation(
             value = "List user permissions on a device",
             notes = "",
@@ -129,7 +129,7 @@ public class DevicePermissionController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
     }
 
-    @RequestMapping(value = "/{deviceUuid}/permission", method = RequestMethod.GET)
+    @RequestMapping(value = "/permission/{deviceUuid}", method = RequestMethod.GET)
     @ApiOperation(
             value = "List current user permissions on a device",
             notes = "",
@@ -156,7 +156,7 @@ public class DevicePermissionController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
     }
 
-    @RequestMapping(value = "/{deviceUuid}/permission", method = RequestMethod.PUT)
+    @RequestMapping(value = "/permission/{deviceUuid}", method = RequestMethod.PUT)
     @ApiOperation(
             value = "Save user permissions on a device",
             notes = "",
