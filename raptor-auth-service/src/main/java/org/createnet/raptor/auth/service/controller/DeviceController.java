@@ -25,11 +25,15 @@ import org.createnet.raptor.auth.entity.AuthorizationResponse;
 import org.createnet.raptor.auth.entity.SyncRequest;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.auth.service.acl.RaptorPermission;
+import org.createnet.raptor.auth.service.objects.JsonErrorResponse;
 import org.createnet.raptor.models.auth.Device;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.services.AclDeviceService;
+import org.createnet.raptor.auth.service.services.AclTokenService;
 import org.createnet.raptor.auth.service.services.DeviceService;
+import org.createnet.raptor.auth.service.services.TokenService;
 import org.createnet.raptor.auth.service.services.UserService;
+import org.createnet.raptor.models.auth.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +43,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.acls.model.Permission;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -82,7 +87,13 @@ public class DeviceController {
     private UserService userService;
 
     @Autowired
+    private TokenService tokenService;
+    
+    @Autowired
     private AclDeviceService aclDeviceService;
+    
+    @Autowired
+    private AclTokenService aclTokenService;
 
     @RequestMapping(value = "/check", method = RequestMethod.POST)
     @ApiOperation(
@@ -93,7 +104,8 @@ public class DeviceController {
     )
     public ResponseEntity<?> checkPermission(
             @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
-            @RequestBody AuthorizationRequest body
+            @RequestBody AuthorizationRequest body,
+            @RequestHeader("Authorization") String rawToken
     ) {
 
         AuthorizationResponse response = new AuthorizationResponse();
@@ -121,7 +133,7 @@ public class DeviceController {
                 Permission permission = RaptorPermission.fromLabel(body.permission);
                 if (permission == null) {
                     logger.warn("Permission not found for user {} `{}` on object {}", user.getUuid(), body.permission, body.objectId);
-                    return ResponseEntity.notFound().build();
+                    return JsonErrorResponse.entity(HttpStatus.NOT_FOUND);
                 }
 
                 /**
@@ -137,11 +149,18 @@ public class DeviceController {
                     if (permission != RaptorPermission.LIST) {
                         device = deviceService.getByUuid(body.objectId);
                         if (device == null) {
-                            return ResponseEntity.notFound().build();
+                            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND);
                         }
                     }
 
                     response.result = aclDeviceService.check(device, user, permission);
+                    
+                    if (response.result) {
+                        // check token level ACL
+                        Token token = tokenService.read(rawToken);
+                        aclTokenService.check(token, user, permission);
+                    }
+
                 }
 
                 break;

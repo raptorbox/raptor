@@ -15,6 +15,9 @@
  */
 package org.createnet.raptor.auth.service.objects;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
 /**
  *
  * @author Luca Capra <luca.capra@create-net.org>
@@ -27,6 +30,16 @@ public class JsonErrorResponse {
     public JsonErrorResponse(int code, String message) {
         this.code = code;
         this.message = message;
+    }
+    
+    public static ResponseEntity<?> entity(HttpStatus code) {
+        return entity(code, null);
+    }
+    public static ResponseEntity<?> entity(HttpStatus code, String message) {
+        if(message == null || message.isEmpty()) {
+            message = code.getReasonPhrase();
+        }
+        return ResponseEntity.status(code).body(new JsonErrorResponse(code.value(), message));
     }
     
 }

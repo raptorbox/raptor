@@ -23,14 +23,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.auth.service.acl.RaptorPermission;
-import org.createnet.raptor.models.auth.Device;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.exception.PermissionNotFoundException;
 import org.createnet.raptor.auth.service.objects.JsonErrorResponse;
 import org.createnet.raptor.auth.service.objects.PermissionRequestBatch;
-import org.createnet.raptor.auth.service.services.AclDeviceService;
-import org.createnet.raptor.auth.service.services.DeviceService;
+import org.createnet.raptor.auth.service.services.AclTokenService;
+import org.createnet.raptor.auth.service.services.TokenService;
 import org.createnet.raptor.auth.service.services.UserService;
+import org.createnet.raptor.models.auth.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,35 +73,35 @@ import org.springframework.web.bind.annotation.RestController;
             message = "Internal error"
     )
 })
-public class DevicePermissionController {
+public class TokenPermissionController {
 
-    private static final Logger logger = LoggerFactory.getLogger(DevicePermissionController.class);
+    private static final Logger logger = LoggerFactory.getLogger(TokenPermissionController.class);
 
     @Autowired
-    private DeviceService deviceService;
+    private TokenService tokenService;
 
     @Autowired
     private UserService userService;
 
     @Autowired
-    private AclDeviceService aclDeviceService;
+    private AclTokenService aclTokenService;
 
-    @RequestMapping(value = "/permission/device/{deviceUuid}/{userUuid}", method = RequestMethod.GET)
+    @RequestMapping(value = "/permission/token/{tokenId}/{userUuid}", method = RequestMethod.GET)
     @ApiOperation(
-            value = "List user permissions on a device",
+            value = "List user permissions on a token",
             notes = "",
             response = String.class,
             responseContainer = "List",
             nickname = "getUserPermissions"
     )
     public ResponseEntity<?> listPermissions(
-            @PathVariable("deviceUuid") String deviceUuid,
+            @PathVariable("tokenId") Long tokenId,
             @PathVariable("userUuid") String userUuid
     ) {
 
-        Device device = deviceService.getByUuid(deviceUuid);
-        if (device == null) {
-            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Device not found");
+        Token token = tokenService.read(tokenId);
+        if (token == null) {
+            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Token not found");
         }
 
         User user = userService.getByUuid(userUuid);
@@ -109,26 +109,26 @@ public class DevicePermissionController {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "User not found");
         }
 
-        List<String> permissions = RaptorPermission.toLabel(aclDeviceService.list(device, user));
+        List<String> permissions = RaptorPermission.toLabel(aclTokenService.list(token, user));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
     }
 
-    @RequestMapping(value = "/permission/device/{deviceUuid}", method = RequestMethod.GET)
+    @RequestMapping(value = "/permission/token/{tokenId}", method = RequestMethod.GET)
     @ApiOperation(
-            value = "List current user permissions on a device",
+            value = "List current user permissions on a token",
             notes = "",
             response = String.class,
             responseContainer = "List",
             nickname = "getPermissions"
     )
     public ResponseEntity<?> listOwnPermissions(
-            @PathVariable("deviceUuid") String deviceUuid,
+            @PathVariable("tokenId") Long tokenId,
             @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser
     ) {
 
-        Device device = deviceService.getByUuid(deviceUuid);
-        if (device == null) {
-            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Device not found");
+        Token token = tokenService.read(tokenId);
+        if (token == null) {
+            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Token not found");
         }
 
         User user = userService.getByUuid(currentUser.getUuid());
@@ -136,13 +136,13 @@ public class DevicePermissionController {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "User not found");
         }
 
-        List<String> permissions = RaptorPermission.toLabel(aclDeviceService.list(device, user));
+        List<String> permissions = RaptorPermission.toLabel(aclTokenService.list(token, user));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
     }
 
-    @RequestMapping(value = "/permission/device/{deviceUuid}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/permission/token/{tokenId}", method = RequestMethod.PUT)
     @ApiOperation(
-            value = "Save user permissions on a device",
+            value = "Save user permissions on a token",
             notes = "",
             response = String.class,
             responseContainer = "List",
@@ -150,16 +150,16 @@ public class DevicePermissionController {
     )
     public ResponseEntity<?> setPermission(
             @RequestBody PermissionRequestBatch body,
-            @PathVariable("deviceUuid") String deviceUuid
+            @PathVariable("tokenId") Long tokenId
     ) {
-
-        Device device = deviceService.getByUuid(deviceUuid);
-        if (device == null) {
-            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Device not found");
+        
+        Token token = tokenService.read(tokenId);
+        if (token == null) {
+            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Token not found");
         }
 
         User user = userService.getByUuid(body.user);
-        if (user == null) {
+        if (user == null) {            
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "User not found");
         }
 
@@ -175,8 +175,8 @@ public class DevicePermissionController {
                 .distinct()
                 .collect(Collectors.toList());
 
-        aclDeviceService.set(device, user, permissions);
-        List<String> settedPermissions = RaptorPermission.toLabel(aclDeviceService.list(device, user));
+        aclTokenService.set(token, user, permissions);
+        List<String> settedPermissions = RaptorPermission.toLabel(aclTokenService.list(token, user));
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(settedPermissions);
     }

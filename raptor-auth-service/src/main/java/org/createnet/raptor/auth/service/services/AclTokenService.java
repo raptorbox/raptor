@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-public class AclTokenService {
+public class AclTokenService implements AclServiceInterface<Token> {
 
     private final Logger logger = LoggerFactory.getLogger(AclTokenService.class);
 
@@ -53,29 +53,35 @@ public class AclTokenService {
         aclManagerService.addPermission(Token.class, token.getId(), new UserSid(user), permission);
     }
 
+    @Override
     public void add(Token token, User user, List<Permission> permissions) {
         aclManagerService.addPermissions(Token.class, token.getId(), new UserSid(user), permissions);
     }
 
+    @Override
     public void set(Token token, User user, List<Permission> permissions) {
-        Long pid = null; 
+        Long pid = null;
         aclManagerService.setPermissions(Token.class, token.getId(), new UserSid(user), permissions, pid);
     }
 
+    @Override
     public List<Permission> list(Token token, User user) {
         ObjectIdentity oitoken = new ObjectIdentityImpl(token.getClass(), token.getId());
         return aclManagerService.getPermissionList(user, oitoken);
     }
 
+    @Override
     public void remove(Token token, User user, Permission permission) {
         aclManagerService.removePermission(Token.class, token.getId(), new UserSid(user), permission);
     }
 
+    @Override
     public boolean isGranted(Token token, User user, Permission permission) {
         return aclManagerService.isPermissionGranted(Token.class, token.getId(), new UserSid(user), permission);
     }
 
     @Retryable(maxAttempts = 3, value = AclManagerService.AclManagerException.class, backoff = @Backoff(delay = 500, multiplier = 3))
+    @Override
     public void register(Token token) {
 
         User owner = token.getUser();
@@ -83,21 +89,20 @@ public class AclTokenService {
         Sid sid = new UserSid(owner);
 
         logger.debug("Found {} permissions for {}", permissions.size(), owner.getUuid());
-        
+
         if (permissions.isEmpty()) {
-            
+
             logger.debug("Set default permission");
-            List<Permission> newPerms =  Arrays.stream(defaultPermissions).collect(Collectors.toList());
-            
+            List<Permission> newPerms = Arrays.stream(defaultPermissions).collect(Collectors.toList());
+
             if (owner.getId().equals(token.getUser().getId())) {
                 newPerms.add(RaptorPermission.ADMINISTRATION);
             }
-            
+
             try {
                 aclManagerService.addPermissions(Token.class, token.getId(), sid, newPerms);
-            }
-            catch(AclManagerService.AclManagerException ex) {
-                logger.warn("Failed to store default permission for {} ({}): {}", token.getId(), sid ,ex.getMessage());
+            } catch (AclManagerService.AclManagerException ex) {
+                logger.warn("Failed to store default permission for {} ({}): {}", token.getId(), sid, ex.getMessage());
                 throw ex;
             }
 
@@ -109,12 +114,13 @@ public class AclTokenService {
 
     }
 
+    @Override
     public boolean check(Token token, User user, Permission permission) {
 
         if (user == null) {
             return false;
         }
-        if (token == null && permission != RaptorPermission.LIST) {
+        if (token == null) {
             return false;
         }
         if (permission == null) {
@@ -135,11 +141,7 @@ public class AclTokenService {
         }
 
         // check device specific permission first
-        if (isGranted(token, user, permission)) {
-            return true;
-        }
-
-        return false;
+        return isGranted(token, user, permission);
     }
 
 }

@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.createnet.raptor.auth.service.acl.RaptorPermission;
 import org.createnet.raptor.auth.service.acl.UserSid;
 import org.createnet.raptor.models.auth.Device;
+import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 
 import org.slf4j.Logger;
@@ -38,48 +39,53 @@ import org.springframework.stereotype.Service;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-public class AclDeviceService {
+public class AclDeviceService implements AclServiceInterface<Device> {
 
     private final Logger logger = LoggerFactory.getLogger(AclDeviceService.class);
 
     @Autowired
     private AclManagerService aclManagerService;
 
-    protected Permission[] defaultPermissions = new Permission[] {
+    protected Permission[] defaultPermissions = new Permission[]{
         RaptorPermission.READ,
-        RaptorPermission.WRITE,
-    };
+        RaptorPermission.WRITE,};
 
     public void add(Device device, User user, Permission permission) {
         aclManagerService.addPermission(Device.class, device.getId(), new UserSid(user), permission);
     }
 
+    @Override
     public void add(Device device, User user, List<Permission> permissions) {
         aclManagerService.addPermissions(Device.class, device.getId(), new UserSid(user), permissions);
     }
 
+    @Override
     public void set(Device device, User user, List<Permission> permissions) {
-        Long pid = null; 
-        if(device.hasParent()) {
+        Long pid = null;
+        if (device.hasParent()) {
             pid = device.getParent().getId();
         }
         aclManagerService.setPermissions(Device.class, device.getId(), new UserSid(user), permissions, pid);
     }
 
+    @Override
     public List<Permission> list(Device device, User user) {
         ObjectIdentity oiDevice = new ObjectIdentityImpl(Device.class, device.getId());
         return aclManagerService.getPermissionList(user, oiDevice);
     }
 
+    @Override
     public void remove(Device device, User user, Permission permission) {
         aclManagerService.removePermission(Device.class, device.getId(), new UserSid(user), permission);
     }
 
+    @Override
     public boolean isGranted(Device device, User user, Permission permission) {
         return aclManagerService.isPermissionGranted(Device.class, device.getId(), new UserSid(user), permission);
     }
 
     @Retryable(maxAttempts = 3, value = AclManagerService.AclManagerException.class, backoff = @Backoff(delay = 500, multiplier = 3))
+    @Override
     public void register(Device device) {
 
         User owner = device.getOwner();
@@ -87,21 +93,20 @@ public class AclDeviceService {
         Sid sid = new UserSid(owner);
 
         logger.debug("Found {} permissions for {}", permissions.size(), owner.getUuid());
-        
+
         if (permissions.isEmpty()) {
-            
+
             logger.debug("Set default permission");
-            List<Permission> newPerms =  Arrays.stream(defaultPermissions).collect(Collectors.toList());
-            
+            List<Permission> newPerms = Arrays.stream(defaultPermissions).collect(Collectors.toList());
+
             if (owner.getId().equals(device.getOwner().getId())) {
                 newPerms.add(RaptorPermission.ADMINISTRATION);
             }
-            
+
             try {
                 aclManagerService.addPermissions(Device.class, device.getId(), sid, newPerms, device.getParentId());
-            }
-            catch(AclManagerService.AclManagerException ex) {
-                logger.warn("Failed to store default permission for {} ({}): {}", device.getId(), sid ,ex.getMessage());
+            } catch (AclManagerService.AclManagerException ex) {
+                logger.warn("Failed to store default permission for {} ({}): {}", device.getId(), sid, ex.getMessage());
                 throw ex;
             }
 
@@ -115,6 +120,7 @@ public class AclDeviceService {
 
     }
 
+    @Override
     public boolean check(Device device, User user, Permission permission) {
 
         if (user == null) {
