@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -71,38 +72,41 @@ public class TokenController {
     private UserService userService;
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping("/token/{uuid}")
+    @RequestMapping(value = "/token", method = RequestMethod.GET)
+    @ApiOperation(
+            value = "List tokens",
+            notes = "",
+            response = Token.class,
+            responseContainer = "Iterable",
+            nickname = "getTokens"
+    )
     public ResponseEntity<?> getTokens(
-            @AuthenticationPrincipal User user,
-            @PathVariable String uuid
+            @RequestParam("uuid") String uuid,
+            @AuthenticationPrincipal User user
     ) {
-        // TODO add ACL checks
+        
+        if (uuid == null || uuid.isEmpty()) {
+            uuid = user.getUuid();
+        }
+        else {
+            User reqUser = userService.getByUuid(uuid);
+            if(reqUser == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new JsonErrorResponse(HttpStatus.NOT_FOUND.value(), "User not found"));
+            }
+        }
+        
+        // @TODO: add ACL checks. Currently users can list their tokens or must be SuperAdmin
         if(!user.getUuid().equals(uuid) && !user.isSuperAdmin()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new JsonErrorResponse(HttpStatus.UNAUTHORIZED.value(), "Not authorized"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new JsonErrorResponse(HttpStatus.NOT_FOUND.value(), "User not found"));
         }
 
         return ResponseEntity.ok(tokenService.list(uuid));
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping("/token")
-    @ApiOperation(
-            value = "List user tokens",
-            notes = "",
-            response = Token.class,
-            responseContainer = "Iterable",
-            nickname = "getUserTokens"
-    )    
-    public Iterable<Token> getUserTokens(
-            @AuthenticationPrincipal User user
-    ) {
-        return tokenService.list(user.getUuid());
-    }
-
-    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/token/{tokenId}", method = RequestMethod.GET)
     @ApiOperation(
-            value = "Get a token",
+            value = "Get a token by ID",
             notes = "",
             response = Token.class,
             nickname = "getToken"

@@ -22,7 +22,6 @@ import io.swagger.annotations.ApiResponses;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.auth.service.services.RoleService;
-import org.createnet.raptor.models.auth.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
