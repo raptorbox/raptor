@@ -137,7 +137,8 @@ public class Token implements Serializable {
     public void setSecret(String secret) {
         this.secret = secret;
     }
-
+    
+    @JsonIgnore
     public Instant getExpiresInstant() {
         if (expires == null) {
             return null;
@@ -150,7 +151,7 @@ public class Token implements Serializable {
     }
 
     public void setExpires(Long expires) {
-        if (expires == 0) {
+        if (expires == null || expires == 0) {
             expires = 622080000L; //20 years, should be enough for our retirement
         }
         this.expires = expires;

@@ -58,7 +58,6 @@ public class JwtTokenService implements Serializable {
     token.setEnabled(true);
     
     final String tokenValue = generateToken(token, token.getExpiresInstant(), token.getSecret());
-            
     return token;
   }
   
@@ -82,7 +81,7 @@ public class JwtTokenService implements Serializable {
   private String generateToken(Map<String, Object> claims, String secret, Instant expiry) {
     return Jwts.builder()
             .setClaims(claims)
-            .setExpiration(expiry == null ? null : Date.from(expiry))
+            .setExpiration(Date.from(expiry))
             .signWith(SignatureAlgorithm.HS512, secret)
             .compact();
   }

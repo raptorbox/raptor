@@ -24,6 +24,8 @@ import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.services.TokenService;
 import org.createnet.raptor.auth.service.services.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,13 +66,37 @@ import org.springframework.web.bind.annotation.RestController;
     )
 })
 public class TokenController {
-
+    
+    private final Logger logger = LoggerFactory.getLogger(TokenController.class);
+    
     @Autowired
     private TokenService tokenService;
 
     @Autowired
     private UserService userService;
 
+    private void mergeRawToken(Token rawToken, Token token) {
+        
+        if(rawToken.getDevice() != null)
+            token.setDevice(rawToken.getDevice());
+        
+        if(rawToken.getEnabled() != null)
+            token.setEnabled(rawToken.getEnabled());
+        
+        if(rawToken.getExpires() != null)
+            token.setExpires(rawToken.getExpires());
+        
+        if(rawToken.getName() != null)
+            token.setName(rawToken.getName());
+        
+        if(rawToken.getUser()!= null)
+            token.setUser(rawToken.getUser());      
+        
+        if(rawToken.getSecret()!= null)
+            token.setSecret(rawToken.getSecret());
+        
+    }
+    
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/token", method = RequestMethod.GET)
     @ApiOperation(
@@ -81,7 +107,7 @@ public class TokenController {
             nickname = "getTokens"
     )
     public ResponseEntity<?> getTokens(
-            @RequestParam("uuid") String uuid,
+            @RequestParam(value = "uuid", required = false) String uuid,
             @AuthenticationPrincipal User user
     ) {
         
@@ -91,15 +117,15 @@ public class TokenController {
         else {
             User reqUser = userService.getByUuid(uuid);
             if(reqUser == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new JsonErrorResponse(HttpStatus.NOT_FOUND.value(), "User not found"));
+                return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "User not found");
             }
         }
         
         // @TODO: add ACL checks. Currently users can list their tokens or must be SuperAdmin
         if(!user.getUuid().equals(uuid) && !user.isSuperAdmin()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new JsonErrorResponse(HttpStatus.NOT_FOUND.value(), "User not found"));
+            return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
         }
-
+        
         return ResponseEntity.ok(tokenService.list(uuid));
     }
 
@@ -120,41 +146,10 @@ public class TokenController {
 
         // TODO add ACL checks
         if (user.getId().longValue() != token.getUser().getId().longValue()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new JsonErrorResponse(HttpStatus.UNAUTHORIZED.value(), "Not authorized"));
+            return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
         }
 
         return ResponseEntity.ok(token);
-    }
-
-    @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/token/{tokenId}", method = RequestMethod.PUT)
-    @ApiOperation(
-            value = "Update a token",
-            notes = "",
-            response = Token.class,
-            nickname = "updateToken"
-    ) 
-    public ResponseEntity<?> update(
-            @AuthenticationPrincipal User user,
-            @PathVariable Long tokenId,
-            @RequestBody Token token
-    ) {
-
-        // TODO add ACL checks        
-        if (user.getId().longValue() != token.getUser().getId().longValue()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new JsonErrorResponse(HttpStatus.UNAUTHORIZED.value(), "Not authorized"));
-        }
-
-        if (token.getSecret().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new JsonErrorResponse(400, "Secret cannot be empty"));
-        }
-
-        token.setId(tokenId);
-
-        // Generate the JWT token
-        tokenService.generateToken(token);
-
-        return ResponseEntity.status(HttpStatus.OK).body(tokenService.update(token));
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -170,16 +165,12 @@ public class TokenController {
             @RequestBody Token rawToken
     ) {
 
-        if (rawToken.getSecret().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new JsonErrorResponse(400, "Secret cannot be empty"));
+        if (rawToken.getSecret() == null || rawToken.getSecret().isEmpty()) {
+            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Secret cannot be empty");
         }
 
         Token token = new Token();
-        token.setName(rawToken.getName());
-        token.setEnabled(rawToken.getEnabled());
-        token.setExpires(rawToken.getExpires());
-        token.setSecret(rawToken.getSecret());
-        token.setType(rawToken.getType());
+        mergeRawToken(rawToken, token);
         token.setUser(currentUser);
 
         // Generate the JWT token
@@ -188,10 +179,85 @@ public class TokenController {
         Token token2 = tokenService.create(token);
 
         if (token2 == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new JsonErrorResponse(500, "Cannot create the token"));
+            return JsonErrorResponse.entity(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot create the token");
         }
-
+        
+        logger.debug("User {} created new token {}", currentUser.getUuid(), token2.getId());
+        
         return ResponseEntity.status(HttpStatus.CREATED).body(token2);
     }
 
+
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/token/{tokenId}", method = RequestMethod.PUT)
+    @ApiOperation(
+            value = "Update a token",
+            notes = "",
+            response = Token.class,
+            nickname = "updateToken"
+    ) 
+    public ResponseEntity<?> update(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long tokenId,
+            @RequestBody Token rawToken
+    ) {
+    
+        Token token = tokenService.read(tokenId);
+        
+        // TODO add ACL checks        
+        if (token.getUser() == null || user.getId().longValue() != token.getUser().getId().longValue()) {
+            return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
+        }
+
+        // Disallow update of LOGIN tokens
+        if (token.getType() == Token.Type.LOGIN) {
+            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Login token cannot be modified");
+        }
+
+        // Todo
+        mergeRawToken(rawToken, token);
+
+        if (token.getSecret() == null || token.getSecret().isEmpty()) {
+            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Secret cannot be empty");
+        }
+        
+        // Generate the JWT token
+        tokenService.generateToken(token);
+
+        
+        Token token2 = tokenService.update(token);
+                
+        logger.debug("User {} update token {}", user.getUuid(), token2.getId());
+        
+        return ResponseEntity.status(HttpStatus.OK).body(token2);
+    }    
+    
+
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/token/{tokenId}", method = RequestMethod.DELETE)
+    @ApiOperation(
+            value = "Delete a token",
+            notes = "",
+            response = Token.class,
+            nickname = "deleteToken"
+    ) 
+    public ResponseEntity<?> delete(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long tokenId
+    ) {
+    
+        Token token = tokenService.read(tokenId);
+        
+        // TODO add ACL checks        
+        if (token.getUser() == null || user.getId().longValue() != token.getUser().getId().longValue()) {
+            return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
+        }
+
+        tokenService.delete(token);
+
+        logger.debug("User {} deleted token {}", user.getUuid(), token.getId());
+        
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
+    }    
+    
 }
