@@ -39,7 +39,7 @@ public class TokenAuthorization extends AbstractAuthorization {
 
     // retries on failure, eg. when auth service has not yet processed the new objects
     final private int retries = 3;
-    final private int waitMillis = 500;
+    final private int waitMillis = 350;
 
     final private Logger logger = LoggerFactory.getLogger(TokenAuthorization.class);
     final private AuthHttpClient client = new AuthHttpClient();

@@ -72,8 +72,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
     protected Client client;
     final protected Logger logger = LoggerFactory.getLogger(ElasticSearchIndexer.class);
     final private ElasticSearchIndexAdmin indexAdmin = new ElasticSearchIndexAdmin();
-   
-    
+
     /**
      *
      * @param file
@@ -112,7 +111,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
         }
         return indices;
     }
-    
+
     /**
      *
      * @param record
@@ -245,7 +244,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
                     .setBulkActions(list.size())
                     .setBulkSize(new ByteSizeValue(1, ByteSizeUnit.MB))
                     .setFlushInterval(TimeValue.timeValueSeconds(1))
-                    .setConcurrentRequests(2)
+                    .setConcurrentRequests(5)
                     .setBackoffPolicy(
                             BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3)
                     )
@@ -298,9 +297,14 @@ public class ElasticSearchIndexer extends AbstractIndexer {
                 }
 
             }
+            
+            bulkProcessor.flush();
+            bulkProcessor.close();
+            
+            logger.debug("Completed batch");
 
-            boolean res = bulkProcessor.awaitClose(10, TimeUnit.MINUTES);
-            logger.debug("Completed batch: result {}", res);
+//            boolean res = bulkProcessor.awaitClose(10, TimeUnit.MINUTES);
+//            logger.debug("Completed batch: result {}", res);
 
         } catch (Exception e) {
             logger.warn("Batch operation failed");
@@ -467,7 +471,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
     public List<IndexRecord> search(Query query) throws SearchException {
 
         try {
-            
+
             QueryBuilder qb = (QueryBuilder) query.getNativeQuery();
             SearchRequestBuilder searchBuilder = client.prepareSearch(query.getIndex())
                     .setTypes(query.getType())

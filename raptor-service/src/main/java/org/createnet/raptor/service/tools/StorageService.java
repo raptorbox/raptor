@@ -192,18 +192,36 @@ public class StorageService extends AbstractRaptorService {
     public void deleteData(Stream stream) {
         
         int offset = 0, 
-            limit = indexer.getDefaultLimit();
+            limit = indexer.getDefaultLimit(),
+            lastCount = -1;
         
         List<RecordSet> records = indexer.getStreamData(stream, limit, offset);
         while(!records.isEmpty()) {
+
+            int len = records.size();
+            
+            logger.debug("Removing {} records from {}", len ,stream.name);
             
             for (RecordSet record : records) {
-                deleteData(stream, record);
+                try {
+                    deleteData(stream, record);
+                } catch (Exception e) {
+                    logger.warn("Error removing record of {}: {}", stream.name, e.getMessage());
+                }
             }
             
             offset += limit;
             records = indexer.getStreamData(stream, limit, offset);
+
+            if (lastCount > -1) {
+                if(lastCount == len && offset > lastCount) {
+                    logger.warn("Loop detected while removing data!");
+                    break;
+                }
+            }
+            lastCount = len;
         }
+        logger.debug("Data removed from {}", stream.name);
 
     }
 

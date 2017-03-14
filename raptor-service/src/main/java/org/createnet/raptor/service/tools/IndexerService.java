@@ -105,7 +105,7 @@ public class IndexerService extends AbstractRaptorService {
             throw new ServiceException(e);
         }
     }
-    
+
     /**
      * Set the index informations based on well known index types
      *
@@ -200,7 +200,7 @@ public class IndexerService extends AbstractRaptorService {
         q.setUserId(userId);
         return searchObject(q);
     }
-    
+
     /**
      * List the objects created by an User
      *
@@ -475,13 +475,18 @@ public class IndexerService extends AbstractRaptorService {
      */
     public void deleteData(Stream stream) {
 
-        int offset = 0, limit = getDefaultLimit();
+        int offset = 0,
+                limit = getDefaultLimit(),
+                lastCount = -1;
 
         List<RecordSet> results = getStreamData(stream, limit, offset);
         while (!results.isEmpty()) {
 
+            int len = results.size();
+            logger.debug("Removing indexer data for {}", stream.name);
+
             List<Indexer.IndexOperation> deletes = new ArrayList();
-            results.stream().forEach((recordSet) -> {
+            results.stream().forEachOrdered((recordSet) -> {
                 Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
                 record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getTimestamp().getTime();
                 deletes.add(new Indexer.IndexOperation(Indexer.IndexOperation.Type.DELETE, record));
@@ -491,6 +496,13 @@ public class IndexerService extends AbstractRaptorService {
 
             offset += limit;
             results = getStreamData(stream, limit, offset);
+            if (lastCount > -1) {
+                if (results.size() == len && len == lastCount && offset > len) {
+                    logger.warn("Loop detected removing data for {}, quitting", stream.name);
+                    break;
+                }
+            }
+            lastCount = results.size();
         }
     }
 
@@ -504,10 +516,10 @@ public class IndexerService extends AbstractRaptorService {
             deleteData(stream);
         });
     }
-    
+
     /**
      * Search for data
-     * 
+     *
      * @param stream the reference stream
      * @param query the data query
      * @param limit number of records
@@ -518,14 +530,14 @@ public class IndexerService extends AbstractRaptorService {
         setCursor(query, limit, offset);
         return searchData(stream, query);
     }
-    
+
     /**
      * Search for data
-     * 
+     *
      * @param stream the reference stream
      * @param query the data query
      * @return the list of RecordSet with data
-     */    
+     */
     public ResultSet searchData(Stream stream, DataQuery query) {
 
         setQueryIndex(query, IndexNames.data);
@@ -538,10 +550,10 @@ public class IndexerService extends AbstractRaptorService {
 
         return resultset;
     }
-    
+
     /**
      * Fetch data for a stream
-     * 
+     *
      * @param stream the stream to fetch data from
      * @return a ResultSet with records
      */
@@ -551,12 +563,12 @@ public class IndexerService extends AbstractRaptorService {
 
     /**
      * Fetch data for a stream
-     * 
+     *
      * @param stream the stream to fetch data from
      * @param limit number of records to return
      * @param offset offset to start from
      * @return a ResultSet with records
-     */    
+     */
     public ResultSet fetchData(Stream stream, Integer limit, Integer offset) {
 
         // query for all the data
@@ -573,6 +585,7 @@ public class IndexerService extends AbstractRaptorService {
 
     /**
      * Fetch the last inserted record
+     *
      * @param stream the stream reference
      * @return the RecordSet with data
      */
