@@ -23,6 +23,8 @@ import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.dispatcher.payload.ActionPayload;
 import org.createnet.raptor.dispatcher.payload.StreamPayload;
 import org.createnet.raptor.models.auth.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
@@ -39,7 +41,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class BrokerMessageHandler {
-
+    
+    final Logger logger = LoggerFactory.getLogger(BrokerMessageHandler.class);
+    
     @Autowired
     private UserService userService;
 
@@ -47,19 +51,19 @@ public class BrokerMessageHandler {
     private DeviceService deviceService;
 
     public void handle(Message<?> message) {
-
-        System.out.println(message.getPayload());
+        
+        logger.debug("MQTT message received");
+        
         JsonNode json;
         try {
             json = mapper.readTree(message.getPayload().toString());
         } catch (IOException ex) {
-            throw new MessagingException("Cannot convert JSON payload: " + message.getPayload().toString());
+            throw new MessagingException("Cannot convert JSON ["+ ex.getMessage() +"] payload:" + message.getPayload().toString());
         }
 
         switch (json.get("type").asText()) {
-            case "object":
-
-
+            case "object":                
+                                
                 User user = userService.getByUuid(json.get("userId").asText());
                 UserDetails details = new RaptorUserDetailsService.RaptorUserDetails(user);
                 final Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), details.getAuthorities());
@@ -71,15 +75,19 @@ public class BrokerMessageHandler {
                 req.objectId = json.get("object").get("id").asText();
                 req.created = json.get("object").get("createdAt").asLong();
 
+                logger.debug("MQTT object message op:{} id:{}", req.operation, req.objectId);
                 deviceService.sync(user, req);
 
                 SecurityContextHolder.getContext().setAuthentication(null);
+
                 break;
             case "data":
                 StreamPayload data = mapper.convertValue(json, StreamPayload.class);
+                logger.debug("MQTT data message raw:{}", json);
                 break;
             case "action":
                 ActionPayload action = mapper.convertValue(json, ActionPayload.class);
+                logger.debug("MQTT action message raw:{}", json);
                 break;
             case "user":
                 // TODO: Add event notification in auth service

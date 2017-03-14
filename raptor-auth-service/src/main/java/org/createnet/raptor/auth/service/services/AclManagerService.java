@@ -160,7 +160,16 @@ public class AclManagerService implements AclManager {
     @Override
     public <T> boolean isPermissionGranted(Class<T> clazz, Serializable identifier, Sid sid, Permission permission) {
         ObjectIdentity identity = new ObjectIdentityImpl(clazz.getCanonicalName(), identifier);
-        MutableAcl acl = (MutableAcl) aclService.readAclById(identity);
+        
+        MutableAcl acl;
+        try {
+            acl = (MutableAcl) aclService.readAclById(identity);
+        }
+        catch(NotFoundException ex) {
+            log.warn("ACL not found for type:{} id:{}. Ex:{}", clazz, identifier, ex.getMessage());
+            return false;
+        }
+        
         boolean isGranted = false;
 
         try {

@@ -31,8 +31,8 @@ public interface TokenRepository extends CrudRepository<Token, Long> {
     Token findByToken(String token);
 
     List<Token> findByUserId(String userId);
-
     List<Token> findByUserUuid(String userUuid);
+    List<Token> findByType(Token.Type type);
 
     @Override
     Token findOne(Long id);

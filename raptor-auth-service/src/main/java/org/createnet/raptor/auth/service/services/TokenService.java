@@ -15,6 +15,10 @@
  */
 package org.createnet.raptor.auth.service.services;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Level;
+import org.createnet.raptor.auth.service.Application;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.repository.TokenRepository;
@@ -99,31 +103,49 @@ public class TokenService {
     @Retryable(maxAttempts = 5, value = TokenHandlingException.class, backoff = @Backoff(delay = 200, multiplier = 4))
     public Token createLoginToken(User user) {
         
-        Token token = tokenUtil.createToken("login", user, this.expiration, this.secret);
-        
-        // Handle high concurrency
-        Token storeToken = tokenRepository.findByToken(token.getToken());
-        if(storeToken != null && storeToken.getType().equals(Token.Type.LOGIN)) {
-            
-            if(storeToken.isValid()) {
-                return storeToken;
+        logger.debug("Creating login token for user:{}", user.getId());
+
+        List<Token> tokens = tokenRepository.findByType(Token.Type.LOGIN);
+        if (tokens.size() > 1) {
+            Token validtoken = null;
+            for (Token loginToken : tokens) {
+                if(loginToken.isValid() && validtoken == null) {
+                    validtoken = loginToken;
+                    continue;
+                }
+                if(!loginToken.isValid()) {
+                    logger.debug("Drop previous login token id:{} for user:{}", loginToken.getId(), user.getId());
+                    try {
+                        delete(loginToken);
+                    }
+                    catch(Exception ex) {
+                        logger.warn("Error deleting token id:{}, err:{}", loginToken.getId(), ex.getMessage());
+                    }
+                }
             }
-            
-            // any other case just drop the previous one refresh the new one
-            delete(storeToken);
-            tokenUtil.refreshToken(token);
+            if(validtoken != null) {
+                logger.debug("Reused valid login token id:{} for user:{}", validtoken.getId(), user.getId());
+                return validtoken;
+            }
         }
-        
-        token.setSecret(Token.Type.LOGIN.name());
+
+        Token token = tokenUtil.createToken("login", user, expiration, Application.passwordEncoder.encode(user.getPassword() + this.secret));
         token.setType(Token.Type.LOGIN);
 
         try {
             create(token);
+            logger.debug("New token created id:{} for user:{}", token.getId(), user.getId());
             return token;
         } catch (DataIntegrityViolationException e) {
-            logger.warn("Failed to store the token, trying to regenerate");
+            logger.warn("Failed to store the token, trying to regenerate. err:{}", e.getMessage());
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ex) {
+                // does nothing
+            }
             throw new TokenHandlingException(e);
         }
+
     }
 
     public Token refreshToken(Token token) {
@@ -132,7 +154,7 @@ public class TokenService {
     }
 
     public Token generateToken(Token token) {
-        token.setToken(tokenUtil.generateToken(token));
+        tokenUtil.generateToken(token);
         return token;
     }
 
@@ -148,10 +170,7 @@ public class TokenService {
         if (token == null) {
             return false;
         }
-
-        // on LOGIN token type use the internal secret
-        String tokenSecret = (token.getSecret().equals(Token.Type.LOGIN.name())) ? this.secret : token.getSecret();
-        return isValid(token, tokenSecret);
+        return isValid(token, token.getSecret());
     }
 
 }

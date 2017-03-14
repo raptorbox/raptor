@@ -151,7 +151,7 @@ public class Token implements Serializable {
     }
 
     public void setExpires(Long expires) {
-        if (expires == null || expires == 0) {
+        if (expires == 0) {
             expires = 622080000L; //20 years, should be enough for our retirement
         }
         this.expires = expires;

@@ -20,12 +20,16 @@ package org.createnet.raptor.auth.entity;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public class LoginRequest {
+
     public String username;
     public String password;
+
+    public LoginRequest() {
+    }
 
     public LoginRequest(String username, String password) {
         this.username = username;
         this.password = password;
     }
-    
+
 }

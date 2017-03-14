@@ -35,13 +35,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
+import org.createnet.raptor.auth.entity.LoginRequest;
+import org.createnet.raptor.auth.entity.LoginResponse;
+import org.createnet.raptor.auth.service.objects.JsonErrorResponse;
 import org.createnet.raptor.auth.service.services.TokenService;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -75,25 +81,6 @@ public class AuthenticationController {
 
     final private static Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
-    protected static class JwtRequest {
-
-        public JwtRequest() {
-        }
-
-        public String username;
-        public String password;
-    }
-
-    protected static class JwtResponse {
-
-        public JwtResponse(User user, String token) {
-            this.user = user;
-            this.token = token;
-        }
-        public String token;
-        public User user;
-    }
-
     @Value("${jwt.header}")
     private String tokenHeader;
 
@@ -108,14 +95,14 @@ public class AuthenticationController {
 
     @RequestMapping(value = "${jwt.route.authentication.path}", method = RequestMethod.POST)
     @ApiOperation(
-            value = "Login an user with provided credentials",
+            value = "Login an user with the provided credentials",
             notes = "",
-            response = JwtResponse.class,
+            response = LoginResponse.class,
             nickname = "login"
     )
-    public ResponseEntity<?> login(@RequestBody JwtRequest authenticationRequest) throws AuthenticationException {
-
+    public ResponseEntity<?> login(@RequestBody LoginRequest authenticationRequest) throws AuthenticationException {
         try {
+            
             final Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authenticationRequest.username, authenticationRequest.password)
             );
@@ -126,17 +113,18 @@ public class AuthenticationController {
             final Token token = tokenService.createLoginToken((User) userDetails);
 
             // Return the token
-            return ResponseEntity.ok(new JwtResponse((User) userDetails, token.getToken()));
+            return ResponseEntity.ok(new LoginResponse((User) userDetails, token.getToken()));
+            
         } catch (AuthenticationException ex) {
             logger.error("Authentication exception: {}", ex.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed");
+            return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED, "Authentication failed");
         }
     }
 
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "${jwt.route.authentication.path}", method = RequestMethod.DELETE)
     @ApiOperation(
-            value = "Logout an user invalidating login the token",
+            value = "Logout an user invalidating the token used for login",
             notes = "",
             nickname = "logout"
     )
@@ -149,11 +137,11 @@ public class AuthenticationController {
         Token token = tokenService.read(reqToken);
 
         if (token == null) {
-            return ResponseEntity.noContent().build();
+            return JsonErrorResponse.entity(HttpStatus.NO_CONTENT);
         }
 
         if (token.getType() != Token.Type.LOGIN) {
-            return ResponseEntity.badRequest().body(null);
+            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST);
         }
 
         tokenService.delete(token);
@@ -167,23 +155,26 @@ public class AuthenticationController {
     @ApiOperation(
             value = "Refresh a login token",
             notes = "The authentication token, provided via `Authorization` header must still be valid.",
-            response = JwtResponse.class,
+            response = LoginResponse.class,
             nickname = "refreshToken"
     )    
     public ResponseEntity<?> refreshToken(
+            @RequestHeader("${jwt.header}") String reqToken,
             HttpServletRequest request,
-            Principal principal
+            @AuthenticationPrincipal User currentUser
     ) {
 
-        String reqToken = request.getHeader(tokenHeader).replace("Bearer ", "");
         Token token = tokenService.read(reqToken);
-
         if (token == null) {
-            return ResponseEntity.badRequest().body(null);
+            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST);
         }
-
+        
+        logger.debug("Refreshing token id:{} for user {}", token.getId(), currentUser.getUuid());
+        
         Token refreshedToken = tokenService.refreshToken(token);
-        return ResponseEntity.ok(new JwtResponse((User) principal, refreshedToken.getToken()));
+        
+        logger.debug("Refreshed token id:{}", refreshedToken.getId());
+        return ResponseEntity.ok(new LoginResponse(currentUser, refreshedToken.getToken()));
     }
 
 }

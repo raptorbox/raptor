@@ -39,14 +39,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Profile;
-import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
 import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
-import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -90,7 +88,7 @@ public class Application {
 
     }
 
-    static final protected BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    static final public BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Value("${raptor.admin.enabled}")
     private Boolean defaultUserEnabled;
@@ -189,7 +187,6 @@ public class Application {
         adapter.setQos(0);
         adapter.setRecoveryInterval(1000);
         adapter.setOutputChannel(mqttInputChannel());
-
         return adapter;
     }
 

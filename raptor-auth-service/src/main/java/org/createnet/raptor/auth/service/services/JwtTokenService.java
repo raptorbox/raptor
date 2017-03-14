@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import org.createnet.raptor.auth.service.Application;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 

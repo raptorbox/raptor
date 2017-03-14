@@ -34,56 +34,79 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public class TokenAuthorization extends AbstractAuthorization {
-  
-  final ObjectMapper mapper = new ObjectMapper();
-      
-  final private Logger logger = LoggerFactory.getLogger(TokenAuthorization.class);
-  final private AuthHttpClient client = new AuthHttpClient();
 
-  @Override
-  public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) {
+    final ObjectMapper mapper = new ObjectMapper();
 
-    try {
-      
-      String id = obj == null ? null : obj.getId();
-      
-      logger.debug("Check authorization for object {} for permission {}", id, op.toString());
-      
-      String response = request(accessToken, id, op.toString());
+    // retries on failure, eg. when auth service has not yet processed the new objects
+    final private int retries = 3;
+    final private int waitMillis = 500;
 
-      JsonNode node = mapper.readTree(response);
-      boolean allowed = node.get("result").booleanValue();
+    final private Logger logger = LoggerFactory.getLogger(TokenAuthorization.class);
+    final private AuthHttpClient client = new AuthHttpClient();
 
-      logger.debug("User {} allowed to {} on {}", (!allowed ? "NOT" : ""), op.toString(), id);
+    @Override
+    public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) {
 
-      return allowed;
+        try {
 
-    } catch (IOException | AuthHttpClient.ClientException ex) {
-      logger.error("Error checking authorization request", ex);
-      throw new AuthorizationException(ex);
+            String id = obj == null ? null : obj.getId();
+
+            logger.debug("Check authorization for object {} for permission {}", id, op.toString());
+
+            int tries = 0;
+            String response = null;
+            while (true) {
+                try {
+                    response = request(accessToken, id, op.toString());
+                    break;
+                } catch (AuthHttpClient.ClientException e) {
+                    try {
+                        Thread.sleep(waitMillis);
+                    } catch (InterruptedException ex) {
+                    }
+                    tries++;
+                    if (tries > this.retries) {
+                        logger.warn("Reached authorization request retry limit of {}, failure", this.retries);
+                        throw e;
+                    }
+                    logger.debug("Retrying authorization request {}/{}", tries, this.retries);
+
+                }
+            }
+
+            JsonNode node = mapper.readTree(response);
+            boolean allowed = node.get("result").booleanValue();
+
+            logger.debug("User {} allowed to {} on {}", (!allowed ? "NOT" : ""), op.toString(), id);
+
+            return allowed;
+
+        } catch (IOException | AuthHttpClient.ClientException ex) {
+            logger.error("Error checking authorization request", ex);
+            throw new AuthorizationException(ex);
+        }
     }
-  }
 
-  @Override
-  public void initialize(AuthConfiguration configuration) {
-    super.initialize(configuration);
-    client.setConfig(configuration);
-  }
+    @Override
+    public void initialize(AuthConfiguration configuration) {
+        super.initialize(configuration);
+        client.setConfig(configuration);
+    }
 
-  protected String request(String accessToken, String id, String permission) {
+    protected String request(String accessToken, String id, String permission) {
 
-    AuthorizationRequest authzreq = new AuthorizationRequest();
-    authzreq.permission = permission;
-    authzreq.objectId = id;
+        AuthorizationRequest authzreq = new AuthorizationRequest();
+        authzreq.permission = permission;
+        authzreq.objectId = id;
 
-    String payload;
-      try {
-          payload = mapper.writeValueAsString(authzreq);
-      } catch (JsonProcessingException ex) {
-          throw new RaptorComponent.ParserException(ex);
-      }
-    
-    return client.check(accessToken, payload);
-  }
+        String payload;
+        try {
+            payload = mapper.writeValueAsString(authzreq);
+        } catch (JsonProcessingException ex) {
+            throw new RaptorComponent.ParserException(ex);
+        }
+
+        return client.check(accessToken, payload);
+    }
 
 }

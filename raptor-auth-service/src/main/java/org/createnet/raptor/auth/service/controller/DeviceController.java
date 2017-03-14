@@ -15,14 +15,17 @@
  */
 package org.createnet.raptor.auth.service.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import org.createnet.raptor.auth.entity.AuthorizationRequest;
 import org.createnet.raptor.auth.entity.AuthorizationResponse;
 import org.createnet.raptor.auth.entity.SyncRequest;
+import org.createnet.raptor.auth.service.Application;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.auth.service.acl.RaptorPermission;
 import org.createnet.raptor.auth.service.objects.JsonErrorResponse;
@@ -105,7 +108,7 @@ public class DeviceController {
     public ResponseEntity<?> checkPermission(
             @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
             @RequestBody AuthorizationRequest body,
-            @RequestHeader("Authorization") String rawToken
+            @RequestHeader("${jwt.header}") String rawToken
     ) {
 
         AuthorizationResponse response = new AuthorizationResponse();
@@ -119,7 +122,9 @@ public class DeviceController {
                         .stream()
                         .map((r) -> r.getName())
                         .collect(Collectors.toList());
-
+                
+                logger.debug("User check result: [operation:{}, user:{}, result:{}]", body.getOperation(), currentUser.getUsername(), response.result);
+                
                 break;
             case Permission:
 
@@ -162,15 +167,14 @@ public class DeviceController {
                     }
 
                 }
-
+                
+                logger.debug("Device permission check result: [operation:{}, deviceId:{}, result:{}]", body.getOperation(), body.objectId, response.result);
+                
                 break;
             default:
-
                 response.result = false;
                 break;
         }
-
-        logger.debug("Check request result: {}", response.result);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
