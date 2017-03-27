@@ -17,6 +17,8 @@ services:
       - couchbase
     networks:
       - raptor_net
+    logging:
+      driver: journald
 
   broker:
     image: raptorbox/broker
@@ -28,6 +30,8 @@ services:
       - elasticsearch
     networks:
       - raptor_net
+    logging:
+      driver: journald
 
   auth:
     image: raptorbox/auth
@@ -41,6 +45,8 @@ services:
       - mariadb
     networks:
       - raptor_net
+    logging:
+      driver: journald
 
   mariadb:
     image: mariadb:latest
@@ -57,6 +63,8 @@ services:
       MYSQL_ROOT_PASSWORD: raptor
     networks:
       - raptor_net
+    logging:
+      driver: journald
 
   couchbase:
     image: couchbase/server
@@ -74,6 +82,8 @@ services:
       - 11210
     networks:
       - raptor_net
+    logging:
+      driver: journald
 
   elasticsearch:
     image: elasticsearch:5
@@ -88,6 +98,8 @@ services:
       - 9300
     networks:
       - raptor_net
+    logging:
+      driver: journald
 
   proxy:
     image: raptorbox/proxy
@@ -99,3 +111,5 @@ services:
       - broker
     networks:
       - raptor_net
+    logging:
+      driver: journald

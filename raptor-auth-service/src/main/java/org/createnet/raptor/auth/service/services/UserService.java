@@ -21,6 +21,8 @@ import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.repository.RoleRepository;
 import org.createnet.raptor.auth.service.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,113 +33,120 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class UserService {
+    
+    final private Logger logger = LoggerFactory.getLogger(UserService.class);
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-  @Autowired
-  private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
 
-  @Autowired
-  private UserRepository userRepository;
+    @Autowired
+    private RoleRepository roleRepository;
 
-  @Autowired
-  private RoleRepository roleRepository;
-
-  public Iterable<User> list() {
-    return userRepository.findAll();
-  }
-
-  public User save(User user) {
-    saveRoles(user);
-    return userRepository.save(user);
-  }
-
-  public User getByUuid(String uuid) {
-    return userRepository.findByUuid(uuid);
-  }
-
-  /**
-   * Save new roles or load roles based on name to ensure roles are all managed
-   */
-  protected void saveRoles(User user) {
-    user.setRoles(
-            user.getRoles().stream().map((r) -> {
-
-              if (r.getId() != null) {
-                return r;
-              }
-
-              Role r1 = roleRepository.findByName(r.getName());
-
-              if (r1 != null) {
-                return r1;
-              }
-
-              r = roleRepository.save(r);
-              return r;
-            }).collect(Collectors.toSet())
-    );
-  }
-
-  public User update(String uuid, User rawUser) {
-
-    User user = userRepository.findByUuid(uuid);
-
-    if (rawUser.getFirstname() != null && !rawUser.getFirstname().isEmpty()) {
-      user.setFirstname(rawUser.getFirstname());
+    public Iterable<User> list() {
+        return userRepository.findAll();
     }
 
-    if (rawUser.getLastname() != null && !rawUser.getLastname().isEmpty()) {
-      user.setLastname(rawUser.getLastname());
+    public User save(User user) {
+        saveRoles(user);
+        return userRepository.save(user);
     }
 
-    if (rawUser.getEmail() != null && !rawUser.getEmail().isEmpty()) {
-      user.setEmail(rawUser.getEmail());
+    public User getByUuid(String uuid) {
+        return userRepository.findByUuid(uuid);
     }
 
-    if (rawUser.getEnabled() != null) {
-      user.setEnabled(rawUser.getEnabled());
+    /**
+     * Save new roles or load roles based on name to ensure roles are all
+     * managed
+     */
+    protected void saveRoles(User user) {
+        user.setRoles(
+                user.getRoles().stream().map((r) -> {
+
+                    if (r.getId() != null) {
+                        return r;
+                    }
+
+                    Role r1 = roleRepository.findByName(r.getName());
+
+                    if (r1 != null) {
+                        return r1;
+                    }
+
+                    r = roleRepository.save(r);
+                    return r;
+                }).collect(Collectors.toSet())
+        );
     }
 
-    // TODO add Role repository
-    if (!rawUser.getRoles().isEmpty()) {
-      rawUser.getRoles().stream().forEach(r -> user.addRole(r));
-      saveRoles(user);
+    public User update(String uuid, User rawUser) {
+
+        User user = userRepository.findByUuid(uuid);
+
+        if (rawUser.getFirstname() != null && !rawUser.getFirstname().isEmpty()) {
+            user.setFirstname(rawUser.getFirstname());
+        }
+
+        if (rawUser.getLastname() != null && !rawUser.getLastname().isEmpty()) {
+            user.setLastname(rawUser.getLastname());
+        }
+
+        if (rawUser.getEmail() != null && !rawUser.getEmail().isEmpty()) {
+            user.setEmail(rawUser.getEmail());
+        }
+
+        if (rawUser.getEnabled() != null) {
+            user.setEnabled(rawUser.getEnabled());
+        }
+
+        // TODO add Role repository
+        if (!rawUser.getRoles().isEmpty()) {
+            rawUser.getRoles().stream().forEach(r -> user.addRole(r));
+            saveRoles(user);
+        }
+
+        if (rawUser.getPassword() != null && !rawUser.getPassword().isEmpty()) {
+            String passwd = rawUser.getPassword();
+            user.setPassword(encodePassword(passwd));
+        }
+        
+        logger.debug("Update user data id:{}", user.getId());
+        
+        return userRepository.save(user);
     }
 
-    if (rawUser.getPassword() != null && !rawUser.getPassword().isEmpty()) {
+    public User create(User rawUser) {
+
         String passwd = rawUser.getPassword();
-        user.setPassword(encodePassword(passwd));
+        if (passwd != null && !passwd.isEmpty()) {
+            rawUser.setPassword(encodePassword(passwd));
+        } else {
+            throw new PasswordMissingException();
+        }
+        
+        logger.debug("Create new user {}", rawUser.getUsername());
+        return userRepository.save(rawUser);
     }
 
-    return userRepository.save(user);
-  }
-
-  public User create(User rawUser) {
-    
-    String passwd = rawUser.getPassword();
-    if(passwd != null && !passwd.isEmpty()) {
-        rawUser.setPassword(encodePassword(passwd));
-    }
-    else {
-        throw new PasswordMissingException();
+    public void delete(User user) {
+        userRepository.delete(user.getId());
     }
 
-    return userRepository.save(rawUser);
-  }
+    protected String encodePassword(String secret) {
+        return passwordEncoder.encode(secret);
+    }
 
-  public void delete(User user ) {
-    userRepository.delete(user.getId());
-  }
+    public boolean exists(User rawUser) {
 
-  protected String encodePassword(String secret) {
-    return passwordEncoder.encode(secret);
-  }
+        User user = getByUuid(rawUser.getUuid());
+        if (user != null) {
+            return true;
+        }
 
-  public boolean exists(User rawUser) {
-    
-    User user = getByUuid(rawUser.getUuid());
-    if(user != null) return true;
-    
-    return userRepository.findByUsername(rawUser.getUsername()) != null;
-  }
+        return userRepository.findByUsername(rawUser.getUsername()) != null;
+    }
 
 }
