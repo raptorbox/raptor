@@ -16,6 +16,7 @@
 package org.createnet.raptor.auth.service.services;
 
 import java.util.stream.Collectors;
+import org.createnet.raptor.auth.service.exception.PasswordMissingException;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.repository.RoleRepository;
@@ -117,7 +118,7 @@ public class UserService {
         rawUser.setPassword(encodePassword(passwd));
     }
     else {
-        throw new RuntimeException("Password cannot be omitted");
+        throw new PasswordMissingException();
     }
 
     return userRepository.save(rawUser);
