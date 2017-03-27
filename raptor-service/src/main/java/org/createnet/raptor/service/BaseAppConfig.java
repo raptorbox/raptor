@@ -18,6 +18,8 @@ package org.createnet.raptor.service;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.models.Info;
 import io.swagger.models.License;
+import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.In;
 import org.createnet.raptor.service.tools.RaptorApplicationEventListener;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -37,11 +39,6 @@ abstract public class BaseAppConfig extends ResourceConfig {
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
 
-        BeanConfig beanConfig = new BeanConfig();
-        beanConfig.setTitle("Raptor HTTP API");
-        beanConfig.setVersion("3.0");
-        beanConfig.setSchemes(new String[]{"http", "https"});
-        beanConfig.setHost("api.raptor.local");
 
         Info info = new Info();
         info.setTitle("Raptor API");
@@ -53,8 +50,19 @@ abstract public class BaseAppConfig extends ResourceConfig {
         );
         info.setVersion("3.0");
 
+        BeanConfig beanConfig = new BeanConfig();
+        
+        beanConfig.getSwagger().securityDefinition("JWT Bearer", new ApiKeyAuthDefinition("Authorization", In.HEADER));
         beanConfig.setInfo(info);
+        
+        beanConfig.setTitle("Raptor HTTP API");
+        beanConfig.setVersion("3.0");
+        beanConfig.setSchemes(new String[]{"http", "https"});
+        beanConfig.setHost("api.raptor.local");
+       
+        beanConfig.setSchemes(new String[] { "https", "http" });
         beanConfig.setBasePath("/");
+
         beanConfig.setResourcePackage(resourcePackage);
         beanConfig.setScan(true);
     }
