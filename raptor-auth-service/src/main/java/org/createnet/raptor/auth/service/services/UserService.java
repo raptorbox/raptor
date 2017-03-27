@@ -96,20 +96,29 @@ public class UserService {
       user.setEnabled(rawUser.getEnabled());
     }
 
-//      // TODO add Role repository
+    // TODO add Role repository
     if (!rawUser.getRoles().isEmpty()) {
       rawUser.getRoles().stream().forEach(r -> user.addRole(r));
       saveRoles(user);
     }
 
-    encodePassword(rawUser);
+    if (rawUser.getPassword() != null && !rawUser.getPassword().isEmpty()) {
+        String passwd = rawUser.getPassword();
+        user.setPassword(encodePassword(passwd));
+    }
 
     return userRepository.save(user);
   }
 
   public User create(User rawUser) {
-
-    encodePassword(rawUser);
+    
+    String passwd = rawUser.getPassword();
+    if(passwd != null && !passwd.isEmpty()) {
+        rawUser.setPassword(encodePassword(passwd));
+    }
+    else {
+        throw new RuntimeException("Password cannot be omitted");
+    }
 
     return userRepository.save(rawUser);
   }
@@ -118,11 +127,8 @@ public class UserService {
     userRepository.delete(user.getId());
   }
 
-  protected void encodePassword(User user) {
-    // TODO missing password validation
-    if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-      user.setPassword(passwordEncoder.encode(user.getPassword()));
-    }
+  protected String encodePassword(String secret) {
+    return passwordEncoder.encode(secret);
   }
 
   public boolean exists(User rawUser) {
