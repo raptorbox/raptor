@@ -52,7 +52,9 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -71,10 +73,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableRetry
 @EntityScan(basePackageClasses = org.createnet.raptor.models.auth.User.class)
+@EnableTransactionManagement
 public class Application {
 
-    static final public ObjectMapper mapper = new ObjectMapper();
-
+    
     public static void main(String[] args) {
 
         ConfigurableApplicationContext app = new SpringApplicationBuilder(Application.class)
@@ -87,8 +89,11 @@ public class Application {
                 .run(args);
 
     }
+    
+    static final public ObjectMapper mapper = new ObjectMapper();
 
     static final public BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 
     @Value("${raptor.admin.enabled}")
     private Boolean defaultUserEnabled;
@@ -140,7 +145,7 @@ public class Application {
 
         User defaultUser = userRepository.findByUsername(defaultUserUsername);
         if (defaultUser != null) {
-            //userRepository.delete(defaultUser.getId());
+//            userRepository.delete(defaultUser.getId());
             return;
         }
 
@@ -197,105 +202,5 @@ public class Application {
             messageHandler.handle(message);
         };
     }
-
-//    // Spring outbound channel
-//    @Bean
-//    @ServiceActivator(inputChannel = "mqttOutboundChannel")
-//    public MessageHandler mqttOutbound() {
-//        MqttPahoMessageHandler messageHandler =
-//                       new MqttPahoMessageHandler("authclient", mqttClientFactory());
-//        messageHandler.setAsync(true);
-//        messageHandler.setDefaultTopic("baz");
-//        return messageHandler;
-//    }
-//
-//    @Bean
-//    public MessageChannel mqttOutboundChannel() {
-//        return new DirectChannel();
-//    }
-//
-//    @MessagingGateway(defaultRequestChannel = "mqttOutboundChannel")
-//    public interface MyGateway {
-//        void sendToMqtt(String data);
-//    }
-//  @Configuration
-//  @EnableResourceServer
-//  protected static class ResourceServer extends ResourceServerConfigurerAdapter {
-//
-//    @Autowired
-//    private TokenStore tokenStore;
-//
-//    @Override
-//    public void configure(ResourceServerSecurityConfigurer resources)
-//            throws Exception {
-//      resources.tokenStore(tokenStore);
-//    }
-//
-//    @Override
-//    public void configure(HttpSecurity http) throws Exception {
-//      http.authorizeRequests().anyRequest().authenticated();
-//    }
-//
-//  }
-//  @Configuration
-//  @EnableAuthorizationServer
-//  public class OAuth2ServerConfiguration extends AuthorizationServerConfigurerAdapter {
-//
-//    @Autowired
-//    private AuthenticationManager auth;
-//
-//    @Autowired
-//    private DataSource dataSource;
-//
-//    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-//
-//    @Bean
-//    public JdbcTokenStore tokenStore() {
-//      return new JdbcTokenStore(dataSource);
-//    }
-//
-//    @Bean
-//    protected AuthorizationCodeServices authorizationCodeServices() {
-//      return new JdbcAuthorizationCodeServices(dataSource);
-//    }
-//
-//    @Override
-//    public void configure(AuthorizationServerSecurityConfigurer security)
-//            throws Exception {
-//      security.passwordEncoder(passwordEncoder);
-//    }
-//
-//    @Override
-//    public void configure(AuthorizationServerEndpointsConfigurer endpoints)
-//            throws Exception {
-//      endpoints.authorizationCodeServices(authorizationCodeServices())
-//              .authenticationManager(auth).tokenStore(tokenStore())
-//              .approvalStoreDisabled();
-//    }
-//
-//    @Override
-//    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-//      // @formatter:off
-//      clients.jdbc(dataSource)
-//              .passwordEncoder(passwordEncoder)
-//              .withClient("my-trusted-client")
-//              .authorizedGrantTypes("password", "authorization_code",
-//                      "refresh_token", "implicit")
-//              .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
-//              .scopes("read", "write", "trust")
-//              .resourceIds("oauth2-resource")
-//              .accessTokenValiditySeconds(60).and()
-//              .withClient("my-client-with-registered-redirect")
-//              .authorizedGrantTypes("authorization_code")
-//              .authorities("ROLE_CLIENT").scopes("read", "trust")
-//              .resourceIds("oauth2-resource")
-//              .redirectUris("http://anywhere?key=value").and()
-//              .withClient("my-client-with-secret")
-//              .authorizedGrantTypes("client_credentials", "password")
-//              .authorities("ROLE_CLIENT").scopes("read")
-//              .resourceIds("oauth2-resource").secret("secret");
-//      // @formatter:on
-//    }
-//
-//  }
+    
 }
