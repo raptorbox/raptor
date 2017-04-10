@@ -13,77 +13,73 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client.model;
+package org.createnet.raptor.client.api;
 
+import org.createnet.raptor.client.AbstractClient;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.createnet.raptor.client.RaptorClient;
-import org.createnet.raptor.client.RaptorComponent;
+import org.createnet.raptor.client.Raptor;
+import org.createnet.raptor.client.event.MessageEventListener;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.indexer.query.impl.es.DataQuery;
-import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.objects.Device;
 
 /**
  * Represent a Device data stream
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class AuthClient extends AbstractClient {
-    
-    public class AuthClientException extends RuntimeException {
+public class StreamClient extends AbstractClient {
 
-        public AuthClientException(String message) {
-            super(message);
-        }
+    public StreamClient(Raptor container) {
+        super(container);
+    }
 
-        public AuthClientException(Throwable cause) {
-            super(cause);
-        }
-        
-    }
-    
-    protected class LoginCredentialsBody {
-        
-        final public String username;
-        final public String password;
+    public interface StreamCallback {
 
-        public LoginCredentialsBody(String username, String password) {
-            this.username = username;
-            this.password = password;
-        }
-        
+        /**
+         * Run when a stream receive data
+         *
+         * @param stream The stream receiving update
+         * @param record The record sent over stream
+         */
+        public void execute(Stream stream, RecordSet record);
     }
-    
-    static public class LoginResponseBody {
-        public String token;
-        public User user;
+
+    protected String getTopic(Stream stream) {
+        String path = String.format(Client.Routes.SUBSCRIBE_STREAM, stream.getDevice().getId(), stream.name);
+        return path;
     }
-    
+
     /**
-     * Login with username and password
+     * Subscribe a Stream for data updates
      *
-     * @param username
-     * @param password
-     * 
-     * @return request response
+     * @param stream The stream to listen data for
+     * @param callback The callback to fire on data arrival
      */
-    public LoginResponseBody login(String username, String password) {
-        
-        JsonNode cred = Device.getMapper().valueToTree(new LoginCredentialsBody(username, password));
-        JsonNode node = getClient().post(RaptorClient.Routes.LOGIN, cred);
-        
-        return Device.getMapper().convertValue(node, LoginResponseBody.class);
+    public void subscribe(Stream stream, StreamCallback callback) {
+        getClient().subscribe(getTopic(stream), (MessageEventListener.Message message) -> {
+            RecordSet record = RecordSet.fromJSON(message.content);
+            callback.execute(stream, record);
+        });
     }
-    
+
     /**
-     * Login with username and password from provided configuration
+     * Unsubscribe a Stream for data updates
+     *
+     * @param stream The stream to unsubscribe from
      */
-    public LoginResponseBody login() {
-        LoginResponseBody body = login(getClient().config.username, getClient().config.password);
-        getClient().getState().loggedIn(body.token, body.user);
-        return body;
+    public void unsubscribe(Stream stream) {
+        getClient().unsubscribe(getTopic(stream));
+    }
+
+    /**
+     * Send stream data
+     *
+     * @param record the record to send
+     */
+    public void push(RecordSet record) {
+        getClient().put(String.format(Client.Routes.PUSH, record.getStream().getDevice().id, record.getStream().name), record.toJsonNode());
     }
 
     /**
@@ -94,7 +90,7 @@ public class AuthClient extends AbstractClient {
      * @param data data to send
      */
     public void push(String objectId, String streamId, RecordSet data) {
-        getClient().put(RaptorComponent.format(RaptorClient.Routes.PUSH, objectId, streamId), data.toJsonNode());
+        getClient().put(String.format(Client.Routes.PUSH, objectId, streamId), data.toJsonNode());
     }
 
     /**
@@ -117,7 +113,7 @@ public class AuthClient extends AbstractClient {
      */
     public ResultSet pull(Stream stream, Integer offset, Integer limit) {
         String qs = buildQueryString(offset, limit);
-        return ResultSet.fromJSON(stream, getClient().get(RaptorComponent.format(RaptorClient.Routes.PULL, stream.getDevice().id, stream.name) + qs));
+        return ResultSet.fromJSON(stream, getClient().get(String.format(Client.Routes.PULL, stream.getDevice().id, stream.name) + qs));
     }
 
     /**
@@ -131,7 +127,7 @@ public class AuthClient extends AbstractClient {
      */
     public JsonNode pull(String objectId, String streamId, Integer offset, Integer limit) {
         String qs = buildQueryString(offset, limit);
-        return getClient().get(RaptorComponent.format(RaptorClient.Routes.PULL, objectId, streamId) + qs);
+        return getClient().get(String.format(Client.Routes.PULL, objectId, streamId) + qs);
     }
 
     /**
@@ -157,7 +153,7 @@ public class AuthClient extends AbstractClient {
     public ResultSet search(Stream stream, DataQuery query, Integer offset, Integer limit) {
         String qs = buildQueryString(offset, limit);
         JsonNode results = getClient().post(
-                RaptorComponent.format(RaptorClient.Routes.SEARCH_DATA, stream.getDevice().id, stream.name) + qs,
+                String.format(Client.Routes.SEARCH_DATA, stream.getDevice().id, stream.name) + qs,
                 query.toJSON()
         );
         return ResultSet.fromJSON(stream, results);

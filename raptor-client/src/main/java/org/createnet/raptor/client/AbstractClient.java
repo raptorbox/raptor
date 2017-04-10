@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Luca Capra <luca.capra@fbk.eu>.
+ * Copyright 2017 FBK/CREATE-NET
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client.model;
+package org.createnet.raptor.client;
 
-import org.createnet.raptor.client.RaptorClient;
-import org.createnet.raptor.client.RaptorComponent;
+import org.createnet.raptor.client.api.Client;
+import org.createnet.raptor.client.config.Config;
 
 /**
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-abstract class AbstractClient implements RaptorComponent {
+abstract public class AbstractClient implements IClient {
+
+    private final Raptor container;
+
+    public AbstractClient(Raptor container) {
+        this.container = container;
+    }
     
     protected String buildQueryString(Integer offset, Integer limit) {
         String qs = null;
@@ -40,16 +46,19 @@ abstract class AbstractClient implements RaptorComponent {
         return qs == null ? "" : qs;
     }
 
-    private RaptorClient client;
-
     @Override
-    public RaptorClient getClient() {
-        return this.client;
+    public Raptor getContainer() {
+        return this.container;
     }
 
     @Override
-    public void setClient(RaptorClient client) {
-        this.client = client;
+    public Client getClient() {
+        return getContainer().getClient();
+    }
+
+    @Override
+    public Config getConfig() {
+        return getContainer().getConfig();
     }
 
 }

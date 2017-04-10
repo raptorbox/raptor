@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client;
+package org.createnet.raptor.client.api;
 
+import org.createnet.raptor.client.AbstractClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mashape.unirest.http.HttpResponse;
@@ -25,9 +26,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Instant;
+import org.createnet.raptor.client.Raptor;
 import org.createnet.raptor.client.event.MessageEventListener;
 import org.createnet.raptor.client.exception.ClientException;
+import org.createnet.raptor.client.exception.MissingAuthenticationException;
 import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.models.objects.Device;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -43,7 +47,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class RaptorClient implements IClient, RaptorComponent {
+public class Client extends AbstractClient {
 
     static {
 
@@ -75,60 +79,17 @@ public class RaptorClient implements IClient, RaptorComponent {
         });
 
     }
-    
-    final protected Logger logger = LoggerFactory.getLogger(RaptorClient.class);
+
+    final protected Logger logger = LoggerFactory.getLogger(Client.class);
 
     protected MqttClient mqttClient;
     
-    final protected State state;
-    
-    
-    final public ClientConfig config;
-    protected RaptorClient client;
-    
+    public Client(Raptor container) {
+        super(container);
+    }
+
     public enum Event {
         DATA, OBJECT
-    }
-    
-    /**
-     * Manage the state of the client
-     */
-    public class State {
-        
-        protected String token;
-        protected boolean loggedIn = false;
-        protected Instant lastLogin;
-        protected User currentUser;
-
-        public State() {
-        
-            this.token=config.token;
-            
-        }
-
-        
-        public void loggedIn(String token, User user) {
-            loggedIn = true;
-            lastLogin = Instant.now();
-            currentUser = user;
-            this.token = token;
-        }
-
-        public String getToken() {
-            return token;
-        }
-
-    }
-    
-    /**
-     * Configuration object
-     */
-    public static class ClientConfig {
-        public String username;
-        public String password;
-        public String token;
-        public String url = "http://api.raptor.local";
-        public int loginExpiration = (60*60*5); // 5min
     }
 
     /**
@@ -140,45 +101,23 @@ public class RaptorClient implements IClient, RaptorComponent {
         final static public String SEARCH = "/search";
 
         final static public String CREATE = LIST;
-        final static public String UPDATE = "/{0}";
+        final static public String UPDATE = "/%s";
         final static public String LOAD = UPDATE;
         final static public String DELETE = UPDATE;
 
-        final static public String PUSH = "/{0}/streams/{1}";
+        final static public String PUSH = "/%s/streams/%s";
         final static public String LAST_UPDATE = PUSH;
         final static public String PULL = PUSH + "/list";
         final static public String SEARCH_DATA = PUSH + "/search";
 
-        final static public String INVOKE = "/{0}/actions/{1}";
+        final static public String INVOKE = "/%s/actions/%s";
         final static public String ACTION_STATUS = INVOKE;
-        final static public String ACTION_LIST = "/{0}/actions";
+        final static public String ACTION_LIST = "/%s/actions";
 
         final static public String SUBSCRIBE_STREAM = PUSH;
-        
+
         final static public String LOGIN = "/auth/login";
 
-    }
-
-    public RaptorClient(ClientConfig config) {
-        this.config = config;
-        state = new State();
-    }
-
-    /**
-     * @return the state of the client
-     */
-    public State getState() {
-        return state;
-    }
-    
-    @Override
-    public RaptorClient getClient() {
-        return this;
-    }
-
-    @Override
-    public void setClient(RaptorClient client) {
-        this.client = client;
     }
 
     /**
@@ -188,7 +127,7 @@ public class RaptorClient implements IClient, RaptorComponent {
      * @return a full url
      */
     public String url(String path) {
-        return config.url + path;
+        return getConfig().getUrl() + path;
     }
 
     /**
@@ -198,18 +137,38 @@ public class RaptorClient implements IClient, RaptorComponent {
      */
     public Device createObject() {
         Device obj = new Device();
-        obj.setContainer(this);
+        obj.setContainer(this.getContainer());
         return obj;
     }
 
     protected void prepareRequest() {
-        
-        if (getClient().getState().getToken() != null) {
-            Unirest.setDefaultHeader("Authorization", "Bearer " + getClient().getState().getToken());
+
+        String token = getContainer().Auth.getToken();
+
+        if (token == null) {
+            throw new MissingAuthenticationException("Token is not available");
+        }
+
+        Unirest.setDefaultHeader("Authorization", "Bearer " + token);
+    }
+
+    protected void checkResponse(HttpResponse<?> response) {
+
+        int status = response.getStatus();
+
+        if (status >= 400) {
+            String message = response.getBody().toString();
+            if(response.getBody() instanceof JsonNode) {
+                JsonNode err = (JsonNode) response.getBody();
+                if (err.has("message")) {
+                    message = err.get("message").asText();
+                }
+            }
+            throw new RequestException(response.getStatus(), response.getStatusText(), message);
         }
 
     }
-    
+
     /**
      * Return and lazily creates an MQTT client
      *
@@ -220,7 +179,7 @@ public class RaptorClient implements IClient, RaptorComponent {
         if (mqttClient == null) {
             try {
 
-                URL url = new URL(config.url);
+                URL url = new URL(getConfig().getUrl());
                 String clientId = "raptor_" + (int) (System.currentTimeMillis() / 1000);
                 String serverURI = "tcp://" + url.getHost() + ":1883";
 
@@ -249,7 +208,6 @@ public class RaptorClient implements IClient, RaptorComponent {
      *
      * @param topic the topic to listen for
      */
-    @Override
     public void unsubscribe(String topic) {
         try {
             getMqttClient().unsubscribe(topic);
@@ -265,7 +223,6 @@ public class RaptorClient implements IClient, RaptorComponent {
      * @param topic the topic to listen for
      * @param listener the listener implementation
      */
-    @Override
     public void subscribe(String topic, MessageEventListener listener) {
         try {
 
@@ -311,7 +268,6 @@ public class RaptorClient implements IClient, RaptorComponent {
      * @param body content to be sent
      * @return the request response
      */
-    @Override
     public JsonNode put(String url, JsonNode body) {
         try {
             prepareRequest();
@@ -319,6 +275,7 @@ public class RaptorClient implements IClient, RaptorComponent {
                     .put(getClient().url(url))
                     .body(body)
                     .asObject(JsonNode.class);
+            checkResponse(objResponse);
             return objResponse.getBody();
         } catch (UnirestException ex) {
             throw new ClientException(ex);
@@ -332,14 +289,17 @@ public class RaptorClient implements IClient, RaptorComponent {
      * @param body content to be sent
      * @return the request response
      */
-    @Override
     public JsonNode post(String url, JsonNode body) {
         try {
-            prepareRequest();
+            // catch login url and skip token signing
+            if (!url.equals(Routes.LOGIN)) {
+                prepareRequest();
+            }
             HttpResponse<JsonNode> objResponse = Unirest
                     .post(getClient().url(url))
                     .body(body)
                     .asObject(JsonNode.class);
+            checkResponse(objResponse);
             return objResponse.getBody();
         } catch (UnirestException ex) {
             throw new ClientException(ex);
@@ -352,13 +312,13 @@ public class RaptorClient implements IClient, RaptorComponent {
      * @param url path of request
      * @return the request response
      */
-    @Override
     public JsonNode get(String url) {
         try {
-            prepareRequest();            
+            prepareRequest();
             HttpResponse<JsonNode> objResponse = Unirest
                     .get(getClient().url(url))
                     .asObject(JsonNode.class);
+            checkResponse(objResponse);
             return objResponse.getBody();
         } catch (UnirestException ex) {
             throw new ClientException(ex);
@@ -371,13 +331,13 @@ public class RaptorClient implements IClient, RaptorComponent {
      * @param url path of request
      * @return the request response
      */
-    @Override
     public JsonNode delete(String url) {
         try {
-            prepareRequest();            
+            prepareRequest();
             HttpResponse<JsonNode> objResponse = Unirest
                     .delete(getClient().url(url))
                     .asObject(JsonNode.class);
+            checkResponse(objResponse);
             return objResponse.getBody();
         } catch (UnirestException ex) {
             throw new ClientException(ex);
@@ -397,7 +357,7 @@ public class RaptorClient implements IClient, RaptorComponent {
                     .header("content-type", "text/plain")
                     .body(payload)
                     .asString();
-
+            checkResponse(objResponse);
         } catch (UnirestException ex) {
             throw new ClientException(ex);
         }

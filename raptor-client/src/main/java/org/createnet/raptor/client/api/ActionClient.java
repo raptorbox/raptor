@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client.model;
+package org.createnet.raptor.client.api;
 
+import org.createnet.raptor.client.AbstractClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
-import org.createnet.raptor.client.RaptorClient;
-import org.createnet.raptor.client.RaptorComponent;
+import org.createnet.raptor.client.Raptor;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Device;
@@ -30,6 +30,10 @@ import org.createnet.raptor.models.objects.Device;
  */
 public class ActionClient extends AbstractClient {
 
+    public ActionClient(Raptor container) {
+        super(container);
+    }
+    
     /**
      * List available actions on the object
      *
@@ -38,7 +42,7 @@ public class ActionClient extends AbstractClient {
      */
     public List<Action> list(Device object) {
 
-        List<Action> actions = Device.getMapper().convertValue(getClient().get(RaptorComponent.format(RaptorClient.Routes.ACTION_LIST, object.id)), new TypeReference<List<Action>>() {
+        List<Action> actions = Device.getMapper().convertValue(getClient().get(String.format(Client.Routes.ACTION_LIST, object.id)), new TypeReference<List<Action>>() {
         });
 
         actions.forEach(action -> {
@@ -57,7 +61,7 @@ public class ActionClient extends AbstractClient {
     public ActionStatus getStatus(Action action) {
         return Device.getMapper().convertValue(
                 getClient().get(
-                        RaptorComponent.format(RaptorClient.Routes.ACTION_STATUS, action.getDevice().id, action.name)
+                        String.format(Client.Routes.ACTION_STATUS, action.getDevice().id, action.name)
                 ),
                 ActionStatus.class
         );
@@ -73,7 +77,7 @@ public class ActionClient extends AbstractClient {
     public ActionStatus getStatus(String objectId, String actionId) {
         return Device.getMapper().convertValue(
                 getClient().get(
-                        RaptorComponent.format(RaptorClient.Routes.ACTION_STATUS, objectId, actionId)
+                        String.format(Client.Routes.ACTION_STATUS, objectId, actionId)
                 ),
                 ActionStatus.class
         );
@@ -89,7 +93,7 @@ public class ActionClient extends AbstractClient {
     public ActionStatus setStatus(Action action, ActionStatus status) {
         return Device.getMapper().convertValue(
                 getClient().post(
-                        RaptorComponent.format(RaptorClient.Routes.ACTION_STATUS, action.getDevice().id, action.name), status.toJsonNode()
+                        String.format(Client.Routes.ACTION_STATUS, action.getDevice().id, action.name), status.toJsonNode()
                 ),
                 ActionStatus.class
         );
@@ -102,7 +106,7 @@ public class ActionClient extends AbstractClient {
      */
     public void removeStatus(Action action) {
         getClient().delete(
-                RaptorComponent.format(RaptorClient.Routes.ACTION_STATUS, action.getDevice().id, action.name)
+                String.format(Client.Routes.ACTION_STATUS, action.getDevice().id, action.name)
         );
     }
     
@@ -114,7 +118,7 @@ public class ActionClient extends AbstractClient {
      */
     public void removeStatus(String objectId, String actionId) {
         getClient().delete(
-                RaptorComponent.format(RaptorClient.Routes.ACTION_STATUS, objectId, actionId)
+                String.format(Client.Routes.ACTION_STATUS, objectId, actionId)
         );
     }
 
@@ -129,7 +133,7 @@ public class ActionClient extends AbstractClient {
     public ActionStatus setStatus(String objectId, String actionId, ActionStatus status) {
         return Device.getMapper().convertValue(
                 getClient().post(
-                        RaptorComponent.format(RaptorClient.Routes.ACTION_STATUS, objectId, actionId), status.toJsonNode()
+                        String.format(Client.Routes.ACTION_STATUS, objectId, actionId), status.toJsonNode()
                 ),
                 ActionStatus.class
         );
@@ -143,7 +147,7 @@ public class ActionClient extends AbstractClient {
      */
     public void invoke(Action action, String payload) {
         getClient().post(
-                RaptorComponent.format(RaptorClient.Routes.INVOKE, action.getDevice().id, action.name), payload
+                String.format(Client.Routes.INVOKE, action.getDevice().id, action.name), payload
         );
     }
 

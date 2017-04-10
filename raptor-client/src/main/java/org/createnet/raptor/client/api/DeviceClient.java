@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client.model;
+package org.createnet.raptor.client.api;
 
+import org.createnet.raptor.client.AbstractClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.List;
-import org.createnet.raptor.client.RaptorClient;
-import org.createnet.raptor.client.RaptorComponent;
+import org.createnet.raptor.client.Raptor;
 import org.createnet.raptor.client.event.MessageEventListener;
 import org.createnet.raptor.client.exception.ClientException;
 import org.createnet.raptor.dispatcher.payload.ActionPayload;
@@ -39,6 +39,10 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public class DeviceClient extends AbstractClient {
+
+    public DeviceClient(Raptor container) {
+        super(container);
+    }
 
     final static Logger logger = LoggerFactory.getLogger(DeviceClient.class);
 
@@ -121,7 +125,7 @@ public class DeviceClient extends AbstractClient {
      * @return the Device instance
      */
     public Device create(Device obj) {
-        JsonNode node = getClient().post(RaptorClient.Routes.CREATE, obj.toJsonNode());
+        JsonNode node = getClient().post(Client.Routes.CREATE, obj.toJsonNode());
         if (!node.has("id")) {
             throw new ClientException("Missing ID on object creation");
         }
@@ -139,7 +143,7 @@ public class DeviceClient extends AbstractClient {
         Device obj = getClient().createObject();
         obj.parse(
                 getClient().get(
-                        RaptorComponent.format(RaptorClient.Routes.LOAD, id)
+                        String.format(Client.Routes.LOAD, id)
                 )
         );
         return obj;
@@ -154,7 +158,7 @@ public class DeviceClient extends AbstractClient {
     public Device update(Device obj) {
         obj.parse(
                 getClient().put(
-                        RaptorComponent.format(RaptorClient.Routes.UPDATE, obj.getId()),
+                        String.format(Client.Routes.UPDATE, obj.getId()),
                         obj.toJsonNode()
                 )
         );
@@ -171,7 +175,7 @@ public class DeviceClient extends AbstractClient {
      */
     public List<Device> search(ObjectQuery query, Integer offset, Integer limit) {
         JsonNode json = getClient().post(
-                RaptorClient.Routes.SEARCH,
+                Client.Routes.SEARCH,
                 query.toJSON()
         );
         List<Device> results = Device.getMapper().convertValue(json, new TypeReference<List<Device>>() {
@@ -196,9 +200,21 @@ public class DeviceClient extends AbstractClient {
      */
     public void delete(Device obj) {
         getClient().delete(
-                RaptorComponent.format(RaptorClient.Routes.DELETE, obj.getId())
+                String.format(Client.Routes.DELETE, obj.getId())
         );
         obj.id = null;
     }
 
+
+    /**
+     * List accessible devices
+     * 
+     * @return the Device instance
+     */
+    public List<Device> list() {
+        JsonNode json = getClient().get(Client.Routes.LIST);
+        List<Device> list = Device.getMapper().convertValue(json, new TypeReference<List<Device>>() {});                
+        return list;
+    }    
+    
 }

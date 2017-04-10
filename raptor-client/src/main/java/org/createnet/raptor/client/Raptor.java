@@ -15,77 +15,79 @@
  */
 package org.createnet.raptor.client;
 
-import org.createnet.raptor.client.model.ActionClient;
-import org.createnet.raptor.client.model.AuthClient;
-import org.createnet.raptor.client.model.DeviceClient;
-import org.createnet.raptor.client.model.StreamClient;
+import org.createnet.raptor.client.config.Config;
+import org.createnet.raptor.client.api.ActionClient;
+import org.createnet.raptor.client.api.AuthClient;
+import org.createnet.raptor.client.api.Client;
+import org.createnet.raptor.client.api.DeviceClient;
+import org.createnet.raptor.client.api.StreamClient;
+import org.createnet.raptor.models.objects.RaptorComponent;
 
 /**
  * Raptor SDK wrapper entry point
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public class Raptor {
+public class Raptor implements IClient, RaptorComponent {
+    
+    final protected Config config;
+    final protected Client client;
+    
+    final public AuthClient Auth;
+    final public StreamClient Stream;
+    final public ActionClient Action;
+    final public DeviceClient Device;
 
-    final protected RaptorClient client;
+    /**
+     * Instantiate the client
+     * 
+     * @param url
+     * @param username
+     * @param password
+     */
+    public Raptor(String url, String username, String password) {
+        this(new Config(url, username, password));
+    }
 
-    final private AuthClient auth;
-    final private StreamClient stream;
-    final private ActionClient action;
-    final private DeviceClient device;
-
-    public RaptorClient getClient() {
-        return client;
+    /**
+     * Instantiate the client
+     * 
+     * @param url
+     * @param token
+     */
+    public Raptor(String url, String token) {
+        this(new Config(url, token));
     }
     
     /**
-     * Get a client for the user manager
-     * @return
+     * Instantiate the client
+     * 
+     * @param config
      */
-    public AuthClient auth() {
-        return auth;
+    public Raptor(Config config) {
+        
+        this.config = config;
+        client = new Client(this);
+        
+        Auth = new AuthClient(this);
+        Stream = new StreamClient(this);
+        Device = new DeviceClient(this);
+        Action = new ActionClient(this);
     }
 
-    /**
-     * Get a client to manage data streams
-     * @return
-     */
-    public StreamClient stream() {
-        return stream;
+    @Override
+    public Config getConfig() {
+        return config;
     }
 
-    /**
-     * Get a client to manage actuations
-     * @return
-     */
-    public ActionClient action() {
-        return action;
+    @Override
+    public Raptor getContainer() {
+        return this;
     }
-
-    /**
-     * Get a client to manage object definitions
-     * @return
-     */    
-    public DeviceClient device() {
-        return device;
+    
+    @Override
+    public Client getClient() {
+        return client;
     }
-
-    public Raptor(RaptorClient.ClientConfig config) {
-
-        client = new RaptorClient(config);
-
-        auth = new AuthClient();
-        auth.setClient(client);
-
-        stream = new StreamClient();
-        stream.setClient(client);
-
-        device = new DeviceClient();
-        device.setClient(client);
-
-        action = new ActionClient();
-        action.setClient(client);
-
-    }
-
+        
 }

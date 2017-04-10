@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Luca Capra <luca.capra@fbk.eu>.
+ * Copyright 2017 FBK/CREATE-NET
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,62 +15,18 @@
  */
 package org.createnet.raptor.client;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.createnet.raptor.client.event.MessageEventListener;
+import org.createnet.raptor.client.Raptor;
+import org.createnet.raptor.client.api.Client;
+import org.createnet.raptor.client.config.Config;
 
 /**
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
 public interface IClient {
-
-    /**
-     * Perform a DELETE request to the API
-     *
-     * @param url path of request
-     * @return the request response
-     */
-    JsonNode delete(String url);
-
-    /**
-     * Perform a GET request to the API
-     *
-     * @param url path of request
-     * @return the request response
-     */
-    JsonNode get(String url);
-
-    /**
-     * Perform a POST request to the API
-     *
-     * @param url path of request
-     * @param body content to be sent
-     * @return the request response
-     */
-    JsonNode post(String url, JsonNode body);
-
-    /**
-     * Perform a PUT request to the API
-     *
-     * @param url path of request
-     * @param body content to be sent
-     * @return the request response
-     */
-    JsonNode put(String url, JsonNode body);
-
-    /**
-     * Subscribe to an MQTT topic emitting a callback as specified in MessageEventListener
-     *
-     * @param topic the topic to listen for
-     * @param listener the listener implementation
-     */
-    void subscribe(String topic, MessageEventListener listener);
-
-    /**
-     * Unsubscribe from an MQTT topic
-     *
-     * @param topic the topic to listen for
-     */
-    void unsubscribe(String topic);
+    
+    public Raptor getContainer();
+    public Client getClient();
+    public Config getConfig();
     
 }

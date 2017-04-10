@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 FBK/CREATE-NET
+ * Copyright 2017 Luca Capra <lcapra@fbk.eu>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client;
-
-import java.text.MessageFormat;
+package org.createnet.raptor.client.exception;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface RaptorComponent extends org.createnet.raptor.models.objects.RaptorComponent {
+public class MissingAuthenticationException extends ClientException {
 
-    public static String format(String text, Object... args) {
-        return MessageFormat.format(text, args);
+    public MissingAuthenticationException(String message) {
+        super(message);
     }
 
-    public RaptorClient getClient();
-
-    public void setClient(RaptorClient client);
+    public MissingAuthenticationException(Throwable cause) {
+        super(cause);
+    }
 
 }
