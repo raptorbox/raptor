@@ -8,7 +8,7 @@ package org.createnet.raptor.models.data;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import org.createnet.raptor.models.objects.RaptorComponent;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.utils.TestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -53,7 +53,7 @@ public class ActionStatusTest extends TestUtils {
     ActionStatus status = ActionStatus.parseJSON(json.toString());
     
     String statusPublic = status.toJSON();
-    JsonNode statusPublicJson = ServiceObject.getMapper().readTree(statusPublic);
+    JsonNode statusPublicJson = Device.getMapper().readTree(statusPublic);
     
     assertTrue(statusPublicJson.has("actionId"));
     

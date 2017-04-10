@@ -18,7 +18,7 @@ package org.createnet.raptor.dispatcher.payload;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.models.objects.RaptorComponent;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 
 /**
  *
@@ -27,11 +27,11 @@ import org.createnet.raptor.models.objects.ServiceObject;
 public class ObjectPayload extends AbstractPayload {
 
     public String userId;
-    public ServiceObject object;
+    public Device object;
     public String path;
 
    
-    public ObjectPayload(ServiceObject obj, String op) {
+    public ObjectPayload(Device obj, String op) {
         userId = obj.userId;
         object = obj;
         path = obj.path();
@@ -42,7 +42,7 @@ public class ObjectPayload extends AbstractPayload {
     @Override
     public String toString() {
         try {
-            return ServiceObject.getMapper().writeValueAsString(this);
+            return Device.getMapper().writeValueAsString(this);
         } catch (JsonProcessingException ex) {
             throw new RaptorComponent.ParserException(ex);
         }

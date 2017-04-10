@@ -34,7 +34,7 @@ import javax.ws.rs.core.Response;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.indexer.query.impl.es.DataQuery;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.createnet.raptor.models.data.RecordSet;
@@ -81,7 +81,7 @@ public class DataApi extends AbstractApi {
     @ApiResponses(value = {})
     public Collection<Stream> list(@PathParam("id") String objectId) {
 
-        ServiceObject obj = objectManager.load(objectId);
+        Device obj = objectManager.load(objectId);
 
         if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
             throw new ForbiddenException("Cannot load stream list");
@@ -105,7 +105,7 @@ public class DataApi extends AbstractApi {
     ) {
 
         Stream stream = streamManager.load(objectId, streamName);
-        ServiceObject obj = stream.getServiceObject();
+        Device obj = stream.getDevice();
 
         if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
             throw new ForbiddenException("Cannot fetch data");
@@ -139,7 +139,7 @@ public class DataApi extends AbstractApi {
     ) {
 
         Stream stream = streamManager.load(streamName, objectId);
-        ServiceObject obj = stream.getServiceObject();
+        Device obj = stream.getDevice();
         
         if (!auth.isAllowed(obj, Authorization.Permission.Push)) {
             throw new ForbiddenException("Cannot delete data");
@@ -170,7 +170,7 @@ public class DataApi extends AbstractApi {
     ) {
 
         Stream stream = streamManager.load(objectId, streamName);
-        ServiceObject obj = stream.getServiceObject();
+        Device obj = stream.getDevice();
         
         if (!auth.isAllowed(obj, Authorization.Permission.Push)) {
             throw new ForbiddenException("Cannot push data");
@@ -201,7 +201,7 @@ public class DataApi extends AbstractApi {
     ) {
 
         Stream stream = streamManager.load(objectId, streamName);
-        ServiceObject obj = stream.getServiceObject();
+        Device obj = stream.getDevice();
         
         if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
             throw new ForbiddenException("Cannot search data");
@@ -233,7 +233,7 @@ public class DataApi extends AbstractApi {
     ) {
         
         Stream stream = streamManager.load(objectId, streamName);
-        ServiceObject obj = stream.getServiceObject();
+        Device obj = stream.getDevice();
         
         if (!auth.isAllowed(obj, Authorization.Permission.Pull)) {
             throw new ForbiddenException("Cannot access data");

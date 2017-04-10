@@ -24,7 +24,7 @@ import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Action;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.indexer.query.impl.es.DataQuery;
 import org.createnet.raptor.service.AbstractRaptorService;
@@ -79,7 +79,7 @@ public class ActionManagerService extends AbstractRaptorService {
         // just an effort to ensure arguments are not flipped
         assert objectId.length() == 36;
 
-        ServiceObject obj = objectManager.load(objectId);
+        Device obj = objectManager.load(objectId);
         Action action = obj.actions.getOrDefault(actionId, null);
 
         if (action == null) {
@@ -98,33 +98,33 @@ public class ActionManagerService extends AbstractRaptorService {
      */
     public ActionStatus getStatus(Action action) {
 
-        assert action.getServiceObject() != null;
+        assert action.getDevice() != null;
 
-        logger.debug("Fetched action {} status for object {}", action.name, action.getServiceObject().id);
+        logger.debug("Fetched action {} status for object {}", action.name, action.getDevice().id);
         return storage.getActionStatus(action);
     }
 
     public ActionStatus setStatus(Action action, String body) {
 
-        assert action.getServiceObject() != null;
+        assert action.getDevice() != null;
 
         ActionStatus actionStatus = storage.saveActionStatus(action, body);
 
         emitter.trigger(Event.EventName.execute, new ActionEvent(action, actionStatus));
 
-        logger.debug("Saved action {} status for object {}", action.name, action.getServiceObject().id);
+        logger.debug("Saved action {} status for object {}", action.name, action.getDevice().id);
 
         return actionStatus;
     }
 
     public void removeStatus(Action action) {
         
-        assert action.getServiceObject() != null;
+        assert action.getDevice() != null;
         
         storage.deleteActionStatus(action);
         emitter.trigger(Event.EventName.deleteAction, new ActionEvent(action, null));
 
-        logger.debug("removed action {} status for object {}", action.name, action.getServiceObject().id);
+        logger.debug("removed action {} status for object {}", action.name, action.getDevice().id);
     }
 
 }

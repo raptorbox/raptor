@@ -16,7 +16,7 @@
 package org.createnet.raptor.auth.authorization;
 
 import org.createnet.raptor.auth.AuthConfiguration;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 
 /**
  *
@@ -38,7 +38,7 @@ public interface Authorization {
   public enum Permission {
     
     List,
-    // ServiceObject definition
+    // Device definition
     Read, Create, Update, Delete,
     // Stream data
     Pull,
@@ -51,6 +51,6 @@ public interface Authorization {
 
   public void initialize(AuthConfiguration configuration);
 
-  public boolean isAuthorized(String accessToken, ServiceObject obj, Permission op) throws AuthorizationException;
+  public boolean isAuthorized(String accessToken, Device obj, Permission op) throws AuthorizationException;
 
 }

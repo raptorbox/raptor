@@ -38,7 +38,7 @@ import org.createnet.raptor.models.data.types.TypesManager;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Channel;
 import org.createnet.raptor.models.objects.RaptorComponent;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.objects.serializer.RecordSetSerializer;
 import org.createnet.raptor.models.objects.deserializer.RecordSetDeserializer;
@@ -83,7 +83,7 @@ public class RecordSet {
 
     public RecordSet(Stream stream, String body) {
         this(stream);
-        ObjectMapper mapper = ServiceObject.getMapper();
+        ObjectMapper mapper = Device.getMapper();
         try {
             parseJson(stream, mapper.readTree(body));
         } catch (IOException ex) {
@@ -176,7 +176,7 @@ public class RecordSet {
 
     public ObjectNode toJsonNode() {
         try {
-            return ServiceObject.getMapper().convertValue(this, ObjectNode.class);
+            return Device.getMapper().convertValue(this, ObjectNode.class);
         } catch (IllegalArgumentException ex) {
             throw new RaptorComponent.ParserException(ex);
         }
@@ -303,14 +303,14 @@ public class RecordSet {
 
     public static RecordSet fromJSON(String raw) {
         try {
-            return ServiceObject.getMapper().readValue(raw, RecordSet.class);
+            return Device.getMapper().readValue(raw, RecordSet.class);
         } catch (IOException ex) {
             throw new RaptorComponent.ParserException(ex);
         }
     }
 
     public static RecordSet fromJSON(JsonNode raw) {
-        return ServiceObject.getMapper().convertValue(raw, RecordSet.class);
+        return Device.getMapper().convertValue(raw, RecordSet.class);
     }
 
     public void setStream(Stream stream) {
@@ -321,12 +321,12 @@ public class RecordSet {
 
             this.streamId = stream.name;
 
-            if (stream.getServiceObject() != null) {
+            if (stream.getDevice() != null) {
 
-                this.objectId = stream.getServiceObject().getId();
+                this.objectId = stream.getDevice().getId();
 
                 if (this.userId == null) {
-                    this.userId = stream.getServiceObject().getUserId();
+                    this.userId = stream.getDevice().getUserId();
                 }
 
             }

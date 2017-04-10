@@ -23,7 +23,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.db.StorageProvider;
@@ -121,20 +121,20 @@ public class StorageService extends AbstractRaptorService {
         return getStorage().getConnection(ConnectionId.actuations.toString());
     }
 
-    public ServiceObject getObject(String id) {
+    public Device getObject(String id) {
         JsonNode json = getObjectConnection().get(id);
         if (json == null) {
             return null;
         }
-        return ServiceObject.fromJSON(json);
+        return Device.fromJSON(json);
     }
 
-    public String saveObject(ServiceObject obj) {
+    public String saveObject(Device obj) {
 
         obj.validate();
 
         if (obj.id == null) {
-            obj.id = ServiceObject.generateUUID();
+            obj.id = Device.generateUUID();
         }
 
         JsonNode json = obj.toJsonNode();
@@ -142,9 +142,9 @@ public class StorageService extends AbstractRaptorService {
         return obj.id;
     }
 
-    public void saveObjects(List<ServiceObject> objs) {
+    public void saveObjects(List<Device> objs) {
 
-        List<ServiceObject> saved = objs.stream().map((ServiceObject o) -> {
+        List<Device> saved = objs.stream().map((Device o) -> {
             try {
                 saveObject(o);
                 return o;
@@ -162,7 +162,7 @@ public class StorageService extends AbstractRaptorService {
 
     }
 
-    public void deleteObject(ServiceObject obj) {
+    public void deleteObject(Device obj) {
 
         // cleanup data
         deleteData(obj.streams.values());
@@ -174,13 +174,13 @@ public class StorageService extends AbstractRaptorService {
 
     // Data 
     protected String getDataId(Stream stream, RecordSet record) {
-        return stream.getServiceObject().id + "-" + stream.name + "-" + record.getTimestamp().getTime();
+        return stream.getDevice().id + "-" + stream.name + "-" + record.getTimestamp().getTime();
     }
 
     public void saveData(Stream stream, RecordSet record) {
 
         record.setStream(stream);
-        record.userId = stream.getServiceObject().getUserId();
+        record.userId = stream.getDevice().getUserId();
 
         getDataConnection().set(getDataId(stream, record), record.toJsonNode(), defaultDataTTL);
     }
@@ -233,7 +233,7 @@ public class StorageService extends AbstractRaptorService {
 
         //drop stream data
         for (Stream stream : streams) {
-            logger.debug("Removing stream {} data for object {}", stream.name, stream.getServiceObject().id);
+            logger.debug("Removing stream {} data for object {}", stream.name, stream.getDevice().id);
             deleteData(stream);
         }
 
@@ -241,7 +241,7 @@ public class StorageService extends AbstractRaptorService {
 
     // Actuations
     protected String getActionId(Action action) {
-        return action.getServiceObject().id + "-" + action.name;
+        return action.getDevice().id + "-" + action.name;
     }
 
     public ActionStatus getActionStatus(Action action) {
@@ -270,7 +270,7 @@ public class StorageService extends AbstractRaptorService {
         if (!changedActions.isEmpty()) {
             // drop action data
             for (Action changedAction : changedActions) {
-                logger.debug("Removing action {} data for object {}", changedAction.name, changedAction.getServiceObject().id);
+                logger.debug("Removing action {} data for object {}", changedAction.name, changedAction.getDevice().id);
                 deleteActionStatus(changedAction);
             }
         }

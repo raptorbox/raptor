@@ -37,8 +37,8 @@ import org.createnet.raptor.events.type.ObjectEvent;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.RaptorComponent;
-import org.createnet.raptor.models.objects.ServiceObject;
-import org.createnet.raptor.models.objects.ServiceObjectContainer;
+import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.objects.DeviceContainer;
 import org.createnet.raptor.models.objects.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +82,7 @@ public class DispatcherService extends AbstractRaptorService {
                     // notify data event
                     DataEvent dataEvent = (DataEvent) event;
 
-                    if (!dataEvent.getStream().getServiceObject().settings.eventsEnabled()) {
+                    if (!dataEvent.getStream().getDevice().settings.eventsEnabled()) {
                         return;
                     }
 
@@ -98,7 +98,7 @@ public class DispatcherService extends AbstractRaptorService {
                     // notify event
                     ActionEvent actionEvent = (ActionEvent) event;
 
-                    if (!actionEvent.getAction().getServiceObject().settings.eventsEnabled()) {
+                    if (!actionEvent.getAction().getDevice().settings.eventsEnabled()) {
                         return;
                     }
 
@@ -153,16 +153,16 @@ public class DispatcherService extends AbstractRaptorService {
         return dispatcher;
     }
 
-    protected String getEventsTopic(ServiceObjectContainer c) {
+    protected String getEventsTopic(DeviceContainer c) {
 
-        ServiceObject obj = c.getServiceObject();
+        Device obj = c.getDevice();
         if (obj == null) {
-            throw new RaptorComponent.ParserException("ServiceObject is null");
+            throw new RaptorComponent.ParserException("Device is null");
         }
 
         String id = obj.getId();
         if (id == null) {
-            throw new RaptorComponent.ParserException("ServiceObject.id is null");
+            throw new RaptorComponent.ParserException("Device.id is null");
         }
 
         return id + "/events";
@@ -172,11 +172,11 @@ public class DispatcherService extends AbstractRaptorService {
         getDispatcher().add(topic, message.toString());
     }
 
-    protected void notifyTreeEvent(ServiceObjectContainer c, DispatcherPayload payload) {
+    protected void notifyTreeEvent(DeviceContainer c, DispatcherPayload payload) {
 
-        ServiceObject obj = c.getServiceObject();
+        Device obj = c.getDevice();
         if (obj == null) {
-            throw new RaptorComponent.ParserException("ServiceObject is null");
+            throw new RaptorComponent.ParserException("Device is null");
         }
 
         String path = obj.path();
@@ -188,7 +188,7 @@ public class DispatcherService extends AbstractRaptorService {
         notifyEvent(path + "/events", payload);
     }
 
-    protected void notifyObjectEvent(String op, ServiceObject obj) {
+    protected void notifyObjectEvent(String op, Device obj) {
 
         String topic = getEventsTopic(obj);
         ObjectPayload payload = new ObjectPayload(obj, op);
@@ -222,12 +222,12 @@ public class DispatcherService extends AbstractRaptorService {
     }
 
     public void pushData(Stream stream, RecordSet records) {
-        String topic = stream.getServiceObject().id + "/streams/" + stream.name + "/updates";
+        String topic = stream.getDevice().id + "/streams/" + stream.name + "/updates";
         notifyEvent(topic, new DataPayload(records.toJson()));
     }
 
     public void actionTrigger(Action action, String status) {
-        String topic = action.getServiceObject().id + "/actions/" + action.name;
+        String topic = action.getDevice().id + "/actions/" + action.name;
         notifyEvent(topic, new DataPayload(status));
     }
 

@@ -28,7 +28,7 @@ public class ActionEvent  extends ObjectEvent {
   final private ActionStatus status;
   
   public ActionEvent(Action action, ActionStatus status) {
-    super(action.getServiceObject());
+    super(action.getDevice());
     this.action = action;
     this.status = status;
   }

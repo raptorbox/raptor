@@ -23,7 +23,7 @@ import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.indexer.query.impl.es.DataQuery;
 import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 
 /**
  * Represent a service object data stream
@@ -71,10 +71,10 @@ public class AuthClient extends AbstractClient {
      */
     public LoginResponseBody login(String username, String password) {
         
-        JsonNode cred = ServiceObject.getMapper().valueToTree(new LoginCredentialsBody(username, password));
+        JsonNode cred = Device.getMapper().valueToTree(new LoginCredentialsBody(username, password));
         JsonNode node = getClient().post(RaptorClient.Routes.LOGIN, cred);
         
-        return ServiceObject.getMapper().convertValue(node, LoginResponseBody.class);
+        return Device.getMapper().convertValue(node, LoginResponseBody.class);
     }
     
     /**
@@ -117,7 +117,7 @@ public class AuthClient extends AbstractClient {
      */
     public ResultSet pull(Stream stream, Integer offset, Integer limit) {
         String qs = buildQueryString(offset, limit);
-        return ResultSet.fromJSON(stream, getClient().get(RaptorComponent.format(RaptorClient.Routes.PULL, stream.getServiceObject().id, stream.name) + qs));
+        return ResultSet.fromJSON(stream, getClient().get(RaptorComponent.format(RaptorClient.Routes.PULL, stream.getDevice().id, stream.name) + qs));
     }
 
     /**
@@ -157,7 +157,7 @@ public class AuthClient extends AbstractClient {
     public ResultSet search(Stream stream, DataQuery query, Integer offset, Integer limit) {
         String qs = buildQueryString(offset, limit);
         JsonNode results = getClient().post(
-                RaptorComponent.format(RaptorClient.Routes.SEARCH_DATA, stream.getServiceObject().id, stream.name) + qs,
+                RaptorComponent.format(RaptorClient.Routes.SEARCH_DATA, stream.getDevice().id, stream.name) + qs,
                 query.toJSON()
         );
         return ResultSet.fromJSON(stream, results);

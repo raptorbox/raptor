@@ -21,16 +21,16 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
 import org.createnet.raptor.models.objects.RaptorComponent;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 
 /**
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-public class ServiceObjectSerializer extends JsonSerializer<ServiceObject> {
+public class DeviceSerializer extends JsonSerializer<Device> {
 
     @Override
-    public void serialize(ServiceObject t, JsonGenerator jg, SerializerProvider sp) throws IOException {
+    public void serialize(Device t, JsonGenerator jg, SerializerProvider sp) throws IOException {
 
         jg.writeStartObject();
 

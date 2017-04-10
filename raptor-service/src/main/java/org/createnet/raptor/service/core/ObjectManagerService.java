@@ -26,7 +26,7 @@ import org.createnet.raptor.events.Event;
 import org.createnet.raptor.events.type.ObjectEvent;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Channel;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
 import org.createnet.raptor.service.AbstractRaptorService;
@@ -71,11 +71,11 @@ public class ObjectManagerService extends AbstractRaptorService {
      * @param id object id to load
      * @return object definition
      */
-    public ServiceObject load(String id) {
+    public Device load(String id) {
 
         logger.debug("Load object {}", id);
 
-        List<ServiceObject> objs = indexer.getObjects(Arrays.asList(id));
+        List<Device> objs = indexer.getObjects(Arrays.asList(id));
         if (objs.isEmpty()) {
             throw new ObjectNotFoundException("Object " + id + " not found");
         }
@@ -92,9 +92,9 @@ public class ObjectManagerService extends AbstractRaptorService {
      * @param limit limit of record per call
      * @return the list of objects
      */
-    public List<ServiceObject> list(String userId, Integer offset, Integer limit) {
+    public List<Device> list(String userId, Integer offset, Integer limit) {
 
-        List<ServiceObject> list = indexer.getObjectsByUser(
+        List<Device> list = indexer.getObjectsByUser(
                 userId, offset, limit
         );
 
@@ -102,7 +102,7 @@ public class ObjectManagerService extends AbstractRaptorService {
         return list;
     }
 
-    synchronized private List<Stream> getChangedStreams(ServiceObject storedObj, ServiceObject obj) {
+    synchronized private List<Stream> getChangedStreams(Device storedObj, Device obj) {
 
         List<Stream> changedStream = new ArrayList();
 
@@ -142,7 +142,7 @@ public class ObjectManagerService extends AbstractRaptorService {
         return changedStream;
     }
 
-    synchronized private List<Action> getChangedActions(ServiceObject storedObj, ServiceObject obj) {
+    synchronized private List<Action> getChangedActions(Device storedObj, Device obj) {
         List<Action> changedAction = new ArrayList();
         obj.actions.values().stream().filter((action) -> (!storedObj.actions.containsKey(action.name))).forEachOrdered((action) -> {
             changedAction.add(action);
@@ -156,7 +156,7 @@ public class ObjectManagerService extends AbstractRaptorService {
      * @param obj the object definition to create
      * @return the create object
      */
-    public ServiceObject create(ServiceObject obj) {
+    public Device create(Device obj) {
 
         obj.id = null;
 
@@ -177,12 +177,12 @@ public class ObjectManagerService extends AbstractRaptorService {
      * @param obj
      * @return
      */
-    public ServiceObject update(ServiceObject obj) {
+    public Device update(Device obj) {
         
         // ensure incoming obj is valid
         obj.validate();
         
-        ServiceObject storedObj = load(obj.id);
+        Device storedObj = load(obj.id);
 
         logger.debug("Updating object {}", obj.id);
 
@@ -237,7 +237,7 @@ public class ObjectManagerService extends AbstractRaptorService {
      */
     public void delete(String id) {
 
-        ServiceObject obj = load(id);
+        Device obj = load(id);
 
         storage.deleteObject(obj);
         indexer.deleteObject(obj);
@@ -254,8 +254,8 @@ public class ObjectManagerService extends AbstractRaptorService {
      * @param query Query parameters to match in the definition
      * @return the matching definitions
      */
-    public List<ServiceObject> search(ObjectQuery query) {
-        List<ServiceObject> list = indexer.searchObject(query);
+    public List<Device> search(ObjectQuery query) {
+        List<Device> list = indexer.searchObject(query);
         return list;
     }
 
@@ -265,7 +265,7 @@ public class ObjectManagerService extends AbstractRaptorService {
      * @param obj the object to load the tree from
      * @return the tree of definition
      */
-    public List<ServiceObject> tree(ServiceObject obj) {
+    public List<Device> tree(Device obj) {
         return tree.getChildren(obj);
     }
 
@@ -276,12 +276,12 @@ public class ObjectManagerService extends AbstractRaptorService {
      * @param childrenObjects list of object to set as children
      * @return the list of children
      */
-    public List<ServiceObject> setChildren(ServiceObject parentObject, List<ServiceObject> childrenObjects) {
+    public List<Device> setChildren(Device parentObject, List<Device> childrenObjects) {
 
-        List<ServiceObject> list = tree.setChildren(parentObject, childrenObjects);
+        List<Device> list = tree.setChildren(parentObject, childrenObjects);
 
         // @TODO: Move to event emitter
-        List<ServiceObject> toSave = new ArrayList(list);
+        List<Device> toSave = new ArrayList(list);
         toSave.add(parentObject);
 
         storage.saveObjects(toSave);
@@ -289,24 +289,24 @@ public class ObjectManagerService extends AbstractRaptorService {
         return list;
     }
 
-    public List<ServiceObject> addChildren(ServiceObject parentObject, List<ServiceObject> childObjects) {
+    public List<Device> addChildren(Device parentObject, List<Device> childObjects) {
 
-        List<ServiceObject> list = tree.addChildren(parentObject, childObjects);
+        List<Device> list = tree.addChildren(parentObject, childObjects);
 
         // @TODO: Move to event emitter
-        List<ServiceObject> toSave = new ArrayList(list);
+        List<Device> toSave = new ArrayList(list);
         toSave.add(parentObject);
         storage.saveObjects(toSave);
 
         return list;
     }
 
-    public List<ServiceObject> removeChildren(ServiceObject parentObject, List<ServiceObject> childObjects) {
+    public List<Device> removeChildren(Device parentObject, List<Device> childObjects) {
 
-        List<ServiceObject> list = tree.removeChildren(parentObject, childObjects);
+        List<Device> list = tree.removeChildren(parentObject, childObjects);
 
         // @TODO: Move to event emitter
-        List<ServiceObject> toSave = new ArrayList(list);
+        List<Device> toSave = new ArrayList(list);
         toSave.add(parentObject);
         storage.saveObjects(toSave);
         

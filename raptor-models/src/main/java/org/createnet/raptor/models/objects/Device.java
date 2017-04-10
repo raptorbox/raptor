@@ -18,7 +18,7 @@ package org.createnet.raptor.models.objects;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.createnet.raptor.models.objects.deserializer.ServiceObjectDeserializer;
+import org.createnet.raptor.models.objects.deserializer.DeviceDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
@@ -35,16 +35,16 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Luca Capra <luca.capra@gmail.com>
  */
-@JsonDeserialize(using = ServiceObjectDeserializer.class)
-public class ServiceObject extends ServiceObjectContainer {
+@JsonDeserialize(using = DeviceDeserializer.class)
+public class Device extends DeviceContainer {
 
-    Logger logger = LoggerFactory.getLogger(ServiceObject.class);
+    Logger logger = LoggerFactory.getLogger(Device.class);
 
     @JsonIgnore
     private boolean isNew = true;
 
     public String userId;
-    public String id = ServiceObject.generateUUID();
+    public String id = Device.generateUUID();
     public String parentId;
     public String path;
 
@@ -61,7 +61,7 @@ public class ServiceObject extends ServiceObjectContainer {
     final public Map<String, Action> actions = new HashMap();
 
     /**
-     * A serializable class containing the settings for a ServiceObject
+     * A serializable class containing the settings for a Device
      */
     static public class Settings {
 
@@ -86,16 +86,16 @@ public class ServiceObject extends ServiceObjectContainer {
         return UUID.randomUUID().toString();
     }
 
-    public ServiceObject() {
+    public Device() {
     }
 
-    public ServiceObject(String soid) {
+    public Device(String soid) {
         this.id = soid;
     }
 
     @Override
     public String toString() {
-        return "ServiceObject<" + (this.id != null ? this.id : this.name) + ">";
+        return "Device<" + (this.id != null ? this.id : this.name) + ">";
     }
 
     public String getId() {
@@ -163,33 +163,33 @@ public class ServiceObject extends ServiceObjectContainer {
     /**
      * Merge an object to the current instance
      *
-     * @param serviceObject the object to merge from
+     * @param device the object to merge from
      */
-    public void parse(ServiceObject serviceObject) {
+    public void parse(Device device) {
 
-        id = serviceObject.id;
-        userId = serviceObject.userId;
-        parentId = serviceObject.parentId;
-        path = serviceObject.path;
+        id = device.id;
+        userId = device.userId;
+        parentId = device.parentId;
+        path = device.path;
 
-        name = serviceObject.name;
-        description = serviceObject.description;
+        name = device.name;
+        description = device.description;
 
-        createdAt = serviceObject.createdAt;
-        updatedAt = serviceObject.updatedAt;
+        createdAt = device.createdAt;
+        updatedAt = device.updatedAt;
 
         customFields.clear();
-        customFields.putAll(serviceObject.customFields);
+        customFields.putAll(device.customFields);
 
         getStreams().clear();
-        serviceObject.getStreams().entrySet().stream().forEach((el) -> {
-            el.getValue().setServiceObject(this);
+        device.getStreams().entrySet().stream().forEach((el) -> {
+            el.getValue().setDevice(this);
             getStreams().put(el.getKey(), el.getValue());
         });
 
         getActions().clear();
-        serviceObject.getActions().entrySet().stream().forEach((el) -> {
-            el.getValue().setServiceObject(this);
+        device.getActions().entrySet().stream().forEach((el) -> {
+            el.getValue().setDevice(this);
             getActions().put(el.getKey(), el.getValue());
         });
 
@@ -199,34 +199,34 @@ public class ServiceObject extends ServiceObjectContainer {
     @Override
     public void parse(String json) {
         try {
-            parse(mapper.readValue(json, ServiceObject.class));
+            parse(mapper.readValue(json, Device.class));
         } catch (IOException ex) {
             throw new ParserException(ex);
         }
     }
 
     /**
-     * Map a JSON string properties to a ServiceObject instance
+     * Map a JSON string properties to a Device instance
      *
      * @param json the json data
-     * @return the ServiceObject instance
+     * @return the Device instance
      */
-    public static ServiceObject fromJSON(String json) {
+    public static Device fromJSON(String json) {
         try {
-            return mapper.readValue(json, ServiceObject.class);
+            return mapper.readValue(json, Device.class);
         } catch (IOException e) {
             throw new RaptorComponent.ParserException(e);
         }
     }
 
     /**
-     * Map JsonNode properties to a ServiceObject instance
+     * Map JsonNode properties to a Device instance
      *
      * @param json the JsonNode data
-     * @return the ServiceObject instance
+     * @return the Device instance
      */
-    public static ServiceObject fromJSON(JsonNode json) {
-        return mapper.convertValue(json, ServiceObject.class);
+    public static Device fromJSON(JsonNode json) {
+        return mapper.convertValue(json, Device.class);
     }
 
     @JsonIgnore
@@ -302,13 +302,13 @@ public class ServiceObject extends ServiceObjectContainer {
      * @param streams list of streams
      * @return 
      */
-    public ServiceObject addStreams(Collection<Stream> streams) {
+    public Device addStreams(Collection<Stream> streams) {
         streams.stream().forEach((stream) -> {
 
-            stream.setServiceObject(this);
+            stream.setDevice(this);
 
             stream.channels.values().stream().forEach((channel) -> {
-                channel.setServiceObject(this);
+                channel.setDevice(this);
             });
 
             this.streams.put(stream.name, stream);
@@ -335,9 +335,9 @@ public class ServiceObject extends ServiceObjectContainer {
      * @param values list of actions
      * @return 
      */
-    public ServiceObject addActions(Collection<Action> values) {
+    public Device addActions(Collection<Action> values) {
         values.stream().forEach((action) -> {
-            action.setServiceObject(this);
+            action.setDevice(this);
             this.actions.put(action.name, action);
         });
         return this;
@@ -356,19 +356,19 @@ public class ServiceObject extends ServiceObjectContainer {
     }
 
     /**
-     * Return the current ServiceObject instance
+     * Return the current Device instance
      *
      * @return self-instance
      */
     @Override
-    public ServiceObject getServiceObject() {
+    public Device getDevice() {
         return this;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof ServiceObject) {
-            ServiceObject sobj = (ServiceObject) obj;
+        if (obj instanceof Device) {
+            Device sobj = (Device) obj;
             if (this.id != null && sobj.id != null) {
                 return sobj.id.equals(this.id);
             }

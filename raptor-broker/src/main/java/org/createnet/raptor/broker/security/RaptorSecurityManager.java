@@ -30,7 +30,7 @@ import org.createnet.raptor.broker.configuration.BrokerConfiguration;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.models.objects.RaptorComponent;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.service.tools.AuthService;
 import org.createnet.raptor.service.tools.IndexerService;
 import org.slf4j.Logger;
@@ -190,7 +190,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
             try {
 
-                ServiceObject obj = indexer.getObject(objectId);
+                Device obj = indexer.getObject(objectId);
                 if (obj == null) {
                     logger.warn("Object not found, id: `{}`", objectId);
                     return false;

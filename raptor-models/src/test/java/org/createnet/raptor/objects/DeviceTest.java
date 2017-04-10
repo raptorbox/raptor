@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.util.UUID;
 import org.createnet.raptor.models.objects.RaptorComponent;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.utils.TestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -23,11 +23,11 @@ import static org.junit.Assert.*;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class ServiceObjectTest extends TestUtils {
+public class DeviceTest extends TestUtils {
   
   protected JsonNode jsonData;
   
-  public ServiceObjectTest() {
+  public DeviceTest() {
     
   }
   
@@ -52,33 +52,33 @@ public class ServiceObjectTest extends TestUtils {
   }
 
   /**
-   * Test of parse method, of class ServiceObject.
+   * Test of parse method, of class Device.
    * @throws org.createnet.raptor.models.objects.RaptorComponent.ParserException
    */
   @Test
   public void testParse() {
     
-    serviceObject.parse(jsonServiceObject.toString());
+    device.parse(jsonDevice.toString());
     
-    assertTrue(serviceObject.name.equals("Phone"));
+    assertTrue(device.name.equals("Phone"));
     
-//    assertTrue(serviceObject.parentId == null);
-//    assertTrue(serviceObject.path == null);
+//    assertTrue(device.parentId == null);
+//    assertTrue(device.path == null);
     
-    assertTrue(serviceObject.streams.size() == 1);
-    assertTrue(serviceObject.streams.get("mylocation").channels.get("position").type.toLowerCase().equals("geo_point"));
+    assertTrue(device.streams.size() == 1);
+    assertTrue(device.streams.get("mylocation").channels.get("position").type.toLowerCase().equals("geo_point"));
     
-    assertTrue(serviceObject.actions.size() == 3);
-    assertTrue(serviceObject.actions.get("makeCall") != null);
+    assertTrue(device.actions.size() == 3);
+    assertTrue(device.actions.get("makeCall") != null);
     
   }
   
   @Test
   public void testSerializeToJsonNode()  {
     
-    serviceObject.parse(jsonServiceObject.toString());
+    device.parse(jsonDevice.toString());
     
-    JsonNode node = serviceObject.toJsonNode();
+    JsonNode node = device.toJsonNode();
     
     assertTrue(node.has("name"));
     
@@ -87,9 +87,9 @@ public class ServiceObjectTest extends TestUtils {
   @Test
   public void testSerializeViewPublic() throws IOException {
     
-    serviceObject.parse(jsonServiceObject.toString());
+    device.parse(jsonDevice.toString());
     
-    String strjson = serviceObject.toJSON();
+    String strjson = device.toJSON();
     JsonNode json = mapper.readTree(strjson);
     
     assertTrue(json.has("userId"));
@@ -97,11 +97,11 @@ public class ServiceObjectTest extends TestUtils {
   }
   
   /**
-   * Test of isNew method, of class ServiceObject.
+   * Test of isNew method, of class Device.
    */
   @Test
   public void testIsNew() {
-    assertTrue((new ServiceObject()).isNew());
+    assertTrue((new Device()).isNew());
   }
 
 

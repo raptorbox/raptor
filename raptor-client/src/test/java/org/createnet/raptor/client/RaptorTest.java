@@ -17,7 +17,7 @@ package org.createnet.raptor.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.client.model.AuthClient;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -84,7 +84,7 @@ public class RaptorTest {
 //        assertNotNull(result.user);
 //        assertNotNull(result.token);
 //        
-//        ServiceObject obj = new ServiceObject();
+//        Device obj = new Device();
 //
 //        obj.name = "test1";
 //        obj.addStream("enviromental")
@@ -92,7 +92,7 @@ public class RaptorTest {
 //                .addChannel("pressure", "number");
 //        obj.addAction("reset");
 //
-//        raptor.serviceObject().create(obj);
+//        raptor.device().create(obj);
 //
 //        assertNotNull(obj.id);
 //

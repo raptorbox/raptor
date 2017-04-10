@@ -19,19 +19,19 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Map;
 import org.createnet.raptor.models.data.Record;
 import org.createnet.raptor.models.data.types.TypesManager;
-import org.createnet.raptor.models.events.ServiceObjectEventListener;
+import org.createnet.raptor.models.events.DeviceEventListener;
 
 /**
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-public abstract class ServiceObjectContainer extends RaptorContainer {
+public abstract class DeviceContainer extends RaptorContainer {
 
     @JsonIgnore
-    protected ServiceObjectEventListener listener;
+    protected DeviceEventListener listener;
 
     @JsonIgnore
-    protected ServiceObject serviceObject;
+    protected Device device;
 
     protected Map<String, Record> getTypes() {
         return TypesManager.getTypes();
@@ -39,29 +39,29 @@ public abstract class ServiceObjectContainer extends RaptorContainer {
 
     @Override
     public RaptorComponent getContainer() {
-        if (getServiceObject() == null) {
+        if (getDevice() == null) {
             return null;
         }
-        return getServiceObject().getContainer();
+        return getDevice().getContainer();
     }
 
-    public void setServiceObject(ServiceObject _serviceObject) {
-        this.serviceObject = _serviceObject;
-//        if(_serviceObject != null) {
-//          this.setContainer(_serviceObject.getContainer());
+    public void setDevice(Device _device) {
+        this.device = _device;
+//        if(_device != null) {
+//          this.setContainer(_device.getContainer());
 //        }
     }
 
-    public ServiceObject getServiceObject() {
-        return serviceObject;
+    public Device getDevice() {
+        return device;
     }
 
     @Override
-    public ServiceObjectEventListener getListener() {
+    public DeviceEventListener getListener() {
         return listener;
     }
 
-    public void setListener(ServiceObjectEventListener listener) {
+    public void setListener(DeviceEventListener listener) {
         this.listener = listener;
     }
 

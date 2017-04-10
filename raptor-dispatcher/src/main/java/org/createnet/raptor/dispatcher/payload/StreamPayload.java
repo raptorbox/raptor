@@ -28,7 +28,7 @@ public class StreamPayload extends ObjectPayload {
     public JsonNode data;
 
     public StreamPayload(Stream stream, String op, JsonNode data) {
-        super(stream.getServiceObject(), op);
+        super(stream.getDevice(), op);
         this.streamId = stream.name;
         this.data = data;
         this.type = MessageType.stream.name();

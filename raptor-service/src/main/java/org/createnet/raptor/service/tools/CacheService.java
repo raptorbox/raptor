@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.createnet.raptor.models.objects.RaptorComponent;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
@@ -126,7 +126,7 @@ public class CacheService extends AbstractRaptorService {
      * Set the cache for an object definition by ID
      * @param obj
      */
-    public void setObject(ServiceObject obj) {
+    public void setObject(Device obj) {
         logger.debug("Store cache for {}", obj.id);
         getObjectCache().put(obj.getId(), obj.toJSON());
     }
@@ -136,12 +136,12 @@ public class CacheService extends AbstractRaptorService {
      * @param id
      * @return the service object definition
      */
-    public ServiceObject getObject(String id) {
+    public Device getObject(String id) {
         if (getObjectCache().containsKey(id)) {
             logger.debug("Load cache for {}", id);
             String cached = getObjectCache().get(id);
             try {
-                return ServiceObject.fromJSON(cached);
+                return Device.fromJSON(cached);
             } catch (RaptorComponent.ParserException ex) {
                 logger.warn("Cannot parse cached json {}: {}", id, cached);
                 getObjectCache().remove(id);

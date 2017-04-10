@@ -35,7 +35,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.indexer.Indexer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,12 +74,12 @@ public class ObjectApi extends AbstractApi {
     @ApiOperation(
             value = "List all the available devices definition",
             notes = "",
-            response = ServiceObject.class,
+            response = Device.class,
             responseContainer = "List",
             nickname = "listDevice"
     )
     @ApiResponses(value = {})
-    public List<ServiceObject> list(
+    public List<Device> list(
             @QueryParam("limit") Integer limit,
             @QueryParam("offset") Integer offset
     ) {
@@ -96,11 +96,11 @@ public class ObjectApi extends AbstractApi {
     @ApiOperation(
             value = "Create a new device definition",
             notes = "",
-            response = ServiceObject.class,
+            response = Device.class,
             nickname = "createDevice"
     )
     @ApiResponses(value = {})
-    public ServiceObject create(ServiceObject obj) {
+    public Device create(Device obj) {
 
         if (!auth.isAllowed(Authorization.Permission.Create)) {
             throw new ForbiddenException("Cannot create object");
@@ -137,18 +137,18 @@ public class ObjectApi extends AbstractApi {
     @ApiOperation(
             value = "Update a device definition",
             notes = "",
-            response = ServiceObject.class,
+            response = Device.class,
             nickname = "updateDevice"
     )
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "Not Found")
     })
-    public ServiceObject update(
+    public Device update(
             @PathParam("id") String objectId,
-            ServiceObject obj
+            Device obj
     ) {
 
-        ServiceObject storedObj = objectManager.load(objectId);
+        Device storedObj = objectManager.load(objectId);
 
         obj.id = objectId;
 
@@ -171,13 +171,13 @@ public class ObjectApi extends AbstractApi {
     @ApiOperation(
             value = "Return a device definition",
             notes = "",
-            response = ServiceObject.class,
+            response = Device.class,
             nickname = "loadDevice"
     )
     @ApiResponses(value = {})
-    public ServiceObject load(@PathParam("id") String id) {
+    public Device load(@PathParam("id") String id) {
 
-        ServiceObject obj = objectManager.load(id);
+        Device obj = objectManager.load(id);
 
         if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
             throw new ForbiddenException("Cannot read object");
@@ -196,7 +196,7 @@ public class ObjectApi extends AbstractApi {
     @ApiResponses(value = {})
     public Response delete(@PathParam("id") String id) {
 
-        ServiceObject obj = objectManager.load(id);
+        Device obj = objectManager.load(id);
 
         if (!auth.isAllowed(obj, Authorization.Permission.Delete)) {
             throw new ForbiddenException("Cannot delete object");
@@ -220,12 +220,12 @@ public class ObjectApi extends AbstractApi {
     @ApiOperation(
             value = "Search for object definitions",
             notes = "",
-            response = ServiceObject.class,
+            response = Device.class,
             responseContainer = "List",
             nickname = "searchDevice"
     )
     @ApiResponses(value = {})
-    public List<ServiceObject> search(ObjectQuery query) {
+    public List<Device> search(ObjectQuery query) {
 
         if (!auth.isAllowed(Authorization.Permission.List)) {
             throw new ForbiddenException("Cannot search for objects");
@@ -234,7 +234,7 @@ public class ObjectApi extends AbstractApi {
         //@TODO load accessible objects from auth service api!
         query.setUserId(auth.getUser().getUserId());
 
-        List<ServiceObject> list = objectManager.search(query);
+        List<Device> list = objectManager.search(query);
 
         return list;
     }

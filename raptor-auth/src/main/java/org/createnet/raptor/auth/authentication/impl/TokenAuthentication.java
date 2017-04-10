@@ -27,7 +27,7 @@ import org.createnet.raptor.auth.entity.AuthorizationRequest;
 import org.createnet.raptor.auth.entity.AuthorizationResponse;
 import org.createnet.raptor.auth.entity.LoginRequest;
 import org.createnet.raptor.auth.entity.LoginResponse;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +91,7 @@ public class TokenAuthentication extends AbstractAuthentication {
     }
 
     @Override
-    public void sync(String accessToken, ServiceObject obj, SyncOperation op) {
+    public void sync(String accessToken, Device obj, SyncOperation op) {
         try {
             logger.debug("Syncing object op:{} for id:{}", op.name(), obj.id);
 

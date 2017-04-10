@@ -28,7 +28,7 @@ import java.time.Instant;
 import org.createnet.raptor.client.event.MessageEventListener;
 import org.createnet.raptor.client.exception.ClientException;
 import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -192,12 +192,12 @@ public class RaptorClient implements IClient, RaptorComponent {
     }
 
     /**
-     * Creates a ServiceObject instance with container reference set
+     * Creates a Device instance with container reference set
      *
-     * @return the new ServiceObject instance
+     * @return the new Device instance
      */
-    public ServiceObject createObject() {
-        ServiceObject obj = new ServiceObject();
+    public Device createObject() {
+        Device obj = new Device();
         obj.setContainer(this);
         return obj;
     }

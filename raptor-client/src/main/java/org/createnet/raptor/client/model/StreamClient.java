@@ -42,7 +42,7 @@ public class StreamClient extends AbstractClient {
     }
 
     protected String getTopic(Stream stream) {
-        String path = RaptorComponent.format(RaptorClient.Routes.SUBSCRIBE_STREAM, stream.getServiceObject().getId(), stream.name);
+        String path = RaptorComponent.format(RaptorClient.Routes.SUBSCRIBE_STREAM, stream.getDevice().getId(), stream.name);
         return path;
     }
     
@@ -72,7 +72,7 @@ public class StreamClient extends AbstractClient {
      * @param record the record to send
      */
     public void push(RecordSet record) {
-        getClient().put(RaptorComponent.format(RaptorClient.Routes.PUSH, record.getStream().getServiceObject().id, record.getStream().name), record.toJsonNode());
+        getClient().put(RaptorComponent.format(RaptorClient.Routes.PUSH, record.getStream().getDevice().id, record.getStream().name), record.toJsonNode());
     }
 
     /**
@@ -106,7 +106,7 @@ public class StreamClient extends AbstractClient {
      */
     public ResultSet pull(Stream stream, Integer offset, Integer limit) {
         String qs = buildQueryString(offset, limit);
-        return ResultSet.fromJSON(stream, getClient().get(RaptorComponent.format(RaptorClient.Routes.PULL, stream.getServiceObject().id, stream.name) + qs));
+        return ResultSet.fromJSON(stream, getClient().get(RaptorComponent.format(RaptorClient.Routes.PULL, stream.getDevice().id, stream.name) + qs));
     }
 
     /**
@@ -146,7 +146,7 @@ public class StreamClient extends AbstractClient {
     public ResultSet search(Stream stream, DataQuery query, Integer offset, Integer limit) {
         String qs = buildQueryString(offset, limit);
         JsonNode results = getClient().post(
-                RaptorComponent.format(RaptorClient.Routes.SEARCH_DATA, stream.getServiceObject().id, stream.name) + qs,
+                RaptorComponent.format(RaptorClient.Routes.SEARCH_DATA, stream.getDevice().id, stream.name) + qs,
                 query.toJSON()
         );
         return ResultSet.fromJSON(stream, results);

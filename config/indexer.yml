@@ -15,7 +15,7 @@ elasticsearch:
     names:
       object:
         index: objects
-        type: serviceobject
+        type: device
       data:
         index: data
         type: record

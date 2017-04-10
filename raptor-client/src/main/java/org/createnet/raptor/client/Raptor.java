@@ -17,7 +17,7 @@ package org.createnet.raptor.client;
 
 import org.createnet.raptor.client.model.ActionClient;
 import org.createnet.raptor.client.model.AuthClient;
-import org.createnet.raptor.client.model.ServiceObjectClient;
+import org.createnet.raptor.client.model.DeviceClient;
 import org.createnet.raptor.client.model.StreamClient;
 
 /**
@@ -32,7 +32,7 @@ public class Raptor {
     final private AuthClient auth;
     final private StreamClient stream;
     final private ActionClient action;
-    final private ServiceObjectClient serviceObject;
+    final private DeviceClient device;
 
     public RaptorClient getClient() {
         return client;
@@ -66,8 +66,8 @@ public class Raptor {
      * Get a client to manage object definitions
      * @return
      */    
-    public ServiceObjectClient serviceObject() {
-        return serviceObject;
+    public DeviceClient device() {
+        return device;
     }
 
     public Raptor(RaptorClient.ClientConfig config) {
@@ -80,8 +80,8 @@ public class Raptor {
         stream = new StreamClient();
         stream.setClient(client);
 
-        serviceObject = new ServiceObjectClient();
-        serviceObject.setClient(client);
+        device = new DeviceClient();
+        device.setClient(client);
 
         action = new ActionClient();
         action.setClient(client);

@@ -21,7 +21,7 @@ import org.createnet.raptor.events.Event;
 import org.createnet.raptor.events.type.DataEvent;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.indexer.query.impl.es.DataQuery;
 import org.createnet.raptor.service.AbstractRaptorService;
@@ -75,7 +75,7 @@ public class StreamManagerService extends AbstractRaptorService {
         // just an effort to ensure arguments are not flipped
         assert objectId.length() == 36;
 
-        ServiceObject obj = objectManager.load(objectId);
+        Device obj = objectManager.load(objectId);
         Stream stream = obj.streams.getOrDefault(streamId, null);
 
         if (stream == null) {
@@ -94,7 +94,7 @@ public class StreamManagerService extends AbstractRaptorService {
      */
     public RecordSet lastUpdate(Stream stream) {
 
-        ServiceObject obj = stream.getServiceObject();
+        Device obj = stream.getDevice();
 
         assert obj != null;
 
@@ -111,7 +111,7 @@ public class StreamManagerService extends AbstractRaptorService {
 
     public void delete(Stream stream) {
 
-        ServiceObject obj = stream.getServiceObject();
+        Device obj = stream.getDevice();
         assert obj != null;
 
         if (!obj.settings.storeEnabled()) {
@@ -126,7 +126,7 @@ public class StreamManagerService extends AbstractRaptorService {
 
     public void push(Stream stream, RecordSet record, String userId) {
 
-        ServiceObject obj = stream.getServiceObject();
+        Device obj = stream.getDevice();
         assert obj != null;
 
         // set the stream, enforcing channels constrain on serialization
@@ -173,7 +173,7 @@ public class StreamManagerService extends AbstractRaptorService {
      */
     public ResultSet search(Stream stream, DataQuery query, Integer offset, Integer limit) {
 
-        ServiceObject obj = stream.getServiceObject();
+        Device obj = stream.getDevice();
         assert obj != null;
 
         if (!obj.settings.storeEnabled()) {
@@ -200,7 +200,7 @@ public class StreamManagerService extends AbstractRaptorService {
 
     public ResultSet fetch(Stream stream, Integer offset, Integer limit) {
         
-        ServiceObject obj = stream.getServiceObject();
+        Device obj = stream.getDevice();
         assert obj != null;
         
         if (!obj.settings.storeEnabled()) {

@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.IOException;
 import java.util.ArrayList;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +79,7 @@ public class ResultSet extends ArrayList<RecordSet> {
     
     private void parse(String jsonString) {
 
-        ObjectMapper mapper = ServiceObject.getMapper();
+        ObjectMapper mapper = Device.getMapper();
         JsonNode json;
 
         try {
@@ -134,7 +134,7 @@ public class ResultSet extends ArrayList<RecordSet> {
      * @return JsonNode representation of the ResultSet
      */
     public ArrayNode toJsonNode() {
-        ObjectMapper mapper = ServiceObject.getMapper();
+        ObjectMapper mapper = Device.getMapper();
         ArrayNode list = mapper.createArrayNode();
         this.forEach((record) -> {
             list.add(record.toJsonNode());

@@ -22,7 +22,7 @@ import org.createnet.raptor.models.events.StreamEventListener;
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-abstract class StreamContainer extends ServiceObjectContainer {
+abstract class StreamContainer extends DeviceContainer {
 
     @JsonIgnore
     protected StreamEventListener listener;
@@ -32,7 +32,7 @@ abstract class StreamContainer extends ServiceObjectContainer {
 
     @Override
     public RaptorComponent getContainer() {
-        return stream.getServiceObject().getContainer();
+        return stream.getDevice().getContainer();
     }
 
     public Stream getStream() {
@@ -42,7 +42,7 @@ abstract class StreamContainer extends ServiceObjectContainer {
     public void setStream(Stream stream) {
         this.stream = stream;
         if (stream != null) {
-            this.setServiceObject(stream.getServiceObject());
+            this.setDevice(stream.getDevice());
         }
     }
 

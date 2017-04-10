@@ -9,7 +9,7 @@ package org.createnet.raptor.models.events;
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public interface ServiceObjectEventListener extends IEventListener {
+public interface DeviceEventListener extends IEventListener {
 
-    public void onList(ServiceObjectEvent serviceObjectEvent);
+    public void onList(DeviceEvent deviceEvent);
 }

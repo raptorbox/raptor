@@ -18,7 +18,7 @@ package org.createnet.raptor.http.api;
 import javax.inject.Inject;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.service.tools.AuthService;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.service.core.ActionManagerService;
 import org.createnet.raptor.service.core.ObjectManagerService;
 import org.createnet.raptor.service.core.StreamManagerService;
@@ -52,7 +52,7 @@ abstract public class AbstractApi {
      * @deprecated move the auth api to listen on broker events
      */
     @Deprecated
-    protected boolean syncObject(ServiceObject obj, Authentication.SyncOperation op) {
+    protected boolean syncObject(Device obj, Authentication.SyncOperation op) {
         try {
             auth.sync(auth.getAccessToken(), obj, op);
         } catch (Exception ex) {

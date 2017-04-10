@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import org.createnet.raptor.auth.AuthConfiguration;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 
 /**
  *
@@ -108,6 +108,6 @@ public interface Authentication {
   public void initialize(AuthConfiguration configuration);
   public UserInfo getUser(String accessToken) throws AuthenticationException;
   public UserInfo login(String username, String password) throws AuthenticationException;
-  public void sync(String accessToken, ServiceObject obj, SyncOperation op) throws AuthenticationException;
+  public void sync(String accessToken, Device obj, SyncOperation op) throws AuthenticationException;
   
 }

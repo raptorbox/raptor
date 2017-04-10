@@ -33,7 +33,7 @@ import org.createnet.raptor.service.tools.TreeService;
 import org.createnet.raptor.models.data.IRecord;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Channel;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -104,7 +104,7 @@ public class IndexerServiceTest {
     @Test
     public void testIndex() {
 
-        ServiceObject obj = new ServiceObject();
+        Device obj = new Device();
         obj.name = "test1";
 
         indexer.saveObject(obj, true);
@@ -115,37 +115,37 @@ public class IndexerServiceTest {
     @Test
     public void testSetChild() {
 
-        ServiceObject a = new ServiceObject(rndName("a"));
+        Device a = new Device(rndName("a"));
 
         String nameB = rndName("b");
-        ServiceObject b = new ServiceObject(nameB);
+        Device b = new Device(nameB);
 
-        ServiceObject c = new ServiceObject(rndName("c"));
+        Device c = new Device(rndName("c"));
 
         String nameD = rndName("b");
-        ServiceObject d = new ServiceObject(nameD);
+        Device d = new Device(nameD);
 
         indexer.saveObjects(Arrays.asList(a, b, c, d), null);
 
         tree.setChildren(a, Arrays.asList(b, c));
-        List<ServiceObject> a_objs = tree.getChildren(a);
+        List<Device> a_objs = tree.getChildren(a);
 
         Assert.assertEquals(2, a_objs.size());
         Assert.assertEquals(1, a_objs.stream().filter(o -> o.id.equals(nameB)).collect(Collectors.toList()).size());
 
         tree.setChildren(c, Arrays.asList(d));
 
-        List<ServiceObject> c_objs = tree.getChildren(c);
+        List<Device> c_objs = tree.getChildren(c);
 
         Assert.assertEquals(1, c_objs.size());
         Assert.assertEquals(nameD, c_objs.get(0).id);
 
     }
 
-    protected List<ServiceObject> addChild(String pid, String cid) {
+    protected List<Device> addChild(String pid, String cid) {
 
-        ServiceObject a = new ServiceObject(pid);
-        ServiceObject f = new ServiceObject(cid);
+        Device a = new Device(pid);
+        Device f = new Device(cid);
 
         indexer.saveObjects(Arrays.asList(a, f));
         tree.addChildren(a, Arrays.asList(f));
@@ -157,17 +157,17 @@ public class IndexerServiceTest {
     public void testPath() throws InterruptedException {
 
         List<String> ids = Arrays.asList("x1", "x2", "x3", "x4", "x5", "x6");
-        List<ServiceObject> objects = ids.stream().sequential()
-                .map(s -> new ServiceObject(s))
+        List<Device> objects = ids.stream().sequential()
+                .map(s -> new Device(s))
                 .collect(Collectors.toList());
 
-        List<ServiceObject> list = null;
+        List<Device> list = null;
         indexer.saveObjects(objects, null);
 
         for (int i = 0; i < objects.size(); i++) {
 
-            ServiceObject curr = objects.get(i);
-            ServiceObject prev = null;
+            Device curr = objects.get(i);
+            Device prev = null;
             if (i > 0) {
                 prev = objects.get(i - 1);
                 list = tree.addChildren(prev, Arrays.asList(curr));
@@ -178,7 +178,7 @@ public class IndexerServiceTest {
 
         String expectedPath = String.join("/", ids);
 
-        ServiceObject x6 = list.get(0);
+        Device x6 = list.get(0);
         String actualPath = x6.path() + "/" + x6.id;
 
         Assert.assertNotNull(list);
@@ -193,7 +193,7 @@ public class IndexerServiceTest {
     public void testAddChild() {
 
         String id = rndName("f");
-        List<ServiceObject> children = addChild(rndName("add"), id);
+        List<Device> children = addChild(rndName("add"), id);
 
         Assert.assertEquals(
                 1,
@@ -211,8 +211,8 @@ public class IndexerServiceTest {
         String pid = rndName("rm");
         String id = rndName("g");
 
-        List<ServiceObject> children1 = addChild(pid, id);
-        List<ServiceObject> children2 = tree.removeChildren(pid, Arrays.asList(id));
+        List<Device> children1 = addChild(pid, id);
+        List<Device> children2 = tree.removeChildren(pid, Arrays.asList(id));
 
         Assert.assertEquals(
                 0,
@@ -227,7 +227,7 @@ public class IndexerServiceTest {
     @Test
     public void testRemoveData() {
         
-        ServiceObject obj = new ServiceObject(rndName("test remove"));
+        Device obj = new Device(rndName("test remove"));
         
         Channel c = new Channel();
         c.name = "foochannel";
@@ -236,7 +236,7 @@ public class IndexerServiceTest {
         Stream stream = new Stream();
         stream.name = "test";
         stream.channels.put("string", c);
-        stream.setServiceObject(obj);
+        stream.setDevice(obj);
         
         List<RecordSet> records = new ArrayList();
         for (int i = 0; i < 5000; i++) {

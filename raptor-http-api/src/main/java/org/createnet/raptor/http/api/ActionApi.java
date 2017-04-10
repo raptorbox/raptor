@@ -31,7 +31,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.createnet.raptor.auth.authorization.Authorization;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.createnet.raptor.models.data.ActionStatus;
@@ -80,7 +80,7 @@ public class ActionApi extends AbstractApi {
             @PathParam("id") String id
     ) {
 
-        ServiceObject obj = objectManager.load(id);
+        Device obj = objectManager.load(id);
 
         if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
             throw new ForbiddenException("Cannot load object");
@@ -105,7 +105,7 @@ public class ActionApi extends AbstractApi {
     ) {
 
         Action action = actionManager.load(objectId, actionId);
-        ServiceObject obj = action.getServiceObject();
+        Device obj = action.getDevice();
 
         if (!auth.isAllowed(obj, Authorization.Permission.Execute)) {
             throw new ForbiddenException("Cannot access action status");
@@ -137,7 +137,7 @@ public class ActionApi extends AbstractApi {
 
         
         Action action = actionManager.load(objectId, actionId);
-        ServiceObject obj = action.getServiceObject();
+        Device obj = action.getDevice();
 
         if (!auth.isAllowed(obj, Authorization.Permission.Execute)) {
             throw new ForbiddenException("Cannot modify action status");
@@ -167,7 +167,7 @@ public class ActionApi extends AbstractApi {
     ) {
 
         Action action = actionManager.load(objectId, actionId);
-        ServiceObject obj = action.getServiceObject();
+        Device obj = action.getDevice();
         
         if (!auth.isAllowed(obj, Authorization.Permission.Execute)) {
             throw new ForbiddenException("Cannot modify action status");

@@ -34,7 +34,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,20 +71,20 @@ public class ObjectTreeApi extends AbstractApi {
     @ApiOperation(
             value = "Return the device children if any", 
             notes = "",
-            response = ServiceObject.class,
+            response = Device.class,
             responseContainer = "List",
             nickname = "getChildren"
     )
     @ApiResponses(value = {})
-    public List<ServiceObject> children(@PathParam("id") String id) {
+    public List<Device> children(@PathParam("id") String id) {
 
-        ServiceObject obj = objectManager.load(id);
+        Device obj = objectManager.load(id);
 
         if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
             throw new ForbiddenException("Cannot read object");
         }
 
-        List<ServiceObject> list = objectManager.tree(obj);
+        List<Device> list = objectManager.tree(obj);
         return list;
     }
 
@@ -92,22 +92,22 @@ public class ObjectTreeApi extends AbstractApi {
     @ApiOperation(
             value = "Set a list of devices as children",
             notes = "",
-            response = ServiceObject.class,
+            response = Device.class,
             responseContainer = "List",
             nickname = "setChildren"
     )
     @ApiResponses(value = {})    
-    public List<ServiceObject> setChildren(@PathParam("id") String id, final List<String> childrenIds) {
+    public List<Device> setChildren(@PathParam("id") String id, final List<String> childrenIds) {
 
-        ServiceObject parentObject = objectManager.load(id);
+        Device parentObject = objectManager.load(id);
         
         if (!auth.isAllowed(parentObject, Authorization.Permission.Read)) {
             throw new ForbiddenException("Cannot load parent object");
         }
         
-        List<ServiceObject> childrenObjects = childrenIds.stream().map((String cid) -> {
+        List<Device> childrenObjects = childrenIds.stream().map((String cid) -> {
 
-            ServiceObject child = objectManager.load(cid);
+            Device child = objectManager.load(cid);
 
             if (!auth.isAllowed(child, Authorization.Permission.Update)) {
                 throw new ForbiddenException("Cannot update object");
@@ -119,14 +119,14 @@ public class ObjectTreeApi extends AbstractApi {
             return child;
         }).collect(Collectors.toList());
 
-        for (ServiceObject childObject : childrenObjects) {
+        for (Device childObject : childrenObjects) {
             boolean sync = syncObject(childObject, Authentication.SyncOperation.UPDATE);
             if (!sync) {
                 throw new InternalServerErrorException("Failed to sync to auth system object " + childObject.id);
             }
         }
 
-        List<ServiceObject> list = objectManager.setChildren(parentObject, childrenObjects);
+        List<Device> list = objectManager.setChildren(parentObject, childrenObjects);
         return list;
     }
 
@@ -135,15 +135,15 @@ public class ObjectTreeApi extends AbstractApi {
     @ApiOperation(
             value = "Add a device as children",
             notes = "",
-            response = ServiceObject.class,
+            response = Device.class,
             responseContainer = "List",
             nickname = "addChildren"
     )
     @ApiResponses(value = {})    
-    public List<ServiceObject> addChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) {
+    public List<Device> addChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) {
 
-        ServiceObject parentObject = objectManager.load(id);
-        ServiceObject childObject = objectManager.load(childrenId);
+        Device parentObject = objectManager.load(id);
+        Device childObject = objectManager.load(childrenId);
 
         if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
             throw new ForbiddenException("Cannot update object");
@@ -160,7 +160,7 @@ public class ObjectTreeApi extends AbstractApi {
             throw new InternalServerErrorException("Failed to sync to auth system object " + childObject.id);
         }
         
-        List<ServiceObject> list = objectManager.addChildren(parentObject, Arrays.asList(childObject));
+        List<Device> list = objectManager.addChildren(parentObject, Arrays.asList(childObject));
 
         return list;
     }
@@ -170,14 +170,14 @@ public class ObjectTreeApi extends AbstractApi {
     @ApiOperation(
             value = "Remove a device from children list",
             notes = "",
-            response = ServiceObject.class,
+            response = Device.class,
             responseContainer = "List",
             nickname = "removeChildren"
     )
-    public List<ServiceObject> removeChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) {
+    public List<Device> removeChildren(@PathParam("id") String id, @PathParam("childrenId") String childrenId) {
 
-        ServiceObject parentObject = objectManager.load(id);
-        ServiceObject childObject = objectManager.load(childrenId);
+        Device parentObject = objectManager.load(id);
+        Device childObject = objectManager.load(childrenId);
 
         if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
             throw new ForbiddenException("Cannot update parent object");
@@ -194,7 +194,7 @@ public class ObjectTreeApi extends AbstractApi {
             throw new InternalServerErrorException("Failed to sync to auth system object " + childObject.id);
         }
         
-        List<ServiceObject> list = objectManager.removeChildren(parentObject, Arrays.asList(childObject));
+        List<Device> list = objectManager.removeChildren(parentObject, Arrays.asList(childObject));
         
         return list;
 

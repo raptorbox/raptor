@@ -6,30 +6,30 @@
 package org.createnet.raptor.models.events;
 
 import java.util.List;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 
 /**
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public class ServiceObjectEvent implements IEvent {
+public class DeviceEvent implements IEvent {
 
-    private ServiceObject object = null;
-    private List<ServiceObject> list = null;
+    private Device object = null;
+    private List<Device> list = null;
 
-    public ServiceObjectEvent(ServiceObject object) {
+    public DeviceEvent(Device object) {
         this.object = object;
     }
     
-    public ServiceObjectEvent(List<ServiceObject> objects) {
+    public DeviceEvent(List<Device> objects) {
         this.list = objects;
     }
 
-    public ServiceObject getObject() {
+    public Device getObject() {
         return object;
     }
     
-    public List<ServiceObject> getList() {
+    public List<Device> getList() {
         return list;
     }
 

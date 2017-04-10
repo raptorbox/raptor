@@ -56,7 +56,7 @@ public class Stream extends StreamContainer {
         
     final public Map<String, Channel> channels = new HashMap();
 
-    public Stream(String json, ServiceObject object) {
+    public Stream(String json, Device object) {
 
         initialize();
         try {
@@ -67,12 +67,12 @@ public class Stream extends StreamContainer {
         }
     }
 
-    public Stream(JsonNode json, ServiceObject object) {
+    public Stream(JsonNode json, Device object) {
         initialize();
         parse(json, object);
     }
 
-    public Stream(String name, JsonNode json, ServiceObject object) {
+    public Stream(String name, JsonNode json, Device object) {
         initialize();
         this.name = name;
         parse(json, object);
@@ -133,8 +133,8 @@ public class Stream extends StreamContainer {
         return this;
     }
     
-    protected void parse(JsonNode json, ServiceObject object) {
-        this.setServiceObject(object);
+    protected void parse(JsonNode json, Device object) {
+        this.setDevice(object);
         parse(json);
     }
 

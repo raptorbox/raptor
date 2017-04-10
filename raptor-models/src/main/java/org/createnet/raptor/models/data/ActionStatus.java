@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.UUID;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.RaptorComponent;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 
 /**
  *
@@ -44,7 +44,7 @@ public class ActionStatus {
     public ActionStatus(Action action, String status) {
         this(status);
         this.actionId = action.name;
-        this.objectId = action.getServiceObject().id;
+        this.objectId = action.getDevice().id;
     }
 
     public ActionStatus(String status) {
@@ -73,14 +73,14 @@ public class ActionStatus {
 
     public static ActionStatus parseJSON(String rawStatus) {
         try {
-            return ServiceObject.getMapper().readValue(rawStatus, ActionStatus.class);
+            return Device.getMapper().readValue(rawStatus, ActionStatus.class);
         } catch (IOException ex) {
             throw new RaptorComponent.ParserException(ex);
         }
     }
 
     public static ActionStatus parseJSON(JsonNode rawStatus) {
-        return ServiceObject.getMapper().convertValue(rawStatus, ActionStatus.class);
+        return Device.getMapper().convertValue(rawStatus, ActionStatus.class);
     }
 
     @Override

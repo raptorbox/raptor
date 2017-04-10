@@ -16,7 +16,7 @@
 package org.createnet.raptor.events.type;
 
 import org.createnet.raptor.events.AbstractEvent;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 
 /**
  *
@@ -24,16 +24,16 @@ import org.createnet.raptor.models.objects.ServiceObject;
  */
 public class ObjectEvent extends AbstractEvent {
   
-  protected ServiceObject obj;
+  protected Device obj;
   
   public ObjectEvent() {
   }
   
-  public ObjectEvent(ServiceObject obj) {
+  public ObjectEvent(Device obj) {
     this.obj = obj;
   }
 
-  public ServiceObject getObject() {
+  public Device getObject() {
     return obj;
   }
   

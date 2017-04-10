@@ -22,14 +22,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.Iterator;
 import org.createnet.raptor.models.objects.Action;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 
 /**
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-public class ServiceObjectDeserializer extends JsonDeserializer<ServiceObject> {
+public class DeviceDeserializer extends JsonDeserializer<Device> {
 
     protected String getText(String fieldName, JsonNode tree) {
         if (tree.has(fieldName) && !tree.get(fieldName).isNull()) {
@@ -39,34 +39,34 @@ public class ServiceObjectDeserializer extends JsonDeserializer<ServiceObject> {
     }
 
     @Override
-    public ServiceObject deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+    public Device deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
-        ServiceObject serviceObject = new ServiceObject();
+        Device device = new Device();
 
         JsonNode tree = jp.getCodec().readTree(jp);
 
         if (tree.has("id")) {
-            serviceObject.id = getText("id", tree);
+            device.id = getText("id", tree);
         }
 
         if (tree.has("userId")) {
-            serviceObject.userId = getText("userId", tree);
+            device.userId = getText("userId", tree);
         }
 
         if (tree.has("name")) {
-            serviceObject.name = getText("name", tree);
+            device.name = getText("name", tree);
         }
 
         if (tree.has("description")) {
-            serviceObject.description = getText("description", tree);
+            device.description = getText("description", tree);
         }
 
         if (tree.has("parentId")) {
-            serviceObject.parentId = getText("parentId", tree);
+            device.parentId = getText("parentId", tree);
         }
 
         if (tree.has("path")) {
-            serviceObject.path = getText("path", tree);
+            device.path = getText("path", tree);
         }
 
         if (tree.has("streams")) {
@@ -79,15 +79,15 @@ public class ServiceObjectDeserializer extends JsonDeserializer<ServiceObject> {
                     String name = fieldNames.next();
                     JsonNode jsonStream = tree.get("streams").get(name);
 
-                    Stream stream = new Stream(name, jsonStream, serviceObject);
-                    serviceObject.streams.put(stream.name, stream);
+                    Stream stream = new Stream(name, jsonStream, device);
+                    device.streams.put(stream.name, stream);
                 }
             }
 
             if (tree.get("streams").isArray()) {
                 for (JsonNode jsonStream : tree.get("streams")) {
                     Stream stream = new Stream(jsonStream);
-                    serviceObject.streams.put(stream.name, stream);
+                    device.streams.put(stream.name, stream);
                 }
             }
 
@@ -97,8 +97,8 @@ public class ServiceObjectDeserializer extends JsonDeserializer<ServiceObject> {
 
             if (tree.get("actions").isArray()) {
                 for (JsonNode json : tree.get("actions")) {
-                    Action actuation = new Action(json, serviceObject);
-                    serviceObject.actions.put(actuation.name, actuation);
+                    Action actuation = new Action(json, device);
+                    device.actions.put(actuation.name, actuation);
                 }
             }
 
@@ -109,13 +109,13 @@ public class ServiceObjectDeserializer extends JsonDeserializer<ServiceObject> {
                     String name = fieldNames.next();
                     JsonNode json = tree.get("actions").get(name);
 
-                    Action actuation = new Action(name, json, serviceObject);
-                    serviceObject.actions.put(actuation.name, actuation);
+                    Action actuation = new Action(name, json, device);
+                    device.actions.put(actuation.name, actuation);
                 }
             }
 
         }
 
-        return serviceObject;
+        return device;
     }
 }

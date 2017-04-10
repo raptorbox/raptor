@@ -28,7 +28,7 @@ import org.createnet.raptor.dispatcher.payload.DataPayload;
 import org.createnet.raptor.dispatcher.payload.DispatcherPayload;
 import org.createnet.raptor.dispatcher.payload.ObjectPayload;
 import org.createnet.raptor.dispatcher.payload.StreamPayload;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,29 +38,29 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class ServiceObjectClient extends AbstractClient {
+public class DeviceClient extends AbstractClient {
 
-    final static Logger logger = LoggerFactory.getLogger(ServiceObjectClient.class);
+    final static Logger logger = LoggerFactory.getLogger(DeviceClient.class);
 
-    public interface ServiceObjectCallback {
+    public interface DeviceCallback {
 
         public static class PayloadMessage {
 
-            final public ServiceObject object;
+            final public Device object;
             final public JsonNode raw;
             final public DispatcherPayload payload;
 
-            public PayloadMessage(ServiceObject object, JsonNode raw, DispatcherPayload payload) {
+            public PayloadMessage(Device object, JsonNode raw, DispatcherPayload payload) {
                 this.raw = raw;
                 this.payload = payload;
                 this.object = object;
             }
         }
 
-        public void execute(ServiceObject obj, PayloadMessage message);
+        public void execute(Device obj, PayloadMessage message);
     }
 
-    protected String getTopic(ServiceObject obj) {
+    protected String getTopic(Device obj) {
         return obj.id + "/events";
     }
 
@@ -70,11 +70,11 @@ public class ServiceObjectClient extends AbstractClient {
      * @param obj the object to listen for
      * @param callback The callback to fire on event arrival
      */
-    public void subscribe(ServiceObject obj, ServiceObjectCallback callback) {
+    public void subscribe(Device obj, DeviceCallback callback) {
         getClient().subscribe(getTopic(obj), (MessageEventListener.Message message) -> {
             try {
 
-                JsonNode json = ServiceObject.getMapper().readTree(message.content);
+                JsonNode json = Device.getMapper().readTree(message.content);
                 DispatcherPayload payload = null;
                 if (json.has("type")) {
                     Class<? extends DispatcherPayload> clazz = null;
@@ -94,11 +94,11 @@ public class ServiceObjectClient extends AbstractClient {
                     }
 
                     if (clazz != null) {
-                        payload = ServiceObject.getMapper().convertValue(json, clazz);
+                        payload = Device.getMapper().convertValue(json, clazz);
                     }
                 }
 
-                callback.execute(obj, new ServiceObjectCallback.PayloadMessage(obj, json, payload));
+                callback.execute(obj, new DeviceCallback.PayloadMessage(obj, json, payload));
             } catch (IOException ex) {
                 logger.error("Error parsing JSON payload: {}", ex.getMessage());
             }
@@ -110,7 +110,7 @@ public class ServiceObjectClient extends AbstractClient {
      *
      * @param obj obj from which to unsubscribe events
      */
-    public void unsubscribe(ServiceObject obj) {
+    public void unsubscribe(Device obj) {
         getClient().unsubscribe(getTopic(obj));
     }
 
@@ -118,9 +118,9 @@ public class ServiceObjectClient extends AbstractClient {
      * Create an object definition
      *
      * @param obj object definition to create
-     * @return the ServiceObject instance
+     * @return the Device instance
      */
-    public ServiceObject create(ServiceObject obj) {
+    public Device create(Device obj) {
         JsonNode node = getClient().post(RaptorClient.Routes.CREATE, obj.toJsonNode());
         if (!node.has("id")) {
             throw new ClientException("Missing ID on object creation");
@@ -133,10 +133,10 @@ public class ServiceObjectClient extends AbstractClient {
      * Load an object definition
      *
      * @param id unique id of the object
-     * @return the ServiceObject instance
+     * @return the Device instance
      */
-    public ServiceObject load(String id) {
-        ServiceObject obj = getClient().createObject();
+    public Device load(String id) {
+        Device obj = getClient().createObject();
         obj.parse(
                 getClient().get(
                         RaptorComponent.format(RaptorClient.Routes.LOAD, id)
@@ -146,12 +146,12 @@ public class ServiceObjectClient extends AbstractClient {
     }
 
     /**
-     * Update a ServiceObject instance
+     * Update a Device instance
      *
-     * @param obj the ServiceObject to update
-     * @return the updated ServiceObject instance
+     * @param obj the Device to update
+     * @return the updated Device instance
      */
-    public ServiceObject update(ServiceObject obj) {
+    public Device update(Device obj) {
         obj.parse(
                 getClient().put(
                         RaptorComponent.format(RaptorClient.Routes.UPDATE, obj.getId()),
@@ -162,39 +162,39 @@ public class ServiceObjectClient extends AbstractClient {
     }
 
     /**
-     * Search for ServiceObjects
+     * Search for Devices
      *
      * @param query the query to match the object definitions
      * @param offset results start from offset
      * @param limit limit the total size of result
-     * @return a list of ServiceObjects matching the query
+     * @return a list of Devices matching the query
      */
-    public List<ServiceObject> search(ObjectQuery query, Integer offset, Integer limit) {
+    public List<Device> search(ObjectQuery query, Integer offset, Integer limit) {
         JsonNode json = getClient().post(
                 RaptorClient.Routes.SEARCH,
                 query.toJSON()
         );
-        List<ServiceObject> results = ServiceObject.getMapper().convertValue(json, new TypeReference<List<ServiceObject>>() {
+        List<Device> results = Device.getMapper().convertValue(json, new TypeReference<List<Device>>() {
         });
         return results;
     }
 
     /**
-     * Search for ServiceObjects
+     * Search for Devices
      *
      * @param query the query to match the object definitions
-     * @return a list of ServiceObjects matching the query
+     * @return a list of Devices matching the query
      */
-    public List<ServiceObject> search(ObjectQuery query) {
+    public List<Device> search(ObjectQuery query) {
         return search(query, null, null);
     }
 
     /**
-     * Delete a ServiceObject instance and all of its data
+     * Delete a Device instance and all of its data
      *
-     * @param obj ServiceObject to delete
+     * @param obj Device to delete
      */
-    public void delete(ServiceObject obj) {
+    public void delete(Device obj) {
         getClient().delete(
                 RaptorComponent.format(RaptorClient.Routes.DELETE, obj.getId())
         );

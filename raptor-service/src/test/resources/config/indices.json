@@ -91,7 +91,7 @@
             }
         },
         "mappings": {
-            "serviceobject": {
+            "device": {
                 "properties": {
                     "id": {
                         "type": "keyword"

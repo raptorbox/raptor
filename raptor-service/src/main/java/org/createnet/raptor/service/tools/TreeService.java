@@ -21,8 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import org.createnet.raptor.models.objects.ServiceObject;
-import org.createnet.raptor.models.objects.ServiceObjectNode;
+import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.objects.DeviceNode;
 import org.createnet.raptor.indexer.Indexer;
 import org.createnet.raptor.indexer.query.impl.es.TreeQuery;
 import org.ehcache.Cache;
@@ -65,12 +65,12 @@ public class TreeService extends AbstractRaptorService {
 
     }
 
-    public List<ServiceObject> getChildrenList(String id) {
-        ServiceObject obj = indexer.getObject(id);
+    public List<Device> getChildrenList(String id) {
+        Device obj = indexer.getObject(id);
         return getChildren(obj);
     }
 
-    public List<ServiceObject> getChildren(ServiceObject parentObject) {
+    public List<Device> getChildren(Device parentObject) {
 
         TreeQuery query = new TreeQuery();
 
@@ -80,7 +80,7 @@ public class TreeService extends AbstractRaptorService {
         indexer.setQueryIndex(query, IndexerService.IndexNames.object);
 
         List<Indexer.IndexRecord> list = indexer.getIndexer().search(query);
-        List<ServiceObject> children = new ArrayList<>();
+        List<Device> children = new ArrayList<>();
 
         //load from cache
         if (getCache().containsKey(parentObject.id)) {
@@ -89,20 +89,20 @@ public class TreeService extends AbstractRaptorService {
         }
 
         for (Indexer.IndexRecord record : list) {
-            ServiceObject child = ServiceObject.fromJSON(record.body);
+            Device child = Device.fromJSON(record.body);
             children.add(child);
         }
 
         return children;
     }
 
-    public List<ServiceObject> addChildren(String parentId, List<String> childrenIds) {
+    public List<Device> addChildren(String parentId, List<String> childrenIds) {
 
         List<String> toload = new ArrayList(childrenIds);
         toload.add(parentId);
 
-        final ServiceObject parentObject = new ServiceObject();
-        List<ServiceObject> children = indexer.getObjects(toload).stream().filter((final ServiceObject o) -> {
+        final Device parentObject = new Device();
+        List<Device> children = indexer.getObjects(toload).stream().filter((final Device o) -> {
             boolean isParent = o.id.equals(parentId);
             if (isParent) {
                 parentObject.parse(o);
@@ -113,9 +113,9 @@ public class TreeService extends AbstractRaptorService {
         return addChildren(parentObject, children);
     }
 
-    public List<ServiceObject> addChildren(ServiceObject parentObject, List<ServiceObject> children) {
+    public List<Device> addChildren(Device parentObject, List<Device> children) {
 
-        List<ServiceObject> ids = getChildren(parentObject);
+        List<Device> ids = getChildren(parentObject);
 
         children.forEach((c) -> {
             if (!ids.contains(c)) {
@@ -128,13 +128,13 @@ public class TreeService extends AbstractRaptorService {
         return ids;
     }
 
-    public List<ServiceObject> removeChildren(String parentId, List<String> childrenIds) {
+    public List<Device> removeChildren(String parentId, List<String> childrenIds) {
 
         List<String> toload = new ArrayList(childrenIds);
         toload.add(parentId);
 
-        final ServiceObject parentObject = new ServiceObject();
-        List<ServiceObject> children = indexer.getObjects(toload).stream().filter((final ServiceObject o) -> {
+        final Device parentObject = new Device();
+        List<Device> children = indexer.getObjects(toload).stream().filter((final Device o) -> {
             boolean isParent = !o.id.equals(parentId);
             if (isParent) {
                 parentObject.parse(o);
@@ -145,9 +145,9 @@ public class TreeService extends AbstractRaptorService {
         return removeChildren(parentObject, children);
     }
 
-    public List<ServiceObject> removeChildren(ServiceObject parentObject, List<ServiceObject> children) {
+    public List<Device> removeChildren(Device parentObject, List<Device> children) {
 
-        List<ServiceObject> ids = getChildren(parentObject);
+        List<Device> ids = getChildren(parentObject);
 
         children.forEach((c) -> {
             if (ids.contains(c)) {
@@ -159,13 +159,13 @@ public class TreeService extends AbstractRaptorService {
         return ids;
     }
 
-    public List<ServiceObject> setChildren(String parentId, List<String> childrenIds) {
+    public List<Device> setChildren(String parentId, List<String> childrenIds) {
 
         List<String> toload = new ArrayList(childrenIds);
         toload.add(parentId);
 
-        final ServiceObject parentObject = new ServiceObject();
-        List<ServiceObject> children = indexer.getObjects(toload).stream().filter((final ServiceObject o) -> {
+        final Device parentObject = new Device();
+        List<Device> children = indexer.getObjects(toload).stream().filter((final Device o) -> {
             boolean isParent = !o.id.equals(parentId);
             if (isParent) {
                 parentObject.parse(o);
@@ -176,7 +176,7 @@ public class TreeService extends AbstractRaptorService {
         return setChildren(parentObject, children);
     }
 
-    public List<ServiceObject> setChildren(ServiceObject parentObject, List<ServiceObject> children) {
+    public List<Device> setChildren(Device parentObject, List<Device> children) {
 
         logger.debug("Storing {} children at {}", children.size(), parentObject.path());
 
@@ -196,8 +196,8 @@ public class TreeService extends AbstractRaptorService {
             logger.debug("Storing child {}.{} path: {}", c.parentId, c.id, c.path);
         });
 
-        List<ServiceObject> toSave = new ArrayList(children);
-        List<ServiceObject> previousList = getChildren(parentObject);
+        List<Device> toSave = new ArrayList(children);
+        List<Device> previousList = getChildren(parentObject);
 
         previousList.stream().forEach((c) -> {
             if (!children.contains(c)) {
@@ -214,11 +214,11 @@ public class TreeService extends AbstractRaptorService {
         return children;
     }
 
-    public ServiceObjectNode loadTree(ServiceObject obj) {
-        return loadTree(new ServiceObjectNode(obj));
+    public DeviceNode loadTree(Device obj) {
+        return loadTree(new DeviceNode(obj));
     }
 
-    public ServiceObjectNode loadTree(ServiceObjectNode node) {
+    public DeviceNode loadTree(DeviceNode node) {
 
         logger.debug("Loading tree for node {}", node.getCurrent().id);
 
@@ -226,10 +226,10 @@ public class TreeService extends AbstractRaptorService {
 
             logger.debug("Loading parent {}", node.getCurrent().parentId);
 
-            ServiceObject parent;
+            Device parent;
 
             parent = indexer.getObject(node.getCurrent().parentId);
-            node.setParent(new ServiceObjectNode(parent));
+            node.setParent(new DeviceNode(parent));
 
             if (parent.parentId != null) {
                 loadTree(node.getParent());
@@ -238,12 +238,12 @@ public class TreeService extends AbstractRaptorService {
         }
 
         if (node.getChildren().isEmpty()) {
-            List<ServiceObject> list = getChildren(node.getCurrent());
-            for (ServiceObject serviceObject : list) {
+            List<Device> list = getChildren(node.getCurrent());
+            for (Device device : list) {
 
-                logger.debug("Loading child {}", serviceObject.id);
+                logger.debug("Loading child {}", device.id);
 
-                ServiceObjectNode child = new ServiceObjectNode(serviceObject);
+                DeviceNode child = new DeviceNode(device);
                 child.setParent(node);
 
                 loadTree(child);
@@ -254,11 +254,11 @@ public class TreeService extends AbstractRaptorService {
         return node;
     }
 
-    public ServiceObjectNode loadRoot(ServiceObject obj) {
-        return loadRoot(new ServiceObjectNode(obj));
+    public DeviceNode loadRoot(Device obj) {
+        return loadRoot(new DeviceNode(obj));
     }
 
-    public ServiceObjectNode loadRoot(ServiceObjectNode node) {
+    public DeviceNode loadRoot(DeviceNode node) {
 
         logger.debug("Loading root path for node {}", node.getCurrent().id);
 
@@ -266,8 +266,8 @@ public class TreeService extends AbstractRaptorService {
 
             logger.debug("Loading parent {}", node.getCurrent().parentId);
 
-            ServiceObject parent = indexer.getObject(node.getCurrent().parentId);
-            node.setParent(new ServiceObjectNode(parent));
+            Device parent = indexer.getObject(node.getCurrent().parentId);
+            node.setParent(new DeviceNode(parent));
 
             if (parent.parentId != null) {
                 loadRoot(node.getParent());
@@ -277,9 +277,9 @@ public class TreeService extends AbstractRaptorService {
         return node;
     }
 
-    public void generateObjectPath(ServiceObject obj) {
+    public void generateObjectPath(Device obj) {
         if (obj.parentId != null) {
-            ServiceObjectNode rootNode = loadRoot(obj);
+            DeviceNode rootNode = loadRoot(obj);
             String path = rootNode.path();
             obj.path = path;
             logger.debug("Generated new path {}", path);
@@ -295,7 +295,7 @@ public class TreeService extends AbstractRaptorService {
 //        while (curr > 0) {
 //            try {
 //
-//                List<ServiceObject> objs = getChildren(new ServiceObject(parentId));
+//                List<Device> objs = getChildren(new Device(parentId));
 //
 //                if (objs.size() == childLength) {
 //                    logger.warn("Object {} avail in index after {}ms", parentId, (max - curr) * wait);

@@ -9,7 +9,7 @@ package org.createnet.raptor.models.events;
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public interface StreamEventListener extends ServiceObjectEventListener {
+public interface StreamEventListener extends DeviceEventListener {
     abstract public void onPush(StreamEvent ev);
     abstract public void onPull(StreamEvent ev);
 }

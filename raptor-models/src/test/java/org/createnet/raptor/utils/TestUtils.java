@@ -24,7 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 
 /**
  *
@@ -32,16 +32,16 @@ import org.createnet.raptor.models.objects.ServiceObject;
  */
 abstract public class TestUtils {
 
-    protected JsonNode jsonServiceObject = null;
-    protected ServiceObject serviceObject;
+    protected JsonNode jsonDevice = null;
+    protected Device device;
 
-    protected final ObjectMapper mapper = ServiceObject.getMapper();
+    protected final ObjectMapper mapper = Device.getMapper();
 
     final protected String defaultStreamName = "mylocation";
 
     protected void loadObject() {
-        jsonServiceObject = loadData("model");
-        serviceObject = new ServiceObject();
+        jsonDevice = loadData("model");
+        device = new Device();
     }
 
     ;

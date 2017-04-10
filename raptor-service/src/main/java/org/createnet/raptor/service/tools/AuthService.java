@@ -23,7 +23,7 @@ import org.createnet.raptor.auth.AuthProvider;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authentication.Authentication.UserInfo;
 import org.createnet.raptor.auth.authorization.Authorization;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.jvnet.hk2.annotations.Service;
 import org.slf4j.LoggerFactory;
 
@@ -61,11 +61,11 @@ public class AuthService {
     return auth;
   }
 
-  public boolean isAllowed(String accessToken, ServiceObject obj, Authorization.Permission op) {
+  public boolean isAllowed(String accessToken, Device obj, Authorization.Permission op) {
     return getProvider().isAuthorized(accessToken, obj, op);
   }
 
-  public boolean isAllowed(ServiceObject obj, Authorization.Permission op) {
+  public boolean isAllowed(Device obj, Authorization.Permission op) {
     return getProvider().isAuthorized(getAccessToken(), obj, op);
   }
 
@@ -96,7 +96,7 @@ public class AuthService {
     return securityContext.getUserPrincipal().getName();
   }
 
-  public void sync(String token, ServiceObject obj, Authentication.SyncOperation op) {
+  public void sync(String token, Device obj, Authentication.SyncOperation op) {
     getProvider().sync(token, obj, op);
   }
 

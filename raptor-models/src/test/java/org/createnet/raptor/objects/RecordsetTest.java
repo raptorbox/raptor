@@ -47,7 +47,7 @@ public class RecordsetTest extends TestUtils {
   }
 
   /**
-   * Test of parse method, of class ServiceObject.
+   * Test of parse method, of class Device.
    * @throws org.createnet.raptor.models.exception.RecordsetException
    * @throws com.fasterxml.jackson.core.JsonProcessingException
    */
@@ -56,7 +56,7 @@ public class RecordsetTest extends TestUtils {
     
     JsonNode data = loadData("record");
     
-    Stream stream = serviceObject.streams.get("mylocation");
+    Stream stream = device.streams.get("mylocation");
     RecordSet records = mapper.readValue(data.toString(), RecordSet.class);
     
     records.userId = "Mr. foobar";
@@ -107,9 +107,9 @@ public class RecordsetTest extends TestUtils {
     JsonNode resultset = loadData("resultset");
     JsonNode json = resultset.get(0);
     
-    serviceObject.parse(jsonServiceObject);
+    device.parse(jsonDevice);
     
-    Stream stream = serviceObject.streams.getOrDefault(defaultStreamName, null);
+    Stream stream = device.streams.getOrDefault(defaultStreamName, null);
     
     assertNotNull("Stream "+ defaultStreamName +" not found in model", stream);
             

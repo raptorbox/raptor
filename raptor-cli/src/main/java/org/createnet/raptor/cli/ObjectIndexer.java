@@ -23,7 +23,7 @@ import org.createnet.raptor.db.query.BaseQuery;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.indexer.Indexer;
 import org.createnet.raptor.models.objects.RaptorComponent;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.service.tools.IndexerService;
 import org.createnet.raptor.service.tools.StorageService;
 import org.slf4j.Logger;
@@ -68,7 +68,7 @@ public class ObjectIndexer {
     
     while (true) {
       
-      List<ServiceObject> list = getObjects(offset, limit);
+      List<Device> list = getObjects(offset, limit);
       
       logger.debug("Retrieved {} records", list.size());
       
@@ -84,7 +84,7 @@ public class ObjectIndexer {
 
   }
 
-  protected void runBatch(List<ServiceObject> list) {
+  protected void runBatch(List<Device> list) {
 
     try {
       
@@ -92,7 +92,7 @@ public class ObjectIndexer {
       List<Indexer.IndexOperation> batchList = new ArrayList();
 
       int i = 0;
-      for (ServiceObject obj : list) {
+      for (Device obj : list) {
 
         Indexer.IndexRecord indexRecord = indexer.getIndexRecord(IndexerService.IndexNames.object);
 
@@ -126,7 +126,7 @@ public class ObjectIndexer {
 
   }
 
-  protected List<ServiceObject> getObjects(int offset, int limit) {
+  protected List<Device> getObjects(int offset, int limit) {
     try {
 
       BaseQuery query = new BaseQuery();
@@ -138,10 +138,10 @@ public class ObjectIndexer {
       
       List<JsonNode> objList = storage.getObjectConnection().list(query);
 
-      List<ServiceObject> list = new ArrayList();
+      List<Device> list = new ArrayList();
 
       for (JsonNode rawobj : objList) {
-        list.add(ServiceObject.fromJSON(rawobj));
+        list.add(Device.fromJSON(rawobj));
       }
 
       return list;

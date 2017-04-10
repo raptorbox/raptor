@@ -28,9 +28,9 @@ import static org.junit.Assert.*;
  *
  * @author l
  */
-public class ServiceObjectNodeTest {
+public class DeviceNodeTest {
 
-    public ServiceObjectNodeTest() {
+    public DeviceNodeTest() {
     }
 
     @BeforeClass
@@ -49,17 +49,17 @@ public class ServiceObjectNodeTest {
     public void tearDown() {
     }
 
-    protected ServiceObjectNode getNode(String id) {
-        return new ServiceObjectNode(new ServiceObject(id));
+    protected DeviceNode getNode(String id) {
+        return new DeviceNode(new Device(id));
     }
 
-    protected ServiceObjectNode getNodes() {
+    protected DeviceNode getNodes() {
 
-        ServiceObjectNode nodeA = getNode("A");
-        ServiceObjectNode nodeB = getNode("B");
-        ServiceObjectNode nodeC = getNode("C");
-        ServiceObjectNode nodeD = getNode("D");
-        ServiceObjectNode nodeE = getNode("E");
+        DeviceNode nodeA = getNode("A");
+        DeviceNode nodeB = getNode("B");
+        DeviceNode nodeC = getNode("C");
+        DeviceNode nodeD = getNode("D");
+        DeviceNode nodeE = getNode("E");
 
         nodeB.addChild(nodeC);
         nodeD.addChild(nodeE);
@@ -70,26 +70,26 @@ public class ServiceObjectNodeTest {
     }
 
     /**
-     * Test of path method, of class ServiceObjectNode.
+     * Test of path method, of class DeviceNode.
      */
     @Test
     public void testPath() {
 
-        ServiceObjectNode node = getNodes();
-        ServiceObjectNode nodeE = node.getChild("D").get().getChild("E").get();
+        DeviceNode node = getNodes();
+        DeviceNode nodeE = node.getChild("D").get().getChild("E").get();
 
         String path = nodeE.path();
         assertEquals(path, "A/D/E");
     }
 
     /**
-     * Test of path method, of class ServiceObjectNode.
+     * Test of path method, of class DeviceNode.
      */
     @Test
     public void testTree() {
         
-        ServiceObjectNode node = getNodes();
-        ServiceObjectNode nodeC = node.getChild("B").get().getChild("C").get();
+        DeviceNode node = getNodes();
+        DeviceNode nodeC = node.getChild("B").get().getChild("C").get();
 
         assertNotNull(nodeC);
     }

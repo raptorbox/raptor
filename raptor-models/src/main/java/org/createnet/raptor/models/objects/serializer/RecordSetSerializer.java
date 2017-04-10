@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.Map;
 import org.createnet.raptor.models.data.IRecord;
 import org.createnet.raptor.models.data.RecordSet;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 
 /**
@@ -36,10 +36,10 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
     public void serialize(RecordSet r, JsonGenerator jg, SerializerProvider sp) throws IOException {
 
         final Stream stream = r.getStream();
-        ServiceObject obj = null;
+        Device obj = null;
 
         if (stream != null) {
-            obj = stream.getServiceObject();
+            obj = stream.getDevice();
         }
 
         jg.writeStartObject();

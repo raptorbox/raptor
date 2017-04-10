@@ -21,7 +21,7 @@ import org.createnet.raptor.client.RaptorClient;
 import org.createnet.raptor.client.RaptorComponent;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.objects.Action;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 
 /**
  * Represent a service object action
@@ -36,13 +36,13 @@ public class ActionClient extends AbstractClient {
      * @param object reference
      * @return return the list of available action for an object
      */
-    public List<Action> list(ServiceObject object) {
+    public List<Action> list(Device object) {
 
-        List<Action> actions = ServiceObject.getMapper().convertValue(getClient().get(RaptorComponent.format(RaptorClient.Routes.ACTION_LIST, object.id)), new TypeReference<List<Action>>() {
+        List<Action> actions = Device.getMapper().convertValue(getClient().get(RaptorComponent.format(RaptorClient.Routes.ACTION_LIST, object.id)), new TypeReference<List<Action>>() {
         });
 
         actions.forEach(action -> {
-            action.setServiceObject(object);
+            action.setDevice(object);
         });
 
         return actions;
@@ -55,9 +55,9 @@ public class ActionClient extends AbstractClient {
      * @return return the list of available action for an object
      */
     public ActionStatus getStatus(Action action) {
-        return ServiceObject.getMapper().convertValue(
+        return Device.getMapper().convertValue(
                 getClient().get(
-                        RaptorComponent.format(RaptorClient.Routes.ACTION_STATUS, action.getServiceObject().id, action.name)
+                        RaptorComponent.format(RaptorClient.Routes.ACTION_STATUS, action.getDevice().id, action.name)
                 ),
                 ActionStatus.class
         );
@@ -71,7 +71,7 @@ public class ActionClient extends AbstractClient {
      * @return return the list of available action for an object
      */
     public ActionStatus getStatus(String objectId, String actionId) {
-        return ServiceObject.getMapper().convertValue(
+        return Device.getMapper().convertValue(
                 getClient().get(
                         RaptorComponent.format(RaptorClient.Routes.ACTION_STATUS, objectId, actionId)
                 ),
@@ -87,9 +87,9 @@ public class ActionClient extends AbstractClient {
      * @return return the list of available action for an object
      */
     public ActionStatus setStatus(Action action, ActionStatus status) {
-        return ServiceObject.getMapper().convertValue(
+        return Device.getMapper().convertValue(
                 getClient().post(
-                        RaptorComponent.format(RaptorClient.Routes.ACTION_STATUS, action.getServiceObject().id, action.name), status.toJsonNode()
+                        RaptorComponent.format(RaptorClient.Routes.ACTION_STATUS, action.getDevice().id, action.name), status.toJsonNode()
                 ),
                 ActionStatus.class
         );
@@ -102,7 +102,7 @@ public class ActionClient extends AbstractClient {
      */
     public void removeStatus(Action action) {
         getClient().delete(
-                RaptorComponent.format(RaptorClient.Routes.ACTION_STATUS, action.getServiceObject().id, action.name)
+                RaptorComponent.format(RaptorClient.Routes.ACTION_STATUS, action.getDevice().id, action.name)
         );
     }
     
@@ -127,7 +127,7 @@ public class ActionClient extends AbstractClient {
      * @return return the list of available action for an object
      */
     public ActionStatus setStatus(String objectId, String actionId, ActionStatus status) {
-        return ServiceObject.getMapper().convertValue(
+        return Device.getMapper().convertValue(
                 getClient().post(
                         RaptorComponent.format(RaptorClient.Routes.ACTION_STATUS, objectId, actionId), status.toJsonNode()
                 ),
@@ -143,7 +143,7 @@ public class ActionClient extends AbstractClient {
      */
     public void invoke(Action action, String payload) {
         getClient().post(
-                RaptorComponent.format(RaptorClient.Routes.INVOKE, action.getServiceObject().id, action.name), payload
+                RaptorComponent.format(RaptorClient.Routes.INVOKE, action.getDevice().id, action.name), payload
         );
     }
 

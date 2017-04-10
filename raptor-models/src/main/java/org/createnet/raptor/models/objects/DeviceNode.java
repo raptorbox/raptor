@@ -25,34 +25,34 @@ import java.util.stream.Collectors;
  *
  * @author l
  */
-public class ServiceObjectNode {
+public class DeviceNode {
 
-    ServiceObject current;
-    List<ServiceObjectNode> children = new ArrayList();
-    ServiceObjectNode parent;
+    Device current;
+    List<DeviceNode> children = new ArrayList();
+    DeviceNode parent;
 
-    public ServiceObjectNode(ServiceObject current) {
+    public DeviceNode(Device current) {
         this(current, null);
     }
 
-    public ServiceObjectNode(ServiceObject current, ServiceObjectNode parent) {
+    public DeviceNode(Device current, DeviceNode parent) {
         this.current = current;
         this.parent = parent;
     }
 
-    public ServiceObject getCurrent() {
+    public Device getCurrent() {
         return current;
     }
 
-    public List<ServiceObjectNode> getChildren() {
+    public List<DeviceNode> getChildren() {
         return children;
     }
 
-    public void addChildren(List<ServiceObjectNode> nodes) {
+    public void addChildren(List<DeviceNode> nodes) {
         nodes.stream().forEach(node -> this.addChild(node));
     }
 
-    public void addChild(ServiceObjectNode node) {
+    public void addChild(DeviceNode node) {
 
         node.getCurrent().parentId = this.getCurrent().id;
         node.setParent(this);
@@ -64,11 +64,11 @@ public class ServiceObjectNode {
         children.add(node);
     }
 
-    public void removeChildren(List<ServiceObjectNode> nodes) {
+    public void removeChildren(List<DeviceNode> nodes) {
         nodes.stream().forEach(node -> this.removeChild(node));
     }
 
-    public void removeChild(ServiceObjectNode node) {
+    public void removeChild(DeviceNode node) {
 
         if (!this.children.contains(node)) {
             return;
@@ -80,25 +80,25 @@ public class ServiceObjectNode {
         children.remove(node);
     }
 
-    public ServiceObjectNode getParent() {
+    public DeviceNode getParent() {
         return parent;
     }
 
-    public void setCurrent(ServiceObject current) {
+    public void setCurrent(Device current) {
         this.current = current;
     }
 
-    public void setParent(ServiceObjectNode parent) {
+    public void setParent(DeviceNode parent) {
         this.parent = parent;
     }
 
-    public ServiceObjectNode getRoot() {
+    public DeviceNode getRoot() {
         return (getParent() == null) ? this : getRoot();
     }
 
-    public List<ServiceObjectNode> tree() {
-        ServiceObjectNode node = this;
-        List<ServiceObjectNode> parts = new ArrayList();
+    public List<DeviceNode> tree() {
+        DeviceNode node = this;
+        List<DeviceNode> parts = new ArrayList();
         while (node.getParent() != null) {
             parts.add(node);
             node = node.getParent();
@@ -108,9 +108,9 @@ public class ServiceObjectNode {
         return parts;
     }
 
-    public List<ServiceObject> objects() {
-        ServiceObjectNode node = this;
-        final List<ServiceObject> parts = new ArrayList();
+    public List<Device> objects() {
+        DeviceNode node = this;
+        final List<Device> parts = new ArrayList();
         while (node.getParent() != null) {
             parts.add(node.getCurrent());
             node = node.getParent();
@@ -129,8 +129,8 @@ public class ServiceObjectNode {
         return getCurrent().parentId + "." + getCurrent().id + " [" +path() + "]";
     }
 
-    public final Optional<ServiceObjectNode> getChild(String id) {
-        final Optional<ServiceObjectNode> o = getChildren().stream().filter(n -> n.getCurrent().id.equals(id)).findFirst();
+    public final Optional<DeviceNode> getChild(String id) {
+        final Optional<DeviceNode> o = getChildren().stream().filter(n -> n.getCurrent().id.equals(id)).findFirst();
         return o;
     }
 

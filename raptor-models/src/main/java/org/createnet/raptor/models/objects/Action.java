@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <luca.capra@gmail.com>
  */
 @JsonSerialize(using = ActionSerializer.class)
-public class Action extends ServiceObjectContainer {
+public class Action extends DeviceContainer {
 
     Logger logger = LoggerFactory.getLogger(Action.class);
 
@@ -59,8 +59,8 @@ public class Action extends ServiceObjectContainer {
         parse(tree, null);
     }
 
-    public Action(String json, ServiceObject object) {
-        ObjectMapper mapper = ServiceObject.getMapper();
+    public Action(String json, Device object) {
+        ObjectMapper mapper = Device.getMapper();
         JsonNode tree;
         try {
             tree = mapper.readTree(json);
@@ -70,7 +70,7 @@ public class Action extends ServiceObjectContainer {
         parse(tree, object);
     }
 
-    public Action(JsonNode json, ServiceObject object) {
+    public Action(JsonNode json, Device object) {
         parse(json, object);
     }
 
@@ -78,7 +78,7 @@ public class Action extends ServiceObjectContainer {
         parse(json, null);
     }
 
-    public Action(String name, JsonNode json, ServiceObject object) {
+    public Action(String name, JsonNode json, Device object) {
         this.name = name;
         parse(json, object);
     }
@@ -115,8 +115,8 @@ public class Action extends ServiceObjectContainer {
         }
     }
 
-    protected void parse(JsonNode json, ServiceObject object) {
-        this.setServiceObject(object);
+    protected void parse(JsonNode json, Device object) {
+        this.setDevice(object);
         parse(json);
     }
 

@@ -29,7 +29,7 @@ import javax.inject.Singleton;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
-import org.createnet.raptor.models.objects.ServiceObject;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.indexer.Indexer;
@@ -194,7 +194,7 @@ public class IndexerService extends AbstractRaptorService {
      * @param limit limit of record per call
      * @return list of objects
      */
-    public List<ServiceObject> getObjectsByUser(String userId, Integer offset, Integer limit) {
+    public List<Device> getObjectsByUser(String userId, Integer offset, Integer limit) {
         ObjectQuery q = new ObjectQuery();
         setCursor(q, limit, offset);
         q.setUserId(userId);
@@ -207,7 +207,7 @@ public class IndexerService extends AbstractRaptorService {
      * @param userId id of an user
      * @return list of objects
      */
-    public List<ServiceObject> getObjectsByUser(String userId) {
+    public List<Device> getObjectsByUser(String userId) {
         return getObjectsByUser(userId, 0, getDefaultLimit());
     }
 
@@ -215,11 +215,11 @@ public class IndexerService extends AbstractRaptorService {
      * Load all objects specified by IDs list
      *
      * @param ids list of ids
-     * @return list of ServiceObject instances
+     * @return list of Device instances
      */
-    public List<ServiceObject> getObjects(List<String> ids) {
+    public List<Device> getObjects(List<String> ids) {
 
-        List<ServiceObject> cached = ids.stream()
+        List<Device> cached = ids.stream()
                 .map((id) -> {
                     return cache.getObject(id);
                 })
@@ -239,26 +239,26 @@ public class IndexerService extends AbstractRaptorService {
      * Load a single object
      *
      * @param id object id
-     * @return ServiceObject instance
+     * @return Device instance
      */
-    public ServiceObject getObject(String id) {
+    public Device getObject(String id) {
 
-        List<ServiceObject> objs = getObjects(Arrays.asList(id));
+        List<Device> objs = getObjects(Arrays.asList(id));
         if (objs.isEmpty()) {
             return null;
         }
 
-        ServiceObject obj = objs.get(0);
+        Device obj = objs.get(0);
         return obj;
     }
 
     /**
      * Index a single object definition
      *
-     * @param obj the ServiceObject instance
+     * @param obj the Device instance
      * @param isNew if the object is newly created
      */
-    public void saveObject(ServiceObject obj, boolean isNew) {
+    public void saveObject(Device obj, boolean isNew) {
 
         Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
 
@@ -279,7 +279,7 @@ public class IndexerService extends AbstractRaptorService {
      *
      * @param obj the object to remove
      */
-    public void deleteObject(ServiceObject obj) {
+    public void deleteObject(Device obj) {
         Indexer.IndexRecord record = getIndexRecord(IndexNames.object);
         record.id = obj.id;
 
@@ -289,15 +289,15 @@ public class IndexerService extends AbstractRaptorService {
         deleteData(obj.streams.values());
     }
 
-    public List<ServiceObject> searchObject(Query query) {
+    public List<Device> searchObject(Query query) {
 
         setQueryIndex(query, IndexNames.object);
 
         List<Indexer.IndexRecord> results = getIndexer().search(query);
-        List<ServiceObject> list = new ArrayList();
+        List<Device> list = new ArrayList();
 
         for (Indexer.IndexRecord result : results) {
-            ServiceObject obj = ServiceObject.fromJSON(result.body);
+            Device obj = Device.fromJSON(result.body);
             list.add(obj);
         }
 
@@ -312,7 +312,7 @@ public class IndexerService extends AbstractRaptorService {
      */
     public RecordSet searchLastUpdate(Stream stream) {
 
-        LastUpdateQuery lastUpdateQuery = new LastUpdateQuery(stream.getServiceObject().id, stream.name);
+        LastUpdateQuery lastUpdateQuery = new LastUpdateQuery(stream.getDevice().id, stream.name);
         setQueryIndex(lastUpdateQuery, IndexNames.data);
 
         lastUpdateQuery.setOffset(0);
@@ -397,7 +397,7 @@ public class IndexerService extends AbstractRaptorService {
      *
      * @param ids list of objects to save
      */
-    public void saveObjects(List<ServiceObject> ids) {
+    public void saveObjects(List<Device> ids) {
         saveObjects(ids, null);
     }
 
@@ -408,7 +408,7 @@ public class IndexerService extends AbstractRaptorService {
      * @param isNew define if the objects are new or is an update operation.
      * null means upsert (insert or update)
      */
-    public void saveObjects(List<ServiceObject> ids, Boolean isNew) {
+    public void saveObjects(List<Device> ids, Boolean isNew) {
 
         if (ids.size() == 1) {
             saveObject(ids.get(0), isNew);
@@ -488,7 +488,7 @@ public class IndexerService extends AbstractRaptorService {
             List<Indexer.IndexOperation> deletes = new ArrayList();
             results.stream().forEachOrdered((recordSet) -> {
                 Indexer.IndexRecord record = getIndexRecord(IndexNames.data);
-                record.id = stream.getServiceObject().id + "-" + stream.name + "-" + recordSet.getTimestamp().getTime();
+                record.id = stream.getDevice().id + "-" + stream.name + "-" + recordSet.getTimestamp().getTime();
                 deletes.add(new Indexer.IndexOperation(Indexer.IndexOperation.Type.DELETE, record));
             });
 
