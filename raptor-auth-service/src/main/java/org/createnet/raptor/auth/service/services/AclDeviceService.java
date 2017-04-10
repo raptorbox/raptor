@@ -112,6 +112,7 @@ public class AclDeviceService implements AclServiceInterface<Device> {
 
             permissions.addAll(newPerms);
         } else {
+            logger.debug("Set node id:{} parent id:{} ", device.getId(), device.getParentId());
             aclManagerService.setParent(device.getClass(), device.getId(), device.getParentId());
         }
 

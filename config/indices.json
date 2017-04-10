@@ -96,7 +96,7 @@
         "mappings": {
             "device": {
                 "_all": {
-                    "disabled": true
+                    "enabled": false
                 },
                 "properties": {
                     "id": {
