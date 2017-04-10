@@ -23,6 +23,7 @@ import java.util.List;
 import org.createnet.raptor.client.Raptor;
 import org.createnet.raptor.client.event.MessageEventListener;
 import org.createnet.raptor.client.exception.ClientException;
+import org.createnet.raptor.client.exception.MissingAuthenticationException;
 import org.createnet.raptor.dispatcher.payload.ActionPayload;
 import org.createnet.raptor.dispatcher.payload.DataPayload;
 import org.createnet.raptor.dispatcher.payload.DispatcherPayload;
@@ -30,6 +31,7 @@ import org.createnet.raptor.dispatcher.payload.ObjectPayload;
 import org.createnet.raptor.dispatcher.payload.StreamPayload;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
+import org.createnet.raptor.models.auth.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -174,6 +176,13 @@ public class DeviceClient extends AbstractClient {
      * @return a list of Devices matching the query
      */
     public List<Device> search(ObjectQuery query, Integer offset, Integer limit) {
+        if(query.getUserId() == null) {
+            User user = getContainer().Auth.getUser();
+            if(user == null) {
+                throw new MissingAuthenticationException("User is not available");
+            }
+            query.setUserId(user.getUuid());
+        }
         JsonNode json = getClient().post(
                 Client.Routes.SEARCH,
                 query.toJSON()

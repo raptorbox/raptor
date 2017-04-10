@@ -16,14 +16,16 @@
 package org.createnet.raptor.client;
 
 import java.util.List;
+import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
 import org.createnet.raptor.models.objects.Device;
-import org.createnet.raptor.models.objects.Stream;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -31,80 +33,146 @@ import static org.junit.Assert.*;
  */
 public class DeviceManagementTest {
     
-    public static Raptor raptor;
+    final Logger log = LoggerFactory.getLogger(DeviceManagementTest.class);
     
+    public static Raptor raptor;
+
     @BeforeClass
     public static void setUpClass() {
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() {
         raptor = new Raptor("http://raptor.local", "admin", "admin");
+        log.debug("Performing login");
         raptor.Auth.login();
+        log.debug("Logged in");
     }
-    
+
     @After
     public void tearDown() {
     }
+//
+//    @Test
+//    public void list() {
+//        log.debug("List devices");
+//        List<Device> list = raptor.Device.list();
+//        log.debug("found {} devices", list.size());
+//        assertNotNull(list);
+//    }
+//
+//    @Test
+//    public void create() {
+//
+//        Device dev = new Device();
+//        dev.name = "test create";
+//
+//        dev.validate();
+//        raptor.Device.create(dev);
+//        
+//        log.debug("Device created {}", dev.id);
+//        assertNotNull(dev.id);
+//    }
+//
+//    @Test
+//    public void updateStream() throws InterruptedException {
+//
+//        Device dev = new Device();
+//        dev.name = "test update";
+//        Stream s = dev.addStream("position", "location", "geo_point");
+//        dev.validate();
+//        raptor.Device.create(dev);
+//        
+//        log.debug("Device created {}", dev.id);
+//        
+//        s.addChannel("speed", "number");
+//        s.addChannel("color", "string");
+//
+//        s.validate();
+//
+//        log.debug("Added channels");
+//        
+//        Thread.sleep(2500);
+//        raptor.Device.update(dev);
+//
+//        log.debug("Updated, fetch list");
+//        
+//        Thread.sleep(3500);
+//        List<Device> list = raptor.Device.list();
+//
+//        log.debug("found {} devices", list.size());
+//        
+//        Device dev1 = list.stream().filter(d -> d.id.equals(dev.id)).findFirst().get();
+//        
+//        
+//        assertNotNull(dev1);
+//        assertTrue(dev1.streams.size() == dev.streams.size());
+//        
+//        log.debug("position channels {} == {}", dev1.streams.get("position").channels.size(), dev.streams.get("position").channels.size());
+//        assertTrue(dev1.streams.get("position").channels.size() == dev.streams.get("position").channels.size());
+//        assertTrue(dev1.streams.get("position").channels.containsKey("color"));
+//        
+//    }
+//
+//    @Test
+//    public void update() throws InterruptedException {
+//        
+//        Device dev = new Device();
+//        dev.name = "modified device";
+//        dev.validate();
+//        raptor.Device.create(dev);
+//
+//        Thread.sleep(2500);
+//        raptor.Device.update(dev);
+//
+//        Thread.sleep(2500);
+//        List<Device> list = raptor.Device.list();
+//
+//        Device dev1 = list.stream().filter(d -> d.id.equals(dev.id)).findFirst().get();
+//        assertNotNull(dev1);
+//
+//        assertEquals(dev1.name, dev.name);
+//    }
+//
+//    @Test
+//    public void load() throws InterruptedException {
+//
+//        Device dev = new Device();
+//        dev.name = "test load";
+//        dev.validate();
+//        raptor.Device.create(dev);
+//
+//        Thread.sleep(3500);
+//        Device dev1 = raptor.Device.load(dev.id);
+//
+//        assertTrue(dev1.name.equals(dev.name));
+//    }
 
     @Test
-    public void list() {
-        List<Device> list = raptor.Device.list();
-        assertNotNull(list);
-    }
-
-    @Test
-    public void create() {
+    public void search() throws InterruptedException {
         
-        Device dev = new Device();
-        
-        dev.name = "test create";
-        
-        dev.validate();
-        raptor.Device.create(dev);
-        
-        assertNotNull(dev.id);
-    }
-
-    @Test
-    public void update() throws InterruptedException {
-        
-        Device dev = new Device();
-        
-        dev.name = "test update";
-        
-        dev.validate();
-        raptor.Device.create(dev);
-        
-        Stream s = dev.addStream("position", "location", "geo_point");
-        
-        s.addChannel("speed", "number");
-        s.addChannel("color", "string");
-        
-        s.validate();
+        for (int i = 0; i < 10; i++) {
+            log.debug("Create device {}", i);
+            Device dev1 = new Device();
+            dev1.name = "test-search "+ i;
+            raptor.Device.create(dev1);
+        }
         
         Thread.sleep(2500);
-        raptor.Device.update(dev);
         
-        assertNotNull(dev.getStream("position").channels.size() == s.channels.size());
+
+        ObjectQuery q = new ObjectQuery();
+        q.name = "test-search 1";
+        log.debug("Searching for {}", q.toJSON().toString());
+        List<Device> results = raptor.Device.search(q);
+
+        log.debug("Results found {}", results);
+        
+        assertNotNull(results);
     }
 
-    @Test
-    public void load() throws InterruptedException {
-        
-        Device dev = new Device();
-        dev.name = "test load";
-        dev.validate();
-        raptor.Device.create(dev);
-        
-        Thread.sleep(3500);
-        Device dev1 = raptor.Device.load(dev.id);
-        
-        assertNotNull(dev1.name.equals(dev.name));
-    }    
-    
 }

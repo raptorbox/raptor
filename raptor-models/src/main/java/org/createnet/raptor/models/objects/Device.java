@@ -343,6 +343,17 @@ public class Device extends DeviceContainer {
         stream.validate();
         return stream;
     }
+    
+    /**
+     * Create a Stream with a channel of the same name
+     * 
+     * @param name
+     * @param channelType
+     * @return 
+     */
+    public Stream addStream(String name, String channelType) {
+        return addStream(name, name, channelType);
+    }
 
     /**
      * Add a list of actions to the device

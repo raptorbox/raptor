@@ -78,6 +78,18 @@ public class AuthClient extends AbstractClient {
         }
         return state.token;
     }
+    
+    /**
+     * Return the current user
+     *
+     * @return
+     */
+    public User getUser() {
+        if (state == null) {
+            return null;
+        }
+        return state.user;
+    }
 
     /**
      * Login with username and password

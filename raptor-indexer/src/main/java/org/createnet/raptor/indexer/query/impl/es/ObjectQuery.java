@@ -111,5 +111,5 @@ public class ObjectQuery extends AbstractESQuery {
     
     return boolQuery.hasClauses() ? boolQuery : null;
   }
-
+  
 }
