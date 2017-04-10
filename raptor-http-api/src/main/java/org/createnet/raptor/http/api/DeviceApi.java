@@ -66,9 +66,9 @@ import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
     )
 })
 @Api(tags = { "Inventory" })
-public class ObjectApi extends AbstractApi {
+public class DeviceApi extends AbstractApi {
 
-    final private Logger logger = LoggerFactory.getLogger(ObjectApi.class);
+    final private Logger logger = LoggerFactory.getLogger(DeviceApi.class);
 
     @GET
     @ApiOperation(
@@ -111,23 +111,10 @@ public class ObjectApi extends AbstractApi {
 
         try {
             obj = objectManager.create(obj);
-        } catch (Indexer.IndexerException ex) {
-
-            logger.error("Indexing error occured", ex);
-            logger.warn("Removing object {} from storage", obj.id);
-
-            objectManager.delete(obj.id);
-
-            throw new InternalServerErrorException("Failed to index device");
+        } catch (Exception ex) {
+            throw new InternalServerErrorException("Failed to create device", ex);
         }
 
-        //move to broker system events
-//        boolean sync = syncObject(obj, Authentication.SyncOperation.CREATE);
-//        if (!sync) {
-//            logger.error("Auth sync failed, aborting creation of object {}", obj.id);
-//            objectManager.delete(obj.id);
-//            throw new InternalServerErrorException("Failed to sync device");
-//        }
         return obj;
     }
 
@@ -158,10 +145,10 @@ public class ObjectApi extends AbstractApi {
 
         obj = objectManager.update(obj);
 
-        boolean sync = syncObject(obj, Authentication.SyncOperation.UPDATE);
-        if (!sync) {
-            throw new InternalServerErrorException("Failed to sync device");
-        }
+//        boolean sync = syncObject(obj, Authentication.SyncOperation.UPDATE);
+//        if (!sync) {
+//            throw new InternalServerErrorException("Failed to sync device");
+//        }
 
         return obj;
     }

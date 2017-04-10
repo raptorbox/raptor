@@ -17,7 +17,6 @@ package org.createnet.raptor.service.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,8 @@ import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
 import org.createnet.raptor.service.AbstractRaptorService;
-import org.createnet.raptor.service.exception.ObjectNotFoundException;
+import org.createnet.raptor.service.exception.DeviceNotFoundException;
+import org.createnet.raptor.service.exception.DeviceOperationException;
 import org.createnet.raptor.service.tools.DispatcherService;
 import org.createnet.raptor.service.tools.EventEmitterService;
 import org.createnet.raptor.service.tools.IndexerService;
@@ -39,6 +39,7 @@ import org.createnet.raptor.service.tools.TreeService;
 import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.createnet.raptor.indexer.Indexer;
 
 /**
  * API to manage Object definitions
@@ -77,7 +78,7 @@ public class ObjectManagerService extends AbstractRaptorService {
 
         List<Device> objs = indexer.getObjects(Arrays.asList(id));
         if (objs.isEmpty()) {
-            throw new ObjectNotFoundException("Object " + id + " not found");
+            throw new DeviceNotFoundException("Object " + id + " not found");
         }
 
         logger.debug("Loaded object {}", id);
@@ -161,7 +162,17 @@ public class ObjectManagerService extends AbstractRaptorService {
         obj.id = null;
 
         storage.saveObject(obj);
-        indexer.saveObject(obj, true);
+        try {
+            indexer.saveObject(obj, true);
+        } catch (Indexer.IndexerException ex) {
+
+            logger.error("Indexing error occured", ex);
+            logger.warn("Removing object {} from storage", obj.id);
+
+            storage.deleteObject(obj);
+
+            throw new DeviceOperationException("Failed to index device");
+        }
 
         emitter.trigger(Event.EventName.create, new ObjectEvent(obj));
 

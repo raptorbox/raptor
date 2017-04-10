@@ -19,16 +19,16 @@ package org.createnet.raptor.service.exception;
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public class ActionNotFoundException extends DeviceNotFoundException {
+public class DeviceOperationException extends RaptorServiceException {
 
-    public ActionNotFoundException() {
+    public DeviceOperationException() {
     }
 
-    public ActionNotFoundException(String message) {
+    public DeviceOperationException(String message) {
         super(message);
     }
 
-    public ActionNotFoundException(Throwable cause) {
+    public DeviceOperationException(Throwable cause) {
         super(cause);
     }
     

@@ -63,9 +63,9 @@ import org.slf4j.LoggerFactory;
     )
 })
 @Api(tags = { "Inventory" })
-public class ObjectTreeApi extends AbstractApi {
+public class DeviceTreeApi extends AbstractApi {
 
-    final private Logger logger = LoggerFactory.getLogger(ObjectTreeApi.class);
+    final private Logger logger = LoggerFactory.getLogger(DeviceTreeApi.class);
 
     @GET
     @ApiOperation(

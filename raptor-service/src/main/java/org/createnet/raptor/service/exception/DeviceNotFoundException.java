@@ -19,16 +19,16 @@ package org.createnet.raptor.service.exception;
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public class ObjectNotFoundException extends RaptorServiceException {
+public class DeviceNotFoundException extends RaptorServiceException {
 
-    public ObjectNotFoundException() {
+    public DeviceNotFoundException() {
     }
 
-    public ObjectNotFoundException(String message) {
+    public DeviceNotFoundException(String message) {
         super(message);
     }
 
-    public ObjectNotFoundException(Throwable cause) {
+    public DeviceNotFoundException(Throwable cause) {
         super(cause);
     }
     

@@ -19,7 +19,7 @@ package org.createnet.raptor.service.exception;
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public class StreamNotFoundException extends ObjectNotFoundException {
+public class StreamNotFoundException extends DeviceNotFoundException {
 
     public StreamNotFoundException() {
     }

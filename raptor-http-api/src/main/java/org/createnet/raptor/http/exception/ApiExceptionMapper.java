@@ -21,7 +21,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import org.createnet.raptor.models.objects.RaptorComponent;
-import org.createnet.raptor.service.exception.ObjectNotFoundException;
+import org.createnet.raptor.service.exception.DeviceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +74,7 @@ public class ApiExceptionMapper implements ExceptionMapper<Exception> {
               .build();
     }
     
-    if (e instanceof ObjectNotFoundException) {
+    if (e instanceof DeviceNotFoundException) {
       logger.error("Not found: {}", e.getMessage());
       return Response
               .status(Response.Status.NOT_FOUND)
