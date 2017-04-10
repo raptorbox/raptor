@@ -191,11 +191,11 @@ public class DeviceApi extends AbstractApi {
 
         objectManager.delete(id);
 
-        boolean sync = syncObject(obj, Authentication.SyncOperation.DELETE);
-        if (!sync) {
-            logger.error("Auth sync failed, aborting deletion of object {}", obj.id);
-            throw new InternalServerErrorException("Failed to sync device");
-        }
+//        boolean sync = syncObject(obj, Authentication.SyncOperation.DELETE);
+//        if (!sync) {
+//            logger.error("Auth sync failed, aborting deletion of object {}", obj.id);
+//            throw new InternalServerErrorException("Failed to sync device");
+//        }
 
         return Response.status(Response.Status.OK).build();
     }
