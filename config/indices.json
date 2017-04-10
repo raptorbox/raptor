@@ -68,6 +68,9 @@
                     },
                     "streamId": {
                         "type": "text"
+                    },
+                    "settings": {
+                        "type": "object"
                     }
                 }
             }
@@ -92,6 +95,9 @@
         },
         "mappings": {
             "device": {
+                "_all": {
+                    "disabled": true
+                },
                 "properties": {
                     "id": {
                         "type": "keyword"
@@ -120,6 +126,9 @@
                         "type": "text"
                     },
                     "customFields": {
+                        "type": "object"
+                    },
+                    "settings": {
                         "type": "object"
                     }
                 }

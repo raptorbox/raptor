@@ -1,10 +1,10 @@
 raptor*/target/*
 .vagrant
 nb*
-data/*
-tmp
+./tmp
 data
 */*.log
-/target/
+./*/target
+./target
 *.log
-dist/*
+./dist/*
