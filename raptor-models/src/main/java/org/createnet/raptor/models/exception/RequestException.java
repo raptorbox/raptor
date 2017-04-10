@@ -19,7 +19,7 @@ package org.createnet.raptor.models.exception;
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-public class RequestException extends Exception {
+public class RequestException extends RuntimeException {
 
     public int status;
     public String statusText;
@@ -33,7 +33,7 @@ public class RequestException extends Exception {
 
     @Override
     public String toString() {
-        return "HTTP " + this.status + " - " + this.statusText;
+        return String.format("HTTP Exception %d - %s: %s", getStatus(), getStatusText(), getBody());
     }
 
     public int getStatus() {

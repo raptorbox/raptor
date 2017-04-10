@@ -152,18 +152,18 @@ public class Device extends DeviceContainer {
     }
 
     /**
-     * Merge an object representation to the current instance
+     * Merge an device representation to the current instance
      *
-     * @param json the JsonNode object representation
+     * @param json the JsonNode device representation
      */
     public void parse(JsonNode json) {
         parse(json.toString());
     }
 
     /**
-     * Merge an object to the current instance
+     * Merge an device to the current instance
      *
-     * @param device the object to merge from
+     * @param device the device to merge from
      */
     public void parse(Device device) {
 
@@ -235,9 +235,9 @@ public class Device extends DeviceContainer {
     }
 
     /**
-     * Return the JsonNode representing the object
+     * Return the JsonNode representing the device
      *
-     * @return the JsonNode representing the object
+     * @return the JsonNode representing the device
      */
     public ObjectNode toJsonNode() {
         ObjectNode node = getMapper().convertValue(this, ObjectNode.class);
@@ -245,7 +245,7 @@ public class Device extends DeviceContainer {
     }
 
     /**
-     * Return the JSON string representing the object
+     * Return the JSON string representing the device
      *
      * @return the JSON representation
      */
@@ -297,7 +297,7 @@ public class Device extends DeviceContainer {
     }
 
     /**
-     * Add a list of streams to the object
+     * Add a list of streams to the device
      *
      * @param streams list of streams
      * @return 
@@ -318,7 +318,7 @@ public class Device extends DeviceContainer {
     }
         
     /**
-     * Create a Stream in the object
+     * Create a Stream in the device
      * 
      * @param name
      * @return 
@@ -328,9 +328,24 @@ public class Device extends DeviceContainer {
         addStreams(Arrays.asList(stream));
         return stream;
     }
+        
+    /**
+     * Create a Stream with a channel
+     * 
+     * @param name
+     * @param channelName
+     * @param channelType
+     * @return 
+     */
+    public Stream addStream(String name, String channelName, String channelType) {
+        Stream stream = addStream(name);
+        stream.addChannel(channelName, channelType);
+        stream.validate();
+        return stream;
+    }
 
     /**
-     * Add a list of actions to the object
+     * Add a list of actions to the device
      *
      * @param values list of actions
      * @return 
@@ -344,7 +359,7 @@ public class Device extends DeviceContainer {
     }
 
     /**
-     * Add an action to the object
+     * Add an action to the device
      *
      * @param name
      * @return 
