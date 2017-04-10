@@ -24,7 +24,7 @@ import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Device;
 
 /**
- * Represent a service object action
+ * Represent a Device action
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */

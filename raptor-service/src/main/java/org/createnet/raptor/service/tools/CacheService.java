@@ -134,7 +134,7 @@ public class CacheService extends AbstractRaptorService {
     /**
      * Get an object definition by ID
      * @param id
-     * @return the service object definition
+     * @return the Device definition
      */
     public Device getObject(String id) {
         if (getObjectCache().containsKey(id)) {

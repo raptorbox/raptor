@@ -26,7 +26,7 @@ import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
 
 /**
- * Represent a service object data stream
+ * Represent a Device data stream
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */

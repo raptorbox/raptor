@@ -25,7 +25,7 @@ import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.indexer.query.impl.es.DataQuery;
 
 /**
- * Represent a service object data stream
+ * Represent a Device data stream
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
