@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.indexer.query.impl.es;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.createnet.raptor.indexer.query.AbstractQuery;
 import org.elasticsearch.index.query.QueryBuilder;
 
@@ -26,6 +27,7 @@ abstract public class AbstractESQuery extends AbstractQuery {
     
     abstract QueryBuilder buildQuery();
     
+    @JsonIgnore
     protected QueryBuilder getQueryBuilder() throws QueryException {
         QueryBuilder qb = buildQuery();
         if (qb == null) {
@@ -34,12 +36,14 @@ abstract public class AbstractESQuery extends AbstractQuery {
         return qb;
     }
     
+    @JsonIgnore
     @Override
     public Object getNativeQuery() throws QueryException {        
         validate();
         return (Object) getQueryBuilder();
     }
 
+    @JsonIgnore
     @Override
     public String format() throws QueryException {
         validate();

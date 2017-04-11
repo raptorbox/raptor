@@ -16,6 +16,7 @@
 package org.createnet.raptor.indexer.query.impl.es;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -28,88 +29,77 @@ import org.elasticsearch.index.query.QueryBuilders;
  */
 public class ObjectQuery extends AbstractESQuery {
 
-  public String search;
+    public String search;
 
-  public String name;
-  public String description;
+    public String name;
+    public String description;
 
-  public Map<String, Object> customFields;
-  
-  @JsonIgnore
-  private String userId;
+    public Map<String, Object> customFields = new HashMap();
 
-  public void setUserId(String userId) {
-    this.userId = userId;
-  }
+    @JsonIgnore
+    private String userId;
 
-  public String getUserId() {
-    return this.userId;
-  }
-
-  @Override
-  public void validate() throws QueryException {
-    
-    if(userId == null) {
-      throw new QueryException("userId not specified");
-    }
-    
-    if (search != null && search.length() > 0) {
-      return;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    if (name != null && name.length() > 0) {
-      return;
+    public String getUserId() {
+        return this.userId;
     }
 
-    if (description != null && description.length() > 0) {
-      return;
-    }
+    @Override
+    public void validate() throws QueryException {
 
-    if (customFields != null) {
-      if (customFields == null || customFields.isEmpty()) {
-        throw new QueryException("customFields must be a non-empty object.");
-      }
-      return;
-    }
+        if (userId == null) {
+            throw new QueryException("userId not specified");
+        }
+
+        if (search != null && search.length() > 0) {
+            return;
+        }
+
+        if (name != null && name.length() > 0) {
+            return;
+        }
+
+        if (description != null && description.length() > 0) {
+            return;
+        }
 
 //    throw new QueryException("Query is empty");
-  }
-
-  @Override
-  protected QueryBuilder buildQuery() {
-
-    BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-    
-    boolQuery.must(QueryBuilders.matchQuery("userId", userId));
-    
-    if (search != null && search.length() > 0) {
-      boolQuery.must(QueryBuilders.multiMatchQuery(search, "name", "customFields.*", "description", "id"));
-      return boolQuery;
     }
 
-    if (name != null && name.length() > 0) {
-      boolQuery.must(QueryBuilders.matchQuery("name", name.toLowerCase()));
+    @Override
+    protected QueryBuilder buildQuery() {
+
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
+        boolQuery.must(QueryBuilders.matchQuery("userId", userId));
+
+        if (search != null && search.length() > 0) {
+            boolQuery.must(QueryBuilders.multiMatchQuery(search, "name", "customFields.*", "description", "id"));
+            return boolQuery;
+        }
+
+        if (name != null && name.length() > 0) {
+            boolQuery.must(QueryBuilders.matchQuery("name", name.toLowerCase()));
+        }
+
+        if (description != null && description.length() > 0) {
+            boolQuery.must(QueryBuilders.matchQuery("description", description.toLowerCase()));
+        }
+
+        if (customFields != null && !customFields.isEmpty()) {
+            
+            for (Iterator<String> iterator = customFields.keySet().iterator(); iterator.hasNext();) {
+                String key = iterator.next();
+                Object val = customFields.get(key);
+                boolQuery.must(QueryBuilders.matchQuery("customFields." + key, val));
+            }
+
+        }
+
+        return boolQuery.hasClauses() ? boolQuery : null;
     }
 
-    if (description != null && description.length() > 0) {
-      boolQuery.must(QueryBuilders.matchQuery("description", description.toLowerCase()));
-    }
-
-    if (customFields != null && !customFields.isEmpty()) {
-
-      Iterator<?> keys = customFields.entrySet().iterator();
-      while (keys.hasNext()) {
-
-        String key = (String) keys.next();
-        String val = customFields.get(key).toString().toLowerCase();
-
-        boolQuery.must(QueryBuilders.matchQuery("customFields." + key, val));
-
-      }
-
-    }
-    
-    return boolQuery.hasClauses() ? boolQuery : null;
-  }
-  
 }
