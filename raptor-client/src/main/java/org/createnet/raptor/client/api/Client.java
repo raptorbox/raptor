@@ -25,12 +25,10 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.Instant;
 import org.createnet.raptor.client.Raptor;
 import org.createnet.raptor.client.event.MessageEventListener;
 import org.createnet.raptor.client.exception.ClientException;
 import org.createnet.raptor.client.exception.MissingAuthenticationException;
-import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.models.objects.Device;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -164,6 +162,7 @@ public class Client extends AbstractClient {
                     message = err.get("message").asText();
                 }
             }
+            logger.error("Request failed {} {}: {}", response.getStatus(), response.getStatusText(), message);
             throw new RequestException(response.getStatus(), response.getStatusText(), message);
         }
 
@@ -270,6 +269,7 @@ public class Client extends AbstractClient {
      */
     public JsonNode put(String url, JsonNode body) {
         try {
+            logger.debug("PUT {}", url);
             prepareRequest();
             HttpResponse<JsonNode> objResponse = Unirest
                     .put(getClient().url(url))
@@ -278,6 +278,7 @@ public class Client extends AbstractClient {
             checkResponse(objResponse);
             return objResponse.getBody();
         } catch (UnirestException ex) {
+            logger.error("Request error: {}", ex.getMessage());
             throw new ClientException(ex);
         }
     }
@@ -291,6 +292,7 @@ public class Client extends AbstractClient {
      */
     public JsonNode post(String url, JsonNode body) {
         try {
+            logger.debug("POST {}", url);
             // catch login url and skip token signing
             if (!url.equals(Routes.LOGIN)) {
                 prepareRequest();
@@ -302,6 +304,7 @@ public class Client extends AbstractClient {
             checkResponse(objResponse);
             return objResponse.getBody();
         } catch (UnirestException ex) {
+            logger.error("Request error: {}", ex.getMessage());
             throw new ClientException(ex);
         }
     }
@@ -314,6 +317,7 @@ public class Client extends AbstractClient {
      */
     public JsonNode get(String url) {
         try {
+            logger.debug("GET {}", url);
             prepareRequest();
             HttpResponse<JsonNode> objResponse = Unirest
                     .get(getClient().url(url))
@@ -321,6 +325,7 @@ public class Client extends AbstractClient {
             checkResponse(objResponse);
             return objResponse.getBody();
         } catch (UnirestException ex) {
+            logger.error("Request error: {}", ex.getMessage());
             throw new ClientException(ex);
         }
     }
@@ -333,6 +338,7 @@ public class Client extends AbstractClient {
      */
     public JsonNode delete(String url) {
         try {
+            logger.debug("DELETE {}", url);
             prepareRequest();
             HttpResponse<JsonNode> objResponse = Unirest
                     .delete(getClient().url(url))
@@ -340,6 +346,7 @@ public class Client extends AbstractClient {
             checkResponse(objResponse);
             return objResponse.getBody();
         } catch (UnirestException ex) {
+            logger.error("Request error: {}", ex.getMessage());
             throw new ClientException(ex);
         }
     }
@@ -352,6 +359,7 @@ public class Client extends AbstractClient {
      */
     public void post(String path, String payload) {
         try {
+            logger.debug("POST text/plain {}", path);
             HttpResponse<String> objResponse = Unirest
                     .post(getClient().url(path))
                     .header("content-type", "text/plain")
@@ -359,6 +367,7 @@ public class Client extends AbstractClient {
                     .asString();
             checkResponse(objResponse);
         } catch (UnirestException ex) {
+            logger.error("Request error: {}", ex.getMessage());
             throw new ClientException(ex);
         }
     }
