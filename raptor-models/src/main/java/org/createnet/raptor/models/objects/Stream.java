@@ -127,7 +127,14 @@ public class Stream extends StreamContainer {
      * @param channel
      * @return
      */
-    public Stream addChannel(Channel channel) {
+    public Stream addChannel(final Channel channel) {
+        
+        // skip if it exists
+        final Channel prevChannel = this.channels.get(channel.name);
+        if (prevChannel != null && prevChannel.type.equals(channel.type)) {
+            return this;
+        }
+        
         channel.setContainer(this);
         this.channels.put(channel.name, channel);
         return this;

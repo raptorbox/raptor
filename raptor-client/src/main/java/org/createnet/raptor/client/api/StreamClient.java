@@ -85,6 +85,16 @@ public class StreamClient extends AbstractClient {
     /**
      * Send stream data
      *
+     * @param s
+     * @param record the record to send
+     */
+    public void push(Stream s, RecordSet record) {
+        getClient().put(String.format(Client.Routes.PUSH, s.getDevice().id, s.name), record.toJsonNode());
+    }
+
+    /**
+     * Send stream data
+     *
      * @param objectId id of the object
      * @param streamId name of the stream
      * @param data data to send

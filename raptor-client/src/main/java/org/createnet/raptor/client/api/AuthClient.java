@@ -118,6 +118,22 @@ public class AuthClient extends AbstractClient {
         return body;
     }
     
-    // todo: logout, roles, user, token
+    /**
+     * Generate a new token with extend expiration time
+     * @return
+     */
+    public LoginState refreshToken() {
+        JsonNode node = getClient().get(Client.Routes.REFRESH_TOKEN);
+        LoginState body = Device.getMapper().convertValue(node, LoginState.class);
+        state = body;
+        return body;
+    }
     
+    /**
+     * Logout the user revoking the token
+     */
+    public void logout() {
+        getClient().delete(Client.Routes.LOGOUT);
+        state = null;
+    }
 }

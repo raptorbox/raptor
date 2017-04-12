@@ -24,85 +24,108 @@ import static org.junit.Assert.*;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public class DeviceTest extends TestUtils {
-  
-  protected JsonNode jsonData;
-  
-  public DeviceTest() {
-    
-  }
-  
-  @BeforeClass
-  public static void setUpClass() {
-    
-  }
-  
-  @AfterClass
-  public static void tearDownClass() {
-  }
-  
-  @Before
-  public void setUp() throws IOException {   
-    loadObject();
-    jsonData = loadData("record");
-  }
-  
-  @After
-  public void tearDown() {
-    
-  }
 
-  /**
-   * Test of parse method, of class Device.
-   * @throws org.createnet.raptor.models.objects.RaptorComponent.ParserException
-   */
-  @Test
-  public void testParse() {
-    
-    device.parse(jsonDevice.toString());
-    
-    assertTrue(device.name.equals("Phone"));
-    
+    protected JsonNode jsonData;
+
+    public DeviceTest() {
+
+    }
+
+    @BeforeClass
+    public static void setUpClass() {
+
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+    }
+
+    @Before
+    public void setUp() throws IOException {
+        loadObject();
+        jsonData = loadData("record");
+    }
+
+    @After
+    public void tearDown() {
+
+    }
+
+    /**
+     * Test of parse method, of class Device.
+     *
+     * @throws
+     * org.createnet.raptor.models.objects.RaptorComponent.ParserException
+     */
+    @Test
+    public void testParse() {
+
+        device.parse(jsonDevice.toString());
+
+        assertTrue(device.name.equals("Phone"));
+
 //    assertTrue(device.parentId == null);
 //    assertTrue(device.path == null);
-    
-    assertTrue(device.streams.size() == 1);
-    assertTrue(device.streams.get("mylocation").channels.get("position").type.toLowerCase().equals("geo_point"));
-    
-    assertTrue(device.actions.size() == 3);
-    assertTrue(device.actions.get("makeCall") != null);
-    
-  }
-  
-  @Test
-  public void testSerializeToJsonNode()  {
-    
-    device.parse(jsonDevice.toString());
-    
-    JsonNode node = device.toJsonNode();
-    
-    assertTrue(node.has("name"));
-    
-  }
-  
-  @Test
-  public void testSerializeViewPublic() throws IOException {
-    
-    device.parse(jsonDevice.toString());
-    
-    String strjson = device.toJSON();
-    JsonNode json = mapper.readTree(strjson);
-    
-    assertTrue(json.has("userId"));
-    assertTrue(json.has("parentId"));
-  }
-  
-  /**
-   * Test of isNew method, of class Device.
-   */
-  @Test
-  public void testIsNew() {
-    assertTrue((new Device()).isNew());
-  }
+        assertTrue(device.streams.size() == 1);
+        assertTrue(device.streams.get("mylocation").channels.get("position").type.toLowerCase().equals("geo_point"));
 
+        assertTrue(device.actions.size() == 3);
+        assertTrue(device.actions.get("makeCall") != null);
+
+    }
+
+    /**
+     * Test of parse method, of class Device.
+     *
+     * @throws
+     * org.createnet.raptor.models.objects.RaptorComponent.ParserException
+     */
+    @Test
+    public void testAddStreams() {
+        
+        Device d = new Device();
+        
+        d.addStream("test", "boolean", "boolean");
+        d.addStream("test", "number", "number");
+        d.addStream("test", "string", "string");
+        
+        assertTrue(d.getStream("test").channels.size() == 3);
+        
+        assertNotNull(d.getStream("test").channels.get("boolean"));
+        assertNotNull(d.getStream("test").channels.get("number"));
+        assertNotNull(d.getStream("test").channels.get("string"));        
+        
+    }
+
+    @Test
+    public void testSerializeToJsonNode() {
+
+        device.parse(jsonDevice.toString());
+
+        JsonNode node = device.toJsonNode();
+
+        assertTrue(node.has("name"));
+
+    }
+
+    @Test
+    public void testSerializeViewPublic() throws IOException {
+
+        device.parse(jsonDevice.toString());
+
+        String strjson = device.toJSON();
+        JsonNode json = mapper.readTree(strjson);
+
+        assertTrue(json.has("userId"));
+        assertTrue(json.has("parentId"));
+    }
+
+    /**
+     * Test of isNew method, of class Device.
+     */
+    @Test
+    public void testIsNew() {
+        assertTrue((new Device()).isNew());
+    }
 
 }

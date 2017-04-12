@@ -143,7 +143,7 @@ public class Token implements Serializable {
         if (expires == null) {
             return null;
         }
-        return Instant.now().plusSeconds(expires);
+        return getCreated().toInstant().plusSeconds(expires);
     }
 
     public Long getExpires() {
@@ -158,7 +158,10 @@ public class Token implements Serializable {
     }
 
     public boolean isExpired() {
-        return getExpiresInstant() != null && getExpiresInstant().isBefore(Instant.now());
+        if(getExpiresInstant() == null) {
+            return true;
+        }
+        return getExpiresInstant().isBefore(Instant.now());
     }
 
     public boolean isEnabled() {

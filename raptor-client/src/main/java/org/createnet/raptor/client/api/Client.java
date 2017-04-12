@@ -56,9 +56,15 @@ public class Client extends AbstractClient {
 
             private final com.fasterxml.jackson.databind.ObjectMapper jacksonObjectMapper
                     = new com.fasterxml.jackson.databind.ObjectMapper();
-
+            
             @Override
             public <T> T readValue(String value, Class<T> valueType) {
+                if (value == null ) {
+                    return null;
+                }
+                if (value.isEmpty()) {
+                    return null;
+                }
                 try {
                     return jacksonObjectMapper.readValue(value, valueType);
                 } catch (IOException e) {
@@ -115,6 +121,8 @@ public class Client extends AbstractClient {
         final static public String SUBSCRIBE_STREAM = PUSH;
 
         final static public String LOGIN = "/auth/login";
+        final static public String LOGOUT = LOGIN;
+        final static public String REFRESH_TOKEN = "/auth/refresh";
 
     }
 

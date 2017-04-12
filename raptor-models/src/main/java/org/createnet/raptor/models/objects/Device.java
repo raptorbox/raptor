@@ -26,6 +26,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -132,7 +133,7 @@ public class Device extends DeviceContainer {
         if (this.name == null) {
             throw new ValidationException("name field missing");
         }
-        
+
         if (!this.isNew() && this.id == null) {
             throw new ValidationException("id field missing");
         }
@@ -297,45 +298,68 @@ public class Device extends DeviceContainer {
     }
 
     /**
-     * Add a list of streams to the device
+     * Add a list of streams to the device, trying to merge channels if they exists already
      *
      * @param streams list of streams
-     * @return 
+     * @return
      */
     public Device addStreams(Collection<Stream> streams) {
-        streams.stream().forEach((stream) -> {
 
-            stream.setDevice(this);
+        for (Stream stream : streams) {
 
-            stream.channels.values().stream().forEach((channel) -> {
+            final Stream prevStream = this.streams.get(stream.name);
+
+            for (Channel channel : stream.channels.values()) {
+                // ensure device ref
                 channel.setDevice(this);
-            });
 
-            this.streams.put(stream.name, stream);
-        });
-        
+                // merging into previous stream
+                if (prevStream != null) {
+                    prevStream.channels.put(channel.name, channel);
+                }
+            }
+
+            // add new stream
+            if (prevStream == null) {
+                stream.setDevice(this);
+                this.streams.put(stream.name, stream);
+            } else {
+                // copy details
+                prevStream.type = stream.type;
+                prevStream.description = stream.description;
+            }
+
+        }
+
         return this;
     }
-        
+
     /**
-     * Create a Stream in the device
-     * 
+     * Add a Stream in the device if it does not exists
+     *
      * @param name
-     * @return 
+     * @return
      */
     public Stream addStream(String name) {
+
+        Stream prevStream = getStream(name);
+        if (prevStream != null) {
+            return prevStream;
+        }
+
         Stream stream = Stream.create(name);
         addStreams(Arrays.asList(stream));
+        
         return stream;
     }
-        
+
     /**
-     * Create a Stream with a channel
-     * 
+     * Add a channel to an stream, creating it if not available
+     *
      * @param name
      * @param channelName
      * @param channelType
-     * @return 
+     * @return
      */
     public Stream addStream(String name, String channelName, String channelType) {
         Stream stream = addStream(name);
@@ -343,13 +367,13 @@ public class Device extends DeviceContainer {
         stream.validate();
         return stream;
     }
-    
+
     /**
-     * Create a Stream with a channel of the same name
-     * 
+     * Add a channel of the same name of the stream
+     *
      * @param name
      * @param channelType
-     * @return 
+     * @return
      */
     public Stream addStream(String name, String channelType) {
         return addStream(name, name, channelType);
@@ -359,7 +383,7 @@ public class Device extends DeviceContainer {
      * Add a list of actions to the device
      *
      * @param values list of actions
-     * @return 
+     * @return
      */
     public Device addActions(Collection<Action> values) {
         values.stream().forEach((action) -> {
@@ -373,7 +397,7 @@ public class Device extends DeviceContainer {
      * Add an action to the device
      *
      * @param name
-     * @return 
+     * @return
      */
     public Action addAction(String name) {
         Action action = Action.create(name);

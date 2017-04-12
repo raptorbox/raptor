@@ -112,6 +112,13 @@ public class RecordSet {
         this.userId = userId;
     }
 
+    public IRecord createRecord(String key, Object value) {
+        if (this.getStream() == null) {
+            throw new RecordsetException("Stream must be set");
+        }
+        return RecordSet.createRecord(this.getStream(), key, value);
+    }
+    
     public static IRecord createRecord(Stream stream, String key, Object value) {
 
         IRecord record = null;
@@ -196,6 +203,10 @@ public class RecordSet {
         return "{}";
     }
 
+    /**
+     * Get the records timestamp
+     * @return 
+     */
     public Date getTimestamp() {
         if (timestamp == null) {
             setTimestamp(new Date());
@@ -203,24 +214,65 @@ public class RecordSet {
         return timestamp;
     }
 
+    /**
+     * Get the records timestamp as UNIX epoch
+     * @return
+     */
     public Long getTimestampTime() {
         return getTimestamp().toInstant().getEpochSecond();
     }
 
+    /**
+     * Set the records timestamp
+     * @param timestamp
+     */
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 
+    /**
+     * Get the stored records
+     * @return
+     */
     public Map<String, IRecord> getRecords() {
         return channels;
     }
 
+    /**
+     * Set all the record values, removing the previous one if any
+     * @param records
+     */
     public void setRecords(List<IRecord> records) {
         this.channels.clear();
 
         for (IRecord record : records) {
             this.channels.put(record.getName(), record);
         }
+    }
+    
+    /**
+     * Add a record value
+     * 
+     * @param record
+     */
+    public void addRecord(IRecord record) {
+        this.channels.put(record.getName(), record);
+    }
+    
+    /**
+     * Add a record value
+     * 
+     * @param channelName
+     * @param value
+     * @return 
+     */
+    public IRecord<?> addRecord(String channelName, Object value) {
+        IRecord r = createRecord(channelName, value);
+        if (r == null) {
+            throw new RecordsetException("Can not create a Record, is the channel name listed in the stream channels?");
+        }
+        this.channels.put(r.getName(), r);
+        return r;
     }
 
     private void parseJson(Stream stream, JsonNode row) {

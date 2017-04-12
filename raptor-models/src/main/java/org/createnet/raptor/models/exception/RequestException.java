@@ -32,10 +32,10 @@ public class RequestException extends RuntimeException {
     }
 
     @Override
-    public String toString() {
-        return String.format("HTTP Exception %d - %s: %s", getStatus(), getStatusText(), getBody());
+    public String getMessage() {
+        return String.format("HTTP %d %s - %s", getStatus(), getStatusText(), getBody());
     }
-
+    
     public int getStatus() {
         return status;
     }

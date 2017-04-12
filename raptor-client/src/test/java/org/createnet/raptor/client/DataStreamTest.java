@@ -15,17 +15,19 @@
  */
 package org.createnet.raptor.client;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
+import org.createnet.raptor.models.data.RecordSet;
+import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
+import org.elasticsearch.common.geo.GeoPoint;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,11 +35,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public class DeviceManagementTest {
-    
-    final Logger log = LoggerFactory.getLogger(DeviceManagementTest.class);
-    
+public class DataStreamTest {
+
+    final Logger log = LoggerFactory.getLogger(DataStreamTest.class);
+
     public static Raptor raptor;
+    public static Device device;
 
     @BeforeClass
     public static void setUpClass() {
@@ -49,164 +52,103 @@ public class DeviceManagementTest {
 
     @Before
     public void setUp() {
-        raptor = new Raptor("http://raptor.local", "admin", "admin");
-        log.debug("Performing login");
-        raptor.Auth.login();
-        log.debug("Logged in");
+
+        raptor = Utils.getRaptor();
+
+        Device d = new Device();
+        d.name = "data test " + System.currentTimeMillis();
+
+        d.addStream("test", "string", "string");
+        d.addStream("test", "number", "number");
+        d.addStream("test", "boolean", "boolean");
+        d.addStream("test", "string", "string");
+        d.addStream("test", "location", "geo_point");
+        
+        Assert.assertTrue(d.getStream("test").channels.size() == 4);
+        
+        log.debug("Creating {} device", d.name);
+
+        device = d;
     }
 
     @After
     public void tearDown() {
     }
-
-    @Test
-    public void list() {
-        log.debug("List devices");
-        List<Device> list = raptor.Device.list();
-        log.debug("found {} devices", list.size());
-        assertNotNull(list);
-    }
-
-    @Test
-    public void create() {
-
-        Device dev = new Device();
-        dev.name = "test create";
-
-        dev.validate();
-        raptor.Device.create(dev);
-        
-        log.debug("Device created {}", dev.id);
-        assertNotNull(dev.id);
-    }
-
-    @Test
-    public void updateStream() throws InterruptedException {
-
-        Device dev = new Device();
-        dev.name = "test update";
-        Stream s = dev.addStream("position", "location", "geo_point");
-        dev.validate();
-        raptor.Device.create(dev);
-        
-        log.debug("Device created {}", dev.id);
-        
-        s.addChannel("speed", "number");
-        s.addChannel("color", "string");
-
-        s.validate();
-
-        log.debug("Added channels");
-        
-        Thread.sleep(2500);
-        raptor.Device.update(dev);
-
-        log.debug("Updated, fetch list");
-        
-        Thread.sleep(3500);
-        List<Device> list = raptor.Device.list();
-
-        log.debug("found {} devices", list.size());
-        
-        Device dev1 = list.stream().filter(d -> d.id.equals(dev.id)).findFirst().get();
-        
-        
-        assertNotNull(dev1);
-        assertTrue(dev1.streams.size() == dev.streams.size());
-        
-        log.debug("position channels {} == {}", dev1.streams.get("position").channels.size(), dev.streams.get("position").channels.size());
-        assertTrue(dev1.streams.get("position").channels.size() == dev.streams.get("position").channels.size());
-        assertTrue(dev1.streams.get("position").channels.containsKey("color"));
-        
-    }
-
-    @Test
-    public void update() throws InterruptedException {
-        
-        Device dev = new Device();
-        dev.name = "modified device";
-        dev.validate();
-        raptor.Device.create(dev);
-
-        Thread.sleep(2500);
-        raptor.Device.update(dev);
-
-        Thread.sleep(2500);
-        List<Device> list = raptor.Device.list();
-
-        Device dev1 = list.stream().filter(d -> d.id.equals(dev.id)).findFirst().get();
-        assertNotNull(dev1);
-
-        assertEquals(dev1.name, dev.name);
-    }
-
-    @Test
-    public void load() throws InterruptedException {
-
-        Device dev = new Device();
-        dev.name = "test load";
-        dev.validate();
-        raptor.Device.create(dev);
-
-        Thread.sleep(3500);
-        Device dev1 = raptor.Device.load(dev.id);
-
-        assertTrue(dev1.name.equals(dev.name));
-    }
-
-    @Test
-    public void searchByName() throws InterruptedException {
-        
-        for (int i = 0; i < 3; i++) {
-            log.debug("Create device {}", i);
-            Device dev1 = new Device();
-            dev1.name = "test-search "+ i;
-            raptor.Device.create(dev1);
-        }
-        
-        Thread.sleep(2500);
-        
-
-        ObjectQuery q = new ObjectQuery();
-        q.name = "test-search 1";
-        log.debug("Searching for {}", q.toJSON().toString());
-        List<Device> results = raptor.Device.search(q);
-        
-        log.debug("Results found {}", results.stream().map(d -> d.name).collect(Collectors.toList()));
-        assertNotNull(results);
-        assertTrue(results.size() > 0);
-        assertEquals(results.get(0).name, q.name);
-
-    }
-   
-    @Test
-    public void searchByCustomFields() throws InterruptedException {
-        
-        for (int i = 0; i < 3; i++) {
-            log.debug("Create device d{}", i);
-            Device dev1 = new Device();
-            dev1.name = "d"+ i;
-            dev1.customFields.put("model", System.currentTimeMillis());
-            String v = i%2 == 0 ? "A" : "B";
-            dev1.customFields.put("version", v);
-            log.debug("Create device with version {}", v);
-            raptor.Device.create(dev1);
-        }
-        
-        Thread.sleep(2500);
-        
-        String testVersion = "A";
-        ObjectQuery q = new ObjectQuery();
-        q.customFields.put("version", testVersion);
-        log.debug("Searching for {}", q.toJSON().toString());
-        
-        List<Device> results = raptor.Device.search(q);
-        
-        log.debug("Results found {}", results.stream().map(d -> d.name).collect(Collectors.toList()));
-        assertNotNull(results);
-//        assertTrue(results.size() > 0);
-//        assertTrue(results.get(0).customFields.get("version").equals(testVersion));
-
+    
+    private Device createDevice(Device d) {
+        return raptor.Device.create(d);
     }
     
+    private Device createDevice() {
+        return raptor.Device.create(device);
+    }
+    
+    private List<RecordSet> createRecordSet(Stream stream, int length) {
+        List<RecordSet> records = new ArrayList();
+        for (int i = 0; i < length; i++) {
+            
+            RecordSet record = new RecordSet(stream);
+            record.addRecord("number", System.currentTimeMillis());
+            record.addRecord("string", System.currentTimeMillis() % 2 == 0 ? "Hello world" : "See you later");
+            record.addRecord("boolean", System.currentTimeMillis() % 2 == 0);
+            record.addRecord("location", new GeoPoint(11.45, 45.11));
+
+            records.add(record);
+        }
+        
+        return records;
+    }
+    
+    @Test
+    public void pushData() throws InterruptedException {
+
+        log.debug("Push device data");
+        
+        Device dev = createDevice();
+        Stream s = dev.getStream("test");
+        
+        List<RecordSet> records = createRecordSet(s, 10);
+
+        records.parallelStream().forEach(record -> raptor.Stream.push(record));
+        
+    }
+
+    @Test
+    public void pullRecords() throws InterruptedException {
+
+        log.debug("Pull device data");
+        
+        Device dev = createDevice();
+        Stream s = dev.getStream("test");
+        
+        List<RecordSet> records = createRecordSet(s, 5);
+        records.parallelStream().forEach(record -> raptor.Stream.push(record));
+        
+        // wait for indexing
+        Thread.sleep(2500);
+        
+        ResultSet results = raptor.Stream.pull(s);
+        Assert.assertTrue(results.size() > 0);
+        
+    }
+
+    @Test
+    public void searchRecords() throws InterruptedException {
+
+        log.debug("Search device data");
+        
+        Device dev = createDevice();
+        Stream s = dev.getStream("test");
+        
+        List<RecordSet> records = createRecordSet(s, 10);
+        records.parallelStream().forEach(record -> raptor.Stream.push(record));
+        
+        // wait for indexing
+        Thread.sleep(2500);
+        
+        ResultSet results = raptor.Stream.pull(s);
+        Assert.assertTrue(results.size() > 0);
+        
+    }
+
 }

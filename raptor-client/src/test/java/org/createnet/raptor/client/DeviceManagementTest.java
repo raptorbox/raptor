@@ -15,8 +15,11 @@
  */
 package org.createnet.raptor.client;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
+import static org.createnet.raptor.client.DataStreamTest.raptor;
 import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
@@ -47,12 +50,10 @@ public class DeviceManagementTest {
     public static void tearDownClass() {
     }
 
+
     @Before
     public void setUp() {
-        raptor = new Raptor("http://raptor.local", "admin", "admin");
-        log.debug("Performing login");
-        raptor.Auth.login();
-        log.debug("Logged in");
+        raptor = Utils.getRaptor();
     }
 
     @After
