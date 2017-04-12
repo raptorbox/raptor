@@ -35,7 +35,7 @@
                         "mapping": {
                             "store": "yes",
                             "index": "not_analyzed",
-                            "type": "double",
+                            "type": "float",
                             "ignore_malformed": true
                         }
                     }
@@ -46,7 +46,7 @@
                         "mapping": {
                             "store": "yes",
                             "index": "not_analyzed",
-                            "type": "double",
+                            "type": "long",
                             "ignore_malformed": true
                         }
                     }
