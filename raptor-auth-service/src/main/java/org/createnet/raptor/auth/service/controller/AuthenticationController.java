@@ -44,7 +44,6 @@ import org.createnet.raptor.models.auth.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -164,7 +163,7 @@ public class AuthenticationController {
             @AuthenticationPrincipal User currentUser
     ) {
 
-        Token token = tokenService.read(reqToken);
+        Token token = tokenService.read(reqToken.replace("Bearer ", ""));
         if (token == null) {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST);
         }
