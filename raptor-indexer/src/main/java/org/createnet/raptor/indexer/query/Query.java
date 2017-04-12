@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public interface Query {
     
-    public enum Fields {
+    public enum Field {
         timestamp, channels, userId, objectId, streamId, actionId
     }
     
@@ -44,7 +44,7 @@ public interface Query {
             this.sort = sort;
             this.field = field;
         }
-        public SortBy(Fields field, Sort sort) {
+        public SortBy(Field field, Sort sort) {
             this.sort = sort;
             this.field = field.name();
         }

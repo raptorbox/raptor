@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import javax.ws.rs.InternalServerErrorException;
 import org.createnet.raptor.events.Event;
 import org.createnet.raptor.events.type.DataEvent;
+import org.createnet.raptor.indexer.query.Query;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Device;
@@ -179,7 +180,7 @@ public class StreamManagerService extends AbstractRaptorService {
         if (!obj.settings.storeEnabled()) {
             return null;
         }
-
+                
         ResultSet results = indexer.searchData(stream, query, limit, offset);
 
         logger.debug("Search data for stream {} in object {} has {} results", stream.name, obj.id, results.size());

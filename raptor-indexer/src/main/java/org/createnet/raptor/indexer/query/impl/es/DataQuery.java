@@ -15,10 +15,12 @@
  */
 package org.createnet.raptor.indexer.query.impl.es;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import org.createnet.raptor.indexer.query.Query;
+import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.GeoBoundingBoxQueryBuilder;
@@ -36,7 +38,16 @@ public class DataQuery extends AbstractESQuery {
 
     public DataQuery() {
     }
-
+        
+    @JsonIgnore
+    private String userId;
+    
+    @JsonIgnore
+    private String objectId;
+    
+    @JsonIgnore
+    private String streamId;
+    
     public List<DataQuery> queryList = new ArrayList();
 
     public boolean timerange = false;
@@ -74,7 +85,19 @@ public class DataQuery extends AbstractESQuery {
 
     @Override
     public void validate() throws Query.QueryException {
-
+        
+        if(getUserId() == null) {
+            throw new QueryException("userId is missing");
+        }
+        
+        if(getObjectId() == null) {
+            throw new QueryException("objectId is missing");
+        }
+        
+        if(getStreamId() == null) {
+            throw new QueryException("streamId is missing");
+        }
+        
         if (timerange) {
             return;
         }
@@ -98,12 +121,13 @@ public class DataQuery extends AbstractESQuery {
 
         throw new Query.QueryException("Query is empty");
     }
-
+    
+    
     @Override
     protected QueryBuilder buildQuery() {
 
         ArrayList<QueryBuilder> queries = new ArrayList();
-
+        
         if (timerange) {
             RangeQueryBuilder rangeFilter
                     = QueryBuilders.rangeQuery("timestamp")
@@ -114,7 +138,6 @@ public class DataQuery extends AbstractESQuery {
         }
 
         if (numericrange) {
-
             RangeQueryBuilder numericrangeFilter
                     = QueryBuilders.rangeQuery(numericrangefield)
                             .from(numericrangefrom).includeLower(true)
@@ -125,7 +148,6 @@ public class DataQuery extends AbstractESQuery {
         }
 
         if (geodistance) {
-
             GeoDistanceQueryBuilder geodistanceFilter = QueryBuilders.geoDistanceQuery("channels.location")
                     .distance(geodistancevalue, DistanceUnit.fromString(geodistanceunit))
                     .point(pointlat, pointlon);
@@ -135,7 +157,6 @@ public class DataQuery extends AbstractESQuery {
         }
 
         if (geoboundingbox) {
-
             GeoBoundingBoxQueryBuilder geodbboxFilter = QueryBuilders.geoBoundingBoxQuery("channels.location");
 
             geodbboxFilter.topLeft().reset(geoboxupperleftlat, geoboxupperleftlon);
@@ -153,17 +174,31 @@ public class DataQuery extends AbstractESQuery {
         queries.forEach((qbpart) -> {
             qb.must(qbpart);
         });
-        
+
         return qb;
     }
 
-    public DataQuery setMatch(Fields field, String value) {
+    /**
+     * Search for a match on a provided field
+     *
+     * @param field
+     * @param value
+     * @return
+     */
+    public DataQuery setMatch(Field field, String value) {
         match = true;
         matchfield = field.name();
         matchstring = value;
         return this;
     }
 
+    /**
+     * Search for a match on a specified channel
+     *
+     * @param field
+     * @param value
+     * @return
+     */
     public DataQuery setMatch(String field, String value) {
         match = true;
         matchfield = field;
@@ -171,10 +206,23 @@ public class DataQuery extends AbstractESQuery {
         return this;
     }
 
+    /**
+     * Search for result from a specified time until now
+     *
+     * @param from
+     * @return
+     */
     public DataQuery timeRange(Instant from) {
         return timeRange(from, Instant.now());
     }
 
+    /**
+     * Search for result in a time frame range
+     *
+     * @param from
+     * @param to
+     * @return
+     */
     public DataQuery timeRange(Instant from, Instant to) {
         this.timerange = true;
         this.timerangefrom = from.getEpochSecond();
@@ -182,4 +230,90 @@ public class DataQuery extends AbstractESQuery {
         return this;
     }
 
+    /**
+     * Search for result in a geo-spatial bounding box
+     *
+     * @param nw top-left coordinate
+     * @param se bottom-right coordinate
+     * @return
+     */
+    public DataQuery boundingBox(GeoPoint nw, GeoPoint se) {
+        this.geoboundingbox = true;
+        this.geoboxupperleftlat = nw.getLat();
+        this.geoboxupperleftlon = nw.getLon();
+        this.geoboxbottomrightlon = se.getLon();
+        this.geoboxbottomrightlat = se.getLat();
+        return this;
+    }
+
+    /**
+     * Search for result in the radius of a geo-spatial point
+     *
+     * @param distance
+     * @param unit
+     * @return
+     */
+    public DataQuery distance(double distance, DistanceUnit unit) {
+        this.geodistance = true;
+        this.geodistanceunit = unit.name();
+        this.geodistancevalue = distance;
+        return this;
+    }
+
+    /**
+     * Search for results in a numeric range
+     *
+     * @param field a channel name of type numeric
+     * @param from
+     * @param to
+     * @return
+     */
+    public DataQuery range(String field, double from, double to) {
+        this.numericrange = true;
+        this.numericrangefrom = from;
+        this.numericrangeto = to;
+        this.numericrangefield = field;
+        return this;
+    }
+
+    /**
+     * Search for results in a numeric range
+     *
+     * @param field a channel name of type numeric
+     * @param from
+     * @param to
+     * @return
+     */
+    public DataQuery range(String field, long from, long to) {
+        this.numericrange = true;
+        this.numericrangefrom = new Long(from).doubleValue();
+        this.numericrangeto = new Long(to).doubleValue();
+        this.numericrangefield = field;
+        return this;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getObjectId() {
+        return objectId;
+    }
+
+    public void setObjectId(String objectId) {
+        this.objectId = objectId;
+    }
+
+    public String getStreamId() {
+        return streamId;
+    }
+
+    public void setStreamId(String streamId) {
+        this.streamId = streamId;
+    }
+    
 }

@@ -165,6 +165,23 @@ public class IndexerService extends AbstractRaptorService {
         return indexer;
     }
 
+    protected DataQuery createDataQuery(Stream stream) {
+        
+        DataQuery query = new DataQuery();
+        setDataQueryDefaults(query, stream);
+        
+        return query;
+    }
+
+    protected void setDataQueryDefaults(DataQuery query, Stream stream) {
+        
+        setQueryIndex(query, IndexNames.data);
+        
+        query.setUserId(stream.getDevice().getUserId());
+        query.setObjectId(stream.getDevice().getId());
+        query.setStreamId(stream.name);        
+    }
+    
     /**
      * Return a well-known index configuration
      *
@@ -317,7 +334,7 @@ public class IndexerService extends AbstractRaptorService {
 
         lastUpdateQuery.setOffset(0);
         lastUpdateQuery.setLimit(1);
-        lastUpdateQuery.setSort(new Query.SortBy(Query.Fields.timestamp, Query.Sort.DESC));
+        lastUpdateQuery.setSort(new Query.SortBy(Query.Field.timestamp, Query.Sort.DESC));
 
         List<Indexer.IndexRecord> results = getIndexer().search(lastUpdateQuery);
 
@@ -449,12 +466,11 @@ public class IndexerService extends AbstractRaptorService {
      * @return a list of RecordSet objects
      */
     public List<RecordSet> getStreamData(Stream stream, Integer limit, Integer offset) {
-
-        DataQuery query = new DataQuery();
-        setQueryIndex(query, IndexNames.data);
-
+        
+        DataQuery query = createDataQuery(stream);
+        
         query
-                .setMatch(Query.Fields.streamId, stream.name);
+                .setMatch(Query.Field.streamId, stream.name);
 
         List<Indexer.IndexRecord> records = getIndexer().search(query);
         List<RecordSet> results = new ArrayList();
@@ -539,10 +555,11 @@ public class IndexerService extends AbstractRaptorService {
      * @return the list of RecordSet with data
      */
     public ResultSet searchData(Stream stream, DataQuery query) {
-
-        setQueryIndex(query, IndexNames.data);
+        
+        setDataQueryDefaults(query, stream);
+        
         List<Indexer.IndexRecord> records = getIndexer().search(query);
-
+       
         ResultSet resultset = new ResultSet(stream);
         records.forEach((record) -> {
             resultset.add(new RecordSet(stream, record.body));
@@ -575,8 +592,12 @@ public class IndexerService extends AbstractRaptorService {
         DataQuery query = new DataQuery();
         setQueryIndex(query, IndexNames.data);
         setCursor(query, limit, offset);
+        
+        query.setUserId(stream.getDevice().getUserId());
+        query.setObjectId(stream.getDevice().getId());
+        query.setStreamId(stream.name);
 
-        query.setSort(new Query.SortBy(Query.Fields.timestamp, Query.Sort.DESC));
+        query.setSort(new Query.SortBy(Query.Field.timestamp, Query.Sort.DESC));
         query.timeRange(Instant.EPOCH);
 
         ResultSet data = searchData(stream, query);
