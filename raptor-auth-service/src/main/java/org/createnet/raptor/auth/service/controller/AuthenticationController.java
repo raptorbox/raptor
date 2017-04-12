@@ -101,7 +101,7 @@ public class AuthenticationController {
     )
     public ResponseEntity<?> login(@RequestBody LoginRequest authenticationRequest) throws AuthenticationException {
         try {
-            
+
             final Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authenticationRequest.username, authenticationRequest.password)
             );
@@ -113,7 +113,7 @@ public class AuthenticationController {
 
             // Return the token
             return ResponseEntity.ok(new LoginResponse((User) userDetails, token.getToken()));
-            
+
         } catch (AuthenticationException ex) {
             logger.error("Authentication exception: {}", ex.getMessage());
             return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED, "Authentication failed");
@@ -156,22 +156,27 @@ public class AuthenticationController {
             notes = "The authentication token, provided via `Authorization` header must still be valid.",
             response = LoginResponse.class,
             nickname = "refreshToken"
-    )    
+    )
     public ResponseEntity<?> refreshToken(
             @RequestHeader("${jwt.header}") String reqToken,
             HttpServletRequest request,
             @AuthenticationPrincipal User currentUser
     ) {
 
-        Token token = tokenService.read(reqToken.replace("Bearer ", ""));
+        String bearer = "Bearer ";
+        if (reqToken.substring(0, bearer.length()).equals(bearer)) {
+            reqToken = reqToken.replace(bearer, "");
+        }
+
+        Token token = tokenService.read(reqToken);
         if (token == null) {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST);
         }
-        
+
         logger.debug("Refreshing token id:{} for user {}", token.getId(), currentUser.getUuid());
-        
+
         Token refreshedToken = tokenService.refreshToken(token);
-        
+
         logger.debug("Refreshed token id:{}", refreshedToken.getId());
         return ResponseEntity.ok(new LoginResponse(currentUser, refreshedToken.getToken()));
     }
