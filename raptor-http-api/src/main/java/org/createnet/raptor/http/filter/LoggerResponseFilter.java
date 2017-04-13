@@ -37,7 +37,7 @@ public class LoggerResponseFilter implements ContainerResponseFilter {
         Principal p = request.getSecurityContext().getUserPrincipal();
         String authName = p == null ? "-" : p.getName();
 
-        if (response.getStatus() > 400) {
+        if (response.getStatus() >= 400) {
             logger.warn("API request error {} {}: [{}] {} /{}",
                     response.getStatus(),
                     response.getStatusInfo().getReasonPhrase(),

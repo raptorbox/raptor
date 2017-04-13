@@ -15,26 +15,29 @@
  */
 package org.createnet.raptor.models.data;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.UUID;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.objects.RaptorContainer;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ActionStatus {
 
     public String id;
     public String status;
-    public int createdAt;
-
+    public int createdAt = (int) (Instant.now().toEpochMilli() / 1000);
     public String actionId;
     public String objectId;
 
@@ -49,14 +52,33 @@ public class ActionStatus {
 
     public ActionStatus(String status) {
         this.status = status;
-        this.createdAt = (int) (System.currentTimeMillis() / 1000);
         this.id = UUID.randomUUID().toString();
     }
 
-    private final static ObjectMapper mapper = new ObjectMapper();
+    private final static ObjectMapper mapper = RaptorContainer.getMapper();
 
     private ObjectMapper getMapper() {
         return mapper;
+    }
+
+    /**
+     * Set status
+     *
+     * @param s
+     * @return
+     */
+    public ActionStatus status(String s) {
+        this.status = s;
+        return this;
+    }
+    
+    /**
+     * Get status
+     *
+     * @return
+     */
+    public String status() {
+        return this.status;
     }
 
     public String toJSON() {

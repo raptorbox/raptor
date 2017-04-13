@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.objects.Action;
-import org.createnet.raptor.models.objects.Stream;
 
 /**
  *
@@ -56,6 +55,10 @@ import org.createnet.raptor.models.objects.Stream;
     @ApiResponse(
             code = 403, 
             message = "Forbidden"
+    ),
+    @ApiResponse(
+            code = 415, 
+            message = "Unsupported Media Type"
     ),
     @ApiResponse(
             code = 500, 
@@ -121,7 +124,8 @@ public class ActionApi extends AbstractApi {
 
     @POST
     @Path("{actionId}")
-    @Consumes(MediaType.TEXT_PLAIN)    
+    @Consumes(value = { MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON })
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             value = "Set the state of an action",
             notes = "",
@@ -134,7 +138,6 @@ public class ActionApi extends AbstractApi {
             @PathParam("actionId") String actionId,
             String body
     ) {
-
         
         Action action = actionManager.load(objectId, actionId);
         Device obj = action.getDevice();

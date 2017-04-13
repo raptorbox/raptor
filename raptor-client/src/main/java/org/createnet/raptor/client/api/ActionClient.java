@@ -33,7 +33,7 @@ public class ActionClient extends AbstractClient {
     public ActionClient(Raptor container) {
         super(container);
     }
-    
+
     /**
      * List available actions on the object
      *
@@ -75,12 +75,9 @@ public class ActionClient extends AbstractClient {
      * @return return the list of available action for an object
      */
     public ActionStatus getStatus(String objectId, String actionId) {
-        return Device.getMapper().convertValue(
-                getClient().get(
-                        String.format(Client.Routes.ACTION_STATUS, objectId, actionId)
-                ),
-                ActionStatus.class
-        );
+        return ActionStatus.parseJSON(getClient().get(
+            String.format(Client.Routes.ACTION_STATUS, objectId, actionId)
+        ));
     }
 
     /**
@@ -91,12 +88,9 @@ public class ActionClient extends AbstractClient {
      * @return return the list of available action for an object
      */
     public ActionStatus setStatus(Action action, ActionStatus status) {
-        return Device.getMapper().convertValue(
-                getClient().post(
-                        String.format(Client.Routes.ACTION_STATUS, action.getDevice().id, action.name), status.toJsonNode()
-                ),
-                ActionStatus.class
-        );
+        return ActionStatus.parseJSON(getClient().post(
+                String.format(Client.Routes.ACTION_STATUS, action.getDevice().id, action.name), status.status
+        ));
     }
 
     /**
@@ -109,7 +103,7 @@ public class ActionClient extends AbstractClient {
                 String.format(Client.Routes.ACTION_STATUS, action.getDevice().id, action.name)
         );
     }
-    
+
     /**
      * Remove the action status for an object
      *

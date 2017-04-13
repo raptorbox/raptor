@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Level;
+import static org.createnet.raptor.client.ActionTest.device;
+import static org.createnet.raptor.client.ActionTest.raptor;
 import org.createnet.raptor.models.objects.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +77,12 @@ public class Utils {
         } catch (InterruptedException ex) {
             throw new RuntimeException(ex);
         }
+    }
+    
+    static public Device createDevice(Device d) {
+        Device d1 = raptor.Device.create(d);
+        waitFor(500);
+        return d1;
     }
     
 }

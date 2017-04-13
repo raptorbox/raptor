@@ -18,10 +18,12 @@ package org.createnet.raptor.client.api;
 import org.createnet.raptor.client.AbstractClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.mashape.unirest.http.HttpMethod;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.request.HttpRequestWithBody;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -49,17 +51,15 @@ public class Client extends AbstractClient {
 
     static {
 
-        Unirest.setDefaultHeader("content-type", "application/json");
-
         // Only one time
         Unirest.setObjectMapper(new ObjectMapper() {
 
             private final com.fasterxml.jackson.databind.ObjectMapper jacksonObjectMapper
                     = new com.fasterxml.jackson.databind.ObjectMapper();
-            
+
             @Override
             public <T> T readValue(String value, Class<T> valueType) {
-                if (value == null ) {
+                if (value == null) {
                     return null;
                 }
                 if (value.isEmpty()) {
@@ -87,7 +87,7 @@ public class Client extends AbstractClient {
     final protected Logger logger = LoggerFactory.getLogger(Client.class);
 
     protected MqttClient mqttClient;
-    
+
     public Client(Raptor container) {
         super(container);
     }
@@ -148,24 +148,39 @@ public class Client extends AbstractClient {
         return obj;
     }
 
-    protected void prepareRequest() {
-
+    protected String getToken() {
         String token = getContainer().Auth.getToken();
-
         if (token == null) {
             throw new MissingAuthenticationException("Token is not available");
         }
+        return "Bearer " + token;
+    }
 
-        Unirest.setDefaultHeader("Authorization", "Bearer " + token);
+    protected void prepareRequest() {
+    }
+
+    protected HttpRequestWithBody request(HttpMethod method, String url) {
+        return request(method, url, true, true);
+    }
+
+    protected HttpRequestWithBody request(HttpMethod method, String url, boolean auth, boolean json) {
+        HttpRequestWithBody req = new HttpRequestWithBody(method, getClient().url(url));
+        if (auth) {
+            req.header("Authorization", getToken());
+        }
+        if (json) {
+            req.header("Content-Type", "application/json");
+        }
+        return req;
     }
 
     protected void checkResponse(HttpResponse<?> response) {
 
         int status = response.getStatus();
 
-        if (status >= 400) {
+        if (status >= 400 && response.getBody() != null) {
             String message = response.getBody().toString();
-            if(response.getBody() instanceof JsonNode) {
+            if (response.getBody() instanceof JsonNode) {
                 JsonNode err = (JsonNode) response.getBody();
                 if (err.has("message")) {
                     message = err.get("message").asText();
@@ -303,11 +318,8 @@ public class Client extends AbstractClient {
         try {
             logger.debug("POST {}", url);
             // catch login url and skip token signing
-            if (!url.equals(Routes.LOGIN)) {
-                prepareRequest();
-            }
-            HttpResponse<JsonNode> objResponse = Unirest
-                    .post(getClient().url(url))
+            prepareRequest();
+            HttpResponse<JsonNode> objResponse = request(HttpMethod.POST, url, !url.equals(Routes.LOGIN), true)
                     .body(body)
                     .asObject(JsonNode.class);
             checkResponse(objResponse);
@@ -328,8 +340,7 @@ public class Client extends AbstractClient {
         try {
             logger.debug("GET {}", url);
             prepareRequest();
-            HttpResponse<JsonNode> objResponse = Unirest
-                    .get(getClient().url(url))
+            HttpResponse<JsonNode> objResponse = request(HttpMethod.GET, url)
                     .asObject(JsonNode.class);
             checkResponse(objResponse);
             return objResponse.getBody();
@@ -349,8 +360,7 @@ public class Client extends AbstractClient {
         try {
             logger.debug("DELETE {}", url);
             prepareRequest();
-            HttpResponse<JsonNode> objResponse = Unirest
-                    .delete(getClient().url(url))
+            HttpResponse<JsonNode> objResponse = request(HttpMethod.DELETE, url)
                     .asObject(JsonNode.class);
             checkResponse(objResponse);
             return objResponse.getBody();
@@ -363,18 +373,19 @@ public class Client extends AbstractClient {
     /**
      * Send a text payload (specific for invoking actions)
      *
-     * @param path path of request
-     * @param payload the raw content to send
+     * @param url
+     * @param payload
+     * @return 
      */
-    public void post(String path, String payload) {
+    public JsonNode post(String url, String payload) {
         try {
-            logger.debug("POST text/plain {}", path);
-            HttpResponse<String> objResponse = Unirest
-                    .post(getClient().url(path))
+            logger.debug("POST text/plain {}", url);
+            HttpResponse<JsonNode> objResponse = request(HttpMethod.POST, url, true, false)
                     .header("content-type", "text/plain")
                     .body(payload)
-                    .asString();
+                    .asObject(JsonNode.class);
             checkResponse(objResponse);
+            return objResponse.getBody();
         } catch (UnirestException ex) {
             logger.error("Request error: {}", ex.getMessage());
             throw new ClientException(ex);

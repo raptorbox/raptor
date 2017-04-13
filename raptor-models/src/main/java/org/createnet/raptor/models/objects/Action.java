@@ -15,12 +15,14 @@
  */
 package org.createnet.raptor.models.objects;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.createnet.raptor.models.objects.serializer.ActionSerializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.IOException;
+import org.createnet.raptor.models.data.ActionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +31,7 @@ import org.slf4j.LoggerFactory;
  * @author Luca Capra <luca.capra@gmail.com>
  */
 @JsonSerialize(using = ActionSerializer.class)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Action extends DeviceContainer {
 
     Logger logger = LoggerFactory.getLogger(Action.class);
@@ -44,11 +47,11 @@ public class Action extends DeviceContainer {
         a.status = status;
         return a;
     }
-    
+
     public static Action create(String name) {
         return Action.create(name, null);
     }
-    
+
     public Action(String json) {
         JsonNode tree;
         try {
@@ -122,20 +125,27 @@ public class Action extends DeviceContainer {
 
     @Override
     public void validate() {
-
         if (name == null) {
             throw new ValidationException("Action name is empty");
         }
-
     }
 
     @Override
-    public void parse(String json)  {
+    public void parse(String json) {
         try {
             parse(mapper.readTree(json));
         } catch (IOException ex) {
             throw new ParserException(ex);
         }
+    }
+
+    /**
+     * Return a status object for this action
+     *
+     * @return
+     */
+    public ActionStatus getStatus() {
+        return new ActionStatus(this, this.status);
     }
 
 }
