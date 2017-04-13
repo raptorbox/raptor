@@ -20,8 +20,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import org.createnet.raptor.indexer.query.Query;
-import org.elasticsearch.common.geo.GeoPoint;
-import org.elasticsearch.common.unit.DistanceUnit;
+import org.createnet.raptor.models.data.types.instances.GeoPoint;
+import org.createnet.raptor.models.data.types.instances.DistanceUnit;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.GeoBoundingBoxQueryBuilder;
 import org.elasticsearch.index.query.GeoDistanceQueryBuilder;
@@ -38,16 +38,16 @@ public class DataQuery extends AbstractESQuery {
 
     public DataQuery() {
     }
-        
+
     @JsonIgnore
     private String userId;
-    
+
     @JsonIgnore
     private String objectId;
-    
+
     @JsonIgnore
     private String streamId;
-    
+
     public List<DataQuery> queryList = new ArrayList();
 
     public boolean timerange = false;
@@ -70,7 +70,7 @@ public class DataQuery extends AbstractESQuery {
     public double pointlon;
 
     public double geodistancevalue;
-    public String geodistanceunit = "km";
+    public DistanceUnit geodistanceunit = DistanceUnit.kilometers;
 
     public boolean geoboundingbox = false;
 
@@ -85,19 +85,19 @@ public class DataQuery extends AbstractESQuery {
 
     @Override
     public void validate() throws Query.QueryException {
-        
-        if(getUserId() == null) {
+
+        if (getUserId() == null) {
             throw new QueryException("userId is missing");
         }
-        
-        if(getObjectId() == null) {
+
+        if (getObjectId() == null) {
             throw new QueryException("objectId is missing");
         }
-        
-        if(getStreamId() == null) {
+
+        if (getStreamId() == null) {
             throw new QueryException("streamId is missing");
         }
-        
+
         if (timerange) {
             return;
         }
@@ -122,12 +122,39 @@ public class DataQuery extends AbstractESQuery {
         throw new Query.QueryException("Query is empty");
     }
     
+    private org.elasticsearch.common.unit.DistanceUnit getDistanceUnit(DistanceUnit unit) {
+        switch(unit) {
+            case centimeters:
+                return org.elasticsearch.common.unit.DistanceUnit.CENTIMETERS;
+            case feets:
+                return org.elasticsearch.common.unit.DistanceUnit.FEET;
+            case inches:
+                return org.elasticsearch.common.unit.DistanceUnit.INCH;
+            case kilometers:
+                return org.elasticsearch.common.unit.DistanceUnit.KILOMETERS;
+            case meters:
+                return org.elasticsearch.common.unit.DistanceUnit.METERS;
+            case miles:
+                return org.elasticsearch.common.unit.DistanceUnit.MILES;
+            case millimeters:
+                return org.elasticsearch.common.unit.DistanceUnit.MILLIMETERS;
+            case nauticalMiles:
+                return org.elasticsearch.common.unit.DistanceUnit.NAUTICALMILES;
+            case yards:
+                return org.elasticsearch.common.unit.DistanceUnit.YARD;
+            default:
+                throw new QueryException("Unit not supported " + unit.name());
+        }
+        
+        
+    }
     
     @Override
     protected QueryBuilder buildQuery() {
 
         ArrayList<QueryBuilder> queries = new ArrayList();
-        
+        ArrayList<QueryBuilder> filters = new ArrayList();
+
         if (timerange) {
             RangeQueryBuilder rangeFilter
                     = QueryBuilders.rangeQuery("timestamp")
@@ -139,7 +166,7 @@ public class DataQuery extends AbstractESQuery {
 
         if (numericrange) {
             RangeQueryBuilder numericrangeFilter
-                    = QueryBuilders.rangeQuery(numericrangefield)
+                    = QueryBuilders.rangeQuery("channels." + numericrangefield)
                             .from(numericrangefrom).includeLower(true)
                             .to(numericrangeto).includeUpper(true);
 
@@ -149,11 +176,10 @@ public class DataQuery extends AbstractESQuery {
 
         if (geodistance) {
             GeoDistanceQueryBuilder geodistanceFilter = QueryBuilders.geoDistanceQuery("channels.location")
-                    .distance(geodistancevalue, DistanceUnit.fromString(geodistanceunit))
+                    .distance(geodistancevalue, getDistanceUnit(this.geodistanceunit))
                     .point(pointlat, pointlon);
 
-            //filter.append(geodistanceFilter.toString());
-            queries.add(geodistanceFilter);
+            filters.add(geodistanceFilter);
         }
 
         if (geoboundingbox) {
@@ -162,7 +188,7 @@ public class DataQuery extends AbstractESQuery {
             geodbboxFilter.topLeft().reset(geoboxupperleftlat, geoboxupperleftlon);
             geodbboxFilter.bottomRight().reset(geoboxbottomrightlat, geoboxbottomrightlon);
 
-            queries.add(geodbboxFilter);
+            filters.add(geodbboxFilter);
         }
 
         if (match) {
@@ -170,26 +196,47 @@ public class DataQuery extends AbstractESQuery {
             queries.add(matchFilter);
         }
 
+        queries.add(QueryBuilders.matchQuery("userId", getUserId()));
+        queries.add(QueryBuilders.matchQuery("objectId", getObjectId()));
+        queries.add(QueryBuilders.matchQuery("streamId", getStreamId()));
+
         BoolQueryBuilder qb = QueryBuilders.boolQuery();
         queries.forEach((qbpart) -> {
             qb.must(qbpart);
         });
 
+        // add geo-spatial filter
+        if (!filters.isEmpty()) {
+            filters.forEach((qbpart) -> {
+                qb.filter(qbpart);
+            });
+        }
+
         return qb;
     }
 
-    /**
-     * Search for a match on a provided field
-     *
-     * @param field
-     * @param value
-     * @return
-     */
-    public DataQuery setMatch(Field field, String value) {
-        match = true;
-        matchfield = field.name();
-        matchstring = value;
-        return this;
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getObjectId() {
+        return objectId;
+    }
+
+    public void setObjectId(String objectId) {
+        this.objectId = objectId;
+    }
+
+    public String getStreamId() {
+        return streamId;
+    }
+
+    public void setStreamId(String streamId) {
+        this.streamId = streamId;
     }
 
     /**
@@ -206,6 +253,20 @@ public class DataQuery extends AbstractESQuery {
         return this;
     }
 
+    /**
+     * Search for a match on a provided field
+     *
+     * @param field
+     * @param value
+     * @return
+     */
+    public DataQuery setMatch(Field field, String value) {
+        match = true;
+        matchfield = field.name();
+        matchstring = value;
+        return this;
+    }    
+    
     /**
      * Search for result from a specified time until now
      *
@@ -249,14 +310,14 @@ public class DataQuery extends AbstractESQuery {
     /**
      * Search for result in the radius of a geo-spatial point
      *
-     * @param distance
-     * @param unit
      * @return
      */
-    public DataQuery distance(double distance, DistanceUnit unit) {
+    public DataQuery distance(GeoPoint point, double distance, DistanceUnit unit) {
         this.geodistance = true;
-        this.geodistanceunit = unit.name();
+        this.geodistanceunit = unit;
         this.geodistancevalue = distance;
+        this.pointlat = point.getLat();
+        this.pointlon = point.getLon();
         return this;
     }
 
@@ -292,28 +353,4 @@ public class DataQuery extends AbstractESQuery {
         return this;
     }
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getObjectId() {
-        return objectId;
-    }
-
-    public void setObjectId(String objectId) {
-        this.objectId = objectId;
-    }
-
-    public String getStreamId() {
-        return streamId;
-    }
-
-    public void setStreamId(String streamId) {
-        this.streamId = streamId;
-    }
-    
 }

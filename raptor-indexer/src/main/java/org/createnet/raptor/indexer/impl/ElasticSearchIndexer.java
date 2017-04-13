@@ -113,7 +113,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
     }
 
     /**
-     *
+     * Save a record
      * @param record
      * @throws IndexerException
      */
@@ -123,9 +123,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
             create(record);
         } else {
             update(record);
-//      upsert(record);          
         }
-
     }
 
     protected void upsert(IndexRecord record) {
@@ -176,7 +174,7 @@ public class ElasticSearchIndexer extends AbstractIndexer {
      */
     protected void create(IndexRecord record) throws IndexerException {
         try {
-            logger.debug("Create index record to {}.{}", record.index, record.type);
+            logger.debug("Create index record {}.{}.{}", record.index, record.type, record.id);
             IndexResponse response = client.prepareIndex(record.index, record.type, record.id)
                     .setSource(record.body)
                     .setTimeout(getTimeout())

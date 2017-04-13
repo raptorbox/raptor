@@ -19,7 +19,6 @@ import javax.inject.Inject;
 import javax.ws.rs.InternalServerErrorException;
 import org.createnet.raptor.events.Event;
 import org.createnet.raptor.events.type.DataEvent;
-import org.createnet.raptor.indexer.query.Query;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Device;
@@ -37,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * API to manage Object definitions
+ * API to manage data streams
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */

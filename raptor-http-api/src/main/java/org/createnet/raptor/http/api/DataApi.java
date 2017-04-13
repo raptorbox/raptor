@@ -138,7 +138,7 @@ public class DataApi extends AbstractApi {
             @PathParam("stream") String streamName
     ) {
 
-        Stream stream = streamManager.load(streamName, objectId);
+        Stream stream = streamManager.load(objectId, streamName);
         Device obj = stream.getDevice();
         
         if (!auth.isAllowed(obj, Authorization.Permission.Push)) {
