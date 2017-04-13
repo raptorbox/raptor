@@ -68,7 +68,7 @@ public class AuthTest {
     }
 
     @Test
-    public void refresh() throws InterruptedException {
+    public void refresh()  {
 
         log.debug("Refresh token");
 
@@ -82,7 +82,7 @@ public class AuthTest {
     }
 
     @Test
-    public void logout() throws InterruptedException {
+    public void logout()  {
 
         log.debug("Logout");
 

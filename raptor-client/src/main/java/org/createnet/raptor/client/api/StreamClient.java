@@ -150,7 +150,20 @@ public class StreamClient extends AbstractClient {
     public JsonNode pull(String objectId, String streamId) {
         return pull(objectId, streamId, null, null);
     }
-
+    
+    /**
+     * Fetch the last record stored in the stream
+     * @param stream
+     * @return
+     */
+    public RecordSet lastUpdate(Stream stream) {
+        JsonNode result = getClient().get(String.format(Client.Routes.LAST_UPDATE, stream.getDevice().getId(), stream.name));
+        if(result == null) {
+            return null;
+        }
+        return RecordSet.fromJSON(result);
+    }
+    
     /**
      * Search for data in the stream
      *
@@ -167,6 +180,17 @@ public class StreamClient extends AbstractClient {
                 query.toJSON()
         );
         return ResultSet.fromJSON(stream, results);
+    }
+
+    /**
+     * Drop all data stored in a stream
+     *
+     * @param stream
+     */
+    public void delete(Stream stream) {
+        getClient().delete(
+                String.format(Client.Routes.STREAM, stream.getDevice().id, stream.name)
+        );
     }
 
 }

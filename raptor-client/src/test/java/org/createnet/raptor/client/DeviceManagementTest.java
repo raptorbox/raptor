@@ -82,7 +82,7 @@ public class DeviceManagementTest {
     }
 
     @Test
-    public void updateStream() throws InterruptedException {
+    public void updateStream()  {
 
         Device dev = new Device();
         dev.name = "test update";
@@ -99,12 +99,12 @@ public class DeviceManagementTest {
 
         log.debug("Added channels");
         
-        Thread.sleep(2500);
+        Utils.waitFor(2500);
         raptor.Device.update(dev);
 
         log.debug("Updated, fetch list");
         
-        Thread.sleep(3500);
+        Utils.waitFor(3500);
         List<Device> list = raptor.Device.list();
 
         log.debug("found {} devices", list.size());
@@ -122,17 +122,17 @@ public class DeviceManagementTest {
     }
 
     @Test
-    public void update() throws InterruptedException {
+    public void update()  {
         
         Device dev = new Device();
         dev.name = "modified device";
         dev.validate();
         raptor.Device.create(dev);
 
-        Thread.sleep(2500);
+        Utils.waitFor(2500);
         raptor.Device.update(dev);
 
-        Thread.sleep(2500);
+        Utils.waitFor(2500);
         List<Device> list = raptor.Device.list();
 
         Device dev1 = list.stream().filter(d -> d.id.equals(dev.id)).findFirst().get();
@@ -142,21 +142,21 @@ public class DeviceManagementTest {
     }
 
     @Test
-    public void load() throws InterruptedException {
+    public void load()  {
 
         Device dev = new Device();
         dev.name = "test load";
         dev.validate();
         raptor.Device.create(dev);
 
-        Thread.sleep(3500);
+        Utils.waitFor(3500);
         Device dev1 = raptor.Device.load(dev.id);
 
         assertTrue(dev1.name.equals(dev.name));
     }
 
     @Test
-    public void searchByName() throws InterruptedException {
+    public void searchByName()  {
         
         for (int i = 0; i < 3; i++) {
             log.debug("Create device {}", i);
@@ -165,7 +165,7 @@ public class DeviceManagementTest {
             raptor.Device.create(dev1);
         }
         
-        Thread.sleep(2500);
+        Utils.waitFor(2500);
         
 
         ObjectQuery q = new ObjectQuery();
@@ -181,7 +181,7 @@ public class DeviceManagementTest {
     }
    
     @Test
-    public void searchByCustomFields() throws InterruptedException {
+    public void searchByCustomFields()  {
         
         for (int i = 0; i < 3; i++) {
             log.debug("Create device d{}", i);
@@ -194,7 +194,7 @@ public class DeviceManagementTest {
             raptor.Device.create(dev1);
         }
         
-        Thread.sleep(2500);
+        Utils.waitFor(2500);
         
         String testVersion = "A";
         ObjectQuery q = new ObjectQuery();

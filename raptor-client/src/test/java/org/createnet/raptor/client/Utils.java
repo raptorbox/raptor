@@ -17,7 +17,6 @@ package org.createnet.raptor.client;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -68,6 +67,14 @@ public class Utils {
         Device d = new Device();
         d.name = name;
         return getRaptor().Device.create(d);
+    }
+    
+    static public void waitFor(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ex) {
+            throw new RuntimeException(ex);
+        }
     }
     
 }

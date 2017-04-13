@@ -109,7 +109,8 @@ public class Client extends AbstractClient {
         final static public String LOAD = UPDATE;
         final static public String DELETE = UPDATE;
 
-        final static public String PUSH = "/%s/streams/%s";
+        final static public String STREAM = "/%s/streams/%s";
+        final static public String PUSH = STREAM;
         final static public String LAST_UPDATE = PUSH;
         final static public String PULL = PUSH + "/list";
         final static public String SEARCH_DATA = PUSH + "/search";
