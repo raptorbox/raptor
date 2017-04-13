@@ -15,11 +15,8 @@
  */
 package org.createnet.raptor.models.data.types;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.createnet.raptor.models.data.Record;
 
 /**

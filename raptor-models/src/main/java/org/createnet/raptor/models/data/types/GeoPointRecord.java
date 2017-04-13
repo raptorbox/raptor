@@ -17,8 +17,8 @@ package org.createnet.raptor.models.data.types;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.models.data.Record;
+import org.createnet.raptor.models.data.types.instances.GeoPoint;
 import org.createnet.raptor.models.objects.RaptorComponent;
-import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.geo.GeoUtils;
 
 /**
@@ -26,17 +26,17 @@ import org.elasticsearch.common.geo.GeoUtils;
  * @author Luca Capra <luca.capra@gmail.com>
  */
 public class GeoPointRecord extends Record<GeoPoint> {
-    
+
     public static class Range {
 
-      public static int LATITUDE_MAX = 180;
-      public static int LATITUDE_MIN = -180;
+        public static int LATITUDE_MAX = 180;
+        public static int LATITUDE_MIN = -180;
 
-      public static int LONGITUDE_MAX = 90;
-      public static int LONGITUDE_MIN = -90;
+        public static int LONGITUDE_MAX = 90;
+        public static int LONGITUDE_MIN = -90;
 
     }
-  
+
     protected GeoPoint value;
 
     @Override
@@ -45,87 +45,78 @@ public class GeoPointRecord extends Record<GeoPoint> {
     }
 
     @Override
-    public void setValue(Object value)  {
+    public void setValue(Object value) {
         this.value = parseValue(value);
     }
 
     @Override
-    public GeoPoint parseValue(Object raw)  {
-      try {
-        
-        String val;
-        GeoPoint point = new GeoPoint();
-        
-        if(raw instanceof GeoPoint) {
-          point = (GeoPoint) raw;
-          if(validateCoords(point)) {
-            return point;
-          }
-          throw new Exception("Lat or Lon coordinates invalid");
-        }
+    public GeoPoint parseValue(Object raw) {
+        try {
 
-        if(raw instanceof JsonNode) {
-          
-          JsonNode node = (JsonNode) raw;
-          
-          if(node.isArray() && node.get(0).isNumber() && node.get(1).isNumber()) {
-            
-            point = new GeoPoint(node.get(0).asDouble(), node.get(1).asDouble());
-            
-            if(validateCoords(point))
-              return point;
-          }
-          
-          if(node.isObject() && node.has(GeoUtils.LATITUDE) && node.has(GeoUtils.LONGITUDE)) {
-            
-            point = new GeoPoint(node.get(GeoUtils.LATITUDE).asDouble(), node.get(GeoUtils.LONGITUDE).asDouble());
-            
-            if(validateCoords(point))
-              return point;
-          }
-          
-//          val = node.asText();
+            String val;
+
+            if (raw instanceof GeoPoint) {
+                GeoPoint point = (GeoPoint) raw;
+                if (validateCoords(point)) {
+                    return point;
+                }
+                throw new Exception("Lat or Lon coordinates invalid");
+            }
+
+            if (raw instanceof JsonNode) {
+
+                JsonNode node = (JsonNode) raw;
+
+                if (node.isArray() && node.get(0).isNumber() && node.get(1).isNumber()) {
+
+                    GeoPoint point = new GeoPoint(node.get(0).asDouble(), node.get(1).asDouble());
+
+                    if (validateCoords(point)) {
+                        return point;
+                    }
+                }
+
+                if (node.isObject() && node.has(GeoUtils.LATITUDE) && node.has(GeoUtils.LONGITUDE)) {
+
+                    GeoPoint point = new GeoPoint(node.get(GeoUtils.LATITUDE).asDouble(), node.get(GeoUtils.LONGITUDE).asDouble());
+
+                    if (validateCoords(point)) {
+                        return point;
+                    }
+                }
+
+            }
+
+            // Avoid to parse plain text as ther may be false matches with commons string
+            throw new Exception("Cannot parse value: " + raw);
+
+        } catch (Exception e) {
+            throw new RaptorComponent.ParserException(e);
         }
-        
-        // Avoid to parse plain text as ther may be false matches with commons string
-        throw new Exception("Cannot parse value: " + raw);
-        
-//        else {
-//          val = (String)raw;
-//        }
-//        
-//        GeoUtils.parseGeoPoint(val, point);       
-//        if(!validateCoords(point)) {
-//          throw new Exception("Lat or Lon coordinates invalid: " + val);
-//        }
-//        
-//        return point;
-      } 
-      catch(Exception e) {
-        throw new RaptorComponent.ParserException(e);
-      }
 
     }
-    
+
     protected static boolean validateCoords(GeoPoint point) {
-      
-      if(point.lat() > Range.LATITUDE_MAX || point.lat() < Range.LATITUDE_MIN)
-        return false;
-      
-      if(point.lon() > Range.LONGITUDE_MAX || point.lon() < Range.LONGITUDE_MIN)
-        return false;
-      
-      return true;
+
+        if (point.getLat() > Range.LATITUDE_MAX || point.getLat() < Range.LATITUDE_MIN) {
+            return false;
+        }
+
+        if (point.getLon() > Range.LONGITUDE_MAX || point.getLon() < Range.LONGITUDE_MIN) {
+            return false;
+        }
+
+        return true;
     }
-    
+
     @Override
     public String getType() {
         return "geo_point";
     }
 
-  @Override
-  public Class<GeoPoint> getClassType() {
-    return GeoPoint.class;
-  }
+    @Override
+    public Class<GeoPoint> getClassType() {
+        return GeoPoint.class;
+    }
 
 }
