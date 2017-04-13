@@ -13,33 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.dispatcher.payload;
+package org.createnet.raptor.models.payload;
 
 /**
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public interface DispatcherPayload {
+public class DataPayload extends AbstractPayload {
 
-    public enum MessageType {
-        object, stream, action, data, 
-        user, permission, role
+    private String c;
+    
+    public DataPayload() {
     }
     
-    /**
-     * Return the type of message
-     * 
-     * @return type of message
-     */
-    public MessageType getType();
-    
-    /**
-     * Return the operation label
-     * 
-     * @return label of the operation
-     */    
-    public String getOp();
-    
+    public DataPayload(String c) {
+        this.c = c;
+        this.type = MessageType.data.name();
+    }
+
     @Override
-    public String toString();
+    public String toString() {
+        return c;
+    }
 }

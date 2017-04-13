@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Luca Capra <luca.capra@fbk.eu>.
+ * Copyright 2017 FBK/CREATE-NET
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.dispatcher.payload;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import org.createnet.raptor.models.objects.Stream;
+package org.createnet.raptor.models.exception;
 
 /**
  *
- * @author Luca Capra <luca.capra@fbk.eu>
+ * @author Luca Capra <luca.capra@gmail.com>
  */
-public class StreamPayload extends ObjectPayload {
+public class PayloadParserException extends RuntimeException
+{
 
-    public String streamId;
-    public JsonNode data;
-
-    public StreamPayload(Stream stream, String op, JsonNode data) {
-        super(stream.getDevice(), op);
-        this.streamId = stream.name;
-        this.data = data;
-        this.type = MessageType.stream.name();
+    public PayloadParserException(Throwable ex) {
+        super("Payload parser error", ex);
     }
-
+    
+    public PayloadParserException(String reason) {
+        super(reason);
+    }
+    
 }

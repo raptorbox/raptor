@@ -23,11 +23,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.jvnet.hk2.annotations.Service;
 import org.createnet.raptor.dispatcher.Dispatcher;
-import org.createnet.raptor.dispatcher.payload.ActionPayload;
-import org.createnet.raptor.dispatcher.payload.DataPayload;
-import org.createnet.raptor.dispatcher.payload.DispatcherPayload;
-import org.createnet.raptor.dispatcher.payload.ObjectPayload;
-import org.createnet.raptor.dispatcher.payload.StreamPayload;
+import org.createnet.raptor.models.payload.ActionPayload;
+import org.createnet.raptor.models.payload.DataPayload;
+import org.createnet.raptor.models.payload.DispatcherPayload;
+import org.createnet.raptor.models.payload.ObjectPayload;
+import org.createnet.raptor.models.payload.StreamPayload;
 import org.createnet.raptor.events.Emitter;
 import org.createnet.raptor.events.Event;
 import org.createnet.raptor.events.Event.EventName;
@@ -91,7 +91,6 @@ public class DispatcherService extends AbstractRaptorService {
 
                     //notify data event
                     notifyDataEvent(dataEvent.getStream(), dataEvent.getRecord());
-
                     break;
                 case "execute":
                 case "deleteAction":
@@ -108,7 +107,6 @@ public class DispatcherService extends AbstractRaptorService {
                     // notify of action event
                     String op = event.getEvent().equals("execute") ? "execute" : "delete";
                     notifyActionEvent(op, actionEvent.getAction(), actionEvent.getActionStatus().status);
-
                     break;
             }
 
@@ -167,8 +165,24 @@ public class DispatcherService extends AbstractRaptorService {
 
         return id + "/events";
     }
+    
+    protected String getUserEventsTopic(DeviceContainer c) {
+
+        Device obj = c.getDevice();
+        if (obj == null) {
+            throw new RaptorComponent.ParserException("Device is null");
+        }
+
+        String userId = obj.getUserId();
+        if (userId == null) {
+            throw new RaptorComponent.ParserException("Device.userId is null");
+        }
+
+        return userId + "/events";
+    }
 
     public void notifyEvent(String topic, DispatcherPayload message) {
+        logger.debug("Notifying {} {}.{}", topic, message.getType(), message.getOp());
         getDispatcher().add(topic, message.toString());
     }
 
@@ -188,6 +202,11 @@ public class DispatcherService extends AbstractRaptorService {
         notifyEvent(path + "/events", payload);
     }
 
+    protected void notifyUserEvent(String op, Device obj, DispatcherPayload payload) {
+        String topic = getUserEventsTopic(obj);
+        notifyEvent(topic, payload);
+    }
+
     protected void notifyObjectEvent(String op, Device obj) {
 
         String topic = getEventsTopic(obj);
@@ -195,6 +214,7 @@ public class DispatcherService extends AbstractRaptorService {
 
         notifyEvent(topic, payload);
         notifyTreeEvent(obj, payload);
+        notifyUserEvent(op, obj, payload);
     }
 
     public void notifyDataEvent(Stream stream, RecordSet record) {
@@ -204,6 +224,7 @@ public class DispatcherService extends AbstractRaptorService {
 
         notifyEvent(topic, payload);
         notifyTreeEvent(stream, payload);
+        notifyUserEvent("push", stream.getDevice(), payload);
     }
 
     protected void notifyActionEvent(String op, Action action, String status) {
@@ -219,6 +240,7 @@ public class DispatcherService extends AbstractRaptorService {
 
         notifyEvent(topic, payload);
         notifyTreeEvent(action, payload);
+        notifyUserEvent(op, action.getDevice(), payload);
     }
 
     public void pushData(Stream stream, RecordSet records) {

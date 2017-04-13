@@ -36,6 +36,7 @@ import org.createnet.raptor.models.objects.Device;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -203,7 +204,7 @@ public class Client extends AbstractClient {
             try {
 
                 URL url = new URL(getConfig().getUrl());
-                String clientId = "raptor_" + (int) (System.currentTimeMillis() / 1000);
+                String clientId = "raptor_client_" + ((int) (System.currentTimeMillis() / 1000));
                 String serverURI = "tcp://" + url.getHost() + ":1883";
 
                 mqttClient = new MqttClient(serverURI, clientId, new MemoryPersistence());
@@ -215,8 +216,21 @@ public class Client extends AbstractClient {
 
         if (!mqttClient.isConnected()) {
             try {
+
                 logger.debug("Connecting to MQTT server {}", mqttClient.getServerURI());
-                mqttClient.connect();
+
+                MqttConnectOptions connOpts = new MqttConnectOptions();
+                connOpts.setCleanSession(true);
+                connOpts.setConnectionTimeout(0);
+                
+                if(getContainer().getConfig().hasCredentials()) {
+                    connOpts.setUserName(getContainer().getConfig().getUsername());
+                    connOpts.setPassword(getContainer().getConfig().getPassword().toCharArray());
+                    logger.debug("Using user credentials");
+                }
+
+                mqttClient.connect(connOpts);
+
             } catch (MqttException ex) {
                 logger.error("Connection failed", ex);
                 throw new ClientException(ex);
@@ -295,8 +309,7 @@ public class Client extends AbstractClient {
         try {
             logger.debug("PUT {}", url);
             prepareRequest();
-            HttpResponse<JsonNode> objResponse = Unirest
-                    .put(getClient().url(url))
+            HttpResponse<JsonNode> objResponse = request(HttpMethod.PUT, url)
                     .body(body)
                     .asObject(JsonNode.class);
             checkResponse(objResponse);
@@ -375,7 +388,7 @@ public class Client extends AbstractClient {
      *
      * @param url
      * @param payload
-     * @return 
+     * @return
      */
     public JsonNode post(String url, String payload) {
         try {

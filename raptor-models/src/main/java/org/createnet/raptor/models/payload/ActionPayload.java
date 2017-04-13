@@ -13,23 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.dispatcher.payload;
+package org.createnet.raptor.models.payload;
+
+import org.createnet.raptor.models.objects.Action;
 
 /**
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public class DataPayload extends AbstractPayload {
+public class ActionPayload extends ObjectPayload {
 
-    private String c;
+    public String actionId;
+    public String data;
+
+    public ActionPayload() {
+    }
     
-    public DataPayload(String c) {
-        this.c = c;
-        this.type = MessageType.data.name();
+    public ActionPayload(Action action, String op, String data) {
+        super(action.getDevice(), op);
+        this.data = data;
+        this.actionId = action.name;
+        this.type = MessageType.action.name();
     }
 
-    @Override
-    public String toString() {
-        return c;
-    }
 }

@@ -24,14 +24,16 @@ import org.createnet.raptor.client.Raptor;
 import org.createnet.raptor.client.event.MessageEventListener;
 import org.createnet.raptor.client.exception.ClientException;
 import org.createnet.raptor.client.exception.MissingAuthenticationException;
-import org.createnet.raptor.dispatcher.payload.ActionPayload;
-import org.createnet.raptor.dispatcher.payload.DataPayload;
-import org.createnet.raptor.dispatcher.payload.DispatcherPayload;
-import org.createnet.raptor.dispatcher.payload.ObjectPayload;
-import org.createnet.raptor.dispatcher.payload.StreamPayload;
+import org.createnet.raptor.models.payload.ActionPayload;
+import org.createnet.raptor.models.payload.DataPayload;
+import org.createnet.raptor.models.payload.DispatcherPayload;
+import org.createnet.raptor.models.payload.ObjectPayload;
+import org.createnet.raptor.models.payload.StreamPayload;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
 import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.models.objects.Action;
+import org.createnet.raptor.models.objects.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,24 +50,39 @@ public class DeviceClient extends AbstractClient {
 
     final static Logger logger = LoggerFactory.getLogger(DeviceClient.class);
 
-    public interface DeviceCallback {
+    public static class PayloadMessage {
 
-        public static class PayloadMessage {
+        final public Device object;
+        final public DispatcherPayload payload;
 
-            final public Device object;
-            final public JsonNode raw;
-            final public DispatcherPayload payload;
-
-            public PayloadMessage(Device object, JsonNode raw, DispatcherPayload payload) {
-                this.raw = raw;
-                this.payload = payload;
-                this.object = object;
-            }
+        public PayloadMessage(Device object, DispatcherPayload payload) {
+            this.payload = payload;
+            this.object = object;
         }
-
-        public void execute(Device obj, PayloadMessage message);
     }
 
+   
+    public interface DataCallback {
+        public void callback(Stream stream, StreamPayload message);
+    }
+    
+    public interface ActionCallback {
+        public void callback(Action action, ActionPayload message);
+    }
+    
+    public interface StreamCallback {
+        public void callback(Stream stream, StreamPayload message);
+    }
+    
+    public interface DeviceCallback {
+        public void callback(Device obj, ObjectPayload message);
+    }
+
+    public interface EventCallback extends ActionCallback, StreamCallback, DeviceCallback, DataCallback {
+        public void callback(Device obj, PayloadMessage message);
+    }
+    
+    
     protected String getTopic(Device obj) {
         return obj.id + "/events";
     }
@@ -76,38 +93,28 @@ public class DeviceClient extends AbstractClient {
      * @param obj the object to listen for
      * @param callback The callback to fire on event arrival
      */
-    public void subscribe(Device obj, DeviceCallback callback) {
+    public void subscribe(Device obj, EventCallback callback) {
         getClient().subscribe(getTopic(obj), (MessageEventListener.Message message) -> {
-            try {
 
-                JsonNode json = Device.getMapper().readTree(message.content);
-                DispatcherPayload payload = null;
-                if (json.has("type")) {
-                    Class<? extends DispatcherPayload> clazz = null;
-                    switch (DispatcherPayload.MessageType.valueOf(json.get("type").asText())) {
-                        case object:
-                            clazz = ObjectPayload.class;
-                            break;
-                        case data:
-                            clazz = DataPayload.class;
-                            break;
-                        case stream:
-                            clazz = StreamPayload.class;
-                            break;
-                        case action:
-                            clazz = ActionPayload.class;
-                            break;
-                    }
-
-                    if (clazz != null) {
-                        payload = Device.getMapper().convertValue(json, clazz);
-                    }
-                }
-
-                callback.execute(obj, new DeviceCallback.PayloadMessage(obj, json, payload));
-            } catch (IOException ex) {
-                logger.error("Error parsing JSON payload: {}", ex.getMessage());
+            DispatcherPayload payload = DispatcherPayload.parseJSON(message.content);
+            switch (payload.getType()) {
+                case object:
+                    callback.callback(obj, (ObjectPayload)payload);
+                    break;
+                case data:
+                    callback.callback(obj, (ObjectPayload)payload);
+                    break;
+                case stream:
+                    StreamPayload streamPayload = (StreamPayload)payload;
+                    callback.callback(obj.getStream(streamPayload.streamId), streamPayload);
+                    break;
+                case action:
+                    ActionPayload actionPayload = (ActionPayload)payload;
+                    callback.callback(obj.getAction(actionPayload.actionId), actionPayload);
+                    break;
             }
+            
+            callback.callback(obj, new PayloadMessage(obj, payload));
         });
     }
 
@@ -176,9 +183,9 @@ public class DeviceClient extends AbstractClient {
      * @return a list of Devices matching the query
      */
     public List<Device> search(ObjectQuery query, Integer offset, Integer limit) {
-        if(query.getUserId() == null) {
+        if (query.getUserId() == null) {
             User user = getContainer().Auth.getUser();
-            if(user == null) {
+            if (user == null) {
                 throw new MissingAuthenticationException("User is not available");
             }
             query.setUserId(user.getUuid());
@@ -214,16 +221,16 @@ public class DeviceClient extends AbstractClient {
         obj.id = null;
     }
 
-
     /**
      * List accessible devices
-     * 
+     *
      * @return the Device instance
      */
     public List<Device> list() {
         JsonNode json = getClient().get(Client.Routes.LIST);
-        List<Device> list = Device.getMapper().convertValue(json, new TypeReference<List<Device>>() {});                
+        List<Device> list = Device.getMapper().convertValue(json, new TypeReference<List<Device>>() {
+        });
         return list;
-    }    
-    
+    }
+
 }

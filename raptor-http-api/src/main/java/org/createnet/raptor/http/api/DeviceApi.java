@@ -143,11 +143,6 @@ public class DeviceApi extends AbstractApi {
 
         obj = objectManager.update(obj);
 
-//        boolean sync = syncObject(obj, Authentication.SyncOperation.UPDATE);
-//        if (!sync) {
-//            throw new InternalServerErrorException("Failed to sync device");
-//        }
-
         return obj;
     }
 

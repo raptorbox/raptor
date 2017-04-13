@@ -29,10 +29,10 @@ import org.createnet.raptor.models.objects.RaptorComponent;
  * @author Luca Capra <luca.capra@fbk.eu>
  */
 public class Raptor implements IClient, RaptorComponent {
-    
+
     final protected Config config;
     final protected Client client;
-    
+
     final public AuthClient Auth;
     final public StreamClient Stream;
     final public ActionClient Action;
@@ -40,7 +40,7 @@ public class Raptor implements IClient, RaptorComponent {
 
     /**
      * Instantiate the client
-     * 
+     *
      * @param url
      * @param username
      * @param password
@@ -51,24 +51,24 @@ public class Raptor implements IClient, RaptorComponent {
 
     /**
      * Instantiate the client
-     * 
+     *
      * @param url
      * @param token
      */
     public Raptor(String url, String token) {
         this(new Config(url, token));
     }
-    
+
     /**
      * Instantiate the client
-     * 
+     *
      * @param config
      */
     public Raptor(Config config) {
-        
+
         this.config = config;
         client = new Client(this);
-        
+
         Auth = new AuthClient(this);
         Stream = new StreamClient(this);
         Device = new DeviceClient(this);
@@ -84,7 +84,7 @@ public class Raptor implements IClient, RaptorComponent {
     public Raptor getContainer() {
         return this;
     }
-    
+
     @Override
     public Client getClient() {
         return client;

@@ -80,7 +80,7 @@ public class Utils {
     }
     
     static public Device createDevice(Device d) {
-        Device d1 = raptor.Device.create(d);
+        Device d1 = getRaptor().Device.create(d);
         waitFor(500);
         return d1;
     }

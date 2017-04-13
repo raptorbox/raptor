@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 FBK/CREATE-NET
+ * Copyright 2017 Luca Capra <luca.capra@fbk.eu>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.dispatcher.payload;
+package org.createnet.raptor.models.payload;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import org.createnet.raptor.models.objects.Stream;
 
 /**
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public class AbstractPayload implements DispatcherPayload {
+public class StreamPayload extends ObjectPayload {
+
+    public String streamId;
+    public JsonNode data;
+
+    public StreamPayload() {
+    }
     
-    public String type;
-    public String op;
-    
-    @Override
-    public MessageType getType() {
-        return type == null ? null : MessageType.valueOf(type);
+    public StreamPayload(Stream stream, String op, JsonNode data) {
+        super(stream.getDevice(), op);
+        this.streamId = stream.name;
+        this.data = data;
+        this.type = MessageType.stream.name();
     }
 
-    @Override
-    public String getOp() {
-        return op;
-    }
-    
 }

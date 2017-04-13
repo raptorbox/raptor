@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.dispatcher.payload;
+package org.createnet.raptor.models.payload;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Device;
 
@@ -30,7 +29,9 @@ public class ObjectPayload extends AbstractPayload {
     public Device object;
     public String path;
 
-   
+    public ObjectPayload() {
+    }
+
     public ObjectPayload(Device obj, String op) {
         userId = obj.userId;
         object = obj;
