@@ -80,7 +80,7 @@ public interface DispatcherPayload {
                 case data:
                     return RaptorContainer.getMapper().treeToValue(json, DataPayload.class);
                 case object:
-                    return RaptorContainer.getMapper().treeToValue(json, ObjectPayload.class);
+                    return RaptorContainer.getMapper().treeToValue(json, DevicePayload.class);
                 case stream:
                     return RaptorContainer.getMapper().treeToValue(json, StreamPayload.class);                    
 //                case permission:

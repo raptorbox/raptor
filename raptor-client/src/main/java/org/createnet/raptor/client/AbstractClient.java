@@ -17,6 +17,7 @@ package org.createnet.raptor.client;
 
 import org.createnet.raptor.client.api.Client;
 import org.createnet.raptor.client.config.Config;
+import org.createnet.raptor.client.events.MqttEventEmitter;
 
 /**
  *
@@ -59,6 +60,11 @@ abstract public class AbstractClient implements IClient {
     @Override
     public Config getConfig() {
         return getContainer().getConfig();
+    }
+
+    @Override
+    public MqttEventEmitter getEmitter() {
+        return getContainer().getEmitter();
     }
 
 }

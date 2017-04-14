@@ -15,12 +15,14 @@
  */
 package org.createnet.raptor.client;
 
-import org.createnet.raptor.client.api.DeviceClient.DeviceCallback;
+import java.time.Instant;
+import java.util.Date;
+import org.createnet.raptor.client.events.DataCallback;
+import org.createnet.raptor.client.events.DeviceCallback;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
-import org.createnet.raptor.models.payload.DispatcherPayload;
-import org.createnet.raptor.models.payload.ObjectPayload;
+import org.createnet.raptor.models.payload.DevicePayload;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -81,12 +83,20 @@ public class EventListenerTest {
         log.debug("watch device events");
         
         Device dev = Utils.createDevice(device);
-//        raptor.Device.subscribe(dev, new DeviceCallback() {
-//            @Override
-//            public void callback(Device obj, ObjectPayload message) {
-//                
-//            }
-//        });
+        
+        raptor.Device.subscribe(dev, new DataCallback() {
+            @Override
+            public void callback(Stream stream, RecordSet record) {
+                log.debug("Data received {}", record.toJson());
+            }
+        });
+        
+        raptor.Device.subscribe(dev, new DataCallback() {
+            @Override
+            public void callback(Stream stream, RecordSet record) {
+                log.debug("Data received {}", record.toJson());
+            }
+        });
         
         dev.addStream("test2", "foo", "boolean");
         dev.addAction("sleep");
@@ -99,6 +109,20 @@ public class EventListenerTest {
         record.createRecord("foo", true);
         
         raptor.Stream.push(stream, record);
+        record.timestamp = new Date(Instant.now().toEpochMilli());
+        Utils.waitFor(500);
+        
+        raptor.Stream.push(stream, record);
+        record.timestamp = new Date(Instant.now().toEpochMilli());
+        Utils.waitFor(500);
+        
+        raptor.Stream.push(stream, record);
+        record.timestamp = new Date(Instant.now().toEpochMilli());
+        Utils.waitFor(500);
+        
+        raptor.Stream.push(stream, record);
+        record.timestamp = new Date(Instant.now().toEpochMilli());
+        Utils.waitFor(500);
 
     }
 

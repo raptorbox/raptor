@@ -18,11 +18,16 @@ package org.createnet.raptor.client.api;
 import org.createnet.raptor.client.AbstractClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.client.Raptor;
-import org.createnet.raptor.client.event.MessageEventListener;
+import org.createnet.raptor.client.events.DataCallback;
+import org.createnet.raptor.client.events.MessageEventListener;
+import org.createnet.raptor.client.events.StreamEventCallback;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.indexer.query.impl.es.DataQuery;
+import org.createnet.raptor.models.payload.DataPayload;
+import org.createnet.raptor.models.payload.DispatcherPayload;
+import org.createnet.raptor.models.payload.StreamPayload;
 
 /**
  * Represent a Device data stream
@@ -46,31 +51,31 @@ public class StreamClient extends AbstractClient {
         public void execute(Stream stream, RecordSet record);
     }
 
-    protected String getTopic(Stream stream) {
-        String path = String.format(Client.Routes.SUBSCRIBE_STREAM, stream.getDevice().getId(), stream.name);
-        return path;
+    /**
+     * Subscribe to a data stream
+     *
+     * @param stream
+     * @param ev
+     */
+    public void subscribe(Stream stream, StreamEventCallback ev) {
+        getEmitter().subscribe(stream, ev);
     }
 
     /**
-     * Subscribe a Stream for data updates
+     * Subscribe to a data stream
      *
-     * @param stream The stream to listen data for
-     * @param callback The callback to fire on data arrival
+     * @param stream
+     * @param ev
      */
-    public void subscribe(Stream stream, StreamCallback callback) {
-        getClient().subscribe(getTopic(stream), (MessageEventListener.Message message) -> {
-            RecordSet record = RecordSet.fromJSON(message.content);
-            callback.execute(stream, record);
+    public void subscribe(Stream stream, DataCallback ev) {
+        subscribe(stream, new StreamEventCallback() {
+            @Override
+            public void trigger(DispatcherPayload payload) {
+                DataPayload dpayload = (DataPayload) payload;
+                RecordSet record = RecordSet.fromJSON(dpayload.toString());
+                ev.callback(stream, record);
+            }
         });
-    }
-
-    /**
-     * Unsubscribe a Stream for data updates
-     *
-     * @param stream The stream to unsubscribe from
-     */
-    public void unsubscribe(Stream stream) {
-        getClient().unsubscribe(getTopic(stream));
     }
 
     /**
@@ -150,20 +155,21 @@ public class StreamClient extends AbstractClient {
     public JsonNode pull(String objectId, String streamId) {
         return pull(objectId, streamId, null, null);
     }
-    
+
     /**
      * Fetch the last record stored in the stream
+     *
      * @param stream
      * @return
      */
     public RecordSet lastUpdate(Stream stream) {
         JsonNode result = getClient().get(String.format(Client.Routes.LAST_UPDATE, stream.getDevice().getId(), stream.name));
-        if(result == null) {
+        if (result == null) {
             return null;
         }
         return RecordSet.fromJSON(result);
     }
-    
+
     /**
      * Search for data in the stream
      *

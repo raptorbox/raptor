@@ -19,9 +19,13 @@ import org.createnet.raptor.client.AbstractClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
 import org.createnet.raptor.client.Raptor;
+import org.createnet.raptor.client.events.ActionCallback;
+import org.createnet.raptor.client.events.ActionEventCallback;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.payload.ActionPayload;
+import org.createnet.raptor.models.payload.DispatcherPayload;
 
 /**
  * Represent a Device action
@@ -34,6 +38,33 @@ public class ActionClient extends AbstractClient {
         super(container);
     }
 
+
+    /**
+     * Subscribe to a data stream
+     *
+     * @param stream
+     * @param ev
+     */
+    public void subscribe(Action action, ActionEventCallback ev) {
+        getEmitter().subscribe(action, ev);
+    }
+
+    /**
+     * Subscribe to a data stream
+     *
+     * @param action
+     * @param ev
+     */
+    public void subscribe(Action action, ActionCallback ev) {
+        subscribe(action, new ActionEventCallback() {
+            @Override
+            public void trigger(DispatcherPayload payload) {
+                ActionPayload apayload = (ActionPayload) payload;
+                ev.callback(action, apayload);
+            }
+        });
+    }    
+    
     /**
      * List available actions on the object
      *

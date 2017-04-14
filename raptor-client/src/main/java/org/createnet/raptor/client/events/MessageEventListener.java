@@ -13,21 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client;
-
-import org.createnet.raptor.client.api.Client;
-import org.createnet.raptor.client.config.Config;
-import org.createnet.raptor.client.events.MqttEventEmitter;
+package org.createnet.raptor.client.events;
 
 /**
  *
- * @author Luca Capra <luca.capra@fbk.eu>
+ * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface IClient {
-    
-    public Raptor getContainer();
-    public Client getClient();
-    public MqttEventEmitter getEmitter();
-    public Config getConfig();
-    
+public interface MessageEventListener {
+  
+  public class Message {
+    public String content;
+    public String topic;
+  }
+  
+  public void onMessage(Message message);
+
 }

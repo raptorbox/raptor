@@ -13,19 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client.event;
+package org.createnet.raptor.client.events;
+
+import org.createnet.raptor.client.events.MqttEventEmitter.EventCallback;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface MessageEventListener {
-  
-  public class Message {
-    public String content;
-    public String topic;
-  }
-  
-  public void onMessage(Message message);
-
+public interface DeviceEventCallback extends RaptorCallback, EventCallback {
 }

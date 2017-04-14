@@ -21,7 +21,7 @@ import org.createnet.raptor.models.objects.Action;
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public class ActionPayload extends ObjectPayload {
+public class ActionPayload extends DevicePayload {
 
     public String actionId;
     public String data;

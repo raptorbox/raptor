@@ -25,21 +25,12 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.HttpRequestWithBody;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import org.createnet.raptor.client.Raptor;
-import org.createnet.raptor.client.event.MessageEventListener;
 import org.createnet.raptor.client.exception.ClientException;
 import org.createnet.raptor.client.exception.MissingAuthenticationException;
 import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.models.objects.Device;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,14 +78,8 @@ public class Client extends AbstractClient {
 
     final protected Logger logger = LoggerFactory.getLogger(Client.class);
 
-    protected MqttClient mqttClient;
-
     public Client(Raptor container) {
         super(container);
-    }
-
-    public enum Event {
-        DATA, OBJECT
     }
 
     /**
@@ -119,7 +104,8 @@ public class Client extends AbstractClient {
         final static public String INVOKE = "/%s/actions/%s";
         final static public String ACTION_STATUS = INVOKE;
         final static public String ACTION_LIST = "/%s/actions";
-
+        
+        final static public String SUBSCRIBE_ACTION = INVOKE;
         final static public String SUBSCRIBE_STREAM = PUSH;
 
         final static public String LOGIN = "/auth/login";
@@ -191,111 +177,6 @@ public class Client extends AbstractClient {
             throw new RequestException(response.getStatus(), response.getStatusText(), message);
         }
 
-    }
-
-    /**
-     * Return and lazily creates an MQTT client
-     *
-     * @return the MQTT client instance
-     */
-    public MqttClient getMqttClient() {
-
-        if (mqttClient == null) {
-            try {
-
-                URL url = new URL(getConfig().getUrl());
-                String clientId = "raptor_client_" + ((int) (System.currentTimeMillis() / 1000));
-                String serverURI = "tcp://" + url.getHost() + ":1883";
-
-                mqttClient = new MqttClient(serverURI, clientId, new MemoryPersistence());
-
-            } catch (MqttException | MalformedURLException ex) {
-                throw new ClientException(ex);
-            }
-        }
-
-        if (!mqttClient.isConnected()) {
-            try {
-
-                logger.debug("Connecting to MQTT server {}", mqttClient.getServerURI());
-
-                MqttConnectOptions connOpts = new MqttConnectOptions();
-                connOpts.setCleanSession(true);
-                connOpts.setConnectionTimeout(0);
-                
-                if(getContainer().getConfig().hasCredentials()) {
-                    connOpts.setUserName(getContainer().getConfig().getUsername());
-                    connOpts.setPassword(getContainer().getConfig().getPassword().toCharArray());
-                    logger.debug("Using user credentials");
-                }
-
-                mqttClient.connect(connOpts);
-
-            } catch (MqttException ex) {
-                logger.error("Connection failed", ex);
-                throw new ClientException(ex);
-            }
-        }
-
-        return mqttClient;
-    }
-
-    /**
-     * Unsubscribe from an MQTT topic
-     *
-     * @param topic the topic to listen for
-     */
-    public void unsubscribe(String topic) {
-        try {
-            getMqttClient().unsubscribe(topic);
-        } catch (MqttException ex) {
-            throw new ClientException(ex);
-        }
-    }
-
-    /**
-     * Subscribe to an MQTT topic emitting a callback as specified in
-     * MessageEventListener
-     *
-     * @param topic the topic to listen for
-     * @param listener the listener implementation
-     */
-    public void subscribe(String topic, MessageEventListener listener) {
-        try {
-
-            logger.debug("Subscribing to MQTT topic {}", topic);
-            getMqttClient().subscribe(topic);
-            getMqttClient().setCallback(new MqttCallback() {
-                @Override
-                public void connectionLost(Throwable thrwbl) {
-                    logger.warn("Connection to MQTT server lost", thrwbl);
-                    try {
-                        getMqttClient().connect();
-                    } catch (MqttException ex) {
-                        logger.error("Failed to reconnect", ex);
-                    }
-                }
-
-                @Override
-                public void messageArrived(String mqttTopic, MqttMessage mqttMessage) throws Exception {
-
-                    MessageEventListener.Message message = new MessageEventListener.Message();
-                    message.topic = mqttTopic;
-                    message.content = new String(mqttMessage.getPayload());
-
-                    logger.debug("New message received on {}: {}", message.topic, message.content);
-                    listener.onMessage(message);
-                }
-
-                @Override
-                public void deliveryComplete(IMqttDeliveryToken imdt) {
-
-                }
-            });
-
-        } catch (MqttException ex) {
-            throw new ClientException(ex);
-        }
     }
 
     /**

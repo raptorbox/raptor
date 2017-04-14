@@ -23,16 +23,16 @@ import org.createnet.raptor.models.objects.Device;
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public class ObjectPayload extends AbstractPayload {
+public class DevicePayload extends AbstractPayload {
 
     public String userId;
     public Device object;
     public String path;
 
-    public ObjectPayload() {
+    public DevicePayload() {
     }
 
-    public ObjectPayload(Device obj, String op) {
+    public DevicePayload(Device obj, String op) {
         userId = obj.userId;
         object = obj;
         path = obj.path();

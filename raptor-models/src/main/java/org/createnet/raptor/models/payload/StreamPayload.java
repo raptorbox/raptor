@@ -22,7 +22,7 @@ import org.createnet.raptor.models.objects.Stream;
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public class StreamPayload extends ObjectPayload {
+public class StreamPayload extends DevicePayload {
 
     public String streamId;
     public JsonNode data;

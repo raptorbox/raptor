@@ -13,21 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client;
+package org.createnet.raptor.client.events;
 
-import org.createnet.raptor.client.api.Client;
-import org.createnet.raptor.client.config.Config;
-import org.createnet.raptor.client.events.MqttEventEmitter;
+import org.createnet.raptor.models.data.RecordSet;
+import org.createnet.raptor.models.objects.Stream;
 
 /**
  *
- * @author Luca Capra <luca.capra@fbk.eu>
+ * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface IClient {
-    
-    public Raptor getContainer();
-    public Client getClient();
-    public MqttEventEmitter getEmitter();
-    public Config getConfig();
-    
+public interface DataCallback extends RaptorCallback {
+    public void callback(Stream stream, RecordSet record);
 }

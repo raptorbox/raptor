@@ -26,7 +26,7 @@ import org.createnet.raptor.dispatcher.Dispatcher;
 import org.createnet.raptor.models.payload.ActionPayload;
 import org.createnet.raptor.models.payload.DataPayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
-import org.createnet.raptor.models.payload.ObjectPayload;
+import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.payload.StreamPayload;
 import org.createnet.raptor.events.Emitter;
 import org.createnet.raptor.events.Event;
@@ -210,7 +210,7 @@ public class DispatcherService extends AbstractRaptorService {
     protected void notifyObjectEvent(String op, Device obj) {
 
         String topic = getEventsTopic(obj);
-        ObjectPayload payload = new ObjectPayload(obj, op);
+        DevicePayload payload = new DevicePayload(obj, op);
 
         notifyEvent(topic, payload);
         notifyTreeEvent(obj, payload);

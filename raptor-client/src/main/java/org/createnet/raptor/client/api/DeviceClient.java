@@ -18,22 +18,24 @@ package org.createnet.raptor.client.api;
 import org.createnet.raptor.client.AbstractClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.io.IOException;
 import java.util.List;
 import org.createnet.raptor.client.Raptor;
-import org.createnet.raptor.client.event.MessageEventListener;
+import org.createnet.raptor.client.events.ActionCallback;
+import org.createnet.raptor.client.events.DataCallback;
+import org.createnet.raptor.client.events.DeviceCallback;
+import org.createnet.raptor.client.events.DeviceEventCallback;
+import org.createnet.raptor.client.events.StreamCallback;
 import org.createnet.raptor.client.exception.ClientException;
 import org.createnet.raptor.client.exception.MissingAuthenticationException;
-import org.createnet.raptor.models.payload.ActionPayload;
-import org.createnet.raptor.models.payload.DataPayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
-import org.createnet.raptor.models.payload.ObjectPayload;
-import org.createnet.raptor.models.payload.StreamPayload;
+import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
 import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.objects.Action;
-import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.models.data.RecordSet;
+import org.createnet.raptor.models.payload.ActionPayload;
+import org.createnet.raptor.models.payload.DataPayload;
+import org.createnet.raptor.models.payload.StreamPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,81 +52,85 @@ public class DeviceClient extends AbstractClient {
 
     final static Logger logger = LoggerFactory.getLogger(DeviceClient.class);
 
-    public static class PayloadMessage {
-
-        final public Device object;
-        final public DispatcherPayload payload;
-
-        public PayloadMessage(Device object, DispatcherPayload payload) {
-            this.payload = payload;
-            this.object = object;
-        }
-    }
-
-   
-    public interface DataCallback {
-        public void callback(Stream stream, StreamPayload message);
-    }
-    
-    public interface ActionCallback {
-        public void callback(Action action, ActionPayload message);
-    }
-    
-    public interface StreamCallback {
-        public void callback(Stream stream, StreamPayload message);
-    }
-    
-    public interface DeviceCallback {
-        public void callback(Device obj, ObjectPayload message);
-    }
-
-    public interface EventCallback extends ActionCallback, StreamCallback, DeviceCallback, DataCallback {
-        public void callback(Device obj, PayloadMessage message);
-    }
-    
-    
-    protected String getTopic(Device obj) {
-        return obj.id + "/events";
+    /**
+     * Register for device events
+     *
+     * @param device the device to listen for
+     * @param callback The callback to fire on event arrival
+     */
+    public void subscribe(Device device, DeviceEventCallback callback) {
+        getEmitter().subscribe(device, callback);
     }
 
     /**
-     * Subscribe for events
+     * Subscribe only to device related events like update or delete
      *
-     * @param obj the object to listen for
-     * @param callback The callback to fire on event arrival
+     * @param dev
+     * @param ev
      */
-    public void subscribe(Device obj, EventCallback callback) {
-        getClient().subscribe(getTopic(obj), (MessageEventListener.Message message) -> {
-
-            DispatcherPayload payload = DispatcherPayload.parseJSON(message.content);
+    public void subscribe(Device dev, DeviceCallback ev) {
+        getEmitter().subscribe(dev, (DispatcherPayload payload) -> {
             switch (payload.getType()) {
                 case object:
-                    callback.callback(obj, (ObjectPayload)payload);
-                    break;
-                case data:
-                    callback.callback(obj, (ObjectPayload)payload);
-                    break;
-                case stream:
-                    StreamPayload streamPayload = (StreamPayload)payload;
-                    callback.callback(obj.getStream(streamPayload.streamId), streamPayload);
-                    break;
-                case action:
-                    ActionPayload actionPayload = (ActionPayload)payload;
-                    callback.callback(obj.getAction(actionPayload.actionId), actionPayload);
+                    ev.callback(dev, (DevicePayload) payload);
                     break;
             }
-            
-            callback.callback(obj, new PayloadMessage(obj, payload));
         });
     }
 
     /**
-     * Unsubscribe a Stream for data updates
+     * Subscribe only to stream related events like update, push or delete
      *
-     * @param obj obj from which to unsubscribe events
+     * @param dev
+     * @param ev
      */
-    public void unsubscribe(Device obj) {
-        getClient().unsubscribe(getTopic(obj));
+    public void subscribe(Device dev, StreamCallback ev) {
+        getEmitter().subscribe(dev, (DispatcherPayload payload) -> {
+            switch (payload.getType()) {
+                case stream:
+                    StreamPayload spayload = (StreamPayload) payload;
+                    ev.callback(dev.getStream(spayload.streamId), spayload);
+                    break;
+            }
+        });
+    }
+
+    /**
+     * Subscribe only to action related events like invoke or status change
+     *
+     * @param dev
+     * @param ev
+     */
+    public void subscribe(Device dev, ActionCallback ev) {
+        getEmitter().subscribe(dev, (DispatcherPayload payload) -> {
+            switch (payload.getType()) {
+                case action:
+                    ActionPayload apayload = (ActionPayload) payload;
+                    ev.callback(dev.getAction(apayload.actionId), apayload);
+                    break;
+            }
+        });
+    }
+
+    /**
+     * Subscribe only to data updates
+     *
+     * @param dev
+     * @param ev
+     */
+    public void subscribe(Device dev, DataCallback ev) {
+        getEmitter().subscribe(dev, new DeviceEventCallback() {
+            @Override
+            public void trigger(DispatcherPayload payload) {
+                switch (payload.getType()) {
+                    case data:
+                        DataPayload dpayload = (DataPayload) payload;
+                        RecordSet record = RecordSet.fromJSON(dpayload.toString());
+                        ev.callback(dev.getStream(record.streamId), record);
+                        break;
+                }
+            }
+        });
     }
 
     /**
