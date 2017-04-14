@@ -33,9 +33,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class UserService {
-    
+
     final private Logger logger = LoggerFactory.getLogger(UserService.class);
-    
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -44,10 +44,9 @@ public class UserService {
 
     @Autowired
     private RoleRepository roleRepository;
-    
+
 //    @Autowired
 //    private DispatcherService dispatcher;
-
     public Iterable<User> list() {
         return userRepository.findAll();
     }
@@ -64,6 +63,8 @@ public class UserService {
     /**
      * Save new roles or load roles based on name to ensure roles are all
      * managed
+     *
+     * @param user
      */
     protected void saveRoles(User user) {
         user.setRoles(
@@ -86,9 +87,16 @@ public class UserService {
     }
 
     public User update(String uuid, User rawUser) {
-
         User user = userRepository.findByUuid(uuid);
+        return update(user, rawUser);
+    }    
+    
+    public User update(User user, User rawUser) {
 
+        if (rawUser.getUsername() != null && !rawUser.getUsername().isEmpty()) {
+            user.setUsername(rawUser.getUsername());
+        }
+        
         if (rawUser.getFirstname() != null && !rawUser.getFirstname().isEmpty()) {
             user.setFirstname(rawUser.getFirstname());
         }
@@ -115,9 +123,9 @@ public class UserService {
             String passwd = rawUser.getPassword();
             user.setPassword(encodePassword(passwd));
         }
-        
+
         logger.debug("Update user data id:{}", user.getId());
-        
+
         return userRepository.save(user);
     }
 
@@ -129,7 +137,7 @@ public class UserService {
         } else {
             throw new PasswordMissingException();
         }
-        
+
         logger.debug("Create new user {}", rawUser.getUsername());
         return userRepository.save(rawUser);
     }

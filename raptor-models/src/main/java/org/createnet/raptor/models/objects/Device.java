@@ -26,7 +26,6 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -241,8 +240,7 @@ public class Device extends DeviceContainer {
      * @return the JsonNode representing the device
      */
     public ObjectNode toJsonNode() {
-        ObjectNode node = getMapper().convertValue(this, ObjectNode.class);
-        return node;
+        return getMapper().valueToTree(this);
     }
 
     /**

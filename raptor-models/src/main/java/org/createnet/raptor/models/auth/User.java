@@ -52,259 +52,268 @@ import org.hibernate.validator.constraints.Email;
 @Table(name = "users")
 public class User implements Serializable {
 
-  @JsonIgnore
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  protected Long id;
+    @JsonIgnore
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    protected Long id;
 
-  @NotEmpty
-  protected String uuid = UUID.randomUUID().toString();
+    @NotEmpty
+    protected String uuid = UUID.randomUUID().toString();
 
-  @NotEmpty
-  @Column(unique = true, nullable = false, length = 128)
-  @Size(min = 4, max = 128)
-  protected String username;
+    @NotEmpty
+    @Column(unique = true, nullable = false, length = 128)
+    @Size(min = 4, max = 128)
+    protected String username;
 
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-  @NotEmpty
-  @Column(length = 128)
-  @Size(min = 4, max = 128)
-  protected String password;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @NotEmpty
+    @Column(length = 128)
+    @Size(min = 4, max = 128)
+    protected String password;
 
-  @JsonIgnore
-  @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
-  @Cascade(value = {CascadeType.REMOVE, CascadeType.SAVE_UPDATE})
-  final protected List<Device> devices = new ArrayList();
-  
-  @JsonIgnore
-  @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
-  @Cascade(value = { CascadeType.REMOVE, CascadeType.SAVE_UPDATE })
-  final protected List<Token> tokens = new ArrayList();
+    @JsonIgnore
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
+    @Cascade(value = {CascadeType.REMOVE, CascadeType.SAVE_UPDATE})
+    final protected List<Device> devices = new ArrayList();
 
-  @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(name = "users_roles", joinColumns = {
-    @JoinColumn(name = "user_id")}, inverseJoinColumns = {
-    @JoinColumn(name = "role_id")})
-  final protected List<Role> roles = new ArrayList();
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    @Cascade(value = {CascadeType.REMOVE, CascadeType.SAVE_UPDATE})
+    final protected List<Token> tokens = new ArrayList();
 
-  @Column(length = 64)
-  @Size(min = 4, max = 64)
-  protected String firstname;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "users_roles", joinColumns = {
+        @JoinColumn(name = "user_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "role_id")})
+    final protected List<Role> roles = new ArrayList();
 
-  @Column(length = 64)
-  @Size(min = 4, max = 64)
-  protected String lastname;
+    @Column(length = 64)
+    @Size(min = 4, max = 64)
+    protected String firstname;
 
-  @Column(length = 128)
-  @NotNull
-  @Email
-  protected String email;
+    @Column(length = 64)
+    @Size(min = 4, max = 64)
+    protected String lastname;
 
-  @Column()
-  @NotNull
-  protected boolean enabled = true;
+    @Column(length = 128)
+    @NotNull
+    @Email
+    protected String email;
 
-  @JsonIgnore
-  @Column(name = "last_password_reset")
-  @Temporal(TemporalType.TIMESTAMP)
-  @NotNull
-  protected Date lastPasswordResetDate = new Date();
+    @Column()
+    @NotNull
+    protected boolean enabled = true;
 
-  @Column(name = "created")
-  @Temporal(TemporalType.TIMESTAMP)
-  @NotNull
-  protected Date created = new Date();
+    @JsonIgnore
+    @Column(name = "last_password_reset")
+    @Temporal(TemporalType.TIMESTAMP)
+    @NotNull
+    protected Date lastPasswordResetDate = new Date();
 
-  public User() {
-  }
+    @Column(name = "created")
+    @Temporal(TemporalType.TIMESTAMP)
+    @NotNull
+    protected Date created = new Date();
 
-  public User(User user) {
-
-    super();
-
-    this.id = user.getId();
-    this.uuid = user.getUuid();
-    this.username = user.getUsername();
-    this.password = user.getPassword();
-
-    user.getTokens().stream().forEach((token) -> this.addToken(token));
-    user.getRoles().stream().forEach((role) -> this.addRole(role));
-
-  }
-
-  @JsonIgnore
-  public boolean isAdmin() {
-    return isSuperAdmin() || this.hasRole(Role.Roles.admin);
-  }
-  
-  @JsonIgnore
-  public boolean isSuperAdmin() {
-    return this.hasRole(Role.Roles.super_admin);
-  }
-  
-  public boolean hasRole(Role.Roles name) {
-    return hasRole(name.name());
-  }
-  
-  public boolean hasRole(String name) {
-    return this.getRoles().stream().filter(r -> r.getName().equals(name)).count() >= 1;
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getUsername() {
-    return username;
-  }
-
-  public void setUsername(String username) {
-    this.username = username;
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
-  }
-
-  @JsonProperty("roles")
-  public Object[] listRoles() {
-    return roles.stream().map(r -> r.getName()).toArray();
-  }
-  
-  @JsonProperty("roles")
-  public void setListRoles(List<String> list) {
-    list.forEach(r -> addRole(new Role(r)));
-  }
-  
-  public List<Role> getRoles() {
-    return roles;
-  }
-
-  public void setRoles(Set<Role> roles) {
-    this.roles.clear();
-    this.roles.addAll(roles);
-  }
-
-  public void addRole(Role role) {
-    if (!this.hasRole(role.getName())) {
-      this.roles.add(role);
+    public User() {
     }
-  }
-  
-  public void addRole(Role.Roles role) {
-    if (!this.hasRole(role)) {
-      this.roles.add(new Role(role));
+
+    public User(User user) {
+        this(user, false);
     }
-  }
 
-  public void removeRole(Role role) {
-    if (this.hasRole(role.getName())) {
-      this.roles.remove(role);
+    public User(User user, boolean newUser) {
+
+        super();
+
+        this.username = user.getUsername();
+        this.password = user.getPassword();
+        this.email = user.getEmail();
+        this.enabled = user.getEnabled();
+
+        user.getTokens().stream().forEach((token) -> this.addToken(token));
+        user.getRoles().stream().forEach((role) -> this.addRole(role));
+
+        if (!newUser) {
+            this.id = user.getId();
+            this.uuid = user.getUuid();
+        }
+
     }
-  }
-  
-  public void removeRole(Role.Roles role) {
-    if (this.hasRole(role)) {
-      this.roles.remove(new Role(role));
+
+    @JsonIgnore
+    public boolean isAdmin() {
+        return isSuperAdmin() || this.hasRole(Role.Roles.admin);
     }
-  }
 
-  public String getUuid() {
-    return uuid;
-  }
-
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
-  }
-
-  public List<Token> getTokens() {
-    return tokens;
-  }
-
-  public void setTokens(List<Token> tokens) {
-    this.tokens.clear();
-    this.tokens.addAll(tokens);
-  }
-
-  public void addToken(Token token) {
-    if (!this.tokens.contains(token)) {
-      this.tokens.add(token);
+    @JsonIgnore
+    public boolean isSuperAdmin() {
+        return this.hasRole(Role.Roles.super_admin);
     }
-  }
 
-  public void removeToken(Token token) {
-    if (this.tokens.contains(token)) {
-      this.tokens.remove(token);
+    public boolean hasRole(Role.Roles name) {
+        return hasRole(name.name());
     }
-  }
 
-  public String getFirstname() {
-    return firstname;
-  }
+    public boolean hasRole(String name) {
+        return this.getRoles().stream().filter(r -> r.getName().equals(name)).count() >= 1;
+    }
 
-  public void setFirstname(String firstname) {
-    this.firstname = firstname;
-  }
+    public Long getId() {
+        return id;
+    }
 
-  public String getLastname() {
-    return lastname;
-  }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-  public void setLastname(String lastname) {
-    this.lastname = lastname;
-  }
+    public String getUsername() {
+        return username;
+    }
 
-  public String getEmail() {
-    return email;
-  }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-  public void setEmail(String email) {
-    this.email = email;
-  }
+    public String getPassword() {
+        return password;
+    }
 
-  public Boolean getEnabled() {
-    return enabled;
-  }
-  
-  public boolean isEnabled() {
-    return enabled;
-  }
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-  public void setEnabled(Boolean enabled) {
-    this.enabled = enabled;
-  }
+    @JsonProperty("roles")
+    public Object[] listRoles() {
+        return roles.stream().map(r -> r.getName()).toArray();
+    }
 
-  public Date getLastPasswordResetDate() {
-    return lastPasswordResetDate;
-  }
+    @JsonProperty("roles")
+    public void setListRoles(List<String> list) {
+        list.forEach(r -> addRole(new Role(r)));
+    }
 
-  public void setLastPasswordResetDate(Date lastPasswordResetDate) {
-    this.lastPasswordResetDate = lastPasswordResetDate;
-  }
+    public List<Role> getRoles() {
+        return roles;
+    }
 
-  public Date getCreated() {
-    return created;
-  }
+    public void setRoles(Set<Role> roles) {
+        this.roles.clear();
+        this.roles.addAll(roles);
+    }
 
-  public void setCreated(Date created) {
-    this.created = created;
-  }
+    public void addRole(Role role) {
+        if (!this.hasRole(role.getName())) {
+            this.roles.add(role);
+        }
+    }
 
-  public List<Device> getDevices() {
-    return devices;
-  }
+    public void addRole(Role.Roles role) {
+        if (!this.hasRole(role)) {
+            this.roles.add(new Role(role));
+        }
+    }
 
-  @Override
-  public String toString() {
-    return "User{" + "uuid=" + uuid + '}';
-  }
-  
+    public void removeRole(Role role) {
+        if (this.hasRole(role.getName())) {
+            this.roles.remove(role);
+        }
+    }
+
+    public void removeRole(Role.Roles role) {
+        if (this.hasRole(role)) {
+            this.roles.remove(new Role(role));
+        }
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public List<Token> getTokens() {
+        return tokens;
+    }
+
+    public void setTokens(List<Token> tokens) {
+        this.tokens.clear();
+        this.tokens.addAll(tokens);
+    }
+
+    public void addToken(Token token) {
+        if (!this.tokens.contains(token)) {
+            this.tokens.add(token);
+        }
+    }
+
+    public void removeToken(Token token) {
+        if (this.tokens.contains(token)) {
+            this.tokens.remove(token);
+        }
+    }
+
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+    
+    public Date getLastPasswordResetDate() {
+        return lastPasswordResetDate;
+    }
+
+    public void setLastPasswordResetDate(Date lastPasswordResetDate) {
+        this.lastPasswordResetDate = lastPasswordResetDate;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public List<Device> getDevices() {
+        return devices;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" + "uuid=" + uuid + '}';
+    }
+
 }

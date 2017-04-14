@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
+import org.createnet.raptor.auth.service.objects.JsonErrorResponse;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,18 +87,17 @@ public class UserController {
             response = User.class,
             nickname = "createUser"
     )
-    public ResponseEntity<User> create(
+    public ResponseEntity<?> createUser(
             @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
             @RequestBody User rawUser
     ) {
 
         boolean exists = userService.exists(rawUser);
-
         if (exists) {
-            return ResponseEntity.status(403).body(null);
+            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Username already taken");
         }
 
-        return ResponseEntity.ok(userService.create(rawUser));
+        return ResponseEntity.ok(userService.create(new User(rawUser, true)));
     }
 
     @RequestMapping(value = {"/me"}, method = RequestMethod.GET)
@@ -113,11 +113,10 @@ public class UserController {
         return (User) user;
     }
 
-
     @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
     @RequestMapping(value = {"/me"}, method = RequestMethod.PUT)
     @ApiOperation(
-            value = "Update an user profile",
+            value = "Update current user profile",
             notes = "",
             response = User.class,
             nickname = "updateProfile"
@@ -137,26 +136,54 @@ public class UserController {
             response = User.class,
             nickname = "getUser"
     )
-    public User getUser(
+    public ResponseEntity<?> getUser(
             @PathVariable String uuid,
             @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser
     ) {
-        return userService.getByUuid(uuid);
+        
+        User u = userService.getByUuid(uuid);
+        
+        if(u == null) {
+            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "User not found");
+        }
+        
+        return ResponseEntity.ok(u);
     }
 
     @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
-    @RequestMapping(value = {"/user"}, method = RequestMethod.PUT)
+    @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.PUT)
     @ApiOperation(
-            value = "Update current user profile",
+            value = "Update an user profile",
             notes = "",
             response = User.class,
             nickname = "updateUser"
     )
-    public User updateUser(
+    public ResponseEntity<?> updateUser(
             @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
+            @PathVariable("uuid") String uuid,
             @RequestBody User rawUser
     ) {
-        return userService.update(currentUser.getUuid(), rawUser);
+        
+        
+        User user = userService.getByUuid(uuid);
+        
+        if (user == null) {
+            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Requested user not found");
+        }
+        
+        if (rawUser.getUuid() != null && !user.getUuid().equals(rawUser.getUuid())) {
+            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Path and body uuid mismatch");
+        }
+        
+        // change username, but ensure it does not exists already
+        if(!rawUser.getUsername().equals(user.getUsername())) {
+            boolean exists = userService.exists(rawUser);
+            if (exists) {
+                return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Username already taken");
+            }
+        }
+        
+        return ResponseEntity.ok(userService.update(user, rawUser));
     }
 
     @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
@@ -167,7 +194,7 @@ public class UserController {
             code = 202,
             nickname = "deleteUser"
     )
-    public ResponseEntity<String> delete(@PathVariable String uuid) {
+    public ResponseEntity<String> deleteUser(@PathVariable String uuid) {
 
         User user = userService.getByUuid(uuid);
         if (user == null) {
