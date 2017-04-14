@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client.events;
+package org.createnet.raptor.client.events.callback;
 
-import org.createnet.raptor.client.events.MqttEventEmitter.EventCallback;
+import org.createnet.raptor.models.objects.Action;
+import org.createnet.raptor.models.payload.ActionPayload;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface DeviceEventCallback extends RaptorCallback, EventCallback {
+public interface ActionCallback extends RaptorCallback {
+    public void callback(Action action, ActionPayload message);
 }

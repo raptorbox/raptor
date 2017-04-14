@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client.events;
+package org.createnet.raptor.client.events.callback;
 
-import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.models.payload.StreamPayload;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface DataCallback extends RaptorCallback {
-    public void callback(Stream stream, RecordSet record);
+public interface StreamCallback extends RaptorCallback {
+
+    public void callback(Stream stream, StreamPayload message);
 }

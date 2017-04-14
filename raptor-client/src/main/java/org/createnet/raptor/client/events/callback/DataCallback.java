@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client.events;
+package org.createnet.raptor.client.events.callback;
 
-import org.createnet.raptor.models.objects.Device;
-import org.createnet.raptor.models.payload.DevicePayload;
+import org.createnet.raptor.models.data.RecordSet;
+import org.createnet.raptor.models.objects.Stream;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface DeviceCallback extends RaptorCallback {
-    public void callback(Device obj, DevicePayload message);
+public interface DataCallback extends RaptorCallback {
+    public void callback(Stream stream, RecordSet record);
 }

@@ -20,11 +20,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import org.createnet.raptor.client.Raptor;
-import org.createnet.raptor.client.events.ActionCallback;
-import org.createnet.raptor.client.events.DataCallback;
-import org.createnet.raptor.client.events.DeviceCallback;
-import org.createnet.raptor.client.events.DeviceEventCallback;
-import org.createnet.raptor.client.events.StreamCallback;
+import org.createnet.raptor.client.events.callback.ActionCallback;
+import org.createnet.raptor.client.events.callback.DataCallback;
+import org.createnet.raptor.client.events.callback.DeviceCallback;
+import org.createnet.raptor.client.events.callback.DeviceEventCallback;
+import org.createnet.raptor.client.events.callback.StreamCallback;
 import org.createnet.raptor.client.exception.ClientException;
 import org.createnet.raptor.client.exception.MissingAuthenticationException;
 import org.createnet.raptor.models.payload.DispatcherPayload;
@@ -123,9 +123,12 @@ public class DeviceClient extends AbstractClient {
             @Override
             public void trigger(DispatcherPayload payload) {
                 switch (payload.getType()) {
-                    case data:
-                        DataPayload dpayload = (DataPayload) payload;
-                        RecordSet record = RecordSet.fromJSON(dpayload.toString());
+                    case stream:
+                        if(!payload.getOp().equals("data")) {
+                            return;
+                        }
+                        StreamPayload dpayload = (StreamPayload) payload;
+                        RecordSet record = RecordSet.fromJSON(dpayload.data);
                         ev.callback(dev.getStream(record.streamId), record);
                         break;
                 }

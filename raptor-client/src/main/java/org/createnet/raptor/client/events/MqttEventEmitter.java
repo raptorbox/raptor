@@ -15,6 +15,9 @@
  */
 package org.createnet.raptor.client.events;
 
+import org.createnet.raptor.client.events.callback.DeviceEventCallback;
+import org.createnet.raptor.client.events.callback.ActionEventCallback;
+import org.createnet.raptor.client.events.callback.StreamEventCallback;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

@@ -17,11 +17,14 @@ package org.createnet.raptor.client;
 
 import java.time.Instant;
 import java.util.Date;
-import org.createnet.raptor.client.events.DataCallback;
-import org.createnet.raptor.client.events.DeviceCallback;
+import org.createnet.raptor.client.events.callback.ActionCallback;
+import org.createnet.raptor.client.events.callback.DataCallback;
+import org.createnet.raptor.client.events.callback.DeviceCallback;
 import org.createnet.raptor.models.data.RecordSet;
+import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.models.payload.ActionPayload;
 import org.createnet.raptor.models.payload.DevicePayload;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -55,75 +58,131 @@ public class EventListenerTest {
     public void setUp() {
 
         raptor = Utils.getRaptor();
+    }
 
+    private Device newDevice(String name) {
         Device d = new Device();
-        d.name = "listener test " + System.currentTimeMillis();
-        
+        d.name = name;
+
         d.addAction("switch");
         d.addAction("dimming");
         d.addAction("battery");
-        
+
         d.addStream("test", "string", "string");
-        
+        d.addStream("test2", "foo", "boolean");
+
         Assert.assertEquals(3, d.getActions().size());
-        Assert.assertEquals(1, d.getStreams().size());
+        Assert.assertEquals(2, d.getStreams().size());
 
         log.debug("Creating {} device", d.name);
 
-        device = d;
+        return d;
     }
 
     @After
     public void tearDown() {
     }
 
-    @Test
-    public void watchDeviceEvents()  {
+    private void pushData(Device dev) {
 
-        log.debug("watch device events");
-        
-        Device dev = Utils.createDevice(device);
-        
-        raptor.Device.subscribe(dev, new DataCallback() {
-            @Override
-            public void callback(Stream stream, RecordSet record) {
-                log.debug("Data received {}", record.toJson());
-            }
-        });
-        
-        raptor.Device.subscribe(dev, new DataCallback() {
-            @Override
-            public void callback(Stream stream, RecordSet record) {
-                log.debug("Data received {}", record.toJson());
-            }
-        });
-        
-        dev.addStream("test2", "foo", "boolean");
-        dev.addAction("sleep");
-        
-        dev = raptor.Device.update(dev);
-        Utils.waitFor(2500);
-        
         Stream stream = dev.getStream("test2");
         RecordSet record = new RecordSet(stream);
         record.createRecord("foo", true);
-        
-        raptor.Stream.push(stream, record);
-        record.timestamp = new Date(Instant.now().toEpochMilli());
-        Utils.waitFor(500);
-        
-        raptor.Stream.push(stream, record);
-        record.timestamp = new Date(Instant.now().toEpochMilli());
-        Utils.waitFor(500);
-        
-        raptor.Stream.push(stream, record);
-        record.timestamp = new Date(Instant.now().toEpochMilli());
-        Utils.waitFor(500);
-        
+
         raptor.Stream.push(stream, record);
         record.timestamp = new Date(Instant.now().toEpochMilli());
         Utils.waitFor(500);
 
+        raptor.Stream.push(stream, record);
+        record.timestamp = new Date(Instant.now().toEpochMilli());
+        Utils.waitFor(500);
+
+        raptor.Stream.push(stream, record);
+        record.timestamp = new Date(Instant.now().toEpochMilli());
+        Utils.waitFor(500);
+
+        raptor.Stream.push(stream, record);
+        record.timestamp = new Date(Instant.now().toEpochMilli());
+        Utils.waitFor(500);
+    }
+
+    @Test
+    public void watchDeviceEvents() {
+    
+        log.debug("watch data events");
+
+        final Device dev = Utils.createDevice(newDevice("dev"));
+
+        raptor.Device.subscribe(dev, new DeviceCallback() {
+            @Override
+            public void callback(Device obj, DevicePayload message) {
+                log.debug("Device event received {}", message.toString());
+                Assert.assertEquals(obj.id, dev.id);
+            }
+        });
+        dev.addStream("test2", "foo", "boolean");
+        dev.addAction("sleep");
+        
+        raptor.Device.update(dev);
+        Utils.waitFor(1000);
+
+    }
+    
+    @Test
+    public void watchDeviceDataEvents() {
+
+        log.debug("watch data events");
+
+        Device dev = Utils.createDevice(newDevice("dev"));
+        Device dev1 = Utils.createDevice(newDevice("dev1"));
+
+        Utils.waitFor(1500);
+
+        raptor.Device.subscribe(dev, new DataCallback() {
+            @Override
+            public void callback(Stream stream, RecordSet record) {
+                log.debug("dev: Data received {}", record.toJson());
+                Assert.assertTrue(record.objectId.equals(dev.getDevice().getId()));
+                Assert.assertTrue(stream.name.equals("test2"));
+            }
+        });
+
+        raptor.Device.subscribe(dev1, new DataCallback() {
+            @Override
+            public void callback(Stream stream, RecordSet record) {
+                log.debug("dev1: Data received {}", record.toJson());
+                Assert.assertTrue(record.objectId.equals(dev1.getDevice().getId()));
+                Assert.assertTrue(stream.name.equals("test2"));
+            }
+        });
+
+        pushData(dev);
+        pushData(dev1);
+        
+        Utils.waitFor(1000);
+    }
+    
+    @Test
+    public void watchDeviceActionEvents() {
+
+        log.debug("watch action events");
+
+        Device dev = Utils.createDevice(newDevice("dev"));
+        Utils.waitFor(1500);
+
+        raptor.Device.subscribe(dev, new ActionCallback() {
+            @Override
+            public void callback(Action action, ActionPayload payload) {
+                log.debug("dev: Data received  for {}: {}", payload.actionId, payload.data);
+                Assert.assertTrue(action.name.equals("switch"));
+                Assert.assertTrue(payload.data.equals("on"));
+            }
+        });
+
+        Action action = dev.getAction("switch");
+        raptor.Action.invoke(action, "on");
+        
+        Utils.waitFor(1000);
     }
 
 }

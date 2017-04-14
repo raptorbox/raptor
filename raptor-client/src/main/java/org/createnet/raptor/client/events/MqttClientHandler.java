@@ -74,7 +74,7 @@ public class MqttClientHandler extends AbstractClient {
 
                 MqttConnectOptions connOpts = new MqttConnectOptions();
                 connOpts.setCleanSession(true);
-                connOpts.setConnectionTimeout(0);
+                connOpts.setConnectionTimeout(5); // 5 secs
 
                 if (getContainer().getConfig().hasCredentials()) {
                     connOpts.setUserName(getContainer().getConfig().getUsername());
@@ -122,23 +122,21 @@ public class MqttClientHandler extends AbstractClient {
      * @param listener the listener implementation
      */
     public void setCallback(MessageEventListener listener) {
-        
-        if(listener == null) {
+
+        if (listener == null) {
             logger.debug("Clear callback");
             getMqttClient().setCallback(null);
             return;
         }
 
+        logger.debug("Set callback");
         getMqttClient().setCallback(new MqttCallback() {
             @Override
             public void connectionLost(Throwable thrwbl) {
                 logger.warn("Connection to MQTT server lost, reconnecting", thrwbl);
-                try {
-                    if (!getMqttClient().isConnected()) {
-                        getMqttClient().connect();
-                    }
-                } catch (MqttException ex) {
-                    logger.error("Failed to reconnect", ex);
+                if (!getMqttClient().isConnected()) {
+                    mqttClient = null;
+                    getMqttClient();
                 }
             }
 
@@ -149,7 +147,7 @@ public class MqttClientHandler extends AbstractClient {
                 message.topic = mqttTopic;
                 message.content = new String(mqttMessage.getPayload());
 
-                logger.debug("New message received on {}: {}", message.topic, message.content);
+                logger.debug("New message received on {}", message.topic, message.content);
                 listener.onMessage(message);
             }
 
@@ -169,6 +167,9 @@ public class MqttClientHandler extends AbstractClient {
         try {
             getMqttClient().unsubscribe(topic);
             topics.remove(topic);
+            if (topics.isEmpty()) {
+                mqttClient.setCallback(null);
+            }
         } catch (MqttException ex) {
             throw new ClientException(ex);
         }
