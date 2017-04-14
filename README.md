@@ -77,7 +77,7 @@ We are working to expand the support of SDK and libraries in different languages
 Here the list of available ones:
 
 - [javascript sdk](https://github.com/raptorbox/raptorjs)
-- [java sdk](https://github.com/raptorbox/raptor/raptor-client) (work in progess)
+- [java sdk](https://github.com/raptorbox/raptor/tree/master/raptor-client)
 
 ## Credits
 
