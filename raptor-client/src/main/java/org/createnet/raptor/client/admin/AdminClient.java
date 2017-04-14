@@ -13,21 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client;
+package org.createnet.raptor.client.admin;
 
-import org.createnet.raptor.client.api.HttpClient;
-import org.createnet.raptor.client.config.Config;
-import org.createnet.raptor.client.events.MqttEventEmitter;
+import org.createnet.raptor.client.AbstractClient;
+import org.createnet.raptor.client.Raptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * Methods to interact with Raptor API
  *
- * @author Luca Capra <luca.capra@fbk.eu>
+ * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface IClient {
+public class AdminClient extends AbstractClient {
+
+    public final UserClient User;
     
-    public Raptor getContainer();
-    public HttpClient getClient();
-    public MqttEventEmitter getEmitter();
-    public Config getConfig();
+    public AdminClient(Raptor container) {
+        super(container);
+        
+        User = new UserClient(container);
+    }
+
+    final static Logger logger = LoggerFactory.getLogger(AdminClient.class);
     
 }

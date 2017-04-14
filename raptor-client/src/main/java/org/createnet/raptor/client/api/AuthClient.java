@@ -102,7 +102,7 @@ public class AuthClient extends AbstractClient {
     public LoginState login(String username, String password) {
 
         JsonNode cred = Device.getMapper().valueToTree(new LoginCredentialsBody(username, password));
-        JsonNode node = getClient().post(Client.Routes.LOGIN, cred);
+        JsonNode node = getClient().post(HttpClient.Routes.LOGIN, cred);
 
         return Device.getMapper().convertValue(node, LoginState.class);
     }
@@ -123,7 +123,7 @@ public class AuthClient extends AbstractClient {
      * @return
      */
     public LoginState refreshToken() {
-        JsonNode node = getClient().get(Client.Routes.REFRESH_TOKEN);
+        JsonNode node = getClient().get(HttpClient.Routes.REFRESH_TOKEN);
         LoginState body = Device.getMapper().convertValue(node, LoginState.class);
         state = body;
         return body;
@@ -133,7 +133,7 @@ public class AuthClient extends AbstractClient {
      * Logout the user revoking the token
      */
     public void logout() {
-        getClient().delete(Client.Routes.LOGOUT);
+        getClient().delete(HttpClient.Routes.LOGOUT);
         state = null;
     }
 }

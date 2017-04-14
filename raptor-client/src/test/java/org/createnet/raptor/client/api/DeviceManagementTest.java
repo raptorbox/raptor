@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client;
+package org.createnet.raptor.client.api;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
-import static org.createnet.raptor.client.DataStreamTest.raptor;
+import org.createnet.raptor.client.Raptor;
+import org.createnet.raptor.client.Utils;
+import static org.createnet.raptor.client.api.DataStreamTest.raptor;
 import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;

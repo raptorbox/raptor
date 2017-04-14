@@ -143,7 +143,7 @@ public class DeviceClient extends AbstractClient {
      * @return the Device instance
      */
     public Device create(Device obj) {
-        JsonNode node = getClient().post(Client.Routes.CREATE, obj.toJsonNode());
+        JsonNode node = getClient().post(HttpClient.Routes.CREATE, obj.toJsonNode());
         if (!node.has("id")) {
             throw new ClientException("Missing ID on object creation");
         }
@@ -158,10 +158,10 @@ public class DeviceClient extends AbstractClient {
      * @return the Device instance
      */
     public Device load(String id) {
-        Device obj = getClient().createObject();
+        Device obj = new Device();
         obj.parse(
                 getClient().get(
-                        String.format(Client.Routes.LOAD, id)
+                        String.format(HttpClient.Routes.LOAD, id)
                 )
         );
         return obj;
@@ -176,7 +176,7 @@ public class DeviceClient extends AbstractClient {
     public Device update(Device obj) {
         obj.parse(
                 getClient().put(
-                        String.format(Client.Routes.UPDATE, obj.getId()),
+                        String.format(HttpClient.Routes.UPDATE, obj.getId()),
                         obj.toJsonNode()
                 )
         );
@@ -200,7 +200,7 @@ public class DeviceClient extends AbstractClient {
             query.setUserId(user.getUuid());
         }
         JsonNode json = getClient().post(
-                Client.Routes.SEARCH,
+                HttpClient.Routes.SEARCH,
                 query.toJSON()
         );
         List<Device> results = Device.getMapper().convertValue(json, new TypeReference<List<Device>>() {
@@ -225,7 +225,7 @@ public class DeviceClient extends AbstractClient {
      */
     public void delete(Device obj) {
         getClient().delete(
-                String.format(Client.Routes.DELETE, obj.getId())
+                String.format(HttpClient.Routes.DELETE, obj.getId())
         );
         obj.id = null;
     }
@@ -236,7 +236,7 @@ public class DeviceClient extends AbstractClient {
      * @return the Device instance
      */
     public List<Device> list() {
-        JsonNode json = getClient().get(Client.Routes.LIST);
+        JsonNode json = getClient().get(HttpClient.Routes.LIST);
         List<Device> list = Device.getMapper().convertValue(json, new TypeReference<List<Device>>() {
         });
         return list;

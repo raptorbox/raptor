@@ -15,10 +15,11 @@
  */
 package org.createnet.raptor.client;
 
+import org.createnet.raptor.client.admin.AdminClient;
 import org.createnet.raptor.client.config.Config;
 import org.createnet.raptor.client.api.ActionClient;
 import org.createnet.raptor.client.api.AuthClient;
-import org.createnet.raptor.client.api.Client;
+import org.createnet.raptor.client.api.HttpClient;
 import org.createnet.raptor.client.api.DeviceClient;
 import org.createnet.raptor.client.api.StreamClient;
 import org.createnet.raptor.client.events.MqttEventEmitter;
@@ -32,13 +33,15 @@ import org.createnet.raptor.models.objects.RaptorComponent;
 public class Raptor implements IClient, RaptorComponent {
 
     final protected Config config;
-    final protected Client client;
+    final protected HttpClient client;
     final protected MqttEventEmitter emitter; 
     
     final public AuthClient Auth;
     final public StreamClient Stream;
     final public ActionClient Action;
     final public DeviceClient Device;
+    
+    final public AdminClient Admin;
 
     /**
      * Instantiate the client
@@ -69,13 +72,15 @@ public class Raptor implements IClient, RaptorComponent {
     public Raptor(Config config) {
 
         this.config = config;
-        client = new Client(this);
+        client = new HttpClient(this);
         emitter = new MqttEventEmitter(this);
 
         Auth = new AuthClient(this);
         Stream = new StreamClient(this);
         Device = new DeviceClient(this);
         Action = new ActionClient(this);
+        
+        Admin = new AdminClient(this);
 
     }
 
@@ -90,7 +95,7 @@ public class Raptor implements IClient, RaptorComponent {
     }
 
     @Override
-    public Client getClient() {
+    public HttpClient getClient() {
         return client;
     }
 

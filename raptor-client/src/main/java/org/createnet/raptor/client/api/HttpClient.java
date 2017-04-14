@@ -29,17 +29,15 @@ import org.createnet.raptor.client.Raptor;
 import org.createnet.raptor.client.exception.ClientException;
 import org.createnet.raptor.client.exception.MissingAuthenticationException;
 import org.createnet.raptor.models.exception.RequestException;
-import org.createnet.raptor.models.objects.Device;
-import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Client class for MQTT and HTTP operations
+ * HttpClient class for MQTT and HTTP operations
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class Client extends AbstractClient {
+public class HttpClient extends AbstractClient {
 
     static {
 
@@ -76,9 +74,9 @@ public class Client extends AbstractClient {
 
     }
 
-    final protected Logger logger = LoggerFactory.getLogger(Client.class);
+    final protected Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
-    public Client(Raptor container) {
+    public HttpClient(Raptor container) {
         super(container);
     }
 
@@ -111,7 +109,14 @@ public class Client extends AbstractClient {
         final static public String LOGIN = "/auth/login";
         final static public String LOGOUT = LOGIN;
         final static public String REFRESH_TOKEN = "/auth/refresh";
-
+        
+        final static public String USER_CREATE = "/auth/user";
+        final public static String USER_GET = USER_CREATE + "/%s";
+        final public static String USER_UPDATE = USER_GET;
+        final public static String USER_DELETE = USER_GET;
+        final public static String USER_UPDATE_ME = USER_CREATE;
+        final public static String USER_GET_ME = USER_CREATE;
+        
     }
 
     /**
@@ -124,17 +129,6 @@ public class Client extends AbstractClient {
         return getConfig().getUrl() + path;
     }
 
-    /**
-     * Creates a Device instance with container reference set
-     *
-     * @return the new Device instance
-     */
-    public Device createObject() {
-        Device obj = new Device();
-        obj.setContainer(this.getContainer());
-        return obj;
-    }
-
     protected String getToken() {
         String token = getContainer().Auth.getToken();
         if (token == null) {
@@ -144,6 +138,7 @@ public class Client extends AbstractClient {
     }
 
     protected void prepareRequest() {
+        //
     }
 
     protected HttpRequestWithBody request(HttpMethod method, String url) {
@@ -165,12 +160,15 @@ public class Client extends AbstractClient {
 
         int status = response.getStatus();
 
-        if (status >= 400 && response.getBody() != null) {
-            String message = response.getBody().toString();
-            if (response.getBody() instanceof JsonNode) {
-                JsonNode err = (JsonNode) response.getBody();
-                if (err.has("message")) {
-                    message = err.get("message").asText();
+        if (status >= 400) {
+            String message = "";
+            if(response.getBody() != null) {
+                message = response.getBody().toString();
+                if (response.getBody() instanceof JsonNode) {
+                    JsonNode err = (JsonNode) response.getBody();
+                    if (err.has("message")) {
+                        message = err.get("message").asText();
+                    }
                 }
             }
             logger.error("Request failed {} {}: {}", response.getStatus(), response.getStatusText(), message);

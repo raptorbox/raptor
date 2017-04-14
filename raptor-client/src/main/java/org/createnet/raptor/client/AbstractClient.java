@@ -15,9 +15,14 @@
  */
 package org.createnet.raptor.client;
 
-import org.createnet.raptor.client.api.Client;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.createnet.raptor.client.api.HttpClient;
 import org.createnet.raptor.client.config.Config;
 import org.createnet.raptor.client.events.MqttEventEmitter;
+import org.createnet.raptor.client.exception.ClientException;
+import org.createnet.raptor.models.objects.RaptorContainer;
 
 /**
  *
@@ -30,7 +35,7 @@ abstract public class AbstractClient implements IClient {
     public AbstractClient(Raptor container) {
         this.container = container;
     }
-    
+
     protected String buildQueryString(Integer offset, Integer limit) {
         String qs = null;
         if (offset != null) {
@@ -53,7 +58,7 @@ abstract public class AbstractClient implements IClient {
     }
 
     @Override
-    public Client getClient() {
+    public HttpClient getClient() {
         return getContainer().getClient();
     }
 
@@ -67,4 +72,29 @@ abstract public class AbstractClient implements IClient {
         return getContainer().getEmitter();
     }
 
+    public ObjectMapper getMapper() {
+        return RaptorContainer.getMapper();
+    }
+
+    /**
+     * Convert an object to JSON
+     * @param o
+     * @return
+     */
+    public String toJson(Object o) {
+        try {
+            return getMapper().writeValueAsString(o);
+        } catch (JsonProcessingException ex) {
+            throw new ClientException(ex);
+        }
+    }
+    
+    /**
+     * Convert an object to JsonNode
+     * @param o
+     * @return
+     */
+    public JsonNode toJsonNode(Object o) {
+        return getMapper().valueToTree(o);
+    }
 }

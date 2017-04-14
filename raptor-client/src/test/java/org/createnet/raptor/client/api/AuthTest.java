@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client;
+package org.createnet.raptor.client.api;
 
 import java.util.Properties;
+import org.createnet.raptor.client.Raptor;
+import org.createnet.raptor.client.Utils;
 import org.createnet.raptor.client.api.AuthClient;
 import org.junit.After;
 import org.junit.AfterClass;

@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.createnet.raptor.client.AbstractClient;
 import org.createnet.raptor.client.Raptor;
-import org.createnet.raptor.client.api.Client;
+import org.createnet.raptor.client.api.HttpClient;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
@@ -69,12 +69,12 @@ public class MqttEventEmitter extends AbstractClient {
     }
 
     protected String getStreamTopic(Stream stream) {
-        String path = String.format(Client.Routes.SUBSCRIBE_STREAM, stream.getDevice().getId(), stream.name);
+        String path = String.format(HttpClient.Routes.SUBSCRIBE_STREAM, stream.getDevice().getId(), stream.name);
         return path;
     }
 
     protected String getActionTopic(Action action) {
-        String path = String.format(Client.Routes.SUBSCRIBE_ACTION, action.getDevice().getId(), action.name);
+        String path = String.format(HttpClient.Routes.SUBSCRIBE_ACTION, action.getDevice().getId(), action.name);
         return path;
     }
 

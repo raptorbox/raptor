@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client;
+package org.createnet.raptor.client.api;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.createnet.raptor.client.Raptor;
+import org.createnet.raptor.client.Utils;
 import org.createnet.raptor.indexer.query.impl.es.DataQuery;
 import org.createnet.raptor.indexer.query.impl.es.DataQueryBuilder;
 import org.createnet.raptor.models.data.RecordSet;

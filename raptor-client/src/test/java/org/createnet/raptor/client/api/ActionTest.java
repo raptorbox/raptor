@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.client;
+package org.createnet.raptor.client.api;
 
 import java.util.List;
+import org.createnet.raptor.client.Raptor;
+import org.createnet.raptor.client.Utils;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Action;
