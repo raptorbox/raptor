@@ -19,7 +19,6 @@
         <module>raptor-auth</module>    
         <module>raptor-db</module>
         <module>raptor-indexer</module>
-        <module>raptor-client</module>        
         <module>raptor-service</module>   
     
         <module>raptor-http-api</module>

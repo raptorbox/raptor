@@ -5,7 +5,9 @@ spring:
   devtools:
     restart:
       enabled: true
-      
+      trigger-file: raptor-auth-service-1.0.jar
+      additional-paths: target
+
   profiles: default
     
   datasource:
