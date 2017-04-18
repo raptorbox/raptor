@@ -19,6 +19,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.createnet.raptor.auth.service.objects.JsonErrorResponse;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
@@ -130,8 +134,19 @@ public class TokenController {
         if (!user.getUuid().equals(uuid) && !user.isSuperAdmin()) {
             return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
         }
-
-        return ResponseEntity.ok(tokenService.list(uuid));
+        
+        Iterable<Token> tokens = tokenService.list(uuid);
+        final List<Token> userToken = new ArrayList();
+        
+        tokens.forEach((Token token) -> {
+            if(token.getType().equals(Token.Type.DEFAULT)) {
+                userToken.add(token);
+            }
+        });
+        
+        logger.debug("Found {} tokens", userToken.size());
+        
+        return ResponseEntity.ok(userToken);
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -142,7 +157,7 @@ public class TokenController {
             response = Token.class,
             nickname = "getToken"
     )
-    public ResponseEntity<?> get(
+    public ResponseEntity<?> getToken(
             @AuthenticationPrincipal User user,
             @PathVariable Long tokenId
     ) {
@@ -166,7 +181,7 @@ public class TokenController {
             response = Token.class,
             nickname = "createToken"
     )
-    public ResponseEntity<?> create(
+    public ResponseEntity<?> createToken(
             @AuthenticationPrincipal User currentUser,
             @RequestBody Token rawToken
     ) {
@@ -179,7 +194,7 @@ public class TokenController {
         mergeRawToken(rawToken, token);
         token.setUser(currentUser);
 
-        // Generate the JWT token
+        // Generate the token based on provided secret
         tokenService.generateToken(token);
 
         Token token2 = tokenService.create(token);
@@ -188,7 +203,7 @@ public class TokenController {
             return JsonErrorResponse.entity(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot create the token");
         }
 
-        logger.debug("User {} created new token {}", currentUser.getUuid(), token2.getId());
+        logger.debug("User {} created new token {} {}", currentUser.getUuid(), token2.getName(),  token2.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(token2);
     }

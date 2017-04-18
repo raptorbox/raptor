@@ -23,6 +23,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.time.Instant;
@@ -41,6 +42,8 @@ import org.hibernate.validator.constraints.NotEmpty;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "tokens")
 public class Token implements Serializable {
@@ -68,7 +71,7 @@ public class Token implements Serializable {
     private String secret;
 
     @Column(unique = false, nullable = false)
-    private boolean enabled = false;
+    private boolean enabled = true;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
@@ -84,12 +87,29 @@ public class Token implements Serializable {
     private Date created = new Date();
 
     @Column(name = "expires")
-    private Long expires = null;
+    private Long expires = 1000L * 60 * 60; // default to 60min
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private Type type = Type.DEFAULT;
-
+    
+    public Token() {
+    }
+    
+    public Token(String name, String secret) {
+        this.name = name;
+        this.secret = secret;
+    }
+    
+    public Token(final Token token) {
+        this.name = token.getName();
+        this.secret = token.getSecret();
+        this.expires = token.getExpires();
+        this.device = token.getDevice();
+        this.enabled = token.getEnabled();
+        this.user = token.getUser();
+    }
+    
     public Long getId() {
         return id;
     }
@@ -156,7 +176,7 @@ public class Token implements Serializable {
         }
         this.expires = expires;
     }
-
+    
     public boolean isExpired() {
         if(getExpiresInstant() == null) {
             return true;

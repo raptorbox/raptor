@@ -63,6 +63,10 @@ public class Device {
   public Device() {
     this.uuid = UUID.randomUUID().toString();
   }
+  
+  public Device(String uuid) {
+    this.uuid = uuid;
+  }
 
   public Long getId() {
     return id;

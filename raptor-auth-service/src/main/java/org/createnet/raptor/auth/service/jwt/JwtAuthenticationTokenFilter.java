@@ -54,7 +54,6 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
           User user = token.getUser() != null ? token.getUser() : null;
 
           if (user != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
             UserDetails userDetails = new RaptorUserDetailsService.RaptorUserDetails(user);
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpRequest));
@@ -62,13 +61,14 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
           }
         }
         else {
-          logger.debug("JWT Token is not valid [name:`{}` id:{} type:{}]", token.getName(), token.getId().toString(), token.getType().name());
+          logger.debug("JWT Token is {} [name:`{}` id:{} type:{}]", (token.isExpired() ? "expired" : "not valid"), token.getName(), token.getId().toString(), token.getType().name());
           if(token.isLoginToken()) {
             tokenService.delete(token);
           }
         }
       }
     }
+
     chain.doFilter(request, response);
   }
 }

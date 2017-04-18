@@ -17,6 +17,7 @@ package org.createnet.raptor.auth.service.repository;
 
 import java.util.List;
 import org.createnet.raptor.models.auth.Token;
+import org.createnet.raptor.models.auth.User;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ public interface TokenRepository extends CrudRepository<Token, Long> {
     List<Token> findByUserId(String userId);
     List<Token> findByUserUuid(String userUuid);
     List<Token> findByType(Token.Type type);
+    List<Token> findByTypeAndUser(Token.Type type, User user);
 
     @Override
     Token findOne(Long id);

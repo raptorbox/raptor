@@ -105,7 +105,7 @@ public class TokenService {
         
         logger.debug("Creating login token for user:{}", user.getId());
 
-        List<Token> tokens = tokenRepository.findByType(Token.Type.LOGIN);
+        List<Token> tokens = tokenRepository.findByTypeAndUser(Token.Type.LOGIN, user);
         if (tokens.size() > 1) {
             Token validtoken = null;
             for (Token loginToken : tokens) {

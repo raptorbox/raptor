@@ -15,6 +15,10 @@
  */
 package org.createnet.raptor.auth.service.services;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.createnet.raptor.auth.service.exception.PasswordMissingException;
 import org.createnet.raptor.models.auth.Role;
@@ -137,7 +141,18 @@ public class UserService {
         } else {
             throw new PasswordMissingException();
         }
-
+        
+        Set<Role> dbRoles = new HashSet();
+        rawUser.getRoles().forEach((Role r) -> {
+            Role dbrole = roleRepository.findByName(r.getName());
+            if (dbrole == null) {
+                dbrole = roleRepository.save(r);
+            }
+            dbRoles.add(dbrole);
+        });
+        
+        rawUser.setRoles(dbRoles);
+        
         logger.debug("Create new user {}", rawUser.getUsername());
         return userRepository.save(rawUser);
     }
