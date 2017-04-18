@@ -75,19 +75,34 @@ public class Application {
 
     static final public ObjectMapper mapper = new ObjectMapper();
 
+    static ConfigurableApplicationContext instance;
+
     public static void main(String[] args) {
-
-        ConfigurableApplicationContext app = new SpringApplicationBuilder(Application.class)
-                .bannerMode(Banner.Mode.OFF)
-                .logStartupInfo(false)
-                .headless(true)
-                .web(true)
-                //            .initializers(new YamlFileApplicationContextInitializer())
-                .application()
-                .run(args);
-
+        getInstance();
     }
 
+    static public ConfigurableApplicationContext getInstance() {
+        return getInstance(new String[]{});
+    }
+
+    static public ConfigurableApplicationContext getInstance(String[] args) {
+        if (instance == null) {
+            instance = new SpringApplicationBuilder(Application.class)
+                    .bannerMode(Banner.Mode.OFF)
+                    .logStartupInfo(false)
+                    .headless(true)
+                    .web(true)
+                    //            .initializers(new YamlFileApplicationContextInitializer())
+                    .application()
+                    .run(args);
+        }
+        return instance;
+    }
+    
+    static public void close() {
+        getInstance().close();
+    }
+    
     static final public BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Value("${raptor.admin.enabled}")
