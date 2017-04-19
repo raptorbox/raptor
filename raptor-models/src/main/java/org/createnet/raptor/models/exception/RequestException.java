@@ -35,7 +35,7 @@ public class RequestException extends RuntimeException {
     public String getMessage() {
         return String.format("HTTP %d %s - %s", getStatus(), getStatusText(), getBody());
     }
-    
+
     public int getStatus() {
         return status;
     }
@@ -47,5 +47,5 @@ public class RequestException extends RuntimeException {
     public String getBody() {
         return body;
     }
-    
+
 }
