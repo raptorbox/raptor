@@ -27,7 +27,7 @@ import org.createnet.raptor.models.auth.Device;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.exception.PermissionNotFoundException;
 import org.createnet.raptor.auth.service.objects.JsonErrorResponse;
-import org.createnet.raptor.auth.service.objects.PermissionRequestBatch;
+import org.createnet.raptor.models.auth.request.PermissionRequestBatch;
 import org.createnet.raptor.auth.service.services.AclDeviceService;
 import org.createnet.raptor.auth.service.services.DeviceService;
 import org.createnet.raptor.auth.service.services.UserService;

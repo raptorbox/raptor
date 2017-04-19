@@ -26,7 +26,7 @@ import org.createnet.raptor.auth.service.acl.RaptorPermission;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.exception.PermissionNotFoundException;
 import org.createnet.raptor.auth.service.objects.JsonErrorResponse;
-import org.createnet.raptor.auth.service.objects.PermissionRequestBatch;
+import org.createnet.raptor.models.auth.request.PermissionRequestBatch;
 import org.createnet.raptor.auth.service.services.AclTokenService;
 import org.createnet.raptor.auth.service.services.TokenService;
 import org.createnet.raptor.auth.service.services.UserService;
@@ -96,7 +96,8 @@ public class TokenPermissionController {
     )
     public ResponseEntity<?> listPermissions(
             @PathVariable("tokenId") Long tokenId,
-            @PathVariable("userUuid") String userUuid
+            @PathVariable("userUuid") String userUuid,
+            @AuthenticationPrincipal User currentUser
     ) {
 
         Token token = tokenService.read(tokenId);
@@ -109,8 +110,13 @@ public class TokenPermissionController {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "User not found");
         }
 
+        //todo: add acl checks
+        if (!user.getUuid().equals(currentUser.getUuid()) || !currentUser.isAdmin()) {
+            return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
+        }
+
         List<String> permissions = RaptorPermission.toLabel(aclTokenService.list(token, user));
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
+        return ResponseEntity.status(HttpStatus.OK).body(permissions);
     }
 
     @RequestMapping(value = "/permission/token/{tokenId}", method = RequestMethod.GET)
@@ -123,7 +129,7 @@ public class TokenPermissionController {
     )
     public ResponseEntity<?> listOwnPermissions(
             @PathVariable("tokenId") Long tokenId,
-            @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser
+            @AuthenticationPrincipal User currentUser
     ) {
 
         Token token = tokenService.read(tokenId);
@@ -137,7 +143,7 @@ public class TokenPermissionController {
         }
 
         List<String> permissions = RaptorPermission.toLabel(aclTokenService.list(token, user));
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
+        return ResponseEntity.status(HttpStatus.OK).body(permissions);
     }
 
     @RequestMapping(value = "/permission/token/{tokenId}", method = RequestMethod.PUT)
@@ -150,17 +156,27 @@ public class TokenPermissionController {
     )
     public ResponseEntity<?> setPermission(
             @RequestBody PermissionRequestBatch body,
-            @PathVariable("tokenId") Long tokenId
+            @PathVariable("tokenId") Long tokenId,
+            @AuthenticationPrincipal User currentUser
     ) {
-        
+
         Token token = tokenService.read(tokenId);
         if (token == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Token not found");
         }
 
-        User user = userService.getByUuid(body.user);
-        if (user == null) {            
-            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "User not found");
+        User user = currentUser;
+        if (body.user != null) {
+            user = userService.getByUuid(body.user);
+            if (user == null) {
+                return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "User not found");
+            }
+
+            //todo: add acl checks
+            if (!user.getUuid().equals(currentUser.getUuid()) || !currentUser.isAdmin()) {
+                return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
+            }
+
         }
 
         List<Permission> permissions = body.permissions

@@ -42,11 +42,9 @@ public class RaptorAuthenticationTokenFilter extends GenericFilterBean {
 
         if (authToken != null && !authToken.isEmpty()) {
 
-            if (authToken.startsWith(tokenHeaderPrefix)) {
-                authToken = authToken.substring(tokenHeaderPrefix.length());
-            }
-
-            Token token = tokenService.read(authToken.trim());
+            
+            authToken = tokenService.extractToken(authToken);
+            Token token = tokenService.read(authToken);
 
             if (token != null) {
                 boolean tokenIsValid = tokenService.isValid(token);

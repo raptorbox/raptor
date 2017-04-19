@@ -68,6 +68,16 @@ public class UserClient extends AbstractClient {
     }
 
     /**
+     * Get user by token
+     *
+     * @return
+     */
+    public User get() {
+        JsonNode node = getClient().get(HttpClient.Routes.USER_GET_ME);
+        return getMapper().convertValue(node, User.class);
+    }
+
+    /**
      * Create a new user
      *
      * @param user

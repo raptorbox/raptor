@@ -114,14 +114,17 @@ public class HttpClient extends AbstractClient {
         final public static String USER_GET = USER_CREATE + "/%s";
         final public static String USER_UPDATE = USER_GET;
         final public static String USER_DELETE = USER_GET;
-        final public static String USER_UPDATE_ME = USER_CREATE;
-        final public static String USER_GET_ME = USER_CREATE;
+        final public static String USER_GET_ME = "/auth/me";        
+        final public static String USER_UPDATE_ME = USER_GET_ME;
         
         final static public String TOKEN_CREATE = "/auth/token";
         final static public String TOKEN_UPDATE = TOKEN_CREATE + "/%s";
         final static public String TOKEN_DELETE = TOKEN_UPDATE;
         final static public String TOKEN_GET = TOKEN_CREATE + "?uuid=%s";
         
+        final static public String TOKEN_PERMISSION_GET = "/auth/permission/token/%s";
+        final static public String TOKEN_PERMISSION_BY_USER = TOKEN_PERMISSION_GET + "/%s";
+        final static public String TOKEN_PERMISSION_SET = TOKEN_PERMISSION_GET;
         
     }
 

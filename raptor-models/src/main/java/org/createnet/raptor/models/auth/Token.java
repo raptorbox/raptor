@@ -116,7 +116,35 @@ public class Token implements Serializable {
         this.enabled = token.getEnabled();
         this.user = token.getUser();
     }
+    
+    public void merge(Token rawToken) {
+        
+        if (rawToken.getDevice() != null) {
+            this.setDevice(rawToken.getDevice());
+        }
 
+        if (rawToken.getEnabled() != null) {
+            this.setEnabled(rawToken.getEnabled());
+        }
+
+        if (rawToken.getExpires() != null) {
+            this.setExpires(rawToken.getExpires());
+        }
+
+        if (rawToken.getName() != null) {
+            this.setName(rawToken.getName());
+        }
+
+        if (rawToken.getUser() != null) {
+            this.setUser(rawToken.getUser());
+        }
+
+        if (rawToken.getSecret() != null) {
+            this.setSecret(rawToken.getSecret());
+        }        
+        
+    }
+    
     public Long getId() {
         return id;
     }

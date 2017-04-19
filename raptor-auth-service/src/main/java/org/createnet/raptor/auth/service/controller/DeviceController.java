@@ -15,17 +15,14 @@
  */
 package org.createnet.raptor.auth.service.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 import org.createnet.raptor.auth.entity.AuthorizationRequest;
 import org.createnet.raptor.auth.entity.AuthorizationResponse;
 import org.createnet.raptor.auth.entity.SyncRequest;
-import org.createnet.raptor.auth.service.Application;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.auth.service.acl.RaptorPermission;
 import org.createnet.raptor.auth.service.objects.JsonErrorResponse;
@@ -141,10 +138,7 @@ public class DeviceController {
                     return JsonErrorResponse.entity(HttpStatus.NOT_FOUND);
                 }
 
-                /**
-                 * @TODO CREATE permission should be attached to an user rather
-                 * than on the object itself
-                 */
+                
                 final boolean isCreate = (body.objectId == null && permission == RaptorPermission.CREATE);
                 if (isCreate) {
                     response.result = true;
@@ -159,13 +153,14 @@ public class DeviceController {
                     }
 
                     response.result = aclDeviceService.check(device, user, permission);
-                    
-                    if (response.result) {
-                        // check token level ACL
-                        Token token = tokenService.read(rawToken);
-                        aclTokenService.check(token, user, permission);
-                    }
 
+                }
+                
+                // check for token specific permission if user level ACL are ok
+                if (response.result) {
+                    // check token level ACL
+                    Token token = tokenService.read(tokenService.extractToken(rawToken));
+                    response.result = aclTokenService.check(token, user, permission);
                 }
                 
                 logger.debug("Device permission check result: [operation:{}, deviceId:{}, result:{}]", body.getOperation(), body.objectId, response.result);

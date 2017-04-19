@@ -46,8 +46,11 @@ public class TokenClient extends AbstractClient {
         protected String secret;
     }
     
+    final public TokenPermissionClient Permission;
+    
     public TokenClient(Raptor container) {
         super(container);
+        Permission = new TokenPermissionClient(container);
     }
 
     final static Logger logger = LoggerFactory.getLogger(TokenClient.class);

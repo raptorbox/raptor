@@ -26,6 +26,7 @@ import org.createnet.raptor.models.auth.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
@@ -45,9 +46,8 @@ public class AclTokenService implements AclServiceInterface<Token> {
     @Autowired
     private AclManagerService aclManagerService;
 
-    protected Permission[] defaultPermissions = new Permission[] {
-        RaptorPermission.ADMINISTRATION,
-    };
+    protected Permission[] defaultPermissions = new Permission[]{
+        RaptorPermission.ADMINISTRATION,};
 
     public void add(Token token, User user, Permission permission) {
         aclManagerService.addPermission(Token.class, token.getId(), new UserSid(user), permission);

@@ -34,7 +34,9 @@ public interface Authorization {
       super(m, t);
     }
   }
-
+  
+  
+  //TODO: merge with Permissions in raptor-models
   public enum Permission {
     
     List,

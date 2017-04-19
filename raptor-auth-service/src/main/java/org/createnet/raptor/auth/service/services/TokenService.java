@@ -45,6 +45,9 @@ public class TokenService {
         }
     }
 
+    @Value("${raptor.auth.headerPrefix}")
+    private String tokenHeaderPrefix;    
+    
     @Value("${raptor.auth.secret}")
     private String secret;
 
@@ -59,15 +62,44 @@ public class TokenService {
 
     @Autowired
     private TokenRepository tokenRepository;
-
+    
+    
+    /**
+     * Extract the raw token from the request header
+     * @param rawToken
+     * @return 
+     */
+    public String extractToken(String rawToken) {
+        
+        if (rawToken.startsWith(tokenHeaderPrefix)) {
+            rawToken = rawToken.substring(tokenHeaderPrefix.length());
+        }
+        
+        return rawToken.trim();
+    }    
+    
+    /**
+     * List token for an user
+     * @param uuid
+     * @return
+     */
     public Iterable<Token> list(String uuid) {
         return tokenRepository.findByUserUuid(uuid);
     }
-
+    
+    /**
+     * Load a token by ID
+     * @param tokenId
+     * @return
+     */
     public Token read(Long tokenId) {
         return tokenRepository.findOne(tokenId);
     }
-
+    
+    /**
+     * Delete a token from database
+     * @param token
+     */
     public void delete(Token token) {
         Token t2 = tokenRepository.findOne(token.getId());
         if (t2 == null) {
@@ -76,24 +108,20 @@ public class TokenService {
         tokenRepository.delete(t2.getId());
     }
 
-    public Token update(Token rawToken) {
-
-        Token token = read(rawToken.getId());
-        if (token == null) {
-            return null;
-        }
-
-        token.setName(rawToken.getName());
-
-        tokenRepository.save(token);
-        return token;
+    /**
+     * Save a token to database
+     * @param token
+     * @return
+     */
+    public Token save(Token token) {
+        return tokenRepository.save(token);
     }
 
-    public Token create(Token token) {
-        tokenRepository.save(token);
-        return token;
-    }
-
+    /**
+     * Load a token entity based on the token string
+     * @param authToken
+     * @return
+     */
     public Token read(String authToken) {
         if (authToken == null) {
             return null;
@@ -111,34 +139,34 @@ public class TokenService {
 
         logger.debug("Creating login token for user:{}", user.getId());
 
-        List<Token> tokens = tokenRepository.findByTypeAndUser(Token.Type.LOGIN, user);
-        if (tokens.size() > 1) {
+//        List<Token> tokens = tokenRepository.findByTypeAndUser(Token.Type.LOGIN, user);
+//        if (tokens.size() > 1) {
 //            Token validtoken = null;
-            for (Token loginToken : tokens) {
+//            for (Token loginToken : tokens) {
 //                if (loginToken.isValid() && validtoken == null) {
 //                    validtoken = loginToken;
 //                    continue;
 //                }
-                if (!loginToken.isValid()) {
-                    logger.debug("Drop previous login token id:{} for user:{}", loginToken.getId(), user.getId());
-                    try {
-                        delete(loginToken);
-                    } catch (Exception ex) {
-                        logger.warn("Error deleting token id:{}, err:{}", loginToken.getId(), ex.getMessage());
-                    }
-                }
-            }
+//                if (!loginToken.isValid()) {
+//                    logger.debug("Drop previous login token id:{} for user:{}", loginToken.getId(), user.getId());
+//                    try {
+//                        delete(loginToken);
+//                    } catch (Exception ex) {
+//                        logger.warn("Error deleting token id:{}, err:{}", loginToken.getId(), ex.getMessage());
+//                    }
+//                }
+//            }
 //            if (validtoken != null) {
 //                logger.debug("Reused valid login token id:{} for user:{}", validtoken.getId(), user.getId());
 //                return validtoken;
 //            }
-        }
+//        }
 
         Token token = tokenUtil.createToken("login", user, expiration, passwordEncoder.encode(user.getPassword() + this.secret));
         token.setType(Token.Type.LOGIN);
 
         try {
-            create(token);
+            save(token);
             logger.debug("New token created id:{} for user:{}", token.getId(), user.getId());
             return token;
         } catch (DataIntegrityViolationException e) {
@@ -153,11 +181,22 @@ public class TokenService {
 
     }
 
+    /**
+     * Generate the token string based on the provided secret
+     * @param token
+     * @return
+     */
     public Token generateToken(Token token) {
         tokenUtil.generate(token);
         return token;
     }
 
+    /**
+     * Check if the token is valid
+     * @param token
+     * @param secret
+     * @return
+     */    
     public boolean isValid(Token token, String secret) {
         // Cannot read the token claims?
         if (!tokenUtil.validate(token, secret)) {
@@ -166,6 +205,11 @@ public class TokenService {
         return token.isValid();
     }
 
+    /**
+     * Check if the token is valid
+     * @param token
+     * @return
+     */        
     public boolean isValid(Token token) {
         if (token == null) {
             return false;

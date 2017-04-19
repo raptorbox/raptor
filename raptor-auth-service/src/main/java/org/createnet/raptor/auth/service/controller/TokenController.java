@@ -21,8 +21,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.createnet.raptor.auth.service.objects.JsonErrorResponse;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
@@ -79,34 +77,6 @@ public class TokenController {
     @Autowired
     private UserService userService;
 
-    private void mergeRawToken(Token rawToken, Token token) {
-
-        if (rawToken.getDevice() != null) {
-            token.setDevice(rawToken.getDevice());
-        }
-
-        if (rawToken.getEnabled() != null) {
-            token.setEnabled(rawToken.getEnabled());
-        }
-
-        if (rawToken.getExpires() != null) {
-            token.setExpires(rawToken.getExpires());
-        }
-
-        if (rawToken.getName() != null) {
-            token.setName(rawToken.getName());
-        }
-
-        if (rawToken.getUser() != null) {
-            token.setUser(rawToken.getUser());
-        }
-
-        if (rawToken.getSecret() != null) {
-            token.setSecret(rawToken.getSecret());
-        }
-
-    }
-
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/token", method = RequestMethod.GET)
     @ApiOperation(
@@ -162,12 +132,15 @@ public class TokenController {
             @PathVariable Long tokenId
     ) {
 
-        
         Token token = tokenService.read(tokenId);
 
         // TODO add ACL checks
         if (user.getId().longValue() != token.getUser().getId().longValue()) {
             return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
+        }
+
+        if (token.isLoginToken()) {
+            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Can not access this token");
         }
 
         return ResponseEntity.ok(token);
@@ -190,14 +163,13 @@ public class TokenController {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Secret cannot be empty");
         }
 
-        Token token = new Token();
-        mergeRawToken(rawToken, token);
+        Token token = new Token(rawToken);
         token.setUser(currentUser);
+        token.setType(Token.Type.DEFAULT);
 
         // Generate the token based on provided secret
         tokenService.generateToken(token);
-
-        Token token2 = tokenService.create(token);
+        Token token2 = tokenService.save(token);
 
         if (token2 == null) {
             return JsonErrorResponse.entity(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot create the token");
@@ -216,14 +188,18 @@ public class TokenController {
             response = Token.class,
             nickname = "updateToken"
     )
-    public ResponseEntity<?> update(
+    public ResponseEntity<?> updateToken(
             @AuthenticationPrincipal User user,
             @PathVariable Long tokenId,
             @RequestBody Token rawToken
     ) {
 
         Token token = tokenService.read(tokenId);
-
+        
+        if(token == null) {
+            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Token not found");
+        }
+        
         // TODO add ACL checks        
         if (token.getUser() == null || user.getId().longValue() != token.getUser().getId().longValue()) {
             return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
@@ -234,8 +210,9 @@ public class TokenController {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Login token cannot be modified");
         }
 
-        // Todo
-        mergeRawToken(rawToken, token);
+        token.merge(rawToken);
+        token.setUser(user);
+        token.setType(Token.Type.DEFAULT);
 
         if (token.getSecret() == null || token.getSecret().isEmpty()) {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Secret cannot be empty");
@@ -244,7 +221,7 @@ public class TokenController {
         // Generate the JWT token
         tokenService.generateToken(token);
 
-        Token token2 = tokenService.update(token);
+        Token token2 = tokenService.save(token);
 
         logger.debug("User {} update token {}", user.getUuid(), token2.getId());
 
@@ -259,13 +236,17 @@ public class TokenController {
             response = Token.class,
             nickname = "deleteToken"
     )
-    public ResponseEntity<?> delete(
+    public ResponseEntity<?> deleteToken(
             @AuthenticationPrincipal User user,
             @PathVariable Long tokenId
     ) {
 
         Token token = tokenService.read(tokenId);
 
+        if(token == null) {
+            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Token not found");
+        }
+        
         // TODO add ACL checks        
         if (token.getUser() == null || user.getId().longValue() != token.getUser().getId().longValue()) {
             return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);

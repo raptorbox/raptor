@@ -29,7 +29,9 @@ import org.createnet.raptor.sdk.exception.AuthenticationFailedException;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public class AuthClient extends AbstractClient {
-
+    
+    protected final String MSG_LOGIN_ERROR = "Authentication failed, please check your credentials";
+    
     protected LoginState state;
 
     public AuthClient(Raptor container) {
@@ -108,11 +110,11 @@ public class AuthClient extends AbstractClient {
 
             return Device.getMapper().convertValue(node, LoginState.class);
         } catch (RequestException ex) {
-            
-            if(ex.getStatus() == 401) {
-                throw new AuthenticationFailedException("Authentication failed, please check your credentials", ex);
+
+            if (ex.getStatus() == 401) {
+                throw new AuthenticationFailedException(MSG_LOGIN_ERROR, ex);
             }
-            
+
             throw ex;
         }
     }
@@ -123,7 +125,21 @@ public class AuthClient extends AbstractClient {
      * @return
      */
     public LoginState login() {
-        LoginState body = login(getConfig().getUsername(), getConfig().getPassword());
+        LoginState body;
+        if (getConfig().hasCredentials()) {
+            body = login(getConfig().getUsername(), getConfig().getPassword());
+        } else {
+            try {
+                User user = getContainer().Admin.User.get();
+                body = new LoginState();
+                body.user = user;
+            } catch (RequestException ex) {
+                if (ex.getStatus() == 401) {
+                    throw new AuthenticationFailedException(MSG_LOGIN_ERROR, ex);
+                }
+                throw ex;
+            }
+        }
         state = body;
         return body;
     }
