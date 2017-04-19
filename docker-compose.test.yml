@@ -57,6 +57,21 @@ services:
     networks:
       - raptor_net
 
+  dbadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      MYSQL_ROOT_PASSWORD: raptor
+    restart: always
+    ports:
+     - 8081:80
+    volumes:
+     - ./data/phpmyadmin:/sessions
+    links:
+      - mariadb:db
+    networks:
+      - raptor_net
+
   couchbase:
     image: couchbase/server
     volumes:

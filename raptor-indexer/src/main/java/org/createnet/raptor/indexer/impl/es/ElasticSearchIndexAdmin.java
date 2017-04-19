@@ -93,9 +93,11 @@ public class ElasticSearchIndexAdmin {
     public void create(String name, JsonNode definition) {
 
         try {
-
+            
+            logger.debug("Creating index {}: {}", name, definition.toString());
+            
             CreateIndexRequestBuilder reqb = client.admin().indices().prepareCreate(name);
-
+            
             if (definition.has("settings")) {
                 reqb.setSettings(
                     Indexer.getObjectMapper().writeValueAsString(definition.get("settings"))
@@ -107,7 +109,7 @@ public class ElasticSearchIndexAdmin {
                 Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodes.next();
                 reqb.addMapping(entry.getKey(), Indexer.getObjectMapper().writeValueAsString(entry.getValue()));
             }
-            
+                
             reqb.get();
             
             

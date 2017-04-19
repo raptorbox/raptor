@@ -42,7 +42,6 @@ import org.hibernate.validator.constraints.NotEmpty;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "tokens")
@@ -50,6 +49,10 @@ public class Token implements Serializable {
 
     public static enum Type {
         LOGIN, DEFAULT
+    }
+
+    public static enum TokenType {
+        DEFAULT, JWT
     }
 
     @Id
@@ -92,15 +95,19 @@ public class Token implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private Type type = Type.DEFAULT;
-    
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "token_type")
+    private TokenType tokenType = TokenType.DEFAULT;
+
     public Token() {
     }
-    
+
     public Token(String name, String secret) {
         this.name = name;
         this.secret = secret;
     }
-    
+
     public Token(final Token token) {
         this.name = token.getName();
         this.secret = token.getSecret();
@@ -109,7 +116,7 @@ public class Token implements Serializable {
         this.enabled = token.getEnabled();
         this.user = token.getUser();
     }
-    
+
     public Long getId() {
         return id;
     }
@@ -157,7 +164,7 @@ public class Token implements Serializable {
     public void setSecret(String secret) {
         this.secret = secret;
     }
-    
+
     @JsonIgnore
     public Instant getExpiresInstant() {
         if (expires == null) {
@@ -176,9 +183,9 @@ public class Token implements Serializable {
         }
         this.expires = expires;
     }
-    
+
     public boolean isExpired() {
-        if(getExpiresInstant() == null) {
+        if (getExpiresInstant() == null) {
             return true;
         }
         return getExpiresInstant().isBefore(Instant.now());
@@ -207,7 +214,8 @@ public class Token implements Serializable {
     public void setType(Type type) {
         this.type = type;
     }
-
+    
+    @JsonIgnore
     public boolean isLoginToken() {
         return this.getType().equals(Type.LOGIN);
     }
@@ -218,6 +226,18 @@ public class Token implements Serializable {
 
     public void setDevice(Device device) {
         this.device = device;
+    }
+
+    public TokenType getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(TokenType tokenType) {
+        this.tokenType = tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = TokenType.valueOf(tokenType);
     }
 
 }
