@@ -53,6 +53,8 @@
         <unirest>1.4.9</unirest>
     
         <artemis>1.4.0</artemis>
+        <flyway>4.1.2</flyway>
+        <springfox>2.4.0</springfox>
     
     </properties>
 

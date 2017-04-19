@@ -7,11 +7,24 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./raptor-auth-service/src/main/resources/sql:/docker-entrypoint-initdb.d
+      # - ./raptor-auth-service/src/main/resources/sql:/docker-entrypoint-initdb.d
       - ./data/mariadb:/var/lib/mysql
     environment:
       MYSQL_USERNAME: root
       MYSQL_ROOT_PASSWORD: raptor
+
+  dbadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      MYSQL_ROOT_PASSWORD: raptor
+    restart: always
+    ports:
+     - 8081:80
+    volumes:
+     - ./data/phpmyadmin:/sessions
+    links:
+      - mariadb:db
 
   couchbase:
     container_name: couchbase
