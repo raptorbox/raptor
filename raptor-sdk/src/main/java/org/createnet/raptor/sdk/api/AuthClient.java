@@ -19,7 +19,9 @@ import org.createnet.raptor.sdk.AbstractClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.sdk.exception.AuthenticationFailedException;
 
 /**
  * Represent a Device data stream
@@ -78,7 +80,7 @@ public class AuthClient extends AbstractClient {
         }
         return state.token;
     }
-    
+
     /**
      * Return the current user
      *
@@ -100,11 +102,19 @@ public class AuthClient extends AbstractClient {
      * @return request response
      */
     public LoginState login(String username, String password) {
+        try {
+            JsonNode cred = Device.getMapper().valueToTree(new LoginCredentialsBody(username, password));
+            JsonNode node = getClient().post(HttpClient.Routes.LOGIN, cred);
 
-        JsonNode cred = Device.getMapper().valueToTree(new LoginCredentialsBody(username, password));
-        JsonNode node = getClient().post(HttpClient.Routes.LOGIN, cred);
-
-        return Device.getMapper().convertValue(node, LoginState.class);
+            return Device.getMapper().convertValue(node, LoginState.class);
+        } catch (RequestException ex) {
+            
+            if(ex.getStatus() == 401) {
+                throw new AuthenticationFailedException("Authentication failed, please check your credentials", ex);
+            }
+            
+            throw ex;
+        }
     }
 
     /**
@@ -117,9 +127,10 @@ public class AuthClient extends AbstractClient {
         state = body;
         return body;
     }
-    
+
     /**
      * Generate a new token with extend expiration time
+     *
      * @return
      */
     public LoginState refreshToken() {
@@ -128,7 +139,7 @@ public class AuthClient extends AbstractClient {
         state = body;
         return body;
     }
-    
+
     /**
      * Logout the user revoking the token
      */

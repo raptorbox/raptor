@@ -19,14 +19,18 @@ package org.createnet.raptor.sdk.exception;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class MissingAuthenticationException extends ClientException {
+public class AuthenticationFailedException extends ClientException {
 
-    public MissingAuthenticationException(String message) {
+    public AuthenticationFailedException(String message) {
         super(message);
     }
 
-    public MissingAuthenticationException(Throwable cause) {
+    public AuthenticationFailedException(Throwable cause) {
         super(cause);
     }
 
+    public AuthenticationFailedException(String message, Throwable cause) {
+        super(message, cause);
+    }
+    
 }

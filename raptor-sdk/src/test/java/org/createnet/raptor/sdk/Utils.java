@@ -62,7 +62,7 @@ public class Utils {
         Properties prop = Utils.loadSettings();
         if (instance == null) {
             instance = new Raptor(prop.getProperty("url"), prop.getProperty("username"), prop.getProperty("password"));
-            log.debug("Performing login");
+            log.debug("Performing login for {}", prop.getProperty("username"));
             instance.Auth.login();
             log.debug("Logged in");
         }
@@ -98,7 +98,10 @@ public class Utils {
     static public Raptor createNewInstance(String username, Set<Role> roles) {
         
         User user = getRaptor().Admin.User.create(username, username + Math.random(), username + "@test.raptor.local", roles);
+        
         assert user != null;
+        assert getRaptor().Auth.getToken() != null;
+        
         
         Raptor r = new Raptor(new Config(instance.getConfig().getUrl(), username, username));
         r.Auth.login();
