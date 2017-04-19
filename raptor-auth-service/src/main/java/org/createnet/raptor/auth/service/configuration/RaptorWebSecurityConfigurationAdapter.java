@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.service;
+package org.createnet.raptor.auth.service.configuration;
 
-import static org.createnet.raptor.auth.service.Application.passwordEncoder;
-import org.createnet.raptor.auth.service.jwt.JsonUsernamePasswordFilter;
-import org.createnet.raptor.auth.service.jwt.JwtAuthenticationEntryPoint;
-import org.createnet.raptor.auth.service.jwt.JwtAuthenticationTokenFilter;
+import org.createnet.raptor.auth.service.RaptorUserDetailsService;
+import org.createnet.raptor.auth.service.authentcation.JsonUsernamePasswordFilter;
+import org.createnet.raptor.auth.service.authentcation.RaptorAuthenticationEntryPoint;
+import org.createnet.raptor.auth.service.authentcation.RaptorAuthenticationTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -38,35 +38,33 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class JWTWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+public class RaptorWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
-    @Value("${jwt.route.authentication.path}")
+    @Value("${raptor.auth.route.authentication.path}")
     private String authenticationPath;
 
-    @Value("${jwt.route.authentication.refresh}")
+    @Value("${raptor.auth.route.authentication.refresh}")
     private String authenticationRefresh;
 
     @Autowired
-    private JwtAuthenticationEntryPoint unauthorizedHandler;
+    private RaptorAuthenticationEntryPoint unauthorizedHandler;
 
     @Autowired
     private RaptorUserDetailsService userDetailsService;
 
     @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
     public void configureAuthentication(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
         authenticationManagerBuilder
                 .userDetailsService(this.userDetailsService)
-                .passwordEncoder(passwordEncoder());
+                .passwordEncoder(passwordEncoder);
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return passwordEncoder;
-    }
-
-    @Bean
-    public JwtAuthenticationTokenFilter authenticationTokenFilterBean() throws Exception {
-        return new JwtAuthenticationTokenFilter();
+    public RaptorAuthenticationTokenFilter authenticationTokenFilterBean() throws Exception {
+        return new RaptorAuthenticationTokenFilter();
     }
 
     @Override

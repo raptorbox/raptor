@@ -15,10 +15,7 @@
  */
 package org.createnet.raptor.auth.service.services;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import org.createnet.raptor.auth.service.Application;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.repository.TokenRepository;
@@ -29,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -47,14 +45,17 @@ public class TokenService {
         }
     }
 
-    @Value("${jwt.secret}")
+    @Value("${raptor.auth.secret}")
     private String secret;
 
-    @Value("${jwt.expiration}")
+    @Value("${raptor.auth.expiration}")
     private Long expiration;
 
     @Autowired
-    private JwtTokenService tokenUtil;
+    private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private TokenUtilService tokenUtil;
 
     @Autowired
     private TokenRepository tokenRepository;
@@ -100,36 +101,40 @@ public class TokenService {
         return tokenRepository.findByToken(authToken);
     }
 
+    /**
+     * Create a login token
+     * @param user
+     * @return
+     */
     @Retryable(maxAttempts = 5, value = TokenHandlingException.class, backoff = @Backoff(delay = 200, multiplier = 4))
     public Token createLoginToken(User user) {
-        
+
         logger.debug("Creating login token for user:{}", user.getId());
 
         List<Token> tokens = tokenRepository.findByTypeAndUser(Token.Type.LOGIN, user);
         if (tokens.size() > 1) {
-            Token validtoken = null;
+//            Token validtoken = null;
             for (Token loginToken : tokens) {
-                if(loginToken.isValid() && validtoken == null) {
-                    validtoken = loginToken;
-                    continue;
-                }
-                if(!loginToken.isValid()) {
+//                if (loginToken.isValid() && validtoken == null) {
+//                    validtoken = loginToken;
+//                    continue;
+//                }
+                if (!loginToken.isValid()) {
                     logger.debug("Drop previous login token id:{} for user:{}", loginToken.getId(), user.getId());
                     try {
                         delete(loginToken);
-                    }
-                    catch(Exception ex) {
+                    } catch (Exception ex) {
                         logger.warn("Error deleting token id:{}, err:{}", loginToken.getId(), ex.getMessage());
                     }
                 }
             }
-            if(validtoken != null) {
-                logger.debug("Reused valid login token id:{} for user:{}", validtoken.getId(), user.getId());
-                return validtoken;
-            }
+//            if (validtoken != null) {
+//                logger.debug("Reused valid login token id:{} for user:{}", validtoken.getId(), user.getId());
+//                return validtoken;
+//            }
         }
 
-        Token token = tokenUtil.createToken("login", user, expiration, Application.passwordEncoder.encode(user.getPassword() + this.secret));
+        Token token = tokenUtil.createToken("login", user, expiration, passwordEncoder.encode(user.getPassword() + this.secret));
         token.setType(Token.Type.LOGIN);
 
         try {
@@ -148,19 +153,14 @@ public class TokenService {
 
     }
 
-    public Token refreshToken(Token token) {
-        tokenUtil.refreshToken(token);
-        return tokenRepository.save(token);
-    }
-
     public Token generateToken(Token token) {
-        tokenUtil.generateToken(token);
+        tokenUtil.generate(token);
         return token;
     }
 
     public boolean isValid(Token token, String secret) {
         // Cannot read the token claims?
-        if (tokenUtil.getClaims(token, secret) == null) {
+        if (!tokenUtil.validate(token, secret)) {
             return false;
         }
         return token.isValid();

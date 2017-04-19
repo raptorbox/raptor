@@ -46,9 +46,13 @@ public interface TokenRepository extends CrudRepository<Token, Long> {
     @Transactional
     @Override
     public void delete(Long id);
-
+    
     @Transactional
     @Override
     public <S extends Token> S save(S token);
 
+    @Transactional
+    @Override
+    public void delete(Iterable<? extends Token> tokens);
+    
 }

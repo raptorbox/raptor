@@ -56,7 +56,7 @@ public class UserService {
     }
 
     public User save(User user) {
-        saveRoles(user);
+        loadRoles(user);
         return userRepository.save(user);
     }
 
@@ -65,29 +65,23 @@ public class UserService {
     }
 
     /**
-     * Save new roles or load roles based on name to ensure roles are all
-     * managed
+     * Load roles to ensure they are managed by hibernate
      *
      * @param user
      */
-    protected void saveRoles(User user) {
-        user.setRoles(
-                user.getRoles().stream().map((r) -> {
-
-                    if (r.getId() != null) {
-                        return r;
-                    }
-
-                    Role r1 = roleRepository.findByName(r.getName());
-
-                    if (r1 != null) {
-                        return r1;
-                    }
-
-                    r = roleRepository.save(r);
-                    return r;
-                }).collect(Collectors.toSet())
-        );
+    protected void loadRoles(User user) {
+        Set<Role> dbRoles = new HashSet();
+        user.getRoles().forEach((Role r) -> {
+            Role dbrole = roleRepository.findByName(r.getName());
+            if (dbrole == null) {
+                // skip unknown
+                return;
+//                dbrole = roleRepository.save(r);                
+            }
+            dbRoles.add(dbrole);
+        });
+        
+        user.setRoles(dbRoles);        
     }
 
     public User update(String uuid, User rawUser) {
@@ -120,7 +114,7 @@ public class UserService {
         // TODO add Role repository
         if (!rawUser.getRoles().isEmpty()) {
             rawUser.getRoles().stream().forEach(r -> user.addRole(r));
-            saveRoles(user);
+            loadRoles(user);
         }
 
         if (rawUser.getPassword() != null && !rawUser.getPassword().isEmpty()) {
@@ -142,16 +136,7 @@ public class UserService {
             throw new PasswordMissingException();
         }
         
-        Set<Role> dbRoles = new HashSet();
-        rawUser.getRoles().forEach((Role r) -> {
-            Role dbrole = roleRepository.findByName(r.getName());
-            if (dbrole == null) {
-                dbrole = roleRepository.save(r);
-            }
-            dbRoles.add(dbrole);
-        });
-        
-        rawUser.setRoles(dbRoles);
+        loadRoles(rawUser);
         
         logger.debug("Create new user {}", rawUser.getUsername());
         return userRepository.save(rawUser);

@@ -42,27 +42,22 @@ logging:
     org.createnet.raptor.auth.service: DEBUG
     org.createnet.raptor: DEBUG
 
-jwt:
-  
-  header: Authorization
-  
-  # A secret used application wide for login token generation, keep it really secret
-  secret: Voi che vivete sicuri Nelle vostre tiepide case
-  
-  # TTL in seconds, 1800 = 30 minutes
-  expiration: 1800
-  
-  route:
-    authentication:
-      path: /login
-      refresh: /refresh
-
 raptor:
+
   admin:
     enabled: true
     username: admin
     password: admin
     email: admin@raptor.local
 
-
-
+  auth:
+    header: Authorization
+    headerPrefix: Bearer
+    # A secret used application wide for login token generation, keep it really secret
+    secret: Voi che vivete sicuri Nelle vostre tiepide case
+    # TTL in seconds, 1800 = 30 minutes
+    expiration: 1800
+    route:
+      authentication:
+        path: /login
+        refresh: /refresh

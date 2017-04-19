@@ -108,7 +108,7 @@ public class DeviceController {
     public ResponseEntity<?> checkPermission(
             @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
             @RequestBody AuthorizationRequest body,
-            @RequestHeader("${jwt.header}") String rawToken
+            @RequestHeader("${raptor.auth.header}") String rawToken
     ) {
 
         AuthorizationResponse response = new AuthorizationResponse();

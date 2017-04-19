@@ -50,8 +50,10 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -71,6 +73,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableRetry
 @EntityScan(basePackageClasses = org.createnet.raptor.models.auth.User.class)
+@EnableScheduling
 public class Application {
 
     static final public ObjectMapper mapper = new ObjectMapper();
@@ -98,12 +101,10 @@ public class Application {
         }
         return instance;
     }
-    
+
     static public void close() {
         getInstance().close();
     }
-    
-    static final public BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Value("${raptor.admin.enabled}")
     private Boolean defaultUserEnabled;
@@ -125,6 +126,11 @@ public class Application {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
 //  @Autowired
 //  private RoleRepository roleRepository;
@@ -162,7 +168,7 @@ public class Application {
         User adminUser = new User();
 
         adminUser.setUsername(defaultUserUsername);
-        adminUser.setPassword(passwordEncoder.encode(defaultUserPassword));
+        adminUser.setPassword(passwordEncoder().encode(defaultUserPassword));
         adminUser.setEmail(defaultUserEmail);
 
 //    adminUser.addRole(roleRepository.findByName(Role.Roles.ROLE_SUPER_ADMIN.name()));

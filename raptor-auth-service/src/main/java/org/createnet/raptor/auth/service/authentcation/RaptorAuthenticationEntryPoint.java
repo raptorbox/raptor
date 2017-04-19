@@ -1,4 +1,4 @@
-package org.createnet.raptor.auth.service.jwt;
+package org.createnet.raptor.auth.service.authentcation;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 @Component
-public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Serializable {
+public class RaptorAuthenticationEntryPoint implements AuthenticationEntryPoint, Serializable {
 
   /**
    * Invoked when the user credentials are missing

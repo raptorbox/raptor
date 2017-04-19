@@ -80,7 +80,7 @@ public class AuthenticationController {
 
     final private static Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
-    @Value("${jwt.header}")
+    @Value("${raptor.auth.header}")
     private String tokenHeader;
 
     @Autowired
@@ -92,7 +92,7 @@ public class AuthenticationController {
     @Autowired
     private TokenService tokenService;
 
-    @RequestMapping(value = "${jwt.route.authentication.path}", method = RequestMethod.POST)
+    @RequestMapping(value = "${raptor.auth.route.authentication.path}", method = RequestMethod.POST)
     @ApiOperation(
             value = "Login an user with the provided credentials",
             notes = "",
@@ -121,7 +121,7 @@ public class AuthenticationController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "${jwt.route.authentication.path}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "${raptor.auth.route.authentication.path}", method = RequestMethod.DELETE)
     @ApiOperation(
             value = "Logout an user invalidating the token used for login",
             notes = "",
@@ -150,7 +150,7 @@ public class AuthenticationController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "${jwt.route.authentication.refresh}", method = RequestMethod.GET)
+    @RequestMapping(value = "${raptor.auth.route.authentication.refresh}", method = RequestMethod.GET)
     @ApiOperation(
             value = "Refresh a login token",
             notes = "The authentication token, provided via `Authorization` header must still be valid.",
@@ -158,7 +158,7 @@ public class AuthenticationController {
             nickname = "refreshToken"
     )
     public ResponseEntity<?> refreshToken(
-            @RequestHeader("${jwt.header}") String reqToken,
+            @RequestHeader("${raptor.auth.header}") String reqToken,
             HttpServletRequest request,
             @AuthenticationPrincipal User currentUser
     ) {
@@ -175,7 +175,7 @@ public class AuthenticationController {
 
         logger.debug("Refreshing token id:{} for user {}", token.getId(), currentUser.getUuid());
 
-        Token refreshedToken = tokenService.refreshToken(token);
+        Token refreshedToken = tokenService.generateToken(token);
 
         logger.debug("Refreshed token id:{}", refreshedToken.getId());
         return ResponseEntity.ok(new LoginResponse(currentUser, refreshedToken.getToken()));

@@ -1,4 +1,4 @@
-package org.createnet.raptor.auth.service.jwt;
+package org.createnet.raptor.auth.service.authentcation;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,9 +9,9 @@ import org.createnet.raptor.models.auth.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-public final class JwtUserFactory {
+public final class RaptorUserFactory {
 
-  private JwtUserFactory() {
+  private RaptorUserFactory() {
   }
 
   public static User create(User user) {
