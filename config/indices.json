@@ -1,158 +1,154 @@
 {
-    "data": {
-        "mappings": {
-            "record": {
-                "mappings": {
-                    "record": {
-                        "_all": {
-                            "enabled": true
-                        },
-                        "dynamic": true,
-                        "dynamic_templates": [{
-                            "geo_point_location": {
-                                "path_match": "channels.location",
-                                "mapping": {
-                                    "store": "yes",
-                                    "type": "geo_point",
-                                    "ignore_malformed": true
-                                }
-                            }
-                        }, {
-                            "text": {
-                                "path_match": "channels.*",
-                                "match_mapping_type": "text",
-                                "mapping": {
-                                    "store": "yes",
-                                    "index": "not_analyzed",
-                                    "type": "text",
-                                    "date_detection": false,
-                                    "ignore_malformed": true
-                                }
-                            }
-                        }, {
-                            "double": {
-                                "path_match": "channels.*",
-                                "match_mapping_type": "double",
-                                "mapping": {
-                                    "store": "yes",
-                                    "index": "not_analyzed",
-                                    "type": "float",
-                                    "ignore_malformed": true
-                                }
-                            }
-                        }, {
-                            "float": {
-                                "path_match": "channels.*",
-                                "match_mapping_type": "float",
-                                "mapping": {
-                                    "store": "yes",
-                                    "index": "not_analyzed",
-                                    "type": "float",
-                                    "ignore_malformed": true
-                                }
-                            }
-                        }, {
-                            "integer": {
-                                "path_match": "channels.*",
-                                "match_mapping_type": "integer",
-                                "mapping": {
-                                    "store": "yes",
-                                    "index": "not_analyzed",
-                                    "type": "long",
-                                    "ignore_malformed": true
-                                }
-                            }
-                        }],
-                        "properties": {
-                            "id": {
-                                "type": "keyword"
-                            },
-                            "timestamp": {
-                                "type": "date",
-                                "index": "not_analyzed"
-                            },
-                            "userId": {
-                                "type": "keyword"
-                            },
-                            "channels": {
-                                "type": "object",
-                                "dynamic": true,
-                                "properties": {
-                                    "location": {
-                                        "type": "geo_point"
-                                    }
-                                }
-                            },
-                            "streamId": {
-                                "type": "text"
-                            },
-                            "settings": {
-                                "type": "object"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    },
-
-    "objects": {
-        "settings": {
-            "analysis": {
-                "analyzer": {
-                    "path_analyzer": {
-                        "tokenizer": "path_tokenizer"
-                    }
-                },
-                "tokenizer": {
-                    "path_tokenizer": {
-                        "type": "path_hierarchy",
-                        "delimiter": "/"
-                    }
-                }
-            }
+  "data": {
+    "mappings": {
+      "record": {
+        "_all": {
+          "enabled": true
         },
-        "mappings": {
-            "device": {
-                "_all": {
-                    "enabled": false
-                },
-                "properties": {
-                    "id": {
-                        "type": "keyword"
-                    },
-                    "userId": {
-                        "type": "keyword"
-                    },
-                    "parentId": {
-                        "type": "keyword"
-                    },
-                    "path": {
-                        "type": "text",
-                        "analyzer": "path_analyzer"
-                    },
-                    "createdAt": {
-                        "type": "date",
-                        "index": "not_analyzed"
-                    },
-                    "public": {
-                        "type": "boolean"
-                    },
-                    "name": {
-                        "type": "text"
-                    },
-                    "description": {
-                        "type": "text"
-                    },
-                    "customFields": {
-                        "type": "object"
-                    },
-                    "settings": {
-                        "type": "object"
-                    }
-                }
+        "dynamic_templates": [{
+          "geo_point_location": {
+            "path_match": "channels.location",
+            "mapping": {
+              "store": "yes",
+              "type": "geo_point",
+              "ignore_malformed": true
             }
+          }
+        }, {
+          "text": {
+            "path_match": "channels.*",
+            "match_mapping_type": "text",
+            "mapping": {
+              "store": "yes",
+              "index": "not_analyzed",
+              "type": "text",
+              "date_detection": false,
+              "ignore_malformed": true
+            }
+          }
+        }, {
+          "double": {
+            "path_match": "channels.*",
+            "match_mapping_type": "double",
+            "mapping": {
+              "store": "yes",
+              "index": "not_analyzed",
+              "type": "float",
+              "ignore_malformed": true
+            }
+          }
+        }, {
+          "float": {
+            "path_match": "channels.*",
+            "match_mapping_type": "float",
+            "mapping": {
+              "store": "yes",
+              "index": "not_analyzed",
+              "type": "float",
+              "ignore_malformed": true
+            }
+          }
+        }, {
+          "integer": {
+            "path_match": "channels.*",
+            "match_mapping_type": "integer",
+            "mapping": {
+              "store": "yes",
+              "index": "not_analyzed",
+              "type": "long",
+              "ignore_malformed": true
+            }
+          }
+        }],
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "timestamp": {
+            "type": "date",
+            "index": "not_analyzed"
+          },
+          "userId": {
+            "type": "keyword"
+          },
+          "channels": {
+            "type": "object",
+            "dynamic": true,
+            "properties": {
+              "location": {
+                "type": "geo_point"
+              }
+            }
+          },
+          "streamId": {
+            "type": "text"
+          },
+          "settings": {
+            "type": "object"
+          }
         }
+      }
     }
+
+  },
+
+  "objects": {
+    "settings": {
+      "analysis": {
+        "analyzer": {
+          "path_analyzer": {
+            "tokenizer": "path_tokenizer"
+          }
+        },
+        "tokenizer": {
+          "path_tokenizer": {
+            "type": "path_hierarchy",
+            "delimiter": "/"
+          }
+        }
+      }
+    },
+    "mappings": {
+      "device": {
+        "_all": {
+          "enabled": false
+        },
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "userId": {
+            "type": "keyword"
+          },
+          "parentId": {
+            "type": "keyword"
+          },
+          "path": {
+            "type": "text",
+            "analyzer": "path_analyzer"
+          },
+          "createdAt": {
+            "type": "date",
+            "index": "not_analyzed"
+          },
+          "public": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "text"
+          },
+          "description": {
+            "type": "text"
+          },
+          "customFields": {
+            "type": "object"
+          },
+          "settings": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
 
 }
