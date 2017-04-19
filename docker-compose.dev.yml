@@ -15,7 +15,7 @@ services:
 
   dbadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
+    container_name: dbadmin
     environment:
       MYSQL_ROOT_PASSWORD: raptor
     restart: always
