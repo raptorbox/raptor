@@ -63,7 +63,6 @@ public class TokenService {
     @Autowired
     private TokenRepository tokenRepository;
     
-    
     /**
      * Extract the raw token from the request header
      * @param rawToken

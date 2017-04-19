@@ -103,7 +103,7 @@ public class DeviceController {
             nickname = "checkPermission"
     )
     public ResponseEntity<?> checkPermission(
-            @AuthenticationPrincipal RaptorUserDetailsService.RaptorUserDetails currentUser,
+            @AuthenticationPrincipal User currentUser,
             @RequestBody AuthorizationRequest body,
             @RequestHeader("${raptor.auth.header}") String rawToken
     ) {
@@ -125,7 +125,7 @@ public class DeviceController {
                 break;
             case Permission:
 
-                User user = (User) currentUser;
+                User user = currentUser;
                 if (body.userId != null) {
                     user = userService.getByUuid(body.userId);
                 }
@@ -160,7 +160,9 @@ public class DeviceController {
                 if (response.result) {
                     // check token level ACL
                     Token token = tokenService.read(tokenService.extractToken(rawToken));
-                    response.result = aclTokenService.check(token, user, permission);
+                    if(!aclTokenService.list(token, user).isEmpty()) {
+                        response.result = aclTokenService.check(token, user, permission);
+                    }
                 }
                 
                 logger.debug("Device permission check result: [operation:{}, deviceId:{}, result:{}]", body.getOperation(), body.objectId, response.result);

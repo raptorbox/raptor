@@ -46,9 +46,6 @@ public class AclTokenService implements AclServiceInterface<Token> {
     @Autowired
     private AclManagerService aclManagerService;
 
-    protected Permission[] defaultPermissions = new Permission[]{
-        RaptorPermission.ADMINISTRATION,};
-
     public void add(Token token, User user, Permission permission) {
         aclManagerService.addPermission(Token.class, token.getId(), new UserSid(user), permission);
     }
@@ -80,38 +77,8 @@ public class AclTokenService implements AclServiceInterface<Token> {
         return aclManagerService.isPermissionGranted(Token.class, token.getId(), new UserSid(user), permission);
     }
 
-    @Retryable(maxAttempts = 3, value = AclManagerService.AclManagerException.class, backoff = @Backoff(delay = 500, multiplier = 3))
     @Override
     public void register(Token token) {
-
-        User owner = token.getUser();
-        List<Permission> permissions = list(token, owner);
-        Sid sid = new UserSid(owner);
-
-        logger.debug("Found {} permissions for {}", permissions.size(), owner.getUuid());
-
-        if (permissions.isEmpty()) {
-
-            logger.debug("Set default permission");
-            List<Permission> newPerms = Arrays.stream(defaultPermissions).collect(Collectors.toList());
-
-            if (owner.getId().equals(token.getUser().getId())) {
-                newPerms.add(RaptorPermission.ADMINISTRATION);
-            }
-
-            try {
-                aclManagerService.addPermissions(Token.class, token.getId(), sid, newPerms);
-            } catch (AclManagerService.AclManagerException ex) {
-                logger.warn("Failed to store default permission for {} ({}): {}", token.getId(), sid, ex.getMessage());
-                throw ex;
-            }
-
-            permissions.addAll(newPerms);
-        }
-
-        String perms = String.join(", ", RaptorPermission.toLabel(permissions));
-        logger.debug("Permission set for device {} to {} - {}", token.getName(), token.getUser().getUuid(), perms);
-
     }
 
     @Override
