@@ -267,7 +267,7 @@ public class EventListenerTest {
         r.Auth.login();
 
         Token t = r.Admin.Token.create(new Token("test", "test"));
-        r.Admin.Token.Permission.set(t, PermissionUtil.asList(Permissions.subscribe, Permissions.pull));
+        r.Admin.Token.Permission.set(t, PermissionUtil.asList(Permissions.pull));
 
         Device dev = r.Device.create(newDevice("dev"));
         Utils.waitFor(1500);
@@ -298,7 +298,7 @@ public class EventListenerTest {
         r.Auth.login();
 
         Token t = r.Admin.Token.create(new Token("test", "test"));
-        r.Admin.Token.Permission.set(t, PermissionUtil.asList(Permissions.subscribe, Permissions.execute));
+        r.Admin.Token.Permission.set(t, PermissionUtil.asList(Permissions.execute));
 
         Device dev = r.Device.create(newDevice("dev"));
         Utils.waitFor(1500);

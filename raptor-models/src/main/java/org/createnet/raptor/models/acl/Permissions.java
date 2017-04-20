@@ -23,7 +23,10 @@ public enum Permissions {
 
     admin,
     list,
+    
+    @Deprecated
     subscribe,
+    
     // object level permissions
     read, update, create, delete,
     // data level permissions

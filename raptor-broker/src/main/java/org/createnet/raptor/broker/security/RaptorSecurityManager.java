@@ -202,10 +202,10 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
                     return false;
                 }
 
-                // ensure user has the `subscribe` flag
-                if (!isAllowed(user, obj, Permissions.subscribe)) {
-                    return false;
-                }
+//                // ensure user has the `subscribe` flag
+//                if (!isAllowed(user, obj, Permissions.subscribe)) {
+//                    return false;
+//                }
 
                 // <object>/events -> requires `admin`
                 String subtopic = topicTokens[soidIndex + 1];
