@@ -199,7 +199,7 @@ public class EventListenerTest {
 
         Token t = r.Admin.Token.create(new Token("test", "test"));
 
-        r.Admin.Token.Permission.set(t, PermissionUtil.asList(Permissions.subscribe));
+        r.Admin.Token.Permission.set(t, PermissionUtil.asList(Permissions.admin));
 
         Device dev = r.Device.create(newDevice("dev"));
         Utils.waitFor(1500);
