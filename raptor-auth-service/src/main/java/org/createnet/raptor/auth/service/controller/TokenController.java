@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.ArrayList;
 import java.util.List;
-import org.createnet.raptor.auth.service.objects.JsonErrorResponse;
+import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.services.TokenService;

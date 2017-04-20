@@ -28,6 +28,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -107,6 +108,10 @@ public class TokenService {
         tokenRepository.delete(t2.getId());
     }
 
+    public void delete(List<Token> list) {
+        tokenRepository.delete(list);
+    }    
+    
     /**
      * Save a token to database
      * @param token
@@ -137,35 +142,11 @@ public class TokenService {
     public Token createLoginToken(User user) {
 
         logger.debug("Creating login token for user:{}", user.getId());
-
-//        List<Token> tokens = tokenRepository.findByTypeAndUser(Token.Type.LOGIN, user);
-//        if (tokens.size() > 1) {
-//            Token validtoken = null;
-//            for (Token loginToken : tokens) {
-//                if (loginToken.isValid() && validtoken == null) {
-//                    validtoken = loginToken;
-//                    continue;
-//                }
-//                if (!loginToken.isValid()) {
-//                    logger.debug("Drop previous login token id:{} for user:{}", loginToken.getId(), user.getId());
-//                    try {
-//                        delete(loginToken);
-//                    } catch (Exception ex) {
-//                        logger.warn("Error deleting token id:{}, err:{}", loginToken.getId(), ex.getMessage());
-//                    }
-//                }
-//            }
-//            if (validtoken != null) {
-//                logger.debug("Reused valid login token id:{} for user:{}", validtoken.getId(), user.getId());
-//                return validtoken;
-//            }
-//        }
-
         Token token = tokenUtil.createToken("login", user, expiration, passwordEncoder.encode(user.getPassword() + this.secret));
         token.setType(Token.Type.LOGIN);
 
         try {
-            save(token);
+            token = save(token);
             logger.debug("New token created id:{} for user:{}", token.getId(), user.getId());
             return token;
         } catch (DataIntegrityViolationException e) {
@@ -215,5 +196,10 @@ public class TokenService {
         }
         return isValid(token, token.getSecret());
     }
-
+    
+    @Transactional
+    public Iterable<Token> findByType(Token.Type type) {
+        return tokenRepository.findByType(type);
+    }
+    
 }

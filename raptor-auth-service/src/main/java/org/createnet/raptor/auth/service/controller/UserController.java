@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
-import org.createnet.raptor.auth.service.objects.JsonErrorResponse;
+import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

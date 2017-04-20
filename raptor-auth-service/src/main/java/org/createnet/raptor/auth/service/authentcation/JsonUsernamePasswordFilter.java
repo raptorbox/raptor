@@ -36,7 +36,6 @@ public class JsonUsernamePasswordFilter extends UsernamePasswordAuthenticationFi
   public final static ObjectMapper jacksonObjectMapper = new ObjectMapper();
 
   protected class LoginForm {
-
     public String username;
     public String password;
   }

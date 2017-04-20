@@ -17,7 +17,7 @@ package org.createnet.raptor.auth.service.token;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.createnet.raptor.auth.service.repository.TokenRepository;
+import org.createnet.raptor.auth.service.services.TokenService;
 import org.createnet.raptor.models.auth.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ public class TokenScheduledTask {
     private Logger log = LoggerFactory.getLogger(TokenScheduledTask.class);
     
     @Autowired
-    private TokenRepository tokenRepository;
+    private TokenService tokenService;
 
     @Scheduled(fixedRate = (1000*60*5)) // every 5min
     public void removeInvalidToken() {
@@ -43,7 +43,7 @@ public class TokenScheduledTask {
         log.debug("Checking for invalid login tokens");
         
         List<Token> remove = new ArrayList();
-        Iterable<Token> list = tokenRepository.findByType(Token.Type.LOGIN);
+        Iterable<Token> list = tokenService.findByType(Token.Type.LOGIN);
         for (Token token : list) {
             if (!token.isValid()) {
                 remove.add(token);
@@ -53,7 +53,7 @@ public class TokenScheduledTask {
         if(!remove.isEmpty()) {
             try {
                 log.debug("Removing {} tokens", remove.size());
-                tokenRepository.delete(remove);
+                tokenService.delete(remove);
                 log.debug("Done");
             }
             catch(Exception ex) {

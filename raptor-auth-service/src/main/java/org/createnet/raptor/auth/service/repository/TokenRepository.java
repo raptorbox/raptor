@@ -30,29 +30,29 @@ import org.springframework.transaction.annotation.Transactional;
 public interface TokenRepository extends CrudRepository<Token, Long> {
 
     Token findByToken(String token);
-
     List<Token> findByUserId(String userId);
     List<Token> findByUserUuid(String userUuid);
     List<Token> findByType(Token.Type type);
     List<Token> findByTypeAndUser(Token.Type type, User user);
 
     @Override
+    @Transactional
     Token findOne(Long id);
 
-    @Transactional
     @Override
+    @Transactional
     public void delete(Token token);
 
-    @Transactional
     @Override
+    @Transactional
     public void delete(Long id);
     
-    @Transactional
     @Override
+    @Transactional
     public <S extends Token> S save(S token);
 
-    @Transactional
     @Override
+    @Transactional
     public void delete(Iterable<? extends Token> tokens);
     
 }

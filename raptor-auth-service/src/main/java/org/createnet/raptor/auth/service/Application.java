@@ -28,7 +28,6 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.Banner;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -36,7 +35,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -66,13 +64,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @Profile("default")
 @SpringBootApplication
 @WebAppConfiguration
-@EnableAutoConfiguration
-@ComponentScan
-@Configuration
 @EnableCaching
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableRetry
 @EntityScan(basePackageClasses = org.createnet.raptor.models.auth.User.class)
+@ComponentScan(basePackages = "org.createnet.raptor.auth.service")
 @EnableScheduling
 public class Application {
 
@@ -95,7 +91,6 @@ public class Application {
                     .logStartupInfo(false)
                     .headless(true)
                     .web(true)
-                    //            .initializers(new YamlFileApplicationContextInitializer())
                     .application()
                     .run(args);
         }

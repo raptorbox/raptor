@@ -15,11 +15,8 @@
  */
 package org.createnet.raptor.auth.service.services;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.createnet.raptor.auth.service.exception.PasswordMissingException;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.auth.User;
@@ -30,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -158,6 +156,16 @@ public class UserService {
         }
 
         return userRepository.findByUsername(rawUser.getUsername()) != null;
+    }
+
+    @Transactional
+    public User findByEmail(String username) {
+        return userRepository.findByEmail(username);
+    }
+    
+    @Transactional
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
 }

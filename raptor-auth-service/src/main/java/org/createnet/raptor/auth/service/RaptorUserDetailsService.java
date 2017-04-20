@@ -16,9 +16,9 @@
 package org.createnet.raptor.auth.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.createnet.raptor.auth.service.repository.UserRepository;
 import org.createnet.raptor.models.auth.User;
 import java.util.Collection;
+import org.createnet.raptor.auth.service.services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,15 +35,15 @@ import org.springframework.stereotype.Service;
 public class RaptorUserDetailsService implements UserDetailsService {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         
-        User user = userRepository.findByEmail(username);
+        User user = userService.findByEmail(username);
 
         if (user == null) {
-            user = userRepository.findByUsername(username);
+            user = userService.findByUsername(username);
         }
 
         if (user == null) {

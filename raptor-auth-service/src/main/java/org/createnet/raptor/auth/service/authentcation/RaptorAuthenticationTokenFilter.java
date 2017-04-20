@@ -41,7 +41,6 @@ public class RaptorAuthenticationTokenFilter extends GenericFilterBean {
         String authToken = httpRequest.getHeader(this.tokenHeader);
 
         if (authToken != null && !authToken.isEmpty()) {
-
             
             authToken = tokenService.extractToken(authToken);
             Token token = tokenService.read(authToken);

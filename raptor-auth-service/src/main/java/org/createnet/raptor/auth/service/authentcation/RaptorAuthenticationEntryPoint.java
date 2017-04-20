@@ -12,13 +12,15 @@ import java.io.Serializable;
 @Component
 public class RaptorAuthenticationEntryPoint implements AuthenticationEntryPoint, Serializable {
 
-  /**
-   * Invoked when the user credentials are missing
-   */
-  @Override
-  public void commence(HttpServletRequest request,
-          HttpServletResponse response,
-          AuthenticationException authException) throws IOException {
-    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-  }
+    /**
+     * Invoked when the user credentials are missing
+     *
+     * @param request
+     * @param authException
+     * @throws java.io.IOException
+     */
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+    }
 }

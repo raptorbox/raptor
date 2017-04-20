@@ -25,7 +25,7 @@ import org.createnet.raptor.auth.entity.AuthorizationResponse;
 import org.createnet.raptor.auth.entity.SyncRequest;
 import org.createnet.raptor.auth.service.RaptorUserDetailsService;
 import org.createnet.raptor.auth.service.acl.RaptorPermission;
-import org.createnet.raptor.auth.service.objects.JsonErrorResponse;
+import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.auth.Device;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.services.AclDeviceService;
