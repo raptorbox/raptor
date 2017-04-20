@@ -19,7 +19,6 @@ import org.createnet.raptor.sdk.AbstractClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.events.callback.DataCallback;
-import org.createnet.raptor.sdk.events.MessageEventListener;
 import org.createnet.raptor.sdk.events.callback.StreamEventCallback;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
@@ -27,7 +26,6 @@ import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.indexer.query.impl.es.DataQuery;
 import org.createnet.raptor.models.payload.DataPayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
-import org.createnet.raptor.models.payload.StreamPayload;
 
 /**
  * Represent a Device data stream

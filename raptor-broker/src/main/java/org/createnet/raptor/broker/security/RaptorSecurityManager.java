@@ -183,6 +183,11 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         }
 
         logger.debug("Validating topic {}", address);
+
+        if(address.substring(0, 1).equals(".")) {
+            address = address.substring(1);
+        }
+        
         String[] topicTokens = address.split("\\.");
         if (topicTokens.length >= 2) {
 

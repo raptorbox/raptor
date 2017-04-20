@@ -42,10 +42,10 @@ public class ActionClient extends AbstractClient {
     /**
      * Subscribe to a data stream
      *
-     * @param stream
+     * @param action
      * @param ev
      */
-    public void subscribe(Action action, ActionEventCallback ev) {
+    protected void subscribe(Action action, ActionEventCallback ev) {
         getEmitter().subscribe(action, ev);
     }
 
