@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.auth.authorization.impl;
 import org.createnet.raptor.auth.authorization.AbstractAuthorization;
+import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.objects.Device;
 
 /**
@@ -27,7 +28,7 @@ public class AllowAllAuthorization extends AbstractAuthorization {
   static final public String defaultUserId = "default-user";
 
   @Override
-  public boolean isAuthorized(String accessToken, Device obj, Permission op) {
+  public boolean isAuthorized(String accessToken, Device obj, Permissions op) {
     return !accessToken.isEmpty();
   }
 

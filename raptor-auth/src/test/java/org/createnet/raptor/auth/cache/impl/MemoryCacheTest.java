@@ -19,6 +19,7 @@ import java.util.Map;
 import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
+import org.createnet.raptor.models.acl.Permissions;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -68,7 +69,7 @@ public class MemoryCacheTest {
   
     String userId = "user";
     String objectId = "obj";
-    Authorization.Permission perm = Authorization.Permission.Create;
+    Permissions perm = Permissions.create;
     
     MemoryCache.CachedItem.defaultTTL = 100;
     

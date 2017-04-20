@@ -29,6 +29,7 @@ import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.broker.configuration.BrokerConfiguration;
 import org.createnet.raptor.config.exception.ConfigurationException;
 import org.createnet.raptor.db.Storage;
+import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.service.tools.AuthService;
@@ -199,7 +200,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
                 logger.debug("Check access permission of user {} to object {}", user.getUserId(), objectId);
 
                 // @NOTE: this was the subscribe permission but has been migrted to Pull to simplify the flow
-                boolean allowed = auth.isAllowed(user.getAccessToken(), obj, Authorization.Permission.Pull);
+                boolean allowed = auth.isAllowed(user.getAccessToken(), obj, Permissions.pull);
                 return allowed;
 
             } catch (Authorization.AuthorizationException | Storage.StorageException | RaptorComponent.ParserException | ConfigurationException ex) {

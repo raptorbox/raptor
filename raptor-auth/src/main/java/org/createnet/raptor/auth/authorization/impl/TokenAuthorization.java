@@ -24,6 +24,7 @@ import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.AuthHttpClient;
 import org.createnet.raptor.auth.authorization.AbstractAuthorization;
 import org.createnet.raptor.auth.entity.AuthorizationRequest;
+import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Device;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public class TokenAuthorization extends AbstractAuthorization {
     final private AuthHttpClient client = new AuthHttpClient();
 
     @Override
-    public boolean isAuthorized(String accessToken, Device obj, Permission op) {
+    public boolean isAuthorized(String accessToken, Device obj, Permissions op) {
 
         try {
 

@@ -19,6 +19,7 @@ import java.util.Map;
 import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
+import org.createnet.raptor.models.acl.Permissions;
 
 /**
  *
@@ -57,8 +58,8 @@ public interface AuthCache {
   public void setup();
   public void clear();
   
-  public Boolean get(String userId, String id, Authorization.Permission op) throws PermissionCacheException;
-  public void set(String userId, String id, Authorization.Permission op, boolean result) throws PermissionCacheException;
+  public Boolean get(String userId, String id, Permissions op) throws PermissionCacheException;
+  public void set(String userId, String id, Permissions op, boolean result) throws PermissionCacheException;
   
   public Authentication.UserInfo get(String accessToken) throws PermissionCacheException;
   public void set(Authentication.UserInfo user) throws PermissionCacheException;

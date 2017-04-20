@@ -16,6 +16,7 @@
 package org.createnet.raptor.auth.authorization;
 
 import org.createnet.raptor.auth.AuthConfiguration;
+import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.objects.Device;
 
 /**
@@ -34,25 +35,8 @@ public interface Authorization {
       super(m, t);
     }
   }
-  
-  
-  //TODO: merge with Permissions in raptor-models
-  public enum Permission {
-    
-    List,
-    // Device definition
-    Read, Create, Update, Delete,
-    // Stream data
-    Pull,
-    Push,
-    Subscribe,
-    // Actuation
-    Execute
-
-  }
 
   public void initialize(AuthConfiguration configuration);
-
-  public boolean isAuthorized(String accessToken, Device obj, Permission op) throws AuthorizationException;
+  public boolean isAuthorized(String accessToken, Device obj, Permissions op) throws AuthorizationException;
 
 }

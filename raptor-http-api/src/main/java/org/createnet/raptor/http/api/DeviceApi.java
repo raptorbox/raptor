@@ -38,6 +38,7 @@ import org.createnet.raptor.models.objects.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
+import org.createnet.raptor.models.acl.Permissions;
 
 /**
  *
@@ -82,7 +83,7 @@ public class DeviceApi extends AbstractApi {
             @QueryParam("offset") Integer offset
     ) {
 
-        if (!auth.isAllowed(Authorization.Permission.List)) {
+        if (!auth.isAllowed(Permissions.list)) {
             throw new ForbiddenException("Cannot list objects");
         }
 
@@ -100,7 +101,7 @@ public class DeviceApi extends AbstractApi {
     @ApiResponses(value = {})
     public Device create(Device obj) {
 
-        if (!auth.isAllowed(Authorization.Permission.Create)) {
+        if (!auth.isAllowed(Permissions.create)) {
             throw new ForbiddenException("Cannot create object");
         }
 
@@ -137,7 +138,7 @@ public class DeviceApi extends AbstractApi {
 
         obj.id = objectId;
 
-        if (!auth.isAllowed(storedObj, Authorization.Permission.Update)) {
+        if (!auth.isAllowed(storedObj, Permissions.update)) {
             throw new ForbiddenException("Cannot update object");
         }
 
@@ -159,7 +160,7 @@ public class DeviceApi extends AbstractApi {
 
         Device obj = objectManager.load(id);
 
-        if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
+        if (!auth.isAllowed(obj, Permissions.read)) {
             throw new ForbiddenException("Cannot read object");
         }
 
@@ -178,7 +179,7 @@ public class DeviceApi extends AbstractApi {
 
         Device obj = objectManager.load(id);
 
-        if (!auth.isAllowed(obj, Authorization.Permission.Delete)) {
+        if (!auth.isAllowed(obj, Permissions.delete)) {
             throw new ForbiddenException("Cannot delete object");
         }
 
@@ -207,7 +208,7 @@ public class DeviceApi extends AbstractApi {
     @ApiResponses(value = {})
     public List<Device> search(ObjectQuery query) {
 
-        if (!auth.isAllowed(Authorization.Permission.List)) {
+        if (!auth.isAllowed(Permissions.list)) {
             throw new ForbiddenException("Cannot search for objects");
         }
 

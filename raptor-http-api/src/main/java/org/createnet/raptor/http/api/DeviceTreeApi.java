@@ -34,6 +34,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
+import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.objects.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +81,7 @@ public class DeviceTreeApi extends AbstractApi {
 
         Device obj = objectManager.load(id);
 
-        if (!auth.isAllowed(obj, Authorization.Permission.Read)) {
+        if (!auth.isAllowed(obj, Permissions.read)) {
             throw new ForbiddenException("Cannot read object");
         }
 
@@ -101,7 +102,7 @@ public class DeviceTreeApi extends AbstractApi {
 
         Device parentObject = objectManager.load(id);
         
-        if (!auth.isAllowed(parentObject, Authorization.Permission.Read)) {
+        if (!auth.isAllowed(parentObject, Permissions.read)) {
             throw new ForbiddenException("Cannot load parent object");
         }
         
@@ -109,7 +110,7 @@ public class DeviceTreeApi extends AbstractApi {
 
             Device child = objectManager.load(cid);
 
-            if (!auth.isAllowed(child, Authorization.Permission.Update)) {
+            if (!auth.isAllowed(child, Permissions.update)) {
                 throw new ForbiddenException("Cannot update object");
             }
 
@@ -145,11 +146,11 @@ public class DeviceTreeApi extends AbstractApi {
         Device parentObject = objectManager.load(id);
         Device childObject = objectManager.load(childrenId);
 
-        if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
+        if (!auth.isAllowed(parentObject, Permissions.update)) {
             throw new ForbiddenException("Cannot update object");
         }
 
-        if (!auth.isAllowed(childObject, Authorization.Permission.Update)) {
+        if (!auth.isAllowed(childObject, Permissions.update)) {
             throw new ForbiddenException("Cannot update object");
         }
 
@@ -179,11 +180,11 @@ public class DeviceTreeApi extends AbstractApi {
         Device parentObject = objectManager.load(id);
         Device childObject = objectManager.load(childrenId);
 
-        if (!auth.isAllowed(parentObject, Authorization.Permission.Update)) {
+        if (!auth.isAllowed(parentObject, Permissions.update)) {
             throw new ForbiddenException("Cannot update parent object");
         }
 
-        if (!auth.isAllowed(childObject, Authorization.Permission.Update)) {
+        if (!auth.isAllowed(childObject, Permissions.update)) {
             throw new ForbiddenException("Cannot update child object");
         }
 

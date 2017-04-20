@@ -26,6 +26,7 @@ import org.createnet.raptor.auth.cache.AuthCache;
 import org.createnet.raptor.auth.cache.impl.EHCache;
 import org.createnet.raptor.auth.cache.impl.MemoryCache;
 import org.createnet.raptor.auth.cache.impl.NoCache;
+import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.objects.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,7 +92,7 @@ public class AuthProvider implements Authorization, Authentication {
     }
 
     @Override
-    public boolean isAuthorized(String accessToken, Device obj, Permission op) {
+    public boolean isAuthorized(String accessToken, Device obj, Permissions op) {
 
         try {
 

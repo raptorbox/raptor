@@ -18,6 +18,7 @@ package org.createnet.raptor.auth.cache.impl;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.auth.cache.AbstractCache;
+import org.createnet.raptor.models.acl.Permissions;
 
 /**
  *
@@ -26,12 +27,12 @@ import org.createnet.raptor.auth.cache.AbstractCache;
 public class NoCache extends AbstractCache {
 
   @Override
-  public Boolean get(String userId, String id, Authorization.Permission op) {
+  public Boolean get(String userId, String id, Permissions op) {
     return null;
   }
 
   @Override
-  public void set(String userId, String id, Authorization.Permission op, boolean result) {
+  public void set(String userId, String id, Permissions op, boolean result) {
   }
 
   

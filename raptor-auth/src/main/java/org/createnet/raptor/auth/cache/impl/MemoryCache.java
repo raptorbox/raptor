@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import org.createnet.raptor.auth.authentication.Authentication;
 import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.auth.cache.AbstractCache;
+import org.createnet.raptor.models.acl.Permissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +98,7 @@ public class MemoryCache extends AbstractCache {
   }
   
   @Override
-  public Boolean get(String userId, String id, Authorization.Permission op) {
+  public Boolean get(String userId, String id, Permissions op) {
     if(id == null) id = "";
     String key = userId + id + op.toString();
     CachedItem<Boolean> cache = getPermissions().get(key);
@@ -110,7 +111,7 @@ public class MemoryCache extends AbstractCache {
   }
 
   @Override
-  public void set(String userId, String id, Authorization.Permission op, boolean result) {
+  public void set(String userId, String id, Permissions op, boolean result) {
     String key = userId + id + op.toString();
     getPermissions().put(key, new CachedItem(result));
   }
