@@ -26,8 +26,8 @@
         <module>raptor-auth-service</module>
         
         <module>raptor-sdk</module>
-        <module>raptor-cli</module>            
-        
+        <module>raptor-cli</module>
+        <module>raptor-profile</module>
     </modules>
   
     <properties>
@@ -49,13 +49,16 @@
         <paho>1.1.1</paho>
         <ehcache>3.1.3</ehcache>
         <swagger>1.5.10</swagger>
-        <spring-boot>1.4.0.RELEASE</spring-boot>
+        <spring-boot>1.5.0.RELEASE</spring-boot>
         <unirest>1.4.9</unirest>
     
         <artemis>2.0.0</artemis>
         <flyway>4.1.2</flyway>
         <springfox>2.4.0</springfox>
-    
+        
+        <spring.data>1.13.1.RELEASE</spring.data>
+        <spring.data.mongodb>1.10.1.RELEASE</spring.data.mongodb>
+        
     </properties>
 
 

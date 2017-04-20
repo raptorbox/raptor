@@ -56,7 +56,7 @@ public class Device {
   private Device parent;
 
   @JsonIgnore
-  @OneToMany(mappedBy = "device", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "device", fetch = FetchType.LAZY)
   @Cascade(value = {CascadeType.REMOVE, CascadeType.SAVE_UPDATE})
   final private List<Token> tokens = new ArrayList();
 

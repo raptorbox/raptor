@@ -77,7 +77,7 @@ public class User implements Serializable {
     final protected List<Device> devices = new ArrayList();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @Cascade(value = {CascadeType.REMOVE, CascadeType.SAVE_UPDATE})
     final protected List<Token> tokens = new ArrayList();
 

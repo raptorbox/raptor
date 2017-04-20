@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.sdk.AbstractClient;
@@ -49,9 +48,12 @@ public class UserClient extends AbstractClient {
         protected String password;
         
     }
-
+    
+    final public PreferencesClient Preferences;
+    
     public UserClient(Raptor container) {
         super(container);
+        Preferences = new PreferencesClient(container);
     }
 
     final static Logger logger = LoggerFactory.getLogger(UserClient.class);

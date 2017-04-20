@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.models.data.Record;
 import org.createnet.raptor.models.data.types.instances.GeoPoint;
 import org.createnet.raptor.models.objects.RaptorComponent;
-import org.elasticsearch.common.geo.GeoUtils;
 
 /**
  *
@@ -76,9 +75,9 @@ public class GeoPointRecord extends Record<GeoPoint> {
                     }
                 }
 
-                if (node.isObject() && node.has(GeoUtils.LATITUDE) && node.has(GeoUtils.LONGITUDE)) {
+                if (node.isObject() && node.has(GeoPoint.LATITUDE) && node.has(GeoPoint.LONGITUDE)) {
 
-                    GeoPoint point = new GeoPoint(node.get(GeoUtils.LATITUDE).asDouble(), node.get(GeoUtils.LONGITUDE).asDouble());
+                    GeoPoint point = new GeoPoint(node.get(GeoPoint.LATITUDE).asDouble(), node.get(GeoPoint.LONGITUDE).asDouble());
 
                     if (validateCoords(point)) {
                         return point;

@@ -122,6 +122,11 @@ public class HttpClient extends AbstractClient {
         final static public String TOKEN_DELETE = TOKEN_UPDATE;
         final static public String TOKEN_GET = TOKEN_CREATE + "?uuid=%s";
         
+        final static public String PREFERENCES_GET_ALL = "/profile/%s";
+        final static public String PREFERENCES_GET = PREFERENCES_GET_ALL + "/%s";
+        final static public String PREFERENCES_SET = PREFERENCES_GET;
+        final static public String PREFERENCES_DELETE = PREFERENCES_GET;
+        
         final static public String TOKEN_PERMISSION_GET = "/auth/permission/token/%s";
         final static public String TOKEN_PERMISSION_BY_USER = TOKEN_PERMISSION_GET + "/%s";
         final static public String TOKEN_PERMISSION_SET = TOKEN_PERMISSION_GET;

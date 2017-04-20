@@ -73,3 +73,12 @@ services:
     image: mobz/elasticsearch-head:5
     ports:
       - 9100:9100
+
+  mongo:
+    image: mongo:3
+    container_name: mongo
+    volumes:
+      - ./data/mongodb:/data/db
+    ports:
+      - 27017:27017
+    command: --smallfiles # --rest --auth

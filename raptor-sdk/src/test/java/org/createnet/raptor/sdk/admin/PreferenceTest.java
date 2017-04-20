@@ -16,6 +16,10 @@
 
 package org.createnet.raptor.sdk.admin;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.math.BigDecimal;
+import java.util.Map;
 import java.util.UUID;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.auth.User;
@@ -34,12 +38,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public class UserTest {
+public class PreferenceTest {
     
-    final Logger log = LoggerFactory.getLogger(UserTest.class);
+    final Logger log = LoggerFactory.getLogger(PreferenceTest.class);
     
-    public static Raptor raptor;
-
     @BeforeClass
     public static void setUpClass() {
     }
@@ -48,120 +50,30 @@ public class UserTest {
     public static void tearDownClass() {
     }
 
-
     @Before
     public void setUp() {
-        raptor = Utils.getRaptor();
     }
 
     @After
     public void tearDown() {
     }
-   
-    private String rndUsername() {
-        int rnd = ((int)(Math.random() * 100000000)) + (int)System.currentTimeMillis();
-        return (rnd % 2 == 0 ? "test_fil_" : "user_ippo_") + rnd; 
-    }
-    
-    @Test
-    public void createUser()  {
-        
-        String username = rndUsername();
-        log.debug("Create user {}", username);
-        User user = raptor.Admin.User.create(username, "pass_" + rndUsername(), "test@test.raptor.local");
-        
-        assertEquals(username, user.getUsername());
-        assertNotNull(user.getUuid());
-    }
-    
-    @Test
-    public void createAnotherUser()  {
-        
-        String username = rndUsername();
-        log.debug("Create user {}", username);
-        
-        User user = new User();
-
-        user.setUsername(username);
-        user.setPassword("secret_" + rndUsername());
-        user.setEmail("foobar+" + username + "@test.raptor.local");
-        user.setId(123456L);
-        
-        String uuid = UUID.randomUUID().toString();
-        user.setUuid(uuid);
-        
-        User newUser = raptor.Admin.User.create(user);
-        
-        assertEquals(username, newUser.getUsername());
-        
-        assertNull(newUser.getId());
-        
-        assertNotNull(newUser.getUuid());
-        assertNotEquals(uuid, newUser.getUuid());
-
-    }
 
     @Test
-    public void updateUser()  {
+    public void setPreference()  {
         
-        String email = "test@test.raptor.local";
-        String username = rndUsername();
-        log.debug("Create user {}", username);
-        User user = raptor.Admin.User.create(username, "pass_" + rndUsername(), email);
+        Raptor r = Utils.createNewInstance();
         
-        user.setEmail("newemail@example.com");
-        user.setEnabled(false);
+        ObjectNode json = r.Admin.User.Preferences.newObjectNode();
         
-        User updatedUser = raptor.Admin.User.update(user);
+        json.put("test", "foo");
+        json.put("size", 1000L);
+        json.put("valid", true);
         
-        assertNotEquals(email, updatedUser.getEmail());
-        assertEquals(false, updatedUser.getEnabled());
+        JsonNode response = r.Admin.User.Preferences.set("test1", json);
         
-    }
-    
-    
-    @Test
-    public void changeDuplicatedUsername()  {
+        assertEquals(response.get("size").asLong(), json.get("size").asLong());
         
-        String username1 = rndUsername();
-        log.debug("Create user1 {}", username1);
-        User user1 = raptor.Admin.User.create(username1, "pass_" + rndUsername(), "test@test.raptor.local");
-        
-        String username2 = rndUsername();
-        log.debug("Create user2 {}", username2);
-        User user2 = raptor.Admin.User.create(username2, "pass_" + rndUsername(), "test@test.raptor.local");
-        
-        user1.setUsername(username2);
-        
-        try {
-            User updatedUser1 = raptor.Admin.User.update(user1);
-        }
-        catch(RequestException ex) {
-            assertEquals(400, ex.status);
-            return;
-        }
-
-        throw new RuntimeException("Duplicated username allowed?");
-    }
-    
-    
-    @Test
-    public void deleteUser()  {
-        
-        String username1 = rndUsername();
-        log.debug("Create user1 {}", username1);
-        User user1 = raptor.Admin.User.create(username1, "pass_" + rndUsername(), "test@test.raptor.local");
-        
-        raptor.Admin.User.delete(user1);
-        
-        try {
-            raptor.Admin.User.get(user1.getUuid());
-            throw new RuntimeException("User should not exists");
-        } catch(RequestException ex) {
-            assertEquals(404, ex.status);
-        }
         
     }
-    
     
 }

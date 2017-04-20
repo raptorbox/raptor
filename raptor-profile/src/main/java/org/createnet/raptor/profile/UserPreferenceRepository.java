@@ -13,38 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.createnet.raptor.profile;
 
-package org.createnet.raptor.models.data.types.instances;
+import java.util.List;
+import org.createnet.raptor.models.profile.UserPreference;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class GeoPoint {
-    
-    static public final String LATITUDE = "lat";
-    static public final String LONGITUDE = "lon";
-    
-    final private double lat;
-    final private double lon;
+public interface UserPreferenceRepository extends MongoRepository<UserPreference, String> {
 
-    public GeoPoint(double lat, double lon) {
-        this.lat = lat;
-        this.lon = lon;
-    }
+    public List<UserPreference> findByUserId(String userId);
+    public UserPreference findOneByUserIdAndName(String userId, String name);
 
-    public double getLat() {
-        return lat;
-    }
-
-    public double getLon() {
-        return lon;
-    }
-
-    @Override
-    public String toString() {
-        return lat + "," + lon;
-    }
-    
-    
 }

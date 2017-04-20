@@ -13,38 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.createnet.raptor.models.data.types.instances;
+package org.createnet.raptor.models.response;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class GeoPoint {
-    
-    static public final String LATITUDE = "lat";
-    static public final String LONGITUDE = "lon";
-    
-    final private double lat;
-    final private double lon;
+public class JsonError {    
+    public final int code;
+    public final String message;
 
-    public GeoPoint(double lat, double lon) {
-        this.lat = lat;
-        this.lon = lon;
-    }
-
-    public double getLat() {
-        return lat;
-    }
-
-    public double getLon() {
-        return lon;
-    }
-
-    @Override
-    public String toString() {
-        return lat + "," + lon;
-    }
-    
-    
+    public JsonError(int code, String message) {
+        this.code = code;
+        this.message = message;
+    }   
 }

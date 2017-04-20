@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 CREATE-NET
+ * Copyright 2017 FBK/CREATE-NET
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.service.objects;
+package org.createnet.raptor.models.response;
 
+import org.createnet.raptor.models.response.JsonError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -24,22 +25,15 @@ import org.springframework.http.ResponseEntity;
  */
 public class JsonErrorResponse {
     
-    public final int code;
-    public final String message;
-
-    public JsonErrorResponse(int code, String message) {
-        this.code = code;
-        this.message = message;
-    }
-    
     public static ResponseEntity<?> entity(HttpStatus code) {
         return entity(code, null);
     }
+
     public static ResponseEntity<?> entity(HttpStatus code, String message) {
         if(message == null || message.isEmpty()) {
             message = code.getReasonPhrase();
         }
-        return ResponseEntity.status(code).body(new JsonErrorResponse(code.value(), message));
+        return ResponseEntity.status(code).body(new JsonError(code.value(), message));
     }
     
 }

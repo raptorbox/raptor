@@ -15,17 +15,11 @@
  */
 package org.createnet.raptor.sdk.admin;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import org.createnet.raptor.models.auth.Role;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.api.HttpClient;
-import org.createnet.raptor.models.auth.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,122 +28,46 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class UserClient extends AbstractClient {
+public class PreferencesClient extends AbstractClient {
 
-    private class JsonUser extends User {
-
-        public JsonUser(User user) {
-            super(user);
-        }
-
-        public JsonUser() {
-        }
-
-        @JsonProperty(access = JsonProperty.Access.READ_WRITE)
-        protected String password;
-        
-    }
-
-    public UserClient(Raptor container) {
+    public PreferencesClient(Raptor container) {
         super(container);
     }
 
-    final static Logger logger = LoggerFactory.getLogger(UserClient.class);
+    final static Logger logger = LoggerFactory.getLogger(PreferencesClient.class);
 
     /**
-     * Get an user
+     * Set profile data
      *
-     * @param userUuid
+     * @param name
+     * @param data
      * @return
      */
-    public User get(String userUuid) {
-        JsonNode node = getClient().get(String.format(HttpClient.Routes.USER_GET, userUuid));
-        return getMapper().convertValue(node, User.class);
+    public JsonNode set(String name, Object data) {
+        return getClient().put(String.format(HttpClient.Routes.PREFERENCES_SET, getContainer().Auth.getUser().getUuid(), name), toJsonNode(data));
     }
-
+    
     /**
-     * Get user by token
+     * Get profile data
+     *
+     * @param name
+     * @return
+     */
+    public JsonNode get(String name) {
+        return getClient().get(String.format(HttpClient.Routes.PREFERENCES_GET, getContainer().Auth.getUser().getUuid(), name));
+    }
+    
+    /**
+     * Get all profile data
      *
      * @return
      */
-    public User get() {
-        JsonNode node = getClient().get(HttpClient.Routes.USER_GET_ME);
-        return getMapper().convertValue(node, User.class);
+    public JsonNode get() {
+        return getClient().get(String.format(HttpClient.Routes.PREFERENCES_GET_ALL, getContainer().Auth.getUser().getUuid()));
     }
 
-    /**
-     * Create a new user
-     *
-     * @param user
-     * @return
-     */
-    public User create(User user) {
-        JsonUser jsonUser = new JsonUser(user);
-        JsonNode node = getClient().post(HttpClient.Routes.USER_CREATE, toJsonNode(jsonUser));
-        return getMapper().convertValue(node, User.class);
-    }
-
-    /**
-     * Update a user
-     *
-     * @param user
-     * @return
-     */
-    public User update(User user) {
-        assert user.getUuid() != null;
-        JsonUser jsonUser = new JsonUser(user);
-        JsonNode node = getClient().put(String.format(HttpClient.Routes.USER_UPDATE, user.getUuid()), toJsonNode(jsonUser));
-        return getMapper().convertValue(node, User.class);
-    }
-
-    /**
-     * Delete a user
-     *
-     * @param user
-     * @return
-     */
-    public void delete(User user) {
-        assert user.getUuid() != null;
-        delete(user.getUuid());
-    }
-
-    /**
-     * Delete a user
-     *
-     * @param userUuid
-     */
-    public void delete(String userUuid) {
-        getClient().delete(String.format(HttpClient.Routes.USER_DELETE, userUuid));
-    }
-
-    /**
-     * Create a new user setting the minimum required parameters
-     *
-     * @param username
-     * @param password
-     * @param email
-     * @return
-     */
-    public User create(String username, String password, String email) {
-        return create(username, password, email, new HashSet(Arrays.asList(new Role(Role.Roles.admin))));
-    }
-
-    /**
-     * Create a new user setting the minimum required parameters
-     *
-     * @param username
-     * @param password
-     * @param email
-     * @param roles
-     * @return
-     */
-    public User create(String username, String password, String email, Set<Role> roles) {
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setEmail(email);
-        user.setRoles(roles);
-        return create(user);
+    public ObjectNode newObjectNode() {
+        return getMapper().createObjectNode();
     }
 
 }
