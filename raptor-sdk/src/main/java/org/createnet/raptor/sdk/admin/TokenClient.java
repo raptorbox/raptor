@@ -84,7 +84,8 @@ public class TokenClient extends AbstractClient {
     public Token create(Token token) {
         JsonToken jsonToken = new JsonToken(token);
         JsonNode node = getClient().post(HttpClient.Routes.TOKEN_CREATE, toJsonNode(jsonToken));
-        return getMapper().convertValue(node, Token.class);
+        Token t1 = getMapper().convertValue(node, Token.class);
+        return mergeToken(token, t1);
     }
 
     /**
@@ -93,9 +94,19 @@ public class TokenClient extends AbstractClient {
      * @return
      */
     public Token update(Token token) {
+
         JsonToken jsonToken = new JsonToken(token);
         JsonNode node = getClient().put(String.format(HttpClient.Routes.TOKEN_UPDATE, token.getId()), toJsonNode(jsonToken));
-        return getMapper().convertValue(node, Token.class);
+        Token t1 = getMapper().convertValue(node, Token.class);
+        
+        return mergeToken(token, t1);
     }
-
+    
+    private Token mergeToken(Token token, Token t1) {
+        token.merge(t1);
+        token.setToken(t1.getToken());
+        token.setId(t1.getId());        
+        return token;
+    }
+    
 }

@@ -81,6 +81,11 @@ public class MqttClientHandler extends AbstractClient {
                     connOpts.setPassword(getContainer().getConfig().getPassword().toCharArray());
                     logger.debug("Using user credentials");
                 }
+                else {
+                    connOpts.setUserName("*"); // username  len < 3 trigger token authentication
+                    connOpts.setPassword(getContainer().getConfig().getToken().toCharArray());
+                    logger.debug("Using user token");
+                }
 
                 mqttClient.connect(connOpts);
 
@@ -112,6 +117,13 @@ public class MqttClientHandler extends AbstractClient {
             topics.add(topic);
 
         } catch (MqttException ex) {
+            
+            // Disconnection may be caused by lack of permissions
+            int code = ex.getReasonCode();
+            if(code == MqttException.REASON_CODE_CONNECTION_LOST) {
+                logger.warn("Client disconnected, try checking user / token permission to access the topic {}", topic);
+            }
+            
             throw new ClientException(ex);
         }
     }

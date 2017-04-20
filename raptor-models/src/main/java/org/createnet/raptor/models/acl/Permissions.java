@@ -20,14 +20,15 @@ package org.createnet.raptor.models.acl;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public enum Permissions {
-    read,
-    update,
-    create,
-    delete,
+
     admin,
-    push,
-    pull,
-    subscribe,
-    execute,
     list,
+    subscribe,
+    // object level permissions
+    read, update, create, delete,
+    // data level permissions
+    push, pull,
+    // action level permissions
+    execute,
+
 }

@@ -105,7 +105,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         Authentication.UserInfo user = null;
 
         // 1. if no username, try with apiKey authentication
-        if (username == null || username.isEmpty()) {
+        if (username == null || username.isEmpty() || username.length() < 3) {
             user = getUser(password);
         } else {
 
@@ -140,7 +140,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     @Override
     public boolean validateUserAndRole(String username, String password, Set<Role> roles, CheckType checkType, String address, RemotingConnection connection) {
 
-        logger.debug("Authenticate user {} witg roles {} on topic/address {}", username, roles, address);
+        logger.debug("Authenticate user {} with roles {} on topic/address {}", username, roles, address);
 
         Authentication.UserInfo user = authenticate(username, password);
 
@@ -197,11 +197,35 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
                     return false;
                 }
 
-                logger.debug("Check access permission of user {} to object {}", user.getUserId(), objectId);
+                // ensure user has the `subscribe` flag
+                if (!isAllowed(user, obj, Permissions.subscribe)) {
+                    return false;
+                }
 
-                // @NOTE: this was the subscribe permission but has been migrted to Pull to simplify the flow
-                boolean allowed = auth.isAllowed(user.getAccessToken(), obj, Permissions.pull);
-                return allowed;
+                // <object>/events -> requires `admin`
+                String subtopic = topicTokens[soidIndex + 1];
+                if (subtopic != null && subtopic.equals("events")) {
+                    if (!isAllowed(user, obj, Permissions.admin)) {
+                        return false;
+                    }
+                }
+
+                // <object>/streams/<stream> -> requires `pull`
+                if (subtopic != null && subtopic.equals("streams")) {
+                    if (!isAllowed(user, obj, Permissions.pull)) {
+                        return false;
+                    }
+                }
+
+                // <object>/actions/<action> -> requires `execute`
+                if (subtopic != null && subtopic.equals("actions")) {
+                    if (!isAllowed(user, obj, Permissions.execute)) {
+                        return false;
+                    }
+                }
+
+
+                return true;
 
             } catch (Authorization.AuthorizationException | Storage.StorageException | RaptorComponent.ParserException | ConfigurationException ex) {
                 logger.error("Failed to subscribe: {}", ex.getMessage(), ex);
@@ -210,6 +234,12 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         }
 
         return false;
+    }
+
+    protected boolean isAllowed(Authentication.UserInfo user, Device device, Permissions permission) {
+        boolean allowed = auth.isAllowed(user.getAccessToken(), device, permission);
+        logger.debug("User {} {} allowed to `{}` to {}", user.getUserId(), allowed ? "" : "NOT ", permission.name(), device.id);
+        return allowed;
     }
 
     @Override

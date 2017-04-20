@@ -17,6 +17,9 @@ package org.createnet.raptor.sdk.events;
 
 import java.time.Instant;
 import java.util.Date;
+import org.createnet.raptor.models.acl.PermissionUtil;
+import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.sdk.events.callback.ActionCallback;
@@ -58,7 +61,6 @@ public class EventListenerTest {
 
     @Before
     public void setUp() {
-
         raptor = Utils.getRaptor();
     }
 
@@ -110,7 +112,7 @@ public class EventListenerTest {
 
     @Test
     public void watchDeviceEvents() {
-    
+
         log.debug("watch data events");
 
         final Device dev = Utils.createDevice(newDevice("dev"));
@@ -124,12 +126,12 @@ public class EventListenerTest {
         });
         dev.addStream("test2", "foo", "boolean");
         dev.addAction("sleep");
-        
+
         raptor.Device.update(dev);
         Utils.waitFor(1000);
 
     }
-    
+
     @Test
     public void watchDeviceDataEvents() {
 
@@ -160,10 +162,10 @@ public class EventListenerTest {
 
         pushData(dev);
         pushData(dev1);
-        
+
         Utils.waitFor(1000);
     }
-    
+
     @Test
     public void watchDeviceActionEvents() {
 
@@ -183,7 +185,77 @@ public class EventListenerTest {
 
         Action action = dev.getAction("switch");
         raptor.Action.invoke(action, "on");
+
+        Utils.waitFor(1000);
+    }
+
+    @Test
+    public void subscribeWithToken() {
+
+        log.debug("subscribe with permission token");
+
+        Raptor r = Utils.createNewInstance();
+        r.Auth.login();
+
+        Token t = r.Admin.Token.create(new Token("test", "test"));
+
+        r.Admin.Token.Permission.set(t, PermissionUtil.asList(Permissions.subscribe));
+
+        Device dev = r.Device.create(newDevice("dev"));
+        Utils.waitFor(1500);
+
+        Raptor r2 = new Raptor(Utils.loadSettings().getProperty("url"), t);
+
+        r2.Device.subscribe(dev, new ActionCallback() {
+            @Override
+            public void callback(Action action, ActionPayload payload) {
+                log.debug("dev: Data received  for {}: {}", payload.actionId, payload.data);
+                Assert.assertTrue(action.name.equals("switch"));
+                Assert.assertTrue(payload.data.equals("on"));
+            }
+        });
+
+        Action action = dev.getAction("switch");
+        raptor.Action.invoke(action, "on");
+
+        Utils.waitFor(1000);
+    }
+
+    @Test
+    public void checkFailingSubscribePermission() {
+
+        log.debug("subscribe with failing permissions");
+
+        Raptor r = Utils.createNewInstance();
+        r.Auth.login();
+
+        Token t = r.Admin.Token.create(new Token("test", "test"));
+        r.Admin.Token.Permission.set(t, PermissionUtil.asList(Permissions.subscribe));
+
+        Device dev = r.Device.create(newDevice("dev"));
+        Utils.waitFor(1500);
+
+        Raptor r2 = new Raptor(Utils.loadSettings().getProperty("url"), t);
         
+        try {
+            r2.Device.subscribe(dev, new DataCallback() {
+                @Override
+                public void callback(Stream stream, RecordSet record) {
+                    log.debug("Got data: {}", record.toJson());
+                }
+            });
+        }
+        catch(Exception e) {
+            log.debug("Exception: {}", e.getMessage());
+        }
+        
+        Stream stream = dev.getStream("test");
+
+        RecordSet record = new RecordSet(stream);
+        record.addRecord(RecordSet.createRecord(stream, "string", "test1"));
+        
+        raptor.Stream.push(record);
+
         Utils.waitFor(1000);
     }
 

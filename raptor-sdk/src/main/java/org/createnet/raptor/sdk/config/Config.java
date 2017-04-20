@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.sdk.config;
 
+import org.createnet.raptor.models.auth.Token;
+
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
@@ -36,6 +38,13 @@ public class Config {
     public Config(String url, String token) {
         this.url = url;
         this.token = token;
+        this.username = null;
+        this.password = null;
+    }
+
+    public Config(String url, Token token) {
+        this.url = url;
+        this.token = token.getToken();
         this.username = null;
         this.password = null;
     }

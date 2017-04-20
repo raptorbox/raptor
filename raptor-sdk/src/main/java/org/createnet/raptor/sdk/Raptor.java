@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.sdk;
 
+import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.sdk.admin.AdminClient;
 import org.createnet.raptor.sdk.config.Config;
 import org.createnet.raptor.sdk.api.ActionClient;
@@ -61,6 +62,16 @@ public class Raptor implements IClient, RaptorComponent {
      * @param token
      */
     public Raptor(String url, String token) {
+        this(new Config(url, token));
+    }
+
+    /**
+     * Instantiate the client
+     *
+     * @param url
+     * @param token
+     */
+    public Raptor(String url, Token token) {
         this(new Config(url, token));
     }
 

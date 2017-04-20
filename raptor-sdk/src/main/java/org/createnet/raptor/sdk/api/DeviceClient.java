@@ -35,6 +35,7 @@ import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.payload.ActionPayload;
 import org.createnet.raptor.models.payload.StreamPayload;
+import org.createnet.raptor.sdk.admin.DevicePermissionClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +46,11 @@ import org.slf4j.LoggerFactory;
  */
 public class DeviceClient extends AbstractClient {
 
+    final public DevicePermissionClient Permission;
+    
     public DeviceClient(Raptor container) {
         super(container);
+        Permission = new DevicePermissionClient(container);
     }
 
     final static Logger logger = LoggerFactory.getLogger(DeviceClient.class);
