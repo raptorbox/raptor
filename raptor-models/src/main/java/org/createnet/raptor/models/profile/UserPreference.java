@@ -16,7 +16,11 @@
 package org.createnet.raptor.models.profile;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.io.IOException;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.createnet.raptor.models.objects.Device;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -27,17 +31,20 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 public class UserPreference {
     
+    public static class Value {
+    }
+    
     @Id
     protected String id = UUID.randomUUID().toString();
     
     protected String userId;
     protected String name;
-    protected JsonNode value;
+    protected String value;
 
     public UserPreference() {
     }
     
-    public UserPreference(String userId, String name, JsonNode value) {
+    public UserPreference(String userId, String name, String value) {
         this.userId = userId;
         this.name = name;
         this.value = value;
@@ -61,11 +68,11 @@ public class UserPreference {
         generateId();
     }
 
-    public JsonNode getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(JsonNode value) {
+    public void setValue(String value) {
         this.value = value;
     }
 

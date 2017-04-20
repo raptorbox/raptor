@@ -14,7 +14,7 @@ spring:
 #    password: admin
     
 server:
-  contextPath: /
+  contextPath: /profile
   port: 8070
   address: 127.0.0.1
   error:

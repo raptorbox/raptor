@@ -57,14 +57,13 @@ public class PreferenceTest {
     @After
     public void tearDown() {
     }
-
+    
     @Test
     public void setPreference()  {
         
         Raptor r = Utils.createNewInstance();
         
         ObjectNode json = r.Admin.User.Preferences.newObjectNode();
-        
         json.put("test", "foo");
         json.put("size", 1000L);
         json.put("valid", true);
@@ -72,8 +71,49 @@ public class PreferenceTest {
         JsonNode response = r.Admin.User.Preferences.set("test1", json);
         
         assertEquals(response.get("size").asLong(), json.get("size").asLong());
+
+    }
+
+    @Test
+    public void getPreference()  {
         
+        Raptor r = Utils.createNewInstance();
         
+        ObjectNode json = r.Admin.User.Preferences.newObjectNode();
+        json.put("test", "foo");
+        json.put("size", 1000L);
+        json.put("valid", true);
+        
+        r.Admin.User.Preferences.set("test1", json);
+        
+        JsonNode response = r.Admin.User.Preferences.get("test1");
+        
+        assertEquals(response.get("size").asLong(), json.get("size").asLong());
+
+    }
+
+    @Test
+    public void getAllPreferences()  {
+        
+        Raptor r = Utils.createNewInstance();
+        
+        ObjectNode json = r.Admin.User.Preferences.newObjectNode();
+        json.put("test", "foo");
+        json.put("size", 1000L);
+        json.put("valid", true);
+        
+        r.Admin.User.Preferences.set("test1", json);       
+        r.Admin.User.Preferences.set("test2", json);
+
+        json.put("valid", false);        
+        r.Admin.User.Preferences.set("test3", json);
+        
+        JsonNode response = r.Admin.User.Preferences.get();
+        
+        assertTrue(response.isArray());
+        assertEquals(3, response.size());
+        
+        assertFalse(response.get(2).get("valid").asBoolean());
     }
     
 }

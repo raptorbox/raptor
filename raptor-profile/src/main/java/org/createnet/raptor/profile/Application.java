@@ -38,6 +38,11 @@ public class Application {
         instance = SpringApplication.run(Application.class, args);
     }
 
+    public static void close() {
+        if(instance != null) {
+            instance.close();
+        }
+    }
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {

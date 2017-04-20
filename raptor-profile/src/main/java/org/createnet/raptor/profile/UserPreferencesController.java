@@ -17,9 +17,12 @@ package org.createnet.raptor.profile;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.annotations.ApiOperation;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.profile.UserPreference;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,10 +41,10 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class UserPreferencesController {
-    
+
     @Autowired
     private UserPreferencesService preferences;
-    
+
     @RequestMapping(method = RequestMethod.GET, value = "/{userId}")
     @ApiOperation(
             value = "Return all the user preferences",
@@ -54,7 +57,7 @@ public class UserPreferencesController {
             @PathVariable("userId") String userId
     ) {
         List<UserPreference> prefs = preferences.list(userId);
-        return ResponseEntity.ok(prefs.stream().map(p -> p.getValue()).collect(Collectors.toList()));
+        return ResponseEntity.ok(prefs.stream().map(p -> toJSON(p.getValue())).collect(Collectors.toList()));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{userId}/{name}")
@@ -70,10 +73,10 @@ public class UserPreferencesController {
             @PathVariable("name") String name
     ) {
         UserPreference pref = preferences.get(userId, name);
-        if(pref == null) {
+        if (pref == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Not found");
         }
-        return ResponseEntity.ok(pref.getValue());
+        return ResponseEntity.ok(toJSON(pref.getValue()));
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{userId}/{name}")
@@ -89,9 +92,9 @@ public class UserPreferencesController {
             @PathVariable("name") String name,
             @RequestBody JsonNode body
     ) {
-        UserPreference pref = new UserPreference(userId, name, body);
+        UserPreference pref = new UserPreference(userId, name, body.toString());
         preferences.save(pref);
-        return ResponseEntity.ok(pref.getValue());
+        return ResponseEntity.ok(toJSON(pref.getValue()));
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/{userId}/{name}")
@@ -106,14 +109,23 @@ public class UserPreferencesController {
             @PathVariable("userId") String userId,
             @PathVariable("name") String name
     ) {
-        
-        UserPreference pref = preferences.get(userId, name);        
-        if(pref == null) {
+
+        UserPreference pref = preferences.get(userId, name);
+        if (pref == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Not found");
-        }        
-        
+        }
+
         preferences.delete(pref);
         return ResponseEntity.accepted().build();
+    }
+
+    private JsonNode toJSON(String value) {
+            try {
+                return Device.getMapper().readTree(value);
+            } catch (IOException ex) {
+                
+            }
+            return null;
     }
 
 }

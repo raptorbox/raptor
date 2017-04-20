@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.models.response;
 
-import org.createnet.raptor.models.response.JsonError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
