@@ -14,4 +14,10 @@ cd raptor-auth-service
 mvn package -DskipTests=true
 cd ..
 
+
+cd raptor-profile
+mvn package -DskipTests=true
+cd ..
+
+
 docker-compose build

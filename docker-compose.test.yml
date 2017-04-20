@@ -43,6 +43,18 @@ services:
     networks:
       - raptor_net
 
+  profile:
+    build: ./raptor-profile
+    container_name: raptor-profile
+    ports:
+      - 8070:8070
+    volumes:
+      - ./config:/etc/raptor
+    depends_on:
+      - mongo
+    networks:
+      - raptor_net
+
   mariadb:
     image: mariadb:latest
     container_name: mariadb
@@ -95,13 +107,22 @@ services:
     networks:
       - raptor_net
 
-  # proxy:
-  #   build: ./docker/proxy
-  #   ports:
-  #     - 80:80
-  #   depends_on:
-  #     - api
-  #     - auth
-  #     - broker
-  #   networks:
-  #     - raptor_net
+  mongo:
+    image: mongo:3
+    container_name: mongo
+    volumes:
+      - ./data/mongodb:/data/db
+    ports:
+      - 27017:27017
+    command: --smallfiles # --rest --auth
+
+# proxy:
+#   build: ./docker/proxy
+#   ports:
+#     - 80:80
+#   depends_on:
+#     - api
+#     - auth
+#     - broker
+#   networks:
+#     - raptor_net

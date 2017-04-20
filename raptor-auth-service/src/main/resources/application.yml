@@ -1,6 +1,4 @@
-
-
-spring:
+spring: 
   devtools:
     restart:
       enabled: true
@@ -8,7 +6,7 @@ spring:
       additional-paths: target
 
   profiles: default
-    
+
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/raptor?createDatabaseIfNotExist=true
     username: root
@@ -17,7 +15,7 @@ spring:
     testWhileIdle: true
     validationQuery: SELECT 1
     lastInsertQuery: SELECT LAST_INSERT_ID()
-    
+
   jpa:
     show-sql: false
     database-platform: org.hibernate.dialect.MySQL5Dialect
@@ -27,7 +25,7 @@ spring:
     # Hibernate ddl auto (none, validate, update, create, create-drop)
     hibernate:
       #fix lazyloading with session closed see http://stackoverflow.com/questions/27299235/spring-mvc-hibernate-could-not-initialize-proxy-no-session
-      enable_lazy_load_no_trans: true 
+      enable_lazy_load_no_trans: true
       ddl-auto: validate
       naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
       dialect: org.hibernate.dialect.MySQL5Dialect

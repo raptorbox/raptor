@@ -7,6 +7,11 @@ docker build . -t raptorbox/auth
 docker push raptorbox/auth
 
 cd ..
+cd raptor-profile
+docker build . -t raptorbox/profile
+docker push raptorbox/profile
+
+cd ..
 cd raptor-http-api
 docker build . -t raptorbox/api
 docker push raptorbox/api
