@@ -31,20 +31,24 @@ import java.util.Objects;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * @author Luca Capra <luca.capra@gmail.com>
  */
 @JsonDeserialize(using = DeviceDeserializer.class)
+@Document
 public class Device extends DeviceContainer {
 
     Logger logger = LoggerFactory.getLogger(Device.class);
 
     @JsonIgnore
     private boolean isNew = true;
-
-    public String userId;
+    
+    @Id
     public String id = Device.generateUUID();
+    public String userId;
     public String parentId;
     public String path;
 

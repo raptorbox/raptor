@@ -7,3 +7,6 @@ nb*
 /target
 *.log
 /dist/*
+/raptor-api/raptor-profile/target/
+/raptor-api/raptor-inventory/target/
+/raptor-api/raptor-auth-service/target/
