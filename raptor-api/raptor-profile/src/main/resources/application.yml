@@ -1,0 +1,29 @@
+
+spring:
+  devtools:
+    restart:
+      enabled: true
+      trigger-file: raptor-profile-1.0.jar
+      additional-paths: target
+  profiles: default
+  mongodb:
+    host: localhost
+    port: 27017
+    database: raptor
+#    username: admin
+#    password: admin
+    
+server:
+  contextPath: /profile
+  port: 8070
+  address: 127.0.0.1
+  error:
+    whitelabel:
+      enabled: true
+
+logging:
+  level:
+#    root: INFO
+#    org.springframework.security: DEBUG
+    org.createnet.raptor.profile: DEBUG
+    org.createnet.raptor: DEBUG
