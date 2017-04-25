@@ -56,7 +56,7 @@ public class TokenPermissionTest {
 
     @AfterClass
     public static void tearDownClass() {
-        raptor.Auth.logout();
+        raptor.Auth().logout();
     }
 
     @Before
@@ -72,12 +72,12 @@ public class TokenPermissionTest {
 
         log.debug("Test get token permission");
 
-        Token token = raptor.Admin.Token.create(new Token("test", "test"));
+        Token token = raptor.Admin().Token.create(new Token("test", "test"));
 
         assertNotNull(token);
         assertNotNull(token.getId());
 
-        List<String> permissions = raptor.Admin.Token.Permission.get(token);
+        List<String> permissions = raptor.Admin().Token.Permission.get(token);
 
         log.debug("Got permissions {}", permissions);
         assertNotNull(permissions);
@@ -89,13 +89,13 @@ public class TokenPermissionTest {
 
         log.debug("Test set token permission");
 
-        Token token = raptor.Admin.Token.create(new Token("test_set", "test"));
+        Token token = raptor.Admin().Token.create(new Token("test_set", "test"));
 
         assertNotNull(token);
         assertNotNull(token.getId());
 
         List<String> permissions = PermissionUtil.asList(Permissions.create, Permissions.pull, Permissions.push);
-        List<String> result = raptor.Admin.Token.Permission.set(token, permissions);
+        List<String> result = raptor.Admin().Token.Permission.set(token, permissions);
 
         log.debug("Added permissions {}", permissions);
         log.debug("Response permissions {}", result);
@@ -115,7 +115,7 @@ public class TokenPermissionTest {
 
         testSet();
         
-        List<Token> tokens = raptor.Admin.Token.get();
+        List<Token> tokens = raptor.Admin().Token.get();
         
         assertFalse(tokens.isEmpty());
         
@@ -123,23 +123,23 @@ public class TokenPermissionTest {
         
         Properties p = Utils.loadSettings();
         Raptor r = new Raptor(new Config(p.getProperty("url"), t.getToken()));
-        r.Auth.login();
+        r.Auth().login();
         
-        assertNotNull(r.Auth.getToken());
-        assertNotNull(r.Auth.getUser());
+        assertNotNull(r.Auth().getToken());
+        assertNotNull(r.Auth().getUser());
         
         Device d = new Device();
         d.name = "test1";
         Stream s = d.addStream("test", "string");
         
-        r.Device.create(d);
+        r.Device().create(d);
         
         RecordSet record = new RecordSet(s);
         record.addRecord(RecordSet.createRecord(s, "test", "hello world"));
-        r.Stream.push(record);
+        r.Stream().push(record);
         
         try {
-            r.Device.delete(d);
+            r.Device().delete(d);
         }
         catch(RequestException ex) {
             assertEquals(403, ex.getStatus());

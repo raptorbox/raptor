@@ -144,7 +144,7 @@ public class HttpClient extends AbstractClient {
     }
 
     protected String getToken() {
-        String token = getContainer().Auth.getToken();
+        String token = getContainer().Auth().getToken();
         if (token == null) {
             throw new MissingAuthenticationException("Token is not available");
         }

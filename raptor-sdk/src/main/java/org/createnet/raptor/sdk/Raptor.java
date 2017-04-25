@@ -37,13 +37,47 @@ public class Raptor implements IClient, RaptorComponent {
     final protected HttpClient client;
     final protected MqttEventEmitter emitter; 
     
-    final public AuthClient Auth;
-    final public StreamClient Stream;
-    final public ActionClient Action;
-    final public DeviceClient Device;
-    
-    final public AdminClient Admin;
+    protected AdminClient Admin;
+    protected AuthClient Auth;
+    protected StreamClient Stream;
+    protected ActionClient Action;
+    protected DeviceClient Device;
 
+    public AdminClient Admin() {
+        if (Admin == null) {
+            Admin = new AdminClient(getContainer());
+        }
+        return Admin;
+    }
+    
+    public AuthClient Auth() {
+        if (Auth == null) {
+            Auth = new AuthClient(getContainer());
+        }
+        return Auth;
+    }
+    
+    public StreamClient Stream() {
+        if (Stream == null) {
+            Stream = new StreamClient(getContainer());
+        }
+        return Stream;
+    }
+    
+    public ActionClient Action() {
+        if (Action == null) {
+            Action = new ActionClient(getContainer());
+        }
+        return Action;
+    }
+    
+    public DeviceClient Device() {
+        if (Device == null) {
+            Device = new DeviceClient(getContainer());
+        }
+        return Device;
+    }
+    
     /**
      * Instantiate the client
      *
@@ -81,18 +115,9 @@ public class Raptor implements IClient, RaptorComponent {
      * @param config
      */
     public Raptor(Config config) {
-
         this.config = config;
         client = new HttpClient(this);
         emitter = new MqttEventEmitter(this);
-
-        Auth = new AuthClient(this);
-        Stream = new StreamClient(this);
-        Device = new DeviceClient(this);
-        Action = new ActionClient(this);
-        
-        Admin = new AdminClient(this);
-
     }
 
     @Override

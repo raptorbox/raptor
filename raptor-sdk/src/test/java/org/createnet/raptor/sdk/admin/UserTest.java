@@ -68,7 +68,7 @@ public class UserTest {
         
         String username = rndUsername();
         log.debug("Create user {}", username);
-        User user = raptor.Admin.User.create(username, "pass_" + rndUsername(), "test@test.raptor.local");
+        User user = raptor.Admin().User.create(username, "pass_" + rndUsername(), "test@test.raptor.local");
         
         assertEquals(username, user.getUsername());
         assertNotNull(user.getUuid());
@@ -90,7 +90,7 @@ public class UserTest {
         String uuid = UUID.randomUUID().toString();
         user.setUuid(uuid);
         
-        User newUser = raptor.Admin.User.create(user);
+        User newUser = raptor.Admin().User.create(user);
         
         assertEquals(username, newUser.getUsername());
         
@@ -107,12 +107,12 @@ public class UserTest {
         String email = "test@test.raptor.local";
         String username = rndUsername();
         log.debug("Create user {}", username);
-        User user = raptor.Admin.User.create(username, "pass_" + rndUsername(), email);
+        User user = raptor.Admin().User.create(username, "pass_" + rndUsername(), email);
         
         user.setEmail("newemail@example.com");
         user.setEnabled(false);
         
-        User updatedUser = raptor.Admin.User.update(user);
+        User updatedUser = raptor.Admin().User.update(user);
         
         assertNotEquals(email, updatedUser.getEmail());
         assertEquals(false, updatedUser.getEnabled());
@@ -125,16 +125,16 @@ public class UserTest {
         
         String username1 = rndUsername();
         log.debug("Create user1 {}", username1);
-        User user1 = raptor.Admin.User.create(username1, "pass_" + rndUsername(), "test@test.raptor.local");
+        User user1 = raptor.Admin().User.create(username1, "pass_" + rndUsername(), "test@test.raptor.local");
         
         String username2 = rndUsername();
         log.debug("Create user2 {}", username2);
-        User user2 = raptor.Admin.User.create(username2, "pass_" + rndUsername(), "test@test.raptor.local");
+        User user2 = raptor.Admin().User.create(username2, "pass_" + rndUsername(), "test@test.raptor.local");
         
         user1.setUsername(username2);
         
         try {
-            User updatedUser1 = raptor.Admin.User.update(user1);
+            User updatedUser1 = raptor.Admin().User.update(user1);
         }
         catch(RequestException ex) {
             assertEquals(400, ex.status);
@@ -150,12 +150,12 @@ public class UserTest {
         
         String username1 = rndUsername();
         log.debug("Create user1 {}", username1);
-        User user1 = raptor.Admin.User.create(username1, "pass_" + rndUsername(), "test@test.raptor.local");
+        User user1 = raptor.Admin().User.create(username1, "pass_" + rndUsername(), "test@test.raptor.local");
         
-        raptor.Admin.User.delete(user1);
+        raptor.Admin().User.delete(user1);
         
         try {
-            raptor.Admin.User.get(user1.getUuid());
+            raptor.Admin().User.get(user1.getUuid());
             throw new RuntimeException("User should not exists");
         } catch(RequestException ex) {
             assertEquals(404, ex.status);

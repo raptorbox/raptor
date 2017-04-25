@@ -196,7 +196,7 @@ public class DeviceClient extends AbstractClient {
      */
     public List<Device> search(ObjectQuery query, Integer offset, Integer limit) {
         if (query.getUserId() == null) {
-            User user = getContainer().Auth.getUser();
+            User user = getContainer().Auth().getUser();
             if (user == null) {
                 throw new MissingAuthenticationException("User is not available");
             }

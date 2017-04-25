@@ -72,7 +72,7 @@ public class TokenClient extends AbstractClient {
      * @return
      */
     public List<Token> get() {
-        JsonNode node = getClient().get(String.format(HttpClient.Routes.TOKEN_GET, getContainer().Auth.getUser().getUuid()));
+        JsonNode node = getClient().get(String.format(HttpClient.Routes.TOKEN_GET, getContainer().Auth().getUser().getUuid()));
         return getMapper().convertValue(node, new TypeReference<List<Token>>() {});
     }
 

@@ -79,7 +79,7 @@ public class ActionTest {
         
         Device dev = Utils.createDevice(device);
         Action a = dev.getAction("switch");
-        ActionStatus status = raptor.Action.setStatus(a, a.getStatus().status("on"));
+        ActionStatus status = raptor.Action().setStatus(a, a.getStatus().status("on"));
         
         Assert.assertNotNull(status);
         Assert.assertEquals("on", status.status);
@@ -93,9 +93,9 @@ public class ActionTest {
         
         Device dev = Utils.createDevice(device);
         Action a = dev.getAction("switch");
-        ActionStatus status = raptor.Action.setStatus(a, a.getStatus().status("on"));
+        ActionStatus status = raptor.Action().setStatus(a, a.getStatus().status("on"));
         
-        ActionStatus s = raptor.Action.getStatus(a);
+        ActionStatus s = raptor.Action().getStatus(a);
         
         Assert.assertEquals(s.status, status.status);
         
@@ -106,7 +106,7 @@ public class ActionTest {
         log.debug("invoke an action");
         Device dev = Utils.createDevice(device);
         Action a = dev.getAction("switch");
-        raptor.Action.invoke(a, "foobar3000");
+        raptor.Action().invoke(a, "foobar3000");
         //todo: add subscription check
     }
     
@@ -115,7 +115,7 @@ public class ActionTest {
         log.debug("list actions");
         Device dev = Utils.createDevice(device);
         
-        List<Action> actions = raptor.Action.list(dev);
+        List<Action> actions = raptor.Action().list(dev);
         
         Assert.assertEquals(dev.actions.size(), actions.size());
     }

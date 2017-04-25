@@ -93,19 +93,19 @@ public class EventListenerTest {
         RecordSet record = new RecordSet(stream);
         record.createRecord("foo", true);
 
-        raptor.Stream.push(stream, record);
+        raptor.Stream().push(stream, record);
         record.timestamp = new Date(Instant.now().toEpochMilli());
         Utils.waitFor(500);
 
-        raptor.Stream.push(stream, record);
+        raptor.Stream().push(stream, record);
         record.timestamp = new Date(Instant.now().toEpochMilli());
         Utils.waitFor(500);
 
-        raptor.Stream.push(stream, record);
+        raptor.Stream().push(stream, record);
         record.timestamp = new Date(Instant.now().toEpochMilli());
         Utils.waitFor(500);
 
-        raptor.Stream.push(stream, record);
+        raptor.Stream().push(stream, record);
         record.timestamp = new Date(Instant.now().toEpochMilli());
         Utils.waitFor(500);
     }
@@ -117,7 +117,7 @@ public class EventListenerTest {
 
         final Device dev = Utils.createDevice(newDevice("dev"));
 
-        raptor.Device.subscribe(dev, new DeviceCallback() {
+        raptor.Device().subscribe(dev, new DeviceCallback() {
             @Override
             public void callback(Device obj, DevicePayload message) {
                 log.debug("Device event received {}", message.toString());
@@ -127,7 +127,7 @@ public class EventListenerTest {
         dev.addStream("test2", "foo", "boolean");
         dev.addAction("sleep");
 
-        raptor.Device.update(dev);
+        raptor.Device().update(dev);
         Utils.waitFor(1000);
 
     }
@@ -142,7 +142,7 @@ public class EventListenerTest {
 
         Utils.waitFor(1500);
 
-        raptor.Device.subscribe(dev, new DataCallback() {
+        raptor.Device().subscribe(dev, new DataCallback() {
             @Override
             public void callback(Stream stream, RecordSet record) {
                 log.debug("dev: Data received {}", record.toJson());
@@ -151,7 +151,7 @@ public class EventListenerTest {
             }
         });
 
-        raptor.Device.subscribe(dev1, new DataCallback() {
+        raptor.Device().subscribe(dev1, new DataCallback() {
             @Override
             public void callback(Stream stream, RecordSet record) {
                 log.debug("dev1: Data received {}", record.toJson());
@@ -174,7 +174,7 @@ public class EventListenerTest {
         Device dev = Utils.createDevice(newDevice("dev"));
         Utils.waitFor(1500);
 
-        raptor.Device.subscribe(dev, new ActionCallback() {
+        raptor.Device().subscribe(dev, new ActionCallback() {
             @Override
             public void callback(Action action, ActionPayload payload) {
                 log.debug("dev: Data received  for {}: {}", payload.actionId, payload.data);
@@ -184,7 +184,7 @@ public class EventListenerTest {
         });
 
         Action action = dev.getAction("switch");
-        raptor.Action.invoke(action, "on");
+        raptor.Action().invoke(action, "on");
 
         Utils.waitFor(1000);
     }
@@ -195,18 +195,18 @@ public class EventListenerTest {
         log.debug("subscribe with permission token");
 
         Raptor r = Utils.createNewInstance();
-        r.Auth.login();
+        r.Auth().login();
 
-        Token t = r.Admin.Token.create(new Token("test", "test"));
+        Token t = r.Admin().Token.create(new Token("test", "test"));
 
-        r.Admin.Token.Permission.set(t, PermissionUtil.asList(Permissions.admin));
+        r.Admin().Token.Permission.set(t, PermissionUtil.asList(Permissions.admin));
 
-        Device dev = r.Device.create(newDevice("dev"));
+        Device dev = r.Device().create(newDevice("dev"));
         Utils.waitFor(1500);
 
         Raptor r2 = new Raptor(Utils.loadSettings().getProperty("url"), t);
 
-        r2.Device.subscribe(dev, new ActionCallback() {
+        r2.Device().subscribe(dev, new ActionCallback() {
             @Override
             public void callback(Action action, ActionPayload payload) {
                 log.debug("dev: Data received  for {}: {}", payload.actionId, payload.data);
@@ -216,7 +216,7 @@ public class EventListenerTest {
         });
 
         Action action = dev.getAction("switch");
-        raptor.Action.invoke(action, "on");
+        raptor.Action().invoke(action, "on");
 
         Utils.waitFor(1000);
     }
@@ -227,18 +227,18 @@ public class EventListenerTest {
         log.debug("subscribe with failing permissions");
 
         Raptor r = Utils.createNewInstance();
-        r.Auth.login();
+        r.Auth().login();
 
-        Token t = r.Admin.Token.create(new Token("test", "test"));
-        r.Admin.Token.Permission.set(t, PermissionUtil.asList(Permissions.subscribe));
+        Token t = r.Admin().Token.create(new Token("test", "test"));
+        r.Admin().Token.Permission.set(t, PermissionUtil.asList(Permissions.subscribe));
 
-        Device dev = r.Device.create(newDevice("dev"));
+        Device dev = r.Device().create(newDevice("dev"));
         Utils.waitFor(1500);
 
         Raptor r2 = new Raptor(Utils.loadSettings().getProperty("url"), t);
 
         try {
-            r2.Device.subscribe(dev, new DataCallback() {
+            r2.Device().subscribe(dev, new DataCallback() {
                 @Override
                 public void callback(Stream stream, RecordSet record) {
                     log.debug("Got data: {}", record.toJson());
@@ -253,7 +253,7 @@ public class EventListenerTest {
         RecordSet record = new RecordSet(stream);
         record.addRecord(RecordSet.createRecord(stream, "string", "test1"));
 
-        raptor.Stream.push(record);
+        raptor.Stream().push(record);
 
         Utils.waitFor(1000);
     }
@@ -264,18 +264,18 @@ public class EventListenerTest {
         log.debug("subscribe to stream topic with permissions (subscribe, pull)");
 
         Raptor r = Utils.createNewInstance();
-        r.Auth.login();
+        r.Auth().login();
 
-        Token t = r.Admin.Token.create(new Token("test", "test"));
-        r.Admin.Token.Permission.set(t, PermissionUtil.asList(Permissions.pull));
+        Token t = r.Admin().Token.create(new Token("test", "test"));
+        r.Admin().Token.Permission.set(t, PermissionUtil.asList(Permissions.pull));
 
-        Device dev = r.Device.create(newDevice("dev"));
+        Device dev = r.Device().create(newDevice("dev"));
         Utils.waitFor(1500);
 
         Raptor r2 = new Raptor(Utils.loadSettings().getProperty("url"), t);
         Stream stream = dev.getStream("test");
 
-        r2.Stream.subscribe(stream, new DataCallback() {
+        r2.Stream().subscribe(stream, new DataCallback() {
             @Override
             public void callback(Stream stream, RecordSet record) {
                 log.debug("Got data: {}", record.toJson());
@@ -284,7 +284,7 @@ public class EventListenerTest {
 
         RecordSet record = new RecordSet(stream);
         record.addRecord(RecordSet.createRecord(stream, "string", "test1"));
-        raptor.Stream.push(record);
+        raptor.Stream().push(record);
 
         Utils.waitFor(1000);
     }
@@ -295,25 +295,25 @@ public class EventListenerTest {
         log.debug("subscribe to action topic with permissions (subscribe, execute)");
 
         Raptor r = Utils.createNewInstance();
-        r.Auth.login();
+        r.Auth().login();
 
-        Token t = r.Admin.Token.create(new Token("test", "test"));
-        r.Admin.Token.Permission.set(t, PermissionUtil.asList(Permissions.execute));
+        Token t = r.Admin().Token.create(new Token("test", "test"));
+        r.Admin().Token.Permission.set(t, PermissionUtil.asList(Permissions.execute));
 
-        Device dev = r.Device.create(newDevice("dev"));
+        Device dev = r.Device().create(newDevice("dev"));
         Utils.waitFor(1500);
 
         Raptor r2 = new Raptor(Utils.loadSettings().getProperty("url"), t);
         Action action = dev.getAction("switch");
 
-        r2.Action.subscribe(action, new ActionCallback() {
+        r2.Action().subscribe(action, new ActionCallback() {
             @Override
             public void callback(Action action, ActionPayload message) {
                 log.debug("Got data: {}", message.data);
             }
         });
 
-        raptor.Action.invoke(action, "on");
+        raptor.Action().invoke(action, "on");
 
         Utils.waitFor(2000);
 
