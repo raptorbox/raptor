@@ -78,7 +78,7 @@ public class Application {
     static ConfigurableApplicationContext instance;
 
     public static void main(String[] args) {
-        getInstance();
+        getInstance(args);
     }
 
     static public ConfigurableApplicationContext getInstance() {
