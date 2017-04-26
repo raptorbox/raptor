@@ -130,7 +130,7 @@ public class AuthClient extends AbstractClient {
             body = login(getConfig().getUsername(), getConfig().getPassword());
         } else {
             try {
-                User user = getContainer().Admin().User.get();
+                User user = getContainer().Admin().User().get();
                 body = new LoginState();
                 body.user = user;
             } catch (RequestException ex) {

@@ -46,7 +46,14 @@ import org.slf4j.LoggerFactory;
  */
 public class DeviceClient extends AbstractClient {
 
-    final public DevicePermissionClient Permission;
+    protected DevicePermissionClient Permission;
+    
+    public DevicePermissionClient Permission() {
+        if (Permission == null) {
+            Permission = new DevicePermissionClient(getContainer());
+        }
+        return Permission;
+    }    
     
     public DeviceClient(Raptor container) {
         super(container);
