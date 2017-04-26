@@ -46,7 +46,14 @@ import org.slf4j.LoggerFactory;
  */
 public class DeviceClient extends AbstractClient {
 
-    final public DevicePermissionClient Permission;
+    protected DevicePermissionClient Permission;
+    
+    public DevicePermissionClient Permission() {
+        if (Permission == null) {
+            Permission = new DevicePermissionClient(getContainer());
+        }
+        return Permission;
+    }    
     
     public DeviceClient(Raptor container) {
         super(container);
@@ -196,7 +203,7 @@ public class DeviceClient extends AbstractClient {
      */
     public List<Device> search(ObjectQuery query, Integer offset, Integer limit) {
         if (query.getUserId() == null) {
-            User user = getContainer().Auth.getUser();
+            User user = getContainer().Auth().getUser();
             if (user == null) {
                 throw new MissingAuthenticationException("User is not available");
             }

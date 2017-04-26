@@ -27,14 +27,25 @@ import org.slf4j.LoggerFactory;
  */
 public class AdminClient extends AbstractClient {
 
-    public final UserClient User;
-    public final TokenClient Token;
+    protected UserClient User;
+    protected TokenClient Token;
+    
+    public UserClient User() {
+        if (User == null) {
+            User = new UserClient(getContainer());
+        }
+        return User;
+    }
+    
+    public TokenClient Token() {
+        if (Token == null) {
+            Token = new TokenClient(getContainer());
+        }
+        return Token;
+    }
     
     public AdminClient(Raptor container) {
-        super(container);
-        
-        User = new UserClient(container);
-        Token = new TokenClient(container);
+        super(container);        
     }
 
     final static Logger logger = LoggerFactory.getLogger(AdminClient.class);

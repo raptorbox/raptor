@@ -49,7 +49,14 @@ public class UserClient extends AbstractClient {
         
     }
     
-    final public PreferencesClient Preferences;
+    protected PreferencesClient Preferences;
+    
+    public PreferencesClient Preferences() {
+        if (Preferences == null) {
+            Preferences = new PreferencesClient(getContainer());
+        }
+        return Preferences;
+    }    
     
     public UserClient(Raptor container) {
         super(container);

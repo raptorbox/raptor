@@ -97,7 +97,7 @@ public class Utils {
      */
     static public Raptor createNewInstance(String username, Set<Role> roles) {
         
-        User user = getRaptor().Admin.User.create(username, username + Math.random(), username + "@test.raptor.local", roles);
+        User user = getRaptor().Admin().User().create(username, username + Math.random(), username + "@test.raptor.local", roles);
         
         assert user != null;
         assert getRaptor().Auth.getToken() != null;
@@ -117,7 +117,7 @@ public class Utils {
     static public Raptor createNewInstance(String username) {
         
         String password = username + Math.random();
-        User user = getRaptor().Admin.User.create(username, password, username + "@test.raptor.local");
+        User user = getRaptor().Admin().User().create(username, password, username + "@test.raptor.local");
         log.debug("Created user {} : {} with uuid {}", username, password, user.getUuid());
         assert user != null;
         
@@ -135,7 +135,7 @@ public class Utils {
         
         String username = rndUsername();
         String password = username + Math.random();
-        User user = getRaptor().Admin.User.create(username, password, username + "@test.raptor.local");
+        User user = getRaptor().Admin().User().create(username, password, username + "@test.raptor.local");
         log.debug("Created user {} : {} with uuid {}", username, password, user.getUuid());
         assert user != null;
         

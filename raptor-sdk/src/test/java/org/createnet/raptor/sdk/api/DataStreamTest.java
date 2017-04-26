@@ -83,11 +83,11 @@ public class DataStreamTest {
     }
 
     private Device createDevice(Device d) {
-        return raptor.Device.create(d);
+        return raptor.Device().create(d);
     }
 
     private Device createDevice() {
-        return raptor.Device.create(device);
+        return raptor.Device().create(device);
     }
 
     private List<RecordSet> createRecordSet(Stream stream, int length) {
@@ -120,7 +120,7 @@ public class DataStreamTest {
     private void pushRecords(Stream s, int len, int waitFor) {
         log.debug("Pushing {} records on {}", len, s.name);
         List<RecordSet> records = createRecordSet(s, len);
-        records.parallelStream().forEach(record -> raptor.Stream.push(record));
+        records.parallelStream().forEach(record -> raptor.Stream().push(record));
         log.debug("Done, waiting for indexing {}millis", waitFor);
         Utils.waitFor(waitFor);
     }
@@ -152,7 +152,7 @@ public class DataStreamTest {
         // wait for indexing
         Utils.waitFor(2500);
 
-        ResultSet results = raptor.Stream.pull(s);
+        ResultSet results = raptor.Stream().pull(s);
         Assert.assertEquals(qt, results.size());
 
     }
@@ -168,7 +168,7 @@ public class DataStreamTest {
         int qt = 1;
         pushRecords(s, qt, 10000);
 
-        RecordSet record = raptor.Stream.lastUpdate(s);
+        RecordSet record = raptor.Stream().lastUpdate(s);
         Assert.assertNotNull(record);
         Assert.assertTrue(record.channels.get("location").getValue() instanceof GeoPoint);
         
@@ -184,7 +184,7 @@ public class DataStreamTest {
         Device dev = createDevice();
         Stream s = dev.getStream("test");
         
-        RecordSet record = raptor.Stream.lastUpdate(s);
+        RecordSet record = raptor.Stream().lastUpdate(s);
         Assert.assertNull(record);
     }
 
@@ -201,7 +201,7 @@ public class DataStreamTest {
 
         DataQuery q = new DataQuery();
         q.timeRange(Instant.EPOCH);
-        ResultSet results = raptor.Stream.search(s, q, 0, 10);
+        ResultSet results = raptor.Stream().search(s, q, 0, 10);
 
         Assert.assertEquals(10, results.size());
     }
@@ -215,14 +215,14 @@ public class DataStreamTest {
         Stream s = dev.getStream("test");
 
         List<RecordSet> records = createRecordSet(s, 10);
-        records.parallelStream().forEach(record -> raptor.Stream.push(record));
+        records.parallelStream().forEach(record -> raptor.Stream().push(record));
 
         // wait for indexing
         Utils.waitFor(2500);
 
         DataQuery q = new DataQuery();
         q.range("number", 0, 100);
-        ResultSet results = raptor.Stream.search(s, q, 0, 10);
+        ResultSet results = raptor.Stream().search(s, q, 0, 10);
 
         Assert.assertEquals(10, results.size());
     }
@@ -240,7 +240,7 @@ public class DataStreamTest {
 
         DataQuery q = new DataQuery();
         q.distance(new GeoPoint(11.45, 45.11), 10000, DistanceUnit.kilometers);
-        ResultSet results = raptor.Stream.search(s, q, 0, 10);
+        ResultSet results = raptor.Stream().search(s, q, 0, 10);
         
         log.debug("Found {} records", results.size());
         Assert.assertTrue(results.size() > 0);
@@ -257,7 +257,7 @@ public class DataStreamTest {
         int qt = 10;
         pushRecords(s, qt);
         
-        ResultSet results = raptor.Stream.search(s, DataQueryBuilder.boundingBox(new GeoPoint(12, 45), new GeoPoint(10, 44)), 0, 10);
+        ResultSet results = raptor.Stream().search(s, DataQueryBuilder.boundingBox(new GeoPoint(12, 45), new GeoPoint(10, 44)), 0, 10);
         
         log.debug("Found {} records", results.size());
         Assert.assertTrue(results.size() > 0);
@@ -274,18 +274,18 @@ public class DataStreamTest {
         int qt = 10;
         pushRecords(s, qt);
         
-        ResultSet results = raptor.Stream.pull(s);
+        ResultSet results = raptor.Stream().pull(s);
         
         log.debug("Found {} records", results.size());
         Assert.assertEquals(10, results.size());
         
-        raptor.Stream.delete(s);
+        raptor.Stream().delete(s);
         
         // wait for indexing
         log.debug("Wait for indexing");
         Utils.waitFor(2500);
         
-        results = raptor.Stream.pull(s);
+        results = raptor.Stream().pull(s);
         log.debug("Found {} records", results.size());
         Assert.assertEquals(0, results.size());
         

@@ -59,16 +59,16 @@ public class TokenTest {
     @Test
     public void listToken() {
         
-        List<Token> tokens = raptor.Admin.Token.get();
+        List<Token> tokens = raptor.Admin().Token.get();
         
-        log.debug("Create new token for user {}", raptor.Auth.getUser().getUuid());
+        log.debug("Create new token for user {}", raptor.Auth().getUser().getUuid());
         
         assertNotNull(tokens);
         assertEquals(0, tokens.size());
         
-        raptor.Admin.Token.create(new Token("test", "secret" + System.currentTimeMillis() * Math.random()));
+        raptor.Admin().Token.create(new Token("test", "secret" + System.currentTimeMillis() * Math.random()));
 
-        tokens = raptor.Admin.Token.get();
+        tokens = raptor.Admin().Token.get();
         
         assertNotNull(tokens);
         assertEquals(1, tokens.size());
@@ -82,7 +82,7 @@ public class TokenTest {
         //fake token
         token.setToken("foobar");
 
-        Token newToken = raptor.Admin.Token.create(token);
+        Token newToken = raptor.Admin().Token.create(token);
 
         assertNotNull(newToken);
         assertNotNull(newToken.getId());
@@ -96,17 +96,17 @@ public class TokenTest {
     @Test
     public void updateToken() {
 
-        Token newToken = raptor.Admin.Token.create(new Token("test", "secret" + System.currentTimeMillis() * Math.random()));
+        Token newToken = raptor.Admin().Token.create(new Token("test", "secret" + System.currentTimeMillis() * Math.random()));
 
         assertNotNull(newToken);
 
         newToken.setDevice(new Device("foobar"));
         newToken.setSecret("test2");
-        newToken.setUser(raptor.Auth.getUser());
+        newToken.setUser(raptor.Auth().getUser());
         newToken.setEnabled(false);
         newToken.setExpires(1L);
 
-        Token updatedToken = raptor.Admin.Token.update(newToken);
+        Token updatedToken = raptor.Admin().Token.update(newToken);
 
         assertNotNull(updatedToken);
         assertNotNull(newToken.getId());

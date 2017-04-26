@@ -46,11 +46,17 @@ public class TokenClient extends AbstractClient {
         protected String secret;
     }
     
-    final public TokenPermissionClient Permission;
+    protected TokenPermissionClient Permission;
+    
+    public TokenPermissionClient Permission() {
+        if (Permission == null) {
+            Permission = new TokenPermissionClient(getContainer());
+        }
+        return Permission;
+    }
     
     public TokenClient(Raptor container) {
         super(container);
-        Permission = new TokenPermissionClient(container);
     }
 
     final static Logger logger = LoggerFactory.getLogger(TokenClient.class);
@@ -72,7 +78,7 @@ public class TokenClient extends AbstractClient {
      * @return
      */
     public List<Token> get() {
-        JsonNode node = getClient().get(String.format(HttpClient.Routes.TOKEN_GET, getContainer().Auth.getUser().getUuid()));
+        JsonNode node = getClient().get(String.format(HttpClient.Routes.TOKEN_GET, getContainer().Auth().getUser().getUuid()));
         return getMapper().convertValue(node, new TypeReference<List<Token>>() {});
     }
 

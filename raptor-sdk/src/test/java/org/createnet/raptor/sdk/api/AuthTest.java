@@ -62,7 +62,7 @@ public class AuthTest {
 
         Properties p = Utils.loadSettings();
 
-        AuthClient.LoginState loginInfo = raptor.Auth.login(p.getProperty("username"), p.getProperty("password"));
+        AuthClient.LoginState loginInfo = raptor.Auth().login(p.getProperty("username"), p.getProperty("password"));
 
         Assert.assertEquals(loginInfo.user.getUsername(), p.getProperty("username"));
         Assert.assertNotNull(loginInfo.token);
@@ -74,7 +74,7 @@ public class AuthTest {
 
         log.debug("Try to fake login");
 
-        AuthClient.LoginState loginInfo = raptor.Auth.login("admin", "apple");
+        AuthClient.LoginState loginInfo = raptor.Auth().login("admin", "apple");
 
     }
 
@@ -86,31 +86,31 @@ public class AuthTest {
         Properties p = Utils.loadSettings();
         Raptor r = new Raptor(p.getProperty("url"), "my fancy token");
 
-        AuthClient.LoginState res = r.Auth.login();
+        AuthClient.LoginState res = r.Auth().login();
     }
 
     @Test
     public void multipleLogin() {
 
         // ensure we have a token
-        Utils.getRaptor().Auth.login();
+        Utils.getRaptor().Auth().login();
 
         Raptor r1 = Utils.createNewInstance();
-        log.debug("test1 {}", r1.Auth.getUser().getUuid());
+        log.debug("test1 {}", r1.Auth().getUser().getUuid());
 
         Raptor r2 = Utils.createNewInstance();
-        log.debug("test2 {}", r2.Auth.getUser().getUuid());
+        log.debug("test2 {}", r2.Auth().getUser().getUuid());
 
-        Assert.assertNotEquals(r1.Auth.getUser().getUuid(), r2.Auth.getUser().getUuid());
+        Assert.assertNotEquals(r1.Auth().getUser().getUuid(), r2.Auth().getUser().getUuid());
 
         log.debug("Try to login again test1");
-        AuthClient.LoginState s1 = r1.Auth.login();
+        AuthClient.LoginState s1 = r1.Auth().login();
         log.debug("Try to login again test2");
-        AuthClient.LoginState s2 = r2.Auth.login();
+        AuthClient.LoginState s2 = r2.Auth().login();
 
-        log.debug("{} vs {}", r1.Auth.getUser().getUuid(), r2.Auth.getUser().getUuid());
+        log.debug("{} vs {}", r1.Auth().getUser().getUuid(), r2.Auth().getUser().getUuid());
 
-        Assert.assertNotEquals(r1.Auth.getUser().getUuid(), r2.Auth.getUser().getUuid());
+        Assert.assertNotEquals(r1.Auth().getUser().getUuid(), r2.Auth().getUser().getUuid());
 
         Assert.assertNotEquals(s1.token, s2.token);
         Assert.assertNotEquals(s1.user.getUuid(), s2.user.getUuid());
@@ -124,8 +124,8 @@ public class AuthTest {
 
         Properties p = Utils.loadSettings();
 
-        AuthClient.LoginState loginInfo = raptor.Auth.login();
-        AuthClient.LoginState refreshInfo = raptor.Auth.refreshToken();
+        AuthClient.LoginState loginInfo = raptor.Auth().login();
+        AuthClient.LoginState refreshInfo = raptor.Auth().refreshToken();
 
         Assert.assertNotNull(refreshInfo.token);
         Assert.assertNotEquals(refreshInfo.token, loginInfo.token);
@@ -138,12 +138,12 @@ public class AuthTest {
 
         Properties p = Utils.loadSettings();
 
-        AuthClient.LoginState loginInfo = raptor.Auth.login();
+        AuthClient.LoginState loginInfo = raptor.Auth().login();
 
-        raptor.Auth.logout();
+        raptor.Auth().logout();
 
-        Assert.assertNull(raptor.Auth.getUser());
-        Assert.assertNull(raptor.Auth.getToken());
+        Assert.assertNull(raptor.Auth().getUser());
+        Assert.assertNull(raptor.Auth().getToken());
     }
 
 }
