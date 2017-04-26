@@ -120,7 +120,7 @@ services:
     volumes:
       - ./data/mongodb:/data/db
     ports:
-      - 27017:27017
+      - 27017
     command: --smallfiles # --rest --auth
     networks:
       - raptor_net
