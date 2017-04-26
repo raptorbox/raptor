@@ -1,10 +1,11 @@
 
 spring:
   profiles: default
-  mongodb:
-    host: localhost
-    port: 27017
-    database: raptor
+  data:
+    mongodb:
+      host: mongo
+      port: 27017
+      database: raptor
 #    username: admin
 #    password: admin
 
