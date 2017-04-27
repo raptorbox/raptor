@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 l.
+ * Copyright 2017 FBK/CREATE-NET
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 /**
  *
- * @author l
+ * @author Luca Capra <luca.capra@gmail.com>
  */
 public class DeviceNode {
 
@@ -123,10 +123,10 @@ public class DeviceNode {
     public String path() {
         return String.join("/", tree().stream().map(n -> n.getCurrent().id).collect(Collectors.toList()));
     }
-    
+
     @Override
     public String toString() {
-        return getCurrent().parentId + "." + getCurrent().id + " [" +path() + "]";
+        return getCurrent().parentId + "." + getCurrent().id + " [" + path() + "]";
     }
 
     public final Optional<DeviceNode> getChild(String id) {

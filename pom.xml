@@ -22,8 +22,8 @@
         <module>raptor-service</module>   
 
         <module>raptor-broker</module>
+        <module>raptor-api</module>        
         <module>raptor-http-api</module>
-        <module>raptor-api</module>
                         
         <module>raptor-sdk</module>
         <module>raptor-cli</module>
@@ -58,7 +58,7 @@
         
         <spring.data>1.13.1.RELEASE</spring.data>
         <spring.data.mongodb>1.10.1.RELEASE</spring.data.mongodb>
-        <maven.compiler.plugin>2.5.1</maven.compiler.plugin>
+        <maven.compiler.plugin>3.6.1</maven.compiler.plugin>
         
     </properties>
 

@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.models.objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.createnet.raptor.models.objects.serializer.ActionSerializer;
 
@@ -25,6 +26,7 @@ import java.io.IOException;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.annotation.Transient;
 
 /**
  *
@@ -34,7 +36,9 @@ import org.slf4j.LoggerFactory;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Action extends DeviceContainer {
 
-    Logger logger = LoggerFactory.getLogger(Action.class);
+    @JsonIgnore
+    @Transient
+    private final Logger logger = LoggerFactory.getLogger(Action.class);
 
     public String id = null;
     public String status = null;

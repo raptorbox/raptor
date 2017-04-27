@@ -27,6 +27,7 @@ import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,7 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @RestController
-@RequestMapping(value = "/inventory")
+@RequestMapping(value = "/")
 @ApiResponses(value = {
     @ApiResponse(
             code = 200, 
@@ -59,6 +60,7 @@ import org.springframework.web.bind.annotation.RestController;
     )
 })
 @Api(tags = { "Inventory" })
+@PreAuthorize("isAuthenticated()")
 public class InventoryController {
     
     @Autowired
@@ -95,9 +97,10 @@ public class InventoryController {
             device.validate();
         }
         catch(RaptorComponent.ValidationException ex) {
-            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Device definition invalid: " + ex.getMessage());
+            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Device definition is not valid: " + ex.getMessage());
         }
 
+        device.userId = currentUser.getUuid();
         deviceService.save(device);
 
         return ResponseEntity.ok(device.toJSON());
@@ -114,10 +117,12 @@ public class InventoryController {
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId
     ) {
+        
         Device device = deviceService.get(deviceId);
         if (device == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Not found");
         }
+        
         return ResponseEntity.ok(device.toJSON());
     }
 

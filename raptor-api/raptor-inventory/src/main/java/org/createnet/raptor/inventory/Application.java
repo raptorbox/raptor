@@ -15,10 +15,16 @@
  */
 package org.createnet.raptor.inventory;
 
+import org.createnet.raptor.api.common.authentication.TokenSecurityAdapter;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -29,9 +35,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.api.common.authentication", "org.createnet.raptor.inventory"})
+@SpringBootApplication(scanBasePackageClasses = {Application.class, TokenSecurityAdapter.class})
+@EnableConfigurationProperties
+@EnableAutoConfiguration
 @EnableMongoRepositories
 @EnableGlobalMethodSecurity(securedEnabled = true)
+@ComponentScan(basePackageClasses = {TokenSecurityAdapter.class, Application.class})
+@Profile("default")
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 public class Application {
 
     static private ConfigurableApplicationContext instance;

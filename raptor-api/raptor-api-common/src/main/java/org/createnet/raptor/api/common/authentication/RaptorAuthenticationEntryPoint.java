@@ -1,4 +1,4 @@
-package org.createnet.raptor.auth.service.authentcation;
+package org.createnet.raptor.api.common.authentication;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;

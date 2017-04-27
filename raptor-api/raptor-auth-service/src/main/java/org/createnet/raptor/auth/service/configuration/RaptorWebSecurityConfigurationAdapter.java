@@ -17,7 +17,7 @@ package org.createnet.raptor.auth.service.configuration;
 
 import org.createnet.raptor.auth.service.services.RaptorUserDetailsService;
 import org.createnet.raptor.auth.service.authentcation.JsonUsernamePasswordFilter;
-import org.createnet.raptor.auth.service.authentcation.RaptorAuthenticationEntryPoint;
+import org.createnet.raptor.api.common.authentication.RaptorAuthenticationEntryPoint;
 import org.createnet.raptor.auth.service.authentcation.RaptorAuthenticationTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +30,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 
 /**
  *
@@ -46,8 +47,10 @@ public class RaptorWebSecurityConfigurationAdapter extends WebSecurityConfigurer
     @Value("${raptor.auth.route.authentication.refresh}")
     private String authenticationRefresh;
 
-    @Autowired
-    private RaptorAuthenticationEntryPoint unauthorizedHandler;
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return new RaptorAuthenticationEntryPoint();
+    }
 
     @Autowired
     private RaptorUserDetailsService userDetailsService;
@@ -72,7 +75,7 @@ public class RaptorWebSecurityConfigurationAdapter extends WebSecurityConfigurer
         httpSecurity
                 // we don't need CSRF because our token is invulnerable
                 .csrf().disable()
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+                .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint()).and()
                 // don't create session
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .cors().and()

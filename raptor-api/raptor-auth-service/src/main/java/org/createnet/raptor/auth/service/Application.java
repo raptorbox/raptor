@@ -17,6 +17,7 @@ package org.createnet.raptor.auth.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.sql.DataSource;
+import org.createnet.raptor.api.common.authentication.TokenHelper;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.repository.UserRepository;
@@ -64,9 +65,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Profile("default")
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 @SpringBootApplication(exclude = { EmbeddedMongoAutoConfiguration.class, MongoAutoConfiguration.class, MongoDataAutoConfiguration.class })
 @EnableCaching
-@EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableRetry
 @EntityScan(basePackageClasses = org.createnet.raptor.models.auth.User.class)
 @ComponentScan(basePackages = "org.createnet.raptor.auth.service")
@@ -110,7 +111,7 @@ public class Application {
     private String defaultUserPassword;
     @Value("${raptor.admin.email}")
     private String defaultUserEmail;
-
+    
     @Autowired
     private DataSource dataSource;
 
@@ -126,6 +127,11 @@ public class Application {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+    
+    @Bean
+    public TokenHelper tokenHelper() {
+        return new TokenHelper();
     }
 
 //  @Autowired

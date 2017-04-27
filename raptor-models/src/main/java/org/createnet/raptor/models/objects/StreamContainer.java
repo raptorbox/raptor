@@ -1,11 +1,11 @@
 /*
- * Copyright 2017 FBK/CREATE-NET
+ * Copyright 2017 FBK/CREATE-NET <http://create-net.fbk.eu>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,18 +16,15 @@
 package org.createnet.raptor.models.objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.createnet.raptor.models.events.StreamEventListener;
+import org.springframework.data.annotation.Transient;
 
 /**
- *
  * @author Luca Capra <luca.capra@gmail.com>
  */
 abstract class StreamContainer extends DeviceContainer {
 
     @JsonIgnore
-    protected StreamEventListener listener;
-
-    @JsonIgnore
+    @Transient
     protected Stream stream;
 
     @Override
@@ -44,20 +41,6 @@ abstract class StreamContainer extends DeviceContainer {
         if (stream != null) {
             this.setDevice(stream.getDevice());
         }
-    }
-
-    @Override
-    public StreamEventListener getListener() {
-        return listener;
-    }
-
-    public void setListener(StreamEventListener listener) {
-        this.listener = listener;
-    }
-
-    @Override
-    protected boolean hasListener() {
-        return getListener() != null;
     }
 
 }

@@ -17,7 +17,7 @@ package org.createnet.raptor.models.objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.createnet.raptor.models.events.IEventListener;
+import org.springframework.data.annotation.Transient;
 
 /**
  *
@@ -25,39 +25,26 @@ import org.createnet.raptor.models.events.IEventListener;
  */
 public abstract class RaptorContainer implements RaptorComponent {
 
-  abstract public void validate() throws ValidationException;
+    abstract public void validate() throws ValidationException;
 
-  abstract public void parse(String json) throws ParserException;
+    abstract public void parse(String json) throws ParserException;
 
-  static protected final ObjectMapper mapper = new ObjectMapper();
+    static protected final ObjectMapper mapper = new ObjectMapper();
 
-  protected IEventListener listener;
-  
-  public static ObjectMapper getMapper() {
-    return mapper;
-  }
+    public static ObjectMapper getMapper() {
+        return mapper;
+    }
 
-  @JsonIgnore
-  protected RaptorComponent container;
+    @JsonIgnore
+    @Transient
+    protected RaptorComponent container;
 
-  public RaptorComponent getContainer() {
-    return container;
-  }
+    public RaptorComponent getContainer() {
+        return container;
+    }
 
-  public void setContainer(RaptorComponent container) {
-    this.container = container;
-  }
-
-  public IEventListener getListener() {
-    return listener;
-  }
-
-  public void setListener(IEventListener listener) {
-    this.listener = listener;
-  }
-
-  protected boolean hasListener() {
-    return getListener() != null;
-  }
+    public void setContainer(RaptorComponent container) {
+        this.container = container;
+    }
 
 }

@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Map;
 import org.createnet.raptor.models.data.Record;
 import org.createnet.raptor.models.data.types.TypesManager;
-import org.createnet.raptor.models.events.DeviceEventListener;
+import org.springframework.data.annotation.Transient;
 
 /**
  *
@@ -28,9 +28,7 @@ import org.createnet.raptor.models.events.DeviceEventListener;
 public abstract class DeviceContainer extends RaptorContainer {
 
     @JsonIgnore
-    protected DeviceEventListener listener;
-
-    @JsonIgnore
+    @Transient
     protected Device device;
 
     protected Map<String, Record> getTypes() {
@@ -47,22 +45,10 @@ public abstract class DeviceContainer extends RaptorContainer {
 
     public void setDevice(Device _device) {
         this.device = _device;
-//        if(_device != null) {
-//          this.setContainer(_device.getContainer());
-//        }
     }
 
     public Device getDevice() {
         return device;
-    }
-
-    @Override
-    public DeviceEventListener getListener() {
-        return listener;
-    }
-
-    public void setListener(DeviceEventListener listener) {
-        this.listener = listener;
     }
 
     @Override

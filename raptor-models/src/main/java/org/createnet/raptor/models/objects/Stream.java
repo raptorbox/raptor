@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.models.objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.createnet.raptor.models.objects.serializer.StreamSerializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -24,6 +25,7 @@ import java.util.Iterator;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.annotation.Transient;
 
 /**
  *
@@ -31,8 +33,10 @@ import org.slf4j.LoggerFactory;
  */
 @JsonSerialize(using = StreamSerializer.class)
 public class Stream extends StreamContainer {
-
-    Logger logger = LoggerFactory.getLogger(Stream.class);
+    
+    @JsonIgnore
+    @Transient
+    private final Logger logger = LoggerFactory.getLogger(Stream.class);
 
     public String name;
     public String type;

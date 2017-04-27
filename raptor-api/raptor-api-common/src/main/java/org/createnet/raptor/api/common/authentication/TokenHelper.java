@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.api.common.authentication;
 
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +42,10 @@ public class TokenHelper {
         }
 
         return rawToken.trim();
+    }
+
+    String getToken(HttpServletRequest httpRequest) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

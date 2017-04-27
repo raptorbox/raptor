@@ -3,20 +3,20 @@ spring:
   devtools:
     restart:
       enabled: true
-      trigger-file: raptor-profile-1.0.jar
-      additional-paths: target
+#      trigger-file: raptor-inventory-1.0.jar
+#      additional-paths: target
+      
   profiles: default
-  data:
-    mongodb:
-      host: mongo
-      port: 27017
-      database: raptor
-  #    username: admin
-  #    password: admin
-
+  mongodb:
+    host: localhost
+    port: 27017
+    database: raptor
+#    username: admin
+#    password: admin
+    
 server:
-  contextPath: /profile
-  port: 8070
+  contextPath: /inventory
+  port: 8060
   address: 127.0.0.1
   error:
     whitelabel:
@@ -28,3 +28,11 @@ logging:
 #    org.springframework.security: DEBUG
     org.createnet.raptor.profile: DEBUG
     org.createnet.raptor: DEBUG
+    org.springframework.data.mongodb.core.index: OFF
+
+raptor:
+    auth:
+        url: http://auth:8090
+        header: Authorization
+        headerPrefix: Bearer
+    
