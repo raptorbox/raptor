@@ -10,3 +10,4 @@ nb*
 /raptor-api/raptor-profile/target/
 /raptor-api/raptor-inventory/target/
 /raptor-api/raptor-auth-service/target/
+/raptor-api/raptor-api-common/target/
