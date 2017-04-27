@@ -13,32 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.entity;
+package org.createnet.raptor.models.auth.request;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class AuthorizationRequest {
-  
-  public static enum Operation {
-    User, Permission
-  }
-  
-  public AuthorizationRequest() {}
-  
-  public AuthorizationRequest(Operation op) {
-    this.operation = op.name();
-  }
-  
-  public String operation = Operation.Permission.name();
+public class LoginRequest {
 
-  public String permission;
-  public String objectId;
-  public String userId;
-  
-  public Operation getOperation() {
-    return Operation.valueOf(operation);
-  }
+    public String username;
+    public String password;
+
+    public LoginRequest() {
+    }
+
+    public LoginRequest(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 
 }

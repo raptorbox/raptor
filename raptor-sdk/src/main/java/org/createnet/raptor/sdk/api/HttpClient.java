@@ -106,6 +106,8 @@ public class HttpClient extends AbstractClient {
         final static public String SUBSCRIBE_ACTION = INVOKE;
         final static public String SUBSCRIBE_STREAM = PUSH;
 
+        final static public String PERMISSION_CHECK = "/auth/check";
+
         final static public String LOGIN = "/auth/login";
         final static public String LOGOUT = LOGIN;
         final static public String REFRESH_TOKEN = "/auth/refresh";
@@ -148,7 +150,7 @@ public class HttpClient extends AbstractClient {
         if (token == null) {
             throw new MissingAuthenticationException("Token is not available");
         }
-        return "Bearer " + token;
+        return token.startsWith("Bearer ") ? token : "Bearer " + token;
     }
 
     protected void prepareRequest() {

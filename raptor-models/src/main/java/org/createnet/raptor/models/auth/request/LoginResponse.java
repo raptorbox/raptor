@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.entity;
+package org.createnet.raptor.models.auth.request;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import java.util.ArrayList;
-import java.util.List;
+import org.createnet.raptor.models.auth.User;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class AuthorizationResponse {
-  
-  public boolean result;
-  
-  public String userId;
-  public List<String> roles = new ArrayList();
-  public String token = null;
+public class LoginResponse {
 
-  public JsonNode details;
+    public String token = null;
+    public User user = new User();
+
+    public LoginResponse() {
+    }
+
+    public LoginResponse(User user, String token) {
+        this.user = user;
+        this.token = token;
+    }
+
 }

@@ -54,7 +54,7 @@ public class TokenFilter extends GenericFilterBean {
 
                 UserDetails userDetails = new RaptorUserDetails(state.user);
 
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                LoginAuthenticationToken authentication = new LoginAuthenticationToken(userDetails, authToken, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpRequest));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);

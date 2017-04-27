@@ -20,11 +20,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.api.HttpClient;
 import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.models.auth.request.AuthorizationRequest;
+import org.createnet.raptor.models.auth.request.AuthorizationResponse;
+import org.createnet.raptor.models.objects.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,24 +50,67 @@ public class UserClient extends AbstractClient {
 
         @JsonProperty(access = JsonProperty.Access.READ_WRITE)
         protected String password;
-        
+
     }
-    
+
     protected PreferencesClient Preferences;
-    
+
     public PreferencesClient Preferences() {
         if (Preferences == null) {
             Preferences = new PreferencesClient(getContainer());
         }
         return Preferences;
-    }    
-    
+    }
+
     public UserClient(Raptor container) {
         super(container);
         Preferences = new PreferencesClient(container);
     }
 
     final static Logger logger = LoggerFactory.getLogger(UserClient.class);
+
+    /**
+     * Check if an user is authorized to operate on a device
+     *
+     * @param device
+     * @param user
+     * @param permission
+     * @return
+     */
+    public AuthorizationResponse isAuthorized(Device device, User user, Permissions permission) {
+        return isAuthorized(device.getId(), user.getUuid(), permission);
+    }
+
+    /**
+     * Check if the current user is authorized to operate on a device
+     *
+     * @param device
+     * @param permission
+     * @return
+     */
+    public AuthorizationResponse isAuthorized(Device device, Permissions permission) {
+        return isAuthorized(device.getId(), getContainer().Auth().getUser().getUuid(), permission);
+    }
+
+    /**
+     * Check if an user is authorized to operate on a device
+     *
+     * @param deviceId
+     * @param userId
+     * @param permission
+     * @return
+     */
+    public AuthorizationResponse isAuthorized(String deviceId, String userId, Permissions permission) {
+
+        AuthorizationRequest auth = new AuthorizationRequest();
+        auth.objectId = deviceId;
+        auth.operation = AuthorizationRequest.Operation.Permission.name();
+        auth.permission = permission.name();
+        auth.userId = userId;
+
+        JsonNode node = getClient().post(HttpClient.Routes.PERMISSION_CHECK, toJsonNode(auth));
+        return getMapper().convertValue(node, AuthorizationResponse.class);
+    }
 
     /**
      * Get an user

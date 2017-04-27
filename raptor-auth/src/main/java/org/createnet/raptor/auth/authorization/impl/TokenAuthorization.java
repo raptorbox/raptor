@@ -23,7 +23,7 @@ import java.util.logging.Level;
 import org.createnet.raptor.auth.AuthConfiguration;
 import org.createnet.raptor.auth.AuthHttpClient;
 import org.createnet.raptor.auth.authorization.AbstractAuthorization;
-import org.createnet.raptor.auth.entity.AuthorizationRequest;
+import org.createnet.raptor.models.auth.request.AuthorizationRequest;
 import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Device;

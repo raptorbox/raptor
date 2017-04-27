@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.api.common.authentication;
+package org.createnet.raptor.api.common.configuration;
 
+import org.createnet.raptor.api.common.authentication.RaptorAuthenticationEntryPoint;
+import org.createnet.raptor.api.common.authentication.TokenAuthenticationProvider;
+import org.createnet.raptor.api.common.authentication.TokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +37,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 @Configuration
 @EnableWebSecurity
-public class TokenSecurityAdapter extends WebSecurityConfigurerAdapter {
+public class TokenSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -56,6 +59,7 @@ public class TokenSecurityAdapter extends WebSecurityConfigurerAdapter {
         return new TokenFilter();
     }
 
+    
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 

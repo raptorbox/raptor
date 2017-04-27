@@ -27,6 +27,7 @@ import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,7 +61,6 @@ import org.springframework.web.bind.annotation.RestController;
     )
 })
 @Api(tags = { "Inventory" })
-@PreAuthorize("isAuthenticated()")
 public class InventoryController {
     
     @Autowired
@@ -88,6 +88,7 @@ public class InventoryController {
             response = Device.class,
             nickname = "createDevice"
     )
+    @PreAuthorize("hasPermission(#device, 'create')")
     public ResponseEntity<?> createDevice(
             @AuthenticationPrincipal User currentUser,
             @RequestBody Device device
@@ -113,6 +114,7 @@ public class InventoryController {
             response = Device.class,
             nickname = "getDevice"
     )
+    @PostAuthorize("hasPermission(returnObject.getId(), 'read')")
     public ResponseEntity<?> getDevice(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId
@@ -133,6 +135,7 @@ public class InventoryController {
             response = Device.class,
             nickname = "updateDevice"
     )
+    @PreAuthorize("hasPermission(#deviceId, 'update')")
     public ResponseEntity<?> updateDevice(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
@@ -157,6 +160,7 @@ public class InventoryController {
             response = Device.class,
             nickname = "deleteDevice"
     )
+    @PreAuthorize("hasPermission(#deviceId, 'delete')")
     public ResponseEntity<?> deleteDevice(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId
