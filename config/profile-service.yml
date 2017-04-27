@@ -1,17 +1,18 @@
 
 spring:
   profiles: default
-  mongodb:
-    host: localhost
-    port: 27017
-    database: raptor
+  data:
+    mongodb:
+      host: mongo
+      port: 27017
+      database: raptor
 #    username: admin
 #    password: admin
 
 server:
   contextPath: /profile
   port: 8070
-  address: 127.0.0.1
+  address: 0.0.0.0
   error:
     whitelabel:
       enabled: true

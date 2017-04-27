@@ -1,19 +1,30 @@
+
+flyway:
+  enabled: false
+  # url: jdbc:mysql://mariadb:3306/raptor?createDatabaseIfNotExist=true
+  # username: root
+  # password: raptor
+
 spring:
 
   profiles: default
 
   datasource:
-    url: jdbc:mysql://mariadb:3306/raptor?createDatabaseIfNotExist=true
+    url: jdbc:mariadb://mariadb:3306/raptor?createDatabaseIfNotExist=true
     username: root
     password: raptor
+    driver-class-name: org.mariadb.jdbc.Driver
     # Keep the connection alive if idle for a long time (needed in production)
     testWhileIdle: true
+    testOnBorrow: true
+    timeBetweenEvictionRunsMillis: 60000
     validationQuery: SELECT 1
     lastInsertQuery: SELECT LAST_INSERT_ID()
 
   jpa:
+    database: MYSQL
     show-sql: false
-    database-platform: org.hibernate.dialect.MySQL5Dialect
+    # database-platform: org.hibernate.dialect.MySQL5Dialect
     properties:
         hibernate:
             enable_lazy_load_no_trans: true
@@ -22,12 +33,12 @@ spring:
       ddl: true
       ddl-auto: validate
       naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
-      dialect: org.hibernate.dialect.MySQL5Dialect
+      # dialect: org.hibernate.dialect.MySQL5Dialect
 
 server:
   contextPath: /auth
   port: 8090
-  address: auth
+  address: 0.0.0.0
   error:
     whitelabel:
       enabled: true
