@@ -1,9 +1,9 @@
 
 flyway:
   enabled: false
-  url: jdbc:mysql://mariadb:3306/raptor?createDatabaseIfNotExist=true
-  username: root
-  password: raptor
+  # url: jdbc:mysql://mariadb:3306/raptor?createDatabaseIfNotExist=true
+  # username: root
+  # password: raptor
 
 spring:
 
@@ -23,7 +23,7 @@ spring:
 
   jpa:
     database: MYSQL
-    show-sql: true
+    show-sql: false
     # database-platform: org.hibernate.dialect.MySQL5Dialect
     properties:
         hibernate:
@@ -38,7 +38,7 @@ spring:
 server:
   contextPath: /auth
   port: 8090
-  address: auth
+  address: 0.0.0.0
   error:
     whitelabel:
       enabled: true
