@@ -15,11 +15,8 @@
  */
 package org.createnet.raptor.auth.service.services;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.createnet.raptor.models.auth.User;
-import java.util.Collection;
-import org.createnet.raptor.api.common.RaptorUserDetails;
-import org.createnet.raptor.auth.service.services.UserService;
+import org.createnet.raptor.api.common.authentication.RaptorUserDetails;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

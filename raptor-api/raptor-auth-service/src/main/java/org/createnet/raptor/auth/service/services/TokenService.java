@@ -16,6 +16,7 @@
 package org.createnet.raptor.auth.service.services;
 
 import java.util.List;
+import org.createnet.raptor.api.common.authentication.TokenHelper;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.repository.TokenRepository;
@@ -46,58 +47,44 @@ public class TokenService {
         }
     }
 
-    @Value("${raptor.auth.headerPrefix}")
-    private String tokenHeaderPrefix;    
-    
-    @Value("${raptor.auth.secret}")
-    private String secret;
-
     @Value("${raptor.auth.expiration}")
     private Long expiration;
 
+    @Value("${raptor.auth.secret}")
+    private String secret;    
+    
     @Autowired
     private PasswordEncoder passwordEncoder;
-    
+
     @Autowired
     private TokenUtilService tokenUtil;
 
     @Autowired
     private TokenRepository tokenRepository;
-    
-    /**
-     * Extract the raw token from the request header
-     * @param rawToken
-     * @return 
-     */
-    public String extractToken(String rawToken) {
-        
-        if (rawToken.startsWith(tokenHeaderPrefix)) {
-            rawToken = rawToken.substring(tokenHeaderPrefix.length());
-        }
-        
-        return rawToken.trim();
-    }    
-    
+
     /**
      * List token for an user
+     *
      * @param uuid
      * @return
      */
     public Iterable<Token> list(String uuid) {
         return tokenRepository.findByUserUuid(uuid);
     }
-    
+
     /**
      * Load a token by ID
+     *
      * @param tokenId
      * @return
      */
     public Token read(Long tokenId) {
         return tokenRepository.findOne(tokenId);
     }
-    
+
     /**
      * Delete a token from database
+     *
      * @param token
      */
     public void delete(Token token) {
@@ -110,10 +97,11 @@ public class TokenService {
 
     public void delete(List<Token> list) {
         tokenRepository.delete(list);
-    }    
-    
+    }
+
     /**
      * Save a token to database
+     *
      * @param token
      * @return
      */
@@ -123,6 +111,7 @@ public class TokenService {
 
     /**
      * Load a token entity based on the token string
+     *
      * @param authToken
      * @return
      */
@@ -135,6 +124,7 @@ public class TokenService {
 
     /**
      * Create a login token
+     *
      * @param user
      * @return
      */
@@ -163,6 +153,7 @@ public class TokenService {
 
     /**
      * Generate the token string based on the provided secret
+     *
      * @param token
      * @return
      */
@@ -173,10 +164,11 @@ public class TokenService {
 
     /**
      * Check if the token is valid
+     *
      * @param token
      * @param secret
      * @return
-     */    
+     */
     public boolean isValid(Token token, String secret) {
         // Cannot read the token claims?
         if (!tokenUtil.validate(token, secret)) {
@@ -187,19 +179,20 @@ public class TokenService {
 
     /**
      * Check if the token is valid
+     *
      * @param token
      * @return
-     */        
+     */
     public boolean isValid(Token token) {
         if (token == null) {
             return false;
         }
         return isValid(token, token.getSecret());
     }
-    
+
     @Transactional
     public Iterable<Token> findByType(Token.Type type) {
         return tokenRepository.findByType(type);
     }
-    
+
 }

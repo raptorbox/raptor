@@ -33,54 +33,54 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 public class JsonUsernamePasswordFilter extends UsernamePasswordAuthenticationFilter {
 
-  public final static ObjectMapper jacksonObjectMapper = new ObjectMapper();
+    public final static ObjectMapper jacksonObjectMapper = new ObjectMapper();
 
-  protected class LoginForm {
-    public String username;
-    public String password;
-  }
+    protected class LoginForm {
 
-  @Override
-  public Authentication attemptAuthentication(HttpServletRequest request,
-          HttpServletResponse response) throws AuthenticationException {
-
-    if (!request.getMethod().equals("POST")) {
-      throw new AuthenticationServiceException(
-              "Authentication method not supported: " + request.getMethod());
+        public String username;
+        public String password;
     }
 
-    if (!request.getContentType().equals(MediaType.APPLICATION_JSON)) {
-      throw new AuthenticationServiceException(
-              "Only Content-Type " + MediaType.APPLICATION_JSON + " is supported. Provided is " + request.getContentType());
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+
+        if (!request.getMethod().equals("POST")) {
+            throw new AuthenticationServiceException(
+                    "Authentication method not supported: " + request.getMethod());
+        }
+
+        if (!request.getContentType().equals(MediaType.APPLICATION_JSON)) {
+            throw new AuthenticationServiceException(
+                    "Only Content-Type " + MediaType.APPLICATION_JSON + " is supported. Provided is " + request.getContentType());
+        }
+
+        LoginForm loginForm;
+        try {
+            InputStream body = request.getInputStream();
+            loginForm = jacksonObjectMapper.readValue(body, LoginForm.class);
+        } catch (IOException ex) {
+            throw new AuthenticationServiceException("Error reading body", ex);
+        }
+
+        if (loginForm.username == null) {
+            loginForm.username = "";
+        }
+
+        if (loginForm.password == null) {
+            loginForm.password = "";
+        }
+
+        loginForm.username = loginForm.username.trim();
+
+        UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(loginForm.username, loginForm.password);
+        setDetails(request, authRequest);
+
+        return this.getAuthenticationManager().authenticate(authRequest);
     }
 
-    LoginForm loginForm;
-    try {
-      InputStream body = request.getInputStream();
-      loginForm = jacksonObjectMapper.readValue(body, LoginForm.class);
-    } catch (IOException ex) {
-      throw new AuthenticationServiceException("Error reading body", ex);
+    @Override
+    protected void setDetails(HttpServletRequest request, UsernamePasswordAuthenticationToken authRequest) {
+        authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
     }
-
-    if (loginForm.username == null) {
-      loginForm.username = "";
-    }
-
-    if (loginForm.password == null) {
-      loginForm.password = "";
-    }
-
-    loginForm.username = loginForm.username.trim();
-
-    UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(loginForm.username, loginForm.password);
-    setDetails(request, authRequest);
-
-    return this.getAuthenticationManager().authenticate(authRequest);
-  }
-
-  @Override
-  protected void setDetails(HttpServletRequest request, UsernamePasswordAuthenticationToken authRequest) {
-    authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
-  }
 
 }

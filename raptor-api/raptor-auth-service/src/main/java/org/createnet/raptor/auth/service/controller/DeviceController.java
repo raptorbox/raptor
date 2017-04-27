@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.stream.Collectors;
+import org.createnet.raptor.api.common.authentication.TokenHelper;
 import org.createnet.raptor.auth.entity.AuthorizationRequest;
 import org.createnet.raptor.auth.entity.AuthorizationResponse;
 import org.createnet.raptor.auth.entity.SyncRequest;
@@ -88,6 +89,9 @@ public class DeviceController {
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private TokenHelper tokenHelper;
     
     @Autowired
     private AclDeviceService aclDeviceService;
@@ -159,7 +163,7 @@ public class DeviceController {
                 // check for token specific permission if user level ACL are ok
                 if (response.result) {
                     // check token level ACL
-                    Token token = tokenService.read(tokenService.extractToken(rawToken));
+                    Token token = tokenService.read(tokenHelper.extractToken(rawToken));
                     if(!aclTokenService.list(token, user).isEmpty()) {
                         response.result = aclTokenService.check(token, user, permission);
                     }

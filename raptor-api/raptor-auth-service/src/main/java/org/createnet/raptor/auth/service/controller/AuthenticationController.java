@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
+import org.createnet.raptor.api.common.authentication.TokenHelper;
 import org.createnet.raptor.auth.entity.LoginRequest;
 import org.createnet.raptor.auth.entity.LoginResponse;
 import org.createnet.raptor.models.response.JsonErrorResponse;
@@ -91,6 +92,9 @@ public class AuthenticationController {
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private TokenHelper tokenHelper;
 
     @RequestMapping(value = "${raptor.auth.route.authentication.path}", method = RequestMethod.POST)
     @ApiOperation(
@@ -162,12 +166,9 @@ public class AuthenticationController {
             HttpServletRequest request,
             @AuthenticationPrincipal User currentUser
     ) {
-
-        String bearer = "Bearer ";
-        if (reqToken.substring(0, bearer.length()).equals(bearer)) {
-            reqToken = reqToken.replace(bearer, "");
-        }
-
+        
+        reqToken = tokenHelper.extractToken(reqToken);
+        
         Token token = tokenService.read(reqToken);
         if (token == null) {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST);

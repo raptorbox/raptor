@@ -20,6 +20,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -28,18 +29,19 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.api.common.authentication", "org.createnet.raptor.inventory"})
 @EnableMongoRepositories
+@EnableGlobalMethodSecurity(securedEnabled = true)
 public class Application {
-    
+
     static private ConfigurableApplicationContext instance;
-    
+
     public static void main(String[] args) {
         instance = SpringApplication.run(Application.class, args);
     }
 
     public static void close() {
-        if(instance != null) {
+        if (instance != null) {
             instance.close();
         }
     }
@@ -55,6 +57,6 @@ public class Application {
                         .maxAge(3600);
             }
         };
-    }    
-    
+    }
+
 }

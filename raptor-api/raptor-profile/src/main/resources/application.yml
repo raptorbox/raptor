@@ -1,4 +1,10 @@
 
+raptor:
+    auth:
+        url: http://auth:8090/auth
+        header: Authorization
+        headerPrefix: Bearer
+
 spring:
   devtools:
     restart:

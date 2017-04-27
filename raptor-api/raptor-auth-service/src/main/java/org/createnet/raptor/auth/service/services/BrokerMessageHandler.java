@@ -17,7 +17,7 @@ package org.createnet.raptor.auth.service.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
-import org.createnet.raptor.api.common.RaptorUserDetails;
+import org.createnet.raptor.api.common.authentication.RaptorUserDetails;
 import org.createnet.raptor.auth.entity.SyncRequest;
 import static org.createnet.raptor.auth.service.Application.mapper;
 import org.createnet.raptor.models.payload.ActionPayload;

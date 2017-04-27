@@ -14,8 +14,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import org.createnet.raptor.api.common.RaptorUserDetails;
-import org.createnet.raptor.auth.service.services.RaptorUserDetailsService;
+import org.createnet.raptor.api.common.authentication.RaptorUserDetails;
+import org.createnet.raptor.api.common.authentication.TokenHelper;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.service.services.TokenService;
@@ -28,12 +28,12 @@ public class RaptorAuthenticationTokenFilter extends GenericFilterBean {
 
     @Autowired
     private TokenService tokenService;
+    
+    @Autowired
+    private TokenHelper tokenHelper;
 
     @Value("${raptor.auth.header}")
     private String tokenHeader;
-
-    @Value("${raptor.auth.headerPrefix}")
-    private String tokenHeaderPrefix;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -43,7 +43,7 @@ public class RaptorAuthenticationTokenFilter extends GenericFilterBean {
 
         if (authToken != null && !authToken.isEmpty()) {
             
-            authToken = tokenService.extractToken(authToken);
+            authToken = tokenHelper.extractToken(authToken);
             Token token = tokenService.read(authToken);
 
             if (token != null) {
@@ -60,7 +60,7 @@ public class RaptorAuthenticationTokenFilter extends GenericFilterBean {
 
                 } else {
 
-                    logger.debug("JWT Token is {} [name:`{}` id:{} type:{}]", (token.isExpired() ? "expired" : "not valid"), token.getName(), token.getId().toString(), token.getType().name());
+                    logger.debug("Token is {} [name:`{}` id:{} type:{}]", (token.isExpired() ? "expired" : "not valid"), token.getName(), token.getId().toString(), token.getType().name());
                     if (token.isLoginToken()) {
                         tokenService.delete(token);
                     }
