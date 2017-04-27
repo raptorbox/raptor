@@ -22,19 +22,19 @@ import org.createnet.raptor.models.objects.Device;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class ObjectEvent extends AbstractEvent {
+public class DeviceEvent extends AbstractEvent {
   
-  protected Device obj;
+  protected Device device;
   
-  public ObjectEvent() {
+  public DeviceEvent() {
   }
   
-  public ObjectEvent(Device obj) {
-    this.obj = obj;
+  public DeviceEvent(Device device) {
+    this.device = device;
   }
 
   public Device getObject() {
-    return obj;
+    return device;
   }
   
 }

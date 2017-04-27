@@ -22,7 +22,7 @@ import org.createnet.raptor.models.objects.Action;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class ActionEvent  extends ObjectEvent {
+public class ActionEvent  extends DeviceEvent {
   
   final private Action action;
   final private ActionStatus status;

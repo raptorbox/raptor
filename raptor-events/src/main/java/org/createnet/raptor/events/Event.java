@@ -21,7 +21,7 @@ package org.createnet.raptor.events;
  */
 public interface Event {
 
-    public enum EventName {
+    public enum EventType {
 
         create, update, delete,
         push, pull,

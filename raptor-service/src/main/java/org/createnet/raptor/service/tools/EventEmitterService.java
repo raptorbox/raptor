@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 import javax.inject.Singleton;
 import org.createnet.raptor.events.Emitter;
 import org.createnet.raptor.events.Event;
-import org.createnet.raptor.events.Event.EventName;
+import org.createnet.raptor.events.Event.EventType;
 import org.jvnet.hk2.annotations.Service;
 
 /**
@@ -33,26 +33,26 @@ public class EventEmitterService extends Emitter {
 
   final ExecutorService executor = Executors.newCachedThreadPool();  
   
-  public void on(EventName name, Callback cb) {
+  public void on(EventType name, Callback cb) {
     on(name.toString(), cb);
   }
 
-  public void off(EventName name, Callback cb) {
+  public void off(EventType name, Callback cb) {
     off(name.toString(), cb);
   }
 
-  public void off(EventName name) {
+  public void off(EventType name) {
     off(name.toString());
   }
 
-  public void trigger(EventName name, Event event) {
+  public void trigger(EventType name, Event event) {
 
     Runnable task = () -> {
 
       event.setParentEvent(name.toString());
 
       // trigger to all listener
-      trigger(EventName.all.toString(), event);
+      trigger(EventType.all.toString(), event);
 
       // group event call
       switch (name) {
@@ -60,12 +60,12 @@ public class EventEmitterService extends Emitter {
         case create:
         case update:
         case delete:
-          trigger(EventName.object.toString(), event);
+          trigger(EventType.object.toString(), event);
           break;
 
         case push:
         case pull:
-          trigger(EventName.data.toString(), event);
+          trigger(EventType.data.toString(), event);
           break;
 
       }

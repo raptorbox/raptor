@@ -30,10 +30,10 @@ import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.payload.StreamPayload;
 import org.createnet.raptor.events.Emitter;
 import org.createnet.raptor.events.Event;
-import org.createnet.raptor.events.Event.EventName;
+import org.createnet.raptor.events.Event.EventType;
 import org.createnet.raptor.events.type.ActionEvent;
 import org.createnet.raptor.events.type.DataEvent;
-import org.createnet.raptor.events.type.ObjectEvent;
+import org.createnet.raptor.events.type.DeviceEvent;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -69,7 +69,7 @@ public class DispatcherService extends AbstractRaptorService {
                 case "create":
                 case "update":
                 case "delete":
-                    ObjectEvent objEvent = (ObjectEvent) event;
+                    DeviceEvent objEvent = (DeviceEvent) event;
 
                     if (!objEvent.getObject().settings.eventsEnabled()) {
                         return;
@@ -255,12 +255,12 @@ public class DispatcherService extends AbstractRaptorService {
 
     private void addEmitterCallback() {
         logger.debug("Register dispatcher event trigger");
-        emitter.on(EventName.all, emitterCallback);
+        emitter.on(EventType.all, emitterCallback);
     }
 
     private void removeEmitterCallback() {
         logger.debug("Unregister dispatcher event trigger");
-        emitter.off(EventName.all, emitterCallback);
+        emitter.off(EventType.all, emitterCallback);
     }
 
 }

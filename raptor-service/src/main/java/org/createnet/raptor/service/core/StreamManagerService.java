@@ -156,7 +156,7 @@ public class StreamManagerService extends AbstractRaptorService {
             logger.debug("Skipped data storage for {}", obj.id);
         }
 
-        emitter.trigger(Event.EventName.push, new DataEvent(stream, record));
+        emitter.trigger(Event.EventType.push, new DataEvent(stream, record));
 
         logger.debug("Received record for stream {} in object {}", stream.name, obj.id);
 

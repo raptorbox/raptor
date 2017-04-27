@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
+import org.createnet.raptor.events.Event;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -65,6 +66,9 @@ public class InventoryController {
     
     @Autowired
     private DeviceService deviceService;
+    
+    @Autowired
+    private DeviceEventPublisher eventPublisher;
 
     @RequestMapping(method = RequestMethod.GET, value = "/")
     @ApiOperation(
@@ -103,7 +107,9 @@ public class InventoryController {
 
         device.userId = currentUser.getUuid();
         deviceService.save(device);
-
+        
+        eventPublisher.notify(device, Event.EventType.create);
+        
         return ResponseEntity.ok(device.toJSON());
     }    
     
@@ -149,7 +155,9 @@ public class InventoryController {
         }
 
         deviceService.save(device);
-
+        
+        eventPublisher.notify(device, Event.EventType.update);
+        
         return ResponseEntity.ok(device.toJSON());
     }
 
@@ -172,7 +180,9 @@ public class InventoryController {
         }
 
         deviceService.delete(device);
-
+        
+        eventPublisher.notify(device, Event.EventType.delete);
+        
         return ResponseEntity.accepted().build();
     }
 

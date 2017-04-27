@@ -110,7 +110,7 @@ public class ActionManagerService extends AbstractRaptorService {
 
         ActionStatus actionStatus = storage.saveActionStatus(action, body);
 
-        emitter.trigger(Event.EventName.execute, new ActionEvent(action, actionStatus));
+        emitter.trigger(Event.EventType.execute, new ActionEvent(action, actionStatus));
 
         logger.debug("Saved action {} status for object {}", action.name, action.getDevice().id);
 
@@ -122,7 +122,7 @@ public class ActionManagerService extends AbstractRaptorService {
         assert action.getDevice() != null;
         
         storage.deleteActionStatus(action);
-        emitter.trigger(Event.EventName.deleteAction, new ActionEvent(action, null));
+        emitter.trigger(Event.EventType.deleteAction, new ActionEvent(action, null));
 
         logger.debug("removed action {} status for object {}", action.name, action.getDevice().id);
     }

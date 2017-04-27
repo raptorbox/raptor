@@ -22,7 +22,7 @@ import org.createnet.raptor.models.objects.Stream;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class DataEvent  extends ObjectEvent {
+public class DataEvent  extends DeviceEvent {
   
   final private Stream stream;
   final private RecordSet record;

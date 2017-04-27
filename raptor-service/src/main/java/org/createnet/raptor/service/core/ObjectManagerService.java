@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import org.createnet.raptor.events.Event;
-import org.createnet.raptor.events.type.ObjectEvent;
+import org.createnet.raptor.events.type.DeviceEvent;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Channel;
 import org.createnet.raptor.models.objects.Device;
@@ -174,7 +174,7 @@ public class ObjectManagerService extends AbstractRaptorService {
             throw new DeviceOperationException("Failed to index device");
         }
 
-        emitter.trigger(Event.EventName.create, new ObjectEvent(obj));
+        emitter.trigger(Event.EventType.create, new DeviceEvent(obj));
 
         logger.debug("Created new object {} for {}", obj.id, obj.userId);
 
@@ -234,7 +234,7 @@ public class ObjectManagerService extends AbstractRaptorService {
         indexer.deleteData(changedStreams);
         storage.deleteActionStatus(changedActions);
 
-        emitter.trigger(Event.EventName.update, new ObjectEvent(storedObj));
+        emitter.trigger(Event.EventType.update, new DeviceEvent(storedObj));
         
         logger.debug("Updated object {} for {}", storedObj.id, obj.userId);
 
@@ -253,7 +253,7 @@ public class ObjectManagerService extends AbstractRaptorService {
         storage.deleteObject(obj);
         indexer.deleteObject(obj);
 
-        emitter.trigger(Event.EventName.delete, new ObjectEvent(obj));
+        emitter.trigger(Event.EventType.delete, new DeviceEvent(obj));
 
         logger.debug("Deleted object {}", id);
 

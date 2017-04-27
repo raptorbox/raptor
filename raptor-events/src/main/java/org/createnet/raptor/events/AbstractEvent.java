@@ -24,7 +24,8 @@ public class AbstractEvent implements Event {
     private String userId;
     private String event;
     private String parentEvent;
-
+    private EventType type;
+    
     @Override
     public String getEvent() {
         return event;
