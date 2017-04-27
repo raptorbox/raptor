@@ -20,7 +20,6 @@ import java.util.Set;
 import org.apache.activemq.artemis.core.security.CheckType;
 import org.apache.activemq.artemis.core.security.Role;
 import org.createnet.raptor.broker.configuration.BrokerConfiguration;
-import org.createnet.raptor.service.RaptorService;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -53,8 +52,6 @@ public class RaptorSecurityManagerTest {
     @Before
     public void setUp() {
 
-
-        RaptorService.inject(manager);
 
         BrokerConfiguration brokerConfiguration = new BrokerConfiguration();
 

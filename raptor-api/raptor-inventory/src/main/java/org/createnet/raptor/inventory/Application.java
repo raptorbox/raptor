@@ -32,7 +32,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.api.common.configuration", "org.createnet.raptor.api.common.authentication", "org.createnet.raptor.inventory"})
+@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.inventory"})
 @EnableConfigurationProperties
 @EnableAutoConfiguration
 @EnableMongoRepositories

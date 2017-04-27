@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.inventory;
 
+import org.createnet.raptor.api.common.events.DeviceApplicationEvent;
 import org.createnet.raptor.events.Event;
 import org.createnet.raptor.events.type.DeviceEvent;
 import org.createnet.raptor.models.objects.Device;
@@ -33,9 +34,23 @@ public class DeviceEventPublisher {
     private ApplicationEventPublisher applicationEventPublisher;
 
     public void notify(Device dev, Event.EventType type) {
+        
         DeviceEvent deviceEvent = new DeviceEvent(dev);
         deviceEvent.setEvent(type.name());
-        applicationEventPublisher.publishEvent(deviceEvent);
+        DeviceApplicationEvent ev = new DeviceApplicationEvent(this, deviceEvent);
+        applicationEventPublisher.publishEvent(ev);
+    }
+    
+    public void create(Device dev) {
+        notify(dev, Event.EventType.create);
+    }
+    
+    public void update(Device dev) {
+        notify(dev, Event.EventType.update);
+    }
+    
+    public void delete(Device dev) {
+        notify(dev, Event.EventType.delete);
     }
 
 }
