@@ -18,22 +18,19 @@ package org.createnet.raptor.broker.security;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Inject;
 import javax.security.cert.X509Certificate;
 import org.apache.activemq.artemis.core.security.CheckType;
 import org.apache.activemq.artemis.core.security.Role;
 import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
 import org.apache.activemq.artemis.spi.core.security.ActiveMQSecurityManager2;
-import org.createnet.raptor.auth.authentication.Authentication;
-import org.createnet.raptor.auth.authorization.Authorization;
 import org.createnet.raptor.broker.configuration.BrokerConfiguration;
-import org.createnet.raptor.config.exception.ConfigurationException;
-import org.createnet.raptor.db.Storage;
 import org.createnet.raptor.models.acl.Permissions;
-import org.createnet.raptor.models.objects.RaptorComponent;
+import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.models.auth.request.AuthorizationResponse;
+import org.createnet.raptor.models.auth.Role.Roles;
 import org.createnet.raptor.models.objects.Device;
-import org.createnet.raptor.service.tools.AuthService;
-import org.createnet.raptor.service.tools.IndexerService;
+import org.createnet.raptor.sdk.Raptor;
+import org.createnet.raptor.sdk.api.AuthClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,34 +42,58 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
     private BrokerConfiguration brokerConfiguration;
 
-    protected enum Roles {
-        user, admin
+    protected class BrokerUser {
+
+        private User user;
+        private Raptor raptor;
+
+        public BrokerUser() {
+        }
+        
+        public BrokerUser(Raptor raptor) {
+            this.raptor = raptor;
+        }
+
+        public BrokerUser(Raptor raptor, User user) {
+            this.raptor = raptor;
+            this.user = user;
+        }
+        
+        public BrokerUser(User user) {
+            this.user = user;
+        }
+
+        public User getUser() {
+            if (user == null && raptor != null) {
+                return raptor.Auth().getUser();
+            }
+            return user;
+        }
+        
+        public Raptor getRaptor() {
+            return raptor;
+        }
+
     }
 
     private final Logger logger = LoggerFactory.getLogger(RaptorSecurityManager.class);
 
     private final Map<String, BrokerConfiguration.BrokerUser> localUsers = new HashMap();
 
-    @Inject
-    AuthService auth;
-
-    @Inject
-    IndexerService indexer;
-
     public RaptorSecurityManager() {
 
     }
 
-    protected Authentication.UserInfo getUser(String token) {
+    protected BrokerUser login(String token) {
         try {
 
-            Authentication.UserInfo user = auth.getUser(token);
-            if (user != null) {
-                logger.debug("Authenticated user {}", user.getUserId());
-                return user;
-            }
+            Raptor r = new Raptor(brokerConfiguration.authUrl, token);
 
-        } catch (ConfigurationException | Authentication.AuthenticationException e) {
+            AuthClient.LoginState result = r.Auth().login();
+            logger.debug("Authenticated user {}", result.user.getUuid());
+
+            return new BrokerUser(r);
+        } catch (Exception e) {
             logger.error("Authentication failed");
         }
         return null;
@@ -83,52 +104,59 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         return (user != null && user.login(password)) ? user : null;
     }
 
-    protected Authentication.UserInfo login(String username, String password) {
+    protected BrokerUser login(String username, String password) {
         try {
 
-            Authentication.UserInfo user = auth.login(username, password);
-            if (user != null) {
-                logger.debug("Login successful for user {}", user.getUserId());
-                return user;
-            }
+            Raptor r = new Raptor(brokerConfiguration.authUrl, username, password);
 
-        } catch (ConfigurationException | Authentication.AuthenticationException e) {
+            AuthClient.LoginState result = r.Auth().login();
+            logger.debug("Login successful for user {}", result.user.getUuid());
+
+            return new BrokerUser(r);
+        } catch (Exception e) {
             logger.error("Login failed");
         }
         return null;
     }
 
-    protected Authentication.UserInfo authenticate(String username, String password) {
+    protected BrokerUser authenticate(String username, String password) {
 
         logger.debug("Authenticate user {}", username);
 
-        Authentication.UserInfo user = null;
+        BrokerUser brokerUser = null;
 
         // 1. if no username, try with apiKey authentication
         if (username == null || username.isEmpty() || username.length() < 3) {
-            user = getUser(password);
+            brokerUser = login(password);
         } else {
 
             // 2. try to login from local configuration file
             BrokerConfiguration.BrokerUser localUser = getLocalUser(username, password);
             if (localUser != null) {
+                
                 logger.debug("Local user {} found", username);
-                user = new Authentication.UserInfo(username, password);
-                user.setRoles(localUser.getRoles());
+                
+                User user = new User();
+                user.setUsername(username);
+                user.setPassword(password);
+                // local users must be admin or they won't  pass ACL checks
+                user.addRole(localUser.getRoles().contains("admin") ? Roles.admin : Roles.guest);
+                
+                brokerUser = new BrokerUser(user);
             }
 
-            if (user == null) {
+            if (brokerUser == null) {
                 // 3. try to login as user to the auth api
-                user = login(username, password);
+                brokerUser = login(username, password);
             }
         }
 
-        if (user == null) {
+        if (brokerUser == null) {
             logger.debug("Login failed for {}:{}", username, password);
             return null;
         }
 
-        return user;
+        return brokerUser;
     }
 
     @Override
@@ -142,14 +170,15 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
         logger.debug("Authenticate user {} with roles {} on topic/address {}", username, roles, address);
 
-        Authentication.UserInfo user = authenticate(username, password);
+        BrokerUser brokerUser = authenticate(username, password);
+        User user = brokerUser.getUser();
 
         if (user == null) {
             logger.debug("User `{}` login failed", username);
             return false;
         }
 
-        boolean isAdmin = user.hasRole(Roles.admin.toString());
+        boolean isAdmin = user.isAdmin();
 
         if (isAdmin) {
             return true;
@@ -184,67 +213,67 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
         logger.debug("Validating topic {}", address);
 
-        if(address.substring(0, 1).equals(".")) {
+        if (address.substring(0, 1).equals(".")) {
             address = address.substring(1);
         }
-        
+
         String[] topicTokens = address.split("\\.");
         if (topicTokens.length >= 2) {
 
+            Raptor r = brokerUser.getRaptor();
+            
+            if(r == null) {
+                logger.warn("Raptor client not available (is a non-admin local users?): {}", user.getUsername());
+                return false;
+            }
+            
             int soidIndex = 0;
             String objectId = topicTokens[soidIndex];
 
             try {
 
-                Device obj = indexer.getObject(objectId);
+                Device obj = r.Device().load(objectId);
                 if (obj == null) {
                     logger.warn("Object not found, id: `{}`", objectId);
                     return false;
                 }
 
-//                // ensure user has the `subscribe` flag
-//                if (!isAllowed(user, obj, Permissions.subscribe)) {
-//                    return false;
-//                }
+                AuthorizationResponse req;
 
                 // <object>/events -> requires `admin`
                 String subtopic = topicTokens[soidIndex + 1];
                 if (subtopic != null && subtopic.equals("events")) {
-                    if (!isAllowed(user, obj, Permissions.admin)) {
+                    req = r.Admin().User().isAuthorized(obj.getId(), user.getUuid(), Permissions.admin);
+                    if (!req.result) {
                         return false;
                     }
                 }
 
                 // <object>/streams/<stream> -> requires `pull`
                 if (subtopic != null && subtopic.equals("streams")) {
-                    if (!isAllowed(user, obj, Permissions.pull)) {
+                    req = r.Admin().User().isAuthorized(obj.getId(), user.getUuid(), Permissions.pull);
+                    if (!req.result) {
                         return false;
                     }
                 }
 
                 // <object>/actions/<action> -> requires `execute`
                 if (subtopic != null && subtopic.equals("actions")) {
-                    if (!isAllowed(user, obj, Permissions.execute)) {
+                    req = r.Admin().User().isAuthorized(obj.getId(), user.getUuid(), Permissions.execute);
+                    if (!req.result) {
                         return false;
                     }
                 }
 
-
                 return true;
 
-            } catch (Authorization.AuthorizationException | Storage.StorageException | RaptorComponent.ParserException | ConfigurationException ex) {
+            } catch (Exception ex) {
                 logger.error("Failed to subscribe: {}", ex.getMessage(), ex);
                 return false;
             }
         }
 
         return false;
-    }
-
-    protected boolean isAllowed(Authentication.UserInfo user, Device device, Permissions permission) {
-        boolean allowed = auth.isAllowed(user.getAccessToken(), device, permission);
-        logger.debug("User {} {} allowed to `{}` to {}", user.getUserId(), allowed ? "" : "NOT ", permission.name(), device.id);
-        return allowed;
     }
 
     @Override

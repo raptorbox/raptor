@@ -22,6 +22,7 @@ import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.exception.AuthenticationFailedException;
+import org.createnet.raptor.sdk.exception.MissingAuthenticationException;
 
 /**
  * Represent a Device data stream
@@ -29,9 +30,9 @@ import org.createnet.raptor.sdk.exception.AuthenticationFailedException;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public class AuthClient extends AbstractClient {
-    
+
     protected final String MSG_LOGIN_ERROR = "Authentication failed, please check your credentials";
-    
+
     protected LoginState state;
 
     public AuthClient(Raptor container) {
@@ -128,7 +129,7 @@ public class AuthClient extends AbstractClient {
         LoginState body;
         if (getConfig().hasCredentials()) {
             body = login(getConfig().getUsername(), getConfig().getPassword());
-        } else {
+        } else if (getConfig().hasToken()) {
             try {
                 User user = getContainer().Admin().User().get();
                 body = new LoginState();
@@ -139,6 +140,8 @@ public class AuthClient extends AbstractClient {
                 }
                 throw ex;
             }
+        } else {
+            throw new MissingAuthenticationException("At least one of credentials or token is required to login");
         }
         state = body;
         return body;

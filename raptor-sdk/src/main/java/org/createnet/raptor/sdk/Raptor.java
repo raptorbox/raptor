@@ -34,9 +34,10 @@ import org.createnet.raptor.models.objects.RaptorComponent;
 public class Raptor implements IClient, RaptorComponent {
 
     final protected Config config;
-    final protected HttpClient client;
-    final protected MqttEventEmitter emitter; 
     
+    protected HttpClient client;
+    protected MqttEventEmitter emitter;
+
     protected AdminClient Admin;
     protected AuthClient Auth;
     protected StreamClient Stream;
@@ -49,35 +50,35 @@ public class Raptor implements IClient, RaptorComponent {
         }
         return Admin;
     }
-    
+
     public AuthClient Auth() {
         if (Auth == null) {
             Auth = new AuthClient(getContainer());
         }
         return Auth;
     }
-    
+
     public StreamClient Stream() {
         if (Stream == null) {
             Stream = new StreamClient(getContainer());
         }
         return Stream;
     }
-    
+
     public ActionClient Action() {
         if (Action == null) {
             Action = new ActionClient(getContainer());
         }
         return Action;
     }
-    
+
     public DeviceClient Device() {
         if (Device == null) {
             Device = new DeviceClient(getContainer());
         }
         return Device;
     }
-    
+
     /**
      * Instantiate the client
      *
@@ -112,12 +113,19 @@ public class Raptor implements IClient, RaptorComponent {
     /**
      * Instantiate the client
      *
+     * @param url
+     */
+    public Raptor(String url) {
+        this(new Config(url));
+    }
+
+    /**
+     * Instantiate the client
+     *
      * @param config
      */
     public Raptor(Config config) {
         this.config = config;
-        client = new HttpClient(this);
-        emitter = new MqttEventEmitter(this);
     }
 
     @Override
@@ -132,11 +140,18 @@ public class Raptor implements IClient, RaptorComponent {
 
     @Override
     public HttpClient getClient() {
+        if(client == null) {
+            client = new HttpClient(this);
+        }
         return client;
     }
 
+    @Override
     public MqttEventEmitter getEmitter() {
+        if (emitter == null) {
+            emitter = new MqttEventEmitter(this);
+        }
         return emitter;
     }
-        
+
 }

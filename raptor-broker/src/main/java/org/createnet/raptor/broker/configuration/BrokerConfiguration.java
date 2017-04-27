@@ -58,6 +58,7 @@ public class BrokerConfiguration implements Configuration {
 
   }
 
+  public String authUrl;
   public String artemisConfiguration;
   public List<BrokerUser> users = new ArrayList();
 

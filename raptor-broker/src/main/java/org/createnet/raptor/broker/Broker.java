@@ -19,7 +19,6 @@ import org.apache.activemq.artemis.core.server.embedded.EmbeddedActiveMQ;
 import org.createnet.raptor.broker.configuration.BrokerConfiguration;
 import org.createnet.raptor.broker.security.RaptorSecurityManager;
 import org.createnet.raptor.config.ConfigurationLoader;
-import org.createnet.raptor.service.RaptorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +50,6 @@ public class Broker {
     final RaptorSecurityManager securityManager = new RaptorSecurityManager();
 
     public void initialize() {
-        RaptorService.inject(securityManager);
         setupServer();
     }
 

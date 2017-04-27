@@ -1,4 +1,5 @@
 
+authUrl: http://auth:8090
 artemisConfiguration: file:///etc/raptor/broker.xml
 users:
   - name: frontend

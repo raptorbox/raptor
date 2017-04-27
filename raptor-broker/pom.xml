@@ -66,11 +66,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>raptor-service</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>raptor-config</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -81,7 +76,12 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
-
+        
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>raptor-sdk</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
   
     <build>
