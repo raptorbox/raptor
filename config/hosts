@@ -1,2 +1,2 @@
 #raptor named host mapping
-127.0.0.1 api.raptor.local raptor.local profile auth api broker proxy couchbase elasticsearch dbadmin mariadb
+127.0.0.1 api.raptor.local raptor.local inventory profile auth api broker proxy couchbase elasticsearch dbadmin mariadb

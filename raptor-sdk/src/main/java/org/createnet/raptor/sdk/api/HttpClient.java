@@ -80,60 +80,6 @@ public class HttpClient extends AbstractClient {
         super(container);
     }
 
-    /**
-     * List of base path for Raptor API
-     */
-    public static class Routes {
-
-        final static public String LIST = "/";
-        final static public String SEARCH = "/search";
-
-        final static public String CREATE = LIST;
-        final static public String UPDATE = "/%s";
-        final static public String LOAD = UPDATE;
-        final static public String DELETE = UPDATE;
-
-        final static public String STREAM = "/%s/streams/%s";
-        final static public String PUSH = STREAM;
-        final static public String LAST_UPDATE = PUSH;
-        final static public String PULL = PUSH + "/list";
-        final static public String SEARCH_DATA = PUSH + "/search";
-
-        final static public String INVOKE = "/%s/actions/%s";
-        final static public String ACTION_STATUS = INVOKE;
-        final static public String ACTION_LIST = "/%s/actions";
-        
-        final static public String SUBSCRIBE_ACTION = INVOKE;
-        final static public String SUBSCRIBE_STREAM = PUSH;
-
-        final static public String PERMISSION_CHECK = "/auth/check";
-
-        final static public String LOGIN = "/auth/login";
-        final static public String LOGOUT = LOGIN;
-        final static public String REFRESH_TOKEN = "/auth/refresh";
-        
-        final static public String USER_CREATE = "/auth/user";
-        final public static String USER_GET = USER_CREATE + "/%s";
-        final public static String USER_UPDATE = USER_GET;
-        final public static String USER_DELETE = USER_GET;
-        final public static String USER_GET_ME = "/auth/me";        
-        final public static String USER_UPDATE_ME = USER_GET_ME;
-        
-        final static public String TOKEN_CREATE = "/auth/token";
-        final static public String TOKEN_UPDATE = TOKEN_CREATE + "/%s";
-        final static public String TOKEN_DELETE = TOKEN_UPDATE;
-        final static public String TOKEN_GET = TOKEN_CREATE + "?uuid=%s";
-        
-        final static public String PREFERENCES_GET_ALL = "/profile/%s";
-        final static public String PREFERENCES_GET = PREFERENCES_GET_ALL + "/%s";
-        final static public String PREFERENCES_SET = PREFERENCES_GET;
-        final static public String PREFERENCES_DELETE = PREFERENCES_GET;
-        
-        final static public String TOKEN_PERMISSION_GET = "/auth/permission/token/%s";
-        final static public String TOKEN_PERMISSION_BY_USER = TOKEN_PERMISSION_GET + "/%s";
-        final static public String TOKEN_PERMISSION_SET = TOKEN_PERMISSION_GET;
-        
-    }
 
     /**
      * Add the configured base url to path

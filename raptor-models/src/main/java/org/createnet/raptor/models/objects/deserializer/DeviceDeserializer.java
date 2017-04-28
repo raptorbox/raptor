@@ -16,11 +16,14 @@
 package org.createnet.raptor.models.objects.deserializer;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Spliterator;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
@@ -67,6 +70,10 @@ public class DeviceDeserializer extends JsonDeserializer<Device> {
 
         if (tree.has("path")) {
             device.path = getText("path", tree);
+        }
+        
+        if (tree.has("properties") && tree.get("properties").size() > 0) {
+            device.properties.putAll(Device.getMapper().convertValue(tree.get("properties"), new TypeReference<Map<String, Object>>() {}));
         }
 
         if (tree.has("streams")) {

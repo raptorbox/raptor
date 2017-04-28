@@ -16,16 +16,27 @@
 package org.createnet.raptor.inventory;
 
 import java.util.List;
+import com.querydsl.core.types.Predicate;
 import org.createnet.raptor.models.objects.Device;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface DeviceRepository extends MongoRepository<Device, String> {
+public interface DeviceRepository extends MongoRepository<Device, String>, QueryDslPredicateExecutor<Device> {
 
     public List<Device> findByUserId(String userId);
-    public List<Device> findByName(String name);
+    public List<Device> findByNameAndUserId(String name, String userId);
+
+    @Override
+    public Page<Device> findAll(Predicate predicate, Pageable pageable);
+
+    @Override
+    public List<Device> findAll(Predicate prdct);
+    
 
 }

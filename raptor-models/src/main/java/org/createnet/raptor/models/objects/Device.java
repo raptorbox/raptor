@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.models.objects.deserializer.DeviceDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.querydsl.core.annotations.QueryEntity;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  */
 @JsonDeserialize(using = DeviceDeserializer.class)
 @Document
+@QueryEntity
 public class Device extends DeviceContainer {
     
     @JsonIgnore
@@ -48,8 +50,9 @@ public class Device extends DeviceContainer {
     private final Logger logger = LoggerFactory.getLogger(Device.class);
 
     @JsonIgnore
+    @Transient
     private boolean isNew = true;
-    
+
     @Id
     public String id = Device.generateUUID();
     
@@ -66,13 +69,22 @@ public class Device extends DeviceContainer {
     public String name;
     public String description = "";
 
+    @Indexed
     public Long createdAt = Instant.now().getEpochSecond();
+    
+    @Indexed
     public Long updatedAt = createdAt;
 
-    final public Map<String, Object> customFields = new HashMap();
+    @Indexed
+    final public Map<String, Object> properties = new HashMap();
+    
+    @Indexed
     final public Settings settings = new Settings();
 
+    @Indexed
     final public Map<String, Stream> streams = new HashMap();
+
+    @Indexed
     final public Map<String, Action> actions = new HashMap();
 
     /**
@@ -193,8 +205,8 @@ public class Device extends DeviceContainer {
         createdAt = device.createdAt;
         updatedAt = device.updatedAt;
 
-        customFields.clear();
-        customFields.putAll(device.customFields);
+        properties.clear();
+        properties.putAll(device.properties);
 
         getStreams().clear();
         device.getStreams().entrySet().stream().forEach((el) -> {

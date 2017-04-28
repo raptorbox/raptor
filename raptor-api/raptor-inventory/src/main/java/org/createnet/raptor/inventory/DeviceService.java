@@ -15,9 +15,14 @@
  */
 package org.createnet.raptor.inventory;
 
+import com.querydsl.core.types.Predicate;
 import java.util.List;
+import org.createnet.raptor.api.common.query.DeviceQueryBuilder;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.query.DeviceQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -49,5 +54,13 @@ public class DeviceService {
     public void delete(Device dev) {
         delete(dev.getId());
     }
-    
+
+    public Page<Device> search(Predicate predicate, Pageable pageable) {
+        return repository.findAll(predicate, pageable);
+    }
+
+    public List<Device> search(Predicate predicate) {
+        return repository.findAll(predicate);
+    }
+        
 }

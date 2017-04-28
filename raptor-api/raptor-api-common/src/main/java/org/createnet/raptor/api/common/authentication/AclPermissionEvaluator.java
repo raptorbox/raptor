@@ -21,6 +21,7 @@ import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.Raptor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 
@@ -39,8 +40,14 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
         if ((auth == null) || (deviceObject == null) || !(permission instanceof String)) {
             return false;
         }
-        
+
         String deviceId = deviceObject.toString();
+
+        if(deviceObject instanceof ResponseEntity) {
+            ResponseEntity entity = (ResponseEntity) deviceObject;
+            deviceObject = (Device)entity.getBody();
+        }
+        
         if(deviceObject instanceof Device) {
             Device dev = (Device)deviceObject;
             deviceId = dev.getId();

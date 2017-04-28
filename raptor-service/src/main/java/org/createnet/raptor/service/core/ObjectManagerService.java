@@ -198,8 +198,8 @@ public class ObjectManagerService extends AbstractRaptorService {
         logger.debug("Updating object {}", obj.id);
 
         // @TODO: handle proper object update, ensuring stream data integrity
-        storedObj.customFields.clear();
-        storedObj.customFields.putAll(obj.customFields);
+        storedObj.properties.clear();
+        storedObj.properties.putAll(obj.properties);
 
         // update settings
         storedObj.settings.storeData = obj.settings.storeData;

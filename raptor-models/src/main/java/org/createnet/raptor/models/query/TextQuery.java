@@ -1,0 +1,79 @@
+/*
+ * Copyright 2017 FBK/CREATE-NET
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.createnet.raptor.models.query;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+/**
+ *
+ * @author Luca Capra <lcapra@fbk.eu>
+ */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public class TextQuery {
+    
+    private String startWith;
+    private String endWith;
+    private String contains;
+    private String equals;
+
+    public TextQuery startWith(String startWith) {
+        this.startWith = startWith;
+        return this;
+    }
+
+    public TextQuery endWith(String endWith) {
+        this.endWith = endWith;
+        return this;
+    }
+
+    public TextQuery contains(String contains) {
+        this.contains = contains;
+        return this;
+    }
+
+    public TextQuery equals(String equals) {
+        this.equals = equals;
+        return this;
+    }
+    
+    @JsonIgnore
+    public boolean isEmpty() {
+        return (
+            getStartWith() == null &&
+            getEndWith() == null &&
+            getContains() == null &&
+            getEquals() == null
+        );
+    }
+    
+    public String getStartWith() {
+        return this.startWith;
+    }
+
+    public String getEndWith() {
+        return this.endWith;
+    }
+
+    public String getContains() {
+        return this.contains;
+    }
+
+    public String getEquals() {
+        return this.equals;
+    }
+
+}

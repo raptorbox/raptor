@@ -24,6 +24,7 @@ import org.createnet.raptor.models.auth.request.PermissionRequestBatch;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.api.HttpClient;
+import org.createnet.raptor.sdk.api.Routes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,7 @@ public class TokenPermissionClient extends AbstractClient {
      * @return
      */
     public List<String> get(Long tokenId) {
-        JsonNode node = getClient().get(String.format(HttpClient.Routes.TOKEN_PERMISSION_GET, tokenId));
+        JsonNode node = getClient().get(String.format(Routes.TOKEN_PERMISSION_GET, tokenId));
         return getMapper().convertValue(node, new TypeReference<List<String>>() {
         });
     }
@@ -84,7 +85,7 @@ public class TokenPermissionClient extends AbstractClient {
         PermissionRequestBatch req = new PermissionRequestBatch();
         req.permissions = permissions;
         
-        JsonNode node = getClient().put(String.format(HttpClient.Routes.TOKEN_PERMISSION_SET, tokenId), toJsonNode(req));
+        JsonNode node = getClient().put(String.format(Routes.TOKEN_PERMISSION_SET, tokenId), toJsonNode(req));
         return getMapper().convertValue(node, new TypeReference<List<String>>() {
         });
     }

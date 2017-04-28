@@ -34,7 +34,7 @@ public class ObjectQuery extends AbstractESQuery {
     public String name;
     public String description;
 
-    public Map<String, Object> customFields = new HashMap();
+    public Map<String, Object> properties = new HashMap();
 
     @JsonIgnore
     private String userId;
@@ -77,7 +77,7 @@ public class ObjectQuery extends AbstractESQuery {
         boolQuery.must(QueryBuilders.matchQuery("userId", userId));
 
         if (search != null && search.length() > 0) {
-            boolQuery.must(QueryBuilders.multiMatchQuery(search, "name", "customFields.*", "description", "id"));
+            boolQuery.must(QueryBuilders.multiMatchQuery(search, "name", "properties.*", "description", "id"));
             return boolQuery;
         }
 
@@ -89,12 +89,12 @@ public class ObjectQuery extends AbstractESQuery {
             boolQuery.must(QueryBuilders.matchQuery("description", description.toLowerCase()));
         }
 
-        if (customFields != null && !customFields.isEmpty()) {
+        if (properties != null && !properties.isEmpty()) {
             
-            for (Iterator<String> iterator = customFields.keySet().iterator(); iterator.hasNext();) {
+            for (Iterator<String> iterator = properties.keySet().iterator(); iterator.hasNext();) {
                 String key = iterator.next();
-                Object val = customFields.get(key);
-                boolQuery.must(QueryBuilders.matchQuery("customFields." + key, val));
+                Object val = properties.get(key);
+                boolQuery.must(QueryBuilders.matchQuery("properties." + key, val));
             }
 
         }

@@ -3,8 +3,8 @@ spring:
   devtools:
     restart:
       enabled: true
-#      trigger-file: raptor-inventory-1.0.jar
-#      additional-paths: target
+      trigger-file: raptor-inventory-1.0.jar
+      additional-paths: target
       
   profiles: default
   mongodb:

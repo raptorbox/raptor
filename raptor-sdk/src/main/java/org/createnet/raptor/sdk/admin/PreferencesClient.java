@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.api.HttpClient;
+import org.createnet.raptor.sdk.api.Routes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,7 @@ public class PreferencesClient extends AbstractClient {
      * @return
      */
     public JsonNode set(String name, Object data) {
-        return getClient().put(String.format(HttpClient.Routes.PREFERENCES_SET, getContainer().Auth().getUser().getUuid(), name), toJsonNode(data));
+        return getClient().put(String.format(Routes.PREFERENCES_SET, getContainer().Auth().getUser().getUuid(), name), toJsonNode(data));
     }
     
     /**
@@ -54,7 +55,7 @@ public class PreferencesClient extends AbstractClient {
      * @return
      */
     public JsonNode get(String name) {
-        return getClient().get(String.format(HttpClient.Routes.PREFERENCES_GET, getContainer().Auth().getUser().getUuid(), name));
+        return getClient().get(String.format(Routes.PREFERENCES_GET, getContainer().Auth().getUser().getUuid(), name));
     }
     
     /**
@@ -63,7 +64,7 @@ public class PreferencesClient extends AbstractClient {
      * @return
      */
     public JsonNode get() {
-        return getClient().get(String.format(HttpClient.Routes.PREFERENCES_GET_ALL, getContainer().Auth().getUser().getUuid()));
+        return getClient().get(String.format(Routes.PREFERENCES_GET_ALL, getContainer().Auth().getUser().getUuid()));
     }
 
     public ObjectNode newObjectNode() {

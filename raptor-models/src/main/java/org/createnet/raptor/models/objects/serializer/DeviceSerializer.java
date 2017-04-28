@@ -16,11 +16,9 @@
 package org.createnet.raptor.models.objects.serializer;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
-import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Device;
 
 /**
@@ -53,7 +51,7 @@ public class DeviceSerializer extends JsonSerializer<Device> {
         jg.writeObjectField("streams", t.streams);
         jg.writeObjectField("actions", t.actions);
 
-        jg.writeObjectField("customFields", t.customFields);
+        jg.writeObjectField("properties", t.properties);
         jg.writeObjectField("settings", t.settings);
 
         jg.writeEndObject();

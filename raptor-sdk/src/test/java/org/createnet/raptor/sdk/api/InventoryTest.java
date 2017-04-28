@@ -22,6 +22,7 @@ import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.models.query.DeviceQuery;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -35,11 +36,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public class DeviceManagementTest {
-    
-    final Logger log = LoggerFactory.getLogger(DeviceManagementTest.class);
-    
-    public static Raptor raptor;
+public class InventoryTest {
+
+    final Logger log = LoggerFactory.getLogger(InventoryTest.class);
 
     @BeforeClass
     public static void setUpClass() {
@@ -49,10 +48,8 @@ public class DeviceManagementTest {
     public static void tearDownClass() {
     }
 
-
     @Before
     public void setUp() {
-        raptor = Utils.getRaptor();
     }
 
     @After
@@ -61,8 +58,9 @@ public class DeviceManagementTest {
 
     @Test
     public void list() {
+        Raptor raptor = Utils.getRaptor();
         log.debug("List devices");
-        List<Device> list = raptor.Device().list();
+        List<Device> list = raptor.Inventory().list();
         log.debug("found {} devices", list.size());
         assertNotNull(list);
     }
@@ -70,69 +68,68 @@ public class DeviceManagementTest {
     @Test
     public void create() {
 
+        Raptor raptor = Utils.getRaptor();
+
         Device dev = new Device();
         dev.name = "test create";
 
         dev.validate();
-        raptor.Device().create(dev);
-        
+        raptor.Inventory().create(dev);
+
         log.debug("Device created {}", dev.id);
         assertNotNull(dev.id);
     }
 
     @Test
-    public void updateStream()  {
+    public void updateStream() {
+
+        Raptor raptor = Utils.getRaptor();
 
         Device dev = new Device();
         dev.name = "test update";
         Stream s = dev.addStream("position", "location", "geo_point");
         dev.validate();
-        raptor.Device().create(dev);
-        
+        raptor.Inventory().create(dev);
+
         log.debug("Device created {}", dev.id);
-        
+
         s.addChannel("speed", "number");
         s.addChannel("color", "string");
 
         s.validate();
 
         log.debug("Added channels");
-        
-        Utils.waitFor(2500);
-        raptor.Device().update(dev);
+
+        raptor.Inventory().update(dev);
 
         log.debug("Updated, fetch list");
-        
-        Utils.waitFor(3500);
-        List<Device> list = raptor.Device().list();
+
+        List<Device> list = raptor.Inventory().list();
 
         log.debug("found {} devices", list.size());
-        
+
         Device dev1 = list.stream().filter(d -> d.id.equals(dev.id)).findFirst().get();
-        
-        
+
         assertNotNull(dev1);
         assertTrue(dev1.streams.size() == dev.streams.size());
-        
+
         log.debug("position channels {} == {}", dev1.streams.get("position").channels.size(), dev.streams.get("position").channels.size());
         assertTrue(dev1.streams.get("position").channels.size() == dev.streams.get("position").channels.size());
         assertTrue(dev1.streams.get("position").channels.containsKey("color"));
-        
+
     }
 
     @Test
-    public void update()  {
-        
+    public void update() {
+        Raptor raptor = Utils.getRaptor();
         Device dev = new Device();
         dev.name = "modified device";
         dev.validate();
-        raptor.Device().create(dev);
+        raptor.Inventory().create(dev);
 
-        Utils.waitFor(2500);
-        raptor.Device().update(dev);
+        raptor.Inventory().update(dev);
 
-        Utils.waitFor(2500);
-        List<Device> list = raptor.Device().list();
+        List<Device> list = raptor.Inventory().list();
 
         Device dev1 = list.stream().filter(d -> d.id.equals(dev.id)).findFirst().get();
         assertNotNull(dev1);
@@ -141,72 +138,68 @@ public class DeviceManagementTest {
     }
 
     @Test
-    public void load()  {
-
+    public void load() {
+        Raptor raptor = Utils.getRaptor();
         Device dev = new Device();
         dev.name = "test load";
         dev.validate();
-        raptor.Device().create(dev);
-
-        Utils.waitFor(3500);
-        Device dev1 = raptor.Device().load(dev.id);
-
+        raptor.Inventory().create(dev);
+        Device dev1 = raptor.Inventory().load(dev.id);
         assertTrue(dev1.name.equals(dev.name));
     }
 
     @Test
-    public void searchByName()  {
-        
+    public void searchByName() {
+
+        Raptor raptor = Utils.getRaptor();
         for (int i = 0; i < 3; i++) {
             log.debug("Create device {}", i);
             Device dev1 = new Device();
-            dev1.name = "test-search "+ i;
-            raptor.Device().create(dev1);
+            dev1.name = "test-search " + i;
+            dev1.properties.put("version", i);
+            dev1.properties.put("active", i%2==0);
+            raptor.Inventory().create(dev1);
         }
-        
-        Utils.waitFor(2500);
-        
 
-        ObjectQuery q = new ObjectQuery();
-        q.name = "test-search 1";
+        DeviceQuery q = new DeviceQuery();
+        q.name.contains("test-search");
         log.debug("Searching for {}", q.toJSON().toString());
-        List<Device> results = raptor.Device().search(q);
-        
+        List<Device> results = raptor.Inventory().search(q);
+
         log.debug("Results found {}", results.stream().map(d -> d.name).collect(Collectors.toList()));
         assertNotNull(results);
         assertTrue(results.size() > 0);
-        assertEquals(results.get(0).name, q.name);
+        assertTrue(results.get(0).name.contains(q.name.getContains()));
 
     }
-   
+
     @Test
-    public void searchByCustomFields()  {
-        
+    public void searchByProperties() {
+
+        Raptor raptor = Utils.getRaptor();
         for (int i = 0; i < 3; i++) {
             log.debug("Create device d{}", i);
             Device dev1 = new Device();
-            dev1.name = "d"+ i;
-            dev1.customFields.put("model", System.currentTimeMillis());
-            String v = i%2 == 0 ? "A" : "B";
-            dev1.customFields.put("version", v);
+            dev1.name = "d" + i;
+            dev1.properties.put("model", System.currentTimeMillis());
+            String v = i % 2 == 0 ? "A" : "B";
+            dev1.properties.put("version", v);
             log.debug("Create device with version {}", v);
-            raptor.Device().create(dev1);
+            raptor.Inventory().create(dev1);
         }
-        
-        Utils.waitFor(2500);
-        
+
         String testVersion = "A";
-        ObjectQuery q = new ObjectQuery();
-        q.customFields.put("version", testVersion);
+        DeviceQuery q = new DeviceQuery();
+        q.properties.has("version", testVersion);
         log.debug("Searching for {}", q.toJSON().toString());
-        
-        List<Device> results = raptor.Device().search(q);
-        
+
+        List<Device> results = raptor.Inventory().search(q);
+
         log.debug("Results found {}", results.stream().map(d -> d.name).collect(Collectors.toList()));
         assertNotNull(results);
 //        assertTrue(results.size() > 0);
-//        assertTrue(results.get(0).customFields.get("version").equals(testVersion));
+//        assertTrue(results.get(0).properties.get("version").equals(testVersion));
 
     }
-    
+
 }

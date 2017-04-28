@@ -119,7 +119,7 @@
                     "description": {
                         "type": "text"
                     },
-                    "customFields": {
+                    "properties": {
                         "type": "object"
                     }
                 }

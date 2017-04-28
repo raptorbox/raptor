@@ -29,6 +29,7 @@ import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationRequest;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.sdk.api.Routes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +109,7 @@ public class UserClient extends AbstractClient {
         auth.permission = permission.name();
         auth.userId = userId;
 
-        JsonNode node = getClient().post(HttpClient.Routes.PERMISSION_CHECK, toJsonNode(auth));
+        JsonNode node = getClient().post(Routes.PERMISSION_CHECK, toJsonNode(auth));
         return getMapper().convertValue(node, AuthorizationResponse.class);
     }
 
@@ -119,7 +120,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public User get(String userUuid) {
-        JsonNode node = getClient().get(String.format(HttpClient.Routes.USER_GET, userUuid));
+        JsonNode node = getClient().get(String.format(Routes.USER_GET, userUuid));
         return getMapper().convertValue(node, User.class);
     }
 
@@ -129,7 +130,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public User get() {
-        JsonNode node = getClient().get(HttpClient.Routes.USER_GET_ME);
+        JsonNode node = getClient().get(Routes.USER_GET_ME);
         return getMapper().convertValue(node, User.class);
     }
 
@@ -141,7 +142,7 @@ public class UserClient extends AbstractClient {
      */
     public User create(User user) {
         JsonUser jsonUser = new JsonUser(user);
-        JsonNode node = getClient().post(HttpClient.Routes.USER_CREATE, toJsonNode(jsonUser));
+        JsonNode node = getClient().post(Routes.USER_CREATE, toJsonNode(jsonUser));
         return getMapper().convertValue(node, User.class);
     }
 
@@ -154,7 +155,7 @@ public class UserClient extends AbstractClient {
     public User update(User user) {
         assert user.getUuid() != null;
         JsonUser jsonUser = new JsonUser(user);
-        JsonNode node = getClient().put(String.format(HttpClient.Routes.USER_UPDATE, user.getUuid()), toJsonNode(jsonUser));
+        JsonNode node = getClient().put(String.format(Routes.USER_UPDATE, user.getUuid()), toJsonNode(jsonUser));
         return getMapper().convertValue(node, User.class);
     }
 
@@ -175,7 +176,7 @@ public class UserClient extends AbstractClient {
      * @param userUuid
      */
     public void delete(String userUuid) {
-        getClient().delete(String.format(HttpClient.Routes.USER_DELETE, userUuid));
+        getClient().delete(String.format(Routes.USER_DELETE, userUuid));
     }
 
     /**

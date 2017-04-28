@@ -23,7 +23,7 @@
             }
         }
     },
-    "customFields": {},
+    "properties": {},
     "actions": [
       {
         "name": "makeCall"

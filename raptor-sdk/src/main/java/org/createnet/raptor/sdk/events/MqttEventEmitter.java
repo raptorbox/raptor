@@ -29,6 +29,7 @@ import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.payload.DispatcherPayload;
+import org.createnet.raptor.sdk.api.Routes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,12 +70,12 @@ public class MqttEventEmitter extends AbstractClient {
     }
 
     protected String getStreamTopic(Stream stream) {
-        String path = String.format(HttpClient.Routes.SUBSCRIBE_STREAM, stream.getDevice().getId(), stream.name);
+        String path = String.format(Routes.SUBSCRIBE_STREAM, stream.getDevice().getId(), stream.name);
         return path;
     }
 
     protected String getActionTopic(Action action) {
-        String path = String.format(HttpClient.Routes.SUBSCRIBE_ACTION, action.getDevice().getId(), action.name);
+        String path = String.format(Routes.SUBSCRIBE_ACTION, action.getDevice().getId(), action.name);
         return path;
     }
 

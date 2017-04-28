@@ -23,6 +23,7 @@ import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.api.HttpClient;
+import org.createnet.raptor.sdk.api.Routes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +69,7 @@ public class TokenClient extends AbstractClient {
      * @return
      */
     public List<Token> get(String userUuid) {
-        JsonNode node = getClient().get(String.format(HttpClient.Routes.TOKEN_GET, userUuid));
+        JsonNode node = getClient().get(String.format(Routes.TOKEN_GET, userUuid));
         return getMapper().convertValue(node, new TypeReference<List<Token>>() {});
     }
     
@@ -78,7 +79,7 @@ public class TokenClient extends AbstractClient {
      * @return
      */
     public List<Token> get() {
-        JsonNode node = getClient().get(String.format(HttpClient.Routes.TOKEN_GET, getContainer().Auth().getUser().getUuid()));
+        JsonNode node = getClient().get(String.format(Routes.TOKEN_GET, getContainer().Auth().getUser().getUuid()));
         return getMapper().convertValue(node, new TypeReference<List<Token>>() {});
     }
 
@@ -89,7 +90,7 @@ public class TokenClient extends AbstractClient {
      */
     public Token create(Token token) {
         JsonToken jsonToken = new JsonToken(token);
-        JsonNode node = getClient().post(HttpClient.Routes.TOKEN_CREATE, toJsonNode(jsonToken));
+        JsonNode node = getClient().post(Routes.TOKEN_CREATE, toJsonNode(jsonToken));
         Token t1 = getMapper().convertValue(node, Token.class);
         return mergeToken(token, t1);
     }
@@ -102,7 +103,7 @@ public class TokenClient extends AbstractClient {
     public Token update(Token token) {
 
         JsonToken jsonToken = new JsonToken(token);
-        JsonNode node = getClient().put(String.format(HttpClient.Routes.TOKEN_UPDATE, token.getId()), toJsonNode(jsonToken));
+        JsonNode node = getClient().put(String.format(Routes.TOKEN_UPDATE, token.getId()), toJsonNode(jsonToken));
         Token t1 = getMapper().convertValue(node, Token.class);
         
         return mergeToken(token, t1);
