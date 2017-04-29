@@ -31,7 +31,7 @@ public class TokenFilter extends GenericFilterBean {
     @Value("${raptor.auth.header}")
     private String tokenHeader;
 
-    @Value("${raptor.auth.url}")
+    @Value("${raptor.url}")
     private String authUrl;
 
     @Override

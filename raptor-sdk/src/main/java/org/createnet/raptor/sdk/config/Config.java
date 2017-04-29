@@ -23,11 +23,11 @@ import org.createnet.raptor.models.auth.Token;
  */
 public class Config {
 
-    protected String url;
+    final protected String url;
 
-    protected volatile String username;
-    protected volatile String password;
-    protected volatile String token;
+    protected String username;
+    protected String password;
+    protected String token;
 
     public Config(String url, String username, String password) {
         this.url = url;
@@ -54,9 +54,6 @@ public class Config {
         this.url = url;
     }
 
-    public Config() {
-    }
-
     public boolean hasCredentials() {
         return getToken() == null;
     }
@@ -69,29 +66,25 @@ public class Config {
         return this.url;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    synchronized public String getUsername() {
+    public String getUsername() {
         return username;
     }
 
-    synchronized public String getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    synchronized public String getToken() {
+    public String getToken() {
         return token;
     }
 
-    synchronized public void setCredentials(String username, String password) {
+    public void setCredentials(String username, String password) {
         this.username = username;
         this.password = password;
         this.token = null;
     }
 
-    synchronized public void setToken(String token) {
+    public void setToken(String token) {
         this.token = token;
         this.username = this.password = null;
     }

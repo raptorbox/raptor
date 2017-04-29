@@ -16,10 +16,13 @@
 package org.createnet.raptor.api.common.authentication;
 
 import java.io.Serializable;
+import org.createnet.raptor.api.common.client.ApiClientService;
 import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.Raptor;
+import org.createnet.raptor.sdk.RequestOptions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.PermissionEvaluator;
@@ -31,9 +34,12 @@ import org.springframework.security.core.Authentication;
  */
 public class AclPermissionEvaluator implements PermissionEvaluator {
 
-    @Value("${raptor.auth.url}")
+    @Value("${raptor.url}")
     private String authUrl;
-
+    
+    @Autowired
+    ApiClientService api;
+    
     @Override
     public boolean hasPermission(Authentication auth, Object deviceObject, Object permission) {
 
@@ -75,8 +81,7 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
         try {
             Permissions p = Permissions.valueOf(permission);
             deviceId = (p == Permissions.create || p == Permissions.list) ? null : deviceId;
-            Raptor r = new Raptor(authUrl, tokenAuthentication.getToken());
-            AuthorizationResponse response = r.Admin().User().isAuthorized(deviceId, tokenAuthentication.getUser().getUuid(), p);
+            AuthorizationResponse response = api.Admin().User().isAuthorized(deviceId, tokenAuthentication.getUser().getUuid(), p);
             return response.result;
         } catch (Exception ex) {
             return false;

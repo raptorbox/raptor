@@ -111,6 +111,10 @@ public class ActionStatusController {
             value = "/{deviceId}/{actionId}", 
             consumes = { 
                 MediaType.TEXT_PLAIN_VALUE
+            },
+            produces = {
+                MediaType.APPLICATION_JSON_UTF8_VALUE,
+                MediaType.APPLICATION_JSON_VALUE,
             }
     )
     @ApiOperation(
@@ -138,7 +142,7 @@ public class ActionStatusController {
         
         actionStatusService.save(actionStatus);
         
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.ok(actionStatus);
     }
 
     @RequestMapping(

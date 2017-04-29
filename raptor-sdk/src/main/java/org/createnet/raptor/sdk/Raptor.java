@@ -34,7 +34,7 @@ import org.createnet.raptor.sdk.api.InventoryClient;
  */
 public class Raptor implements IClient, RaptorComponent {
 
-    final protected Config config = new Config();
+    final protected Config config;
 
     protected HttpClient client;
     protected MqttEventEmitter emitter;
@@ -132,24 +132,10 @@ public class Raptor implements IClient, RaptorComponent {
     /**
      * Instantiate the client
      *
-     */
-    public Raptor() {
-    }
-
-    /**
-     * Instantiate the client
-     *
      * @param config
      */
     public Raptor(Config config) {
-        
-        this.config.setUrl(config.getUrl());
-        if(config.hasCredentials()) {
-            this.config.setCredentials(config.getUsername(), config.getPassword());
-        }
-        else {
-            this.config.setToken(config.getToken());
-        }
+        this.config = config;
     }
 
     public Raptor setToken(String token) {
@@ -159,11 +145,6 @@ public class Raptor implements IClient, RaptorComponent {
 
     public Raptor setCredentials(String username, String password) {
         this.getConfig().setCredentials(username, password);
-        return this;
-    }
-
-    public Raptor setUrl(String url) {
-        this.getConfig().setUrl(url);
         return this;
     }
 

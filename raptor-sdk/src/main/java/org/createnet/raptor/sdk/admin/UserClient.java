@@ -29,6 +29,7 @@ import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationRequest;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.api.Routes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +110,7 @@ public class UserClient extends AbstractClient {
         auth.permission = permission.name();
         auth.userId = userId;
 
-        JsonNode node = getClient().post(Routes.PERMISSION_CHECK, toJsonNode(auth));
+        JsonNode node = getClient().post(Routes.PERMISSION_CHECK, toJsonNode(auth), RequestOptions.retriable());
         return getMapper().convertValue(node, AuthorizationResponse.class);
     }
 

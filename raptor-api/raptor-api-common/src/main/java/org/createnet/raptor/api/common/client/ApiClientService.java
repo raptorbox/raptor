@@ -16,25 +16,18 @@
 package org.createnet.raptor.api.common.client;
 
 import org.createnet.raptor.sdk.Raptor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.RequestScope;
 
 /**
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
 @Component
-@RequestScope
 public class ApiClientService extends Raptor {
 
-    @Value("${raptor.auth.url}")
-    String baseUrl;
-
-    public ApiClientService() {
-        this.setUrl(baseUrl);
-        this.setToken((String)SecurityContextHolder.getContext().getAuthentication().getCredentials());
+    public ApiClientService(String url, String token) {
+        super(url, token);
     }
+    
 
 }

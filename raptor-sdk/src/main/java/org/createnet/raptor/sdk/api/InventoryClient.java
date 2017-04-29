@@ -35,6 +35,7 @@ import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.payload.ActionPayload;
 import org.createnet.raptor.models.payload.StreamPayload;
 import org.createnet.raptor.models.query.DeviceQuery;
+import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.admin.DevicePermissionClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,11 +169,7 @@ public class InventoryClient extends AbstractClient {
      */
     public Device load(String id) {
         Device obj = new Device();
-        obj.parse(
-                getClient().get(
-                        String.format(Routes.INVENTORY_LOAD, id)
-                )
-        );
+        obj.parse(getClient().get(String.format(Routes.INVENTORY_LOAD, id)));
         return obj;
     }
 

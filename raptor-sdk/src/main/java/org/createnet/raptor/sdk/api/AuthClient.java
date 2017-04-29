@@ -21,6 +21,7 @@ import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.exception.AuthenticationFailedException;
 import org.createnet.raptor.sdk.exception.MissingAuthenticationException;
 
@@ -106,8 +107,9 @@ public class AuthClient extends AbstractClient {
      */
     public LoginState login(String username, String password) {
         try {
+            
             JsonNode cred = Device.getMapper().valueToTree(new LoginCredentialsBody(username, password));
-            JsonNode node = getClient().post(Routes.LOGIN, cred);
+            JsonNode node = getClient().post(Routes.LOGIN, cred, RequestOptions.defaults().withAuthToken(false));
 
             return Device.getMapper().convertValue(node, LoginState.class);
         } catch (RequestException ex) {

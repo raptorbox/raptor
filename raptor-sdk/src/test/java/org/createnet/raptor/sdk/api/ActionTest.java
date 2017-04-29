@@ -90,13 +90,13 @@ public class ActionTest {
 
         log.debug("get action status");
         
-        
         Device dev = Utils.createDevice(device);
         Action a = dev.getAction("switch");
         ActionStatus status = raptor.Action().setStatus(a, a.getStatus().status("on"));
         
         ActionStatus s = raptor.Action().getStatus(a);
         
+        Assert.assertNotNull(s);
         Assert.assertEquals(s.status, status.status);
         
     }
