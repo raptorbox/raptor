@@ -27,18 +27,28 @@ import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.RaptorContainer;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Document
 public class ActionStatus {
 
+    @Id
     public String id;
+    
     public String status;
     public int createdAt = (int) (Instant.now().toEpochMilli() / 1000);
+    
+    @Indexed
     public String actionId;
+    
+    @Indexed
     public String objectId;
 
     public ActionStatus() {

@@ -34,8 +34,8 @@ import org.createnet.raptor.sdk.api.InventoryClient;
  */
 public class Raptor implements IClient, RaptorComponent {
 
-    final protected Config config;
-    
+    final protected Config config = new Config();
+
     protected HttpClient client;
     protected MqttEventEmitter emitter;
 
@@ -73,7 +73,7 @@ public class Raptor implements IClient, RaptorComponent {
         }
         return Action;
     }
-    
+
     @Deprecated
     public DeviceClient Device() {
         if (Device == null) {
@@ -81,7 +81,7 @@ public class Raptor implements IClient, RaptorComponent {
         }
         return Device;
     }
-    
+
     public InventoryClient Inventory() {
         if (Inventory == null) {
             Inventory = new InventoryClient(getContainer());
@@ -132,10 +132,39 @@ public class Raptor implements IClient, RaptorComponent {
     /**
      * Instantiate the client
      *
+     */
+    public Raptor() {
+    }
+
+    /**
+     * Instantiate the client
+     *
      * @param config
      */
     public Raptor(Config config) {
-        this.config = config;
+        
+        this.config.setUrl(config.getUrl());
+        if(config.hasCredentials()) {
+            this.config.setCredentials(config.getUsername(), config.getPassword());
+        }
+        else {
+            this.config.setToken(config.getToken());
+        }
+    }
+
+    public Raptor setToken(String token) {
+        this.getConfig().setToken(token);
+        return this;
+    }
+
+    public Raptor setCredentials(String username, String password) {
+        this.getConfig().setCredentials(username, password);
+        return this;
+    }
+
+    public Raptor setUrl(String url) {
+        this.getConfig().setUrl(url);
+        return this;
     }
 
     @Override
@@ -150,7 +179,7 @@ public class Raptor implements IClient, RaptorComponent {
 
     @Override
     public HttpClient getClient() {
-        if(client == null) {
+        if (client == null) {
             client = new HttpClient(this);
         }
         return client;

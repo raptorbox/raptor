@@ -34,11 +34,10 @@ final public class Routes {
     public static final String PULL = PUSH + "/list";
     public static final String SEARCH_DATA = PUSH + "/search";
     
-    public static final String INVOKE = "/%s/actions/%s";
+    public static final String INVOKE = "/action/%s/%s";
     public static final String ACTION_STATUS = INVOKE;
-    public static final String ACTION_LIST = "/%s/actions";
     
-    public static final String SUBSCRIBE_ACTION = INVOKE;
+    public static final String SUBSCRIBE_ACTION = "%s/actions/%s";
     public static final String SUBSCRIBE_STREAM = PUSH;
     
     public static final String PERMISSION_CHECK = "/auth/check";

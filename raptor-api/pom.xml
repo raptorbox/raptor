@@ -17,6 +17,7 @@
         <module>raptor-profile</module>
         <module>raptor-inventory</module>
         <module>raptor-auth-service</module>
+        <module>raptor-action</module>
     </modules>
     
     <dependencyManagement>

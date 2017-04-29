@@ -34,5 +34,12 @@ public class JsonErrorResponse {
         }
         return ResponseEntity.status(code).body(new JsonError(code.value(), message));
     }
+
+    public static ResponseEntity<?> notFound(String message) {
+        return entity(HttpStatus.NOT_FOUND, message);
+    }
     
+    public static ResponseEntity<?> notFound() {
+        return entity(HttpStatus.NOT_FOUND, "Not found");
+    }
 }

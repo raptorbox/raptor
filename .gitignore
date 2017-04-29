@@ -12,3 +12,4 @@ nb*
 /raptor-api/raptor-auth-service/target/
 /raptor-api/raptor-api-common/target/
 /raptor-api/raptor-inventory.1/target/
+/raptor-api/raptor-action/target/

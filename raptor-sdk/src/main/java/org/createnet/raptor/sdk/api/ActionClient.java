@@ -38,7 +38,6 @@ public class ActionClient extends AbstractClient {
         super(container);
     }
 
-
     /**
      * Subscribe to a data stream
      *
@@ -64,24 +63,6 @@ public class ActionClient extends AbstractClient {
             }
         });
     }    
-    
-    /**
-     * List available actions on the object
-     *
-     * @param object reference
-     * @return return the list of available action for an object
-     */
-    public List<Action> list(Device object) {
-
-        List<Action> actions = Device.getMapper().convertValue(getClient().get(String.format(Routes.ACTION_LIST, object.id)), new TypeReference<List<Action>>() {
-        });
-
-        actions.forEach(action -> {
-            action.setDevice(object);
-        });
-
-        return actions;
-    }
 
     /**
      * Get the action status for an object

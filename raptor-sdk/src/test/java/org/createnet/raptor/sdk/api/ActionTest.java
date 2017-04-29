@@ -109,15 +109,5 @@ public class ActionTest {
         raptor.Action().invoke(a, "foobar3000");
         //todo: add subscription check
     }
-    
-    @Test
-    public void list()  {
-        log.debug("list actions");
-        Device dev = Utils.createDevice(device);
-        
-        List<Action> actions = raptor.Action().list(dev);
-        
-        Assert.assertEquals(dev.actions.size(), actions.size());
-    }
 
 }
