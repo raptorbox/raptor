@@ -26,6 +26,7 @@ import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -70,54 +71,59 @@ public class ActionStatusController {
 
     @Autowired
     private ActionStatusEventPublisher actionStatusPublisher;
-    
+
     @Autowired
     private ApiClientService raptor;
 
     @RequestMapping(
-            method = RequestMethod.POST, 
+            method = RequestMethod.POST,
             value = "/{deviceId}/{actionId}",
-            consumes = { 
+            consumes = {
                 MediaType.TEXT_PLAIN_VALUE
             }
     )
     @ApiOperation(
             value = "Trigger an action, updating the state with the request body if provided",
             notes = "The whole body is stored as a text value",
-            nickname = "invoke"
+            nickname = "execute"
     )
-    public ResponseEntity<?> invoke(
+    public ResponseEntity<?> execute(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
             @PathVariable("actionId") String actionId,
             @RequestBody String status
     ) {
-                
+
         Device device = raptor.Inventory().load(deviceId);
-        
+
         Action action = device.getAction(actionId);
-        if(action == null) {
+        if (action == null) {
             return JsonErrorResponse.notFound("Action not found");
         }
-        
-        if(status != null && !status.isEmpty()) {
-            ActionStatus actionStatus = new ActionStatus(action, status);
+
+        ActionStatus actionStatus;
+        if (status != null && !status.isEmpty()) {
+            actionStatus = new ActionStatus(action, status);
             actionStatusService.save(actionStatus);
+        } else {
+            actionStatus = actionStatusService.get(deviceId, actionId);
         }
+
+        // notify of invocation
+        actionStatusPublisher.execute(action, actionStatus);
 
         return ResponseEntity.accepted().build();
     }
 
     @RequestMapping(
-            method = RequestMethod.PUT, 
-            value = "/{deviceId}/{actionId}", 
-            consumes = { 
+            method = RequestMethod.PUT,
+            value = "/{deviceId}/{actionId}",
+            consumes = {
                 MediaType.TEXT_PLAIN_VALUE
             },
             produces = {
                 MediaType.APPLICATION_JSON_UTF8_VALUE,
-                MediaType.APPLICATION_JSON_VALUE,
-            }
+                MediaType.APPLICATION_JSON_VALUE,}
     )
     @ApiOperation(
             value = "Update the status for an action",
@@ -132,27 +138,28 @@ public class ActionStatusController {
             @PathVariable("actionId") String actionId,
             @RequestBody String status
     ) {
-                
+
         Device device = raptor.Inventory().load(deviceId);
-        
+
         Action action = device.getAction(actionId);
-        if(action == null) {
+        if (action == null) {
             return JsonErrorResponse.notFound("Action not found");
         }
-        
+
         ActionStatus actionStatus = new ActionStatus(action, status);
-        
         actionStatusService.save(actionStatus);
-        
+
+        actionStatusPublisher.execute(action, actionStatus);
+
         return ResponseEntity.ok(actionStatus);
     }
 
     @RequestMapping(
-            method = RequestMethod.GET, 
-            value = "/{deviceId}/{actionId}", 
-            produces = { 
-                MediaType.APPLICATION_JSON_VALUE, 
-                MediaType.APPLICATION_JSON_UTF8_VALUE 
+            method = RequestMethod.GET,
+            value = "/{deviceId}/{actionId}",
+            produces = {
+                MediaType.APPLICATION_JSON_VALUE,
+                MediaType.APPLICATION_JSON_UTF8_VALUE
             }
     )
     @ApiOperation(
@@ -166,23 +173,23 @@ public class ActionStatusController {
             @PathVariable("deviceId") String deviceId,
             @PathVariable("actionId") String actionId
     ) {
-                
+
         Device device = raptor.Inventory().load(deviceId);
-        
+
         Action action = device.getAction(actionId);
-        if(action == null) {
+        if (action == null) {
             return JsonErrorResponse.notFound("Action not found");
         }
-        
+
         ActionStatus status = actionStatusService.get(deviceId, action.name);
-        
+
         return ResponseEntity.ok(status);
     }
 
     @RequestMapping(
-            method = RequestMethod.GET, 
-            value = "/{deviceId}/{actionId}", 
-            produces = { 
+            method = RequestMethod.GET,
+            value = "/{deviceId}/{actionId}",
+            produces = {
                 MediaType.TEXT_PLAIN_VALUE
             }
     )
@@ -197,17 +204,68 @@ public class ActionStatusController {
             @PathVariable("deviceId") String deviceId,
             @PathVariable("actionId") String actionId
     ) {
-                
+
         Device device = raptor.Inventory().load(deviceId);
-        
+
         Action action = device.getAction(actionId);
-        if(action == null) {
+        if (action == null) {
             return JsonErrorResponse.notFound("Action not found");
         }
-        
+
         ActionStatus status = actionStatusService.get(deviceId, action.name);
-        
+
         return ResponseEntity.ok(status);
+    }
+
+    @RequestMapping(
+            method = RequestMethod.DELETE,
+            value = "/{deviceId}/{actionId}"
+    )
+    @ApiOperation(
+            value = "Delete the current status of an action",
+            notes = "When an action status is reset the listening devices may stop triggering the action",
+            nickname = "delete"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                code = 204,
+                message = "Ok"
+        )
+        ,
+    @ApiResponse(
+                code = 401,
+                message = "Not authorized"
+        )
+        ,
+    @ApiResponse(
+                code = 403,
+                message = "Forbidden"
+        )
+        ,
+    @ApiResponse(
+                code = 500,
+                message = "Internal error"
+        )
+    })
+    public ResponseEntity<?> delete(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable("deviceId") String deviceId,
+            @PathVariable("actionId") String actionId
+    ) {
+
+        Device device = raptor.Inventory().load(deviceId);
+
+        Action action = device.getAction(actionId);
+        if (action == null) {
+            return JsonErrorResponse.notFound("Action not found");
+        }
+
+        ActionStatus status = actionStatusService.get(deviceId, action.name);
+        if (status == null) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.accepted().build();
     }
 
 }

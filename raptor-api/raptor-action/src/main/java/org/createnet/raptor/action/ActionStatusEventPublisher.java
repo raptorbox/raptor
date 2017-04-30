@@ -15,10 +15,11 @@
  */
 package org.createnet.raptor.action;
 
-import org.createnet.raptor.api.common.events.DeviceApplicationEvent;
+import org.createnet.raptor.api.common.events.ActionApplicationEvent;
 import org.createnet.raptor.events.Event;
-import org.createnet.raptor.events.type.DeviceEvent;
-import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.events.type.ActionEvent;
+import org.createnet.raptor.models.data.ActionStatus;
+import org.createnet.raptor.models.objects.Action;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -33,24 +34,21 @@ public class ActionStatusEventPublisher {
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
-//    public void notify(Device dev, Event.EventType type) {
-//        
-//        DeviceEvent deviceEvent = new DeviceEvent(dev);
-//        deviceEvent.setEvent(type.name());
-//        DeviceApplicationEvent ev = new DeviceApplicationEvent(this, deviceEvent);
-//        applicationEventPublisher.publishEvent(ev);
-//    }
-//    
-//    public void create(Device dev) {
-//        notify(dev, Event.EventType.create);
-//    }
-//    
-//    public void update(Device dev) {
-//        notify(dev, Event.EventType.update);
-//    }
-//    
-//    public void delete(Device dev) {
-//        notify(dev, Event.EventType.delete);
-//    }
+    public void notify(Action action, ActionStatus status, Event.EventType type) {
+        
+        ActionEvent actionEvent = new ActionEvent(action, status);
+        actionEvent.setEvent(type.name());
+        
+        ActionApplicationEvent ev = new ActionApplicationEvent(this, actionEvent);
+        applicationEventPublisher.publishEvent(ev);
+    }
+    
+    public void execute(Action action, ActionStatus status) {
+        notify(action, status, Event.EventType.execute);
+    }
+    
+    public void delete(Action action, ActionStatus status) {
+        notify(action, status, Event.EventType.deleteAction);
+    }
 
 }
