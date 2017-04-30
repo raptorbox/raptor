@@ -24,7 +24,7 @@ import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
-import org.createnet.raptor.sdk.api.HttpClient;
+
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationRequest;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
@@ -55,18 +55,18 @@ public class UserClient extends AbstractClient {
 
     }
 
-    protected PreferencesClient Preferences;
+    protected ProfileClient Profile;
 
-    public PreferencesClient Preferences() {
-        if (Preferences == null) {
-            Preferences = new PreferencesClient(getContainer());
+    public ProfileClient Profile() {
+        if (Profile == null) {
+            Profile = new ProfileClient(getContainer());
         }
-        return Preferences;
+        return Profile;
     }
 
     public UserClient(Raptor container) {
         super(container);
-        Preferences = new PreferencesClient(container);
+        Profile = new ProfileClient(container);
     }
 
     final static Logger logger = LoggerFactory.getLogger(UserClient.class);

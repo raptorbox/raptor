@@ -16,16 +16,34 @@
 package org.createnet.raptor.profile;
 
 import java.util.List;
-import org.createnet.raptor.models.profile.UserPreference;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.createnet.raptor.models.profile.UserProfile;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface UserPreferenceRepository extends MongoRepository<UserPreference, String> {
+@Service
+public class UserProfileService {
+    
+    @Autowired
+    private UserProfileRepository repository;
+    
+    public void save(UserProfile pref) {
+        repository.save(pref);
+    }
+    
+    public UserProfile get(String userId, String name) {
+        return repository.findOneByUserIdAndName(userId, name);
+    }
+    
+    public List<UserProfile> list(String userId) {
+        return repository.findByUserId(userId);
+    }
 
-    public List<UserPreference> findByUserId(String userId);
-    public UserPreference findOneByUserIdAndName(String userId, String name);
-
+    public void delete(UserProfile pref) {
+        repository.delete(pref.getId());
+    }
+    
 }

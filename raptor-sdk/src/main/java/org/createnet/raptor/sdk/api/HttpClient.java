@@ -249,8 +249,8 @@ public class HttpClient extends AbstractClient {
      * @return the request response
      */
     public JsonNode requestAsText(HttpMethod httpMethod, String url, String body, RequestOptions opts) {
-        logger.debug("POST text/plain {}", url);
-        HttpRequestWithBody req = createRequest(HttpMethod.POST, url, opts);
+        logger.debug("{} text/plain {}", httpMethod, url);
+        HttpRequestWithBody req = createRequest(httpMethod, url, opts);
         req.body(body);
         return tryRequest(req, opts);
     }
@@ -264,6 +264,17 @@ public class HttpClient extends AbstractClient {
      */
     public JsonNode post(String url, String payload) {
         return requestAsText(HttpMethod.POST, url, payload, RequestOptions.defaults().textBody(true));
+    }
+
+    /**
+     * Send a text payload (specific for invoking actions)
+     *
+     * @param url
+     * @param payload
+     * @return
+     */
+    public JsonNode put(String url, String payload) {
+        return requestAsText(HttpMethod.PUT, url, payload, RequestOptions.defaults().textBody(true));
     }
 
     /**
@@ -364,5 +375,5 @@ public class HttpClient extends AbstractClient {
     public JsonNode delete(String url) {
         return delete(url, RequestOptions.defaults());
     }
-    
+
 }

@@ -62,7 +62,7 @@ import org.springframework.web.bind.annotation.RestController;
             message = "Internal error"
     )
 })
-@Api(tags = {"Inventory"})
+@Api(tags = {"Action"})
 public class ActionStatusController {
 
     @Autowired
@@ -76,15 +76,17 @@ public class ActionStatusController {
 
     @RequestMapping(
             method = RequestMethod.POST, 
-            value = "/{deviceId}/{actionId}"
+            value = "/{deviceId}/{actionId}",
+            consumes = { 
+                MediaType.TEXT_PLAIN_VALUE
+            }
     )
     @ApiOperation(
             value = "Trigger an action, updating the state with the request body if provided",
             notes = "The whole body is stored as a text value",
-            response = ActionStatus.class,
-            nickname = "trigger"
+            nickname = "invoke"
     )
-    public ResponseEntity<?> trigger(
+    public ResponseEntity<?> invoke(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
             @PathVariable("actionId") String actionId,

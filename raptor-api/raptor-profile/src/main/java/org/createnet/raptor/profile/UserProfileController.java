@@ -16,13 +16,16 @@
 package org.createnet.raptor.profile;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
-import org.createnet.raptor.models.profile.UserPreference;
+import org.createnet.raptor.models.profile.UserProfile;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,23 +42,45 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @RestController
-public class UserPreferencesController {
+@ApiResponses(value = {
+    @ApiResponse(
+            code = 200,
+            message = "Ok"
+    )
+    ,
+    @ApiResponse(
+            code = 401,
+            message = "Not authorized"
+    )
+    ,
+    @ApiResponse(
+            code = 403,
+            message = "Forbidden"
+    )
+    ,
+    @ApiResponse(
+            code = 500,
+            message = "Internal error"
+    )
+})
+@Api(tags = {"UserProfile"})
+public class UserProfileController {
 
     @Autowired
-    private UserPreferencesService preferences;
+    private UserProfileService profileService;
 
     @RequestMapping(method = RequestMethod.GET, value = "/{userId}")
     @ApiOperation(
             value = "Return all the user preferences",
             notes = "",
-            response = UserPreference.class,
+            response = UserProfile.class,
             nickname = "getPreferences"
     )
     public ResponseEntity<?> getPreferences(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("userId") String userId
     ) {
-        List<UserPreference> prefs = preferences.list(userId);
+        List<UserProfile> prefs = profileService.list(userId);
         return ResponseEntity.ok(prefs.stream().map(p -> toJSON(p.getValue())).collect(Collectors.toList()));
     }
 
@@ -63,7 +88,7 @@ public class UserPreferencesController {
     @ApiOperation(
             value = "Return a user preference by name",
             notes = "",
-            response = UserPreference.class,
+            response = UserProfile.class,
             nickname = "getPreference"
     )
     public ResponseEntity<?> getPreference(
@@ -71,7 +96,7 @@ public class UserPreferencesController {
             @PathVariable("userId") String userId,
             @PathVariable("name") String name
     ) {
-        UserPreference pref = preferences.get(userId, name);
+        UserProfile pref = profileService.get(userId, name);
         if (pref == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Not found");
         }
@@ -82,7 +107,7 @@ public class UserPreferencesController {
     @ApiOperation(
             value = "Set an user preference by name",
             notes = "",
-            response = UserPreference.class,
+            response = UserProfile.class,
             nickname = "setPreference"
     )
     public ResponseEntity<?> setPreference(
@@ -91,8 +116,8 @@ public class UserPreferencesController {
             @PathVariable("name") String name,
             @RequestBody JsonNode body
     ) {
-        UserPreference pref = new UserPreference(userId, name, body.toString());
-        preferences.save(pref);
+        UserProfile pref = new UserProfile(userId, name, body.toString());
+        profileService.save(pref);
         return ResponseEntity.ok(toJSON(pref.getValue()));
     }
 
@@ -100,7 +125,7 @@ public class UserPreferencesController {
     @ApiOperation(
             value = "Drop an user preference by name",
             notes = "",
-            response = UserPreference.class,
+            response = UserProfile.class,
             nickname = "deletePreference"
     )
     public ResponseEntity<?> deletePreference(
@@ -109,12 +134,12 @@ public class UserPreferencesController {
             @PathVariable("name") String name
     ) {
 
-        UserPreference pref = preferences.get(userId, name);
+        UserProfile pref = profileService.get(userId, name);
         if (pref == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Not found");
         }
 
-        preferences.delete(pref);
+        profileService.delete(pref);
         return ResponseEntity.accepted().build();
     }
 

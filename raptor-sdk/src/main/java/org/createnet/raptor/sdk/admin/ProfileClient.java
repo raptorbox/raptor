@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
-import org.createnet.raptor.sdk.api.HttpClient;
 import org.createnet.raptor.sdk.api.Routes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +28,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class PreferencesClient extends AbstractClient {
+public class ProfileClient extends AbstractClient {
 
-    public PreferencesClient(Raptor container) {
+    public ProfileClient(Raptor container) {
         super(container);
     }
 
-    final static Logger logger = LoggerFactory.getLogger(PreferencesClient.class);
+    final static Logger logger = LoggerFactory.getLogger(ProfileClient.class);
 
     /**
      * Set profile data
@@ -45,7 +44,7 @@ public class PreferencesClient extends AbstractClient {
      * @return
      */
     public JsonNode set(String name, Object data) {
-        return getClient().put(String.format(Routes.PREFERENCES_SET, getContainer().Auth().getUser().getUuid(), name), toJsonNode(data));
+        return getClient().put(String.format(Routes.PROFILE_SET, getContainer().Auth().getUser().getUuid(), name), toJsonNode(data));
     }
     
     /**
@@ -55,7 +54,7 @@ public class PreferencesClient extends AbstractClient {
      * @return
      */
     public JsonNode get(String name) {
-        return getClient().get(String.format(Routes.PREFERENCES_GET, getContainer().Auth().getUser().getUuid(), name));
+        return getClient().get(String.format(Routes.PROFILE_GET, getContainer().Auth().getUser().getUuid(), name));
     }
     
     /**
@@ -64,7 +63,7 @@ public class PreferencesClient extends AbstractClient {
      * @return
      */
     public JsonNode get() {
-        return getClient().get(String.format(Routes.PREFERENCES_GET_ALL, getContainer().Auth().getUser().getUuid()));
+        return getClient().get(String.format(Routes.PROFILE_GET_ALL, getContainer().Auth().getUser().getUuid()));
     }
 
     public ObjectNode newObjectNode() {

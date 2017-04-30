@@ -57,10 +57,10 @@ final public class Routes {
     public static final String TOKEN_DELETE = TOKEN_UPDATE;
     public static final String TOKEN_GET = TOKEN_CREATE + "?uuid=%s";
     
-    public static final String PREFERENCES_GET_ALL = "/profile/%s";
-    public static final String PREFERENCES_GET = PREFERENCES_GET_ALL + "/%s";
-    public static final String PREFERENCES_SET = PREFERENCES_GET;
-    public static final String PREFERENCES_DELETE = PREFERENCES_GET;
+    public static final String PROFILE_GET_ALL = "/profile/%s";
+    public static final String PROFILE_GET = PROFILE_GET_ALL + "/%s";
+    public static final String PROFILE_SET = PROFILE_GET;
+    public static final String PREFERENCES_DELETE = PROFILE_GET;
     
     public static final String TOKEN_PERMISSION_GET = "/auth/permission/token/%s";
     public static final String TOKEN_PERMISSION_BY_USER = TOKEN_PERMISSION_GET + "/%s";

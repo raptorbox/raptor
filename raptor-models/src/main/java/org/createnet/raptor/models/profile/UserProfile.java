@@ -15,12 +15,7 @@
  */
 package org.createnet.raptor.models.profile;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import java.io.IOException;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.createnet.raptor.models.objects.Device;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -29,10 +24,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Document
-public class UserPreference {
-    
-    public static class Value {
-    }
+public class UserProfile {
     
     @Id
     protected String id = UUID.randomUUID().toString();
@@ -41,10 +33,10 @@ public class UserPreference {
     protected String name;
     protected String value;
 
-    public UserPreference() {
+    public UserProfile() {
     }
     
-    public UserPreference(String userId, String name, String value) {
+    public UserProfile(String userId, String name, String value) {
         this.userId = userId;
         this.name = name;
         this.value = value;

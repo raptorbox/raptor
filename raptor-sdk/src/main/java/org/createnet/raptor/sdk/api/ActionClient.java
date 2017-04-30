@@ -100,7 +100,7 @@ public class ActionClient extends AbstractClient {
      * @return return the list of available action for an object
      */
     public ActionStatus setStatus(Action action, ActionStatus status) {
-        return ActionStatus.parseJSON(getClient().post(
+        return ActionStatus.parseJSON(getClient().put(
                 String.format(Routes.ACTION_STATUS, action.getDevice().id, action.name), status.status
         ));
     }
