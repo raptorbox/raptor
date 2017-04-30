@@ -13,24 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.data;
+package org.createnet.raptor.api.common.events;
 
-import org.createnet.raptor.api.common.BaseApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.createnet.raptor.events.type.DataEvent;
+import org.springframework.context.ApplicationEvent;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.data"})
-@EnableMongoRepositories
-@EnableSpringDataWebSupport
-public class Application extends BaseApplication {
+public class StreamApplicationEvent extends ApplicationEvent {
 
-    public static void main(String[] args) {
-        start(Application.class, args);
+    private final DataEvent dataEvent;
+    
+    public StreamApplicationEvent(Object source, DataEvent dev) {
+        super(source);
+        this.dataEvent = dev;
     }
 
+    public DataEvent getActionEvent() {
+        return dataEvent;
+    }
+    
 }

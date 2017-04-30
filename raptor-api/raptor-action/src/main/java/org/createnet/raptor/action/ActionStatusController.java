@@ -26,9 +26,9 @@ import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -87,6 +87,7 @@ public class ActionStatusController {
             notes = "The whole body is stored as a text value",
             nickname = "execute"
     )
+    @PreAuthorize("hasPermission(#deviceId, 'execute')")
     public ResponseEntity<?> execute(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
@@ -132,6 +133,7 @@ public class ActionStatusController {
             response = ActionStatus.class,
             nickname = "setActionStatus"
     )
+    @PreAuthorize("hasPermission(#deviceId, 'execute')")
     public ResponseEntity<?> setActionStatus(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
@@ -168,6 +170,7 @@ public class ActionStatusController {
             response = ActionStatus.class,
             nickname = "getActionStatus"
     )
+    @PreAuthorize("hasPermission(#deviceId, 'execute')")
     public ResponseEntity<?> getActionStatus(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
@@ -199,6 +202,7 @@ public class ActionStatusController {
             response = String.class,
             nickname = "getActionStatusValue"
     )
+    @PreAuthorize("hasPermission(#deviceId, 'execute')")
     public ResponseEntity<?> getActionStatusValue(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
@@ -229,24 +233,15 @@ public class ActionStatusController {
     @ApiResponses(value = {
         @ApiResponse(
                 code = 204,
-                message = "Ok"
+                message = "No content"
         )
         ,
     @ApiResponse(
-                code = 401,
-                message = "Not authorized"
-        )
-        ,
-    @ApiResponse(
-                code = 403,
-                message = "Forbidden"
-        )
-        ,
-    @ApiResponse(
-                code = 500,
-                message = "Internal error"
+                code = 202,
+                message = "Accepted"
         )
     })
+    @PreAuthorize("hasPermission(#deviceId, 'execute')")
     public ResponseEntity<?> delete(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,

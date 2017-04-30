@@ -44,6 +44,10 @@ import org.createnet.raptor.models.objects.serializer.RecordSetSerializer;
 import org.createnet.raptor.models.objects.deserializer.RecordSetDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  *
@@ -52,19 +56,30 @@ import org.slf4j.LoggerFactory;
 @JsonSerialize(using = RecordSetSerializer.class)
 @JsonDeserialize(using = RecordSetDeserializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Document
 public class RecordSet {
-
+    
+    @Id
+    @Indexed
     public Date timestamp;
+    
+    @Indexed
     final public Map<String, IRecord> channels = new HashMap();
 
     public String userId;
+    
+    @Indexed
     public String streamId;
+    
+    @Indexed
     public String objectId;
 
     @JsonIgnore
+    @Transient
     private final Logger logger = LoggerFactory.getLogger(RecordSet.class);
 
     @JsonIgnore
+    @Transient
     private Stream stream;
 
     public RecordSet() {

@@ -15,22 +15,23 @@
  */
 package org.createnet.raptor.data;
 
-import org.createnet.raptor.api.common.BaseApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import java.util.List;
+import org.createnet.raptor.models.data.RecordSet;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.data"})
-@EnableMongoRepositories
-@EnableSpringDataWebSupport
-public class Application extends BaseApplication {
+public interface StreamRepository extends MongoRepository<RecordSet, String> {
+    
+    public List<RecordSet> findByObjectIdAndStreamId(String deviceId, String streamId, Pageable page);
+    public void deleteByObjectIdAndStreamId(String deviceId, String streamId);
+    
+    @Override
+    public void deleteAll();
 
-    public static void main(String[] args) {
-        start(Application.class, args);
-    }
 
+    
 }
