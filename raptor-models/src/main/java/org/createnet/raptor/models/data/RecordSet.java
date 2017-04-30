@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.client.model.geojson.Point;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -64,8 +66,9 @@ public class RecordSet {
     public Date timestamp;
     
     @Indexed
-    final public Map<String, IRecord> channels = new HashMap();
-
+    final public Map<String, IRecord> channels = new HashMap();   
+    
+    @Indexed
     public String userId;
     
     @Indexed
@@ -73,6 +76,9 @@ public class RecordSet {
     
     @Indexed
     public String objectId;
+
+    @GeoSpatialIndexed
+    public Point location;
 
     @JsonIgnore
     @Transient
@@ -425,4 +431,34 @@ public class RecordSet {
 
     }
 
+    public RecordSet userId(String userId) {
+        this.userId = userId;
+        return this;
+    }
+
+    public RecordSet streamId(String streamId) {
+        this.streamId = streamId;
+        return this;
+    }
+
+    public RecordSet stream(Stream stream) {
+        setStream(stream);
+        return this;
+    }
+
+    public RecordSet setObjectId(String objectId) {
+        this.objectId = objectId;
+        return this;
+    }
+
+    public RecordSet location(Point location) {
+        this.location = location;
+        return this;
+    }
+
+    public RecordSet channel(String name, IRecord record) {
+        this.channels.put(name, record);
+        return this;
+    }
+    
 }
