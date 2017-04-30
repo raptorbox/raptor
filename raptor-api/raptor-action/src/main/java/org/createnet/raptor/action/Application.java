@@ -15,54 +15,20 @@
  */
 package org.createnet.raptor.action;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.createnet.raptor.api.common.BaseApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @SpringBootApplication(scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.action"})
-@EnableConfigurationProperties
-@EnableAutoConfiguration
 @EnableMongoRepositories
-@Profile("default")
-@EnableAspectJAutoProxy(proxyTargetClass = true)
-public class Application {
-
-    static private ConfigurableApplicationContext instance;
+public class Application extends BaseApplication {
 
     public static void main(String[] args) {
-        instance = SpringApplication.run(Application.class, args);
-    }
-
-    public static void close() {
-        if (instance != null) {
-            instance.close();
-        }
-    }
-
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurerAdapter() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("*")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE")
-                        .maxAge(3600);
-            }
-        };
+        start(Application.class, args);
     }
 
 }

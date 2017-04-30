@@ -13,18 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.profile;
+package org.createnet.raptor.data;
 
 import org.createnet.raptor.api.common.BaseApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.profile", "org.createnet.raptor.api.common"})
-@EnableMongoRepositories
+@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.data"})
 public class Application extends BaseApplication {
 
     public static void main(String[] args) {
