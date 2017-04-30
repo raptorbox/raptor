@@ -5,7 +5,6 @@ spring:
       enabled: true
       trigger-file: raptor-action-1.0.jar
       additional-paths: target
-      
   profiles: default
   mongodb:
     host: localhost

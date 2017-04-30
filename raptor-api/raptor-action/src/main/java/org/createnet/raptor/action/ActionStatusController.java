@@ -264,7 +264,9 @@ public class ActionStatusController {
         if (status == null) {
             return ResponseEntity.noContent().build();
         }
-
+        
+        actionStatusService.delete(status);
+        
         return ResponseEntity.accepted().build();
     }
 
