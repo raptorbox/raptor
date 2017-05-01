@@ -13,8 +13,6 @@ services:
       - 1883:1883
     volumes:
       - ./config:/etc/raptor
-    depends_on:
-      - elasticsearch
     networks:
       - raptor_net
 
