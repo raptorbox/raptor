@@ -20,7 +20,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import org.createnet.raptor.indexer.query.Query;
-import org.createnet.raptor.models.data.types.instances.GeoPoint;
 import org.createnet.raptor.models.data.types.instances.DistanceUnit;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.GeoBoundingBoxQueryBuilder;
@@ -29,6 +28,7 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.springframework.data.geo.Point;
 
 /**
  *
@@ -298,26 +298,28 @@ public class DataQuery extends AbstractESQuery {
      * @param se bottom-right coordinate
      * @return
      */
-    public DataQuery boundingBox(GeoPoint nw, GeoPoint se) {
+    public DataQuery boundingBox(Point nw, Point se) {
         this.geoboundingbox = true;
-        this.geoboxupperleftlat = nw.getLat();
-        this.geoboxupperleftlon = nw.getLon();
-        this.geoboxbottomrightlon = se.getLon();
-        this.geoboxbottomrightlat = se.getLat();
+        this.geoboxupperleftlat = nw.getX();
+        this.geoboxupperleftlon = nw.getY();
+        this.geoboxbottomrightlon = se.getY();
+        this.geoboxbottomrightlat = se.getX();
         return this;
     }
 
     /**
      * Search for result in the radius of a geo-spatial point
      *
+     * @param point
+     * @param unit
      * @return
      */
-    public DataQuery distance(GeoPoint point, double distance, DistanceUnit unit) {
+    public DataQuery distance(Point point, double distance, DistanceUnit unit) {
         this.geodistance = true;
         this.geodistanceunit = unit;
         this.geodistancevalue = distance;
-        this.pointlat = point.getLat();
-        this.pointlon = point.getLon();
+        this.pointlat = point.getX();
+        this.pointlon = point.getY();
         return this;
     }
 

@@ -17,8 +17,8 @@ package org.createnet.raptor.indexer.query.impl.es;
 
 import java.time.Instant;
 import org.createnet.raptor.indexer.query.Query;
-import org.createnet.raptor.models.data.types.instances.GeoPoint;
 import org.createnet.raptor.models.data.types.instances.DistanceUnit;
+import org.springframework.data.geo.Point;
 
 /**
  * Create prestructured data queries 
@@ -65,7 +65,7 @@ public class DataQueryBuilder {
      * @param se bottom-right coordinate
      * @return
      */
-    public static DataQuery boundingBox(GeoPoint nw, GeoPoint se) {
+    public static DataQuery boundingBox(Point nw, Point se) {
         return new DataQuery().boundingBox(nw, se);
     }
 
@@ -77,7 +77,7 @@ public class DataQueryBuilder {
      * @param unit
      * @return
      */
-    public static DataQuery distance(GeoPoint point, double distance, DistanceUnit unit) {
+    public static DataQuery distance(Point point, double distance, DistanceUnit unit) {
         return new DataQuery().distance(point, distance, unit);
     }
 
