@@ -6,19 +6,6 @@ networks:
 
 services:
 
-  api:
-    build: ./raptor-http-api
-    container_name: raptor-http-api
-    ports:
-      - 127.0.0.1:8080:8080
-    volumes:
-      - ./config:/etc/raptor
-    depends_on:
-      - elasticsearch
-      - couchbase
-    networks:
-      - raptor_net
-
   broker:
     build: ./raptor-broker
     container_name: raptor-broker
@@ -31,20 +18,32 @@ services:
     networks:
       - raptor_net
 
-  auth:
-    build: ./raptor-auth-service
-    container_name: raptor-auth-service
+  action:
+    build: ./raptor-api/raptor-action
+    container_name: raptor-action
     ports:
-      - 8090:8090
+      - 8050:8050
     volumes:
       - ./config:/etc/raptor
     depends_on:
-      - mariadb
+      - mongo
+    networks:
+      - raptor_net
+
+  inventory:
+    build: ./raptor-api/raptor-inventory
+    container_name: raptor-inventory
+    ports:
+      - 8060:8060
+    volumes:
+      - ./config:/etc/raptor
+    depends_on:
+      - mongo
     networks:
       - raptor_net
 
   profile:
-    build: ./raptor-profile
+    build: ./raptor-api/raptor-profile
     container_name: raptor-profile
     ports:
       - 8070:8070
@@ -52,6 +51,30 @@ services:
       - ./config:/etc/raptor
     depends_on:
       - mongo
+    networks:
+      - raptor_net
+
+  inventory:
+    build: ./raptor-api/raptor-stream
+    container_name: raptor-stream
+    ports:
+      - 8080:8080
+    volumes:
+      - ./config:/etc/raptor
+    depends_on:
+      - mongo
+    networks:
+      - raptor_net
+
+  auth:
+    build: ./raptor-api/raptor-auth-service
+    container_name: raptor-auth-service
+    ports:
+      - 8090:8090
+    volumes:
+      - ./config:/etc/raptor
+    depends_on:
+      - mariadb
     networks:
       - raptor_net
 
@@ -92,29 +115,6 @@ services:
     networks:
       - raptor_net
 
-  couchbase:
-    image: couchbase/server
-    volumes:
-      - ./data/couchbase:/opt/couchbase/var
-    ports:
-      - 8091:8091
-      - 8092:8092
-      - 8093:8093
-      - 11210:11210
-    networks:
-      - raptor_net
-
-  elasticsearch:
-    image: elasticsearch:5
-    command: elasticsearch -E cluster.name="raptor" -E path.data=/usr/share/elasticsearch/data -E transport.host=0.0.0.0 -E indices.store.throttle.type=none
-    volumes:
-      - ./data/elasticsearch:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
-      - 9300:9300
-    networks:
-      - raptor_net
-
   mongo:
     image: mongo:3
     container_name: mongo
@@ -125,14 +125,3 @@ services:
     command: --smallfiles # --rest --auth
     networks:
       - raptor_net
-
-# proxy:
-#   build: ./docker/proxy
-#   ports:
-#     - 80:80
-#   depends_on:
-#     - api
-#     - auth
-#     - broker
-#   networks:
-#     - raptor_net

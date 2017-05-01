@@ -118,7 +118,7 @@ public class StreamController {
         if (!currentUser.isAdmin() && !record.userId.equals(currentUser.getUuid())) {
             record.userId = currentUser.getUuid();
         }
-        
+                
         // save data!
         streamService.save(record);
 

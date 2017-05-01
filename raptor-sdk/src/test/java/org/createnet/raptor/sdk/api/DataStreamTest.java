@@ -25,7 +25,6 @@ import org.createnet.raptor.indexer.query.impl.es.DataQuery;
 import org.createnet.raptor.indexer.query.impl.es.DataQueryBuilder;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
-import org.createnet.raptor.models.data.types.instances.GeoPoint;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.data.types.instances.DistanceUnit;
@@ -37,6 +36,7 @@ import org.junit.Test;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.geo.Point;
 
 /**
  *
@@ -69,7 +69,6 @@ public class DataStreamTest {
         d.addStream("test", "number", "number");
         d.addStream("test", "boolean", "boolean");
         d.addStream("test", "string", "string");
-        d.addStream("test", "location", "geo_point");
 
         Assert.assertTrue(d.getStream("test").channels.size() == 4);
 
@@ -98,7 +97,7 @@ public class DataStreamTest {
             record.addRecord("number", i);
             record.addRecord("string", System.currentTimeMillis() % 2 == 0 ? "Hello world" : "See you later");
             record.addRecord("boolean", System.currentTimeMillis() % 2 == 0);
-            record.addRecord("location", new GeoPoint(11.45, 45.11));
+            record.addRecord("location", new Point(11.45, 45.11));
 
             long time = (long) (Instant.now().toEpochMilli() - (i * 1000) - (Math.random() * 100));
 
@@ -170,10 +169,8 @@ public class DataStreamTest {
 
         RecordSet record = raptor.Stream().lastUpdate(s);
         Assert.assertNotNull(record);
-        Assert.assertTrue(record.channels.get("location").getValue() instanceof GeoPoint);
         
-        GeoPoint p = (GeoPoint)record.channels.get("location").getValue();
-        Assert.assertEquals(11.45, p.getLat(), 0);
+        Assert.assertEquals(11.45, record.location.getX(), 0);
     }
     
     @Test
@@ -239,7 +236,7 @@ public class DataStreamTest {
         pushRecords(s, qt);
 
         DataQuery q = new DataQuery();
-        q.distance(new GeoPoint(11.45, 45.11), 10000, DistanceUnit.kilometers);
+        q.distance(new Point(11.45, 45.11), 10000, DistanceUnit.kilometers);
         ResultSet results = raptor.Stream().search(s, q, 0, 10);
         
         log.debug("Found {} records", results.size());
@@ -257,7 +254,7 @@ public class DataStreamTest {
         int qt = 10;
         pushRecords(s, qt);
         
-        ResultSet results = raptor.Stream().search(s, DataQueryBuilder.boundingBox(new GeoPoint(12, 45), new GeoPoint(10, 44)), 0, 10);
+        ResultSet results = raptor.Stream().search(s, DataQueryBuilder.boundingBox(new Point(12, 45), new Point(10, 44)), 0, 10);
         
         log.debug("Found {} records", results.size());
         Assert.assertTrue(results.size() > 0);

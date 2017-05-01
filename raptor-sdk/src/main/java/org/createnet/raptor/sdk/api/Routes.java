@@ -27,18 +27,21 @@ final public class Routes {
     public static final String LOAD = UPDATE;
     public static final String DELETE = UPDATE;
     
-    public static final String STREAM = "/%s/streams/%s";
+    public static final String STREAM = "/stream/%s/%s";
     public static final String PUSH = STREAM;
     
     public static final String LAST_UPDATE = PUSH;
-    public static final String PULL = PUSH + "/list";
+    public static final String PULL = PUSH;
     public static final String SEARCH_DATA = PUSH + "/search";
     
     public static final String INVOKE = "/action/%s/%s";
     public static final String ACTION_STATUS = INVOKE;
     
     public static final String SUBSCRIBE_ACTION = "%s/actions/%s";
-    public static final String SUBSCRIBE_STREAM = PUSH;
+    public static final String SUBSCRIBE_STREAM = "%s/streams/%s";
+    
+    public static final String SUBSCRIBE_DEVICE_EVENTS = "%s/events";
+    public static final String SUBSCRIBE_USER_EVENTS = SUBSCRIBE_DEVICE_EVENTS;
     
     public static final String PERMISSION_CHECK = "/auth/check";
     public static final String LOGIN = "/auth/login";

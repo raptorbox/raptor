@@ -3,9 +3,10 @@ spring:
   devtools:
     restart:
       enabled: true
-      trigger-file: raptor-data-1.0.jar
+      trigger-file: raptor-stream-1.0.jar
       additional-paths: target
   profiles: default
+
   mongodb:
     host: localhost
     port: 27017
@@ -14,8 +15,8 @@ spring:
 #    password: admin
     
 server:
-  contextPath: /data
-  port: 8040
+  contextPath: /stream
+  port: 8080
   address: 127.0.0.1
   error:
     whitelabel:

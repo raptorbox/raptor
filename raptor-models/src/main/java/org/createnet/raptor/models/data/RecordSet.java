@@ -19,13 +19,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.createnet.raptor.models.data.types.NumberRecord;
 import org.createnet.raptor.models.data.types.BooleanRecord;
-import org.createnet.raptor.models.data.types.GeoPointRecord;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.client.model.geojson.Point;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -47,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -60,20 +59,20 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Document
 public class RecordSet {
-    
+
     @Id
     @Indexed
     public Date timestamp;
-    
+
     @Indexed
-    final public Map<String, IRecord> channels = new HashMap();   
-    
+    final public Map<String, IRecord> channels = new HashMap();
+
     @Indexed
     public String userId;
-    
+
     @Indexed
     public String streamId;
-    
+
     @Indexed
     public String objectId;
 
@@ -94,7 +93,7 @@ public class RecordSet {
 
     public RecordSet(Stream stream) {
         this();
-        this.setStream(stream);
+        this.stream(stream);
     }
 
     public RecordSet(Stream stream, JsonNode row) {
@@ -139,7 +138,7 @@ public class RecordSet {
         }
         return RecordSet.createRecord(this.getStream(), key, value);
     }
-    
+
     public static IRecord createRecord(Stream stream, String key, Object value) {
 
         IRecord record = null;
@@ -188,9 +187,6 @@ public class RecordSet {
                 case "number":
                     record = new NumberRecord();
                     break;
-                case "geo_point":
-                    record = new GeoPointRecord();
-                    break;
                 default:
                     throw new RaptorComponent.ParserException("Data type not supported: " + channel.type);
             }
@@ -226,7 +222,8 @@ public class RecordSet {
 
     /**
      * Get the records timestamp
-     * @return 
+     *
+     * @return
      */
     public Date getTimestamp() {
         if (timestamp == null) {
@@ -237,6 +234,7 @@ public class RecordSet {
 
     /**
      * Get the records timestamp as UNIX epoch
+     *
      * @return
      */
     public Long getTimestampTime() {
@@ -245,6 +243,7 @@ public class RecordSet {
 
     /**
      * Set the records timestamp
+     *
      * @param timestamp
      */
     public void setTimestamp(Date timestamp) {
@@ -253,6 +252,7 @@ public class RecordSet {
 
     /**
      * Get the stored records
+     *
      * @return
      */
     public Map<String, IRecord> getRecords() {
@@ -261,6 +261,7 @@ public class RecordSet {
 
     /**
      * Set all the record values, removing the previous one if any
+     *
      * @param records
      */
     public void setRecords(List<IRecord> records) {
@@ -270,22 +271,22 @@ public class RecordSet {
             this.channels.put(record.getName(), record);
         }
     }
-    
+
     /**
      * Add a record value
-     * 
+     *
      * @param record
      */
     public void addRecord(IRecord record) {
         this.channels.put(record.getName(), record);
     }
-    
+
     /**
      * Add a record value
-     * 
+     *
      * @param channelName
      * @param value
-     * @return 
+     * @return
      */
     public IRecord<?> addRecord(String channelName, Object value) {
         IRecord r = createRecord(channelName, value);
@@ -460,5 +461,5 @@ public class RecordSet {
         this.channels.put(name, record);
         return this;
     }
-    
+
 }

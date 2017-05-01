@@ -58,10 +58,6 @@ public class TypesManager {
             instance = new BooleanRecord();
             types.put(instance.getType(), instance);
 
-            // Boolean
-            instance = new GeoPointRecord();
-            types.put(instance.getType(), instance);
-
             // String
             instance = new StringRecord();
             types.put(instance.getType(), instance);
