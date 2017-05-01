@@ -23,7 +23,6 @@ import org.createnet.raptor.sdk.events.callback.StreamEventCallback;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Stream;
-import org.createnet.raptor.indexer.query.impl.es.DataQuery;
 import org.createnet.raptor.models.payload.DataPayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 
@@ -177,14 +176,14 @@ public class StreamClient extends AbstractClient {
      * @param limit limit the total size of result
      * @return the data resultset
      */
-    public ResultSet search(Stream stream, DataQuery query, Integer offset, Integer limit) {
-        String qs = buildQueryString(offset, limit);
-        JsonNode results = getClient().post(
-                String.format(Routes.SEARCH_DATA, stream.getDevice().id, stream.name) + qs,
-                query.toJSON()
-        );
-        return ResultSet.fromJSON(stream, results);
-    }
+//    public ResultSet search(Stream stream, DataQuery query, Integer offset, Integer limit) {
+//        String qs = buildQueryString(offset, limit);
+//        JsonNode results = getClient().post(
+//                String.format(Routes.SEARCH_DATA, stream.getDevice().id, stream.name) + qs,
+//                query.toJSON()
+//        );
+//        return ResultSet.fromJSON(stream, results);
+//    }
 
     /**
      * Drop all data stored in a stream

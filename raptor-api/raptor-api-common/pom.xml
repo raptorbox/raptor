@@ -79,12 +79,6 @@
             <groupId>org.springframework.retry</groupId>
             <artifactId>spring-retry</artifactId>
         </dependency>
-        
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>raptor-auth</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>

@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
-import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.query.DeviceQuery;

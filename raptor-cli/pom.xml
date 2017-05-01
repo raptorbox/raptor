@@ -12,36 +12,21 @@
   <packaging>jar</packaging>
   
   <dependencies>
-
     <dependency>
       <groupId>com.beust</groupId>
       <artifactId>jcommander</artifactId>
       <version>1.48</version>
     </dependency>    
-    
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j}</version>
     </dependency>
-    
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>raptor-http-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>raptor-broker</artifactId>
-      <version>${project.version}</version>
-     </dependency>
-
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>raptor-config</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-core</artifactId>
@@ -55,11 +40,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>raptor-auth-service</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>raptor-service</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

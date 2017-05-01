@@ -21,14 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import org.createnet.raptor.cli.command.IndexCommand;
-import org.createnet.raptor.cli.command.LaunchCommand;
-import org.createnet.raptor.cli.command.SetupCommand;
 import org.createnet.raptor.config.ConfigurationLoader;
-import org.createnet.raptor.service.ServiceBinder;
-import org.glassfish.hk2.api.ServiceLocator;
-import org.glassfish.hk2.api.ServiceLocatorFactory;
-import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.createnet.raptor.cli.command.Command;
@@ -51,14 +44,10 @@ public class Runner {
     }
 
     static final private Logger logger = LoggerFactory.getLogger(Runner.class);
-    protected ServiceLocator serviceLocator;
     protected JCommander cmd;
 
     // add here commands!
-    final protected Class[] availCommands = new Class[]{
-        SetupCommand.class,
-        IndexCommand.class,
-        LaunchCommand.class,};
+    final protected Class[] availCommands = new Class[]{};
 
     final protected Map<String, Command> commands = new HashMap();
 
@@ -72,20 +61,12 @@ public class Runner {
 
         cmd = new JCommander(this);
 
-        ServiceLocatorFactory locatorFactory = ServiceLocatorFactory.getInstance();
-
-        serviceLocator = locatorFactory.create("CliLocator");
-        ServiceLocatorUtilities.bind(serviceLocator, new ServiceBinder());
-
         for (Class availCommand : availCommands) {
             try {
-
                 Command c = (Command) availCommand.newInstance();
                 logger.debug("Added command {}", c.getName());
-                serviceLocator.inject(c);
                 commands.put(c.getName(), c);
                 cmd.addCommand(c.getName(), c);
-
             } catch (InstantiationException | IllegalAccessException ex) {
                 throw new Command.CommandException(ex);
             }

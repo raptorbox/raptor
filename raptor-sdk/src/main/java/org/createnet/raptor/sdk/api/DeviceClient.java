@@ -30,11 +30,11 @@ import org.createnet.raptor.sdk.exception.MissingAuthenticationException;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.objects.Device;
-import org.createnet.raptor.indexer.query.impl.es.ObjectQuery;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.payload.ActionPayload;
 import org.createnet.raptor.models.payload.StreamPayload;
+import org.createnet.raptor.models.query.DeviceQuery;
 import org.createnet.raptor.sdk.admin.DevicePermissionClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -203,13 +203,13 @@ public class DeviceClient extends AbstractClient {
      * @param limit limit the total size of result
      * @return a list of Devices matching the query
      */
-    public List<Device> search(ObjectQuery query, Integer offset, Integer limit) {
+    public List<Device> search(DeviceQuery query, Integer offset, Integer limit) {
         if (query.getUserId() == null) {
             User user = getContainer().Auth().getUser();
             if (user == null) {
                 throw new MissingAuthenticationException("User is not available");
             }
-            query.setUserId(user.getUuid());
+            query.userId(user.getUuid());
         }
         JsonNode json = getClient().post(
                 Routes.SEARCH,
@@ -226,7 +226,7 @@ public class DeviceClient extends AbstractClient {
      * @param query the query to match the object definitions
      * @return a list of Devices matching the query
      */
-    public List<Device> search(ObjectQuery query) {
+    public List<Device> search(DeviceQuery query) {
         return search(query, null, null);
     }
 
