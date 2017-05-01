@@ -15,15 +15,10 @@
         <module>raptor-models</module>    
         <module>raptor-events</module>    
         <module>raptor-config</module>
-        <module>raptor-dispatcher</module>    
-        <module>raptor-auth</module>    
-        <module>raptor-db</module>
-        <module>raptor-indexer</module>
-        <module>raptor-service</module>   
+        <module>raptor-dispatcher</module>   
 
         <module>raptor-broker</module>
-        <module>raptor-api</module>        
-        <module>raptor-http-api</module>
+        <module>raptor-api</module>
                         
         <module>raptor-sdk</module>
         <module>raptor-cli</module>
