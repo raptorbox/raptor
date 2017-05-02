@@ -17,6 +17,9 @@ package org.createnet.raptor.models.objects;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.createnet.raptor.models.objects.RaptorComponent.ParserException;
 import org.createnet.raptor.models.objects.RaptorComponent.ValidationException;
 
@@ -26,78 +29,86 @@ import org.createnet.raptor.models.objects.RaptorComponent.ValidationException;
  */
 public class Channel extends StreamContainer {
 
-  public String name;
-  public String type;
-  public String unit;
+    public static final List<String> Types = new ArrayList(Arrays.asList(
+            "number",
+            "string",
+            "boolean"
+    ));
 
-  public static Channel create(String name, String type, String unit) {
-      Channel channel = new Channel();
-      channel.name = name;
-      channel.type = type;
-      channel.unit = unit;
-      
-      return channel;
-  }
-  
-  public static Channel create(String name, String type) {
-      return Channel.create(name, type, null);
-  }
-  
-  public Channel() {
-  }
+    public String name;
+    public String type;
+    public String unit;
 
-  public Channel(JsonNode json) {
-    parse(json);
-  }
+    public static Channel create(String name, String type, String unit) {
+        Channel channel = new Channel();
+        channel.name = name;
+        channel.type = type;
+        channel.unit = unit;
 
-  public Channel(String name, JsonNode json) {
-    this.name = name;
-    parse(json);
-  }
-
-  @Override
-  public void validate() {
-
-    if (name == null) {
-      throw new ValidationException("Channel name is empty");
+        return channel;
     }
 
-    if (type == null) {
-      throw new ValidationException("Channel type is empty");
+    public static Channel create(String name, String type) {
+        return Channel.create(name, type, null);
     }
 
-    if (!this.getTypes().keySet().contains(type.toLowerCase())) {
-      throw new ValidationException("Channel type not supported: " + type);
+    public Channel() {
     }
 
-  }
-
-  @Override
-  public void parse(String json) {
-    try {
-      parse(mapper.readTree(json));
-    } catch (IOException ex) {
-      throw new ParserException(ex);
+    public Channel(JsonNode json) {
+        this();
+        parse(json);
     }
-  }
 
-  public void parse(JsonNode json) {
-
-    if (json.isTextual()) {
-      type = json.asText();
-    } else {
-      if (json.has("name")) {
-        name = json.get("name").asText();
-      }
-
-      if (json.has("type")) {
-        type = json.get("type").asText();
-      }
-
-      if (json.has("unit")) {
-        unit = json.get("unit").asText();
-      }
+    public Channel(String name, JsonNode json) {
+        this();
+        this.name = name;
+        parse(json);
     }
-  }
+
+    @Override
+    public void validate() {
+
+        if (name == null) {
+            throw new ValidationException("Channel name is empty");
+        }
+
+        if (type == null) {
+            throw new ValidationException("Channel type is empty");
+        }
+
+        if (!Types.contains(type.toLowerCase())) {
+            throw new ValidationException("Channel type not supported: " + type);
+        }
+
+    }
+
+    @Override
+    public void parse(String json) {
+        try {
+            parse(mapper.readTree(json));
+        } catch (IOException ex) {
+            throw new ParserException(ex);
+        }
+    }
+
+    public void parse(JsonNode json) {
+
+        if (json.isTextual()) {
+            type = json.asText();
+        } else {
+            if (json.has("name")) {
+                name = json.get("name").asText();
+            }
+
+            if (json.has("type")) {
+                type = json.get("type").asText();
+            }
+
+            if (json.has("unit")) {
+                unit = json.get("unit").asText();
+            }
+        }
+    }
 
 }

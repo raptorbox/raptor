@@ -119,7 +119,7 @@ public class DataStreamTest {
         List<RecordSet> records = createRecordSet(s, len);
         records.parallelStream().forEach(record -> raptor.Stream().push(record));
         log.debug("Done, waiting for indexing {}millis", waitFor);
-        Utils.waitFor(waitFor);
+//        Utils.waitFor(waitFor);
     }
     
     @Test
@@ -132,26 +132,40 @@ public class DataStreamTest {
 
         pushRecords(s, 1);
     }
-//
-//    @Test
-//    public void pullRecords() {
-//
-//        log.debug("Pull device data");
-//
-//        Device dev = createDevice();
-//        Stream s = dev.getStream("test");
-//        
-//        int qt = 5;
-//        pushRecords(s, qt);
-//        
-//        // wait for indexing
-//        Utils.waitFor(2500);
-//
-//        ResultSet results = raptor.Stream().pull(s);
-//        Assert.assertEquals(qt, results.size());
-//
-//    }
-//
+    
+    @Test
+    public void dropData()  {
+
+        log.debug("Drop device data");
+
+        Device dev = createDevice();
+        Stream s = dev.getStream("test");
+
+        pushRecords(s, 10);
+        
+        raptor.Stream().delete(s);
+        
+        ResultSet results = raptor.Stream().pull(s);
+        
+        Assert.assertTrue(results.isEmpty());
+        
+    }
+
+    @Test
+    public void pullRecords() {
+
+        log.debug("Pull device data");
+
+        Device dev = createDevice();
+        Stream s = dev.getStream("test");
+        
+        int qt = 5;
+        pushRecords(s, qt);
+        
+        ResultSet results = raptor.Stream().pull(s);
+        Assert.assertEquals(qt, results.size());
+    }
+
 //    @Test
 //    public void pullLastUpdate() {
 //

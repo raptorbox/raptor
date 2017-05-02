@@ -16,9 +16,6 @@
 package org.createnet.raptor.models.objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.Map;
-import org.createnet.raptor.models.data.Record;
-import org.createnet.raptor.models.data.types.TypesManager;
 import org.springframework.data.annotation.Transient;
 
 /**
@@ -30,10 +27,6 @@ public abstract class DeviceContainer extends RaptorContainer {
     @JsonIgnore
     @Transient
     protected Device device;
-
-    protected Map<String, Record> getTypes() {
-        return TypesManager.getTypes();
-    }
 
     @Override
     public RaptorComponent getContainer() {

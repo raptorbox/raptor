@@ -17,8 +17,6 @@ package org.createnet.raptor.models.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.createnet.raptor.models.data.types.NumberRecord;
-import org.createnet.raptor.models.data.types.BooleanRecord;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -26,14 +24,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.createnet.raptor.models.data.types.StringRecord;
-import org.createnet.raptor.models.data.types.TypesManager;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Channel;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -61,6 +56,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class RecordSet {
 
     @Id
+    public String id;
+    
     @Indexed
     public Date timestamp;
 
@@ -111,91 +108,19 @@ public class RecordSet {
         }
     }
 
-    public RecordSet(ArrayList<IRecord> records) {
+    public RecordSet(Map<String, Object> records) {
         this();
-        for (IRecord record : records) {
-            this.channels.put(record.getName(), record.getValue());
-        }
+        this.channels.putAll(records);
     }
 
-    public RecordSet(ArrayList<IRecord> records, Date date) {
-
-        for (IRecord record : records) {
-            this.channels.put(record.getName(), record);
-        }
-
+    public RecordSet(Map<String, Object> records, Date date) {
+        this.channels.putAll(records);
         this.timestamp = date;
     }
 
-    public RecordSet(ArrayList<IRecord> records, Date date, String userId) {
+    public RecordSet(Map<String, Object> records, Date date, String userId) {
         this(records, date);
         this.userId = userId;
-    }
-
-    public IRecord createRecord(String key, Object value) {
-        if (this.getStream() == null) {
-            throw new RecordsetException("Stream must be set");
-        }
-        return RecordSet.createRecord(this.getStream(), key, value);
-    }
-
-    public static IRecord createRecord(Stream stream, String key, Object value) {
-
-        IRecord record = null;
-        Channel channel = null;
-
-        if (stream != null) {
-
-            if (!stream.channels.isEmpty() && !stream.channels.containsKey(key)) {
-                return null;
-            }
-
-            channel = stream.channels.get(key);
-        } else {
-
-            //try parse value
-            for (Map.Entry<String, Record> item : TypesManager.getTypes().entrySet()) {
-
-                try {
-
-                    Record recordType = item.getValue();
-                    value = recordType.parseValue(value);
-
-                    channel = new Channel();
-                    channel.name = key;
-                    channel.type = recordType.getType();
-
-                    break;
-
-                } catch (RaptorComponent.ParserException e) {
-//          int v = 0;
-                }
-
-            }
-
-        }
-
-        if (channel != null) {
-
-            switch (channel.type.toLowerCase()) {
-                case "string":
-                    record = new StringRecord();
-                    break;
-                case "boolean":
-                    record = new BooleanRecord();
-                    break;
-                case "number":
-                    record = new NumberRecord();
-                    break;
-                default:
-                    throw new RaptorComponent.ParserException("Data type not supported: " + channel.type);
-            }
-
-            record.setValue(value);
-            record.setChannel(channel);
-        }
-
-        return record;
     }
 
     public ObjectNode toJsonNode() {
@@ -259,44 +184,39 @@ public class RecordSet {
         return channels;
     }
 
-    /**
-     * Set all the record values, removing the previous one if any
-     *
-     * @param records
-     */
-    public void setRecords(List<IRecord> records) {
-        this.channels.clear();
-
-        for (IRecord record : records) {
-            this.channels.put(record.getName(), record.getValue());
-        }
+    public static Object parseType(JsonNode channelNode) {
+        return parseType(channelNode, null);
     }
 
-    /**
-     * Add a record value
-     *
-     * @param record
-     * @return 
-     */
-    public RecordSet addRecord(IRecord record) {
-        this.channels.put(record.getName(), record.getValue());
-        return this;
-    }
+    public static Object parseType(JsonNode channelNode, Channel channel) {
 
-    /**
-     * Add a record value
-     *
-     * @param channelName
-     * @param value
-     * @return
-     */
-    public IRecord<?> addRecord(String channelName, Object value) {
-        IRecord r = createRecord(channelName, value);
-        if (r == null) {
-            throw new RecordsetException("Can not create a Record, is the channel name listed in the stream channels?");
+        Object channelValue = null;
+        String channelType = null;
+
+        if (channelNode.isBoolean()) {
+            channelType = "boolean";
+            channelValue = channelNode.asBoolean();
         }
-        this.channels.put(r.getName(), r.getValue());
-        return r;
+
+        if (channelNode.isNumber()) {
+            channelType = "number";
+            if (channelNode.isFloat() || channelNode.isDouble()) {
+                channelValue = channelNode.asDouble();
+            } else {
+                channelValue = channelNode.asLong();
+            }
+        }
+
+        if (channelNode.isTextual()) {
+            channelType = "string";
+            channelValue = channelNode.asText();
+        }
+
+        if (channel != null && channelType != null) {
+            channel.type = channelType;
+        }
+
+        return channelValue;
     }
 
     private void parseJson(Stream stream, JsonNode row) {
@@ -322,43 +242,23 @@ public class RecordSet {
             String channelName = item.getKey();
             JsonNode nodeValue = item.getValue();
 
-            JsonNode valObj = nodeValue;
-
             // allow short-hand without [current-]value
             if (nodeValue.isObject()) {
                 if (nodeValue.has("value")) {
-                    valObj = nodeValue.get("value");
+                    nodeValue = nodeValue.get("value");
                 } else if (nodeValue.has("current-value")) {
-                    valObj = nodeValue.get("current-value");
+                    nodeValue = nodeValue.get("current-value");
                 }
             }
 
-            try {
-                if (stream != null && (stream.channels != null && !stream.channels.isEmpty())) {
-                    if (stream.channels.containsKey(channelName)) {
-                        this.addRecord(stream, channelName, valObj);
-                    }
-                } else {
-                    // definition is unknown, add all channels to the record set
-                    this.addRecord(stream, channelName, valObj);
-                }
-            } catch (Exception e) {
-                throw new RecordsetException(e);
+            Object channelValue = parseType(nodeValue);
+
+            if (channelValue != null) {
+                this.channel(channelName, channelValue);
             }
 
         }
 
-    }
-
-    protected IRecord addRecord(Stream stream, String channelName, Object value) {
-
-        IRecord record = RecordSet.createRecord(stream, channelName, value);
-        if (record != null) {
-            record.setRecordSet(this);
-            this.channels.put(record.getName(), record.getValue());
-        }
-
-        return record;
     }
 
     /**
@@ -418,18 +318,38 @@ public class RecordSet {
     public void validate() {
 
         if (getStream() != null) {
-
-//      for (String channelName : stream.channels.keySet()) {
-//        if (!channels.containsKey(channelName)) {
-//          throw new RaptorComponent.ValidationException("Missing channel: " + channelName);
-//        }
-//      }
             for (String channelName : channels.keySet()) {
-                if (!getStream().channels.containsKey(channelName)) {
+                
+                Channel channel = getStream().channels.getOrDefault(channelName, null);
+                if (channel == null) {
                     throw new RaptorComponent.ValidationException("Objet model does not define this channel: " + channelName);
                 }
+                
+                Object value = this.channels.get(channelName);
+                
+                if(channel.type.equals("boolean")) {
+                    if(!(value instanceof Boolean)) {
+                        throw new RaptorComponent.ValidationException("Channel " + channelName + " should be a boolean");
+                    }
+                }
+                if(channel.type.equals("number")) {
+                    if(
+                        !(value instanceof Float) && 
+                        !(value instanceof Double) && 
+                        !(value instanceof Integer) && 
+                        !(value instanceof Long) && 
+                        !(value instanceof Short)
+                    ) {
+                        throw new RaptorComponent.ValidationException("Channel " + channelName + " should be a number");
+                    }                    
+                }
+                if(channel.type.equals("string")) {
+                    if(!(value instanceof String)) {
+                        throw new RaptorComponent.ValidationException("Channel " + channelName + " should be a string");
+                    }                                        
+                }
             }
-
+            
         }
 
     }
@@ -441,6 +361,11 @@ public class RecordSet {
 
     public RecordSet streamId(String streamId) {
         this.streamId = streamId;
+        return this;
+    }
+
+    public RecordSet deviceId(String deviceId) {
+        this.objectId = deviceId;
         return this;
     }
 
@@ -474,53 +399,53 @@ public class RecordSet {
         return this;
     }
 
-    public RecordSet channel(String name, IRecord record) {
-        this.channels.put(name, record.getValue());
+    public RecordSet channel(String name, Object record) {
+        this.channels.put(name, record);
         return this;
     }
-    
+
     public RecordSet channel(String name, String value) {
-        addRecord(name, value);
+        channel(name, (Object) value);
         return this;
     }
-    
+
     public RecordSet channel(String name, int value) {
-        addRecord(name, value);
+        channel(name, (Object) value);
         return this;
     }
-    
+
     public RecordSet channel(String name, Integer value) {
-        addRecord(name, value);
+        channel(name, (Object) value);
         return this;
     }
-    
+
     public RecordSet channel(String name, long value) {
-        addRecord(name, value);
+        channel(name, (Object) value);
         return this;
     }
-    
+
     public RecordSet channel(String name, Long value) {
-        addRecord(name, value);
+        channel(name, (Object) value);
         return this;
     }
-    
+
     public RecordSet channel(String name, double value) {
-        addRecord(name, value);
+        channel(name, (Object) value);
         return this;
     }
-    
+
     public RecordSet channel(String name, Double value) {
-        addRecord(name, value);
+        channel(name, (Object) value);
         return this;
     }
-    
+
     public RecordSet channel(String name, boolean value) {
-        addRecord(name, value);
+        channel(name, (Object) value);
         return this;
     }
-    
+
     public RecordSet channel(String name, Boolean value) {
-        addRecord(name, value);
+        channel(name, (Object) value);
         return this;
     }
 

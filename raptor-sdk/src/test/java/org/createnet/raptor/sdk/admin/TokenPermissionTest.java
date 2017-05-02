@@ -132,14 +132,14 @@ public class TokenPermissionTest {
         d.name = "test1";
         Stream s = d.addStream("test", "string");
         
-        r.Device().create(d);
+        r.Inventory().create(d);
         
         RecordSet record = new RecordSet(s);
-        record.addRecord(RecordSet.createRecord(s, "test", "hello world"));
+        record.channel("test", "hello world");
         r.Stream().push(record);
         
         try {
-            r.Device().delete(d);
+            r.Inventory().delete(d);
         }
         catch(RequestException ex) {
             assertEquals(403, ex.getStatus());

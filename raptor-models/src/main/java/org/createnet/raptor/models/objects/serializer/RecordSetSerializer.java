@@ -19,8 +19,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
-import org.createnet.raptor.models.data.IRecord;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
@@ -45,39 +45,39 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
         jg.writeStartObject();
 
         jg.writeObjectFieldStart("channels");
+        
+        for (Map.Entry<String, Object> item : r.channels.entrySet()) {
 
-        for (Map.Entry<String, IRecord> item : r.channels.entrySet()) {
-
-            String channelName = item.getKey();
-            IRecord channel = item.getValue();
+            String channelName = item.getKey();           
 
             // enforce stream schema if available
             if (r.getStream() != null) {
                 if (!r.getStream().channels.containsKey(channelName)) {
                     // skip unmanaged field
-                    return;
+                    continue;
                 }
             }
-
-            if (channel == null) {
+            
+            Object channelValue = item.getValue();
+            
+            if (channelValue == null) {
                 continue;
             }
-            if (channel.getValue() == null) {
-                continue;
-            }
-
-            jg.writeObjectField(channelName, channel.getValue());
-
-//            jg.writeObjectFieldStart(channelName);
-//            jg.writeObjectField("current-value", channel.getValue());
-//            jg.writeEndObject();
+            
+            jg.writeObjectField(channelName, channelValue);
 
         }
 
         jg.writeEndObject();
 
         jg.writeNumberField("timestamp", r.getTimestampTime());
-        
+
+        if (r.location != null) {
+            Map<String, Double> loc = new HashMap();
+            loc.put("x", r.location.getX());
+            loc.put("y", r.location.getY());
+            jg.writeObjectField("location", loc);
+        }
         
         // try to get a value
         if(r.userId == null && obj != null) {

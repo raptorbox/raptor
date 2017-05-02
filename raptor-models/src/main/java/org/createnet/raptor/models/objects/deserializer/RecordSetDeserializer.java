@@ -20,20 +20,18 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
-import java.util.Date;
 import java.util.Iterator;
-import java.util.Map;
-import org.createnet.raptor.models.data.Record;
 import org.createnet.raptor.models.data.RecordSet;
-import org.createnet.raptor.models.data.types.TypesManager;
 import org.createnet.raptor.models.objects.Channel;
-import org.createnet.raptor.models.objects.RaptorComponent;
+import org.springframework.data.geo.Point;
 
 /**
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
 public class RecordSetDeserializer extends JsonDeserializer<RecordSet> {
+
+    final private long past = 90000000000L; //Tue Nov 07 1972 17:00:00 GMT+0100 (CET)
 
     @Override
     public RecordSet deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
@@ -42,34 +40,46 @@ public class RecordSetDeserializer extends JsonDeserializer<RecordSet> {
         RecordSet recordset = new RecordSet();
 
         if (tree.has("userId")) {
-            recordset.userId = tree.get("userId").asText();
+            recordset.userId(tree.get("userId").asText());
         }
+
         if (tree.has("objectId")) {
-            recordset.objectId = tree.get("objectId").asText();
+            recordset.deviceId(tree.get("objectId").asText());
         }
+        if (tree.has("deviceId")) {
+            recordset.deviceId(tree.get("deviceId").asText());
+        }
+
         if (tree.has("streamId")) {
-            recordset.streamId = tree.get("streamId").asText();
+            recordset.streamId(tree.get("streamId").asText());
+        }
+
+        if (tree.has("location")
+                && (tree.get("location").has("x") && tree.get("location").has("y"))) {
+            Double x = tree.get("location").get("x").asDouble();
+            Double y = tree.get("location").get("y").asDouble();
+            recordset.location(new Point(x, y));
         }
 
         long time = System.currentTimeMillis();
-
         if (tree.has("channels")) {
-
+            
             if (tree.has("timestamp")) {
                 long time1 = tree.get("timestamp").asLong();
-                if (time1 > 0) {
+                if (time1 > 0 && time1 < past) {
                     time = time1 * 1000;
                 }
             } else if (tree.has("lastUpdate")) {
                 long time1 = tree.get("lastUpdate").asLong();
-                if (time1 > 0) {
+                if (time1 > 0 && time1 < past) {
                     time = time1 * 1000;
                 }
             }
+            
             tree = tree.get("channels");
         }
 
-        recordset.setTimestamp(new Date(time));
+        recordset.timestamp(time);
 
         if (tree.isObject()) {
 
@@ -85,25 +95,12 @@ public class RecordSetDeserializer extends JsonDeserializer<RecordSet> {
                     }
                 }
 
-                for (Map.Entry<String, Record> item : TypesManager.getTypes().entrySet()) {
-                    try {
+                Channel channel = new Channel();
+                channel.name = channelName;
 
-                        Record recordType = item.getValue();
-                        Object val = recordType.parseValue(channelNode);
-
-                        Record instance = (Record) recordType.getClass().newInstance();
-                        instance.setValue(val);
-                        Channel channel = new Channel();
-
-                        channel.name = channelName;
-                        channel.type = instance.getType();
-                        instance.setChannel(channel);
-
-                        recordset.channels.put(channelName, instance);
-                        break;
-
-                    } catch (RaptorComponent.ParserException | InstantiationException | IllegalAccessException e) {
-                    }
+                Object channelValue = RecordSet.parseType(channelNode, channel);
+                if (channelValue != null) {
+                    recordset.channel(channelName, channelValue);
                 }
 
             }

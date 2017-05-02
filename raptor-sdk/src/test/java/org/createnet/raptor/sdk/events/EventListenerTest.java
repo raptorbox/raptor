@@ -91,7 +91,7 @@ public class EventListenerTest {
 
         Stream stream = dev.getStream("test2");
         RecordSet record = new RecordSet(stream);
-        record.createRecord("foo", true);
+        record.channel("foo", true);
 
         raptor.Stream().push(stream, record);
         record.timestamp = new Date(Instant.now().toEpochMilli());
@@ -251,7 +251,7 @@ public class EventListenerTest {
         Stream stream = dev.getStream("test");
 
         RecordSet record = new RecordSet(stream);
-        record.addRecord(RecordSet.createRecord(stream, "string", "test1"));
+        record.channel("string", "test1");
 
         raptor.Stream().push(record);
 
@@ -283,7 +283,7 @@ public class EventListenerTest {
         });
 
         RecordSet record = new RecordSet(stream);
-        record.addRecord(RecordSet.createRecord(stream, "string", "test1"));
+        record.channel("string", "test1");
         raptor.Stream().push(record);
 
         Utils.waitFor(1000);
