@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class TextQuery {
+public class TextQuery implements IQuery {
     
     private String startWith;
     private String endWith;
@@ -45,7 +45,7 @@ public class TextQuery {
         return this;
     }
 
-    public TextQuery equals(String equals) {
+    public TextQuery match(String equals) {
         this.equals = equals;
         return this;
     }

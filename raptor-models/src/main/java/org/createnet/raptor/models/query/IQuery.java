@@ -15,26 +15,10 @@
  */
 package org.createnet.raptor.models.query;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class DeviceQuery extends BaseQuery {
-
-    
-    public final TextQuery name = new TextQuery();
-    public final TextQuery description = new TextQuery();
-    public final MapQuery properties = new MapQuery();
-
-    
-    public DeviceQuery() {
-    }
-
-    public DeviceQuery(String userId) {
-        this.userId = userId;
-    }
-
+interface IQuery {
+    public boolean isEmpty();
 }

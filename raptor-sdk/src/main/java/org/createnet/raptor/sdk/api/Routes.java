@@ -32,7 +32,7 @@ final public class Routes {
     
     public static final String LAST_UPDATE = PUSH;
     public static final String PULL = PUSH;
-    public static final String SEARCH_DATA = PUSH + "/search";
+    public static final String SEARCH_DATA = PUSH;
     
     public static final String INVOKE = "/action/%s/%s";
     public static final String ACTION_STATUS = INVOKE;

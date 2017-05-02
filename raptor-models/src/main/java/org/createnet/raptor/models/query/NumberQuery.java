@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.models.query;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
@@ -22,19 +23,25 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class DeviceQuery extends BaseQuery {
-
+public class NumberQuery implements IQuery {
     
-    public final TextQuery name = new TextQuery();
-    public final TextQuery description = new TextQuery();
-    public final MapQuery properties = new MapQuery();
-
+    private final Number[] between = new Number[2];
     
-    public DeviceQuery() {
+    public NumberQuery between(Number min, Number max) {
+        this.between[0] = min;
+        this.between[1] = max;
+        return this;
     }
 
-    public DeviceQuery(String userId) {
-        this.userId = userId;
+    @JsonIgnore
+    public boolean isEmpty() {
+        return (
+            getBetween().length == 0
+        );
     }
 
+    public Number[] getBetween() {
+        return between;
+    }
+    
 }

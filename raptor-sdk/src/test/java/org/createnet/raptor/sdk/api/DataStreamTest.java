@@ -23,10 +23,11 @@ import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
+import org.createnet.raptor.models.data.types.instances.DistanceUnit;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
-import org.createnet.raptor.models.data.types.instances.DistanceUnit;
-import org.createnet.raptor.models.query.RecordSetQuery;
+import org.createnet.raptor.models.query.DataQuery;
+import org.createnet.raptor.models.query.DataQuery;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -45,7 +46,6 @@ public class DataStreamTest {
 
     final Logger log = LoggerFactory.getLogger(DataStreamTest.class);
 
-    public static Raptor raptor;
     public static Device device;
 
     @BeforeClass
@@ -58,8 +58,6 @@ public class DataStreamTest {
 
     @Before
     public void setUp() {
-
-        raptor = Utils.getRaptor();
 
         Device d = new Device();
         d.name = "data test " + System.currentTimeMillis();
@@ -79,11 +77,11 @@ public class DataStreamTest {
     public void tearDown() {
     }
 
-    private Device createDevice(Device d) {
+    private Device createDevice(Raptor raptor, Device d) {
         return raptor.Inventory().create(d);
     }
 
-    private Device createDevice() {
+    private Device createDevice(Raptor raptor) {
         return raptor.Inventory().create(device);
     }
 
@@ -105,43 +103,43 @@ public class DataStreamTest {
             records.add(record);
         }
 
-        // wait indexing
-        Utils.waitFor(2500);
         return records;
     }
     
-    private void pushRecords(Stream s, int len) {
-        pushRecords(s, len, 2500);
+    private void pushRecords(Raptor raptor, Stream s, int len) {
+        pushRecords(raptor, s, len, 2500);
     }
     
-    private void pushRecords(Stream s, int len, int waitFor) {
+    private void pushRecords(Raptor raptor, Stream s, int len, int waitFor) {
         log.debug("Pushing {} records on {}", len, s.name);
         List<RecordSet> records = createRecordSet(s, len);
         records.parallelStream().forEach(record -> raptor.Stream().push(record));
-        log.debug("Done, waiting for indexing {}millis", waitFor);
-//        Utils.waitFor(waitFor);
     }
     
     @Test
     public void pushData()  {
 
+        Raptor raptor = Utils.createNewInstance();
+        
         log.debug("Push device data");
 
-        Device dev = createDevice();
+        Device dev = createDevice(raptor);
         Stream s = dev.getStream("test");
 
-        pushRecords(s, 1);
+        pushRecords(raptor, s, 1);
     }
     
     @Test
     public void dropData()  {
 
+        Raptor raptor = Utils.createNewInstance();
+        
         log.debug("Drop device data");
 
-        Device dev = createDevice();
+        Device dev = createDevice(raptor);
         Stream s = dev.getStream("test");
 
-        pushRecords(s, 10);
+        pushRecords(raptor, s, 10);
         
         raptor.Stream().delete(s);
         
@@ -153,150 +151,144 @@ public class DataStreamTest {
 
     @Test
     public void pullRecords() {
-
+        
+        Raptor raptor = Utils.createNewInstance();
+        
         log.debug("Pull device data");
 
-        Device dev = createDevice();
+        Device dev = createDevice(raptor);
         Stream s = dev.getStream("test");
         
         int qt = 5;
-        pushRecords(s, qt);
+        pushRecords(raptor, s, qt);
         
         ResultSet results = raptor.Stream().pull(s);
         Assert.assertEquals(qt, results.size());
     }
 
-//    @Test
-//    public void pullLastUpdate() {
-//
-//        log.debug("Pull device last update");
-//
-//        Device dev = createDevice();
-//        Stream s = dev.getStream("test");
-//        
-//        int qt = 1;
-//        pushRecords(s, qt, 10000);
-//
-//        RecordSet record = raptor.Stream().lastUpdate(s);
-//        Assert.assertNotNull(record);
-//        
-//        Assert.assertEquals(11.45, record.location.getX(), 0);
-//    }
-//    
-//    @Test
-//    public void pullEmptyLastUpdate() {
-//
-//        log.debug("Pull empty device last update");
-//
-//        Device dev = createDevice();
-//        Stream s = dev.getStream("test");
-//        
-//        RecordSet record = raptor.Stream().lastUpdate(s);
-//        Assert.assertNull(record);
-//    }
-//
-//    @Test
-//    public void searchByTimeRange()  {
-//
-//        log.debug("Search by time range");
-//
-//        Device dev = createDevice();
-//        Stream s = dev.getStream("test");
-//        
-//        int qt = 10;
-//        pushRecords(s, qt);
-//
-//        RecordSetQuery q = new RecordSetQuery();
-//        q.timeRange(Instant.EPOCH);
-//        ResultSet results = raptor.Stream().search(s, q, 0, 10);
-//
-//        Assert.assertEquals(10, results.size());
-//    }
-//
-//    @Test
-//    public void searchByNumericRange()  {
-//
-//        log.debug("Search by numeric range");
-//
-//        Device dev = createDevice();
-//        Stream s = dev.getStream("test");
-//
-//        List<RecordSet> records = createRecordSet(s, 10);
-//        records.parallelStream().forEach(record -> raptor.Stream().push(record));
-//
-//        // wait for indexing
-//        Utils.waitFor(2500);
-//
-//        RecordSetQuery q = new RecordSetQuery();
-//        q.range("number", 0, 100);
-//        ResultSet results = raptor.Stream().search(s, q, 0, 10);
-//
-//        Assert.assertEquals(10, results.size());
-//    }
-//    
-//    @Test
-//    public void searchByDistance()  {
-//
-//        log.debug("Search by distance");
-//
-//        Device dev = createDevice();
-//        Stream s = dev.getStream("test");
-//        
-//        int qt = 10;
-//        pushRecords(s, qt);
-//
-//        RecordSetQuery q = new RecordSetQuery();
-//        q.distance(new Point(11.45, 45.11), 10000, DistanceUnit.kilometers);
-//        ResultSet results = raptor.Stream().search(s, q, 0, 10);
-//        
-//        log.debug("Found {} records", results.size());
-//        Assert.assertTrue(results.size() > 0);
-//    }
-//
-//    @Test
-//    public void searchByBoundingBox()  {
-//
-//        log.debug("Search by bounding box");
-//
-//        Device dev = createDevice();
-//        Stream s = dev.getStream("test");
-//
-//        int qt = 10;
-//        pushRecords(s, qt);
-//        
-//        ResultSet results = raptor.Stream().search(s, RecordSetQueryBuilder.boundingBox(new Point(12, 45), new Point(10, 44)), 0, 10);
-//        
-//        log.debug("Found {} records", results.size());
-//        Assert.assertTrue(results.size() > 0);
-//    }
-//
-//    @Test
-//    public void dropData()  {
-//
-//        log.debug("Drop data");
-//
-//        Device dev = createDevice();
-//        Stream s = dev.getStream("test");
-//
-//        int qt = 10;
-//        pushRecords(s, qt);
-//        
-//        ResultSet results = raptor.Stream().pull(s);
-//        
-//        log.debug("Found {} records", results.size());
-//        Assert.assertEquals(10, results.size());
-//        
-//        raptor.Stream().delete(s);
-//        
-//        // wait for indexing
-//        log.debug("Wait for indexing");
-//        Utils.waitFor(2500);
-//        
-//        results = raptor.Stream().pull(s);
-//        log.debug("Found {} records", results.size());
-//        Assert.assertEquals(0, results.size());
-//        
-//        
-//    }
+    @Test
+    public void pullLastUpdate() {
+
+        Raptor raptor = Utils.createNewInstance();
+        
+        log.debug("Pull device last update");
+
+        Device dev = createDevice(raptor);
+        Stream s = dev.getStream("test");
+        
+        String msg = "LastUpdate";
+        
+        RecordSet r = new RecordSet(s)
+            .channel("number", 1)
+            .channel("string", msg)
+            .channel("boolean", true)
+            .location(new Point(11.45, 45.11))
+        ;        
+        
+        raptor.Stream().push(r);
+        
+        RecordSet record = raptor.Stream().lastUpdate(s);
+        Assert.assertNotNull(record);
+        
+        Assert.assertEquals(record.channels.get("number"), r.channels.get("number"));
+        Assert.assertEquals(record.channels.get("string"), r.channels.get("string"));
+        Assert.assertEquals(record.channels.get("boolean"), r.channels.get("boolean"));
+
+    }
+
+    @Test
+    public void pullEmptyLastUpdate() {
+        
+        Raptor raptor = Utils.createNewInstance();
+        
+        log.debug("Pull empty device last update");
+
+        Device dev = createDevice(raptor);
+        Stream s = dev.getStream("test");
+        
+        RecordSet record = raptor.Stream().lastUpdate(s);
+        Assert.assertNull(record);
+    }
+
+    @Test
+    public void searchByTimeRange()  {
+        
+        Raptor raptor = Utils.createNewInstance();
+        
+        log.debug("Search by time range");
+
+        Device dev = createDevice(raptor);
+        Stream s = dev.getStream("test");
+        
+        int qt = 10;
+        pushRecords(raptor, s, qt);
+
+        DataQuery q = new DataQuery()
+                .timeRange(Instant.EPOCH);
+
+        ResultSet results = raptor.Stream().search(s, q);
+
+        Assert.assertEquals(10, results.size());
+    }
+
+    @Test
+    public void searchByNumericRange()  {
+
+        Raptor raptor = Utils.createNewInstance();
+        
+        log.debug("Search by numeric range");
+
+        Device dev = createDevice(raptor);
+        Stream s = dev.getStream("test");
+
+        List<RecordSet> records = createRecordSet(s, 10);
+        records.parallelStream().forEach(record -> raptor.Stream().push(record));
+
+        DataQuery q = new DataQuery();
+        q.range("number", 0, 100);
+        ResultSet results = raptor.Stream().search(s, q);
+
+        Assert.assertEquals(10, results.size());
+    }
+    
+    @Test
+    public void searchByDistance()  {
+        
+        Raptor raptor = Utils.createNewInstance();
+        
+        log.debug("Search by distance");
+
+        Device dev = createDevice(raptor);
+        Stream s = dev.getStream("test");
+        
+        int qt = 10;
+        pushRecords(raptor, s, qt);
+
+        DataQuery q = new DataQuery();
+        q.distance(new Point(11.45, 45.11), 10000, DistanceUnit.kilometers);
+        ResultSet results = raptor.Stream().search(s, q);
+        
+        log.debug("Found {} records", results.size());
+        Assert.assertTrue(results.size() > 0);
+    }
+
+    @Test
+    public void searchByBoundingBox()  {
+
+        Raptor raptor = Utils.createNewInstance();
+        
+        log.debug("Search by bounding box");
+
+        Device dev = createDevice(raptor);
+        Stream s = dev.getStream("test");
+
+        int qt = 10;
+        pushRecords(raptor, s, qt);
+        
+        ResultSet results = raptor.Stream().search(s, new DataQuery().boundingBox(new Point(12, 45), new Point(10, 44)));
+        
+        log.debug("Found {} records", results.size());
+        Assert.assertTrue(results.size() > 0);
+    }
 
 }

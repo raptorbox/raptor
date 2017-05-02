@@ -25,6 +25,7 @@ import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.models.query.DataQuery;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -218,4 +219,35 @@ public class StreamController {
         return ResponseEntity.ok(record);
     }
 
+
+    @RequestMapping(
+            method = RequestMethod.POST,
+            value = "/{deviceId}/{streamId}"
+    )
+    @ApiOperation(
+            value = "Retrieve data based on the search query",
+            notes = "",
+            nickname = "search"
+    )
+    @PreAuthorize("hasPermission(#deviceId, 'pull')")
+    public ResponseEntity<?> search(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable("deviceId") String deviceId,
+            @PathVariable("streamId") String streamId,
+            @RequestBody DataQuery query
+    ) {
+
+        Device device = raptor.Inventory().load(deviceId);
+
+        Stream stream = device.getStream(streamId);
+        if (stream == null) {
+            return JsonErrorResponse.notFound("Stream not found");
+        }
+        
+        
+
+        return ResponseEntity.ok().build();
+    }
+    
+    
 }

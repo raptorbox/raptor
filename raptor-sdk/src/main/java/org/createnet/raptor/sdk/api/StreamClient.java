@@ -25,6 +25,7 @@ import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.payload.DataPayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
+import org.createnet.raptor.models.query.DataQuery;
 
 /**
  * Represent a Device data stream
@@ -172,18 +173,15 @@ public class StreamClient extends AbstractClient {
      *
      * @param stream the stream to search in
      * @param query the search query
-     * @param offset results start from offset
-     * @param limit limit the total size of result
-     * @return the data resultset
+     * @return 
      */
-//    public ResultSet search(Stream stream, DataQuery query, Integer offset, Integer limit) {
-//        String qs = buildQueryString(offset, limit);
-//        JsonNode results = getClient().post(
-//                String.format(Routes.SEARCH_DATA, stream.getDevice().id, stream.name) + qs,
-//                query.toJSON()
-//        );
-//        return ResultSet.fromJSON(stream, results);
-//    }
+    public ResultSet search(Stream stream, DataQuery query) {
+        JsonNode results = getClient().post(
+                String.format(Routes.SEARCH_DATA, stream.getDevice().id, stream.name),
+                query.toJSON()
+        );
+        return ResultSet.fromJSON(stream, results);
+    }
 
     /**
      * Drop all data stored in a stream
