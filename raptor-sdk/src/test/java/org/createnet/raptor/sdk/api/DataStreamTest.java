@@ -27,7 +27,6 @@ import org.createnet.raptor.models.data.types.instances.DistanceUnit;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.query.DataQuery;
-import org.createnet.raptor.models.query.DataQuery;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

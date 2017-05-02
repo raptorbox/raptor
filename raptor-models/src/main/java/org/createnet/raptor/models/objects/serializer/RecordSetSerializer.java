@@ -73,10 +73,7 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
         jg.writeNumberField("timestamp", r.getTimestampTime());
 
         if (r.location != null) {
-            Map<String, Double> loc = new HashMap();
-            loc.put("x", r.location.getX());
-            loc.put("y", r.location.getY());
-            jg.writeObjectField("location", loc);
+            jg.writeObjectField("location", r.location);
         }
         
         // try to get a value

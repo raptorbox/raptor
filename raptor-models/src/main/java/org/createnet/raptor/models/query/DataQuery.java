@@ -51,13 +51,18 @@ public class DataQuery extends BaseQuery {
         return this;
     }
     
+    public DataQuery match(String channelName, boolean match) {
+        this.channels.put(channelName, new BoolQuery(match));
+        return this;
+    }
+    
     public DataQuery distance(Point center, double radius, DistanceUnit unit) {
         this.location.distance(center, radius, unit);
         return this;
     }
     
     public DataQuery distance(Point center, double radius) {
-        return distance(center, radius, DistanceUnit.meters);
+        return distance(center, radius, DistanceUnit.kilometers);
     }
     
     public DataQuery boundingBox(Point nw, Point sw) {

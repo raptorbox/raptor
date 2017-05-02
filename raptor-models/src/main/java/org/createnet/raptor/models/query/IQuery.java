@@ -19,6 +19,6 @@ package org.createnet.raptor.models.query;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-interface IQuery {
+public interface IQuery {
     public boolean isEmpty();
 }

@@ -24,6 +24,7 @@ import java.util.Iterator;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Channel;
 import org.springframework.data.geo.Point;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
 /**
  *
@@ -58,7 +59,7 @@ public class RecordSetDeserializer extends JsonDeserializer<RecordSet> {
                 && (tree.get("location").has("x") && tree.get("location").has("y"))) {
             Double x = tree.get("location").get("x").asDouble();
             Double y = tree.get("location").get("y").asDouble();
-            recordset.location(new Point(x, y));
+            recordset.location(new GeoJsonPoint(x, y));
         }
 
         long time = System.currentTimeMillis();

@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.geo.Point;
+import org.springframework.data.mongodb.core.index.GeoSpatialIndexType;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -73,8 +74,8 @@ public class RecordSet {
     @Indexed
     public String objectId;
 
-    @GeoSpatialIndexed
-    public Point location;
+    @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2D)
+    public double[] location;
 
     @JsonIgnore
     @Transient
@@ -394,9 +395,13 @@ public class RecordSet {
         return this;
     }
 
-    public RecordSet location(Point location) {
-        this.location = location;
+    public RecordSet location(double x, double y) {
+        this.location = new double[]{ x, y };
         return this;
+    }
+    
+    public RecordSet location(Point location) {
+        return location(location.getX(), location.getY());
     }
 
     public RecordSet channel(String name, Object record) {

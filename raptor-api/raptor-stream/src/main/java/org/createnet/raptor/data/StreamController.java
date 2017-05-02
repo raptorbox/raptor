@@ -15,20 +15,26 @@
  */
 package org.createnet.raptor.data;
 
+import com.querydsl.core.types.Predicate;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
 import org.createnet.raptor.api.common.client.ApiClientService;
+import org.createnet.raptor.api.common.query.DataQueryBuilder;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.data.RecordSet;
+import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.query.DataQuery;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -86,6 +92,9 @@ public class StreamController {
 
     @Autowired
     private StreamService streamService;
+    
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @RequestMapping(
             method = RequestMethod.PUT,
@@ -244,9 +253,20 @@ public class StreamController {
             return JsonErrorResponse.notFound("Stream not found");
         }
         
-        
+        DataQueryBuilder qb = new DataQueryBuilder(query);
+        Pageable paging = qb.getPaging();
+//        Predicate predicate = qb.getPredicate();
+        Query q = qb.getQuery();
 
-        return ResponseEntity.ok().build();
+        ResultSet result = new ResultSet(stream);
+        
+        List<RecordSet> records = mongoTemplate.find(q, RecordSet.class);
+        result.addAll(records);
+        
+//        Page<RecordSet> page = streamService.search(q, paging);
+//        result.addAll(page.getContent());
+        
+        return ResponseEntity.ok(result);
     }
     
     

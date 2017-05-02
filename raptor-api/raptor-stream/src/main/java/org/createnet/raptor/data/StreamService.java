@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.data;
 
+import com.querydsl.core.types.Predicate;
 import java.util.List;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Stream;
@@ -52,11 +53,19 @@ public class StreamService {
         }
 
         return records.getContent().get(0);
-
     }
 
     public void deleteAll(Stream stream) {
         repository.deleteByObjectIdAndStreamId(stream.getDevice().getId(), stream.name);
     }
+
+    public Page<RecordSet> search(Predicate predicate, Pageable pageable) {
+        return repository.findAll(predicate, pageable);
+    }
+
+    public List<RecordSet> search(Predicate predicate) {
+        return repository.findAll(predicate);
+    }
+            
 
 }

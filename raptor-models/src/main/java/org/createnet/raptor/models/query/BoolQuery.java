@@ -13,13 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.models.data.types.instances;
+package org.createnet.raptor.models.query;
 
 /**
  *
- * @author Luca Capra <lcapra@fbk.eu>
+ * @author Luca Capra <luca.capra@gmail.com>
  */
-public enum DistanceUnit {
-    miles,  // mile
-    kilometers,  // kilometer    
+public class BoolQuery implements IQuery {
+    
+    private final boolean match;
+    
+    public BoolQuery(boolean match) {
+        this.match = match;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    public boolean getMatch() {
+        return match;
+    }
+    
 }
+

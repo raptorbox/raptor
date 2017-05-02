@@ -17,9 +17,7 @@ package org.createnet.raptor.inventory;
 
 import com.querydsl.core.types.Predicate;
 import java.util.List;
-import org.createnet.raptor.api.common.query.DeviceQueryBuilder;
 import org.createnet.raptor.models.objects.Device;
-import org.createnet.raptor.models.query.DeviceQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

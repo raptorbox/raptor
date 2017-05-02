@@ -20,13 +20,22 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.MapPath;
 import com.querydsl.core.types.dsl.SimplePath;
 import com.querydsl.core.types.dsl.StringPath;
+import java.time.Instant;
+import java.util.Date;
 import java.util.Iterator;
-import org.createnet.raptor.models.data.QRecordSet;
-import org.createnet.raptor.models.objects.QDevice;
+import java.util.Map;
+import org.createnet.raptor.models.query.BoolQuery;
 import org.createnet.raptor.models.query.DataQuery;
+import org.createnet.raptor.models.query.GeoQuery;
+import org.createnet.raptor.models.query.IQuery;
 import org.createnet.raptor.models.query.MapQuery;
+import org.createnet.raptor.models.query.NumberQuery;
 import org.createnet.raptor.models.query.TextQuery;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.geo.Circle;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.TextCriteria;
 
 /**
  *
@@ -44,38 +53,128 @@ public class DataQueryBuilder extends BaseQueryBuilder {
         return getPaging(query);
     }
 
+    public Query getQuery() {
+
+        Query q = new Query();
+        q.with(this.getPaging());
+        
+        if (query.getUserId() != null) {
+            q.addCriteria(Criteria.where("userId").is(query.getUserId()));
+        }
+        
+        if (!query.getTimestamp().isEmpty()) {
+            // between
+            if(query.getTimestamp().getBetween().length > 0) {
+                Date t0 = Date.from(Instant.ofEpochMilli(query.getTimestamp().getBetween()[0].longValue()));
+                Date t1 = Date.from(Instant.ofEpochMilli(query.getTimestamp().getBetween()[1].longValue()));
+                q.addCriteria(Criteria.where("timestamp").lt(t1).gt(t0));
+            }
+        }
+        
+        if (!query.getLocation().isEmpty()) {
+            GeoQuery.Distance d = query.getLocation().getDistance();
+            if (d.center != null) {
+                q.addCriteria(Criteria.where("location").withinSphere(new Circle(d.center, d.radius)));
+            }
+        }
+        
+        if (query.getStreamId() != null) {
+            q.addCriteria(Criteria.where("streamId").is(query.getStreamId()));
+        }
+        
+        for (Map.Entry<String, IQuery> en : query.getChannels().entrySet()) {
+            
+            String channelName = en.getKey();
+            IQuery channelQuery = en.getValue();
+            
+            if(channelQuery instanceof TextQuery) {
+                TextQuery txtQuery = (TextQuery)channelQuery;
+                
+                if(txtQuery.getContains() != null) {
+                    q.addCriteria(TextCriteria.forDefaultLanguage().matching(txtQuery.getContains()));
+                }
+                if(txtQuery.getStartWith() != null) {
+                    q.addCriteria(Criteria.where(channelName).regex(String.format("/^%s/", txtQuery.getStartWith())));
+                }
+                if(txtQuery.getEndWith() != null) {
+                    q.addCriteria(Criteria.where(channelName).regex(String.format("/%s$/", txtQuery.getEndWith())));
+                }
+            }
+            
+            if(channelQuery instanceof BoolQuery) {
+                BoolQuery boolQuery = (BoolQuery)channelQuery;
+                q.addCriteria(Criteria.where(channelName).is(boolQuery.getMatch()));
+            }
+            
+            if(channelQuery instanceof NumberQuery) {
+                NumberQuery numQuery = (NumberQuery)channelQuery;
+                if(numQuery.getBetween() != null) {
+                    q.addCriteria(Criteria.where(channelName).gt(numQuery.getBetween()[0]).lt(numQuery.getBetween()[1]));
+                }
+            }
+            
+        }
+        
+        return q;
+    }
+    
     public Predicate getPredicate() {
-
-        QRecordSet record = new QRecordSet("record");
-
-        BooleanBuilder predicate = new BooleanBuilder();
+        throw new RuntimeException("querydsl geoquery is missing?");
+//        QRecordSet record = new QRecordSet("record");
+//
+//        BooleanBuilder predicate = new BooleanBuilder();
 //
 //        if (query.getUserId() != null) {
-//            predicate.and(device.userId.eq(query.getUserId()));
+//            predicate.and(record.userId.eq(query.getUserId()));
 //        }
-//
-//        // name
-//        Predicate pname = buildTextQuery(query.name, device.name);
-//        if (pname != null) {
-//            predicate.and(pname);
+//        
+//        if (!query.getTimestamp().isEmpty()) {
+//            
+//            // between
+//            if(query.getTimestamp().getBetween().length > 0) {
+//                Date t0 = Date.from(Instant.ofEpochMilli(query.getTimestamp().getBetween()[0].longValue()));
+//                Date t1 = Date.from(Instant.ofEpochMilli(query.getTimestamp().getBetween()[1].longValue()));
+//                predicate.and(record.timestamp.between(t0, t1));
+//            }
+//            
 //        }
-//
-//        // description
-//        Predicate pdesc = buildTextQuery(query.description, device.description);
-//        if (pdesc != null) {
-//            predicate.and(pdesc);
+//        
+//        if (!query.getLocation().isEmpty()) {
+//            GeoQuery.Distance d = query.getLocation().getDistance();
+//            if (d.center != null) {
+//                predicate.and(MongodbExpressions.near(record.location, 0, 0));
+//                NearQuery nearQuery = NearQuery
+//                        .near(d.center)
+//                        .maxDistance(new Distance(d.radius, Metrics.KILOMETERS));
+//            }
 //        }
-//
-//        // properties
-//        Predicate pprops = buildMapQuery(query.properties, device.properties);
-//        if (pprops != null) {
-//            predicate.and(pprops);
-//        }
+//        
+//        
+//        return predicate;
+    }
 
-        //stream
-        //actions
-        //settings
-        return predicate;
+    private Query buildTextCriteria(String fieldName, TextQuery txt) {
+
+        if (txt.isEmpty()) {
+            return null;
+        }
+        
+        Query q = new Query();
+        
+        if (txt.getContains() != null) {
+            q.addCriteria(TextCriteria.forDefaultLanguage().matching(fieldName));
+        }
+
+        if (txt.getStartWith() != null) {
+        }
+
+        if (txt.getEndWith() != null) {
+        }
+
+        if (txt.getEquals() != null) {
+        }
+
+        return q;
     }
 
     private Predicate buildTextQuery(TextQuery txt, StringPath txtfield) {

@@ -15,21 +15,30 @@
  */
 package org.createnet.raptor.data;
 
+import com.querydsl.core.types.Predicate;
 import java.util.List;
 import org.createnet.raptor.models.data.RecordSet;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.querydsl.QueryDslPredicateExecutor;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface StreamRepository extends MongoRepository<RecordSet, String> {
+public interface StreamRepository extends MongoRepository<RecordSet, String>, QueryDslPredicateExecutor<RecordSet> {
     
     public List<RecordSet> findByObjectIdAndStreamId(String deviceId, String streamId, Pageable page);
     public void deleteByObjectIdAndStreamId(String deviceId, String streamId);
     
     @Override
     public void deleteAll();
+ 
+    @Override
+    public Page<RecordSet> findAll(Predicate predicate, Pageable pageable);
+
+    @Override
+    public List<RecordSet> findAll(Predicate prdct);    
     
 }

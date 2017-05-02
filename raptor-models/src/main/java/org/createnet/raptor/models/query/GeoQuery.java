@@ -22,12 +22,12 @@ import org.springframework.data.geo.Point;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-class GeoQuery implements IQuery {
+public class GeoQuery implements IQuery {
 
     static public class Distance {
         public Point center = null;
         public Double radius = null;
-        public DistanceUnit unit = DistanceUnit.meters;
+        public DistanceUnit unit = DistanceUnit.kilometers;
     }
     
     static public class BoundingBox {
