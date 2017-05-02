@@ -58,7 +58,7 @@ services:
     networks:
       - raptor_net
 
-  inventory:
+  stream:
     build: ./raptor-api/raptor-stream
     container_name: raptor-stream
     ports:
@@ -132,5 +132,17 @@ services:
     ports:
       - 27017:27017
     command: --smallfiles # --rest --auth
+    networks:
+      - raptor_net
+
+
+  rproxy:
+    build: ./docker/proxy
+    depends_on:
+      # - stream
+      - action
+      - inventory
+      - auth
+      - broker
     networks:
       - raptor_net

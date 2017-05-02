@@ -3,21 +3,22 @@ spring:
   devtools:
     restart:
       enabled: true
-      trigger-file: raptor-stream-1.0.jar
+      trigger-file: raptor-inventory-1.0.jar
       additional-paths: target
+
   profiles: default
   data:
     mongodb:
       host: mongo
       port: 27017
       database: raptor
-#      username: admin
-#      password: admin
-    
+  #    username: admin
+  #    password: admin
+
 server:
-  contextPath: /stream
-  port: 8080
-  address: 127.0.0.1
+  contextPath: /inventory
+  port: 8060
+  address: inventory
   error:
     whitelabel:
       enabled: true
@@ -31,8 +32,7 @@ logging:
     org.springframework.data.mongodb.core.index: OFF
 
 raptor:
-    url: http://raptor.local
+    url: http://rproxy
     auth:
         header: Authorization
         headerPrefix: Bearer
-    

@@ -29,8 +29,7 @@ logging:
     org.springframework.data.mongodb.core.index: OFF
 
 raptor:
-    url: http://raptor.local
+    url: http://rproxy
     auth:
-        url: http://auth:8090
         header: Authorization
         headerPrefix: Bearer

@@ -51,6 +51,7 @@ logging:
     org.createnet.raptor: DEBUG
 
 raptor:
+  url: http://rproxy
   admin:
     enabled: true
     username: admin

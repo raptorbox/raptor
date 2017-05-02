@@ -25,7 +25,7 @@ logging:
     org.createnet.raptor: DEBUG
 
 raptor:
-    url: http://raptor.local
+    url: http://rproxy
     auth:
         header: Authorization
         headerPrefix: Bearer

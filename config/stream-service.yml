@@ -3,7 +3,7 @@ spring:
   devtools:
     restart:
       enabled: true
-      trigger-file: raptor-action-1.0.jar
+      trigger-file: raptor-stream-1.0.jar
       additional-paths: target
   profiles: default
   data:
@@ -13,9 +13,9 @@ spring:
       database: raptor
 
 server:
-  contextPath: /action
-  port: 8050
-  address: action
+  contextPath: /stream
+  port: 8080
+  address: stream
   error:
     whitelabel:
       enabled: true
@@ -29,8 +29,7 @@ logging:
     org.springframework.data.mongodb.core.index: OFF
 
 raptor:
-    url: http://raptor.local
+    url: http://rproxy
     auth:
-        url: http://auth:8090
         header: Authorization
         headerPrefix: Bearer

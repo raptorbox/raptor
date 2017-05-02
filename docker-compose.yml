@@ -125,7 +125,7 @@ services:
     networks:
       - raptor_net
 
-  proxy:
+  rproxy:
     image: raptorbox/proxy
     ports:
       - 9090:80
