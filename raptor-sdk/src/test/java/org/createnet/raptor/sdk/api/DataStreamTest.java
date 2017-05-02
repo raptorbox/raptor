@@ -67,9 +67,8 @@ public class DataStreamTest {
         d.addStream("test", "string", "string");
         d.addStream("test", "number", "number");
         d.addStream("test", "boolean", "boolean");
-        d.addStream("test", "string", "string");
 
-        Assert.assertTrue(d.getStream("test").channels.size() == 4);
+        Assert.assertTrue(d.getStream("test").channels.size() == 3);
 
         log.debug("Creating {} device", d.name);
 
@@ -81,27 +80,27 @@ public class DataStreamTest {
     }
 
     private Device createDevice(Device d) {
-        return raptor.Device().create(d);
+        return raptor.Inventory().create(d);
     }
 
     private Device createDevice() {
-        return raptor.Device().create(device);
+        return raptor.Inventory().create(device);
     }
 
     private List<RecordSet> createRecordSet(Stream stream, int length) {
         List<RecordSet> records = new ArrayList();
         for (int i = 0; i < length; i++) {
 
-            RecordSet record = new RecordSet(stream);
-            record.addRecord("number", i);
-            record.addRecord("string", System.currentTimeMillis() % 2 == 0 ? "Hello world" : "See you later");
-            record.addRecord("boolean", System.currentTimeMillis() % 2 == 0);
-            record.addRecord("location", new Point(11.45, 45.11));
-
             long time = (long) (Instant.now().toEpochMilli() - (i * 1000) - (Math.random() * 100));
-
             log.debug("Set timestamp to {}", time);
-            record.setTimestamp(new Date(time));
+            
+            RecordSet record = new RecordSet(stream)
+                .channel("number", i)
+                .channel("string", System.currentTimeMillis() % 2 == 0 ? "Hello world" : "See you later")
+                .channel("boolean", System.currentTimeMillis() % 2 == 0)
+                .location(new Point(11.45, 45.11))
+                .timestamp(new Date(time))
+            ;
 
             records.add(record);
         }
@@ -132,8 +131,6 @@ public class DataStreamTest {
         Stream s = dev.getStream("test");
 
         pushRecords(s, 1);
-        
-        
     }
 //
 //    @Test

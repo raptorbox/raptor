@@ -65,7 +65,7 @@ public class RecordSet {
     public Date timestamp;
 
     @Indexed
-    final public Map<String, IRecord> channels = new HashMap();
+    final public Map<String, Object> channels = new HashMap();
 
     @Indexed
     public String userId;
@@ -114,7 +114,7 @@ public class RecordSet {
     public RecordSet(ArrayList<IRecord> records) {
         this();
         for (IRecord record : records) {
-            this.channels.put(record.getName(), record);
+            this.channels.put(record.getName(), record.getValue());
         }
     }
 
@@ -255,7 +255,7 @@ public class RecordSet {
      *
      * @return
      */
-    public Map<String, IRecord> getRecords() {
+    public Map<String, Object> getRecords() {
         return channels;
     }
 
@@ -268,7 +268,7 @@ public class RecordSet {
         this.channels.clear();
 
         for (IRecord record : records) {
-            this.channels.put(record.getName(), record);
+            this.channels.put(record.getName(), record.getValue());
         }
     }
 
@@ -276,9 +276,11 @@ public class RecordSet {
      * Add a record value
      *
      * @param record
+     * @return 
      */
-    public void addRecord(IRecord record) {
-        this.channels.put(record.getName(), record);
+    public RecordSet addRecord(IRecord record) {
+        this.channels.put(record.getName(), record.getValue());
+        return this;
     }
 
     /**
@@ -293,7 +295,7 @@ public class RecordSet {
         if (r == null) {
             throw new RecordsetException("Can not create a Record, is the channel name listed in the stream channels?");
         }
-        this.channels.put(r.getName(), r);
+        this.channels.put(r.getName(), r.getValue());
         return r;
     }
 
@@ -353,7 +355,7 @@ public class RecordSet {
         IRecord record = RecordSet.createRecord(stream, channelName, value);
         if (record != null) {
             record.setRecordSet(this);
-            this.channels.put(record.getName(), record);
+            this.channels.put(record.getName(), record.getValue());
         }
 
         return record;
@@ -363,7 +365,7 @@ public class RecordSet {
      * @param channelName
      * @return IRecord
      */
-    public IRecord getByChannelName(String channelName) {
+    public Object getByChannelName(String channelName) {
         return channels.get(channelName);
     }
 
@@ -371,7 +373,7 @@ public class RecordSet {
      * @param channel
      * @return IRecord
      */
-    public IRecord getByChannel(Channel channel) {
+    public Object getByChannel(Channel channel) {
         return getByChannelName(channel.name);
     }
 
@@ -452,13 +454,73 @@ public class RecordSet {
         return this;
     }
 
+    public RecordSet timestamp(int time) {
+        setTimestamp(new Date(time));
+        return this;
+    }
+
+    public RecordSet timestamp(long time) {
+        setTimestamp(new Date(time));
+        return this;
+    }
+
+    public RecordSet timestamp(Date time) {
+        setTimestamp(time);
+        return this;
+    }
+
     public RecordSet location(Point location) {
         this.location = location;
         return this;
     }
 
     public RecordSet channel(String name, IRecord record) {
-        this.channels.put(name, record);
+        this.channels.put(name, record.getValue());
+        return this;
+    }
+    
+    public RecordSet channel(String name, String value) {
+        addRecord(name, value);
+        return this;
+    }
+    
+    public RecordSet channel(String name, int value) {
+        addRecord(name, value);
+        return this;
+    }
+    
+    public RecordSet channel(String name, Integer value) {
+        addRecord(name, value);
+        return this;
+    }
+    
+    public RecordSet channel(String name, long value) {
+        addRecord(name, value);
+        return this;
+    }
+    
+    public RecordSet channel(String name, Long value) {
+        addRecord(name, value);
+        return this;
+    }
+    
+    public RecordSet channel(String name, double value) {
+        addRecord(name, value);
+        return this;
+    }
+    
+    public RecordSet channel(String name, Double value) {
+        addRecord(name, value);
+        return this;
+    }
+    
+    public RecordSet channel(String name, boolean value) {
+        addRecord(name, value);
+        return this;
+    }
+    
+    public RecordSet channel(String name, Boolean value) {
+        addRecord(name, value);
         return this;
     }
 
