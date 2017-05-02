@@ -1,18 +1,21 @@
 
 spring:
+  devtools:
+    restart:
+      enabled: true
+      trigger-file: raptor-action-1.0.jar
+      additional-paths: target
   profiles: default
   data:
     mongodb:
       host: mongo
       port: 27017
       database: raptor
-#    username: admin
-#    password: admin
 
 server:
-  contextPath: /profile
-  port: 8070
-  address: profile
+  contextPath: /action
+  port: 8050
+  address: action
   error:
     whitelabel:
       enabled: true
@@ -23,9 +26,11 @@ logging:
 #    org.springframework.security: DEBUG
     org.createnet.raptor.profile: DEBUG
     org.createnet.raptor: DEBUG
+    org.springframework.data.mongodb.core.index: OFF
 
 raptor:
     url: http://raptor.local
     auth:
+        url: http://auth:8090
         header: Authorization
         headerPrefix: Bearer

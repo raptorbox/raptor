@@ -6,13 +6,13 @@ spring:
       trigger-file: raptor-stream-1.0.jar
       additional-paths: target
   profiles: default
-
-  mongodb:
-    host: localhost
-    port: 27017
-    database: raptor
-#    username: admin
-#    password: admin
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: raptor
+#      username: admin
+#      password: admin
     
 server:
   contextPath: /stream

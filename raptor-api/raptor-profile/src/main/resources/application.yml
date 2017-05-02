@@ -28,3 +28,11 @@ logging:
 #    org.springframework.security: DEBUG
     org.createnet.raptor.profile: DEBUG
     org.createnet.raptor: DEBUG
+
+
+raptor:
+    url: http://raptor.local
+    auth:
+        header: Authorization
+        headerPrefix: Bearer
+    

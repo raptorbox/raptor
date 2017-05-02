@@ -7,3 +7,9 @@ EXPOSE 8050
 COPY target/raptor-action-1.0.jar /raptor-action.jar
 
 CMD ["java","-jar","/raptor-action.jar", "--spring.config.location=file:/etc/raptor/action-service.yml"]
+
+
+
+COPY target/raptor-action-1.0.jar /raptor-action.jar
+
+CMD ["java","-jar","/raptor-action.jar", "--spring.config.location=file:/etc/raptor/action-service.yml"]

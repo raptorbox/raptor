@@ -42,99 +42,99 @@ import org.springframework.data.geo.Point;
  * @author Luca Capra <luca.capra@fbk.eu>
  */
 public class DataStreamTest {
-//
-//    final Logger log = LoggerFactory.getLogger(DataStreamTest.class);
-//
-//    public static Raptor raptor;
-//    public static Device device;
-//
-//    @BeforeClass
-//    public static void setUpClass() {
-//    }
-//
-//    @AfterClass
-//    public static void tearDownClass() {
-//    }
-//
-//    @Before
-//    public void setUp() {
-//
-//        raptor = Utils.getRaptor();
-//
-//        Device d = new Device();
-//        d.name = "data test " + System.currentTimeMillis();
-//
-//        d.addStream("test", "string", "string");
-//        d.addStream("test", "number", "number");
-//        d.addStream("test", "boolean", "boolean");
-//        d.addStream("test", "string", "string");
-//
-//        Assert.assertTrue(d.getStream("test").channels.size() == 4);
-//
-//        log.debug("Creating {} device", d.name);
-//
-//        device = d;
-//    }
-//
-//    @After
-//    public void tearDown() {
-//    }
-//
-//    private Device createDevice(Device d) {
-//        return raptor.Device().create(d);
-//    }
-//
-//    private Device createDevice() {
-//        return raptor.Device().create(device);
-//    }
-//
-//    private List<RecordSet> createRecordSet(Stream stream, int length) {
-//        List<RecordSet> records = new ArrayList();
-//        for (int i = 0; i < length; i++) {
-//
-//            RecordSet record = new RecordSet(stream);
-//            record.addRecord("number", i);
-//            record.addRecord("string", System.currentTimeMillis() % 2 == 0 ? "Hello world" : "See you later");
-//            record.addRecord("boolean", System.currentTimeMillis() % 2 == 0);
-//            record.addRecord("location", new Point(11.45, 45.11));
-//
-//            long time = (long) (Instant.now().toEpochMilli() - (i * 1000) - (Math.random() * 100));
-//
-//            log.debug("Set timestamp to {}", time);
-//            record.setTimestamp(new Date(time));
-//
-//            records.add(record);
-//        }
-//
-//        // wait indexing
-//        Utils.waitFor(2500);
-//        return records;
-//    }
-//    
-//    private void pushRecords(Stream s, int len) {
-//        pushRecords(s, len, 2500);
-//    }
-//    
-//    private void pushRecords(Stream s, int len, int waitFor) {
-//        log.debug("Pushing {} records on {}", len, s.name);
-//        List<RecordSet> records = createRecordSet(s, len);
-//        records.parallelStream().forEach(record -> raptor.Stream().push(record));
-//        log.debug("Done, waiting for indexing {}millis", waitFor);
-//        Utils.waitFor(waitFor);
-//    }
-//    
-//    @Test
-//    public void pushData()  {
-//
-//        log.debug("Push device data");
-//
-//        Device dev = createDevice();
-//        Stream s = dev.getStream("test");
-//
-//        pushRecords(s, 1);
-//        
-//        
-//    }
+
+    final Logger log = LoggerFactory.getLogger(DataStreamTest.class);
+
+    public static Raptor raptor;
+    public static Device device;
+
+    @BeforeClass
+    public static void setUpClass() {
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+    }
+
+    @Before
+    public void setUp() {
+
+        raptor = Utils.getRaptor();
+
+        Device d = new Device();
+        d.name = "data test " + System.currentTimeMillis();
+
+        d.addStream("test", "string", "string");
+        d.addStream("test", "number", "number");
+        d.addStream("test", "boolean", "boolean");
+        d.addStream("test", "string", "string");
+
+        Assert.assertTrue(d.getStream("test").channels.size() == 4);
+
+        log.debug("Creating {} device", d.name);
+
+        device = d;
+    }
+
+    @After
+    public void tearDown() {
+    }
+
+    private Device createDevice(Device d) {
+        return raptor.Device().create(d);
+    }
+
+    private Device createDevice() {
+        return raptor.Device().create(device);
+    }
+
+    private List<RecordSet> createRecordSet(Stream stream, int length) {
+        List<RecordSet> records = new ArrayList();
+        for (int i = 0; i < length; i++) {
+
+            RecordSet record = new RecordSet(stream);
+            record.addRecord("number", i);
+            record.addRecord("string", System.currentTimeMillis() % 2 == 0 ? "Hello world" : "See you later");
+            record.addRecord("boolean", System.currentTimeMillis() % 2 == 0);
+            record.addRecord("location", new Point(11.45, 45.11));
+
+            long time = (long) (Instant.now().toEpochMilli() - (i * 1000) - (Math.random() * 100));
+
+            log.debug("Set timestamp to {}", time);
+            record.setTimestamp(new Date(time));
+
+            records.add(record);
+        }
+
+        // wait indexing
+        Utils.waitFor(2500);
+        return records;
+    }
+    
+    private void pushRecords(Stream s, int len) {
+        pushRecords(s, len, 2500);
+    }
+    
+    private void pushRecords(Stream s, int len, int waitFor) {
+        log.debug("Pushing {} records on {}", len, s.name);
+        List<RecordSet> records = createRecordSet(s, len);
+        records.parallelStream().forEach(record -> raptor.Stream().push(record));
+        log.debug("Done, waiting for indexing {}millis", waitFor);
+        Utils.waitFor(waitFor);
+    }
+    
+    @Test
+    public void pushData()  {
+
+        log.debug("Push device data");
+
+        Device dev = createDevice();
+        Stream s = dev.getStream("test");
+
+        pushRecords(s, 1);
+        
+        
+    }
 //
 //    @Test
 //    public void pullRecords() {
