@@ -30,6 +30,8 @@ import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.query.DataQuery;
 import org.createnet.raptor.models.response.JsonErrorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -83,7 +85,9 @@ import org.springframework.web.bind.annotation.RestController;
 })
 @Api(tags = {"Data"})
 public class StreamController {
-
+    
+    final private Logger log = LoggerFactory.getLogger(StreamController.class);
+    
     @Autowired
     private ApiClientService raptor;
 
@@ -253,8 +257,11 @@ public class StreamController {
             return JsonErrorResponse.notFound("Stream not found");
         }
         
+        query.streamId(streamId);
+        query.deviceId(deviceId);
+        
         DataQueryBuilder qb = new DataQueryBuilder(query);
-        Pageable paging = qb.getPaging();
+//        Pageable paging = qb.getPaging();
 //        Predicate predicate = qb.getPredicate();
         Query q = qb.getQuery();
 

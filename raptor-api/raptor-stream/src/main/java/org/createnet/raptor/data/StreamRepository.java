@@ -29,8 +29,9 @@ import org.springframework.data.querydsl.QueryDslPredicateExecutor;
  */
 public interface StreamRepository extends MongoRepository<RecordSet, String>, QueryDslPredicateExecutor<RecordSet> {
     
-    public List<RecordSet> findByObjectIdAndStreamId(String deviceId, String streamId, Pageable page);
-    public void deleteByObjectIdAndStreamId(String deviceId, String streamId);
+    public List<RecordSet> findByDeviceIdAndStreamId(String deviceId, String streamId, Pageable page);
+    public Page<RecordSet> findOneByDeviceIdAndStreamId(String deviceId, String streamId, Pageable page);
+    public void deleteByDeviceIdAndStreamId(String deviceId, String streamId);
     
     @Override
     public void deleteAll();

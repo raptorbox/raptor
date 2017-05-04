@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.models.query;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,46 +26,46 @@ import org.springframework.data.geo.Point;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class DataQuery extends BaseQuery {
-        
+public class DataQuery extends BaseQuery {  
+    
     protected final NumberQuery timestamp = new NumberQuery();
     protected final Map<String, IQuery> channels = new HashMap();
     protected final GeoQuery location = new GeoQuery();
     protected String streamId = null;
-       
+
     public DataQuery timeRange(Instant from, Instant to) {
         timestamp.between(from.toEpochMilli(), to.toEpochMilli());
         return this;
     }
-   
+
     public DataQuery timeRange(Instant from) {
         return timeRange(from, Instant.now());
     }
-    
+
     public DataQuery range(String channelName, Number from, Number to) {
         this.channels.put(channelName, new NumberQuery().between(from, to));
         return this;
     }
-    
+
     public DataQuery match(String channelName, String match) {
         this.channels.put(channelName, new TextQuery().match(match));
         return this;
     }
-    
+
     public DataQuery match(String channelName, boolean match) {
         this.channels.put(channelName, new BoolQuery(match));
         return this;
     }
-    
+
     public DataQuery distance(Point center, double radius, DistanceUnit unit) {
         this.location.distance(center, radius, unit);
         return this;
     }
-    
+
     public DataQuery distance(Point center, double radius) {
         return distance(center, radius, DistanceUnit.kilometers);
     }
-    
+
     public DataQuery boundingBox(Point nw, Point sw) {
         this.location.boundingBox(nw, sw);
         return this;
@@ -74,7 +75,7 @@ public class DataQuery extends BaseQuery {
         this.streamId = s;
         return this;
     }
-    
+
     public NumberQuery getTimestamp() {
         return timestamp;
     }
@@ -90,5 +91,5 @@ public class DataQuery extends BaseQuery {
     public String getStreamId() {
         return streamId;
     }
-    
+
 }

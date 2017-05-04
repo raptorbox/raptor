@@ -24,8 +24,8 @@ import org.createnet.raptor.models.objects.Device;
  */
 abstract public class BaseQuery implements IQuery, QueryBuilder {
 
-
     protected String userId;
+    protected String deviceId;
 
     protected Integer offset = 0;
     protected Integer limit = 1000;
@@ -54,8 +54,17 @@ abstract public class BaseQuery implements IQuery, QueryBuilder {
         return userId;
     }
 
+    public String getDeviceId() {
+        return deviceId;
+    }
+
     public BaseQuery userId(String userId) {
         this.userId = userId;
+        return this;
+    }
+    
+    public BaseQuery deviceId(String deviceId) {
+        this.deviceId = deviceId;
         return this;
     }
 

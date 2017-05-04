@@ -19,8 +19,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import org.createnet.raptor.models.auth.Role;
@@ -140,7 +138,7 @@ public class Utils {
         assert user != null;
         
         Raptor r = new Raptor(new Config(instance.getConfig().getUrl(), username, password));
-        r.Auth.login();
+        r.Auth().login();
 
         return r;
     }

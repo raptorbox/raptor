@@ -15,10 +15,13 @@
  */
 package org.createnet.raptor.models.query;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 /**
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
+@JsonTypeName("boolean")
 public class BoolQuery implements IQuery {
     
     private final boolean match;

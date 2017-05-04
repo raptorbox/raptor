@@ -15,15 +15,19 @@
  */
 package org.createnet.raptor.api.common.query;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.MapPath;
 import com.querydsl.core.types.dsl.SimplePath;
 import com.querydsl.core.types.dsl.StringPath;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.createnet.raptor.models.query.BoolQuery;
 import org.createnet.raptor.models.query.DataQuery;
 import org.createnet.raptor.models.query.GeoQuery;
@@ -31,9 +35,12 @@ import org.createnet.raptor.models.query.IQuery;
 import org.createnet.raptor.models.query.MapQuery;
 import org.createnet.raptor.models.query.NumberQuery;
 import org.createnet.raptor.models.query.TextQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.CriteriaDefinition;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.TextCriteria;
 
@@ -43,12 +50,25 @@ import org.springframework.data.mongodb.core.query.TextCriteria;
  */
 public class DataQueryBuilder extends BaseQueryBuilder {
 
+    @JsonIgnore
+    final private Logger log = LoggerFactory.getLogger(DataQueryBuilder.class);
+    
     private final DataQuery query;
+    private final List<CriteriaDefinition> criteria = new ArrayList();
 
     public DataQueryBuilder(DataQuery query) {
         this.query = query;
     }
-
+    
+    protected void addCriteria(CriteriaDefinition c) {
+        criteria.add(c);
+    }
+    
+    protected Criteria[] getCriteria() {
+        return criteria.toArray(new Criteria[criteria.size()]);
+    }
+    
+    
     public Pageable getPaging() {
         return getPaging(query);
     }
@@ -59,27 +79,31 @@ public class DataQueryBuilder extends BaseQueryBuilder {
         q.with(this.getPaging());
         
         if (query.getUserId() != null) {
-            q.addCriteria(Criteria.where("userId").is(query.getUserId()));
+            addCriteria(Criteria.where("userId").is(query.getUserId()));
+        }
+        
+        if (query.getStreamId() != null) {
+            addCriteria(Criteria.where("streamId").is(query.getStreamId()));
+        }
+        
+        if (query.getDeviceId() != null) {
+            addCriteria(Criteria.where("deviceId").is(query.getDeviceId()));
         }
         
         if (!query.getTimestamp().isEmpty()) {
             // between
-            if(query.getTimestamp().getBetween().length > 0) {
+            if(query.getTimestamp().getBetween()[0] != null && query.getTimestamp().getBetween()[1] != null) {
                 Date t0 = Date.from(Instant.ofEpochMilli(query.getTimestamp().getBetween()[0].longValue()));
                 Date t1 = Date.from(Instant.ofEpochMilli(query.getTimestamp().getBetween()[1].longValue()));
-                q.addCriteria(Criteria.where("timestamp").lt(t1).gt(t0));
+                addCriteria(Criteria.where("timestamp").lt(t1).gt(t0));
             }
         }
         
         if (!query.getLocation().isEmpty()) {
             GeoQuery.Distance d = query.getLocation().getDistance();
             if (d.center != null) {
-                q.addCriteria(Criteria.where("location").withinSphere(new Circle(d.center, d.radius)));
+                addCriteria(Criteria.where("location").withinSphere(new Circle(d.center, d.radius)));
             }
-        }
-        
-        if (query.getStreamId() != null) {
-            q.addCriteria(Criteria.where("streamId").is(query.getStreamId()));
         }
         
         for (Map.Entry<String, IQuery> en : query.getChannels().entrySet()) {
@@ -91,30 +115,38 @@ public class DataQueryBuilder extends BaseQueryBuilder {
                 TextQuery txtQuery = (TextQuery)channelQuery;
                 
                 if(txtQuery.getContains() != null) {
-                    q.addCriteria(TextCriteria.forDefaultLanguage().matching(txtQuery.getContains()));
+                    addCriteria(TextCriteria.forDefaultLanguage().matching(txtQuery.getContains()));
                 }
                 if(txtQuery.getStartWith() != null) {
-                    q.addCriteria(Criteria.where(channelName).regex(String.format("/^%s/", txtQuery.getStartWith())));
+                    addCriteria(Criteria.where(channelName).regex(String.format("/^%s/", txtQuery.getStartWith())));
                 }
                 if(txtQuery.getEndWith() != null) {
-                    q.addCriteria(Criteria.where(channelName).regex(String.format("/%s$/", txtQuery.getEndWith())));
+                    addCriteria(Criteria.where(channelName).regex(String.format("/%s$/", txtQuery.getEndWith())));
                 }
             }
             
             if(channelQuery instanceof BoolQuery) {
                 BoolQuery boolQuery = (BoolQuery)channelQuery;
-                q.addCriteria(Criteria.where(channelName).is(boolQuery.getMatch()));
+                addCriteria(Criteria.where(channelName).is(boolQuery.getMatch()));
             }
             
             if(channelQuery instanceof NumberQuery) {
                 NumberQuery numQuery = (NumberQuery)channelQuery;
                 if(numQuery.getBetween() != null) {
-                    q.addCriteria(Criteria.where(channelName).gt(numQuery.getBetween()[0]).lt(numQuery.getBetween()[1]));
+                    addCriteria(Criteria.where(channelName).gt(numQuery.getBetween()[0]).lt(numQuery.getBetween()[1]));
                 }
             }
             
         }
         
+        if(criteria.isEmpty()) {
+            return null;
+        }
+
+        q.addCriteria(new Criteria().andOperator(getCriteria()));
+        
+        log.debug("Mongodb data query: {}", q);
+
         return q;
     }
     

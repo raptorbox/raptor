@@ -124,6 +124,19 @@ services:
     networks:
       - raptor_net
 
+  mongoadmin:
+    image: adicom/admin-mongo
+    container_name: mongoadmin
+    # environment:
+    restart: always
+    ports:
+     - 8082:1234
+    # volumes:
+    links:
+      - mongo
+    networks:
+      - raptor_net
+
   mongo:
     image: mongo:3
     container_name: mongo

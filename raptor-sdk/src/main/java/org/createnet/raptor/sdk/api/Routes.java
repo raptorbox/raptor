@@ -30,7 +30,7 @@ final public class Routes {
     public static final String STREAM = "/stream/%s/%s";
     public static final String PUSH = STREAM;
     
-    public static final String LAST_UPDATE = PUSH;
+    public static final String LAST_UPDATE = PUSH + "/lastUpdate";
     public static final String PULL = PUSH;
     public static final String SEARCH_DATA = PUSH;
     

@@ -146,7 +146,7 @@ public class EventListenerTest {
             @Override
             public void callback(Stream stream, RecordSet record) {
                 log.debug("dev: Data received {}", record.toJson());
-                Assert.assertTrue(record.objectId.equals(dev.getDevice().getId()));
+                Assert.assertTrue(record.deviceId.equals(dev.getDevice().getId()));
                 Assert.assertTrue(stream.name.equals("test2"));
             }
         });
@@ -155,7 +155,7 @@ public class EventListenerTest {
             @Override
             public void callback(Stream stream, RecordSet record) {
                 log.debug("dev1: Data received {}", record.toJson());
-                Assert.assertTrue(record.objectId.equals(dev1.getDevice().getId()));
+                Assert.assertTrue(record.deviceId.equals(dev1.getDevice().getId()));
                 Assert.assertTrue(stream.name.equals("test2"));
             }
         });

@@ -41,22 +41,23 @@ public class StreamService {
     }
 
     public List<RecordSet> list(Stream stream, Pageable page) {
-        return repository.findByObjectIdAndStreamId(stream.getDevice().getId(), stream.name, page);
+        return repository.findByDeviceIdAndStreamId(stream.getDevice().getId(), stream.name, page);
     }
 
     public RecordSet lastUpdate(Stream stream) {
+        
+        Pageable page = new PageRequest(0, 1, new Sort(Sort.Direction.DESC, "timestamp"));
+        List<RecordSet> records = list(stream, page);
 
-        Page<RecordSet> records = repository.findAll(new PageRequest(0, 1, new Sort(Sort.Direction.DESC, "timestamp")));
-
-        if (records.getTotalElements() == 0) {
+        if (records.isEmpty()) {
             return null;
         }
 
-        return records.getContent().get(0);
+        return records.get(0);
     }
 
     public void deleteAll(Stream stream) {
-        repository.deleteByObjectIdAndStreamId(stream.getDevice().getId(), stream.name);
+        repository.deleteByDeviceIdAndStreamId(stream.getDevice().getId(), stream.name);
     }
 
     public Page<RecordSet> search(Predicate predicate, Pageable pageable) {

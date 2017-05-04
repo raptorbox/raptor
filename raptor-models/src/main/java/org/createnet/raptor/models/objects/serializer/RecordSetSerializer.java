@@ -87,12 +87,12 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
 
 
         // try to get a value
-        if(r.objectId == null && obj != null) {
-            r.objectId = obj.id;
+        if(r.deviceId == null && obj != null) {
+            r.deviceId = obj.id;
         }
         
-        if (r.objectId != null) {
-            jg.writeStringField("objectId", r.objectId);
+        if (r.deviceId != null) {
+            jg.writeStringField("objectId", r.deviceId);
         }
 
         

@@ -72,7 +72,7 @@ public class RecordSet {
     public String streamId;
 
     @Indexed
-    public String objectId;
+    public String deviceId;
 
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2D)
     public double[] location;
@@ -300,7 +300,7 @@ public class RecordSet {
 
             if (stream.getDevice() != null) {
 
-                this.objectId = stream.getDevice().getId();
+                this.deviceId = stream.getDevice().getId();
 
                 if (this.userId == null) {
                     this.userId = stream.getDevice().getUserId();
@@ -366,7 +366,7 @@ public class RecordSet {
     }
 
     public RecordSet deviceId(String deviceId) {
-        this.objectId = deviceId;
+        this.deviceId = deviceId;
         return this;
     }
 
@@ -376,10 +376,15 @@ public class RecordSet {
     }
 
     public RecordSet setObjectId(String objectId) {
-        this.objectId = objectId;
+        this.deviceId = objectId;
         return this;
     }
 
+    public RecordSet timestamp(Instant i) {
+        setTimestamp(Date.from(i));
+        return this;
+    }
+    
     public RecordSet timestamp(int time) {
         setTimestamp(new Date(time));
         return this;
