@@ -24,7 +24,6 @@ import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
-import org.createnet.raptor.models.data.types.instances.DistanceUnit;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.query.DataQuery;
@@ -36,7 +35,9 @@ import org.junit.Test;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.geo.Metrics;
 import org.springframework.data.geo.Point;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
 /**
  *
@@ -91,12 +92,16 @@ public class DataStreamTest {
 
             long time = (long) (Instant.now().toEpochMilli() - (i * 1000) - (Math.random() * 100));
             log.debug("Set timestamp to {}", time);
-
+            
+            
+            double posX = 11.45 + (System.currentTimeMillis() % 2 == 0 ? -1*i : i);
+            double posY = 45.11 + (System.currentTimeMillis() % 2 == 0 ? -1*i : i);
+            
             RecordSet record = new RecordSet(stream)
                     .channel("number", i)
                     .channel("string", System.currentTimeMillis() % 2 == 0 ? "Hello world" : "See you later")
                     .channel("boolean", System.currentTimeMillis() % 2 == 0)
-                    .location(new Point(11.45, 45.11))
+                    .location(new GeoJsonPoint(posX, posY))
                     .timestamp(new Date(time));
 
             records.add(record);
@@ -181,7 +186,7 @@ public class DataStreamTest {
                 .channel("number", 1)
                 .channel("string", msg)
                 .channel("boolean", true)
-                .location(new Point(11.45, 45.11));
+                .location(new GeoJsonPoint(11.45, 45.11));
 
         raptor.Stream().push(r);
 
@@ -257,14 +262,15 @@ public class DataStreamTest {
         Device dev = createDevice(raptor);
         Stream s = dev.getStream("test");
 
-        List<RecordSet> records = createRecordSet(s, 10);
+        int cnt = 6, offset = 2;
+        List<RecordSet> records = createRecordSet(s, cnt);
         records.parallelStream().forEach(record -> raptor.Stream().push(record));
 
         DataQuery q = new DataQuery();
-        q.range("number", 0, 100);
+        q.range("number", offset, cnt);
         ResultSet results = raptor.Stream().search(s, q);
 
-        Assert.assertEquals(10, results.size());
+        Assert.assertEquals(cnt-offset, results.size());
     }
 
     @Test
@@ -281,11 +287,11 @@ public class DataStreamTest {
         pushRecords(raptor, s, qt);
 
         DataQuery q = new DataQuery();
-        q.distance(new Point(11.45, 45.11), 10000, DistanceUnit.kilometers);
+        q.distance(new GeoJsonPoint(11.45, 45.11), 10000, Metrics.KILOMETERS);
         ResultSet results = raptor.Stream().search(s, q);
 
         log.debug("Found {} records", results.size());
-        Assert.assertTrue(results.size() > 0);
+        Assert.assertEquals(qt, results.size());
     }
 
     @Test
@@ -301,7 +307,7 @@ public class DataStreamTest {
         int qt = 10;
         pushRecords(raptor, s, qt);
 
-        ResultSet results = raptor.Stream().search(s, new DataQuery().boundingBox(new Point(12, 45), new Point(10, 44)));
+        ResultSet results = raptor.Stream().search(s, new DataQuery().boundingBox(new GeoJsonPoint(12, 45), new GeoJsonPoint(10, 44)));
 
         log.debug("Found {} records", results.size());
         Assert.assertTrue(results.size() > 0);

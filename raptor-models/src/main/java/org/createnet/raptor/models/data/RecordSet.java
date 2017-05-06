@@ -27,7 +27,6 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import org.createnet.raptor.models.exception.RecordsetException;
 import org.createnet.raptor.models.objects.Channel;
@@ -40,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
-import org.springframework.data.geo.Point;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexType;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -74,8 +73,8 @@ public class RecordSet {
     @Indexed
     public String deviceId;
 
-    @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2D)
-    public double[] location;
+    @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
+    public GeoJsonPoint location;
 
     @JsonIgnore
     @Transient
@@ -401,12 +400,13 @@ public class RecordSet {
     }
 
     public RecordSet location(double x, double y) {
-        this.location = new double[]{ x, y };
+        this.location = new GeoJsonPoint(x, y);
         return this;
     }
     
-    public RecordSet location(Point location) {
-        return location(location.getX(), location.getY());
+    public RecordSet location(GeoJsonPoint location) {
+        this.location = location;
+        return this;
     }
 
     public RecordSet channel(String name, Object record) {

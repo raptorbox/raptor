@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.geo.Circle;
+import org.springframework.data.geo.Distance;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.CriteriaDefinition;
 import org.springframework.data.mongodb.core.query.Query;
@@ -52,23 +53,22 @@ public class DataQueryBuilder extends BaseQueryBuilder {
 
     @JsonIgnore
     final private Logger log = LoggerFactory.getLogger(DataQueryBuilder.class);
-    
+
     private final DataQuery query;
     private final List<CriteriaDefinition> criteria = new ArrayList();
 
     public DataQueryBuilder(DataQuery query) {
         this.query = query;
     }
-    
+
     protected void addCriteria(CriteriaDefinition c) {
         criteria.add(c);
     }
-    
+
     protected Criteria[] getCriteria() {
         return criteria.toArray(new Criteria[criteria.size()]);
     }
-    
-    
+
     public Pageable getPaging() {
         return getPaging(query);
     }
@@ -77,79 +77,87 @@ public class DataQueryBuilder extends BaseQueryBuilder {
 
         Query q = new Query();
         q.with(this.getPaging());
-        
+
         if (query.getUserId() != null) {
             addCriteria(Criteria.where("userId").is(query.getUserId()));
         }
-        
+
         if (query.getStreamId() != null) {
             addCriteria(Criteria.where("streamId").is(query.getStreamId()));
         }
-        
+
         if (query.getDeviceId() != null) {
             addCriteria(Criteria.where("deviceId").is(query.getDeviceId()));
         }
-        
+
         if (!query.getTimestamp().isEmpty()) {
             // between
-            if(query.getTimestamp().getBetween()[0] != null && query.getTimestamp().getBetween()[1] != null) {
+            if (query.getTimestamp().getBetween()[0] != null && query.getTimestamp().getBetween()[1] != null) {
                 Date t0 = Date.from(Instant.ofEpochMilli(query.getTimestamp().getBetween()[0].longValue()));
                 Date t1 = Date.from(Instant.ofEpochMilli(query.getTimestamp().getBetween()[1].longValue()));
                 addCriteria(Criteria.where("timestamp").lt(t1).gt(t0));
             }
         }
-        
+
         if (!query.getLocation().isEmpty()) {
             GeoQuery.Distance d = query.getLocation().getDistance();
             if (d.center != null) {
-                addCriteria(Criteria.where("location").withinSphere(new Circle(d.center, d.radius)));
+                addCriteria(Criteria.where("location").withinSphere(
+                        new Circle(d.center, 
+                                new Distance(d.radius, d.unit)
+                        )
+                ));
             }
         }
-        
+
         for (Map.Entry<String, IQuery> en : query.getChannels().entrySet()) {
-            
+
             String channelName = en.getKey();
+            String channelFieldName = "channels." + channelName;
+
             IQuery channelQuery = en.getValue();
-            
-            if(channelQuery instanceof TextQuery) {
-                TextQuery txtQuery = (TextQuery)channelQuery;
-                
-                if(txtQuery.getContains() != null) {
-                    addCriteria(TextCriteria.forDefaultLanguage().matching(txtQuery.getContains()));
+
+            if (channelQuery instanceof TextQuery) {
+
+                TextQuery txtQuery = (TextQuery) channelQuery;
+
+                if (txtQuery.getContains() != null) {
+//                    addCriteria(TextCriteria.forDefaultLanguage().matching(txtQuery.getContains()));
+                    addCriteria(Criteria.where(channelFieldName).is(txtQuery.getContains()));
                 }
-                if(txtQuery.getStartWith() != null) {
-                    addCriteria(Criteria.where(channelName).regex(String.format("/^%s/", txtQuery.getStartWith())));
+                if (txtQuery.getStartWith() != null) {
+                    addCriteria(Criteria.where(channelFieldName).regex(String.format("/^%s/", txtQuery.getStartWith())));
                 }
-                if(txtQuery.getEndWith() != null) {
-                    addCriteria(Criteria.where(channelName).regex(String.format("/%s$/", txtQuery.getEndWith())));
-                }
-            }
-            
-            if(channelQuery instanceof BoolQuery) {
-                BoolQuery boolQuery = (BoolQuery)channelQuery;
-                addCriteria(Criteria.where(channelName).is(boolQuery.getMatch()));
-            }
-            
-            if(channelQuery instanceof NumberQuery) {
-                NumberQuery numQuery = (NumberQuery)channelQuery;
-                if(numQuery.getBetween() != null) {
-                    addCriteria(Criteria.where(channelName).gt(numQuery.getBetween()[0]).lt(numQuery.getBetween()[1]));
+                if (txtQuery.getEndWith() != null) {
+                    addCriteria(Criteria.where(channelFieldName).regex(String.format("/%s$/", txtQuery.getEndWith())));
                 }
             }
-            
+
+            if (channelQuery instanceof BoolQuery) {
+                BoolQuery boolQuery = (BoolQuery) channelQuery;
+                addCriteria(Criteria.where(channelFieldName).is(boolQuery.getMatch()));
+            }
+
+            if (channelQuery instanceof NumberQuery) {
+                NumberQuery numQuery = (NumberQuery) channelQuery;
+                if (numQuery.getBetween() != null) {
+                    addCriteria(Criteria.where(channelFieldName).gte(numQuery.getBetween()[0]).lte(numQuery.getBetween()[1]));
+                }
+            }
+
         }
-        
-        if(criteria.isEmpty()) {
+
+        if (criteria.isEmpty()) {
             return null;
         }
 
         q.addCriteria(new Criteria().andOperator(getCriteria()));
-        
+
         log.debug("Mongodb data query: {}", q);
 
         return q;
     }
-    
+
     public Predicate getPredicate() {
         throw new RuntimeException("querydsl geoquery is missing?");
 //        QRecordSet record = new QRecordSet("record");
@@ -190,9 +198,9 @@ public class DataQueryBuilder extends BaseQueryBuilder {
         if (txt.isEmpty()) {
             return null;
         }
-        
+
         Query q = new Query();
-        
+
         if (txt.getContains() != null) {
             q.addCriteria(TextCriteria.forDefaultLanguage().matching(fieldName));
         }

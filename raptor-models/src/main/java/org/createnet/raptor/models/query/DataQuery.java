@@ -15,12 +15,12 @@
  */
 package org.createnet.raptor.models.query;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import org.createnet.raptor.models.data.types.instances.DistanceUnit;
+import org.springframework.data.geo.Metrics;
 import org.springframework.data.geo.Point;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
 /**
  *
@@ -57,16 +57,16 @@ public class DataQuery extends BaseQuery {
         return this;
     }
 
-    public DataQuery distance(Point center, double radius, DistanceUnit unit) {
+    public DataQuery distance(GeoJsonPoint center, double radius, Metrics unit) {
         this.location.distance(center, radius, unit);
         return this;
     }
 
-    public DataQuery distance(Point center, double radius) {
-        return distance(center, radius, DistanceUnit.kilometers);
+    public DataQuery distance(GeoJsonPoint center, double radius) {
+        return distance(center, radius, Metrics.KILOMETERS);
     }
 
-    public DataQuery boundingBox(Point nw, Point sw) {
+    public DataQuery boundingBox(GeoJsonPoint nw, GeoJsonPoint sw) {
         this.location.boundingBox(nw, sw);
         return this;
     }

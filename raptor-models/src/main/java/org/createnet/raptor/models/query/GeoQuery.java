@@ -15,8 +15,8 @@
  */
 package org.createnet.raptor.models.query;
 
-import org.createnet.raptor.models.data.types.instances.DistanceUnit;
-import org.springframework.data.geo.Point;
+import org.springframework.data.geo.Metrics;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
 /**
  *
@@ -25,38 +25,38 @@ import org.springframework.data.geo.Point;
 public class GeoQuery implements IQuery {
 
     static public class Distance {
-        public Point center = null;
+
+        public GeoJsonPoint center = null;
         public Double radius = null;
-        public DistanceUnit unit = DistanceUnit.kilometers;
+        public Metrics unit = Metrics.KILOMETERS;
     }
-    
+
     static public class BoundingBox {
-        public Point northWest = null;
-        public Point southWest = null;
+
+        public GeoJsonPoint northWest = null;
+        public GeoJsonPoint southWest = null;
     }
-    
+
     protected final Distance distance = new Distance();
     protected final BoundingBox boundingBox = new BoundingBox();
-    
-    public GeoQuery distance(Point center,  double radius, DistanceUnit unit) {
+
+    public GeoQuery distance(GeoJsonPoint center, double radius, Metrics unit) {
         distance.center = center;
         distance.radius = radius;
         distance.unit = unit;
         return this;
     }
 
-    public GeoQuery boundingBox(Point nw, Point sw) {
+    public GeoQuery boundingBox(GeoJsonPoint nw, GeoJsonPoint sw) {
         this.boundingBox.northWest = nw;
         this.boundingBox.southWest = sw;
         return this;
     }
-    
+
     @Override
     public boolean isEmpty() {
-        return (
-            (getDistance().radius == null || getDistance().center == null) && 
-            (getBoundingBox().northWest == null || getBoundingBox().southWest == null)
-        );
+        return ((getDistance().radius == null || getDistance().center == null)
+                && (getBoundingBox().northWest == null || getBoundingBox().southWest == null));
     }
 
     public Distance getDistance() {
@@ -66,5 +66,5 @@ public class GeoQuery implements IQuery {
     public BoundingBox getBoundingBox() {
         return boundingBox;
     }
-    
+
 }
