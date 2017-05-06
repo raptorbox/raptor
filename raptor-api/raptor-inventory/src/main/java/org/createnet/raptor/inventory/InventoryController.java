@@ -200,7 +200,7 @@ public class InventoryController {
             response = Device.class,
             nickname = "searchDevices"
     )
-    @PreAuthorize("hasPermission('search', 'list')")
+    @PreAuthorize("hasPermission('#', 'list')")
 //    @PostAuthorize("hasPermission(returnObject.body, 'read')") // TODO: enable shared access
     public ResponseEntity<?> searchDevices(
             @AuthenticationPrincipal User currentUser,

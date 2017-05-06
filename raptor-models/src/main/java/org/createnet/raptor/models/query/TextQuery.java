@@ -18,6 +18,9 @@ package org.createnet.raptor.models.query;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -31,6 +34,7 @@ public class TextQuery implements IQuery {
     private String endWith;
     private String contains;
     private String equals;
+    private final List<String> in = new ArrayList();
 
     public TextQuery startWith(String startWith) {
         this.startWith = startWith;
@@ -51,6 +55,11 @@ public class TextQuery implements IQuery {
         this.equals = equals;
         return this;
     }
+
+    public TextQuery in(String... values) {
+        this.in.addAll(Arrays.asList(values));
+        return this;
+    }
     
     @JsonIgnore
     public boolean isEmpty() {
@@ -58,7 +67,8 @@ public class TextQuery implements IQuery {
             getStartWith() == null &&
             getEndWith() == null &&
             getContains() == null &&
-            getEquals() == null
+            getEquals() == null &&
+            getIn().isEmpty()
         );
     }
     
@@ -76,6 +86,10 @@ public class TextQuery implements IQuery {
 
     public String getEquals() {
         return this.equals;
+    }
+    
+    public List<String> getIn() {
+        return this.in;
     }
 
 }

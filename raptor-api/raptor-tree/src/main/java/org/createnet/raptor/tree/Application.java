@@ -13,28 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.models.query;
+package org.createnet.raptor.data;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import org.createnet.raptor.api.common.BaseApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class DeviceQuery extends BaseQuery {
+@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.data"})
+@EnableMongoRepositories
+@EnableSpringDataWebSupport
+public class Application extends BaseApplication {
 
-    public final TextQuery id = new TextQuery();
-    public final TextQuery name = new TextQuery();
-    public final TextQuery description = new TextQuery();
-    public final MapQuery properties = new MapQuery();
-
-    
-    public DeviceQuery() {
-    }
-
-    public DeviceQuery(String userId) {
-        this.userId = userId;
+    public static void main(String[] args) {
+        start(Application.class, args);
     }
 
 }
