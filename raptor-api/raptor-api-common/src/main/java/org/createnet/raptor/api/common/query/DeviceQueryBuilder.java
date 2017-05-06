@@ -113,6 +113,10 @@ public class DeviceQueryBuilder {
             predicate.and(txtfield.endsWith(txt.getEquals()));
         }
 
+        if (!txt.getIn().isEmpty()) {
+            predicate.and(txtfield.in(txt.getIn()));
+        }
+
         return predicate;
     }
 

@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2017 FBK/CREATE-NET
  *
@@ -13,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.data;
+package org.createnet.raptor.tree;
 
 import org.createnet.raptor.api.common.BaseApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -19,6 +19,7 @@
         <module>raptor-auth-service</module>
         <module>raptor-action</module>
         <module>raptor-stream</module>
+        <module>raptor-tree</module>
     </modules>
     
     <dependencyManagement>

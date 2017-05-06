@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.createnet.raptor.models.query.BoolQuery;
 import org.createnet.raptor.models.query.DataQuery;
 import org.createnet.raptor.models.query.GeoQuery;
@@ -116,7 +115,9 @@ public class DataQueryBuilder extends BaseQueryBuilder {
             String channelFieldName = "channels." + channelName;
 
             IQuery channelQuery = en.getValue();
-
+            
+            if(channelQuery.isEmpty()) continue;
+            
             if (channelQuery instanceof TextQuery) {
 
                 TextQuery txtQuery = (TextQuery) channelQuery;
@@ -130,6 +131,9 @@ public class DataQueryBuilder extends BaseQueryBuilder {
                 }
                 if (txtQuery.getEndWith() != null) {
                     addCriteria(Criteria.where(channelFieldName).regex(String.format("/%s$/", txtQuery.getEndWith())));
+                }
+                if (txtQuery.getIn().isEmpty()) {
+                    addCriteria(Criteria.where(channelFieldName).in(txtQuery.getIn()));
                 }
             }
 

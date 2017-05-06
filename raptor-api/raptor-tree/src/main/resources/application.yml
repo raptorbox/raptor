@@ -3,7 +3,7 @@ spring:
   devtools:
     restart:
       enabled: true
-      trigger-file: raptor-stream-1.0.jar
+      trigger-file: raptor-tree-1.0.jar
       additional-paths: target
   profiles: default
   data:
@@ -15,8 +15,8 @@ spring:
 #      password: admin
     
 server:
-  contextPath: /stream
-  port: 8080
+  contextPath: /tree
+  port: 8085
   address: 127.0.0.1
   error:
     whitelabel:

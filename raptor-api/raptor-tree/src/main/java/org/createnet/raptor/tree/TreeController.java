@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.data;
+package org.createnet.raptor.tree;
 
-import com.querydsl.core.types.Predicate;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -33,7 +32,6 @@ import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
@@ -83,22 +81,42 @@ import org.springframework.web.bind.annotation.RestController;
             message = "Internal error"
     )
 })
-@Api(tags = {"Data"})
-public class StreamController {
-    
-    final private Logger log = LoggerFactory.getLogger(StreamController.class);
-    
+@Api(tags = {"Inventory", "Tree"})
+public class TreeController {
+
+    final private Logger log = LoggerFactory.getLogger(TreeController.class);
+
     @Autowired
     private ApiClientService raptor;
 
     @Autowired
-    private StreamEventPublisher streamPublisher;
+    private TreeService treeService;
 
     @Autowired
-    private StreamService streamService;
-    
-    @Autowired
     private MongoTemplate mongoTemplate;
+
+    @RequestMapping(
+            method = RequestMethod.GET,
+            value = "/{deviceId}"
+    )
+    @ApiOperation(
+            value = "Return the device children if any",
+            notes = "",
+            response = Device.class,
+            responseContainer = "List",
+            nickname = "getChildren"
+    )
+    @PreAuthorize("hasPermission(#deviceId, 'read')")
+    public ResponseEntity<?> list(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable("deviceId") String deviceId
+    ) {
+
+        Device device = raptor.Inventory().load(deviceId);
+        List<Device> records = treeService.children(device.getId());
+
+        return ResponseEntity.ok(records);
+    }
 
     @RequestMapping(
             method = RequestMethod.PUT,
@@ -132,12 +150,9 @@ public class StreamController {
         if (!currentUser.isAdmin() && !record.userId.equals(currentUser.getUuid())) {
             record.userId = currentUser.getUuid();
         }
-                
+
         // save data!
         streamService.save(record);
-
-        // notify of invocation       
-        streamPublisher.push(record);
 
         return ResponseEntity.accepted().build();
     }
@@ -173,35 +188,6 @@ public class StreamController {
 
     @RequestMapping(
             method = RequestMethod.GET,
-            value = "/{deviceId}/{streamId}"
-    )
-    @ApiOperation(
-            value = "Retrieve all the stored stream data",
-            notes = "",
-            nickname = "list"
-    )
-    @PreAuthorize("hasPermission(#deviceId, 'pull')")
-    public ResponseEntity<?> list(
-            @AuthenticationPrincipal User currentUser,
-            @PathVariable("deviceId") String deviceId,
-            @PathVariable("streamId") String streamId,
-            Pageable pager
-    ) {
-
-        Device device = raptor.Inventory().load(deviceId);
-
-        Stream stream = device.getStream(streamId);
-        if (stream == null) {
-            return JsonErrorResponse.notFound("Stream not found");
-        }
-
-        List<RecordSet> records = streamService.list(stream, pager);
-
-        return ResponseEntity.ok(records);
-    }
-
-    @RequestMapping(
-            method = RequestMethod.GET,
             value = "/{deviceId}/{streamId}/lastUpdate"
     )
     @ApiOperation(
@@ -232,7 +218,6 @@ public class StreamController {
         return ResponseEntity.ok(record);
     }
 
-
     @RequestMapping(
             method = RequestMethod.POST,
             value = "/{deviceId}/{streamId}"
@@ -256,25 +241,23 @@ public class StreamController {
         if (stream == null) {
             return JsonErrorResponse.notFound("Stream not found");
         }
-        
+
         query.streamId(streamId);
         query.deviceId(deviceId);
-        
+
         DataQueryBuilder qb = new DataQueryBuilder(query);
 //        Pageable paging = qb.getPaging();
 //        Predicate predicate = qb.getPredicate();
         Query q = qb.getQuery();
 
         ResultSet result = new ResultSet(stream);
-        
+
         List<RecordSet> records = mongoTemplate.find(q, RecordSet.class);
         result.addAll(records);
-        
+
 //        Page<RecordSet> page = streamService.search(q, paging);
 //        result.addAll(page.getContent());
-        
         return ResponseEntity.ok(result);
     }
-    
-    
+
 }

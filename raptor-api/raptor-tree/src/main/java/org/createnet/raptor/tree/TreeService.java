@@ -13,17 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.data;
+package org.createnet.raptor.tree;
 
-import com.querydsl.core.types.Predicate;
 import java.util.List;
-import org.createnet.raptor.models.data.RecordSet;
-import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.models.objects.Device;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,41 +25,13 @@ import org.springframework.stereotype.Service;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-public class StreamService {
+public class TreeService {
 
     @Autowired
-    private StreamRepository repository;
+    private TreeRepository repository;
 
-    public void save(RecordSet record) {
-        repository.save(record);
-    }
-
-    public List<RecordSet> list(Stream stream, Pageable page) {
-        return repository.findByDeviceIdAndStreamId(stream.getDevice().getId(), stream.name, page);
-    }
-
-    public RecordSet lastUpdate(Stream stream) {
-        
-        Pageable page = new PageRequest(0, 1, new Sort(Sort.Direction.DESC, "timestamp"));
-        List<RecordSet> records = list(stream, page);
-
-        if (records.isEmpty()) {
-            return null;
-        }
-
-        return records.get(0);
-    }
-
-    public void deleteAll(Stream stream) {
-        repository.deleteByDeviceIdAndStreamId(stream.getDevice().getId(), stream.name);
-    }
-
-    public Page<RecordSet> search(Predicate predicate, Pageable pageable) {
-        return repository.findAll(predicate, pageable);
-    }
-
-    public List<RecordSet> search(Predicate predicate) {
-        return repository.findAll(predicate);
+    List<Device> children(String id) {
+        return repository.findByParentId(id);
     }
             
 
