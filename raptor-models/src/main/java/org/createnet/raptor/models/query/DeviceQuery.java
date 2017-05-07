@@ -16,6 +16,7 @@
 package org.createnet.raptor.models.query;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.List;
 
 /**
  *
@@ -28,7 +29,6 @@ public class DeviceQuery extends BaseQuery {
     public final TextQuery name = new TextQuery();
     public final TextQuery description = new TextQuery();
     public final MapQuery properties = new MapQuery();
-
     
     public DeviceQuery() {
     }
@@ -36,5 +36,17 @@ public class DeviceQuery extends BaseQuery {
     public DeviceQuery(String userId) {
         this.userId = userId;
     }
-
+    
+    public static DeviceQuery queryByDeviceId(String... deviceId) {
+        DeviceQuery q = new DeviceQuery();
+        q.id.in(deviceId);
+        return q;
+    }
+    
+    public static DeviceQuery queryByDeviceId(List<String> deviceId) {
+        DeviceQuery q = new DeviceQuery();
+        q.id.in(deviceId.toArray(new String[deviceId.size()]));
+        return q;
+    }
+    
 }

@@ -20,14 +20,17 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.createnet.raptor.api.common.client.ApiClientService;
 import org.createnet.raptor.api.common.query.DataQueryBuilder;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.objects.DeviceNode;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.query.DataQuery;
+import org.createnet.raptor.models.query.DeviceQuery;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,160 +107,169 @@ public class TreeController {
             notes = "",
             response = Device.class,
             responseContainer = "List",
-            nickname = "getChildren"
+            nickname = "children"
     )
     @PreAuthorize("hasPermission(#deviceId, 'read')")
-    public ResponseEntity<?> list(
+    public ResponseEntity<?> children(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId
     ) {
 
         Device device = raptor.Inventory().load(deviceId);
-        List<Device> records = treeService.children(device.getId());
+        DeviceNode node = treeService.node(device.getId());
+        
+        List<Device> records = raptor.Inventory().search(
+                DeviceQuery.queryByDeviceId(
+                        node.getChildren()
+                                .stream()
+                                .map(n -> n.getCurrent().getId())
+                                .collect(Collectors.toList())
+                ));
 
         return ResponseEntity.ok(records);
     }
-
-    @RequestMapping(
-            method = RequestMethod.PUT,
-            value = "/{deviceId}/{streamId}"
-    )
-    @ApiOperation(
-            value = "Save stream data",
-            notes = "",
-            nickname = "push"
-    )
-    @PreAuthorize("hasPermission(#deviceId, 'push')")
-    public ResponseEntity<?> push(
-            @AuthenticationPrincipal User currentUser,
-            @PathVariable("deviceId") String deviceId,
-            @PathVariable("streamId") String streamId,
-            @RequestBody RecordSet record
-    ) {
-
-        Device device = raptor.Inventory().load(deviceId);
-
-        Stream stream = device.getStream(streamId);
-        if (stream == null) {
-            return JsonErrorResponse.notFound("Stream not found");
-        }
-        record.setStream(stream);
-
-        if (record.userId == null) {
-            record.userId = currentUser.getUuid();
-        }
-
-        if (!currentUser.isAdmin() && !record.userId.equals(currentUser.getUuid())) {
-            record.userId = currentUser.getUuid();
-        }
-
-        // save data!
-        streamService.save(record);
-
-        return ResponseEntity.accepted().build();
-    }
-
-    @RequestMapping(
-            method = RequestMethod.DELETE,
-            value = "/{deviceId}/{streamId}"
-    )
-    @ApiOperation(
-            value = "Remove all the stored data",
-            notes = "",
-            nickname = "delete"
-    )
-    @PreAuthorize("hasPermission(#deviceId, 'push')")
-    public ResponseEntity<?> delete(
-            @AuthenticationPrincipal User currentUser,
-            @PathVariable("deviceId") String deviceId,
-            @PathVariable("streamId") String streamId
-    ) {
-
-        Device device = raptor.Inventory().load(deviceId);
-
-        Stream stream = device.getStream(streamId);
-        if (stream == null) {
-            return JsonErrorResponse.notFound("Stream not found");
-        }
-
-        // save data!
-        streamService.deleteAll(stream);
-
-        return ResponseEntity.ok().build();
-    }
-
-    @RequestMapping(
-            method = RequestMethod.GET,
-            value = "/{deviceId}/{streamId}/lastUpdate"
-    )
-    @ApiOperation(
-            value = "Retrieve the last record stored for a stream",
-            notes = "",
-            nickname = "lastUpdate"
-    )
-    @PreAuthorize("hasPermission(#deviceId, 'pull')")
-    public ResponseEntity<?> lastUpdate(
-            @AuthenticationPrincipal User currentUser,
-            @PathVariable("deviceId") String deviceId,
-            @PathVariable("streamId") String streamId
-    ) {
-
-        Device device = raptor.Inventory().load(deviceId);
-
-        Stream stream = device.getStream(streamId);
-        if (stream == null) {
-            return JsonErrorResponse.notFound("Stream not found");
-        }
-
-        RecordSet record = streamService.lastUpdate(stream);
-
-        if (record == null) {
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(record);
-    }
-
-    @RequestMapping(
-            method = RequestMethod.POST,
-            value = "/{deviceId}/{streamId}"
-    )
-    @ApiOperation(
-            value = "Retrieve data based on the search query",
-            notes = "",
-            nickname = "search"
-    )
-    @PreAuthorize("hasPermission(#deviceId, 'pull')")
-    public ResponseEntity<?> search(
-            @AuthenticationPrincipal User currentUser,
-            @PathVariable("deviceId") String deviceId,
-            @PathVariable("streamId") String streamId,
-            @RequestBody DataQuery query
-    ) {
-
-        Device device = raptor.Inventory().load(deviceId);
-
-        Stream stream = device.getStream(streamId);
-        if (stream == null) {
-            return JsonErrorResponse.notFound("Stream not found");
-        }
-
-        query.streamId(streamId);
-        query.deviceId(deviceId);
-
-        DataQueryBuilder qb = new DataQueryBuilder(query);
-//        Pageable paging = qb.getPaging();
-//        Predicate predicate = qb.getPredicate();
-        Query q = qb.getQuery();
-
-        ResultSet result = new ResultSet(stream);
-
-        List<RecordSet> records = mongoTemplate.find(q, RecordSet.class);
-        result.addAll(records);
-
-//        Page<RecordSet> page = streamService.search(q, paging);
-//        result.addAll(page.getContent());
-        return ResponseEntity.ok(result);
-    }
+    
+//
+//    @RequestMapping(
+//            method = RequestMethod.PUT,
+//            value = "/{deviceId}/{streamId}"
+//    )
+//    @ApiOperation(
+//            value = "Save stream data",
+//            notes = "",
+//            nickname = "push"
+//    )
+//    @PreAuthorize("hasPermission(#deviceId, 'push')")
+//    public ResponseEntity<?> push(
+//            @AuthenticationPrincipal User currentUser,
+//            @PathVariable("deviceId") String deviceId,
+//            @PathVariable("streamId") String streamId,
+//            @RequestBody RecordSet record
+//    ) {
+//
+//        Device device = raptor.Inventory().load(deviceId);
+//
+//        Stream stream = device.getStream(streamId);
+//        if (stream == null) {
+//            return JsonErrorResponse.notFound("Stream not found");
+//        }
+//        record.setStream(stream);
+//
+//        if (record.userId == null) {
+//            record.userId = currentUser.getUuid();
+//        }
+//
+//        if (!currentUser.isAdmin() && !record.userId.equals(currentUser.getUuid())) {
+//            record.userId = currentUser.getUuid();
+//        }
+//
+//        // save data!
+//        treeService.save(record);
+//
+//        return ResponseEntity.accepted().build();
+//    }
+//
+//    @RequestMapping(
+//            method = RequestMethod.DELETE,
+//            value = "/{deviceId}/{streamId}"
+//    )
+//    @ApiOperation(
+//            value = "Remove all the stored data",
+//            notes = "",
+//            nickname = "delete"
+//    )
+//    @PreAuthorize("hasPermission(#deviceId, 'push')")
+//    public ResponseEntity<?> delete(
+//            @AuthenticationPrincipal User currentUser,
+//            @PathVariable("deviceId") String deviceId,
+//            @PathVariable("streamId") String streamId
+//    ) {
+//
+//        Device device = raptor.Inventory().load(deviceId);
+//
+//        Stream stream = device.getStream(streamId);
+//        if (stream == null) {
+//            return JsonErrorResponse.notFound("Stream not found");
+//        }
+//
+//        // save data!
+//        streamService.deleteAll(stream);
+//
+//        return ResponseEntity.ok().build();
+//    }
+//
+//    @RequestMapping(
+//            method = RequestMethod.GET,
+//            value = "/{deviceId}/{streamId}/lastUpdate"
+//    )
+//    @ApiOperation(
+//            value = "Retrieve the last record stored for a stream",
+//            notes = "",
+//            nickname = "lastUpdate"
+//    )
+//    @PreAuthorize("hasPermission(#deviceId, 'pull')")
+//    public ResponseEntity<?> lastUpdate(
+//            @AuthenticationPrincipal User currentUser,
+//            @PathVariable("deviceId") String deviceId,
+//            @PathVariable("streamId") String streamId
+//    ) {
+//
+//        Device device = raptor.Inventory().load(deviceId);
+//
+//        Stream stream = device.getStream(streamId);
+//        if (stream == null) {
+//            return JsonErrorResponse.notFound("Stream not found");
+//        }
+//
+//        RecordSet record = streamService.lastUpdate(stream);
+//
+//        if (record == null) {
+//            return ResponseEntity.noContent().build();
+//        }
+//
+//        return ResponseEntity.ok(record);
+//    }
+//
+//    @RequestMapping(
+//            method = RequestMethod.POST,
+//            value = "/{deviceId}/{streamId}"
+//    )
+//    @ApiOperation(
+//            value = "Retrieve data based on the search query",
+//            notes = "",
+//            nickname = "search"
+//    )
+//    @PreAuthorize("hasPermission(#deviceId, 'pull')")
+//    public ResponseEntity<?> search(
+//            @AuthenticationPrincipal User currentUser,
+//            @PathVariable("deviceId") String deviceId,
+//            @PathVariable("streamId") String streamId,
+//            @RequestBody DataQuery query
+//    ) {
+//
+//        Device device = raptor.Inventory().load(deviceId);
+//
+//        Stream stream = device.getStream(streamId);
+//        if (stream == null) {
+//            return JsonErrorResponse.notFound("Stream not found");
+//        }
+//
+//        query.streamId(streamId);
+//        query.deviceId(deviceId);
+//
+//        DataQueryBuilder qb = new DataQueryBuilder(query);
+////        Pageable paging = qb.getPaging();
+////        Predicate predicate = qb.getPredicate();
+//        Query q = qb.getQuery();
+//
+//        ResultSet result = new ResultSet(stream);
+//
+//        List<RecordSet> records = mongoTemplate.find(q, RecordSet.class);
+//        result.addAll(records);
+//
+////        Page<RecordSet> page = streamService.search(q, paging);
+////        result.addAll(page.getContent());
+//        return ResponseEntity.ok(result);
+//    }
 
 }

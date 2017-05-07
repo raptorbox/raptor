@@ -17,6 +17,7 @@ package org.createnet.raptor.tree;
 
 import java.util.List;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.objects.DeviceNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,9 +31,8 @@ public class TreeService {
     @Autowired
     private TreeRepository repository;
 
-    List<Device> children(String id) {
+    DeviceNode node(String id) {
         return repository.findByParentId(id);
     }
-            
 
 }
