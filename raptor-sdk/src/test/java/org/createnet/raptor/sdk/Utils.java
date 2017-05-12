@@ -63,7 +63,7 @@ public class Utils {
         if (instance == null) {
             instance = new Raptor(prop.getProperty("url"), prop.getProperty("username"), prop.getProperty("password"));
             log.debug("Performing login for {}", prop.getProperty("username"));
-            instance.Auth.login();
+            instance.Auth().login();
             log.debug("Logged in");
         }
         return instance;
@@ -72,7 +72,7 @@ public class Utils {
     static public Device createDevice(String name) throws IOException {
         Device d = new Device();
         d.name = name;
-        return getRaptor().Device.create(d);
+        return getRaptor().Device().create(d);
     }
     
     static public void waitFor(int millis) {
@@ -84,7 +84,7 @@ public class Utils {
     }
     
     static public Device createDevice(Device d) {
-        Device d1 = getRaptor().Device.create(d);
+        Device d1 = getRaptor().Device().create(d);
         waitFor(500);
         return d1;
     }
@@ -100,11 +100,11 @@ public class Utils {
         User user = getRaptor().Admin().User().create(username, username + Math.random(), username + "@test.raptor.local", roles);
         
         assert user != null;
-        assert getRaptor().Auth.getToken() != null;
+        assert getRaptor().Auth().getToken() != null;
         
         
         Raptor r = new Raptor(new Config(instance.getConfig().getUrl(), username, username));
-        r.Auth.login();
+        r.Auth().login();
 
         return r;
     }
@@ -122,7 +122,7 @@ public class Utils {
         assert user != null;
         
         Raptor r = new Raptor(new Config(instance.getConfig().getUrl(), username, password));
-        r.Auth.login();
+        r.Auth().login();
 
         return r;
     }
@@ -140,7 +140,7 @@ public class Utils {
         assert user != null;
         
         Raptor r = new Raptor(new Config(instance.getConfig().getUrl(), username, password));
-        r.Auth.login();
+        r.Auth().login();
 
         return r;
     }

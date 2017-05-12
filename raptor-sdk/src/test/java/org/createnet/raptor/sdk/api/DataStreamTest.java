@@ -60,7 +60,7 @@ public class DataStreamTest {
     @Before
     public void setUp() {
 
-        raptor = Utils.getRaptor();
+        raptor = Utils.createNewInstance();
 
         Device d = new Device();
         d.name = "data test " + System.currentTimeMillis();
