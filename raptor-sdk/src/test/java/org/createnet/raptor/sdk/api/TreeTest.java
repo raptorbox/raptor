@@ -67,7 +67,8 @@ public class TreeTest {
         
         TreeNode node1 = TreeNode.create("Root1");
         TreeNode node2 = TreeNode.create("Root2");
-        raptor.Tree().add(node1);
+        raptor.Tree().create(node1);
+        
         
     }
 

@@ -73,6 +73,20 @@ public class TreeService {
     }
 
     /**
+     * Return the direct leaves of a node
+     *
+     * @param id
+     * @return
+     */
+    public List<TreeNode> children(String id) {
+        TreeNode node = get(id);
+        if (node == null) {
+            return null;
+        }        
+        return children(node);
+    }
+
+    /**
      * Return the subtree of the node
      *
      * @param node
