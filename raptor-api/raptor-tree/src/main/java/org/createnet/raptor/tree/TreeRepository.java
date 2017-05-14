@@ -17,7 +17,7 @@ package org.createnet.raptor.tree;
 
 import com.querydsl.core.types.Predicate;
 import java.util.List;
-import org.createnet.raptor.models.objects.DeviceNode;
+import org.createnet.raptor.models.tree.TreeNode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -27,14 +27,30 @@ import org.springframework.data.querydsl.QueryDslPredicateExecutor;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface TreeRepository extends MongoRepository<DeviceNode, String>, QueryDslPredicateExecutor<DeviceNode> {
+public interface TreeRepository extends MongoRepository<TreeNode, String>, QueryDslPredicateExecutor<TreeNode> {
     
-    public DeviceNode findByParentId(String deviceId);
- 
-    @Override
-    public Page<DeviceNode> findAll(Predicate predicate, Pageable pageable);
+    public TreeNode findByParentId(String deviceId);
 
     @Override
-    public List<DeviceNode> findAll(Predicate prdct);    
+    public Iterable<TreeNode> findAll(Iterable<String> ids);
+
+    @Override
+    public <S extends TreeNode> List<S> save(Iterable<S> entites);
+
+    @Override
+    public void delete(String id);
+
+    @Override
+    public TreeNode findOne(String id);
+
+    @Override
+    public <S extends TreeNode> S save(S entity);
+
+    @Override
+    public Page<TreeNode> findAll(Predicate predicate, Pageable pageable);
+    
+    
+    @Override
+    public List<TreeNode> findAll(Predicate prdct);    
     
 }

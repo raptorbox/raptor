@@ -20,24 +20,16 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import org.createnet.raptor.api.common.client.ApiClientService;
-import org.createnet.raptor.api.common.query.DataQueryBuilder;
 import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.data.RecordSet;
-import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Device;
-import org.createnet.raptor.models.objects.DeviceNode;
-import org.createnet.raptor.models.objects.Stream;
-import org.createnet.raptor.models.query.DataQuery;
-import org.createnet.raptor.models.query.DeviceQuery;
 import org.createnet.raptor.models.response.JsonErrorResponse;
+import org.createnet.raptor.models.tree.TreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -100,75 +92,76 @@ public class TreeController {
 
     @RequestMapping(
             method = RequestMethod.GET,
-            value = "/{deviceId}"
+            value = "/"
     )
     @ApiOperation(
-            value = "Return the device children if any",
+            value = "Return the whole tree a device belongs to",
             notes = "",
-            response = Device.class,
+            response = TreeNode.class,
             responseContainer = "List",
-            nickname = "children"
+            nickname = "tree"
     )
     @PreAuthorize("hasPermission(#deviceId, 'read')")
-    public ResponseEntity<?> children(
+    public ResponseEntity<?> tree(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId
     ) {
 
         Device device = raptor.Inventory().load(deviceId);
-        DeviceNode node = treeService.node(device.getId());
-        
-        List<Device> records = raptor.Inventory().search(
-                DeviceQuery.queryByDeviceId(
-                        node.getChildren()
-                                .stream()
-                                .map(n -> n.getCurrent().getId())
-                                .collect(Collectors.toList())
-                ));
+        TreeNode tree = treeService.tree(device.getId());
 
-        return ResponseEntity.ok(records);
+        return ResponseEntity.ok(tree);
     }
-    
-//
-//    @RequestMapping(
-//            method = RequestMethod.PUT,
-//            value = "/{deviceId}/{streamId}"
-//    )
-//    @ApiOperation(
-//            value = "Save stream data",
-//            notes = "",
-//            nickname = "push"
-//    )
+
+    @RequestMapping(
+            method = RequestMethod.PUT,
+            value = { "/{parentId}", "/" }
+    )
+    @ApiOperation(
+            value = "Add items to the tree node",
+            notes = "",
+            nickname = "addNodes"
+    )
 //    @PreAuthorize("hasPermission(#deviceId, 'push')")
-//    public ResponseEntity<?> push(
-//            @AuthenticationPrincipal User currentUser,
-//            @PathVariable("deviceId") String deviceId,
-//            @PathVariable("streamId") String streamId,
-//            @RequestBody RecordSet record
-//    ) {
-//
-//        Device device = raptor.Inventory().load(deviceId);
-//
-//        Stream stream = device.getStream(streamId);
-//        if (stream == null) {
-//            return JsonErrorResponse.notFound("Stream not found");
-//        }
-//        record.setStream(stream);
-//
-//        if (record.userId == null) {
-//            record.userId = currentUser.getUuid();
-//        }
-//
-//        if (!currentUser.isAdmin() && !record.userId.equals(currentUser.getUuid())) {
-//            record.userId = currentUser.getUuid();
-//        }
-//
-//        // save data!
-//        treeService.save(record);
-//
-//        return ResponseEntity.accepted().build();
-//    }
-//
+    public ResponseEntity<?> addNodes(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable("parentId") Optional<String> optionalParentId,
+            @RequestBody List<TreeNode> nodes
+    ) {
+
+        TreeNode parent = new TreeNode();
+        if(optionalParentId.isPresent()) {
+            TreeNode storedParent = treeService.get(optionalParentId.get());
+            if (storedParent == null) {
+                return JsonErrorResponse.notFound("Node not found");
+            }
+            parent.merge(storedParent);
+        }
+
+        nodes.stream().forEach((raw) -> {
+
+            TreeNode node = treeService.get(raw.getId());
+            if (node == null) {
+                node = new TreeNode();
+            }
+
+            node.merge(raw);
+            node.parent(parent);
+            
+            if(node.getUserId() == null) {
+                node.user(currentUser);
+            }
+            if (!currentUser.isAdmin() && !node.getUserId().equals(currentUser.getUuid())) {
+                node.user(currentUser);
+            }
+
+            treeService.save(node);
+            log.debug("Added children {}", node.getId());
+        });
+
+        return ResponseEntity.accepted().build();
+    }
+
 //    @RequestMapping(
 //            method = RequestMethod.DELETE,
 //            value = "/{deviceId}/{streamId}"
@@ -271,5 +264,4 @@ public class TreeController {
 ////        result.addAll(page.getContent());
 //        return ResponseEntity.ok(result);
 //    }
-
 }
