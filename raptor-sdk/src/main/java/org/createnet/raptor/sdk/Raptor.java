@@ -20,7 +20,6 @@ import org.createnet.raptor.sdk.admin.AdminClient;
 import org.createnet.raptor.sdk.config.Config;
 import org.createnet.raptor.sdk.api.ActionClient;
 import org.createnet.raptor.sdk.api.AuthClient;
-import org.createnet.raptor.sdk.api.DeviceClient;
 import org.createnet.raptor.sdk.api.StreamClient;
 import org.createnet.raptor.sdk.events.MqttEventEmitter;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -42,7 +41,6 @@ public class Raptor implements IClient, RaptorComponent {
     protected AuthClient Auth;
     protected StreamClient Stream;
     protected ActionClient Action;
-    protected DeviceClient Device;
     protected InventoryClient Inventory;
 
     public AdminClient Admin() {
@@ -71,14 +69,6 @@ public class Raptor implements IClient, RaptorComponent {
             Action = new ActionClient(getContainer());
         }
         return Action;
-    }
-
-    @Deprecated
-    public DeviceClient Device() {
-        if (Device == null) {
-            Device = new DeviceClient(getContainer());
-        }
-        return Device;
     }
 
     public InventoryClient Inventory() {
