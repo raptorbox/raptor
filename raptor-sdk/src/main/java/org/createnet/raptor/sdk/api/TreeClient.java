@@ -36,18 +36,17 @@ import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.payload.ActionPayload;
 import org.createnet.raptor.models.payload.StreamPayload;
 import org.createnet.raptor.models.query.DeviceQuery;
+import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.admin.DevicePermissionClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Methods to interact with Raptor API
- * 
- * @deprecated use InventoryClient instead
+ *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@Deprecated
-public class DeviceClient extends AbstractClient {
+public class InventoryClient extends AbstractClient {
 
     protected DevicePermissionClient Permission;
     
@@ -56,14 +55,13 @@ public class DeviceClient extends AbstractClient {
             Permission = new DevicePermissionClient(getContainer());
         }
         return Permission;
-    }    
-    
-    public DeviceClient(Raptor container) {
-        super(container);
-        Permission = new DevicePermissionClient(container);
     }
 
-    final static Logger logger = LoggerFactory.getLogger(DeviceClient.class);
+    public InventoryClient(Raptor container) {
+        super(container);
+    }
+
+    final static Logger logger = LoggerFactory.getLogger(InventoryClient.class);
 
     /**
      * Register for device events
@@ -150,13 +148,13 @@ public class DeviceClient extends AbstractClient {
     }
 
     /**
-     * Create an object definition
+     * Create a new device instance
      *
      * @param obj object definition to create
      * @return the Device instance
      */
     public Device create(Device obj) {
-        JsonNode node = getClient().post(Routes.CREATE, obj.toJsonNode());
+        JsonNode node = getClient().post(Routes.INVENTORY_CREATE, obj.toJsonNode());
         if (!node.has("id")) {
             throw new ClientException("Missing ID on object creation");
         }
@@ -165,23 +163,19 @@ public class DeviceClient extends AbstractClient {
     }
 
     /**
-     * Load an object definition
+     * Load a device definition
      *
      * @param id unique id of the object
      * @return the Device instance
      */
     public Device load(String id) {
         Device obj = new Device();
-        obj.parse(
-                getClient().get(
-                        String.format(Routes.LOAD, id)
-                )
-        );
+        obj.parse(getClient().get(String.format(Routes.INVENTORY_LOAD, id)));
         return obj;
     }
 
     /**
-     * Update a Device instance
+     * Update a device instance
      *
      * @param obj the Device to update
      * @return the updated Device instance
@@ -189,7 +183,7 @@ public class DeviceClient extends AbstractClient {
     public Device update(Device obj) {
         obj.parse(
                 getClient().put(
-                        String.format(Routes.UPDATE, obj.getId()),
+                        String.format(Routes.INVENTORY_UPDATE, obj.getId()),
                         obj.toJsonNode()
                 )
         );
@@ -200,11 +194,9 @@ public class DeviceClient extends AbstractClient {
      * Search for Devices
      *
      * @param query the query to match the object definitions
-     * @param offset results start from offset
-     * @param limit limit the total size of result
      * @return a list of Devices matching the query
      */
-    public List<Device> search(DeviceQuery query, Integer offset, Integer limit) {
+    public List<Device> search(DeviceQuery query) {
         if (query.getUserId() == null) {
             User user = getContainer().Auth().getUser();
             if (user == null) {
@@ -213,22 +205,12 @@ public class DeviceClient extends AbstractClient {
             query.userId(user.getUuid());
         }
         JsonNode json = getClient().post(
-                Routes.SEARCH,
+                Routes.INVENTORY_SEARCH,
                 query.toJSON()
         );
         List<Device> results = Device.getMapper().convertValue(json, new TypeReference<List<Device>>() {
         });
         return results;
-    }
-
-    /**
-     * Search for Devices
-     *
-     * @param query the query to match the object definitions
-     * @return a list of Devices matching the query
-     */
-    public List<Device> search(DeviceQuery query) {
-        return search(query, null, null);
     }
 
     /**
@@ -238,7 +220,7 @@ public class DeviceClient extends AbstractClient {
      */
     public void delete(Device obj) {
         getClient().delete(
-                String.format(Routes.DELETE, obj.getId())
+                String.format(Routes.INVENTORY_DELETE, obj.getId())
         );
         obj.id = null;
     }
@@ -249,7 +231,7 @@ public class DeviceClient extends AbstractClient {
      * @return the Device instance
      */
     public List<Device> list() {
-        JsonNode json = getClient().get(Routes.LIST);
+        JsonNode json = getClient().get(Routes.INVENTORY_LIST);
         List<Device> list = Device.getMapper().convertValue(json, new TypeReference<List<Device>>() {
         });
         return list;
