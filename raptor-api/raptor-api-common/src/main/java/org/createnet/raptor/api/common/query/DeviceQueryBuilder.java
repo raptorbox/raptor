@@ -65,6 +65,12 @@ public class DeviceQueryBuilder {
             predicate.and(device.userId.eq(query.getUserId()));
         }
 
+        // id
+        Predicate pid = buildTextQuery(query.id, device.id);
+        if (pid != null) {
+            predicate.and(pid);
+        }
+
         // name
         Predicate pname = buildTextQuery(query.name, device.name);
         if (pname != null) {
