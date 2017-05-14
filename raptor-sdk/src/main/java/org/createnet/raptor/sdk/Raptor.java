@@ -20,7 +20,6 @@ import org.createnet.raptor.sdk.admin.AdminClient;
 import org.createnet.raptor.sdk.config.Config;
 import org.createnet.raptor.sdk.api.ActionClient;
 import org.createnet.raptor.sdk.api.AuthClient;
-import org.createnet.raptor.sdk.api.HttpClient;
 import org.createnet.raptor.sdk.api.DeviceClient;
 import org.createnet.raptor.sdk.api.StreamClient;
 import org.createnet.raptor.sdk.events.MqttEventEmitter;

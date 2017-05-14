@@ -30,7 +30,7 @@ import org.createnet.raptor.models.auth.request.AuthorizationRequest;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.RequestOptions;
-import org.createnet.raptor.sdk.api.Routes;
+import org.createnet.raptor.sdk.Routes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

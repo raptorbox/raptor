@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.sdk.api;
+package org.createnet.raptor.sdk;
 
 /**
  * List of base path for Raptor API
@@ -76,4 +76,8 @@ final public class Routes {
     public static final String INVENTORY_LOAD = INVENTORY_UPDATE;
     public static final String INVENTORY_DELETE = INVENTORY_UPDATE;
     
+    public static final String TREE_LIST = "/tree/";
+    public static final String TREE_GET = TREE_LIST + "/%s";
+    public static final String TREE_ADD = TREE_GET;
+    public static final String TREE_REMOVE = TREE_GET;
 }

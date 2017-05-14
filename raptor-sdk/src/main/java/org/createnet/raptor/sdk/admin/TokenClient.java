@@ -22,8 +22,8 @@ import java.util.List;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
-import org.createnet.raptor.sdk.api.HttpClient;
-import org.createnet.raptor.sdk.api.Routes;
+import org.createnet.raptor.sdk.HttpClient;
+import org.createnet.raptor.sdk.Routes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

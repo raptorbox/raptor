@@ -18,7 +18,6 @@ package org.createnet.raptor.sdk;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.createnet.raptor.sdk.api.HttpClient;
 import org.createnet.raptor.sdk.config.Config;
 import org.createnet.raptor.sdk.events.MqttEventEmitter;
 import org.createnet.raptor.sdk.exception.ClientException;

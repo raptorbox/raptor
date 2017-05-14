@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.sdk;
 
-import org.createnet.raptor.sdk.api.HttpClient;
 import org.createnet.raptor.sdk.config.Config;
 import org.createnet.raptor.sdk.events.MqttEventEmitter;
 

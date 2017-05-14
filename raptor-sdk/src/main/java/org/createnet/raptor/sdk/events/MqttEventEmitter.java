@@ -24,12 +24,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
-import org.createnet.raptor.sdk.api.HttpClient;
+import org.createnet.raptor.sdk.HttpClient;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.payload.DispatcherPayload;
-import org.createnet.raptor.sdk.api.Routes;
+import org.createnet.raptor.sdk.Routes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

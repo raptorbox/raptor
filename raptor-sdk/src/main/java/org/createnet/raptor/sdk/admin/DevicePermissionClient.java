@@ -22,7 +22,7 @@ import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.request.PermissionRequestBatch;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
-import org.createnet.raptor.sdk.api.Routes;
+import org.createnet.raptor.sdk.Routes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
