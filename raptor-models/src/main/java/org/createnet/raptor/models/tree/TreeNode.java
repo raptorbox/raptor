@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.models.objects.Device;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -59,6 +60,34 @@ public class TreeNode {
 
     @Transient
     protected final List<TreeNode> children = new ArrayList<>();
+
+    /**
+     * Create a tree node from a Device
+     * 
+     * @param device
+     * @return
+     */
+    static public TreeNode create(Device device) {
+        return new TreeNode()
+                .id(device.getId())
+                .parentId(null)
+                .userId(device.getUserId())
+                .type(NodeType.device)
+                .order(0);
+    }
+
+    /**
+     * Create a group tree node
+     * 
+     * @param name
+     * @return
+     */    
+    static public TreeNode create(String name) {
+        TreeNode node = new TreeNode()
+                .type(NodeType.group);
+        node.properties().put("name", name);
+        return node;
+    }
 
     public TreeNode merge(TreeNode node) {
         return this

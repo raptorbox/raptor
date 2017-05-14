@@ -162,6 +162,55 @@ public class TreeController {
         return ResponseEntity.accepted().build();
     }
 
+    @RequestMapping(
+            method = RequestMethod.POST,
+            value = { "/" }
+    )
+    @ApiOperation(
+            value = "Create a node of a tree",
+            notes = "",
+            nickname = "createNode"
+    )
+//    @PreAuthorize("hasPermission(#deviceId, 'push')")
+    public ResponseEntity<?> createNode(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable("parentId") Optional<String> optionalParentId,
+            @RequestBody List<TreeNode> nodes
+    ) {
+
+        TreeNode parent = new TreeNode();
+        if(optionalParentId.isPresent()) {
+            TreeNode storedParent = treeService.get(optionalParentId.get());
+            if (storedParent == null) {
+                return JsonErrorResponse.notFound("Node not found");
+            }
+            parent.merge(storedParent);
+        }
+
+        nodes.stream().forEach((raw) -> {
+
+            TreeNode node = treeService.get(raw.getId());
+            if (node == null) {
+                node = new TreeNode();
+            }
+
+            node.merge(raw);
+            node.parent(parent);
+            
+            if(node.getUserId() == null) {
+                node.user(currentUser);
+            }
+            if (!currentUser.isAdmin() && !node.getUserId().equals(currentUser.getUuid())) {
+                node.user(currentUser);
+            }
+
+            treeService.save(node);
+            log.debug("Added children {}", node.getId());
+        });
+
+        return ResponseEntity.accepted().build();
+    }
+
 //    @RequestMapping(
 //            method = RequestMethod.DELETE,
 //            value = "/{deviceId}/{streamId}"

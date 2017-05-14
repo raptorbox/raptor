@@ -19,25 +19,13 @@ import org.createnet.raptor.sdk.Routes;
 import org.createnet.raptor.sdk.AbstractClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.createnet.raptor.sdk.Raptor;
-import org.createnet.raptor.sdk.events.callback.ActionCallback;
-import org.createnet.raptor.sdk.events.callback.DataCallback;
-import org.createnet.raptor.sdk.events.callback.DeviceCallback;
-import org.createnet.raptor.sdk.events.callback.DeviceEventCallback;
-import org.createnet.raptor.sdk.events.callback.StreamCallback;
-import org.createnet.raptor.sdk.exception.ClientException;
-import org.createnet.raptor.sdk.exception.MissingAuthenticationException;
-import org.createnet.raptor.models.payload.DispatcherPayload;
-import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.objects.Device;
-import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.data.RecordSet;
-import org.createnet.raptor.models.payload.ActionPayload;
-import org.createnet.raptor.models.payload.StreamPayload;
-import org.createnet.raptor.models.query.DeviceQuery;
-import org.createnet.raptor.sdk.RequestOptions;
-import org.createnet.raptor.sdk.admin.DevicePermissionClient;
+import org.createnet.raptor.models.tree.TreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,194 +34,80 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class InventoryClient extends AbstractClient {
+public class TreeClient extends AbstractClient {
 
-    protected DevicePermissionClient Permission;
-    
-    public DevicePermissionClient Permission() {
-        if (Permission == null) {
-            Permission = new DevicePermissionClient(getContainer());
-        }
-        return Permission;
-    }
-
-    public InventoryClient(Raptor container) {
+    public TreeClient(Raptor container) {
         super(container);
     }
 
-    final static Logger logger = LoggerFactory.getLogger(InventoryClient.class);
+    final static Logger logger = LoggerFactory.getLogger(TreeClient.class);
 
     /**
-     * Register for device events
+     * Return the current tree structure for an user
      *
-     * @param device the device to listen for
-     * @param callback The callback to fire on event arrival
+     * @return the 
      */
-    public void subscribe(Device device, DeviceEventCallback callback) {
-        getEmitter().subscribe(device, callback);
+    public List<TreeNode> list() {
+        JsonNode json = getClient().get(Routes.TREE_LIST);
+        List<TreeNode> list = Device.getMapper().convertValue(json, new TypeReference<List<TreeNode>>() {});
+        return list;
     }
 
     /**
-     * Subscribe only to device related events like update or delete
+     * Add nodes to a tree branch
      *
-     * @param dev
-     * @param ev
+     * @param parent
+     * @param devices
+     * @return 
      */
-    public void subscribe(Device dev, DeviceCallback ev) {
-        getEmitter().subscribe(dev, (DispatcherPayload payload) -> {
-            switch (payload.getType()) {
-                case object:
-                    ev.callback(dev, (DevicePayload) payload);
-                    break;
-            }
-        });
-    }
-
-    /**
-     * Subscribe only to stream related events like update, push or delete
-     *
-     * @param dev
-     * @param ev
-     */
-    public void subscribe(Device dev, StreamCallback ev) {
-        getEmitter().subscribe(dev, (DispatcherPayload payload) -> {
-            switch (payload.getType()) {
-                case stream:
-                    StreamPayload spayload = (StreamPayload) payload;
-                    ev.callback(dev.getStream(spayload.streamId), spayload);
-                    break;
-            }
-        });
-    }
-
-    /**
-     * Subscribe only to action related events like invoke or status change
-     *
-     * @param dev
-     * @param ev
-     */
-    public void subscribe(Device dev, ActionCallback ev) {
-        getEmitter().subscribe(dev, (DispatcherPayload payload) -> {
-            switch (payload.getType()) {
-                case action:
-                    ActionPayload apayload = (ActionPayload) payload;
-                    ev.callback(dev.getAction(apayload.actionId), apayload);
-                    break;
-            }
-        });
-    }
-
-    /**
-     * Subscribe only to data updates
-     *
-     * @param dev
-     * @param ev
-     */
-    public void subscribe(Device dev, DataCallback ev) {
-        getEmitter().subscribe(dev, new DeviceEventCallback() {
-            @Override
-            public void trigger(DispatcherPayload payload) {
-                switch (payload.getType()) {
-                    case stream:
-                        if(!payload.getOp().equals("data")) {
-                            return;
-                        }
-                        StreamPayload dpayload = (StreamPayload) payload;
-                        RecordSet record = RecordSet.fromJSON(dpayload.data);
-                        ev.callback(dev.getStream(record.streamId), record);
-                        break;
-                }
-            }
-        });
-    }
-
-    /**
-     * Create a new device instance
-     *
-     * @param obj object definition to create
-     * @return the Device instance
-     */
-    public Device create(Device obj) {
-        JsonNode node = getClient().post(Routes.INVENTORY_CREATE, obj.toJsonNode());
-        if (!node.has("id")) {
-            throw new ClientException("Missing ID on object creation");
-        }
-        obj.id = node.get("id").asText();
-        return obj;
-    }
-
-    /**
-     * Load a device definition
-     *
-     * @param id unique id of the object
-     * @return the Device instance
-     */
-    public Device load(String id) {
-        Device obj = new Device();
-        obj.parse(getClient().get(String.format(Routes.INVENTORY_LOAD, id)));
-        return obj;
-    }
-
-    /**
-     * Update a device instance
-     *
-     * @param obj the Device to update
-     * @return the updated Device instance
-     */
-    public Device update(Device obj) {
-        obj.parse(
-                getClient().put(
-                        String.format(Routes.INVENTORY_UPDATE, obj.getId()),
-                        obj.toJsonNode()
-                )
+    public List<TreeNode> add(TreeNode parent, Device... devices) {
+        return add(parent, 
+                Arrays.asList(devices).stream()
+                        .map((d) -> TreeNode.create(d))
+                        .collect(Collectors.toList())
         );
-        return obj;
     }
 
     /**
-     * Search for Devices
+     * Add nodes to a tree branch
      *
-     * @param query the query to match the object definitions
-     * @return a list of Devices matching the query
+     * @param devices
+     * @return 
      */
-    public List<Device> search(DeviceQuery query) {
-        if (query.getUserId() == null) {
-            User user = getContainer().Auth().getUser();
-            if (user == null) {
-                throw new MissingAuthenticationException("User is not available");
-            }
-            query.userId(user.getUuid());
-        }
-        JsonNode json = getClient().post(
-                Routes.INVENTORY_SEARCH,
-                query.toJSON()
+    public List<TreeNode> add(Device... devices) {
+        return add(null, 
+                Arrays.asList(devices).stream()
+                        .map((d) -> TreeNode.create(d))
+                        .collect(Collectors.toList())
         );
-        List<Device> results = Device.getMapper().convertValue(json, new TypeReference<List<Device>>() {
-        });
-        return results;
     }
-
+    
     /**
-     * Delete a Device instance and all of its data
+     * Create a node of a tree
      *
-     * @param obj Device to delete
+     * @param node
+     * @return 
      */
-    public void delete(Device obj) {
-        getClient().delete(
-                String.format(Routes.INVENTORY_DELETE, obj.getId())
-        );
-        obj.id = null;
+    public TreeNode create(TreeNode node) {
+        JsonNode json = getClient().post(Routes.TREE_ADD, toJsonNode(node));
+        TreeNode node1 = Device.getMapper().convertValue(json, TreeNode.class);
+        return node1;
     }
-
+    
     /**
-     * List accessible devices
+     * Add devices to a tree branch
      *
-     * @return the Device instance
+     * @param parent
+     * @param nodes
+     * @return 
      */
-    public List<Device> list() {
-        JsonNode json = getClient().get(Routes.INVENTORY_LIST);
-        List<Device> list = Device.getMapper().convertValue(json, new TypeReference<List<Device>>() {
-        });
+    public List<TreeNode> add(TreeNode parent, List<TreeNode> nodes) {
+        
+        String url = String.format(Routes.TREE_ADD, parent == null ? "" : parent.getId());
+        JsonNode json = getClient().put(url, toJsonNode(nodes));
+        
+        List<TreeNode> list = Device.getMapper().convertValue(json, new TypeReference<List<TreeNode>>() {});
+
         return list;
     }
 
