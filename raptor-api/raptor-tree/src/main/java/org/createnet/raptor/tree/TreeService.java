@@ -32,18 +32,19 @@ public class TreeService {
     @Autowired
     private TreeRepository repository;
 
-    /** 
+    /**
      * Return a single node by id
-     * 
+     *
      * @param id
      * @return
      */
     public TreeNode get(String id) {
         return repository.findOne(id);
     }
-    
+
     /**
      * Return a list of nodes by ids
+     *
      * @param ids
      * @return
      */
@@ -82,7 +83,7 @@ public class TreeService {
         TreeNode node = get(id);
         if (node == null) {
             return null;
-        }        
+        }
         return children(node);
     }
 
@@ -107,6 +108,43 @@ public class TreeService {
     }
 
     /**
+     * Return the parents of a node
+     *
+     * @param node
+     * @return
+     */
+    public TreeNode parents(TreeNode node) {
+
+        // find the direct children
+        List<TreeNode> children = children(node);
+
+        children.forEach((n) -> {
+            subtree(n);
+        });
+
+        node.children().addAll(children);
+
+        return node;
+    }
+
+    /**
+     * Return the parent of a node
+     *
+     * @param node
+     * @return
+     */
+    public TreeNode parent(TreeNode node) {
+        
+        String parentId = node.getParentId();
+        if (parentId == null) {
+            return null;
+        }
+
+        TreeNode parent = get(parentId);
+        return parent;
+    }
+
+    /**
      * Return the root of the node
      *
      * @param node
@@ -118,13 +156,28 @@ public class TreeService {
             return null;
         }
 
-        String parentId = node.getParentId();
-        if (parentId == null) {
-            return node;
+        TreeNode parent = parent(node);
+        if (parent == null) {
+            return null;
         }
 
-        TreeNode parent = get(parentId);
         return root(parent);
+    }
+
+    /**
+     * Return the root of the node
+     *
+     * @param id
+     * @return
+     */
+    public TreeNode root(String id) {
+        
+        TreeNode node = get(id);
+        if (node == null) {
+            return null;
+        }
+        
+        return root(node);
     }
 
     /**
@@ -140,7 +193,25 @@ public class TreeService {
         }
 
         TreeNode root = root(node);
+        if(root == null) {
+            root = node;
+        }
+
         return subtree(root);
+    }
+
+    /**
+     * Return the whole tree a node belongs to
+     *
+     * @param id
+     * @return
+     */
+    public TreeNode tree(String id) {
+        TreeNode node = get(id);
+        if (node == null) {
+            return null;
+        }
+        return tree(node);
     }
 
     /**
@@ -157,24 +228,46 @@ public class TreeService {
         return subtree(node);
     }
 
-    public TreeNode root(String id) {
-        TreeNode node = get(id);
-        if (node == null) {
-            return null;
-        }
-        return root(node);
-    }
-
-    public TreeNode tree(String id) {
-        TreeNode node = get(id);
-        if (node == null) {
-            return null;
-        }
-        return tree(node);
-    }
-
+    /**
+     * Save a node
+     *
+     * @param node
+     * @return
+     */
     public TreeNode save(TreeNode node) {
         return repository.save(node);
+    }
+
+    /**
+     * Delete a node by id
+     *
+     * @param id
+     */
+    public void delete(String id) {
+        
+        TreeNode node = get(id);
+        if(node == null) 
+            return;
+
+        delete(node);
+    }
+
+    /**
+     * Delete a node
+     *
+     * @param node
+     */
+    public void delete(final TreeNode node) {
+        
+        final List<TreeNode> children = children(node);
+        if(!children.isEmpty()) {
+            children.stream().forEach((child) -> { 
+                child.parent(node.getParentId() != null ? node.getParentId() : null); 
+            });
+            repository.save(children);
+        }
+        
+        repository.delete(node);
     }
 
 }

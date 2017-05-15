@@ -19,12 +19,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.createnet.raptor.api.common.client.ApiClientService;
 import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.tree.TreeNode;
 import org.slf4j.Logger;
@@ -32,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -87,9 +84,6 @@ public class TreeController {
 
     @Autowired
     private TreeService treeService;
-
-    @Autowired
-    private MongoTemplate mongoTemplate;
 
     @RequestMapping(
             method = RequestMethod.GET,
@@ -214,107 +208,32 @@ public class TreeController {
 
         return ResponseEntity.ok(node);
     }
-    
-//    @RequestMapping(
-//            method = RequestMethod.DELETE,
-//            value = "/{deviceId}/{streamId}"
-//    )
-//    @ApiOperation(
-//            value = "Remove all the stored data",
-//            notes = "",
-//            nickname = "delete"
-//    )
-//    @PreAuthorize("hasPermission(#deviceId, 'push')")
-//    public ResponseEntity<?> delete(
-//            @AuthenticationPrincipal User currentUser,
-//            @PathVariable("deviceId") String deviceId,
-//            @PathVariable("streamId") String streamId
-//    ) {
-//
-//        Device device = raptor.Inventory().load(deviceId);
-//
-//        Stream stream = device.getStream(streamId);
-//        if (stream == null) {
-//            return JsonErrorResponse.notFound("Stream not found");
-//        }
-//
-//        // save data!
-//        streamService.deleteAll(stream);
-//
-//        return ResponseEntity.ok().build();
-//    }
-//
-//    @RequestMapping(
-//            method = RequestMethod.GET,
-//            value = "/{deviceId}/{streamId}/lastUpdate"
-//    )
-//    @ApiOperation(
-//            value = "Retrieve the last record stored for a stream",
-//            notes = "",
-//            nickname = "lastUpdate"
-//    )
-//    @PreAuthorize("hasPermission(#deviceId, 'pull')")
-//    public ResponseEntity<?> lastUpdate(
-//            @AuthenticationPrincipal User currentUser,
-//            @PathVariable("deviceId") String deviceId,
-//            @PathVariable("streamId") String streamId
-//    ) {
-//
-//        Device device = raptor.Inventory().load(deviceId);
-//
-//        Stream stream = device.getStream(streamId);
-//        if (stream == null) {
-//            return JsonErrorResponse.notFound("Stream not found");
-//        }
-//
-//        RecordSet record = streamService.lastUpdate(stream);
-//
-//        if (record == null) {
-//            return ResponseEntity.noContent().build();
-//        }
-//
-//        return ResponseEntity.ok(record);
-//    }
-//
-//    @RequestMapping(
-//            method = RequestMethod.POST,
-//            value = "/{deviceId}/{streamId}"
-//    )
-//    @ApiOperation(
-//            value = "Retrieve data based on the search query",
-//            notes = "",
-//            nickname = "search"
-//    )
-//    @PreAuthorize("hasPermission(#deviceId, 'pull')")
-//    public ResponseEntity<?> search(
-//            @AuthenticationPrincipal User currentUser,
-//            @PathVariable("deviceId") String deviceId,
-//            @PathVariable("streamId") String streamId,
-//            @RequestBody DataQuery query
-//    ) {
-//
-//        Device device = raptor.Inventory().load(deviceId);
-//
-//        Stream stream = device.getStream(streamId);
-//        if (stream == null) {
-//            return JsonErrorResponse.notFound("Stream not found");
-//        }
-//
-//        query.streamId(streamId);
-//        query.deviceId(deviceId);
-//
-//        DataQueryBuilder qb = new DataQueryBuilder(query);
-////        Pageable paging = qb.getPaging();
-////        Predicate predicate = qb.getPredicate();
-//        Query q = qb.getQuery();
-//
-//        ResultSet result = new ResultSet(stream);
-//
-//        List<RecordSet> records = mongoTemplate.find(q, RecordSet.class);
-//        result.addAll(records);
-//
-////        Page<RecordSet> page = streamService.search(q, paging);
-////        result.addAll(page.getContent());
-//        return ResponseEntity.ok(result);
-//    }
+
+    @RequestMapping(
+            method = RequestMethod.DELETE,
+            value = { "/{nodeId}" }
+    )
+    @ApiOperation(
+            value = "Delete a node from a tree",
+            notes = "",
+            nickname = "deleteNode"
+    )
+//    @PreAuthorize("hasPermission(#deviceId, 'delete')")
+    public ResponseEntity<?> deleteNode(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable("nodeId") String nodeId
+    ) {
+
+        TreeNode node = treeService.get(nodeId);
+        
+        if(node == null) {
+            return JsonErrorResponse.notFound();
+        }
+
+        treeService.delete(node);
+        log.debug("Deleted node {}", node.getId());
+
+        return ResponseEntity.ok(node);
+    }
+
 }

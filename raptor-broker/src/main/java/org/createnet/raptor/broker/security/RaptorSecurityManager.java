@@ -232,7 +232,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
             try {
 
-                Device obj = r.Device().load(objectId);
+                Device obj = r.Inventory().load(objectId);
                 if (obj == null) {
                     logger.warn("Object not found, id: `{}`", objectId);
                     return false;
