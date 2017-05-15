@@ -7,11 +7,21 @@ services:
     ports:
       - 3306:3306
     volumes:
-      # - ./raptor-auth-service/src/main/resources/sql:/docker-entrypoint-initdb.d
+      - ./raptor-auth-service/src/main/resources/sql:/docker-entrypoint-initdb.d
       - ./data/mariadb:/var/lib/mysql
     environment:
       MYSQL_USERNAME: root
       MYSQL_ROOT_PASSWORD: raptor
+    networks:
+      - raptor_net
+
+  busybox:
+    image: busybox
+    container_name: busybox
+    volumes:
+      - ./:/raptor
+    networks:
+      - raptor_net
 
   dbadmin:
     image: phpmyadmin/phpmyadmin
@@ -25,54 +35,21 @@ services:
      - ./data/phpmyadmin:/sessions
     links:
       - mariadb:db
+    networks:
+      - raptor_net
 
-  couchbase:
-    container_name: couchbase
-    image: couchbase/server
-    volumes:
-      - ./data/couchbase:/opt/couchbase/var
+  mongoadmin:
+    image: adicom/admin-mongo
+    container_name: mongoadmin
+    # environment:
+    restart: always
     ports:
-      - 8091:8091
-      - 8092:8092
-      - 8093:8093
-      - 11210:11210
-
-
-  elasticsearch:
-    image: elasticsearch:5
-    command: elasticsearch -E cluster.name="raptor" -E path.data=/usr/share/elasticsearch/data -E transport.host=0.0.0.0 -E indices.store.throttle.type=none
-    volumes:
-      - ./data/elasticsearch:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
-      - 9300:9300
-
-    # ulimits:
-    #   memlock:
-    #     soft: -1
-    #     hard: -1
-    #   nofile:
-    #     soft: 65536
-    #     hard: 65536
-    # mem_limit: 1g
-    # cap_add:
-    #   - IPC_LOCK
-
-  # elasticsearch:
-  #   container_name: elasticsearch
-  #   image: elasticsearch:5
-  #   command: elasticsearch -E cluster.name="raptor" -E path.data=/usr/share/elasticsearch/data -E transport.host=0.0.0.0 -E http.cors.enabled=true -E http.cors.allow-origin=localhost:9100
-  #   volumes:
-  #     - ./data/elasticsearch:/usr/share/elasticsearch/data
-  #   ports:
-  #     - 9200:9200
-  #     - 9300:9300
-
-  elasticsearch_head:
-    container_name: elasticsearch_head
-    image: mobz/elasticsearch-head:5
-    ports:
-      - 9100:9100
+     - 8082:1234
+    # volumes:
+    links:
+      - mongo
+    networks:
+      - raptor_net
 
   mongo:
     image: mongo:3
@@ -82,3 +59,5 @@ services:
     ports:
       - 27017:27017
     command: --smallfiles # --rest --auth
+    networks:
+      - raptor_net

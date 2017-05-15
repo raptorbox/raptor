@@ -25,7 +25,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.data"})
+@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.tree"})
 @EnableMongoRepositories
 @EnableSpringDataWebSupport
 public class Application extends BaseApplication {

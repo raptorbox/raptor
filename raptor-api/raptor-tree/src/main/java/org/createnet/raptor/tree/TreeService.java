@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.tree;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import java.util.List;
 import org.createnet.raptor.models.tree.QTreeNode;
@@ -62,7 +63,22 @@ public class TreeService {
 
         QTreeNode q = new QTreeNode("node");
 
-        Predicate p = q.parentId.eq(node.getId());
+        String id = node.getId();
+        
+        BooleanBuilder p = new BooleanBuilder();
+        
+        if(node.getUserId() == null) {
+            throw new InternalError("userId is missing");
+        }
+        
+        p.and(q.userId.eq(node.getUserId()));
+        
+        if (id != null) {
+            p.and(q.parentId.eq(id));
+        } else {
+            p.and(q.parentId.isNull());
+        }
+        
         List<TreeNode> children = repository.findAll(p);
 
         children.parallelStream()
@@ -134,7 +150,7 @@ public class TreeService {
      * @return
      */
     public TreeNode parent(TreeNode node) {
-        
+
         String parentId = node.getParentId();
         if (parentId == null) {
             return null;
@@ -171,12 +187,12 @@ public class TreeService {
      * @return
      */
     public TreeNode root(String id) {
-        
+
         TreeNode node = get(id);
         if (node == null) {
             return null;
         }
-        
+
         return root(node);
     }
 
@@ -193,7 +209,7 @@ public class TreeService {
         }
 
         TreeNode root = root(node);
-        if(root == null) {
+        if (root == null) {
             root = node;
         }
 
@@ -244,10 +260,11 @@ public class TreeService {
      * @param id
      */
     public void delete(String id) {
-        
+
         TreeNode node = get(id);
-        if(node == null) 
+        if (node == null) {
             return;
+        }
 
         delete(node);
     }
@@ -258,15 +275,15 @@ public class TreeService {
      * @param node
      */
     public void delete(final TreeNode node) {
-        
+
         final List<TreeNode> children = children(node);
-        if(!children.isEmpty()) {
-            children.stream().forEach((child) -> { 
-                child.parent(node.getParentId() != null ? node.getParentId() : null); 
+        if (!children.isEmpty()) {
+            children.stream().forEach((child) -> {
+                child.parent(node.getParentId() != null ? node.getParentId() : null);
             });
             repository.save(children);
         }
-        
+
         repository.delete(node);
     }
 

@@ -1,2 +1,2 @@
 #raptor named host mapping
-127.0.0.1 api.raptor.local raptor.local inventory profile auth api action data stream broker proxy couchbase elasticsearch dbadmin mariadb mongo
+127.0.0.1 api.raptor.local raptor.local tree inventory profile auth api action data stream broker proxy couchbase elasticsearch dbadmin mariadb mongo

@@ -15,6 +15,9 @@
  */
 package org.createnet.raptor.models.tree;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +35,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * @author Luca Capra <luca.capra@gmail.com>
  */
 @Document
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TreeNode {
 
     public enum NodeType {
@@ -47,7 +51,7 @@ public class TreeNode {
     @Indexed
     protected String userId;
 
-    @Indexed
+    @Indexed    
     protected String parentId = null;
 
     @Indexed
@@ -56,6 +60,7 @@ public class TreeNode {
     protected Map<String, Object> properties = new HashMap();
 
     @Transient
+    @JsonIgnore
     protected TreeNode parent = null;
 
     @Transient
@@ -63,7 +68,7 @@ public class TreeNode {
 
     /**
      * Create a tree node from a Device
-     * 
+     *
      * @param device
      * @return
      */
@@ -78,10 +83,10 @@ public class TreeNode {
 
     /**
      * Create a group tree node
-     * 
+     *
      * @param name
      * @return
-     */    
+     */
     static public TreeNode create(String name) {
         TreeNode node = new TreeNode()
                 .type(NodeType.group);
@@ -90,12 +95,16 @@ public class TreeNode {
     }
 
     public TreeNode merge(TreeNode node) {
-        return this
+        this
                 .id(node.getId())
                 .parentId(node.getParentId())
                 .userId(node.getUserId())
                 .type(node.getType())
                 .order(node.getOrder());
+
+        this.children().addAll(node.children());
+        this.parent(node.getParent());
+        return this;
     }
 
     public String getId() {
@@ -112,6 +121,10 @@ public class TreeNode {
 
     public String getParentId() {
         return parentId;
+    }
+
+    public TreeNode getParent() {
+        return parent;
     }
 
     public long getOrder() {
@@ -153,17 +166,17 @@ public class TreeNode {
     }
 
     public TreeNode parent(TreeNode parent) {
-        if(parent == null) {
+        if (parent == null) {
             parentId(null);
             this.parent = null;
-        }
-        else {
+        } else {
             parentId(parent.getId());
             this.parent = parent;
         }
         return this;
     }
 
+    @JsonGetter
     public List<TreeNode> children() {
         return children;
     }

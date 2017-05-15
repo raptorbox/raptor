@@ -19,7 +19,6 @@ import org.createnet.raptor.sdk.Routes;
 import org.createnet.raptor.sdk.AbstractClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,6 +50,18 @@ public class TreeClient extends AbstractClient {
         JsonNode json = getClient().get(Routes.TREE_LIST);
         List<TreeNode> list = Device.getMapper().convertValue(json, new TypeReference<List<TreeNode>>() {});
         return list;
+    }
+
+    /**
+     * Return the whole tree structure for a node
+     *
+     * @param node
+     * @return the 
+     */
+    public TreeNode tree(TreeNode node) {
+        JsonNode json = getClient().get(String.format(Routes.TREE_GET, node.getId()));
+        TreeNode tree = Device.getMapper().convertValue(json, TreeNode.class);
+        return node.merge(tree);
     }
 
     /**
@@ -89,9 +100,9 @@ public class TreeClient extends AbstractClient {
      * @return 
      */
     public TreeNode create(TreeNode node) {
-        JsonNode json = getClient().post(Routes.TREE_ADD, toJsonNode(node));
+        JsonNode json = getClient().post(Routes.TREE_CREATE, toJsonNode(node));
         TreeNode node1 = Device.getMapper().convertValue(json, TreeNode.class);
-        return node1;
+        return node.merge(node1);
     }
     
     /**

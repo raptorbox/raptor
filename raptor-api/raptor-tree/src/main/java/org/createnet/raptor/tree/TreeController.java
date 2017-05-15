@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.createnet.raptor.api.common.client.ApiClientService;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.response.JsonErrorResponse;
@@ -28,7 +29,6 @@ import org.createnet.raptor.models.tree.TreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -87,7 +87,27 @@ public class TreeController {
 
     @RequestMapping(
             method = RequestMethod.GET,
-            value = "/{nodeId}/tree"
+            value = "/"
+    )
+    @ApiOperation(
+            value = "List all trees",
+            notes = "",
+            response = TreeNode.class,
+            responseContainer = "List",
+            nickname = "list"
+    )
+    public ResponseEntity<?> list(
+            @AuthenticationPrincipal User currentUser
+    ) {
+        TreeNode root = (new TreeNode()).id(null).user(currentUser);
+        List<TreeNode> roots = treeService.children(root);
+        List<TreeNode> nodes = roots.stream().map((n) -> treeService.tree(n)).collect(Collectors.toList());
+        return ResponseEntity.ok(nodes);
+    }
+
+    @RequestMapping(
+            method = RequestMethod.GET,
+            value = "/{nodeId}"
     )
     @ApiOperation(
             value = "Return the whole tree a node belongs to",

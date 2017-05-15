@@ -77,6 +77,7 @@ final public class Routes {
     public static final String INVENTORY_DELETE = INVENTORY_UPDATE;
     
     public static final String TREE_LIST = "/tree/";
+    public static final String TREE_CREATE = TREE_LIST;
     public static final String TREE_GET = TREE_LIST + "/%s";
     public static final String TREE_ADD = TREE_GET;
     public static final String TREE_REMOVE = TREE_GET;

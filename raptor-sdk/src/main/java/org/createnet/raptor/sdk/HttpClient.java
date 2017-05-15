@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.sdk;
 
-import org.createnet.raptor.sdk.AbstractClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mashape.unirest.http.HttpMethod;
@@ -26,11 +25,9 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.HttpRequest;
 import com.mashape.unirest.request.HttpRequestWithBody;
 import java.io.IOException;
-import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.exception.ClientException;
 import org.createnet.raptor.sdk.exception.MissingAuthenticationException;
 import org.createnet.raptor.models.exception.RequestException;
-import org.createnet.raptor.sdk.RequestOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +105,10 @@ public class HttpClient extends AbstractClient {
 
         assert opts != null;
 
-        HttpRequestWithBody req = new HttpRequestWithBody(method, getClient().url(url));
+        url = getClient().url(url);
+        logger.debug("{} {}", method.name(), url);
+
+        HttpRequestWithBody req = new HttpRequestWithBody(method, url);
 
         if (opts.withAuth()) {
             req.header("Authorization", getToken());
@@ -187,8 +187,6 @@ public class HttpClient extends AbstractClient {
      * @return the request response
      */
     public JsonNode request(HttpMethod httpMethod, String url, JsonNode body, RequestOptions opts) {
-
-        logger.debug("{} {}", httpMethod.name(), url);
 
         if (opts == null) {
             opts = RequestOptions.defaults();
