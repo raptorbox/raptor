@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.data;
 
-import org.createnet.raptor.api.common.events.StreamApplicationEvent;
+import org.createnet.raptor.api.common.dispatcher.events.StreamApplicationEvent;
 import org.createnet.raptor.events.Event;
 import org.createnet.raptor.events.type.DataEvent;
 import org.createnet.raptor.models.data.RecordSet;

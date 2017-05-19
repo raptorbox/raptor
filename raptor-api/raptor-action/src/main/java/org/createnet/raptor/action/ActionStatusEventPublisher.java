@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.action;
 
-import org.createnet.raptor.api.common.events.ActionApplicationEvent;
+import org.createnet.raptor.api.common.dispatcher.events.ActionApplicationEvent;
 import org.createnet.raptor.events.Event;
 import org.createnet.raptor.events.type.ActionEvent;
 import org.createnet.raptor.models.data.ActionStatus;

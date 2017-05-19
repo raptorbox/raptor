@@ -15,11 +15,13 @@
  */
 package org.createnet.raptor.api.common;
 
+import java.util.Arrays;
+import java.util.List;
+import org.createnet.raptor.api.common.configuration.RaptorConfiguration;
 import org.createnet.raptor.api.common.dispatcher.RaptorMessageHandler;
 import org.createnet.raptor.config.ConfigurationLoader;
 import org.createnet.raptor.dispatcher.DispatcherConfiguration;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -43,34 +45,54 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.sdk.Topics;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.FileSystemResource;
 
 /**
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-
 @EnableConfigurationProperties
 @EnableAutoConfiguration
 @EnableMongoRepositories
 @Profile("default")
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public abstract class BaseApplication {
-    
-    
+
+    private RaptorConfiguration configuration;
+
     static private ConfigurableApplicationContext instance;
-    
+    static public String appName;
+
     protected RaptorMessageHandler messageHandler;
-    
+
     public static void close() {
         if (instance != null) {
             instance.close();
         }
     }
-    
+
     public static void start(Class clazz, String[] args) {
         if (instance == null) {
-            instance = SpringApplication.run(clazz, args);
+
+            String[] parts = clazz.getCanonicalName().split("\\.");
+            appName = parts[parts.length - 2];
+            String name = "--spring.config.name=" + appName;
+
+            String[] args2 = new String[args.length + 1];
+            System.arraycopy(args, 0, args2, 0, args.length);
+            args2[args2.length - 1] = name;
+
+            instance = SpringApplication.run(clazz, args2);
         }
+    }
+
+    @Autowired   
+    public void setRaptorConfiguration(RaptorConfiguration config) {
+        this.configuration = config;
     }
 
     @Bean
@@ -89,7 +111,8 @@ public abstract class BaseApplication {
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
 
-        DispatcherConfiguration config = (DispatcherConfiguration) ConfigurationLoader.getConfiguration("dispatcher", DispatcherConfiguration.class);
+//        DispatcherConfiguration config = (DispatcherConfiguration) ConfigurationLoader.getConfiguration("dispatcher", DispatcherConfiguration.class);
+        RaptorConfiguration.Dispatcher config = configuration.getDispatcher();
 
         DefaultMqttPahoClientFactory f = new DefaultMqttPahoClientFactory();
 
@@ -107,28 +130,28 @@ public abstract class BaseApplication {
     public MessageChannel mqttInputChannel() {
         return new DirectChannel();
     }
-    
+
     /**
      * Create a MQTT connection to the broker listening to all events
-     * 
+     *
      * @param messageHandler
-     * @return 
-     */    
+     * @return
+     */
     public MessageProducer createMqttClient(RaptorMessageHandler messageHandler) {
         return createMqttClient(messageHandler, String.format(Topics.DEVICE, "+"));
     }
-    
+
     /**
      * Create a MQTT connection to the broker
-     * 
+     *
      * @param messageHandler
      * @param topic
-     * @return 
+     * @return
      */
     public MessageProducer createMqttClient(RaptorMessageHandler messageHandler, String topic) {
-        
+
         this.messageHandler = messageHandler;
-        
+
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(this.getClass().getName().replace(".", "-"), mqttClientFactory(), topic);
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
@@ -142,9 +165,22 @@ public abstract class BaseApplication {
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public MessageHandler handler() {
         return (Message<?> message) -> {
-            if(messageHandler != null)
+            if (messageHandler != null) {
                 messageHandler.handle((DispatcherPayload) message.getPayload());
+            }
         };
-    }    
-    
+    }
+
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer properties() {
+        PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
+        YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
+        yaml.setResources(
+                new FileSystemResource("/etc/raptor/raptor.yml"),
+                new FileSystemResource("/etc/raptor/" + appName + ".yml")
+        );
+        propertySourcesPlaceholderConfigurer.setProperties(yaml.getObject());
+        return propertySourcesPlaceholderConfigurer;
+    }
+
 }

@@ -1,0 +1,18 @@
+
+spring:
+  devtools:
+    restart:
+      enabled: true
+      trigger-file: raptor-action-1.0.jar
+      additional-paths: target
+  profiles: default
+  data:
+    mongodb:
+      host: mongo
+      port: 27017
+      database: raptor
+
+server:
+  contextPath: /tree
+  port: 8085
+  address: tree

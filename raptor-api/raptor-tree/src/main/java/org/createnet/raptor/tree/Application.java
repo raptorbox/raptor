@@ -17,7 +17,6 @@
 package org.createnet.raptor.tree;
 
 import org.createnet.raptor.api.common.BaseApplication;
-import org.createnet.raptor.models.payload.DevicePayload;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
