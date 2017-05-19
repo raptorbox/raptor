@@ -41,14 +41,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Dispatcher {
 
-    public enum ObjectOperation {
-        create, update, delete, push
-    }
-
-    public enum ActionOperation {
-        execute, delete
-    }
-
     final protected Logger logger = LoggerFactory.getLogger(Dispatcher.class);
 
     protected BlockingQueue<Runnable> queue;

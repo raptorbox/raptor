@@ -155,10 +155,10 @@ public class TreeController {
     @ApiOperation(
             value = "Add items to the tree node",
             notes = "",
-            nickname = "addNodes"
+            nickname = "add"
     )
 //    @PreAuthorize("hasPermission(#deviceId, 'push')")
-    public ResponseEntity<?> addNodes(
+    public ResponseEntity<?> add(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("parentId") Optional<String> optionalParentId,
             @RequestBody List<TreeNode> nodes
@@ -204,10 +204,10 @@ public class TreeController {
     @ApiOperation(
             value = "Create a node of a tree",
             notes = "",
-            nickname = "createNode"
+            nickname = "create"
     )
 //    @PreAuthorize("hasPermission(#deviceId, 'push')")
-    public ResponseEntity<?> createNode(
+    public ResponseEntity<?> create(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("parentId") Optional<String> optionalParentId,
             @RequestBody TreeNode raw
@@ -236,10 +236,10 @@ public class TreeController {
     @ApiOperation(
             value = "Delete a node from a tree",
             notes = "",
-            nickname = "deleteNode"
+            nickname = "delete"
     )
 //    @PreAuthorize("hasPermission(#deviceId, 'delete')")
-    public ResponseEntity<?> deleteNode(
+    public ResponseEntity<?> delete(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("nodeId") String nodeId
     ) {

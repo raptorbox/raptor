@@ -13,32 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.api.common.events;
+package org.createnet.raptor.api.common.dispatcher.events;
 
 import org.createnet.raptor.events.type.DeviceEvent;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
+import org.springframework.context.ApplicationEvent;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@Component
-public class MqttDispatcherEventListener implements ApplicationListener<DeviceApplicationEvent> {
+public class DeviceApplicationEvent extends ApplicationEvent {
 
-    @Autowired
-    DispatcherService dispatcher;
-
-    @Override
-    public void onApplicationEvent(DeviceApplicationEvent event) {
-        
-        DeviceEvent objEvent = event.getDeviceEvent();
-        
-        if (!objEvent.getObject().settings.eventsEnabled()) {
-            return;
-        }
-
-        dispatcher.notifyObjectEvent(objEvent.getParentEvent(), objEvent.getObject());
+    private final DeviceEvent deviceEvent;
+    
+    public DeviceApplicationEvent(Object source, DeviceEvent dev) {
+        super(source);
+        this.deviceEvent = dev;
     }
+
+    public DeviceEvent getDeviceEvent() {
+        return deviceEvent;
+    }
+    
 }

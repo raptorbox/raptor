@@ -47,8 +47,6 @@ public class UserService {
     @Autowired
     private RoleRepository roleRepository;
 
-//    @Autowired
-//    private DispatcherService dispatcher;
     public Iterable<User> list() {
         return userRepository.findAll();
     }

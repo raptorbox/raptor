@@ -24,12 +24,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
-import org.createnet.raptor.sdk.HttpClient;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.payload.DispatcherPayload;
-import org.createnet.raptor.sdk.Routes;
+import org.createnet.raptor.models.tree.TreeNode;
+import org.createnet.raptor.sdk.Topics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,16 +66,20 @@ public class MqttEventEmitter extends AbstractClient {
     }
 
     protected String getDeviceTopic(Device obj) {
-        return obj.id + "/events";
+        return String.format(Topics.DEVICE, obj.id);
+    }
+
+    protected String getGroupTopic(TreeNode n) {
+        return String.format(Topics.GROUP, n.getId());
     }
 
     protected String getStreamTopic(Stream stream) {
-        String path = String.format(Routes.SUBSCRIBE_STREAM, stream.getDevice().getId(), stream.name);
+        String path = String.format(Topics.STREAM, stream.getDevice().getId(), stream.name);
         return path;
     }
 
     protected String getActionTopic(Action action) {
-        String path = String.format(Routes.SUBSCRIBE_ACTION, action.getDevice().getId(), action.name);
+        String path = String.format(Topics.ACTION, action.getDevice().getId(), action.name);
         return path;
     }
 

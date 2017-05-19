@@ -132,6 +132,10 @@ public class TreeTest {
         List<TreeNode> children = raptor.Tree().children(node1);
         assertEquals(1, children.size());
         
+        
+        tree = raptor.Tree().tree(node1);
+        assertEquals(1, tree.children().size());
+
     }
 
 }

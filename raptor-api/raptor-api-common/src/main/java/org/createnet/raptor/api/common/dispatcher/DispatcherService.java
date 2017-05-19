@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.api.common.events;
+package org.createnet.raptor.api.common.dispatcher;
 
 import org.createnet.raptor.config.ConfigurationLoader;
 import org.createnet.raptor.dispatcher.Dispatcher;
 import org.createnet.raptor.dispatcher.DispatcherConfiguration;
+import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Device;
@@ -29,6 +30,8 @@ import org.createnet.raptor.models.payload.DataPayload;
 import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.StreamPayload;
+import org.createnet.raptor.models.tree.TreeNode;
+import org.createnet.raptor.sdk.Topics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -81,7 +84,7 @@ public class DispatcherService implements InitializingBean, DisposableBean {
             throw new RaptorComponent.ParserException("Device.id is null");
         }
 
-        return id + "/events";
+        return String.format(Topics.DEVICE, id);
     }
 
     protected String getUserEventsTopic(DeviceContainer c) {
@@ -96,7 +99,7 @@ public class DispatcherService implements InitializingBean, DisposableBean {
             throw new RaptorComponent.ParserException("Device.userId is null");
         }
 
-        return userId + "/events";
+        return String.format(Topics.USER, userId);
     }
 
     public void notifyEvent(String topic, DispatcherPayload message) {
@@ -104,48 +107,36 @@ public class DispatcherService implements InitializingBean, DisposableBean {
         getDispatcher().add(topic, message.toString());
     }
 
-    protected void notifyTreeEvent(DeviceContainer c, DispatcherPayload payload) {
-
-        Device obj = c.getDevice();
-        if (obj == null) {
-            throw new RaptorComponent.ParserException("Device is null");
-        }
-
-        String path = obj.path();
-        if (path == null) {
-            logger.debug("Object {} (pid:{}) path is empty", obj.id, obj.parentId);
-            return;
-        }
-
-        notifyEvent(path + "/events", payload);
+    protected void notifyTreeEvent(TreeNode n, DispatcherPayload payload) {
+        String topic = String.format(Topics.GROUP, n.path());
+        notifyEvent(topic, payload);
+        
     }
 
-    protected void notifyUserEvent(String op, Device obj, DispatcherPayload payload) {
+    protected void notifyUserEvent(Permissions op, Device obj, DispatcherPayload payload) {
         String topic = getUserEventsTopic(obj);
         notifyEvent(topic, payload);
     }
 
-    protected void notifyObjectEvent(String op, Device obj) {
+    protected void notifyDeviceEvent(Permissions op, Device obj) {
 
         String topic = getEventsTopic(obj);
         DevicePayload payload = new DevicePayload(obj, op);
 
         notifyEvent(topic, payload);
-        notifyTreeEvent(obj, payload);
         notifyUserEvent(op, obj, payload);
     }
 
     public void notifyDataEvent(Stream stream, RecordSet record) {
 
         String topic = getEventsTopic(stream);
-        StreamPayload payload = new StreamPayload(stream, "data", record.toJsonNode());
+        StreamPayload payload = new StreamPayload(stream, Permissions.data, record.toJsonNode());
 
         notifyEvent(topic, payload);
-        notifyTreeEvent(stream, payload);
-        notifyUserEvent("push", stream.getDevice(), payload);
+        notifyUserEvent(Permissions.push, stream.getDevice(), payload);
     }
 
-    protected void notifyActionEvent(String op, Action action, String status) {
+    protected void notifyActionEvent(Permissions op, Action action, String status) {
 
         String topic = getEventsTopic(action);
 
@@ -157,7 +148,6 @@ public class DispatcherService implements InitializingBean, DisposableBean {
         ActionPayload payload = new ActionPayload(action, op, data);
 
         notifyEvent(topic, payload);
-        notifyTreeEvent(action, payload);
         notifyUserEvent(op, action.getDevice(), payload);
     }
 

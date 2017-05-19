@@ -17,9 +17,12 @@
 package org.createnet.raptor.tree;
 
 import org.createnet.raptor.api.common.BaseApplication;
+import org.createnet.raptor.models.payload.DevicePayload;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.integration.core.MessageProducer;
 
 /**
  *
@@ -33,5 +36,15 @@ public class Application extends BaseApplication {
     public static void main(String[] args) {
         start(Application.class, args);
     }
-
+    
+    @Bean
+    TreeMessageHandler treeMessageHandler() {
+        return new TreeMessageHandler();
+    }
+    
+    @Bean
+    public MessageProducer mqttClient() {
+        return createMqttClient(treeMessageHandler());
+    }
+    
 }

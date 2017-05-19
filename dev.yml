@@ -21,7 +21,6 @@ services:
 
   dbadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: dbadmin
     environment:
       MYSQL_ROOT_PASSWORD: raptor
     restart: always
@@ -34,7 +33,6 @@ services:
 
   mongoadmin:
     image: adicom/admin-mongo
-    container_name: mongoadmin
     # environment:
     restart: always
     ports:

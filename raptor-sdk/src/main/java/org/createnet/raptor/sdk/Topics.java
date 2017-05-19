@@ -13,26 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.api.common.events;
-
-import org.createnet.raptor.events.type.ActionEvent;
-import org.springframework.context.ApplicationEvent;
+package org.createnet.raptor.sdk;
 
 /**
- *
- * @author Luca Capra <lcapra@fbk.eu>
+ * List of topics for Raptor API
  */
-public class ActionApplicationEvent extends ApplicationEvent {
-
-    private final ActionEvent actionEvent;
-    
-    public ActionApplicationEvent(Object source, ActionEvent dev) {
-        super(source);
-        this.actionEvent = dev;
-    }
-
-    public ActionEvent getActionEvent() {
-        return actionEvent;
-    }
-    
+final public class Topics {
+    public static final String ACTION = "/action/%s/%s";
+    public static final String STREAM = "/stream/%s/%s";
+    public static final String DEVICE = "/device/%s";
+    public static final String USER = "/user/%s";
+    public static final String GROUP = "/group/%s";
 }

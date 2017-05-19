@@ -16,6 +16,7 @@
 package org.createnet.raptor.models.payload;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.objects.Stream;
 
 /**
@@ -30,11 +31,11 @@ public class StreamPayload extends DevicePayload {
     public StreamPayload() {
     }
     
-    public StreamPayload(Stream stream, String op, JsonNode data) {
+    public StreamPayload(Stream stream, Permissions op, JsonNode data) {
         super(stream.getDevice(), op);
         this.streamId = stream.name;
         this.data = data;
-        this.type = MessageType.stream.name();
+        this.type = MessageType.stream;
     }
 
 }

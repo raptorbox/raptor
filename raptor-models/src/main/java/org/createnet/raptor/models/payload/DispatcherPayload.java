@@ -17,9 +17,7 @@ package org.createnet.raptor.models.payload;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.validation.Payload;
+import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.exception.PayloadParserException;
 import org.createnet.raptor.models.objects.RaptorContainer;
 
@@ -30,7 +28,7 @@ import org.createnet.raptor.models.objects.RaptorContainer;
 public interface DispatcherPayload {
 
     public enum MessageType {
-        object, stream, action, data, 
+        device, stream, action, data, 
         user, permission, role
     }
     
@@ -46,7 +44,7 @@ public interface DispatcherPayload {
      * 
      * @return label of the operation
      */    
-    public String getOp();
+    public Permissions getOp();
     
     @Override
     public String toString();
@@ -79,7 +77,7 @@ public interface DispatcherPayload {
                     return RaptorContainer.getMapper().treeToValue(json, ActionPayload.class);
                 case data:
                     return RaptorContainer.getMapper().treeToValue(json, DataPayload.class);
-                case object:
+                case device:
                     return RaptorContainer.getMapper().treeToValue(json, DevicePayload.class);
                 case stream:
                     return RaptorContainer.getMapper().treeToValue(json, StreamPayload.class);                    

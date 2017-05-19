@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.models.payload;
 
+import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.objects.Action;
 
 /**
@@ -29,11 +30,11 @@ public class ActionPayload extends DevicePayload {
     public ActionPayload() {
     }
     
-    public ActionPayload(Action action, String op, String data) {
+    public ActionPayload(Action action, Permissions op, String data) {
         super(action.getDevice(), op);
         this.data = data;
         this.actionId = action.name;
-        this.type = MessageType.action.name();
+        this.type = MessageType.action;
     }
 
 }

@@ -82,7 +82,7 @@ public class InventoryClient extends AbstractClient {
     public void subscribe(Device dev, DeviceCallback ev) {
         getEmitter().subscribe(dev, (DispatcherPayload payload) -> {
             switch (payload.getType()) {
-                case object:
+                case device:
                     ev.callback(dev, (DevicePayload) payload);
                     break;
             }
@@ -150,7 +150,7 @@ public class InventoryClient extends AbstractClient {
     /**
      * Create a new device instance
      *
-     * @param obj object definition to create
+     * @param obj device definition to create
      * @return the Device instance
      */
     public Device create(Device obj) {
@@ -165,7 +165,7 @@ public class InventoryClient extends AbstractClient {
     /**
      * Load a device definition
      *
-     * @param id unique id of the object
+     * @param id unique id of the device
      * @return the Device instance
      */
     public Device load(String id) {
@@ -193,7 +193,7 @@ public class InventoryClient extends AbstractClient {
     /**
      * Search for Devices
      *
-     * @param query the query to match the object definitions
+     * @param query the query to match the device definitions
      * @return a list of Devices matching the query
      */
     public List<Device> search(DeviceQuery query) {

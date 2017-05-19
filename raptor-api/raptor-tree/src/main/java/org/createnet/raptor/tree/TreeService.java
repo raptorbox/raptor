@@ -16,7 +16,6 @@
 package org.createnet.raptor.tree;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
 import java.util.List;
 import org.createnet.raptor.models.tree.QTreeNode;
 import org.createnet.raptor.models.tree.TreeNode;
@@ -44,7 +43,7 @@ public class TreeService {
     }
 
     /**
-     * Return a list of nodes by ids
+     * Return a list of nodes by multiple id
      *
      * @param ids
      * @return
@@ -279,7 +278,8 @@ public class TreeService {
         final List<TreeNode> children = children(node);
         if (!children.isEmpty()) {
             children.stream().forEach((child) -> {
-                child.parent(node.getParentId() != null ? node.getParentId() : null);
+                String parentId = node.getParentId() != null ? node.getParentId(): null;
+                child.parentId(parentId);
             });
             repository.save(children);
         }

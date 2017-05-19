@@ -59,9 +59,14 @@ public class TreeClient extends AbstractClient {
      * @return the 
      */
     public TreeNode tree(TreeNode node) {
+        
         JsonNode json = getClient().get(String.format(Routes.TREE_GET, node.getId()));
         TreeNode tree = Device.getMapper().convertValue(json, TreeNode.class);
-        return node.merge(tree);
+        
+        node.children().clear();
+        node.children().addAll(tree.children());
+        
+        return node;
     }
 
     /**

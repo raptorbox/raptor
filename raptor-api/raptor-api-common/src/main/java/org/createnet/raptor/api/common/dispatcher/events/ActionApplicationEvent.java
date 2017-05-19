@@ -13,27 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.models.payload;
+package org.createnet.raptor.api.common.dispatcher.events;
 
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.events.type.ActionEvent;
+import org.springframework.context.ApplicationEvent;
 
 /**
  *
- * @author Luca Capra <luca.capra@fbk.eu>
+ * @author Luca Capra <lcapra@fbk.eu>
  */
-public class AbstractPayload implements DispatcherPayload {
+public class ActionApplicationEvent extends ApplicationEvent {
+
+    private final ActionEvent actionEvent;
     
-    public MessageType type;
-    public Permissions op;
-    
-    @Override
-    public MessageType getType() {
-        return type;
+    public ActionApplicationEvent(Object source, ActionEvent dev) {
+        super(source);
+        this.actionEvent = dev;
     }
 
-    @Override
-    public Permissions getOp() {
-        return op;
+    public ActionEvent getActionEvent() {
+        return actionEvent;
     }
     
 }

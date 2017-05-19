@@ -13,26 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.api.common.events;
+package org.createnet.raptor.api.common.dispatcher;
 
-import org.createnet.raptor.events.type.DeviceEvent;
-import org.springframework.context.ApplicationEvent;
+import org.createnet.raptor.models.payload.DispatcherPayload;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class DeviceApplicationEvent extends ApplicationEvent {
+public interface RaptorMessageHandler {
 
-    private final DeviceEvent deviceEvent;
-    
-    public DeviceApplicationEvent(Object source, DeviceEvent dev) {
-        super(source);
-        this.deviceEvent = dev;
-    }
+    public void handle(DispatcherPayload dispatcherPayload);
 
-    public DeviceEvent getDeviceEvent() {
-        return deviceEvent;
-    }
-    
 }

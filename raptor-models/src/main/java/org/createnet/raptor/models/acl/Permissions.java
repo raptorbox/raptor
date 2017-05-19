@@ -33,5 +33,7 @@ public enum Permissions {
     push, pull,
     // action level permissions
     execute,
+    
+    data,
 
 }

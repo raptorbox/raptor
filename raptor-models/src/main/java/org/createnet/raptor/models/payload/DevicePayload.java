@@ -16,6 +16,7 @@
 package org.createnet.raptor.models.payload;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Device;
 
@@ -32,11 +33,11 @@ public class DevicePayload extends AbstractPayload {
     public DevicePayload() {
     }
 
-    public DevicePayload(Device obj, String op) {
+    public DevicePayload(Device obj, Permissions op) {
         userId = obj.userId;
         object = obj;
         path = obj.path();
-        type = MessageType.object.name();
+        type = MessageType.device;
         this.op = op;
     }
 

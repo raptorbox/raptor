@@ -19,10 +19,14 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
 import org.springframework.data.annotation.Id;
@@ -37,7 +41,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TreeNode {
-
+    
+    public static final String separator = "/";
+    
     public enum NodeType {
         group, user, device
     }
@@ -193,4 +199,37 @@ public class TreeNode {
         return children;
     }
 
+    public boolean isDevice() {
+        return getType().equals(NodeType.device);
+    }
+
+    public boolean isGroup() {
+        return getType().equals(NodeType.group);
+    }
+
+    public boolean isUser() {
+        return getType().equals(NodeType.user);
+    }
+    
+    /**
+     * Build a string with the path from root to the current node
+     * Ensure the tree is fully loaded to avoid incomplete paths.
+     * 
+     * @return 
+     */
+    public String path() {
+        
+        List<String> path = Arrays.asList(this.getId());
+        
+        TreeNode p = this.getParent();
+        if(p != null) {
+            while(p != null) {
+                path.add(p.getId());
+                p = p.getParent();
+            }
+        }
+        
+        Collections.reverse(path);
+        return String.join(separator, path);
+    }
 }

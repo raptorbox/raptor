@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.api.common.events;
+package org.createnet.raptor.api.common.dispatcher.events;
 
 import org.createnet.raptor.events.type.DataEvent;
 import org.springframework.context.ApplicationEvent;

@@ -37,12 +37,6 @@ final public class Routes {
     public static final String INVOKE = "/action/%s/%s";
     public static final String ACTION_STATUS = INVOKE;
     
-    public static final String SUBSCRIBE_ACTION = "%s/actions/%s";
-    public static final String SUBSCRIBE_STREAM = "%s/streams/%s";
-    
-    public static final String SUBSCRIBE_DEVICE_EVENTS = "%s/events";
-    public static final String SUBSCRIBE_USER_EVENTS = SUBSCRIBE_DEVICE_EVENTS;
-    
     public static final String PERMISSION_CHECK = "/auth/check";
     public static final String LOGIN = "/auth/login";
     public static final String LOGOUT = LOGIN;
