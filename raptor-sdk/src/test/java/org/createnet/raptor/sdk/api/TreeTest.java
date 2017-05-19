@@ -102,7 +102,35 @@ public class TreeTest {
         
         assertEquals(tree, node1);
         assertEquals(1, tree.children().size());
+        assertEquals("child1", tree.children().get(0).getName());
+        assertEquals("child2", tree.children().get(0).children().get(0).getName());
         
+    }
+
+    @Test
+    public void delete() {
+
+        Raptor raptor = Utils.createNewInstance();
+
+        log.debug("create tree");
+
+        TreeNode node1 = TreeNode.create("Root1");
+        raptor.Tree().create(node1);
+
+        TreeNode child1 = TreeNode.create("child1");
+        TreeNode child2 = TreeNode.create("child2");
+        
+        raptor.Tree().add(node1, Arrays.asList(child1, child2));
+        
+        TreeNode tree = raptor.Tree().tree(node1);
+        
+        assertEquals(tree, node1);
+        assertEquals(2, tree.children().size());
+        
+        raptor.Tree().remove(tree.children().get(0));
+        
+        List<TreeNode> children = raptor.Tree().children(node1);
+        assertEquals(1, children.size());
         
     }
 

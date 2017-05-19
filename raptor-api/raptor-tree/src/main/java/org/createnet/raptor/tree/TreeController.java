@@ -253,7 +253,7 @@ public class TreeController {
         treeService.delete(node);
         log.debug("Deleted node {}", node.getId());
 
-        return ResponseEntity.ok(node);
+        return ResponseEntity.accepted().build();
     }
 
 }

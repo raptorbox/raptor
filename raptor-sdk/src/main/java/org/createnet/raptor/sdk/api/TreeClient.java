@@ -65,6 +65,18 @@ public class TreeClient extends AbstractClient {
     }
 
     /**
+     * Return the direct children of a node
+     *
+     * @param node
+     * @return the 
+     */
+    public List<TreeNode> children(TreeNode node) {
+        JsonNode json = getClient().get(String.format(Routes.TREE_CHILDREN, node.getId()));
+        List<TreeNode> list = Device.getMapper().convertValue(json, new TypeReference<List<TreeNode>>() {});
+        return list;
+    }
+
+    /**
      * Add nodes to a tree branch
      *
      * @param parent
@@ -106,7 +118,7 @@ public class TreeClient extends AbstractClient {
     }
     
     /**
-     * Add devices to a tree branch
+     * Add nodes to a tree branch
      *
      * @param parent
      * @param nodes
@@ -120,6 +132,16 @@ public class TreeClient extends AbstractClient {
         List<TreeNode> list = Device.getMapper().convertValue(json, new TypeReference<List<TreeNode>>() {});
 
         return list;
+    }
+    
+    /**
+     * Remove node from a tree branch
+     *
+     * @param node
+     */
+    public void remove(TreeNode node) {
+        String url = String.format(Routes.TREE_REMOVE, node.getId());
+        getClient().delete(url);
     }
 
 }

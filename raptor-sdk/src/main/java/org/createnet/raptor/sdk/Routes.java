@@ -79,6 +79,7 @@ final public class Routes {
     public static final String TREE_LIST = "/tree/";
     public static final String TREE_CREATE = TREE_LIST;
     public static final String TREE_GET = TREE_LIST + "/%s";
+    public static final String TREE_CHILDREN = TREE_GET + "/children";
     public static final String TREE_ADD = TREE_GET;
     public static final String TREE_REMOVE = TREE_GET;
 }

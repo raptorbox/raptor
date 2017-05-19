@@ -46,12 +46,15 @@ public class TreeNode {
     protected String id = UUID.randomUUID().toString();
 
     @Indexed
+    protected String name = "";
+
+    @Indexed
     protected NodeType type;
 
     @Indexed
     protected String userId;
 
-    @Indexed    
+    @Indexed
     protected String parentId = null;
 
     @Indexed
@@ -88,15 +91,15 @@ public class TreeNode {
      * @return
      */
     static public TreeNode create(String name) {
-        TreeNode node = new TreeNode()
-                .type(NodeType.group);
-        node.properties().put("name", name);
-        return node;
+        return new TreeNode()
+                .type(NodeType.group)
+                .name(name);
     }
 
     public TreeNode merge(TreeNode node) {
         this
                 .id(node.getId())
+                .name(node.getName())
                 .parentId(node.getParentId())
                 .userId(node.getUserId())
                 .type(node.getType())
@@ -109,6 +112,10 @@ public class TreeNode {
 
     public String getId() {
         return id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public NodeType getType() {
@@ -133,6 +140,11 @@ public class TreeNode {
 
     public TreeNode id(String id) {
         this.id = id;
+        return this;
+    }
+
+    public TreeNode name(String name) {
+        this.name = name;
         return this;
     }
 
