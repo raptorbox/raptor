@@ -43,7 +43,7 @@ public class TreeMessageHandler implements RaptorMessageHandler {
                 
                 switch (payload.op) {
                     case delete:
-                        treeService.delete(payload.object.getId());
+                        treeService.delete(payload.device.getId());
                         break;
                 }
 

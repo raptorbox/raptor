@@ -15,14 +15,10 @@
  */
 package org.createnet.raptor.api.common;
 
-import java.util.Arrays;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.createnet.raptor.api.common.configuration.RaptorConfiguration;
 import org.createnet.raptor.api.common.dispatcher.RaptorMessageHandler;
-import org.createnet.raptor.config.ConfigurationLoader;
-import org.createnet.raptor.dispatcher.DispatcherConfiguration;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -45,9 +41,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.sdk.Topics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.Banner;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.FileSystemResource;
 
@@ -55,14 +54,17 @@ import org.springframework.core.io.FileSystemResource;
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
+@Profile("default")
 @EnableConfigurationProperties
 @EnableAutoConfiguration
-@EnableMongoRepositories
-@Profile("default")
+//@EnableMongoRepositories(basePackages = "org.createnet.raptor.models")
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public abstract class BaseApplication {
 
-    private RaptorConfiguration configuration;
+    static public Logger log;
+    static final public ObjectMapper mapper = new ObjectMapper();
+
+    protected RaptorConfiguration configuration;
 
     static private ConfigurableApplicationContext instance;
     static public String appName;
@@ -77,22 +79,35 @@ public abstract class BaseApplication {
 
     public static void start(Class clazz, String[] args) {
         if (instance == null) {
-
+            
+            log = LoggerFactory.getLogger(clazz);
+            
             String[] parts = clazz.getCanonicalName().split("\\.");
             appName = parts[parts.length - 2];
             String name = "--spring.config.name=" + appName;
 
-            String[] args2 = new String[args.length + 1];
+            String[] args2 = new String[args.length + 2];
             System.arraycopy(args, 0, args2, 0, args.length);
-            args2[args2.length - 1] = name;
+            args2[args2.length - 2] = name;
+            args2[args2.length - 1] = "spring.profiles.active=default";
 
-            instance = SpringApplication.run(clazz, args2);
+            instance = new SpringApplicationBuilder()
+                    .bannerMode(Banner.Mode.OFF)
+                    .logStartupInfo(true)
+                    .headless(true)
+                    .web(true)
+                    .application()
+                    .run(clazz, args2);
         }
     }
 
-    @Autowired   
-    public void setRaptorConfiguration(RaptorConfiguration config) {
+    @Autowired
+    public void setConfiguration(RaptorConfiguration config) {
         this.configuration = config;
+    }
+    
+    public RaptorConfiguration getConfiguration(RaptorConfiguration config) {
+        return this.configuration;
     }
 
     @Bean
@@ -116,9 +131,9 @@ public abstract class BaseApplication {
 
         DefaultMqttPahoClientFactory f = new DefaultMqttPahoClientFactory();
 
-        f.setUserName(config.username);
-        f.setPassword(config.password);
-        f.setServerURIs(config.uri);
+        f.setUserName(config.getUsername());
+        f.setPassword(config.getPassword());
+        f.setServerURIs(config.getUri());
         f.setCleanSession(true);
         f.setPersistence(new MemoryPersistence());
 
