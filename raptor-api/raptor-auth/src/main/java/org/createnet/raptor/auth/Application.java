@@ -15,91 +15,45 @@
  */
 package org.createnet.raptor.auth;
 
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.createnet.raptor.api.common.BaseApplication;
 import org.createnet.raptor.api.common.authentication.TokenHelper;
-import org.createnet.raptor.api.common.configuration.RaptorConfiguration;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.repository.UserRepository;
 import org.createnet.raptor.auth.services.AuthMessageHandler;
 import org.createnet.raptor.auth.services.UserService;
+import org.createnet.raptor.models.configuration.RaptorConfiguration;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
-import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
-import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
-import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.core.MessageProducer;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Profile("default")
-@SpringBootApplication(
-        scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.auth"},
-        exclude = {EmbeddedMongoAutoConfiguration.class, MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
+@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.auth"})
+@EntityScan(basePackages = "org.createnet.raptor.models.auth")
+@EnableScheduling
 @EnableCaching
 @EnableRetry
-@EntityScan(basePackages = "org.createnet.raptor.models.auth")
-@EnableJpaRepositories(
-        basePackages = "org.createnet.raptor.auth.repository",
-        entityManagerFactoryRef = "entityManagerFactory"
-)
-@EnableScheduling
 public class Application extends BaseApplication {
 
     public static void main(String[] args) {
         start(Application.class, args);
     }
-
-    @Primary
-    @Bean(name = "dataSource")
-    @ConfigurationProperties(prefix = "spring.datasource")
-    public DataSource dataSource() {
-        return DataSourceBuilder.create().build();
-    }
-
-    @Primary
-    @Bean(name = "entityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-            EntityManagerFactoryBuilder builder,
-            @Qualifier("dataSource") DataSource dataSource) {
-        return builder
-                .dataSource(dataSource)
-                .packages("org.createnet.raptor.models.auth")
-//                .persistenceUnit("foo")
-                .build();
-    }
-    
-    @Primary
-    @Bean(name = "transactionManager")
-    public PlatformTransactionManager transactionManager(
-            @Qualifier("entityManagerFactory") EntityManagerFactory entityManagerFactory) {
-        return new JpaTransactionManager(entityManagerFactory);
-    }    
-    
+  
     @Autowired
     private DataSource dataSource;
 
@@ -137,7 +91,7 @@ public class Application extends BaseApplication {
 
     protected void createDefaultUser() {
 
-        RaptorConfiguration.Auth.Admin admin = configuration.getAuth().getAdmin();
+        RaptorConfiguration.Auth.Admin admin = getConfiguration().getAuth().getAdmin();
 
         if (!admin.isEnabled()) {
             return;
