@@ -19,7 +19,7 @@ docker build . -t raptorbox/action
 docker push raptorbox/action
 cd ..
 
-cd raptor-auth-service
+cd raptor-auth
 docker build . -t raptorbox/auth
 docker push raptorbox/auth
 cd ..

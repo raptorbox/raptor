@@ -9,6 +9,12 @@
     <artifactId>raptor-tree</artifactId>
     <packaging>jar</packaging>
     <dependencies>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>        
+        
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>raptor-api-common</artifactId>

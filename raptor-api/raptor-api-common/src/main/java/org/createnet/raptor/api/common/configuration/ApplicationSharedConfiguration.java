@@ -16,7 +16,8 @@
 package org.createnet.raptor.api.common.configuration;
 
 import org.createnet.raptor.api.common.client.ApiClientService;
-import org.springframework.beans.factory.annotation.Value;
+import org.createnet.raptor.models.configuration.RaptorConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -29,15 +30,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 @Configuration
 public class ApplicationSharedConfiguration {
-    
-    @Value("${raptor.url}")
-    String authUrl;
-    
+
+    @Autowired
+    RaptorConfiguration config;
+
     @Bean
     @Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
     public ApiClientService apiClientService() {
-        String token = (String)SecurityContextHolder.getContext().getAuthentication().getCredentials();
-        return new ApiClientService(authUrl, token);
-    }    
-    
+        String token = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
+        return new ApiClientService(config.getUrl(), token);
+    }
+
 }

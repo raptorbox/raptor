@@ -1,0 +1,23 @@
+spring:
+  devtools:
+    restart:
+      enabled: true
+      trigger-file: raptor-${spring.config.name}-1.0.jar
+      additional-paths: target
+  data:
+    mongodb:
+      host: mongo
+      port: 27017
+      database: raptor
+
+server:
+  port: 8080
+  contextPath: /${spring.config.name}
+  address: 0.0.0.0
+  error:
+    whitelabel:
+      enabled: true
+
+logging:
+  level:
+    org.createnet.raptor: DEBUG

@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.models.auth.request;
 
+import org.createnet.raptor.models.acl.Permissions;
+
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
@@ -24,5 +26,5 @@ public class SyncRequest {
   public String userId;
   public String parentId;  
   public Long created;
-  public String operation;
+  public Permissions operation;
 }

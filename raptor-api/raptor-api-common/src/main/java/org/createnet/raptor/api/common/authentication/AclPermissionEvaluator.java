@@ -20,10 +20,7 @@ import org.createnet.raptor.api.common.client.ApiClientService;
 import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.objects.Device;
-import org.createnet.raptor.sdk.Raptor;
-import org.createnet.raptor.sdk.RequestOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
@@ -34,12 +31,9 @@ import org.springframework.security.core.Authentication;
  */
 public class AclPermissionEvaluator implements PermissionEvaluator {
 
-    @Value("${raptor.url}")
-    private String authUrl;
-    
     @Autowired
     ApiClientService api;
-    
+
     @Override
     public boolean hasPermission(Authentication auth, Object deviceObject, Object permission) {
 
@@ -49,16 +43,16 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
 
         String deviceId = deviceObject.toString();
 
-        if(deviceObject instanceof ResponseEntity) {
+        if (deviceObject instanceof ResponseEntity) {
             ResponseEntity entity = (ResponseEntity) deviceObject;
-            deviceObject = (Device)entity.getBody();
+            deviceObject = (Device) entity.getBody();
         }
-        
-        if(deviceObject instanceof Device) {
-            Device dev = (Device)deviceObject;
+
+        if (deviceObject instanceof Device) {
+            Device dev = (Device) deviceObject;
             deviceId = dev.getId();
         }
-        
+
         return isAuthorized(auth, deviceId, permission.toString().toLowerCase());
     }
 

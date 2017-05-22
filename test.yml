@@ -73,8 +73,8 @@ services:
       - raptor_net
 
   auth:
-    build: ./raptor-api/raptor-auth-service
-    container_name: raptor-auth-service
+    build: ./raptor-api/raptor-auth
+    container_name: raptor-auth
     ports:
       - 8090:8090
     volumes:
@@ -93,7 +93,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./raptor-auth-service/src/main/resources/sql:/docker-entrypoint-initdb.d
+      - ./raptor-auth/src/main/resources/sql:/docker-entrypoint-initdb.d
       - ./data/mariadb:/var/lib/mysql
     environment:
       MYSQL_USERNAME: root

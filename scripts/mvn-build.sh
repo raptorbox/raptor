@@ -10,7 +10,7 @@ cd raptor-action
 mvn package -DskipTests=true
 cd ..
 
-cd raptor-auth-service
+cd raptor-auth
 mvn package -DskipTests=true
 cd ..
 

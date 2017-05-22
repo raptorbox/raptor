@@ -39,7 +39,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>raptor-auth-service</artifactId>
+      <artifactId>raptor-auth</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

@@ -16,7 +16,8 @@
 package org.createnet.raptor.api.common.authentication;
 
 import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Value;
+import org.createnet.raptor.models.configuration.RaptorConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,8 +27,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class TokenHelper {
 
-    @Value("${raptor.auth.headerPrefix}")
-    private String tokenHeaderPrefix;
+    @Autowired
+    RaptorConfiguration config;
 
     /**
      * Extract the raw token from the request header
@@ -36,9 +37,9 @@ public class TokenHelper {
      * @return
      */
     public String extractToken(String rawToken) {
-
-        if (rawToken.startsWith(tokenHeaderPrefix)) {
-            rawToken = rawToken.substring(tokenHeaderPrefix.length());
+        String tokenPrefix = config.getAuth().getHeaderPrefix();
+        if (rawToken.startsWith(tokenPrefix)) {
+            rawToken = rawToken.substring(tokenPrefix.length());
         }
 
         return rawToken.trim();

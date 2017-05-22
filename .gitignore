@@ -9,10 +9,11 @@ nb*
 /dist/*
 /raptor-api/raptor-profile/target/
 /raptor-api/raptor-inventory/target/
-/raptor-api/raptor-auth-service/target/
+/raptor-api/raptor-auth/target/
 /raptor-api/raptor-api-common/target/
 /raptor-api/raptor-inventory.1/target/
 /raptor-api/raptor-action/target/
 /raptor-api/raptor-data/target/
 /raptor-api/raptor-stream/target/
 /raptor-api/raptor-tree/target/
+/raptor-api/raptor-auth/target/

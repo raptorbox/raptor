@@ -17,13 +17,14 @@ package org.createnet.raptor.api.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.List;
 import org.createnet.raptor.api.common.dispatcher.RaptorMessageHandler;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -45,29 +46,29 @@ import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.sdk.Topics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.SpringApplication;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 
 /**
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
 @Profile("default")
-@EnableConfigurationProperties
 @EnableAutoConfiguration
-@EnableMongoRepositories(basePackages = "org.createnet.raptor.models")
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-@PropertySource("file:/etc/raptor/")
 public abstract class BaseApplication {
 
     final String configFile = "/etc/raptor/raptor.yml";
-    
+
     static public Logger log;
     static final public ObjectMapper mapper = new ObjectMapper();
-    
+
     final private static ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
-    
+
     static private ConfigurableApplicationContext instance;
     static public String appName;
 
@@ -81,7 +82,7 @@ public abstract class BaseApplication {
 
     public static void start(Class clazz, String[] args) {
         if (instance == null) {
-            
+
             log = LoggerFactory.getLogger(clazz);
 
             String[] parts = clazz.getCanonicalName().split("\\.");
@@ -92,21 +93,14 @@ public abstract class BaseApplication {
             System.arraycopy(args, 0, args2, 0, args.length);
             args2[args2.length - 1] = name;
 
-            instance = SpringApplication.run(clazz, args);
-        }
-    }
-    
-    @Bean
-    public RaptorConfiguration loadConfiguration() {
-        try {
-            return yamlMapper.readValue(configFile, RaptorConfiguration.class);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
+            instance = SpringApplication.run(clazz, args2);
         }
     }
 
+    @Bean
+    @ConfigurationProperties(prefix = "raptor")
     public RaptorConfiguration getConfiguration() {
-        return loadConfiguration();
+        return new RaptorConfiguration();
     }
 
     @Bean
@@ -125,7 +119,6 @@ public abstract class BaseApplication {
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
 
-//        DispatcherConfiguration config = (DispatcherConfiguration) ConfigurationLoader.getConfiguration("dispatcher", DispatcherConfiguration.class);
         RaptorConfiguration.Dispatcher config = getConfiguration().getDispatcher();
 
         DefaultMqttPahoClientFactory f = new DefaultMqttPahoClientFactory();
@@ -185,16 +178,22 @@ public abstract class BaseApplication {
         };
     }
 
-//    @Bean
-//    public static PropertySourcesPlaceholderConfigurer properties() {
-//        PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
-//        YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
-//        yaml.setResources(
-//                new FileSystemResource("/etc/raptor/raptor.yml"),
-//                new FileSystemResource("/etc/raptor/" + appName + ".yml")
-//        );
-//        propertySourcesPlaceholderConfigurer.setProperties(yaml.getObject());
-//        return propertySourcesPlaceholderConfigurer;
-//    }
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer properties() {
+        PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
+
+        propertySourcesPlaceholderConfigurer.setIgnoreResourceNotFound(false);
+
+        final List<Resource> resourceLst = new ArrayList();
+
+        resourceLst.add(new FileSystemResource("/etc/raptor/raptor.yml"));
+        resourceLst.add(new FileSystemResource("/etc/raptor/" + appName + ".yml"));
+
+        YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
+        yaml.setResources(resourceLst.toArray(new Resource[]{}));
+
+        propertySourcesPlaceholderConfigurer.setProperties(yaml.getObject());
+        return propertySourcesPlaceholderConfigurer;
+    }
 
 }

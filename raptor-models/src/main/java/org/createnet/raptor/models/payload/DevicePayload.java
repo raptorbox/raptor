@@ -27,7 +27,7 @@ import org.createnet.raptor.models.objects.Device;
 public class DevicePayload extends AbstractPayload {
 
     public String userId;
-    public Device object;
+    public Device device;
     public String path;
 
     public DevicePayload() {
@@ -35,7 +35,7 @@ public class DevicePayload extends AbstractPayload {
 
     public DevicePayload(Device obj, Permissions op) {
         userId = obj.userId;
-        object = obj;
+        device = obj;
         path = obj.path();
         type = MessageType.device;
         this.op = op;
@@ -50,4 +50,28 @@ public class DevicePayload extends AbstractPayload {
         }
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public Device getDevice() {
+        return device;
+    }
+
+    public void setDevice(Device device) {
+        this.device = device;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+    
 }

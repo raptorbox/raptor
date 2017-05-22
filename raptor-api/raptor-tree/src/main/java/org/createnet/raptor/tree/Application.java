@@ -27,9 +27,11 @@ import org.springframework.integration.core.MessageProducer;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.tree"})
-@EnableMongoRepositories
+@SpringBootApplication(
+        scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.tree"}
+)
 @EnableSpringDataWebSupport
+@EnableMongoRepositories(basePackages = "org.createnet.raptor.tree")
 public class Application extends BaseApplication {
 
     public static void main(String[] args) {
