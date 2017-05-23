@@ -1,4 +1,0 @@
-protocol: mqtt
-username: system
-password: system123
-uri: tcp://broker:1883

@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.models.configuration;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  *
  * @author Luca Capra <luca.capra@gmail.com>
@@ -23,14 +25,14 @@ public class RaptorConfiguration {
 
     public RaptorConfiguration() {
     }
-    
+
     private String url;
     private Dispatcher dispatcher = new Dispatcher();
     private Auth auth = new Auth();
 
     public static class Auth {
 
-        private Admin admin = new Admin();        
+        private Admin admin = new Admin();
         private String header = "authorization";
         private String headerPrefix = "Bearer ";
         private String secret;
@@ -74,8 +76,7 @@ public class RaptorConfiguration {
             public void setEmail(String email) {
                 this.email = email;
             }
-            
-            
+
         }
 
         public String getHeader() {
@@ -120,6 +121,7 @@ public class RaptorConfiguration {
 
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Dispatcher {
 
         private String protocol;
@@ -128,6 +130,17 @@ public class RaptorConfiguration {
         private String password;
 
         private String uri;
+
+        private int queueLength;
+        private int poolSize;
+
+        public int getQueueLength() {
+            return queueLength;
+        }
+
+        public int getPoolSize() {
+            return poolSize;
+        }
 
         public String getProtocol() {
             return protocol;

@@ -16,9 +16,6 @@
 package org.createnet.raptor.api.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.createnet.raptor.api.common.dispatcher.RaptorMessageHandler;
@@ -66,8 +63,6 @@ public abstract class BaseApplication {
 
     static public Logger log;
     static final public ObjectMapper mapper = new ObjectMapper();
-
-    final private static ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
     static private ConfigurableApplicationContext instance;
     static public String appName;

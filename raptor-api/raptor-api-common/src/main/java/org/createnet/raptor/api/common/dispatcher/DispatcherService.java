@@ -15,10 +15,8 @@
  */
 package org.createnet.raptor.api.common.dispatcher;
 
-import org.createnet.raptor.config.ConfigurationLoader;
-import org.createnet.raptor.dispatcher.Dispatcher;
-import org.createnet.raptor.dispatcher.DispatcherConfiguration;
 import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Device;
@@ -36,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -46,8 +45,10 @@ import org.springframework.stereotype.Service;
 public class DispatcherService implements InitializingBean, DisposableBean {
 
     final private Logger logger = LoggerFactory.getLogger(DispatcherService.class);
-
     private Dispatcher dispatcher;
+    
+    @Autowired
+    RaptorConfiguration config;
 
     public Dispatcher getDispatcher() {
         if (dispatcher == null) {
@@ -57,9 +58,12 @@ public class DispatcherService implements InitializingBean, DisposableBean {
         return dispatcher;
     }
 
-    protected DispatcherConfiguration getConfiguration() {
-        return (DispatcherConfiguration) ConfigurationLoader
-                .getConfiguration("dispatcher", DispatcherConfiguration.class);
+    /**
+     * @todo rewrite this to use dispatcher
+     * @return 
+     */
+    protected RaptorConfiguration.Dispatcher getConfiguration() {
+        return config.getDispatcher();
     }
 
     @Override
