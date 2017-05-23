@@ -15,7 +15,9 @@
  */
 package org.createnet.raptor.auth.configuration;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.PathSelectors;
@@ -23,6 +25,7 @@ import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.Contact;
+import springfox.documentation.service.VendorExtension;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -52,7 +55,7 @@ public class SwaggerConfiguration {
 
     private ApiInfo apiInfo() {
         Contact contact = new Contact("Luca", "https://github.com/raptorbox", "");
-
+        Collection<VendorExtension> vendors = new ArrayList();
         ApiInfo info = new ApiInfo(
                 "Raptor Auth API",
                 "Authentication and user management API",
@@ -60,7 +63,8 @@ public class SwaggerConfiguration {
                 "https://github.com/raptorbox/raptor",
                 contact,
                 "Apache 2",
-                "https://github.com/raptorbox/raptor/LICENSE"
+                "https://github.com/raptorbox/raptor/LICENSE",
+                vendors
         );
 
         return info;

@@ -37,6 +37,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
  *
@@ -48,6 +49,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableScheduling
 @EnableCaching
 @EnableRetry
+@EnableWebMvc
 public class Application extends BaseApplication {
 
     public static void main(String[] args) {
