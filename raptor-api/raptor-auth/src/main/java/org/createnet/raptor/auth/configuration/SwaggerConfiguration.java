@@ -31,43 +31,47 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
- *
+ * @todo Enable again once this bug is fixed 
+ * @see https://github.com/springfox/springfox/issues/1827
+ * 
+ * 
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@Configuration
-@EnableSwagger2
+
+//@Configuration
+//@EnableSwagger2
 public class SwaggerConfiguration {
-
-    @Bean
-    public Docket api() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(apiInfo())
-                .select()
-                .apis(RequestHandlerSelectors.any())
-                .paths(PathSelectors.any())
-                .build()
-                .securitySchemes(Arrays.asList(apiKey()));
-    }
-
-    private ApiKey apiKey() {
-        return new ApiKey("JWT Bearer", "Authorization", "header");
-    }
-
-    private ApiInfo apiInfo() {
-        Contact contact = new Contact("Luca", "https://github.com/raptorbox", "");
-        Collection<VendorExtension> vendors = new ArrayList();
-        ApiInfo info = new ApiInfo(
-                "Raptor Auth API",
-                "Authentication and user management API",
-                "1.0",
-                "https://github.com/raptorbox/raptor",
-                contact,
-                "Apache 2",
-                "https://github.com/raptorbox/raptor/LICENSE",
-                vendors
-        );
-
-        return info;
-    }
+//
+//    @Bean
+//    public Docket api() {
+//        return new Docket(DocumentationType.SWAGGER_2)
+//                .apiInfo(apiInfo())
+//                .select()
+//                .apis(RequestHandlerSelectors.any())
+//                .paths(PathSelectors.any())
+//                .build()
+//                .securitySchemes(Arrays.asList(apiKey()));
+//    }
+//
+//    private ApiKey apiKey() {
+//        return new ApiKey("JWT Bearer", "Authorization", "header");
+//    }
+//
+//    private ApiInfo apiInfo() {
+//        Contact contact = new Contact("Luca", "https://github.com/raptorbox", "");
+//        Collection<VendorExtension> vendors = new ArrayList();
+//        ApiInfo info = new ApiInfo(
+//                "Raptor Auth API",
+//                "Authentication and user management API",
+//                "1.0",
+//                "https://github.com/raptorbox/raptor",
+//                contact,
+//                "Apache 2",
+//                "https://github.com/raptorbox/raptor/LICENSE",
+//                vendors
+//        );
+//
+//        return info;
+//    }
 
 }
