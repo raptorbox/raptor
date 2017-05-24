@@ -1,6 +1,5 @@
-
 /*
- * Copyright 2017 FBK/CREATE-NET
+ * Copyright 2017 Luca Capra <lcapra@fbk.eu>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,37 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.tree;
+package org.createnet.raptor.broker;
 
 import org.createnet.raptor.api.common.BaseApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.integration.core.MessageProducer;
+import org.springframework.context.annotation.Configuration;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @SpringBootApplication(
-        scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.tree"}
+        scanBasePackages = {"org.createnet.raptor.broker"},
+        exclude = {ErrorMvcAutoConfiguration.class, ArtemisAutoConfiguration.class}
 )
-@EnableSpringDataWebSupport
-@EnableMongoRepositories(basePackages = "org.createnet.raptor.tree")
 public class Application extends BaseApplication {
 
     public static void main(String[] args) {
-        start(Application.class, args);
+        Class clazz = Application.class;
+        createInstance(clazz)
+                .web(false)
+                .run(buildArgs(clazz, args));
     }
 
     @Bean
-    TreeMessageHandler treeMessageHandler() {
-        return new TreeMessageHandler();
+    ApplicationStartup applicationStartup() {
+        return new ApplicationStartup();
+    }
+    
+    @Bean
+    Broker broker() {
+        return new Broker(getConfiguration());
     }
 
-    @Bean
-    public MessageProducer mqttClient() {
-        return createMqttClient(treeMessageHandler());
-    }
 }

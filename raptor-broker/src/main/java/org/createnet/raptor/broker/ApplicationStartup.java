@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 FBK/CREATE-NET
+ * Copyright 2017 Luca Capra <lcapra@fbk.eu>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.api.common.client;
+package org.createnet.raptor.broker;
 
-import org.createnet.raptor.sdk.Raptor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 /**
  *
- * @author Luca Capra <luca.capra@gmail.com>
+ * @author Luca Capra <lcapra@fbk.eu>
  */
 @Component
-public class ApiClientService extends Raptor {
-
-    public ApiClientService(String url, String token) {
-        super(url, token);
+public class ApplicationStartup implements ApplicationListener<ApplicationReadyEvent> {
+    
+    @Autowired Broker broker;
+    
+    /**
+     * @param event
+     */
+    @Override
+    public void onApplicationEvent(final ApplicationReadyEvent event) {
+        broker.start();
     }
 
 }

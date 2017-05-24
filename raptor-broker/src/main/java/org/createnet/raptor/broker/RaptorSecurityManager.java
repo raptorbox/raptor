@@ -13,102 +13,74 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.broker.security;
+package org.createnet.raptor.broker;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import javax.security.cert.X509Certificate;
 import org.apache.activemq.artemis.core.security.CheckType;
 import org.apache.activemq.artemis.core.security.Role;
 import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
 import org.apache.activemq.artemis.spi.core.security.ActiveMQSecurityManager2;
-import org.createnet.raptor.broker.configuration.BrokerConfiguration;
 import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.auth.Role.Roles;
+import org.createnet.raptor.models.configuration.BrokerConfiguration;
+import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.api.AuthClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+@Component
 public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
-
-    private BrokerConfiguration brokerConfiguration;
-
-    protected class BrokerUser {
-
-        private User user;
-        private Raptor raptor;
-
-        public BrokerUser() {
-        }
-        
-        public BrokerUser(Raptor raptor) {
-            this.raptor = raptor;
-        }
-
-        public BrokerUser(Raptor raptor, User user) {
-            this.raptor = raptor;
-            this.user = user;
-        }
-        
-        public BrokerUser(User user) {
-            this.user = user;
-        }
-
-        public User getUser() {
-            if (user == null && raptor != null) {
-                return raptor.Auth().getUser();
-            }
-            return user;
-        }
-        
-        public Raptor getRaptor() {
-            return raptor;
-        }
-
-    }
-
+    
+    @Autowired
+    RaptorConfiguration config;
+    
     private final Logger logger = LoggerFactory.getLogger(RaptorSecurityManager.class);
-
-    private final Map<String, BrokerConfiguration.BrokerUser> localUsers = new HashMap();
-
-    public RaptorSecurityManager() {
-
-    }
 
     protected BrokerUser login(String token) {
         try {
-
-            Raptor r = new Raptor(brokerConfiguration.authUrl, token);
-
+            
+            Raptor r = new Raptor(config.getUrl(), token);
             AuthClient.LoginState result = r.Auth().login();
             logger.debug("Authenticated user {}", result.user.getUuid());
 
             return new BrokerUser(r);
+
         } catch (Exception e) {
-            logger.error("Authentication failed");
+            logger.error("Authentication failed ({})", e.getMessage());
         }
         return null;
     }
 
-    protected BrokerConfiguration.BrokerUser getLocalUser(String username, String password) {
-        BrokerConfiguration.BrokerUser user = localUsers.getOrDefault(username, null);
-        return (user != null && user.login(password)) ? user : null;
+    protected BrokerUser getLocalUser(String username, String password) {
+        
+        BrokerConfiguration.BrokerLocalUser user = config.getBroker().getUsers().getOrDefault(username, null);
+        
+        if(user == null) {
+            return null;
+        }
+        
+        if(!user.getPassword().equals(password)) {
+            return null;
+        }
+        
+        return new BrokerUser(user);
     }
 
     protected BrokerUser login(String username, String password) {
         try {
-
-            Raptor r = new Raptor(brokerConfiguration.authUrl, username, password);
-
+            
+            Raptor r = new Raptor(config.getUrl(), username, password);
             AuthClient.LoginState result = r.Auth().login();
             logger.debug("Login successful for user {}", result.user.getUuid());
 
@@ -116,6 +88,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         } catch (Exception e) {
             logger.error("Login failed");
         }
+        
         return null;
     }
 
@@ -131,29 +104,16 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         } else {
 
             // 2. try to login from local configuration file
-            BrokerConfiguration.BrokerUser localUser = getLocalUser(username, password);
+            BrokerUser localUser = getLocalUser(username, password);
             if (localUser != null) {
-                
                 logger.debug("Local user {} found", username);
-                
-                User user = new User();
-                user.setUsername(username);
-                user.setPassword(password);
-                // local users must be admin or they won't  pass ACL checks
-                user.addRole(localUser.getRoles().contains("admin") ? Roles.admin : Roles.guest);
-                
-                brokerUser = new BrokerUser(user);
+                brokerUser = localUser;
             }
 
             if (brokerUser == null) {
                 // 3. try to login as user to the auth api
                 brokerUser = login(username, password);
             }
-        }
-
-        if (brokerUser == null) {
-            logger.debug("Login failed for {}:{}", username, password);
-            return null;
         }
 
         return brokerUser;
@@ -171,14 +131,13 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         logger.debug("Authenticate user {} with roles {} on topic/address {}", username, roles, address);
 
         BrokerUser brokerUser = authenticate(username, password);
-        User user = brokerUser.getUser();
 
-        if (user == null) {
-            logger.debug("User `{}` login failed", username);
+        if (brokerUser == null) {
+            logger.debug("Login failed for `{}`", username);
             return false;
         }
 
-        boolean isAdmin = user.isAdmin();
+        boolean isAdmin = brokerUser.isAdmin();
 
         if (isAdmin) {
             return true;
@@ -223,7 +182,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
             Raptor r = brokerUser.getRaptor();
             
             if(r == null) {
-                logger.warn("Raptor client not available (is a non-admin local users?): {}", user.getUsername());
+                logger.warn("Raptor client not available [local user: {}]", brokerUser.isLocal());
                 return false;
             }
             
@@ -237,7 +196,8 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
                     logger.warn("Object not found, id: `{}`", objectId);
                     return false;
                 }
-
+                
+                User user = r.Auth().getUser();
                 AuthorizationResponse req;
 
                 // <object>/events -> requires `admin`
@@ -286,16 +246,6 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     public boolean validateUserAndRole(String user, String password, Set<Role> roles, CheckType checkType) {
         logger.warn("validateUserAndRole(user, password, roles, checkType): NOT IMPLEMENTED");
         return roles.contains(Roles.admin.name()) && validateUser(user, password);
-    }
-
-    public void setBrokerConfiguration(BrokerConfiguration brokerConfiguration) {
-
-        localUsers.clear();
-        for (BrokerConfiguration.BrokerUser user : brokerConfiguration.users) {
-            localUsers.put(user.name, user);
-        }
-
-        this.brokerConfiguration = brokerConfiguration;
     }
 
 }

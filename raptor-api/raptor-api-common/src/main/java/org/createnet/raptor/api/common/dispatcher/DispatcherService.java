@@ -16,6 +16,7 @@
 package org.createnet.raptor.api.common.dispatcher;
 
 import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.configuration.DispatcherConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Action;
@@ -45,14 +46,14 @@ import org.springframework.stereotype.Service;
 public class DispatcherService implements InitializingBean, DisposableBean {
 
     final private Logger logger = LoggerFactory.getLogger(DispatcherService.class);
-    private Dispatcher dispatcher;
+    private DispatcherEngine dispatcher;
     
     @Autowired
     RaptorConfiguration config;
 
-    public Dispatcher getDispatcher() {
+    public DispatcherEngine getDispatcher() {
         if (dispatcher == null) {
-            dispatcher = new Dispatcher();
+            dispatcher = new DispatcherEngine();
             dispatcher.initialize(getConfiguration());
         }
         return dispatcher;
@@ -62,7 +63,7 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      * @todo rewrite this to use dispatcher
      * @return 
      */
-    protected RaptorConfiguration.Dispatcher getConfiguration() {
+    protected DispatcherConfiguration getConfiguration() {
         return config.getDispatcher();
     }
 

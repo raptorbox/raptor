@@ -23,14 +23,13 @@
  */
 package org.createnet.raptor.api.common.dispatcher;
 
-import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.createnet.raptor.models.configuration.DispatcherConfiguration;
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
@@ -40,7 +39,7 @@ public class BrokerClient {
   Logger logger = LoggerFactory.getLogger(BrokerClient.class);
   
   private static MqttClient connection = null;
-  private RaptorConfiguration.Dispatcher configuration;
+  private DispatcherConfiguration configuration;
     
   private final String clientName = "raptor";
   private final int connectionTimeout = 10;
@@ -49,7 +48,7 @@ public class BrokerClient {
   private final int qos = 2;
   private final boolean retain = false;
 
-  public void initialize(RaptorConfiguration.Dispatcher config) {
+  public void initialize(DispatcherConfiguration config) {
     configuration = config;  
   }
 

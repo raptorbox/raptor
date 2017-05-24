@@ -32,14 +32,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-public class Dispatcher {
+public class DispatcherEngine {
 
-    final protected Logger logger = LoggerFactory.getLogger(Dispatcher.class);
+    final protected Logger logger = LoggerFactory.getLogger(DispatcherEngine.class);
 
     protected BlockingQueue<Runnable> queue;
     protected Queue messageQueue = new Queue();
 
-    protected RaptorConfiguration.Dispatcher config;
+    protected org.createnet.raptor.models.configuration.DispatcherConfiguration config;
     protected BrokerClient client = new BrokerClient();
 
     final ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
@@ -73,7 +73,7 @@ public class Dispatcher {
 
     }
 
-    public void initialize(RaptorConfiguration.Dispatcher config) {
+    public void initialize(org.createnet.raptor.models.configuration.DispatcherConfiguration config) {
 
         this.config = config;
 

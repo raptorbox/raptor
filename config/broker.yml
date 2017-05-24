@@ -1,12 +1,3 @@
 
-authUrl: http://auth:8090
-artemisConfiguration: file:///etc/raptor/broker.xml
-users:
-  - name: frontend
-    password: frontend42
-    roles:
-      - admin
-  - name: system
-    password: system123
-    roles:
-      - admin
+server:
+  port: 8084

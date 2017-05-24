@@ -16,29 +16,32 @@
 package org.createnet.raptor.broker;
 
 import org.apache.activemq.artemis.core.server.embedded.EmbeddedActiveMQ;
-import org.createnet.raptor.broker.configuration.BrokerConfiguration;
-import org.createnet.raptor.broker.security.RaptorSecurityManager;
-import org.createnet.raptor.config.ConfigurationLoader;
+import org.createnet.raptor.models.configuration.BrokerConfiguration;
+import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+@Service
 public class Broker {
 
     final protected Logger logger = LoggerFactory.getLogger(Broker.class);
+    private final RaptorConfiguration config;
+    
+    @Bean
+    RaptorSecurityManager raptorSecurityManager() {
+        return new RaptorSecurityManager();
+    }    
 
-    public static void main(final String[] args) {
-
-        final Broker broker = new Broker();
-        broker.start();
-        
+    public Broker(RaptorConfiguration config) {
+        this.config = config;
     }
-
-    private BrokerConfiguration brokerConfiguration;
-
+    
     public class BrokerException extends RuntimeException {
 
         public BrokerException(Throwable t) {
@@ -47,20 +50,17 @@ public class Broker {
     }
 
     final protected EmbeddedActiveMQ server = new EmbeddedActiveMQ();
-    final RaptorSecurityManager securityManager = new RaptorSecurityManager();
 
     public void initialize() {
         setupServer();
     }
 
     protected void setupServer() {
-
-        securityManager.setBrokerConfiguration(getBrokerConfiguration());
-
-        server.setSecurityManager(securityManager);
-        server.setConfigResourcePath(getConfigPath());
+        BrokerConfiguration brokerConfig = config.getBroker();
+        server.setSecurityManager(raptorSecurityManager());
+        server.setConfigResourcePath(brokerConfig.getArtemis());
     }
-
+    
     public void start() {
 
         try {
@@ -72,7 +72,7 @@ public class Broker {
             
             server.start();
         } catch (Exception ex) {
-            logger.error("Error launching the borker: {}", ex.getMessage(), ex);
+            logger.error("Broker startup error: {}", ex.getMessage(), ex);
             throw new BrokerException(ex);
         }
     }
@@ -85,24 +85,6 @@ public class Broker {
         } catch (Exception ex) {
             throw new BrokerException(ex);
         }
-    }
-
-    private BrokerConfiguration getBrokerConfiguration() {
-
-        if (brokerConfiguration == null) {
-            brokerConfiguration = (BrokerConfiguration) ConfigurationLoader.getConfiguration("broker", BrokerConfiguration.class);
-        }
-
-        return brokerConfiguration;
-    }
-
-    private String getConfigPath() {
-
-        if (brokerConfiguration.artemisConfiguration == null) {
-            throw new RuntimeException("broker.xml path not specified");
-        }
-
-        return brokerConfiguration.artemisConfiguration;
     }
 
 }

@@ -16,9 +16,13 @@
 package org.createnet.raptor.api.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.createnet.raptor.api.common.dispatcher.RaptorMessageHandler;
+import org.createnet.raptor.models.configuration.DispatcherConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -44,7 +48,8 @@ import org.createnet.raptor.sdk.Topics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
-import org.springframework.boot.SpringApplication;
+import org.springframework.boot.Banner;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.FileSystemResource;
@@ -59,9 +64,7 @@ import org.springframework.core.io.Resource;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public abstract class BaseApplication {
 
-    final String configFile = "/etc/raptor/raptor.yml";
-
-    static public Logger log;
+    static public Logger log = null;
     static final public ObjectMapper mapper = new ObjectMapper();
 
     static private ConfigurableApplicationContext instance;
@@ -69,27 +72,54 @@ public abstract class BaseApplication {
 
     protected RaptorMessageHandler messageHandler;
 
-    public static void close() {
-        if (instance != null) {
-            instance.close();
+    public static SpringApplicationBuilder createInstance(Class clazz) {
+
+        if (log == null) {
+            log = LoggerFactory.getLogger(clazz);
+        }
+
+        return new SpringApplicationBuilder()
+                .addCommandLineProperties(true)
+                .bannerMode(Banner.Mode.OFF)
+                .registerShutdownHook(true)
+                .sources(clazz)
+                .web(true);
+    }
+
+    public static void start(SpringApplicationBuilder builder, String[] args) {
+        if (instance == null) {
+            instance = builder.run(args);
         }
     }
 
     public static void start(Class clazz, String[] args) {
         if (instance == null) {
-
-            log = LoggerFactory.getLogger(clazz);
-
-            String[] parts = clazz.getCanonicalName().split("\\.");
-            appName = parts[parts.length - 2];
-            String name = "--spring.config.name=" + appName;
-
-            String[] args2 = new String[args.length + 1];
-            System.arraycopy(args, 0, args2, 0, args.length);
-            args2[args2.length - 1] = name;
-
-            instance = SpringApplication.run(clazz, args2);
+            createInstance(clazz).run(buildArgs(clazz, args));
         }
+    }
+
+    public static ConfigurableApplicationContext getInstance() {
+        return instance;
+    }
+
+    public static void close() {
+        if (instance != null) {
+            instance.close();
+            instance = null;
+        }
+    }
+
+    static public String[] buildArgs(Class clazz, String[] args) {
+
+        String[] parts = clazz.getCanonicalName().split("\\.");
+        appName = parts[parts.length - 2];
+        String name = "--spring.config.name=" + appName;
+
+        String[] args2 = new String[args.length + 1];
+        System.arraycopy(args, 0, args2, 0, args.length);
+        args2[args2.length - 1] = name;
+
+        return args2;
     }
 
     @Bean
@@ -114,7 +144,7 @@ public abstract class BaseApplication {
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
 
-        RaptorConfiguration.Dispatcher config = getConfiguration().getDispatcher();
+        DispatcherConfiguration config = getConfiguration().getDispatcher();
 
         DefaultMqttPahoClientFactory f = new DefaultMqttPahoClientFactory();
 
@@ -179,13 +209,19 @@ public abstract class BaseApplication {
 
         propertySourcesPlaceholderConfigurer.setIgnoreResourceNotFound(false);
 
-        final List<Resource> resourceLst = new ArrayList();
+        final String basepath = "/etc/raptor/";
+        List<Resource> resources = new ArrayList<String>(Arrays.asList("raptor.yml", appName + ".yml"))
+                .stream()
+                .filter(f -> new File(basepath + f).exists())
+                .map(f -> new FileSystemResource(basepath + f))
+                .collect(Collectors.toList());
 
-        resourceLst.add(new FileSystemResource("/etc/raptor/raptor.yml"));
-        resourceLst.add(new FileSystemResource("/etc/raptor/" + appName + ".yml"));
+        if (resources.isEmpty()) {
+            throw new RuntimeException("Cannot find a loadable property file in: " + basepath);
+        }
 
         YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
-        yaml.setResources(resourceLst.toArray(new Resource[]{}));
+        yaml.setResources(resources.toArray(new Resource[]{}));
 
         propertySourcesPlaceholderConfigurer.setProperties(yaml.getObject());
         return propertySourcesPlaceholderConfigurer;

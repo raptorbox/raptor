@@ -21,166 +21,24 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RaptorConfiguration {
 
-    public RaptorConfiguration() {
-    }
-
     private String url;
-    private Dispatcher dispatcher = new Dispatcher();
-    private Auth auth = new Auth();
 
-    public static class Auth {
+    private DispatcherConfiguration dispatcher = new DispatcherConfiguration();
+    private AuthConfiguration auth = new AuthConfiguration();
+    private BrokerConfiguration broker = new BrokerConfiguration();
 
-        private Admin admin = new Admin();
-        private String header = "authorization";
-        private String headerPrefix = "Bearer ";
-        private String secret;
-        private int expiration = 1800;
-
-        public static class Admin {
-
-            private boolean enabled = true;
-            private String username;
-            private String password;
-            private String email;
-
-            public boolean isEnabled() {
-                return enabled;
-            }
-
-            public void setEnabled(boolean enabled) {
-                this.enabled = enabled;
-            }
-
-            public String getUsername() {
-                return username;
-            }
-
-            public void setUsername(String username) {
-                this.username = username;
-            }
-
-            public String getPassword() {
-                return password;
-            }
-
-            public void setPassword(String password) {
-                this.password = password;
-            }
-
-            public String getEmail() {
-                return email;
-            }
-
-            public void setEmail(String email) {
-                this.email = email;
-            }
-
-        }
-
-        public String getHeader() {
-            return header;
-        }
-
-        public void setHeader(String header) {
-            this.header = header;
-        }
-
-        public String getHeaderPrefix() {
-            return headerPrefix;
-        }
-
-        public void setHeaderPrefix(String headerPrefix) {
-            this.headerPrefix = headerPrefix;
-        }
-
-        public String getSecret() {
-            return secret;
-        }
-
-        public void setSecret(String secret) {
-            this.secret = secret;
-        }
-
-        public int getExpiration() {
-            return expiration;
-        }
-
-        public void setExpiration(int expiration) {
-            this.expiration = expiration;
-        }
-
-        public Admin getAdmin() {
-            return admin;
-        }
-
-        public void setAdmin(Admin admin) {
-            this.admin = admin;
-        }
-
+    public BrokerConfiguration getBroker() {
+        return broker;
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Dispatcher {
-
-        private String protocol;
-
-        private String username;
-        private String password;
-
-        private String uri;
-
-        private int queueLength;
-        private int poolSize;
-
-        public int getQueueLength() {
-            return queueLength;
-        }
-
-        public int getPoolSize() {
-            return poolSize;
-        }
-
-        public String getProtocol() {
-            return protocol;
-        }
-
-        public void setProtocol(String protocol) {
-            this.protocol = protocol;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-
-        public String getUri() {
-            return uri;
-        }
-
-        public void setUri(String uri) {
-            this.uri = uri;
-        }
-
-    }
-
-    public Dispatcher getDispatcher() {
+    public DispatcherConfiguration getDispatcher() {
         return dispatcher;
     }
 
-    public void setDispatcher(Dispatcher dispatcher) {
+    public void setDispatcher(DispatcherConfiguration dispatcher) {
         this.dispatcher = dispatcher;
     }
 
@@ -188,16 +46,8 @@ public class RaptorConfiguration {
         return url;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public Auth getAuth() {
+    public AuthConfiguration getAuth() {
         return auth;
-    }
-
-    public void setAuth(Auth auth) {
-        this.auth = auth;
     }
 
 }

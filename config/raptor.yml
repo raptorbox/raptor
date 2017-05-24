@@ -36,14 +36,24 @@ raptor:
     uri: tcp://broker:1883
 
   auth:
+    # Default user to be created, disable setting enabled to false
     admin:
       enabled: true
       username: admin
       password: admin
       email: admin@raptor.local
+
     header: Authorization
     headerPrefix: Bearer
-    # A secret used application wide for login token generation, keep it really secret
-    secret: Voi che vivete sicuri Nelle vostre tiepide case
+    # Used for login token generation
+    secret: ${random.value}
     # TTL in seconds, 1800 = 30 minutes
     expiration: 1800
+
+  broker:
+    artemis: file:///etc/raptor/broker.xml
+    users:
+      system:
+        password: ${random.value}
+        roles:
+          - admin
