@@ -14,7 +14,6 @@
     
         <module>raptor-models</module>    
         <module>raptor-events</module>    
-        <module>raptor-config</module>
         <module>raptor-sdk</module>
         
         <module>raptor-api</module>
