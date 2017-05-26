@@ -16,7 +16,6 @@
 package org.createnet.raptor.broker;
 
 import org.createnet.raptor.models.auth.Role;
-import org.createnet.raptor.models.configuration.BrokerConfiguration;
 import org.createnet.raptor.models.configuration.BrokerLocalUser;
 import org.createnet.raptor.sdk.Raptor;
 
