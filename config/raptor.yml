@@ -55,5 +55,5 @@ raptor:
     users:
       - name: system
         password: secr3t
-        # roles:
-        #   - admin
+        roles:
+          - admin
