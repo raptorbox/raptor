@@ -72,6 +72,20 @@ services:
     networks:
       - raptor_net
 
+  tree:
+    build: ./raptor-api/raptor-tree
+    container_name: raptor-tree
+    ports:
+      - 8085:8085
+    volumes:
+      - ./config:/etc/raptor
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    networks:
+      - raptor_net
+
   auth:
     build: ./raptor-api/raptor-auth
     container_name: raptor-auth
