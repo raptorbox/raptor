@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
-import org.createnet.raptor.api.common.authentication.TokenHelper;
+import org.createnet.raptor.api.common.configuration.TokenHelper;
 import org.createnet.raptor.models.auth.request.LoginRequest;
 import org.createnet.raptor.models.auth.request.LoginResponse;
 import org.createnet.raptor.models.response.JsonErrorResponse;

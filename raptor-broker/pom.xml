@@ -14,7 +14,7 @@
     <packaging>jar</packaging>
     
     <properties>
-        <mainclass>org.createnet.raptor.broker.Broker</mainclass>
+        <mainclass>org.createnet.raptor.broker.Application</mainclass>
     </properties>
 
     <dependencies>
@@ -57,50 +57,26 @@
 
     </dependencies>
   
+  
     <build>
         <plugins>
-            
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.5.0</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot}</version>
+                <configuration>
+                    <fork>true</fork>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>exec</goal>
+                            <goal>repackage</goal>
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <mainClass>${mainclass}</mainClass>
-                </configuration>
-            </plugin>
-            
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>default-cli</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>                
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>${mainclass}</mainClass>                            
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-            </plugin>
-
+            </plugin>            
         </plugins>
-        
     </build>
-
+            
+  
 </project>

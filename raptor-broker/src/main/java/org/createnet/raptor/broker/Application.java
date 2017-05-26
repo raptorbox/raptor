@@ -18,17 +18,17 @@ package org.createnet.raptor.broker;
 import org.createnet.raptor.api.common.BaseApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration;
-import org.springframework.context.annotation.Bean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @SpringBootApplication(
-        scanBasePackages = {"org.createnet.raptor.broker"},
-        exclude = {ErrorMvcAutoConfiguration.class, ArtemisAutoConfiguration.class}
+        scanBasePackages = {"org.createnet.raptor.broker", "org.createnet.raptor.api.common.configuration"},
+        exclude = {ArtemisAutoConfiguration.class}
 )
+@EnableConfigurationProperties
 public class Application extends BaseApplication {
 
     public static void main(String[] args) {
@@ -36,16 +36,6 @@ public class Application extends BaseApplication {
         createInstance(clazz)
                 .web(false)
                 .run(buildArgs(clazz, args));
-    }
-
-    @Bean
-    ApplicationStartup applicationStartup() {
-        return new ApplicationStartup();
-    }
-    
-    @Bean
-    Broker broker() {
-        return new Broker(getConfiguration());
     }
 
 }

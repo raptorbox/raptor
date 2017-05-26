@@ -13,30 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.models.configuration;
+package org.createnet.raptor.api.common.configuration;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.ArrayList;
-import java.util.List;
-import org.hibernate.validator.constraints.NotBlank;
+import org.createnet.raptor.models.configuration.RaptorConfiguration;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@JsonIgnoreProperties(ignoreUnknown = false)
-public class BrokerConfiguration {
-
-    @NotBlank
-    protected String artemis = "file:///etc/raptor/broker.xml";
-    protected List<BrokerLocalUser> users = new ArrayList();
-
-    public String getArtemis() {
-        return artemis;
-    }
-
-    public List<BrokerLocalUser> getUsers() {
-        return users;
-    }
-
+@Component
+@Configuration
+@ConfigurationProperties(prefix = "raptor")
+public class RaptorConfig extends RaptorConfiguration {
+    
 }

@@ -30,6 +30,10 @@ public class RaptorConfiguration {
     private AuthConfiguration auth = new AuthConfiguration();
     private BrokerConfiguration broker = new BrokerConfiguration();
 
+    public String getUrl() {
+        return url;
+    }
+    
     public BrokerConfiguration getBroker() {
         return broker;
     }
@@ -40,10 +44,6 @@ public class RaptorConfiguration {
 
     public void setDispatcher(DispatcherConfiguration dispatcher) {
         this.dispatcher = dispatcher;
-    }
-
-    public String getUrl() {
-        return url;
     }
 
     public AuthConfiguration getAuth() {

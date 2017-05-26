@@ -15,18 +15,21 @@
  */
 package org.createnet.raptor.broker;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.security.cert.X509Certificate;
 import org.apache.activemq.artemis.core.security.CheckType;
 import org.apache.activemq.artemis.core.security.Role;
 import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
 import org.apache.activemq.artemis.spi.core.security.ActiveMQSecurityManager2;
+import org.createnet.raptor.api.common.configuration.RaptorConfig;
 import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.auth.Role.Roles;
 import org.createnet.raptor.models.configuration.BrokerConfiguration;
-import org.createnet.raptor.models.configuration.RaptorConfiguration;
+import org.createnet.raptor.models.configuration.BrokerLocalUser;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.api.AuthClient;
@@ -42,8 +45,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     
+    RaptorConfig config;
+    
     @Autowired
-    RaptorConfiguration config;
+    public RaptorSecurityManager(RaptorConfig config) {
+        this.config = config;
+    }    
     
     private final Logger logger = LoggerFactory.getLogger(RaptorSecurityManager.class);
 
@@ -62,19 +69,22 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         return null;
     }
 
-    protected BrokerUser getLocalUser(String username, String password) {
+    protected BrokerUser getLocalUser(final String username, final String password) {
         
-        BrokerConfiguration.BrokerLocalUser user = config.getBroker().getUsers().getOrDefault(username, null);
+        List<BrokerLocalUser> users = config.getBroker().getUsers().stream().filter((BrokerLocalUser user) -> { 
+            
+            if(user.getPassword() == null || user.getPassword().isEmpty() || password == null || password.isEmpty()) {
+                return false;
+            }
+
+            return user.getPassword().equals(password);
+            
+        }).collect(Collectors.toList());
         
-        if(user == null) {
+        if(users.isEmpty())
             return null;
-        }
         
-        if(!user.getPassword().equals(password)) {
-            return null;
-        }
-        
-        return new BrokerUser(user);
+        return new BrokerUser(users.get(0));
     }
 
     protected BrokerUser login(String username, String password) {

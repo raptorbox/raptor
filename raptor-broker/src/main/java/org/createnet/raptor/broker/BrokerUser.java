@@ -17,6 +17,7 @@ package org.createnet.raptor.broker;
 
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.configuration.BrokerConfiguration;
+import org.createnet.raptor.models.configuration.BrokerLocalUser;
 import org.createnet.raptor.sdk.Raptor;
 
 /**
@@ -25,7 +26,7 @@ import org.createnet.raptor.sdk.Raptor;
  */
 public class BrokerUser {
         
-    private BrokerConfiguration.BrokerLocalUser localUser;
+    private BrokerLocalUser localUser;
     private Raptor raptor;
 
     public BrokerUser() {
@@ -35,7 +36,7 @@ public class BrokerUser {
         this.raptor = raptor;
     }
     
-    public BrokerUser(BrokerConfiguration.BrokerLocalUser localUser) {
+    public BrokerUser(BrokerLocalUser localUser) {
         this.localUser = localUser;
     }
 
@@ -54,7 +55,7 @@ public class BrokerUser {
         return getLocalUser() != null;
     }
 
-    public BrokerConfiguration.BrokerLocalUser getLocalUser() {
+    public BrokerLocalUser getLocalUser() {
         return localUser;
     }
     

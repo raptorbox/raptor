@@ -53,7 +53,7 @@ raptor:
   broker:
     artemis: file:///etc/raptor/broker.xml
     users:
-      system:
-        password: ${random.value}
-        roles:
-          - admin
+      - name: system
+        password: secr3t
+        # roles:
+        #   - admin

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.api.common.authentication;
+package org.createnet.raptor.api.common.configuration;
 
 import javax.servlet.http.HttpServletRequest;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;

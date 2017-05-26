@@ -15,7 +15,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import org.createnet.raptor.api.common.authentication.RaptorUserDetails;
-import org.createnet.raptor.api.common.authentication.TokenHelper;
+import org.createnet.raptor.api.common.configuration.TokenHelper;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.services.TokenService;

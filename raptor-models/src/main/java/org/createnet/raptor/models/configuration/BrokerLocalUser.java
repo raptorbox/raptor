@@ -15,28 +15,34 @@
  */
 package org.createnet.raptor.models.configuration;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.validator.constraints.NotBlank;
 
 /**
  *
- * @author Luca Capra <lcapra@fbk.eu>
+ * @author Luca Capra <luca.capra@gmail.com>
  */
-@JsonIgnoreProperties(ignoreUnknown = false)
-public class BrokerConfiguration {
+public class BrokerLocalUser {
 
     @NotBlank
-    protected String artemis = "file:///etc/raptor/broker.xml";
-    protected List<BrokerLocalUser> users = new ArrayList();
+    protected String username;
 
-    public String getArtemis() {
-        return artemis;
+    @NotBlank
+    protected String password;
+
+    protected List<String> roles = new ArrayList();
+
+    public String getPassword() {
+        return password;
     }
 
-    public List<BrokerLocalUser> getUsers() {
-        return users;
+    public List<String> getRoles() {
+        return roles;
     }
 
+    public String getUsername() {
+        return username;
+    }
+    
 }

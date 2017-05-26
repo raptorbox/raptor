@@ -20,6 +20,7 @@ import org.createnet.raptor.models.configuration.BrokerConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
@@ -31,17 +32,13 @@ import org.springframework.stereotype.Service;
 public class Broker {
 
     final protected Logger logger = LoggerFactory.getLogger(Broker.class);
-    private final RaptorConfiguration config;
-    
-    @Bean
-    RaptorSecurityManager raptorSecurityManager() {
-        return new RaptorSecurityManager();
-    }    
 
-    public Broker(RaptorConfiguration config) {
-        this.config = config;
-    }
+    @Autowired
+    RaptorConfiguration config;
     
+    @Autowired
+    RaptorSecurityManager raptorSecurityManager;
+
     public class BrokerException extends RuntimeException {
 
         public BrokerException(Throwable t) {
@@ -57,19 +54,19 @@ public class Broker {
 
     protected void setupServer() {
         BrokerConfiguration brokerConfig = config.getBroker();
-        server.setSecurityManager(raptorSecurityManager());
+        server.setSecurityManager(raptorSecurityManager);
         server.setConfigResourcePath(brokerConfig.getArtemis());
     }
-    
+
     public void start() {
 
         try {
-            
+
             logger.debug("Initializing broker services");
-            initialize();            
-            
+            initialize();
+
             logger.debug("Starting broker");
-            
+
             server.start();
         } catch (Exception ex) {
             logger.error("Broker startup error: {}", ex.getMessage(), ex);

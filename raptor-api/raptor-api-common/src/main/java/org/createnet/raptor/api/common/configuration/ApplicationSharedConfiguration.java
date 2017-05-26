@@ -16,7 +16,6 @@
 package org.createnet.raptor.api.common.configuration;
 
 import org.createnet.raptor.api.common.client.ApiClientService;
-import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class ApplicationSharedConfiguration {
 
     @Autowired
-    RaptorConfiguration config;
+    RaptorConfig config;
 
     @Bean
     @Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)

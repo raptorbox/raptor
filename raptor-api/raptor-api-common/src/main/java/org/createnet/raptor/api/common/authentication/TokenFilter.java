@@ -1,5 +1,6 @@
 package org.createnet.raptor.api.common.authentication;
 
+import org.createnet.raptor.api.common.configuration.TokenHelper;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;

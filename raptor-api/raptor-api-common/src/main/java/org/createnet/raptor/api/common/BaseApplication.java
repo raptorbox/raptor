@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.createnet.raptor.api.common.configuration.RaptorConfig;
 import org.createnet.raptor.api.common.dispatcher.RaptorMessageHandler;
 import org.createnet.raptor.models.configuration.DispatcherConfiguration;
-import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -47,10 +47,10 @@ import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.sdk.Topics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.Banner;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -70,6 +70,9 @@ public abstract class BaseApplication {
     static private ConfigurableApplicationContext instance;
     static public String appName;
 
+    @Autowired
+    RaptorConfig configuration;
+            
     protected RaptorMessageHandler messageHandler;
 
     public static SpringApplicationBuilder createInstance(Class clazz) {
@@ -122,11 +125,11 @@ public abstract class BaseApplication {
         return args2;
     }
 
-    @Bean
-    @ConfigurationProperties(prefix = "raptor")
-    public RaptorConfiguration getConfiguration() {
-        return new RaptorConfiguration();
-    }
+//    @Bean
+//    @ConfigurationProperties(prefix = "raptor")
+//    public RaptorConfiguration getConfiguration() {
+//        return new RaptorConfiguration();
+//    }
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
@@ -144,7 +147,7 @@ public abstract class BaseApplication {
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
 
-        DispatcherConfiguration config = getConfiguration().getDispatcher();
+        DispatcherConfiguration config = configuration.getDispatcher();
 
         DefaultMqttPahoClientFactory f = new DefaultMqttPahoClientFactory();
 

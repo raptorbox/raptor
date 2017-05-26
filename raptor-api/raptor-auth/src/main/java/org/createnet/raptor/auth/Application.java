@@ -17,7 +17,8 @@ package org.createnet.raptor.auth;
 
 import javax.sql.DataSource;
 import org.createnet.raptor.api.common.BaseApplication;
-import org.createnet.raptor.api.common.authentication.TokenHelper;
+import org.createnet.raptor.api.common.configuration.TokenHelper;
+import org.createnet.raptor.api.common.configuration.RaptorConfig;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.repository.UserRepository;
@@ -57,6 +58,9 @@ public class Application extends BaseApplication {
     }
   
     @Autowired
+    private RaptorConfig configuration;
+    
+    @Autowired
     private DataSource dataSource;
 
     @Autowired
@@ -93,7 +97,7 @@ public class Application extends BaseApplication {
 
     protected void createDefaultUser() {
 
-        AuthConfiguration.Admin admin = getConfiguration().getAuth().getAdmin();
+        AuthConfiguration.Admin admin = configuration.getAuth().getAdmin();
 
         if (!admin.isEnabled()) {
             return;
