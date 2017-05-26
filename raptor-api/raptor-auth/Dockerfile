@@ -6,6 +6,6 @@ MAINTAINER Luca Capra <lcapra@fbk.eu>
 VOLUME ["/etc/raptor"]
 EXPOSE 8090
 
-COPY target/raptor-auth-1.0.jar /raptor-auth.jar
+COPY target/raptor-auth-1.0.jar /raptor.jar
 
-CMD ["java","-jar","/raptor-auth.jar", "--spring.config.location=file:/etc/raptor/auth-service.yml"]
+CMD ["java","-jar","/raptor.jar"]

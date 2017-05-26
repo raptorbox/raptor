@@ -25,3 +25,9 @@ cd ..
 cd raptor-stream
 mvn package -DskipTests=true
 cd ..
+
+cd raptor-tree
+mvn package -DskipTests=true
+cd ..
+
+cd ..
