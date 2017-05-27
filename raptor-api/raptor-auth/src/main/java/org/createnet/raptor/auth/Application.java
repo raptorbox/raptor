@@ -18,13 +18,13 @@ package org.createnet.raptor.auth;
 import javax.sql.DataSource;
 import org.createnet.raptor.api.common.BaseApplication;
 import org.createnet.raptor.api.common.configuration.TokenHelper;
-import org.createnet.raptor.api.common.configuration.RaptorConfig;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.repository.UserRepository;
 import org.createnet.raptor.auth.services.AuthMessageHandler;
 import org.createnet.raptor.auth.services.UserService;
 import org.createnet.raptor.models.configuration.AuthConfiguration;
+import org.createnet.raptor.models.configuration.RaptorConfiguration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -58,7 +58,7 @@ public class Application extends BaseApplication {
     }
   
     @Autowired
-    private RaptorConfig configuration;
+    private RaptorConfiguration configuration;
     
     @Autowired
     private DataSource dataSource;

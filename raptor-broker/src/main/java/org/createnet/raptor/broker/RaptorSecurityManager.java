@@ -23,13 +23,12 @@ import org.apache.activemq.artemis.core.security.CheckType;
 import org.apache.activemq.artemis.core.security.Role;
 import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
 import org.apache.activemq.artemis.spi.core.security.ActiveMQSecurityManager2;
-import org.createnet.raptor.api.common.configuration.RaptorConfig;
 import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.auth.Role.Roles;
-import org.createnet.raptor.models.configuration.BrokerConfiguration;
 import org.createnet.raptor.models.configuration.BrokerLocalUser;
+import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.api.AuthClient;
@@ -45,12 +44,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     
-    RaptorConfig config;
-    
     @Autowired
-    public RaptorSecurityManager(RaptorConfig config) {
-        this.config = config;
-    }    
+    RaptorConfiguration config;
     
     private final Logger logger = LoggerFactory.getLogger(RaptorSecurityManager.class);
 

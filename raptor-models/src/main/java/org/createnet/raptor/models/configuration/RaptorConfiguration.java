@@ -33,7 +33,7 @@ public class RaptorConfiguration {
     public String getUrl() {
         return url;
     }
-    
+
     public BrokerConfiguration getBroker() {
         return broker;
     }
@@ -48,6 +48,18 @@ public class RaptorConfiguration {
 
     public AuthConfiguration getAuth() {
         return auth;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public void setAuth(AuthConfiguration auth) {
+        this.auth = auth;
+    }
+
+    public void setBroker(BrokerConfiguration broker) {
+        this.broker = broker;
     }
 
 }

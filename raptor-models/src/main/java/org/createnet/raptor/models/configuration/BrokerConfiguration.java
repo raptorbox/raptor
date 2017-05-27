@@ -18,7 +18,7 @@ package org.createnet.raptor.models.configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.List;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -27,8 +27,8 @@ import org.hibernate.validator.constraints.NotBlank;
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class BrokerConfiguration {
 
-    @NotBlank
-    protected String artemis = "file:///etc/raptor/broker.xml";
+    @NotNull
+    protected String artemis;
     protected List<BrokerLocalUser> users = new ArrayList();
 
     public String getArtemis() {
@@ -37,6 +37,14 @@ public class BrokerConfiguration {
 
     public List<BrokerLocalUser> getUsers() {
         return users;
+    }
+
+    public void setArtemis(String artemis) {
+        this.artemis = artemis;
+    }
+
+    public void setUsers(List<BrokerLocalUser> users) {
+        this.users = users;
     }
 
 }

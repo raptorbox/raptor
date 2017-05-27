@@ -74,4 +74,12 @@ public class DispatcherConfiguration {
         this.uri = uri;
     }
 
+    public void setQueueLength(int queueLength) {
+        this.queueLength = queueLength;
+    }
+
+    public void setPoolSize(int poolSize) {
+        this.poolSize = poolSize;
+    }
+
 }

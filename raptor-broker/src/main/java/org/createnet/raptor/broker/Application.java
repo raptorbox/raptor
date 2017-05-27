@@ -25,7 +25,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @SpringBootApplication(
-        scanBasePackages = {"org.createnet.raptor.broker", "org.createnet.raptor.api.common.configuration"},
+        scanBasePackages = {"org.createnet.raptor.broker"},
         exclude = {ArtemisAutoConfiguration.class}
 )
 @EnableConfigurationProperties

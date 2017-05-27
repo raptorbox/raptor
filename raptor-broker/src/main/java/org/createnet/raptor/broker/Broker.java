@@ -21,7 +21,6 @@ import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,7 +34,7 @@ public class Broker {
 
     @Autowired
     RaptorConfiguration config;
-    
+
     @Autowired
     RaptorSecurityManager raptorSecurityManager;
 
@@ -55,18 +54,15 @@ public class Broker {
     protected void setupServer() {
         BrokerConfiguration brokerConfig = config.getBroker();
         server.setSecurityManager(raptorSecurityManager);
+        logger.debug("Artemis configuration: {}", brokerConfig.getArtemis());
         server.setConfigResourcePath(brokerConfig.getArtemis());
     }
 
     public void start() {
-
         try {
-
             logger.debug("Initializing broker services");
             initialize();
-
             logger.debug("Starting broker");
-
             server.start();
         } catch (Exception ex) {
             logger.error("Broker startup error: {}", ex.getMessage(), ex);
@@ -75,7 +71,6 @@ public class Broker {
     }
 
     public void stop() {
-
         try {
             logger.debug("Stopping broker");
             server.stop();
