@@ -99,17 +99,17 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
     protected BrokerUser authenticate(String username, String password) {
 
-        logger.debug("Authenticate user {}", username);
-
         BrokerUser brokerUser = null;
 
         // 1. if no username, try with apiKey authentication
         if (username == null || username.isEmpty() || username.length() < 3) {
+            logger.debug("Trying token login");
             brokerUser = login(password);
         } else {
 
             // 2. try to login from local configuration file
             BrokerUser localUser = getLocalUser(username, password);
+            logger.debug("Try local login for user {}", username);
             if (localUser != null) {
                 logger.debug("Local user {} found", username);
                 brokerUser = localUser;
@@ -117,6 +117,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
             if (brokerUser == null) {
                 // 3. try to login as user to the auth api
+                logger.debug("Authenticate on auth API user {}", username);
                 brokerUser = login(username, password);
             }
         }

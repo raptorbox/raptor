@@ -16,6 +16,7 @@
 package org.createnet.raptor.api.common.dispatcher;
 
 import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.configuration.BrokerLocalUser;
 import org.createnet.raptor.models.configuration.DispatcherConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.createnet.raptor.models.data.RecordSet;
@@ -54,6 +55,16 @@ public class DispatcherService implements InitializingBean, DisposableBean {
     public DispatcherEngine getDispatcher() {
         if (dispatcher == null) {
             dispatcher = new DispatcherEngine();
+            
+            if(config.getBroker().getUsers().isEmpty()) {
+                throw new RuntimeException("Missing broker local user. Add one to raptor.yml under broker.users");
+            }
+            
+            BrokerLocalUser user = config.getBroker().getUsers().get(0);
+            getConfiguration().setUsername(user.getUsername());
+            getConfiguration().setPassword(user.getPassword());
+            
+            logger.debug("Connecting as MQTT user {}", getConfiguration().getUsername());
             dispatcher.initialize(getConfiguration());
         }
         return dispatcher;

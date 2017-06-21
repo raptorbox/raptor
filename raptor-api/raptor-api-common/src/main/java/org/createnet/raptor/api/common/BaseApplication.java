@@ -158,7 +158,9 @@ public abstract class BaseApplication {
         DispatcherConfiguration dispatcherConfig = raptorConfiguration().getDispatcher();
         
         DefaultMqttPahoClientFactory f = new DefaultMqttPahoClientFactory();
-
+        
+        log.debug("Using local broker user {}", defaultUser.getUsername());
+        
         f.setUserName(defaultUser.getUsername());
         f.setPassword(defaultUser.getPassword());
         f.setServerURIs(dispatcherConfig.getUri());
