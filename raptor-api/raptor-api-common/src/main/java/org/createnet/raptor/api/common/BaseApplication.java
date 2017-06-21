@@ -56,6 +56,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
  *
@@ -64,6 +66,7 @@ import org.springframework.core.io.Resource;
 @Profile("default")
 @EnableAutoConfiguration
 @EnableAspectJAutoProxy(proxyTargetClass = true)
+//@EnableSwagger2
 public abstract class BaseApplication {
 
     static public Logger log = null;
@@ -135,6 +138,17 @@ public abstract class BaseApplication {
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurerAdapter() {
+
+            @Override
+            public void addResourceHandlers(ResourceHandlerRegistry registry) {
+
+                registry.addResourceHandler("swagger-ui.html")
+                        .addResourceLocations("classpath:/META-INF/resources/");
+
+                registry.addResourceHandler("/webjars/**")
+                        .addResourceLocations("classpath:/META-INF/resources/webjars/");
+            }
+
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
@@ -149,18 +163,18 @@ public abstract class BaseApplication {
     public MqttPahoClientFactory mqttClientFactory() {
 
         List<BrokerLocalUser> users = raptorConfiguration().getBroker().getUsers();
-        
-        if(users.isEmpty()) {
+
+        if (users.isEmpty()) {
             throw new RuntimeException("Missing local broker users. Review raptor.yml configuration file");
         }
-            
+
         BrokerLocalUser defaultUser = users.get(0);
         DispatcherConfiguration dispatcherConfig = raptorConfiguration().getDispatcher();
-        
+
         DefaultMqttPahoClientFactory f = new DefaultMqttPahoClientFactory();
-        
+
         log.debug("Using local broker user {}", defaultUser.getUsername());
-        
+
         f.setUserName(defaultUser.getUsername());
         f.setPassword(defaultUser.getPassword());
         f.setServerURIs(dispatcherConfig.getUri());
@@ -216,7 +230,6 @@ public abstract class BaseApplication {
         };
     }
 
-
     @Bean
     public static PropertySourcesPlaceholderConfigurer properties() {
         PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
@@ -238,6 +251,6 @@ public abstract class BaseApplication {
 
         propertySourcesPlaceholderConfigurer.setProperties(yaml.getObject());
         return propertySourcesPlaceholderConfigurer;
-    }    
-    
+    }
+
 }
