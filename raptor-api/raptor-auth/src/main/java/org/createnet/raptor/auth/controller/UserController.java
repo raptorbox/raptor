@@ -19,7 +19,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.createnet.raptor.auth.services.RaptorUserDetailsService;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.services.UserService;

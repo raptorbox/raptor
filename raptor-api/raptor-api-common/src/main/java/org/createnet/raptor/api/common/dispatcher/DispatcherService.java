@@ -61,6 +61,11 @@ public class DispatcherService implements InitializingBean, DisposableBean {
             }
             
             BrokerLocalUser user = config.getBroker().getUsers().get(0);
+
+            if(user.getUsername() == null) {
+                throw new RuntimeException("Broker local username is null..");
+            }            
+            
             getConfiguration().setUsername(user.getUsername());
             getConfiguration().setPassword(user.getPassword());
             
