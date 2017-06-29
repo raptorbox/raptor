@@ -29,7 +29,7 @@ public class RaptorConfiguration {
     private DispatcherConfiguration dispatcher = new DispatcherConfiguration();
     private AuthConfiguration auth = new AuthConfiguration();
     private BrokerConfiguration broker = new BrokerConfiguration();
-
+    
     public String getUrl() {
         return url;
     }
@@ -61,5 +61,5 @@ public class RaptorConfiguration {
     public void setBroker(BrokerConfiguration broker) {
         this.broker = broker;
     }
-
+    
 }

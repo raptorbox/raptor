@@ -47,6 +47,8 @@
         <flyway>4.1.2</flyway>
         <springfox>2.7.0</springfox>
         
+        <spring-cloud.version>Dalston.SR1</spring-cloud.version>
+        
         <spring.data>1.13.1.RELEASE</spring.data>
         <spring.data.mongodb>1.10.1.RELEASE</spring.data.mongodb>
         <maven.compiler.plugin>3.6.1</maven.compiler.plugin>

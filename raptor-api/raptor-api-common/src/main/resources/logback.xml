@@ -16,7 +16,7 @@
     <logger name="org.createnet.raptor" level="debug" />
     <logger name="springfox.documentation" level="debug" />
     
-    <root level="warn">
+    <root level="debug">
         <appender-ref ref="STDOUT" />
     </root>
 

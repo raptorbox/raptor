@@ -101,6 +101,16 @@ services:
     networks:
       - raptor_net
 
+  auth:
+    build: ./raptor-api/raptor-gateway
+    container_name: raptor-gateway
+    ports:
+      - 9090:9090
+    volumes:
+      - ./config:/etc/raptor
+    networks:
+      - raptor_net
+
   mariadb:
     image: mariadb:latest
     container_name: mariadb
@@ -164,10 +174,6 @@ services:
   rproxy:
     build: ./docker/proxy
     depends_on:
-      # - stream
-      - action
-      - inventory
-      - auth
-      - broker
+      - gateway
     networks:
       - raptor_net

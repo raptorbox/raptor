@@ -17,3 +17,4 @@ nb*
 /raptor-api/raptor-stream/target/
 /raptor-api/raptor-tree/target/
 /raptor-api/raptor-auth/target/
+/raptor-api/raptor-gateway/target/

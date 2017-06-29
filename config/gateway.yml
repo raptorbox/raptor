@@ -1,0 +1,29 @@
+
+server:
+  port: 9090
+  contextPath: /
+
+zuul:
+    routes:
+        action:
+            path: /action/**
+            url: http://action:8050
+        inventory:
+            path: /inventory/**
+            url: http://inventory:8060
+        profile:
+            path: /profile/**
+            url: http://profile:8070
+        stream:
+            path: /stream/**
+            url: http://stream:8080
+        tree:
+            path: /tree/**
+            url: http://tree:8085
+        auth:
+            path: /auth/**
+            url: http://auth:8090
+
+ribbon:
+    eureka:
+        enabled: false

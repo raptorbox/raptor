@@ -20,6 +20,7 @@
         <module>raptor-action</module>
         <module>raptor-stream</module>
         <module>raptor-tree</module>
+        <module>raptor-gateway</module>
     </modules>
     
     <dependencyManagement>
