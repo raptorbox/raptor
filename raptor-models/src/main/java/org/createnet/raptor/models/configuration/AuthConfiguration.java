@@ -17,6 +17,7 @@ package org.createnet.raptor.models.configuration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.createnet.raptor.models.auth.Role;
 
 /**
@@ -24,7 +25,9 @@ import org.createnet.raptor.models.auth.Role;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public class AuthConfiguration {
-
+    
+    private String serviceUserType = "service";
+    
     private List<AdminUser> users = new ArrayList();
     private String header = "authorization";
     private String headerPrefix = "Bearer ";
@@ -35,14 +38,28 @@ public class AuthConfiguration {
         return getUsers().stream().filter(u -> u.getUsername().equals(username) && !u.isLocked()).count() == 0;
     }
     
+    public AdminUser getServiceUser() {
+        Optional<AdminUser> user = getUsers().stream().filter(u -> u.getUsername().equals(serviceUserType)).findFirst();
+        return user.isPresent() ? user.get() : null;
+    }
+    
     public static class AdminUser {
 
         private String username;
         private String password;
         private String email;
+        private String type;
         private boolean lock;
         private List<Role.Roles> roles = new ArrayList();
+        
+        public String getType() {
+            return type;
+        }
 
+        public void setType(String type) {
+            this.type = type;
+        }
+        
         public boolean isLocked() {
             return lock;
         }

@@ -16,6 +16,8 @@
 package org.createnet.raptor.api.common.configuration;
 
 import org.createnet.raptor.api.common.client.ApiClientService;
+import org.createnet.raptor.api.common.client.InternalApiClientService;
+import org.createnet.raptor.models.configuration.AuthConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -39,6 +41,17 @@ public class ApplicationSharedConfiguration {
     public ApiClientService apiClientService() {
         String token = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
         return new ApiClientService(config.getUrl(), token);
+    }
+    
+    @Bean
+    public InternalApiClientService internalApiClientService() {
+        
+        AuthConfiguration.AdminUser user = config.getAuth().getServiceUser();
+        
+        InternalApiClientService client = new InternalApiClientService(config.getUrl(), user.getUsername(), user.getPassword());
+//        client.Auth().login();
+        
+        return client;
     }
 
 }
