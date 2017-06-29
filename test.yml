@@ -101,7 +101,7 @@ services:
     networks:
       - raptor_net
 
-  auth:
+  gateway:
     build: ./raptor-api/raptor-gateway
     container_name: raptor-gateway
     ports:
