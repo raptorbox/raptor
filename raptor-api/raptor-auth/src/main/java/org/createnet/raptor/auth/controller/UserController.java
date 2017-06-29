@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiResponses;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.services.UserService;
+import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,6 +67,10 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private RaptorConfiguration configuration;
+
+    @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
     @RequestMapping(value = "/user", method = RequestMethod.GET)
     @ApiOperation(
             value = "List available user",
@@ -109,7 +114,7 @@ public class UserController {
     public User getProfile(
             @AuthenticationPrincipal User user
     ) {
-        return (User) user;
+        return user;
     }
 
     @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
@@ -120,13 +125,18 @@ public class UserController {
             response = User.class,
             nickname = "updateProfile"
     )
-    public User updateProfile(
+    public ResponseEntity updateProfile(
             @AuthenticationPrincipal User currentUser,
             @RequestBody User rawUser
     ) {
-        return userService.update(currentUser.getUuid(), rawUser);
-    }    
-    
+
+        if (configuration.getAuth().userHasLock(rawUser.getUsername())) {
+            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "User cannot be modified");
+        }
+
+        return ResponseEntity.ok(userService.update(currentUser.getUuid(), rawUser));
+    }
+
     @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
     @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.GET)
     @ApiOperation(
@@ -139,13 +149,13 @@ public class UserController {
             @PathVariable String uuid,
             @AuthenticationPrincipal User currentUser
     ) {
-        
+
         User u = userService.getByUuid(uuid);
-        
-        if(u == null) {
+
+        if (u == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "User not found");
         }
-        
+
         return ResponseEntity.ok(u);
     }
 
@@ -162,26 +172,29 @@ public class UserController {
             @PathVariable("uuid") String uuid,
             @RequestBody User rawUser
     ) {
-        
-        
+
         User user = userService.getByUuid(uuid);
-        
+
         if (user == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Requested user not found");
         }
-        
+
         if (rawUser.getUuid() != null && !user.getUuid().equals(rawUser.getUuid())) {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Path and body uuid mismatch");
         }
-        
+
         // change username, but ensure it does not exists already
-        if(!rawUser.getUsername().equals(user.getUsername())) {
+        if (!rawUser.getUsername().equals(user.getUsername())) {
             boolean exists = userService.exists(rawUser);
             if (exists) {
                 return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Username already taken");
             }
         }
-        
+
+        if (configuration.getAuth().userHasLock(rawUser.getUsername())) {
+            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "User cannot be modified");
+        }
+
         return ResponseEntity.ok(userService.update(user, rawUser));
     }
 
@@ -193,11 +206,15 @@ public class UserController {
             code = 202,
             nickname = "deleteUser"
     )
-    public ResponseEntity<String> deleteUser(@PathVariable String uuid) {
+    public ResponseEntity deleteUser(@PathVariable String uuid) {
 
         User user = userService.getByUuid(uuid);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found");
+        }
+
+        if (configuration.getAuth().userHasLock(user.getUsername())) {
+            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "User cannot be modified");
         }
 
         userService.delete(user);

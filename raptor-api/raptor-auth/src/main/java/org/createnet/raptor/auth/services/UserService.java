@@ -46,7 +46,7 @@ public class UserService {
 
     @Autowired
     private RoleRepository roleRepository;
-
+    
     public Iterable<User> list() {
         return userRepository.findAll();
     }
@@ -86,7 +86,7 @@ public class UserService {
     }    
     
     public User update(User user, User rawUser) {
-
+        
         if (rawUser.getUsername() != null && !rawUser.getUsername().isEmpty()) {
             user.setUsername(rawUser.getUsername());
         }

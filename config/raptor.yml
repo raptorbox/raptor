@@ -12,7 +12,6 @@ spring:
       port: 27017
       database: raptor
 
-
 server:
   port: 80
   contextPath: /${spring.config.name}
@@ -25,21 +24,27 @@ logging:
   level:
     org.createnet.raptor: DEBUG
 
-
 raptor:
-  url: http://rproxy
+  url: http://gateway
 
   dispatcher:
     protocol: mqtt
     uri: tcp://broker:1883
 
   auth:
-    # Default user to be created, disable setting enabled to false
-    admin:
-      enabled: true
-      username: admin
-      password: admin
-      email: admin@raptor.local
+
+    users:
+      - username: admin
+        password: admin
+        email: admin@raptor.local
+        roles:
+          - super_admin
+      - username: service
+        password: s3cret
+        email: service@raptor.local
+        roles:
+          - super_admin
+        lock: true
 
     header: Authorization
     headerPrefix: Bearer

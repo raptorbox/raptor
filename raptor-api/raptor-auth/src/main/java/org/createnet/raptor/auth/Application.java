@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.auth;
 
+import java.util.List;
 import javax.sql.DataSource;
 import org.createnet.raptor.api.common.BaseApplication;
 import org.createnet.raptor.api.common.configuration.TokenHelper;
@@ -56,10 +57,10 @@ public class Application extends BaseApplication {
     public static void main(String[] args) {
         start(Application.class, args);
     }
-  
+
     @Autowired
     private RaptorConfiguration configuration;
-    
+
     @Autowired
     private DataSource dataSource;
 
@@ -97,27 +98,30 @@ public class Application extends BaseApplication {
 
     protected void createDefaultUser() {
 
-        AuthConfiguration.Admin admin = configuration.getAuth().getAdmin();
+        List<AuthConfiguration.AdminUser> users = configuration.getAuth().getUsers();
 
-        if (!admin.isEnabled()) {
-            return;
-        }
+        users.forEach((AuthConfiguration.AdminUser admin) -> {
 
-        User defaultUser = userRepository.findByUsername(admin.getUsername());
-        if (defaultUser != null) {
-            log.debug("Default admin user `{}` exists (id: {})", defaultUser.getUsername(), defaultUser.getId());
-            //userRepository.delete(defaultUser.getId());
-            return;
-        }
+            User defaultUser = userRepository.findByUsername(admin.getUsername());
+            if (defaultUser != null) {
+                log.debug("User `{}` exists (id: {})", defaultUser.getUsername(), defaultUser.getId());
+                return;
+            }
 
-        User adminUser = new User();
+            User adminUser = new User();
 
-        adminUser.setUsername(admin.getUsername());
-        adminUser.setPassword(passwordEncoder().encode(admin.getPassword()));
-        adminUser.setEmail(admin.getEmail());
-        adminUser.addRole(Role.Roles.super_admin);
+            adminUser.setUsername(admin.getUsername());
+            adminUser.setPassword(passwordEncoder().encode(admin.getPassword()));
+            adminUser.setEmail(admin.getEmail());
+            
+            admin.getRoles().forEach((r) -> {
+                adminUser.addRole(new Role(r));
+            });
 
-        userService.save(adminUser);
+            userService.save(adminUser);
+
+        });
+
     }
 
 }

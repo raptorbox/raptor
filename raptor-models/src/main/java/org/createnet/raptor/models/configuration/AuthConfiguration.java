@@ -15,33 +15,54 @@
  */
 package org.createnet.raptor.models.configuration;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.createnet.raptor.models.auth.Role;
+
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public class AuthConfiguration {
 
-    private Admin admin = new Admin();
+    private List<AdminUser> users = new ArrayList();
     private String header = "authorization";
     private String headerPrefix = "Bearer ";
     private String secret;
     private int expiration = 1800;
 
-    public static class Admin {
+    public boolean userHasLock(final String username) {
+        return getUsers().stream().filter(u -> u.getUsername().equals(username) && !u.isLocked()).count() == 0;
+    }
+    
+    public static class AdminUser {
 
-        private boolean enabled = true;
         private String username;
         private String password;
         private String email;
+        private boolean lock;
+        private List<Role.Roles> roles = new ArrayList();
 
-        public boolean isEnabled() {
-            return enabled;
+        public boolean isLocked() {
+            return lock;
+        }
+        
+        public boolean getLock() {
+            return lock;
         }
 
-        public void setEnabled(boolean enabled) {
-            this.enabled = enabled;
+        public void setLock(boolean lock) {
+            this.lock = lock;
         }
 
+        public List<Role.Roles> getRoles() {
+            return roles;
+        }
+
+        public void setRoles(List<Role.Roles> roles) {
+            this.roles = roles;
+        }
+        
         public String getUsername() {
             return username;
         }
@@ -65,7 +86,7 @@ public class AuthConfiguration {
         public void setEmail(String email) {
             this.email = email;
         }
-
+                
     }
 
     public String getHeader() {
@@ -100,12 +121,12 @@ public class AuthConfiguration {
         this.expiration = expiration;
     }
 
-    public Admin getAdmin() {
-        return admin;
+    public List<AdminUser> getUsers() {
+        return users;
     }
 
-    public void setAdmin(Admin admin) {
-        this.admin = admin;
+    public void setUsers(List<AdminUser> users) {
+        this.users = users;
     }
 
 }
