@@ -19,8 +19,6 @@ services:
   action:
     build: ./raptor-api/raptor-action
     container_name: raptor-action
-    ports:
-      - 8050:8050
     volumes:
       - ./config:/etc/raptor
     links:
@@ -33,8 +31,6 @@ services:
   inventory:
     build: ./raptor-api/raptor-inventory
     container_name: raptor-inventory
-    ports:
-      - 8060:8060
     volumes:
       - ./config:/etc/raptor
     links:
@@ -47,8 +43,6 @@ services:
   profile:
     build: ./raptor-api/raptor-profile
     container_name: raptor-profile
-    ports:
-      - 8070:8070
     volumes:
       - ./config:/etc/raptor
     links:
@@ -61,8 +55,6 @@ services:
   stream:
     build: ./raptor-api/raptor-stream
     container_name: raptor-stream
-    ports:
-      - 8080:8080
     volumes:
       - ./config:/etc/raptor
     links:
@@ -75,8 +67,6 @@ services:
   tree:
     build: ./raptor-api/raptor-tree
     container_name: raptor-tree
-    ports:
-      - 8085:8085
     volumes:
       - ./config:/etc/raptor
     links:
@@ -89,8 +79,6 @@ services:
   auth:
     build: ./raptor-api/raptor-auth
     container_name: raptor-auth
-    ports:
-      - 8090:8090
     volumes:
       - ./config:/etc/raptor
     links:
@@ -104,8 +92,6 @@ services:
   apigateway:
     build: ./raptor-api/raptor-gateway
     container_name: raptor-gateway
-    ports:
-      - 9090:9090
     volumes:
       - ./config:/etc/raptor
     networks:
@@ -114,8 +100,6 @@ services:
   mariadb:
     image: mariadb:latest
     container_name: mariadb
-    ports:
-      - 3306:3306
     volumes:
       - ./raptor-auth/src/main/resources/sql:/docker-entrypoint-initdb.d
       - ./data/mariadb:/var/lib/mysql
@@ -138,8 +122,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: raptor
     restart: always
-    ports:
-     - 8081:80
     volumes:
      - ./data/phpmyadmin:/sessions
     links:
@@ -151,8 +133,6 @@ services:
     image: adicom/admin-mongo
     # environment:
     restart: always
-    ports:
-     - 8082:1234
     # volumes:
     links:
       - mongo
@@ -164,16 +144,6 @@ services:
     container_name: mongo
     volumes:
       - ./data/mongodb:/data/db
-    ports:
-      - 27017:27017
     command: --smallfiles # --rest --auth
-    networks:
-      - raptor_net
-
-
-  rproxy:
-    build: ./docker/proxy
-    depends_on:
-      - apigateway
     networks:
       - raptor_net

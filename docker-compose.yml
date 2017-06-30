@@ -6,72 +6,91 @@ networks:
 
 services:
 
-  api:
-    image: raptorbox/api
-    ports:
-      - 127.0.0.1:8080:8080
-    volumes:
-      - ./config:/etc/raptor
-    depends_on:
-      - elasticsearch
-      - couchbase
-    networks:
-      - raptor_net
-    logging:
-      driver: journald
-      options:
-         tag: "{{.Name}}"
-
   broker:
     image: raptorbox/broker
     ports:
       - 1883:1883
     volumes:
       - ./config:/etc/raptor
-    depends_on:
-      - elasticsearch
     networks:
       - raptor_net
-    logging:
-      driver: journald
-      options:
-         tag: "{{.Name}}"
 
-  auth:
-    image: raptorbox/auth
-    expose:
-      - 8090
+  action:
+    image: raptorbox/action
     volumes:
       - ./config:/etc/raptor
-    depends_on:
-      - mariadb
-    networks:
-      - raptor_net
-    logging:
-      driver: journald
-      options:
-         tag: "{{.Name}}"
-
-  profile:
-    image: raptorbox/profile
-    expose:
-      - 8070
-    volumes:
-      - ./config:/etc/raptor
+    links:
+      - mongo
     depends_on:
       - mongo
     networks:
       - raptor_net
-    logging:
-      driver: journald
-      options:
-         tag: "{{.Name}}"
+
+  inventory:
+    image: raptorbox/inventory
+    volumes:
+      - ./config:/etc/raptor
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    networks:
+      - raptor_net
+
+  profile:
+    image: raptorbox/profile
+    volumes:
+      - ./config:/etc/raptor
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    networks:
+      - raptor_net
+
+  stream:
+    image: raptorbox/stream
+    volumes:
+      - ./config:/etc/raptor
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    networks:
+      - raptor_net
+
+  tree:
+    image: raptorbox/tree
+    volumes:
+      - ./config:/etc/raptor
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    networks:
+      - raptor_net
+
+  auth:
+    image: raptorbox/auth
+    volumes:
+      - ./config:/etc/raptor
+    links:
+      - mariadb
+    depends_on:
+      - mariadb
+      - broker
+    networks:
+      - raptor_net
+
+  apigateway:
+    image: raptorbox/gateway
+    volumes:
+      - ./config:/etc/raptor
+    networks:
+      - raptor_net
 
   mariadb:
     image: mariadb:latest
-    container_name: mariadb
-    expose:
-      - 3306
     volumes:
       - ./raptor-auth/src/main/resources/sql:/docker-entrypoint-initdb.d
       - ./data/mariadb:/var/lib/mysql
@@ -80,62 +99,11 @@ services:
       MYSQL_ROOT_PASSWORD: raptor
     networks:
       - raptor_net
-    logging:
-      driver: journald
-      options:
-         tag: "{{.Name}}"
-
-  couchbase:
-    image: couchbase/server
-    volumes:
-      - ./data/couchbase:/opt/couchbase/var
-    expose:
-      - 8091
-      - 8092
-      - 8093
-      - 11210
-    networks:
-      - raptor_net
-    logging:
-      driver: journald
-
-  elasticsearch:
-    image: elasticsearch:5
-    command: elasticsearch -E cluster.name="raptor" -E path.data=/usr/share/elasticsearch/data -E transport.host=0.0.0.0
-    volumes:
-      - ./data/elasticsearch:/usr/share/elasticsearch/data
-    expose:
-      - 9200
-      - 9300
-    networks:
-      - raptor_net
-    logging:
-      driver: journald
-      options:
-         tag: "{{.Name}}"
 
   mongo:
     image: mongo:3
-    container_name: mongo
     volumes:
       - ./data/mongodb:/data/db
-    ports:
-      - 27017
     command: --smallfiles # --rest --auth
     networks:
       - raptor_net
-
-  rproxy:
-    image: raptorbox/proxy
-    ports:
-      - 9090:80
-    depends_on:
-      - api
-      - auth
-      - broker
-    networks:
-      - raptor_net
-    logging:
-      driver: journald
-      options:
-         tag: "{{.Name}}"

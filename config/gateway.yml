@@ -1,6 +1,5 @@
 
 server:
-  port: 9090
   contextPath: /
 
 zuul:
