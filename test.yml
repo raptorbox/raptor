@@ -108,6 +108,8 @@ services:
       MYSQL_ROOT_PASSWORD: raptor
     networks:
       - raptor_net
+    ports:
+        - 3306:3306
 
   busybox:
     image: busybox
@@ -128,6 +130,8 @@ services:
       - mariadb:db
     networks:
       - raptor_net
+    ports:
+        - 8081:80
 
   mongoadmin:
     image: adicom/admin-mongo
@@ -138,7 +142,8 @@ services:
       - mongo
     networks:
       - raptor_net
-
+    ports:
+        - 8082:1234
   mongo:
     image: mongo:3
     container_name: mongo
@@ -147,3 +152,5 @@ services:
     command: --smallfiles # --rest --auth
     networks:
       - raptor_net
+    ports:
+        - 27017:27017

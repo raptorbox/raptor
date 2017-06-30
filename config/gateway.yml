@@ -6,22 +6,22 @@ zuul:
     routes:
         action:
             path: /action/**
-            url: http://action:8050
+            url: http://action
         inventory:
             path: /inventory/**
-            url: http://inventory:8060
+            url: http://inventory
         profile:
             path: /profile/**
-            url: http://profile:8070
+            url: http://profile
         stream:
             path: /stream/**
-            url: http://stream:8080
+            url: http://stream
         tree:
             path: /tree/**
-            url: http://tree:8085
+            url: http://tree
         auth:
             path: /auth/**
-            url: http://auth:8090
+            url: http://auth
 
 ribbon:
     eureka:

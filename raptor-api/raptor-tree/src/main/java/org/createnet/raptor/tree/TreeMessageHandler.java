@@ -61,12 +61,20 @@ public class TreeMessageHandler implements RaptorMessageHandler {
                 
                 break;
         }
-        
-        
-        
+
     }
     
     protected void notifyParent(TreeNode node) {
+        
+        TreeNode parents = treeService.parents(node);
+        
+        TreeNode parent = parents;
+        while(parent != null) {
+            
+            
+            
+            parent = parents.getParent();
+        }
         
     }
 
