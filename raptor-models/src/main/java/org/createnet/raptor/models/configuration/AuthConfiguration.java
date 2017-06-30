@@ -35,7 +35,7 @@ public class AuthConfiguration {
     private int expiration = 1800;
 
     public boolean userHasLock(final String username) {
-        return getUsers().stream().filter(u -> u.getUsername().equals(username) && !u.isLocked()).count() == 0;
+        return getUsers().stream().filter(u -> u.getUsername().equals(username)).filter(u -> u.isLocked()).count() == 1;
     }
     
     public AdminUser getServiceUser() {

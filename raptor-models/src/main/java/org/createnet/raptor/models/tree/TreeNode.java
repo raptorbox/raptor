@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
 import org.springframework.data.annotation.Id;
@@ -45,7 +43,7 @@ public class TreeNode {
     public static final String separator = "/";
     
     public enum NodeType {
-        group, user, device
+        group, user, device, application
     }
 
     @Id
