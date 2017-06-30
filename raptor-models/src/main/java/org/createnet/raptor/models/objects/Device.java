@@ -16,6 +16,7 @@
 package org.createnet.raptor.models.objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.models.objects.deserializer.DeviceDeserializer;
@@ -44,7 +45,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 @QueryEntity
 public class Device extends DeviceContainer {
-    
+
     @JsonIgnore
     @Transient
     private final Logger logger = LoggerFactory.getLogger(Device.class);
@@ -54,38 +55,32 @@ public class Device extends DeviceContainer {
     private boolean isNew = true;
 
     @Id
-    public String id = Device.generateUUID();
-    
-    @Indexed
-    public String userId;
-    
-    @Indexed
-    public String parentId;
-    
-    @Indexed
-    public String path;
+    private String id = Device.generateUUID();
 
     @Indexed
-    public String name;
-    public String description = "";
+    private String userId;
 
     @Indexed
-    public Long createdAt = Instant.now().getEpochSecond();
-    
-    @Indexed
-    public Long updatedAt = createdAt;
+    private String name;
+    private String description = "";
 
     @Indexed
-    final public Map<String, Object> properties = new HashMap();
-    
-    @Indexed
-    final public Settings settings = new Settings();
+    private Long createdAt = Instant.now().getEpochSecond();
 
     @Indexed
-    final public Map<String, Stream> streams = new HashMap();
+    private Long updatedAt = createdAt;
 
     @Indexed
-    final public Map<String, Action> actions = new HashMap();
+    final private Map<String, Object> properties = new HashMap();
+
+    @Indexed
+    final private Settings settings = new Settings();
+
+    @Indexed
+    final private Map<String, Stream> streams = new HashMap();
+
+    @Indexed
+    final private Map<String, Action> actions = new HashMap();
 
     /**
      * A serializable class containing the settings for a Device
@@ -123,27 +118,6 @@ public class Device extends DeviceContainer {
     @Override
     public String toString() {
         return "Device<" + (this.id != null ? this.id : this.name) + ">";
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public String getParentId() {
-        return parentId;
-    }
-
-    public String path() {
-        return path;
-    }
-
-    @JsonIgnore
-    public boolean isRoot() {
-        return parentId == null;
     }
 
     /**
@@ -196,8 +170,6 @@ public class Device extends DeviceContainer {
 
         id = device.id;
         userId = device.userId;
-        parentId = device.parentId;
-        path = device.path;
 
         name = device.name;
         description = device.description;
@@ -208,16 +180,16 @@ public class Device extends DeviceContainer {
         properties.clear();
         properties.putAll(device.properties);
 
-        getStreams().clear();
-        device.getStreams().entrySet().stream().forEach((el) -> {
+        streams().clear();
+        device.streams().entrySet().stream().forEach((el) -> {
             el.getValue().setDevice(this);
-            getStreams().put(el.getKey(), el.getValue());
+            streams().put(el.getKey(), el.getValue());
         });
 
-        getActions().clear();
-        device.getActions().entrySet().stream().forEach((el) -> {
+        actions().clear();
+        device.actions().entrySet().stream().forEach((el) -> {
             el.getValue().setDevice(this);
-            getActions().put(el.getKey(), el.getValue());
+            actions().put(el.getKey(), el.getValue());
         });
 
         isNew = (id == null);
@@ -256,11 +228,6 @@ public class Device extends DeviceContainer {
         return mapper.convertValue(json, Device.class);
     }
 
-    @JsonIgnore
-    public boolean isNew() {
-        return isNew;
-    }
-
     /**
      * Return the JsonNode representing the device
      *
@@ -284,11 +251,155 @@ public class Device extends DeviceContainer {
         }
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Device) {
+            Device sobj = (Device) obj;
+            if (this.id != null && sobj.id != null) {
+                return sobj.id.equals(this.id);
+            }
+        }
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + Objects.hashCode(this.id);
+        return hash;
+    }
+
+    @JsonProperty
+    public String name() {
+        return name;
+    }
+
+    @JsonProperty
+    public String description() {
+        return description;
+    }
+
+    @JsonIgnore
+    public Instant createdAt() {
+        return Instant.ofEpochSecond(createdAt);
+    }
+
+    @JsonIgnore
+    public Instant updatedAt() {
+        return Instant.ofEpochSecond(updatedAt);
+    }
+
+    @JsonProperty
+    public long getCreatedAt() {
+        return createdAt;
+    }
+    
+    @JsonProperty
+    public long getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @JsonProperty
+    public String id() {
+        return id;
+    }
+    
+    @JsonProperty
+    public String userId() {
+        return userId;
+    }
+
+    @JsonProperty
+    public Map<String, Object> properties() {
+        return properties;
+    }
+
+    @JsonProperty
+    public Settings settings() {
+        return settings;
+    }
+
     /**
      * Return the Stream list
      *
      * @return a Map of Stream instances
      */
+    @JsonProperty
+    public Map<String, Stream> streams() {
+        return this.streams;
+    }
+
+    /**
+     * Return the Action list
+     *
+     * @return a Map of Action instances
+     */
+    @JsonProperty
+    public Map<String, Action> actions() {
+        return this.actions;
+    }
+    
+    /**
+     * Return a Stream by name
+     *
+     * @param name the name of the stream
+     * @return a Stream instance
+     */
+    public Stream stream(String name) {
+        return streams().getOrDefault(name, null);
+    }
+
+    /**
+     * Return an Action
+     *
+     * @param name the name of the Action
+     * @return a Map of Action instances
+     */
+    public Action action(String name) {
+        return actions().getOrDefault(name, null);
+    }
+
+    public Device id(String id) {
+        this.id = id;
+        return this;
+    }
+
+    public Device userId(String uid) {
+        this.userId = uid;
+        return this;
+    }
+
+    public Device name(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public Device description(String description) {
+        this.description = description;
+        return this;
+    }
+
+    public Device createdAt(Long createdAt) {
+        this.createdAt = createdAt;
+        return this;
+    }
+
+    public Device updatedAt(Long updatedAt) {
+        this.updatedAt = updatedAt;
+        return this;
+    }
+
+    @JsonIgnore
+    public boolean isNew() {
+        return isNew;
+    }
+
+    /**
+     * Return the Stream list
+     *
+     * @return a Map of Stream instances
+     */
+    @Deprecated
     public Map<String, Stream> getStreams() {
         return this.streams;
     }
@@ -299,8 +410,9 @@ public class Device extends DeviceContainer {
      * @param name the name of the stream
      * @return a Stream instance
      */
+    @Deprecated
     public Stream getStream(String name) {
-        return getStreams().getOrDefault(name, null);
+        return streams().getOrDefault(name, null);
     }
 
     /**
@@ -308,6 +420,7 @@ public class Device extends DeviceContainer {
      *
      * @return a Map of Action instances
      */
+    @Deprecated
     public Map<String, Action> getActions() {
         return this.actions;
     }
@@ -318,12 +431,14 @@ public class Device extends DeviceContainer {
      * @param name the name of the Action
      * @return a Map of Action instances
      */
+    @Deprecated
     public Action getAction(String name) {
-        return getActions().getOrDefault(name, null);
+        return actions().getOrDefault(name, null);
     }
 
     /**
-     * Add a list of streams to the device, trying to merge channels if they exists already
+     * Add a list of streams to the device, trying to merge channels if they
+     * exists already
      *
      * @param streams list of streams
      * @return
@@ -332,7 +447,7 @@ public class Device extends DeviceContainer {
 
         for (Stream stream : streams) {
 
-            final Stream prevStream = this.streams.get(stream.name);
+            final Stream prevStream = this.streams().get(stream.name);
 
             for (Channel channel : stream.channels.values()) {
                 // ensure device ref
@@ -347,7 +462,7 @@ public class Device extends DeviceContainer {
             // add new stream
             if (prevStream == null) {
                 stream.setDevice(this);
-                this.streams.put(stream.name, stream);
+                this.streams().put(stream.name, stream);
             } else {
                 // copy details
                 prevStream.type = stream.type;
@@ -367,14 +482,14 @@ public class Device extends DeviceContainer {
      */
     public Stream addStream(String name) {
 
-        Stream prevStream = getStream(name);
+        Stream prevStream = stream(name);
         if (prevStream != null) {
             return prevStream;
         }
 
         Stream stream = Stream.create(name);
         addStreams(Arrays.asList(stream));
-        
+
         return stream;
     }
 
@@ -438,24 +553,6 @@ public class Device extends DeviceContainer {
     @Override
     public Device getDevice() {
         return this;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof Device) {
-            Device sobj = (Device) obj;
-            if (this.id != null && sobj.id != null) {
-                return sobj.id.equals(this.id);
-            }
-        }
-        return super.equals(obj);
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 53 * hash + Objects.hashCode(this.id);
-        return hash;
     }
 
 }

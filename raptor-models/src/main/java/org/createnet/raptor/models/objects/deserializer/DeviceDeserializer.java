@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Spliterator;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
@@ -49,31 +48,23 @@ public class DeviceDeserializer extends JsonDeserializer<Device> {
         JsonNode tree = jp.getCodec().readTree(jp);
 
         if (tree.has("id")) {
-            device.id = getText("id", tree);
+            device.id(getText("id", tree));
         }
 
         if (tree.has("userId")) {
-            device.userId = getText("userId", tree);
+            device.userId(getText("userId", tree));
         }
 
         if (tree.has("name")) {
-            device.name = getText("name", tree);
+            device.name(getText("name", tree));
         }
 
         if (tree.has("description")) {
-            device.description = getText("description", tree);
+            device.description(getText("description", tree));
         }
 
-        if (tree.has("parentId")) {
-            device.parentId = getText("parentId", tree);
-        }
-
-        if (tree.has("path")) {
-            device.path = getText("path", tree);
-        }
-        
         if (tree.has("properties") && tree.get("properties").size() > 0) {
-            device.properties.putAll(Device.getMapper().convertValue(tree.get("properties"), new TypeReference<Map<String, Object>>() {}));
+            device.properties().putAll(Device.getMapper().convertValue(tree.get("properties"), new TypeReference<Map<String, Object>>() {}));
         }
 
         if (tree.has("streams")) {
@@ -87,14 +78,14 @@ public class DeviceDeserializer extends JsonDeserializer<Device> {
                     JsonNode jsonStream = tree.get("streams").get(name);
 
                     Stream stream = new Stream(name, jsonStream, device);
-                    device.streams.put(stream.name, stream);
+                    device.streams().put(stream.name, stream);
                 }
             }
 
             if (tree.get("streams").isArray()) {
                 for (JsonNode jsonStream : tree.get("streams")) {
                     Stream stream = new Stream(jsonStream);
-                    device.streams.put(stream.name, stream);
+                    device.streams().put(stream.name, stream);
                 }
             }
 
@@ -105,7 +96,7 @@ public class DeviceDeserializer extends JsonDeserializer<Device> {
             if (tree.get("actions").isArray()) {
                 for (JsonNode json : tree.get("actions")) {
                     Action actuation = new Action(json, device);
-                    device.actions.put(actuation.name, actuation);
+                    device.actions().put(actuation.name, actuation);
                 }
             }
 
@@ -117,7 +108,7 @@ public class DeviceDeserializer extends JsonDeserializer<Device> {
                     JsonNode json = tree.get("actions").get(name);
 
                     Action actuation = new Action(name, json, device);
-                    device.actions.put(actuation.name, actuation);
+                    device.actions().put(actuation.name, actuation);
                 }
             }
 

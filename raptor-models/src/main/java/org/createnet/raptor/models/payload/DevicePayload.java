@@ -28,15 +28,13 @@ public class DevicePayload extends AbstractPayload {
 
     public String userId;
     public Device device;
-    public String path;
 
     public DevicePayload() {
     }
 
     public DevicePayload(Device obj, Permissions op) {
-        userId = obj.userId;
+        userId = obj.userId();
         device = obj;
-        path = obj.path();
         type = MessageType.device;
         this.op = op;
     }
@@ -66,12 +64,4 @@ public class DevicePayload extends AbstractPayload {
         this.device = device;
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-    
 }

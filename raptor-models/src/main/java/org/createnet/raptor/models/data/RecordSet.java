@@ -299,10 +299,10 @@ public class RecordSet {
 
             if (stream.getDevice() != null) {
 
-                this.deviceId = stream.getDevice().getId();
+                this.deviceId = stream.getDevice().id();
 
                 if (this.userId == null) {
-                    this.userId = stream.getDevice().getUserId();
+                    this.userId = stream.getDevice().userId();
                 }
 
             }

@@ -18,6 +18,7 @@ package org.createnet.raptor.tree;
 import org.createnet.raptor.api.common.dispatcher.RaptorMessageHandler;
 import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
+import org.createnet.raptor.models.tree.TreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,15 +42,32 @@ public class TreeMessageHandler implements RaptorMessageHandler {
 
                 DevicePayload payload = (DevicePayload) dispatcherPayload;
                 
+                TreeNode node = treeService.get(payload.device.id());
+                
+                //constrined reactions
                 switch (payload.op) {
                     case delete:
-                        treeService.delete(payload.device.getId());
+                        if(node != null) {
+                            treeService.delete(payload.device.id());
+                        }
+                        break;
+                    case update:
+                        if(node != null) {
+                            node.name(payload.device.name());
+                            treeService.save(node);
+                        }
                         break;
                 }
-
+                
                 break;
         }
-
+        
+        
+        
+    }
+    
+    protected void notifyParent(TreeNode node) {
+        
     }
 
 }

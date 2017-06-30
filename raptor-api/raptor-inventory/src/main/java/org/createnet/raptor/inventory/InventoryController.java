@@ -112,7 +112,7 @@ public class InventoryController {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Device definition is not valid: " + ex.getMessage());
         }
 
-        device.userId = currentUser.getUuid();
+        device.userId(currentUser.getUuid());
         deviceService.save(device);
 
         eventPublisher.create(device);

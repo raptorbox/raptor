@@ -61,15 +61,15 @@ public class DataStreamTest {
     public void setUp() {
 
         Device d = new Device();
-        d.name = "data test " + System.currentTimeMillis();
+        d.name("data test " + System.currentTimeMillis());
 
         d.addStream("test", "string", "string");
         d.addStream("test", "number", "number");
         d.addStream("test", "boolean", "boolean");
 
-        Assert.assertTrue(d.getStream("test").channels.size() == 3);
+        Assert.assertTrue(d.stream("test").channels.size() == 3);
 
-        log.debug("Creating {} device", d.name);
+        log.debug("Creating {} device", d.name());
 
         device = d;
     }

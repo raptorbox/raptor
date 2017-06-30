@@ -62,15 +62,15 @@ public class DeviceTest extends TestUtils {
 
         device.parse(jsonDevice.toString());
 
-        assertTrue(device.name.equals("Phone"));
+        assertTrue(device.name().equals("Phone"));
 
 //    assertTrue(device.parentId == null);
 //    assertTrue(device.path == null);
-        assertTrue(device.streams.size() == 1);
-        assertTrue(device.streams.get("mylocation").channels.get("position").type.toLowerCase().equals("geo_point"));
+        assertTrue(device.streams().size() == 1);
+        assertTrue(device.streams().get("mylocation").channels.get("position").type.toLowerCase().equals("geo_point"));
 
-        assertTrue(device.actions.size() == 3);
-        assertTrue(device.actions.get("makeCall") != null);
+        assertTrue(device.actions().size() == 3);
+        assertTrue(device.actions().get("makeCall") != null);
 
     }
 
@@ -89,11 +89,11 @@ public class DeviceTest extends TestUtils {
         d.addStream("test", "number", "number");
         d.addStream("test", "string", "string");
         
-        assertTrue(d.getStream("test").channels.size() == 3);
+        assertTrue(d.stream("test").channels.size() == 3);
         
-        assertNotNull(d.getStream("test").channels.get("boolean"));
-        assertNotNull(d.getStream("test").channels.get("number"));
-        assertNotNull(d.getStream("test").channels.get("string"));        
+        assertNotNull(d.stream("test").channels.get("boolean"));
+        assertNotNull(d.stream("test").channels.get("number"));
+        assertNotNull(d.stream("test").channels.get("string"));        
         
     }
 
@@ -117,7 +117,6 @@ public class DeviceTest extends TestUtils {
         JsonNode json = mapper.readTree(strjson);
 
         assertTrue(json.has("userId"));
-        assertTrue(json.has("parentId"));
     }
 
     /**

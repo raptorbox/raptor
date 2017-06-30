@@ -50,7 +50,7 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
 
         if (deviceObject instanceof Device) {
             Device dev = (Device) deviceObject;
-            deviceId = dev.getId();
+            deviceId = dev.id();
         }
 
         return isAuthorized(auth, deviceId, permission.toString().toLowerCase());

@@ -69,7 +69,7 @@ public class Utils {
     
     static public Device createDevice(String name) throws IOException {
         Device d = new Device();
-        d.name = name;
+        d.name(name);
         return getRaptor().Inventory().create(d);
     }
     

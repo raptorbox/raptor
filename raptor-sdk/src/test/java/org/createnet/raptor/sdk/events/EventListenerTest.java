@@ -66,7 +66,7 @@ public class EventListenerTest {
 
     private Device newDevice(String name) {
         Device d = new Device();
-        d.name = name;
+        d.name(name);
 
         d.addAction("switch");
         d.addAction("dimming");
@@ -75,10 +75,10 @@ public class EventListenerTest {
         d.addStream("test", "string", "string");
         d.addStream("test2", "foo", "boolean");
 
-        Assert.assertEquals(3, d.getActions().size());
-        Assert.assertEquals(2, d.getStreams().size());
+        Assert.assertEquals(3, d.actions().size());
+        Assert.assertEquals(2, d.streams().size());
 
-        log.debug("Creating {} device", d.name);
+        log.debug("Creating {} device", d.name());
 
         return d;
     }
@@ -89,7 +89,7 @@ public class EventListenerTest {
 
     private void pushData(Device dev) {
 
-        Stream stream = dev.getStream("test2");
+        Stream stream = dev.stream("test2");
         RecordSet record = new RecordSet(stream);
         record.channel("foo", true);
 
@@ -121,7 +121,7 @@ public class EventListenerTest {
             @Override
             public void callback(Device obj, DevicePayload message) {
                 log.debug("Device event received {}", message.toString());
-                Assert.assertEquals(obj.id, dev.id);
+                Assert.assertEquals(obj.id(), dev.id());
             }
         });
         dev.addStream("test2", "foo", "boolean");
@@ -146,7 +146,7 @@ public class EventListenerTest {
             @Override
             public void callback(Stream stream, RecordSet record) {
                 log.debug("dev: Data received {}", record.toJson());
-                Assert.assertTrue(record.deviceId.equals(dev.getDevice().getId()));
+                Assert.assertTrue(record.deviceId.equals(dev.getDevice().id()));
                 Assert.assertTrue(stream.name.equals("test2"));
             }
         });
@@ -155,7 +155,7 @@ public class EventListenerTest {
             @Override
             public void callback(Stream stream, RecordSet record) {
                 log.debug("dev1: Data received {}", record.toJson());
-                Assert.assertTrue(record.deviceId.equals(dev1.getDevice().getId()));
+                Assert.assertTrue(record.deviceId.equals(dev1.getDevice().id()));
                 Assert.assertTrue(stream.name.equals("test2"));
             }
         });
@@ -215,7 +215,7 @@ public class EventListenerTest {
             }
         });
 
-        Action action = dev.getAction("switch");
+        Action action = dev.action("switch");
         raptor.Action().invoke(action, "on");
 
         Utils.waitFor(1000);
@@ -248,7 +248,7 @@ public class EventListenerTest {
             log.debug("Exception: {}", e.getMessage());
         }
 
-        Stream stream = dev.getStream("test");
+        Stream stream = dev.stream("test");
 
         RecordSet record = new RecordSet(stream);
         record.channel("string", "test1");
@@ -273,7 +273,7 @@ public class EventListenerTest {
         Utils.waitFor(1500);
 
         Raptor r2 = new Raptor(Utils.loadSettings().getProperty("url"), t);
-        Stream stream = dev.getStream("test");
+        Stream stream = dev.stream("test");
 
         r2.Stream().subscribe(stream, new DataCallback() {
             @Override

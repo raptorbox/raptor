@@ -129,7 +129,7 @@ public class TokenPermissionTest {
         assertNotNull(r.Auth().getUser());
         
         Device d = new Device();
-        d.name = "test1";
+        d.name("test1");
         Stream s = d.addStream("test", "string");
         
         r.Inventory().create(d);

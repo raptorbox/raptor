@@ -41,7 +41,7 @@ public class StreamService {
     }
 
     public List<RecordSet> list(Stream stream, Pageable page) {
-        return repository.findByDeviceIdAndStreamId(stream.getDevice().getId(), stream.name, page);
+        return repository.findByDeviceIdAndStreamId(stream.getDevice().id(), stream.name, page);
     }
 
     public RecordSet lastUpdate(Stream stream) {
@@ -57,7 +57,7 @@ public class StreamService {
     }
 
     public void deleteAll(Stream stream) {
-        repository.deleteByDeviceIdAndStreamId(stream.getDevice().getId(), stream.name);
+        repository.deleteByDeviceIdAndStreamId(stream.getDevice().id(), stream.name);
     }
 
     public Page<RecordSet> search(Predicate predicate, Pageable pageable) {

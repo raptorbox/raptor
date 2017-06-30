@@ -209,7 +209,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
                 // <object>/events -> requires `admin`
                 String subtopic = topicTokens[soidIndex + 1];
                 if (subtopic != null && subtopic.equals("events")) {
-                    req = r.Admin().User().isAuthorized(obj.getId(), user.getUuid(), Permissions.admin);
+                    req = r.Admin().User().isAuthorized(obj.id(), user.getUuid(), Permissions.admin);
                     if (!req.result) {
                         return false;
                     }
@@ -217,7 +217,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
                 // <object>/streams/<stream> -> requires `pull`
                 if (subtopic != null && subtopic.equals("streams")) {
-                    req = r.Admin().User().isAuthorized(obj.getId(), user.getUuid(), Permissions.pull);
+                    req = r.Admin().User().isAuthorized(obj.id(), user.getUuid(), Permissions.pull);
                     if (!req.result) {
                         return false;
                     }
@@ -225,7 +225,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
                 // <object>/actions/<action> -> requires `execute`
                 if (subtopic != null && subtopic.equals("actions")) {
-                    req = r.Admin().User().isAuthorized(obj.getId(), user.getUuid(), Permissions.execute);
+                    req = r.Admin().User().isAuthorized(obj.id(), user.getUuid(), Permissions.execute);
                     if (!req.result) {
                         return false;
                     }

@@ -74,7 +74,7 @@ public class ActionClient extends AbstractClient {
     public ActionStatus getStatus(Action action) {
         return Device.getMapper().convertValue(
                 getClient().get(
-                        String.format(Routes.ACTION_STATUS, action.getDevice().id, action.name)
+                        String.format(Routes.ACTION_STATUS, action.getDevice().id(), action.name)
                 ),
                 ActionStatus.class
         );
@@ -102,7 +102,7 @@ public class ActionClient extends AbstractClient {
      */
     public ActionStatus setStatus(Action action, ActionStatus status) {
         return ActionStatus.parseJSON(getClient().put(
-                String.format(Routes.ACTION_STATUS, action.getDevice().id, action.name), status.status
+                String.format(Routes.ACTION_STATUS, action.getDevice().id(), action.name), status.status
         ));
     }
 
@@ -113,7 +113,7 @@ public class ActionClient extends AbstractClient {
      */
     public void removeStatus(Action action) {
         getClient().delete(
-                String.format(Routes.ACTION_STATUS, action.getDevice().id, action.name)
+                String.format(Routes.ACTION_STATUS, action.getDevice().id(), action.name)
         );
     }
 
@@ -154,7 +154,7 @@ public class ActionClient extends AbstractClient {
      */
     public void invoke(Action action, String payload) {
         getClient().post(
-                String.format(Routes.INVOKE, action.getDevice().id, action.name), payload
+                String.format(Routes.INVOKE, action.getDevice().id(), action.name), payload
         );
     }
 

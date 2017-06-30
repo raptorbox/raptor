@@ -81,9 +81,9 @@ public class TreeNode {
      */
     static public TreeNode create(Device device) {
         return new TreeNode()
-                .id(device.getId())
+                .id(device.id())
                 .parentId(null)
-                .userId(device.getUserId())
+                .userId(device.userId())
                 .type(NodeType.device)
                 .order(0);
     }

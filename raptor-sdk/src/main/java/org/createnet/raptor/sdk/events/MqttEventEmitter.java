@@ -66,7 +66,7 @@ public class MqttEventEmitter extends AbstractClient {
     }
 
     protected String getDeviceTopic(Device obj) {
-        return String.format(Topics.DEVICE, obj.id);
+        return String.format(Topics.DEVICE, obj.id());
     }
 
     protected String getGroupTopic(TreeNode n) {
@@ -74,12 +74,12 @@ public class MqttEventEmitter extends AbstractClient {
     }
 
     protected String getStreamTopic(Stream stream) {
-        String path = String.format(Topics.STREAM, stream.getDevice().getId(), stream.name);
+        String path = String.format(Topics.STREAM, stream.getDevice().id(), stream.name);
         return path;
     }
 
     protected String getActionTopic(Action action) {
-        String path = String.format(Topics.ACTION, action.getDevice().getId(), action.name);
+        String path = String.format(Topics.ACTION, action.getDevice().id(), action.name);
         return path;
     }
 

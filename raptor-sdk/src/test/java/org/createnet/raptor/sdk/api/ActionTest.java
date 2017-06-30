@@ -55,15 +55,15 @@ public class ActionTest {
         raptor = Utils.getRaptor();
 
         Device d = new Device();
-        d.name = "data test " + System.currentTimeMillis();
+        d.name("data test " + System.currentTimeMillis());
         
         d.addAction("switch");
         d.addAction("dimming");
         d.addAction("battery");
 
-        Assert.assertEquals(3, d.getActions().size());
+        Assert.assertEquals(3, d.actions().size());
 
-        log.debug("Creating {} device", d.name);
+        log.debug("Creating {} device", d.name());
 
         device = d;
     }
@@ -78,7 +78,7 @@ public class ActionTest {
         log.debug("set action status");
         
         Device dev = Utils.createDevice(device);
-        Action a = dev.getAction("switch");
+        Action a = dev.action("switch");
         ActionStatus status = raptor.Action().setStatus(a, a.getStatus().status("on"));
         
         Assert.assertNotNull(status);
@@ -91,7 +91,7 @@ public class ActionTest {
         log.debug("get action status");
         
         Device dev = Utils.createDevice(device);
-        Action a = dev.getAction("switch");
+        Action a = dev.action("switch");
         ActionStatus status = raptor.Action().setStatus(a, a.getStatus().status("on"));
         
         ActionStatus s = raptor.Action().getStatus(a);
@@ -105,7 +105,7 @@ public class ActionTest {
     public void invoke()  {
         log.debug("invoke an action");
         Device dev = Utils.createDevice(device);
-        Action a = dev.getAction("switch");
+        Action a = dev.action("switch");
         raptor.Action().invoke(a, "foobar3000");
         //todo: add subscription check
     }

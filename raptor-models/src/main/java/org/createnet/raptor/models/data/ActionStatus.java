@@ -57,7 +57,7 @@ public class ActionStatus {
     public ActionStatus(Action action, String status) {
         this(status);
         this.actionId = action.name;
-        this.objectId = action.getDevice().id;
+        this.objectId = action.getDevice().id();
     }
 
     public ActionStatus(String status) {

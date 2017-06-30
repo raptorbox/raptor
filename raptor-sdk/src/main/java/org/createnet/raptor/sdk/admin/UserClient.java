@@ -81,7 +81,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public AuthorizationResponse isAuthorized(Device device, User user, Permissions permission) {
-        return isAuthorized(device.getId(), user.getUuid(), permission);
+        return isAuthorized(device.id(), user.getUuid(), permission);
     }
 
     /**
@@ -92,7 +92,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public AuthorizationResponse isAuthorized(Device device, Permissions permission) {
-        return isAuthorized(device.getId(), getContainer().Auth().getUser().getUuid(), permission);
+        return isAuthorized(device.id(), getContainer().Auth().getUser().getUuid(), permission);
     }
 
     /**

@@ -50,7 +50,7 @@ public class DeviceService {
     }
 
     public void delete(Device dev) {
-        delete(dev.getId());
+        delete(dev.id());
     }
 
     public Page<Device> search(Predicate predicate, Pageable pageable) {

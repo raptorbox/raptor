@@ -70,13 +70,13 @@ public class InventoryTest {
         Raptor raptor = Utils.getRaptor();
 
         Device dev = new Device();
-        dev.name = "test create";
+        dev.name("test create");
 
         dev.validate();
         raptor.Inventory().create(dev);
 
-        log.debug("Device created {}", dev.id);
-        assertNotNull(dev.id);
+        log.debug("Device created {}", dev.id());
+        assertNotNull(dev.id());
     }
 
     @Test
@@ -85,12 +85,12 @@ public class InventoryTest {
         Raptor raptor = Utils.getRaptor();
 
         Device dev = new Device();
-        dev.name = "test update";
+        dev.name("test update");
         Stream s = dev.addStream("position", "location", "geo_point");
         dev.validate();
         raptor.Inventory().create(dev);
 
-        log.debug("Device created {}", dev.id);
+        log.debug("Device created {}", dev.id());
 
         s.addChannel("speed", "number");
         s.addChannel("color", "string");
@@ -107,14 +107,14 @@ public class InventoryTest {
 
         log.debug("found {} devices", list.size());
 
-        Device dev1 = list.stream().filter(d -> d.id.equals(dev.id)).findFirst().get();
+        Device dev1 = list.stream().filter(d -> d.id().equals(dev.id())).findFirst().get();
 
         assertNotNull(dev1);
-        assertTrue(dev1.streams.size() == dev.streams.size());
+        assertTrue(dev1.streams().size() == dev.streams().size());
 
-        log.debug("position channels {} == {}", dev1.streams.get("position").channels.size(), dev.streams.get("position").channels.size());
-        assertTrue(dev1.streams.get("position").channels.size() == dev.streams.get("position").channels.size());
-        assertTrue(dev1.streams.get("position").channels.containsKey("color"));
+        log.debug("position channels {} == {}", dev1.streams().get("position").channels.size(), dev.streams().get("position").channels.size());
+        assertTrue(dev1.streams().get("position").channels.size() == dev.streams().get("position").channels.size());
+        assertTrue(dev1.streams().get("position").channels.containsKey("color"));
 
     }
 
@@ -122,7 +122,7 @@ public class InventoryTest {
     public void update() {
         Raptor raptor = Utils.getRaptor();
         Device dev = new Device();
-        dev.name = "modified device";
+        dev.name("modified device");
         dev.validate();
         raptor.Inventory().create(dev);
 
@@ -130,21 +130,21 @@ public class InventoryTest {
 
         List<Device> list = raptor.Inventory().list();
 
-        Device dev1 = list.stream().filter(d -> d.id.equals(dev.id)).findFirst().get();
+        Device dev1 = list.stream().filter(d -> d.id().equals(dev.id())).findFirst().get();
         assertNotNull(dev1);
 
-        assertEquals(dev1.name, dev.name);
+        assertEquals(dev1.name(), dev.name());
     }
 
     @Test
     public void load() {
         Raptor raptor = Utils.getRaptor();
         Device dev = new Device();
-        dev.name = "test load";
+        dev.name("test load");
         dev.validate();
         raptor.Inventory().create(dev);
-        Device dev1 = raptor.Inventory().load(dev.id);
-        assertTrue(dev1.name.equals(dev.name));
+        Device dev1 = raptor.Inventory().load(dev.id());
+        assertTrue(dev1.name().equals(dev.name()));
     }
 
     @Test
@@ -154,9 +154,9 @@ public class InventoryTest {
         for (int i = 0; i < 3; i++) {
             log.debug("Create device {}", i);
             Device dev1 = new Device();
-            dev1.name = "test-search " + i;
-            dev1.properties.put("version", i);
-            dev1.properties.put("active", i%2==0);
+            dev1.name("test-search " + i);
+            dev1.properties().put("version", i);
+            dev1.properties().put("active", i%2==0);
             raptor.Inventory().create(dev1);
         }
 
@@ -165,10 +165,10 @@ public class InventoryTest {
         log.debug("Searching for {}", q.toJSON().toString());
         List<Device> results = raptor.Inventory().search(q);
 
-        log.debug("Results found {}", results.stream().map(d -> d.name).collect(Collectors.toList()));
+        log.debug("Results found {}", results.stream().map(d -> d.name()).collect(Collectors.toList()));
         assertNotNull(results);
         assertTrue(results.size() > 0);
-        assertTrue(results.get(0).name.contains(q.name.getContains()));
+        assertTrue(results.get(0).name().contains(q.name.getContains()));
 
     }
 
@@ -179,10 +179,10 @@ public class InventoryTest {
         for (int i = 0; i < 3; i++) {
             log.debug("Create device d{}", i);
             Device dev1 = new Device();
-            dev1.name = "d" + i;
-            dev1.properties.put("model", System.currentTimeMillis());
+            dev1.name("d" + i);
+            dev1.properties().put("model", System.currentTimeMillis());
             String v = i % 2 == 0 ? "A" : "B";
-            dev1.properties.put("version", v);
+            dev1.properties().put("version", v);
             log.debug("Create device with version {}", v);
             raptor.Inventory().create(dev1);
         }
@@ -194,10 +194,8 @@ public class InventoryTest {
 
         List<Device> results = raptor.Inventory().search(q);
 
-        log.debug("Results found {}", results.stream().map(d -> d.name).collect(Collectors.toList()));
+        log.debug("Results found {}", results.stream().map(d -> d.name()).collect(Collectors.toList()));
         assertNotNull(results);
-//        assertTrue(results.size() > 0);
-//        assertTrue(results.get(0).properties.get("version").equals(testVersion));
 
     }
 

@@ -37,7 +37,7 @@ public class MqttDispatcherEventListener implements ApplicationListener<DeviceAp
         
         DeviceEvent objEvent = event.getDeviceEvent();
         
-        if (!objEvent.getObject().settings.eventsEnabled()) {
+        if (!objEvent.getObject().settings().eventsEnabled()) {
             return;
         }
 

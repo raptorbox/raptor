@@ -77,7 +77,7 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
         
         // try to get a value
         if(r.userId == null && obj != null) {
-            r.userId = obj.userId;
+            r.userId = obj.userId();
         }
         
         if (r.userId != null) {
@@ -87,7 +87,7 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
 
         // try to get a value
         if(r.deviceId == null && obj != null) {
-            r.deviceId = obj.id;
+            r.deviceId = obj.id();
         }
         
         if (r.deviceId != null) {

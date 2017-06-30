@@ -100,7 +100,7 @@ public class DispatcherService implements InitializingBean, DisposableBean {
             throw new RaptorComponent.ParserException("Device is null");
         }
 
-        String id = obj.getId();
+        String id = obj.id();
         if (id == null) {
             throw new RaptorComponent.ParserException("Device.id is null");
         }
@@ -115,7 +115,7 @@ public class DispatcherService implements InitializingBean, DisposableBean {
             throw new RaptorComponent.ParserException("Device is null");
         }
 
-        String userId = obj.getUserId();
+        String userId = obj.userId();
         if (userId == null) {
             throw new RaptorComponent.ParserException("Device.userId is null");
         }
@@ -173,12 +173,12 @@ public class DispatcherService implements InitializingBean, DisposableBean {
     }
 
     public void pushData(Stream stream, RecordSet records) {
-        String topic = stream.getDevice().id + "/streams/" + stream.name + "/updates";
+        String topic = stream.getDevice().id() + "/streams/" + stream.name + "/updates";
         notifyEvent(topic, new DataPayload(records.toJson()));
     }
 
     public void actionTrigger(Action action, String status) {
-        String topic = action.getDevice().id + "/actions/" + action.name;
+        String topic = action.getDevice().id() + "/actions/" + action.name;
         notifyEvent(topic, new DataPayload(status));
     }
 

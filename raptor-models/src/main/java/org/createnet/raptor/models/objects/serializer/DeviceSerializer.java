@@ -32,27 +32,27 @@ public class DeviceSerializer extends JsonSerializer<Device> {
 
         jg.writeStartObject();
 
-        if (t.id != null) {
-            jg.writeStringField("id", t.id);
+        if (t.id() != null) {
+            jg.writeStringField("id", t.id());
         }
 
-        if (t.userId != null) {
-            jg.writeStringField("userId", t.userId);
+        if (t.userId() != null) {
+            jg.writeStringField("userId", t.userId());
         }
 
-        if (t.name != null) {
-            jg.writeStringField("name", t.name);
+        if (t.name() != null) {
+            jg.writeStringField("name", t.name());
         }
 
-        if (t.description != null) {
-            jg.writeStringField("description", t.description);
+        if (t.description() != null) {
+            jg.writeStringField("description", t.description());
         }
 
-        jg.writeObjectField("streams", t.streams);
-        jg.writeObjectField("actions", t.actions);
+        jg.writeObjectField("streams", t.streams());
+        jg.writeObjectField("actions", t.actions());
 
-        jg.writeObjectField("properties", t.properties);
-        jg.writeObjectField("settings", t.settings);
+        jg.writeObjectField("properties", t.properties());
+        jg.writeObjectField("settings", t.settings());
 
         jg.writeEndObject();
 

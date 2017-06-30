@@ -36,7 +36,6 @@ import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.payload.ActionPayload;
 import org.createnet.raptor.models.payload.StreamPayload;
 import org.createnet.raptor.models.query.DeviceQuery;
-import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.admin.DevicePermissionClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +99,7 @@ public class InventoryClient extends AbstractClient {
             switch (payload.getType()) {
                 case stream:
                     StreamPayload spayload = (StreamPayload) payload;
-                    ev.callback(dev.getStream(spayload.streamId), spayload);
+                    ev.callback(dev.stream(spayload.streamId), spayload);
                     break;
             }
         });
@@ -117,7 +116,7 @@ public class InventoryClient extends AbstractClient {
             switch (payload.getType()) {
                 case action:
                     ActionPayload apayload = (ActionPayload) payload;
-                    ev.callback(dev.getAction(apayload.actionId), apayload);
+                    ev.callback(dev.action(apayload.actionId), apayload);
                     break;
             }
         });
@@ -140,7 +139,7 @@ public class InventoryClient extends AbstractClient {
                         }
                         StreamPayload dpayload = (StreamPayload) payload;
                         RecordSet record = RecordSet.fromJSON(dpayload.data);
-                        ev.callback(dev.getStream(record.streamId), record);
+                        ev.callback(dev.stream(record.streamId), record);
                         break;
                 }
             }
@@ -158,7 +157,7 @@ public class InventoryClient extends AbstractClient {
         if (!node.has("id")) {
             throw new ClientException("Missing ID on object creation");
         }
-        obj.id = node.get("id").asText();
+        obj.id(node.get("id").asText());
         return obj;
     }
 
@@ -183,7 +182,7 @@ public class InventoryClient extends AbstractClient {
     public Device update(Device obj) {
         obj.parse(
                 getClient().put(
-                        String.format(Routes.INVENTORY_UPDATE, obj.getId()),
+                        String.format(Routes.INVENTORY_UPDATE, obj.id()),
                         obj.toJsonNode()
                 )
         );
@@ -220,9 +219,9 @@ public class InventoryClient extends AbstractClient {
      */
     public void delete(Device obj) {
         getClient().delete(
-                String.format(Routes.INVENTORY_DELETE, obj.getId())
+                String.format(Routes.INVENTORY_DELETE, obj.id())
         );
-        obj.id = null;
+        obj.id(null);
     }
 
     /**
