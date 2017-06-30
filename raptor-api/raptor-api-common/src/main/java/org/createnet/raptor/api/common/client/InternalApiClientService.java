@@ -15,7 +15,9 @@
  */
 package org.createnet.raptor.api.common.client;
 
+import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.sdk.Raptor;
+import org.createnet.raptor.sdk.api.AuthClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -59,4 +61,13 @@ public class InternalApiClientService extends Raptor {
 
     }
 
+    public Raptor impersonate(String userId) {
+        AuthClient.LoginState state = Admin().User().impersonate(userId);
+        return new Raptor(config.getUrl(), state.token);
+    }
+
+    public Raptor impersonate(User user) {
+        return impersonate(user.getUuid());
+    }
+    
 }

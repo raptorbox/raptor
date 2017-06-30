@@ -44,6 +44,7 @@ final public class Routes {
     
     public static final String USER_CREATE = "/auth/user";
     public static final String USER_GET = USER_CREATE + "/%s";
+    public static final String USER_IMPERSONATE = USER_GET + "/impersonate";
     public static final String USER_UPDATE = USER_GET;
     public static final String USER_DELETE = USER_GET;
     public static final String USER_GET_ME = "/auth/me";

@@ -31,6 +31,7 @@ import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.Routes;
+import org.createnet.raptor.sdk.api.AuthClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,6 +134,17 @@ public class UserClient extends AbstractClient {
     public User get() {
         JsonNode node = getClient().get(Routes.USER_GET_ME);
         return getMapper().convertValue(node, User.class);
+    }
+
+    /**
+     * Impersonate an user retrieving a valid login token
+     *
+     * @param userId User ID to impersonate
+     * @return
+     */
+    public AuthClient.LoginState impersonate(String userId) {
+        JsonNode node = getClient().get(String.format(Routes.USER_IMPERSONATE, userId));
+        return getMapper().convertValue(node, AuthClient.LoginState.class);
     }
 
     /**

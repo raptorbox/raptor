@@ -19,15 +19,20 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.createnet.raptor.auth.services.TokenService;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.services.UserService;
+import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.models.auth.Token;
+import org.createnet.raptor.models.auth.request.LoginResponse;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,6 +71,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TokenService tokenService;
 
     @Autowired
     private RaptorConfiguration configuration;
@@ -145,7 +153,7 @@ public class UserController {
             response = User.class,
             nickname = "getUser"
     )
-    public ResponseEntity<?> getUser(
+    public ResponseEntity getUser(
             @PathVariable String uuid,
             @AuthenticationPrincipal User currentUser
     ) {
@@ -157,6 +165,36 @@ public class UserController {
         }
 
         return ResponseEntity.ok(u);
+    }
+
+    @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
+    @RequestMapping(value = {"/user/{uuid}/impersonate"}, method = RequestMethod.GET)
+    @ApiOperation(
+            value = "Retrieve a login token for the user",
+            notes = "",
+            response = LoginResponse.class,
+            nickname = "impersonateUser"
+    )
+    public ResponseEntity impersonateUser(
+            @PathVariable String uuid,
+            @AuthenticationPrincipal User currentUser
+    ) {
+
+        User u = userService.getByUuid(uuid);
+        if (u == null) {
+            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "User not found");
+        }
+        
+        if (u.hasRole(Role.Roles.super_admin)) {
+            return JsonErrorResponse.entity(HttpStatus.FORBIDDEN, "Cannot impersonat this user");
+        }
+
+        if (configuration.getAuth().userHasLock(rawUser.getUsername())) {
+            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "User cannot be modified");
+        }
+
+        final Token token = tokenService.createLoginToken(u);
+        return ResponseEntity.ok(new LoginResponse(u, token));
     }
 
     @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
