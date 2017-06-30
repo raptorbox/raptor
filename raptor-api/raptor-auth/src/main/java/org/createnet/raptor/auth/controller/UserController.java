@@ -189,7 +189,7 @@ public class UserController {
             return JsonErrorResponse.entity(HttpStatus.FORBIDDEN, "Cannot impersonat this user");
         }
 
-        if (configuration.getAuth().userHasLock(rawUser.getUsername())) {
+        if (configuration.getAuth().userHasLock(u.getUsername())) {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "User cannot be modified");
         }
 
