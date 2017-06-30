@@ -116,7 +116,7 @@ public class AuthenticationController {
             final Token token = tokenService.createLoginToken((User) userDetails);
 
             // Return the token
-            return ResponseEntity.ok(new LoginResponse((User) userDetails, token.getToken()));
+            return ResponseEntity.ok(new LoginResponse((User) userDetails, token));
 
         } catch (AuthenticationException ex) {
             logger.error("Authentication exception: {}", ex.getMessage());
@@ -177,9 +177,11 @@ public class AuthenticationController {
         logger.debug("Refreshing token id:{} for user {}", token.getId(), currentUser.getUuid());
 
         Token refreshedToken = tokenService.generateToken(token);
-
+        
+        refreshedToken = tokenService.save(refreshedToken);
         logger.debug("Refreshed token id:{}", refreshedToken.getId());
-        return ResponseEntity.ok(new LoginResponse(currentUser, refreshedToken.getToken()));
+        
+        return ResponseEntity.ok(new LoginResponse(currentUser, refreshedToken));
     }
 
 }

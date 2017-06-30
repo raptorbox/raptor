@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.models.auth.request;
 
+import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 
 /**
@@ -24,14 +25,22 @@ import org.createnet.raptor.models.auth.User;
 public class LoginResponse {
 
     public String token = null;
+    public Long expires = null;
     public User user = new User();
 
     public LoginResponse() {
     }
 
-    public LoginResponse(User user, String token) {
+    public LoginResponse(User user, String token, Long expires) {
         this.user = user;
         this.token = token;
+        this.expires = expires;
+    }
+    
+    public LoginResponse(User user, Token token) {
+        this.user = user;
+        this.token = token.getToken();
+        this.expires = token.getExpiresInstant().toEpochMilli();
     }
 
 }

@@ -15,8 +15,9 @@
  */
 package org.createnet.raptor.api.common.client;
 
-import org.createnet.raptor.api.common.BaseApplication;
 import org.createnet.raptor.sdk.Raptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -26,12 +27,14 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class InternalApiClientService extends Raptor {
-
+    
+    private Logger log = LoggerFactory.getLogger(InternalApiClientService.class);
+    
     public InternalApiClientService(String url, String username, String password) {
         super(url, username, password);
     }
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 360000)
     public void refreshToken() {
 
         if (Auth().getConfig().getUsername() == null) {
@@ -39,14 +42,20 @@ public class InternalApiClientService extends Raptor {
         }
         
         if(Auth().getToken() == null) {
-            BaseApplication.log.debug("Missing service token, skip refresh");
-            Auth().login();
+            log.debug("Missing service token, attempt login");
+            try {
+                Auth().login();
+            }
+            catch(Exception ex) {
+                log.warn("Login failed: {}", ex.getMessage());
+            }
+            
             return;
         }
         
-        BaseApplication.log.debug("Refreshing service token");
+        log.debug("Refreshing service token");
         Auth().refreshToken();
-        BaseApplication.log.debug("Service token updated");
+        log.debug("Service token updated");
 
     }
 

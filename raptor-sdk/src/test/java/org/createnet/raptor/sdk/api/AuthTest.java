@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.sdk.api;
 
+import java.time.Instant;
 import java.util.Properties;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
@@ -123,12 +124,22 @@ public class AuthTest {
         log.debug("Refresh token");
 
         Properties p = Utils.loadSettings();
-
+        long now = Instant.now().toEpochMilli();
+        
         AuthClient.LoginState loginInfo = raptor.Auth().login();
         AuthClient.LoginState refreshInfo = raptor.Auth().refreshToken();
 
         Assert.assertNotNull(refreshInfo.token);
         Assert.assertNotEquals(refreshInfo.token, loginInfo.token);
+        Assert.assertTrue(now < refreshInfo.expires);
+        
+        log.debug("Refresh token, again");
+        AuthClient.LoginState refreshInfo2 = raptor.Auth().refreshToken();
+
+        Assert.assertNotNull(refreshInfo2.token);
+        Assert.assertNotEquals(refreshInfo.token, refreshInfo2.token);
+        Assert.assertTrue(now < refreshInfo2.expires);
+        
     }
 
     @Test

@@ -105,7 +105,14 @@ public class Application extends BaseApplication {
             User defaultUser = userRepository.findByUsername(admin.getUsername());
             if (defaultUser != null) {
                 log.debug("User `{}` exists (id: {})", defaultUser.getUsername(), defaultUser.getId());
-                return;
+                
+                if (admin.isLocked()) {
+                    log.debug("Recreating user `{}`", defaultUser.getUsername());    
+                    userService.delete(defaultUser);
+                }
+                else {
+                    return;
+                }
             }
 
             User adminUser = new User();

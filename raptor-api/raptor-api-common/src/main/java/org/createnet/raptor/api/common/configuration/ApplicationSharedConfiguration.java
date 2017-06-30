@@ -45,12 +45,8 @@ public class ApplicationSharedConfiguration {
     
     @Bean
     public InternalApiClientService internalApiClientService() {
-        
         AuthConfiguration.AdminUser user = config.getAuth().getServiceUser();
-        
         InternalApiClientService client = new InternalApiClientService(config.getUrl(), user.getUsername(), user.getPassword());
-//        client.Auth().login();
-        
         return client;
     }
 

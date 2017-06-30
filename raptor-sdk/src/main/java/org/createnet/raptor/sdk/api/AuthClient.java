@@ -66,7 +66,7 @@ public class AuthClient extends AbstractClient {
     }
 
     static public class LoginState {
-
+        public Long expires;
         public String token;
         public User user;
     }
