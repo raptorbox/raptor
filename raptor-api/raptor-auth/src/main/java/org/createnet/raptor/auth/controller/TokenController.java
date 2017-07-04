@@ -26,6 +26,7 @@ import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.services.TokenService;
 import org.createnet.raptor.auth.services.UserService;
+import org.createnet.raptor.models.apidocs.ApiDocsToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +83,7 @@ public class TokenController {
     @ApiOperation(
             value = "List tokens",
             notes = "",
-            response = Token.class,
+            response = ApiDocsToken.class,
             responseContainer = "Iterable",
             nickname = "getTokens"
     )
@@ -124,7 +125,7 @@ public class TokenController {
     @ApiOperation(
             value = "Get a token by ID",
             notes = "",
-            response = Token.class,
+            response = ApiDocsToken.class,
             nickname = "getToken"
     )
     public ResponseEntity<?> getToken(
@@ -151,7 +152,7 @@ public class TokenController {
     @ApiOperation(
             value = "Create a token",
             notes = "",
-            response = Token.class,
+            response = ApiDocsToken.class,
             nickname = "createToken"
     )
     public ResponseEntity<?> createToken(
@@ -185,7 +186,7 @@ public class TokenController {
     @ApiOperation(
             value = "Update a token",
             notes = "",
-            response = Token.class,
+            response = ApiDocsToken.class,
             nickname = "updateToken"
     )
     public ResponseEntity<?> updateToken(
@@ -233,7 +234,7 @@ public class TokenController {
     @ApiOperation(
             value = "Delete a token",
             notes = "",
-            response = Token.class,
+            response = ApiDocsToken.class,
             nickname = "deleteToken"
     )
     public ResponseEntity<?> deleteToken(

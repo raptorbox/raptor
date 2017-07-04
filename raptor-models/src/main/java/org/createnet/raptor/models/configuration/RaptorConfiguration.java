@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class RaptorConfiguration {
 
     private String url;
+    private Boolean web;
 
     private DispatcherConfiguration dispatcher = new DispatcherConfiguration();
     private AuthConfiguration auth = new AuthConfiguration();
@@ -60,6 +61,14 @@ public class RaptorConfiguration {
 
     public void setBroker(BrokerConfiguration broker) {
         this.broker = broker;
+    }
+
+    public Boolean getWeb() {
+        return web;
+    }
+
+    public void setWeb(Boolean web) {
+        this.web = web;
     }
     
 }

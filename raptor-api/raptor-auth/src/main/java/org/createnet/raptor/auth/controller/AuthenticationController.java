@@ -40,6 +40,7 @@ import org.createnet.raptor.models.auth.request.LoginRequest;
 import org.createnet.raptor.models.auth.request.LoginResponse;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.auth.services.TokenService;
+import org.createnet.raptor.models.apidocs.ApiDocsLoginResponse;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.slf4j.Logger;
@@ -100,7 +101,7 @@ public class AuthenticationController {
     @ApiOperation(
             value = "Login an user with the provided credentials",
             notes = "",
-            response = LoginResponse.class,
+            response = ApiDocsLoginResponse.class,
             nickname = "login"
     )
     public ResponseEntity<?> login(@RequestBody LoginRequest authenticationRequest) throws AuthenticationException {
@@ -158,7 +159,7 @@ public class AuthenticationController {
     @ApiOperation(
             value = "Refresh a login token",
             notes = "The authentication token, provided via `Authorization` header must still be valid.",
-            response = LoginResponse.class,
+            response = ApiDocsLoginResponse.class,
             nickname = "refreshToken"
     )
     public ResponseEntity<?> refreshToken(

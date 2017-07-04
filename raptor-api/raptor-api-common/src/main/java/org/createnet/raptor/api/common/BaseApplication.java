@@ -58,7 +58,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
  *
@@ -68,7 +67,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableAutoConfiguration
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableScheduling
-//@EnableSwagger2
 public abstract class BaseApplication {
 
     static public Logger log = null;

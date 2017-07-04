@@ -33,6 +33,7 @@ import org.createnet.raptor.auth.services.AclTokenService;
 import org.createnet.raptor.auth.services.DeviceService;
 import org.createnet.raptor.auth.services.TokenService;
 import org.createnet.raptor.auth.services.UserService;
+import org.createnet.raptor.models.apidocs.ApiDocsAuthorizationResponse;
 import org.createnet.raptor.models.auth.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +103,7 @@ public class DeviceController {
     @ApiOperation(
             value = "Check user permission on a device",
             notes = "",
-            response = AuthorizationResponse.class,
+            response = ApiDocsAuthorizationResponse.class,
             nickname = "checkPermission"
     )
     public ResponseEntity<?> checkPermission(
