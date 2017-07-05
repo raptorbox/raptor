@@ -143,21 +143,19 @@ public class DeviceController {
                 }
 
                 
-                final boolean isCreate = (body.objectId == null && permission == RaptorPermission.CREATE);
-                if (isCreate) {
-                    response.result = true;
-                } else {
 
-                    Device device = null;
-                    if (permission != RaptorPermission.LIST) {
-                        device = deviceService.getByUuid(body.objectId);
-                        if (device == null) {
-                            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND);
-                        }
+                if (body.objectId == null && (permission == RaptorPermission.CREATE || permission == RaptorPermission.LIST)) {
+                    // set true here, token permission will check over permission without objectId
+                    response.result = true;
+                }
+                else {
+
+                    Device device = deviceService.getByUuid(body.objectId);
+                    if (device == null) {
+                        return JsonErrorResponse.entity(HttpStatus.NOT_FOUND);
                     }
 
                     response.result = aclDeviceService.check(device, user, permission);
-
                 }
                 
                 // check for token specific permission if user level ACL are ok
