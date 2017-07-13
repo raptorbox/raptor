@@ -13,36 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.events;
+package org.createnet.raptor.events.type;
+
+import org.createnet.raptor.events.AbstractEvent;
+import org.createnet.raptor.models.tree.TreeNode;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface Event {
+public class TreeNodeEvent extends AbstractEvent {
 
-    public enum EventType {
+    final private TreeNode node;
 
-        create, update, delete,
-        push, pull,
-        execute, deleteAction,
-        subscribe,
-        object, data,
-        all,
-        
-        tree
+    public TreeNodeEvent(TreeNode node) {
+        this.node = node;
     }
 
-    public String getEvent();
-
-    public void setEvent(String name);
-
-    public String getParentEvent();
-
-    public void setParentEvent(String name);
-
-    public String getUserId();
-
-    public void setUserId(String name);
+    public TreeNode getNode() {
+        return node;
+    }
 
 }

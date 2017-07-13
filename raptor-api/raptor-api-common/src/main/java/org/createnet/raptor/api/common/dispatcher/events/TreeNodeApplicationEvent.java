@@ -13,36 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.events;
+package org.createnet.raptor.api.common.dispatcher.events;
+
+import org.createnet.raptor.events.type.TreeNodeEvent;
+import org.springframework.context.ApplicationEvent;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface Event {
+public class TreeNodeApplicationEvent extends ApplicationEvent {
 
-    public enum EventType {
-
-        create, update, delete,
-        push, pull,
-        execute, deleteAction,
-        subscribe,
-        object, data,
-        all,
-        
-        tree
+    private final TreeNodeEvent treeNodeEvent;
+    
+    public TreeNodeApplicationEvent(Object source, TreeNodeEvent node) {
+        super(source);
+        this.treeNodeEvent = node;
     }
 
-    public String getEvent();
-
-    public void setEvent(String name);
-
-    public String getParentEvent();
-
-    public void setParentEvent(String name);
-
-    public String getUserId();
-
-    public void setUserId(String name);
-
+    public TreeNodeEvent getTreeNodeEvent() {
+        return treeNodeEvent;
+    }
+    
 }

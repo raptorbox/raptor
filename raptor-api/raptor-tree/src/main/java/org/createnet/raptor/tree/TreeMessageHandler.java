@@ -33,6 +33,9 @@ public class TreeMessageHandler implements RaptorMessageHandler {
     
     @Autowired
     TreeService treeService;
+        
+    @Autowired
+    private TreeNodeEventPublisher treeNodePublisher;    
     
     @Override
     public void handle(DispatcherPayload dispatcherPayload) {
@@ -48,11 +51,13 @@ public class TreeMessageHandler implements RaptorMessageHandler {
                 switch (payload.op) {
                     case delete:
                         if(node != null) {
+                            log.debug("Drop node %s", payload.device.id());
                             treeService.delete(payload.device.id());
                         }
                         break;
                     case update:
                         if(node != null) {
+                            log.debug("Update node %s", payload.device.id());
                             node.name(payload.device.name());
                             treeService.save(node);
                         }
@@ -65,17 +70,12 @@ public class TreeMessageHandler implements RaptorMessageHandler {
     }
     
     protected void notifyParent(TreeNode node) {
-        
         TreeNode parents = treeService.parents(node);
-        
         TreeNode parent = parents;
         while(parent != null) {
-            
-            
-            
+            treeNodePublisher.notify(parent);
             parent = parents.getParent();
         }
-        
     }
 
 }
