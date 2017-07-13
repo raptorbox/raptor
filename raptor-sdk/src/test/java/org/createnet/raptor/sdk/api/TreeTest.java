@@ -17,6 +17,7 @@ package org.createnet.raptor.sdk.api;
 
 import java.util.Arrays;
 import java.util.List;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.models.tree.TreeNode;
@@ -90,21 +91,21 @@ public class TreeTest {
 
         TreeNode child1 = TreeNode.create("child1");
         TreeNode child2 = TreeNode.create("child2");
-        
+
         raptor.Tree().add(node1, Arrays.asList(child1));
         raptor.Tree().add(child1, Arrays.asList(child2));
-        
+
         List<TreeNode> nodes = raptor.Tree().list();
-        
+
         assertEquals(1, nodes.size());
-        
+
         TreeNode tree = raptor.Tree().tree(node1);
-        
+
         assertEquals(tree, node1);
         assertEquals(1, tree.children().size());
         assertEquals("child1", tree.children().get(0).getName());
         assertEquals("child2", tree.children().get(0).children().get(0).getName());
-        
+
     }
 
     @Test
@@ -119,22 +120,44 @@ public class TreeTest {
 
         TreeNode child1 = TreeNode.create("child1");
         TreeNode child2 = TreeNode.create("child2");
-        
+
         raptor.Tree().add(node1, Arrays.asList(child1, child2));
-        
+
         TreeNode tree = raptor.Tree().tree(node1);
-        
+
         assertEquals(tree, node1);
         assertEquals(2, tree.children().size());
-        
+
         raptor.Tree().remove(tree.children().get(0));
-        
+
         List<TreeNode> children = raptor.Tree().children(node1);
         assertEquals(1, children.size());
-        
-        
+
         tree = raptor.Tree().tree(node1);
         assertEquals(1, tree.children().size());
+
+    }
+
+    @Test
+    public void createDeviceNode() {
+
+        Raptor raptor = Utils.createNewInstance();
+
+        log.debug("create tree");
+
+        TreeNode root = TreeNode.create("Root");
+        raptor.Tree().create(root);
+
+        Device dev = new Device();
+        dev.name("test create");
+        raptor.Inventory().create(dev);
+
+        raptor.Tree().add(root, dev);
+        
+        List<TreeNode> nodes = raptor.Tree().children(root);
+        assertEquals(1, nodes.size());
+        assertEquals(1, nodes.stream().filter((d) -> d.isDevice() && d.getId().equals(dev.getId())).count());
+        assertTrue(nodes.get(0).isDevice());
 
     }
 

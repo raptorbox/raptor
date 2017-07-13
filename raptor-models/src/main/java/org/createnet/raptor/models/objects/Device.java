@@ -555,4 +555,28 @@ public class Device extends DeviceContainer {
         return this;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    public Settings getSettings() {
+        return settings;
+    }
+    
 }

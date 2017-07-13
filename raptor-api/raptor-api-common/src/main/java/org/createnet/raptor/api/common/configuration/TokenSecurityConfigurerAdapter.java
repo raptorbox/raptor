@@ -15,10 +15,12 @@
  */
 package org.createnet.raptor.api.common.configuration;
 
+import org.createnet.raptor.api.common.authentication.HttpTokenFilter;
 import org.createnet.raptor.api.common.authentication.RaptorAuthenticationEntryPoint;
 import org.createnet.raptor.api.common.authentication.TokenAuthenticationProvider;
-import org.createnet.raptor.api.common.authentication.TokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -37,7 +39,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 @Configuration
 @EnableWebSecurity
+@ConditionalOnExpression("'${spring.config.name}' != 'auth'")
 public class TokenSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
+
+    @Value("${spring.config.name}")
+    String appName;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -55,11 +61,10 @@ public class TokenSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter
     }
 
     @Bean
-    public TokenFilter tokenFilter() {
-        return new TokenFilter();
+    public HttpTokenFilter httpTokenFilter() {
+        return new HttpTokenFilter();
     }
 
-    
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
@@ -71,7 +76,7 @@ public class TokenSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter
                 .authorizeRequests()
                 .antMatchers("/v2/api-docs").permitAll() // swagger api docs
                 .anyRequest().authenticated()
-                .and().addFilterBefore(tokenFilter(), UsernamePasswordAuthenticationFilter.class);
+                .and().addFilterBefore(httpTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Autowired

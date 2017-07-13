@@ -196,15 +196,18 @@ public class TreeNode {
     public List<TreeNode> children() {
         return children;
     }
-
+    
+    @JsonIgnore
     public boolean isDevice() {
         return getType().equals(NodeType.device);
     }
 
+    @JsonIgnore
     public boolean isGroup() {
         return getType().equals(NodeType.group);
     }
 
+    @JsonIgnore
     public boolean isUser() {
         return getType().equals(NodeType.user);
     }
