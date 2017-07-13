@@ -27,6 +27,8 @@ services:
       - mongo
     networks:
       - raptor_net
+    ports:
+      - 10081:80
 
   inventory:
     build: ./raptor-api/raptor-inventory
@@ -39,6 +41,8 @@ services:
       - mongo
     networks:
       - raptor_net
+    ports:
+      - 10082:80
 
   profile:
     build: ./raptor-api/raptor-profile
@@ -51,6 +55,8 @@ services:
       - mongo
     networks:
       - raptor_net
+    ports:
+      - 10083:80
 
   stream:
     build: ./raptor-api/raptor-stream
@@ -63,6 +69,8 @@ services:
       - mongo
     networks:
       - raptor_net
+    ports:
+      - 10084:80
 
   tree:
     build: ./raptor-api/raptor-tree
@@ -75,6 +83,8 @@ services:
       - mongo
     networks:
       - raptor_net
+    ports:
+      - 10085:80
 
   auth:
     build: ./raptor-api/raptor-auth
@@ -88,6 +98,8 @@ services:
       - broker
     networks:
       - raptor_net
+    ports:
+      - 10086:80
 
   apigateway:
     build: ./raptor-api/raptor-gateway
@@ -96,6 +108,8 @@ services:
       - ./config:/etc/raptor
     networks:
       - raptor_net
+    ports:
+      - 10080:80
 
   mariadb:
     image: mariadb:latest
