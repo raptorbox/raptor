@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.createnet.raptor.api.common.dispatcher.RaptorMessageHandler;
-import org.createnet.raptor.models.configuration.BrokerLocalUser;
+import org.createnet.raptor.models.configuration.AuthConfiguration;
 import org.createnet.raptor.models.configuration.DispatcherConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -162,13 +162,12 @@ public abstract class BaseApplication {
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
 
-        List<BrokerLocalUser> users = raptorConfiguration().getBroker().getUsers();
+        AuthConfiguration.AdminUser defaultUser = raptorConfiguration().getAuth().getServiceUser();
 
-        if (users.isEmpty()) {
-            throw new RuntimeException("Missing local broker users. Review raptor.yml configuration file");
+        if (defaultUser == null) {
+            throw new RuntimeException("Missing service user. Review raptor.yml configuration file under auth.users section");
         }
 
-        BrokerLocalUser defaultUser = users.get(0);
         DispatcherConfiguration dispatcherConfig = raptorConfiguration().getDispatcher();
 
         DefaultMqttPahoClientFactory f = new DefaultMqttPahoClientFactory();

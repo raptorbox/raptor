@@ -27,7 +27,7 @@ import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.auth.Role.Roles;
-import org.createnet.raptor.models.configuration.BrokerLocalUser;
+import org.createnet.raptor.models.configuration.AuthConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.Raptor;
@@ -66,7 +66,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
     protected BrokerUser getLocalUser(final String username, final String password) {
         
-        List<BrokerLocalUser> users = config.getBroker().getUsers().stream().filter((BrokerLocalUser user) -> { 
+        List<AuthConfiguration.AdminUser> users = config.getAuth().getUsers().stream().filter((AuthConfiguration.AdminUser user) -> { 
             
             if(user.getPassword() == null || user.getPassword().isEmpty() || password == null || password.isEmpty()) {
                 return false;

@@ -29,22 +29,13 @@ public class BrokerConfiguration {
 
     @NotNull
     protected String artemis;
-    protected List<BrokerLocalUser> users = new ArrayList();
 
     public String getArtemis() {
         return artemis;
     }
 
-    public List<BrokerLocalUser> getUsers() {
-        return users;
-    }
-
     public void setArtemis(String artemis) {
         this.artemis = artemis;
-    }
-
-    public void setUsers(List<BrokerLocalUser> users) {
-        this.users = users;
     }
 
 }

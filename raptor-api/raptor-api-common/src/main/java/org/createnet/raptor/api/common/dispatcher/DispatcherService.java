@@ -16,7 +16,7 @@
 package org.createnet.raptor.api.common.dispatcher;
 
 import org.createnet.raptor.models.acl.Permissions;
-import org.createnet.raptor.models.configuration.BrokerLocalUser;
+import org.createnet.raptor.models.configuration.AuthConfiguration;
 import org.createnet.raptor.models.configuration.DispatcherConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.createnet.raptor.models.data.RecordSet;
@@ -56,14 +56,10 @@ public class DispatcherService implements InitializingBean, DisposableBean {
         if (dispatcher == null) {
             dispatcher = new DispatcherEngine();
             
-            if(config.getBroker().getUsers().isEmpty()) {
-                throw new RuntimeException("Missing broker local user. Add one to raptor.yml under broker.users");
-            }
-            
-            BrokerLocalUser user = config.getBroker().getUsers().get(0);
+            AuthConfiguration.AdminUser user = config.getAuth().getServiceUser();
 
-            if(user.getUsername() == null) {
-                throw new RuntimeException("Broker local username is null..");
+            if(user == null) {
+                throw new RuntimeException("Service user not found, review your raptor.yml configuration");
             }            
             
             getConfiguration().setUsername(user.getUsername());
