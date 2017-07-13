@@ -26,6 +26,7 @@ import org.createnet.raptor.auth.services.AuthMessageHandler;
 import org.createnet.raptor.auth.services.UserService;
 import org.createnet.raptor.models.configuration.AuthConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
+import org.createnet.raptor.sdk.Topics;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -87,7 +88,9 @@ public class Application extends BaseApplication {
 
     @Bean
     public MessageProducer mqttClient() {
-        return createMqttClient(authMessageHandler());
+        return createMqttClient(new String[]{ 
+            String.format(Topics.DEVICE, "+"),
+        }, authMessageHandler());
     }
 
     @Autowired

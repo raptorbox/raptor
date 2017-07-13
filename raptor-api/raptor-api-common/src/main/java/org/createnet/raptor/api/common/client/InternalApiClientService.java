@@ -48,7 +48,7 @@ public class InternalApiClientService extends Raptor {
             log.debug("Missing service token, attempt login");
             try {
                 // retry and wait to handle long bootstrap times
-                Auth().login(RequestOptions.retriable().maxRetries(5).waitFor(500));
+                Auth().login(RequestOptions.retriable().maxRetries(10).waitFor(500));
                 log.debug("Service login done");
             }
             catch(Exception ex) {

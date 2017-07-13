@@ -40,7 +40,7 @@ raptor:
         roles:
           - super_admin
       - username: service
-        password: s3cret
+        password: s3cret007
         email: service@raptor.local
         roles:
           - super_admin
@@ -56,8 +56,3 @@ raptor:
 
   broker:
     artemis: file:///etc/raptor/broker.xml
-    users:
-      - username: system
-        password: secr3t
-        roles:
-          - admin

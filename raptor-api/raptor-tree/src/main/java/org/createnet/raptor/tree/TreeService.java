@@ -129,15 +129,13 @@ public class TreeService {
      * @return
      */
     public TreeNode parents(TreeNode node) {
-
-        // find the direct children
-        List<TreeNode> children = children(node);
-
-        children.forEach((n) -> {
-            subtree(n);
-        });
-
-        node.children().addAll(children);
+        
+        TreeNode curr = node;
+        TreeNode parent = parent(node);
+        while(parent != null) {
+            curr.parent(parent);
+            parent = parent(node);
+        }
 
         return node;
     }

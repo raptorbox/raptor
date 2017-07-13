@@ -52,6 +52,14 @@ public class AuthConfiguration {
         private boolean lock;
         private List<Role.Roles> roles = new ArrayList();
         
+        public boolean isAdmin() {
+            return isSuperAdmin() || getRoles().contains(Role.Roles.admin);
+        }
+        
+        public boolean isSuperAdmin() {
+            return getRoles().contains(Role.Roles.super_admin);
+        }
+        
         public String getType() {
             return type;
         }
@@ -71,7 +79,7 @@ public class AuthConfiguration {
         public void setLock(boolean lock) {
             this.lock = lock;
         }
-
+        
         public List<Role.Roles> getRoles() {
             return roles;
         }

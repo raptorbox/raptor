@@ -18,6 +18,7 @@ package org.createnet.raptor.tree;
 import org.createnet.raptor.api.common.dispatcher.events.TreeNodeApplicationEvent;
 import org.createnet.raptor.events.Event;
 import org.createnet.raptor.events.type.TreeNodeEvent;
+import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.tree.TreeNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -33,17 +34,17 @@ public class TreeNodeEventPublisher {
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
-    public void notify(TreeNode node, Event.EventType type) {
+    public void notify(TreeNode node, DispatcherPayload payload, Event.EventType type) {
 
-        TreeNodeEvent ev = new TreeNodeEvent(node);
+        TreeNodeEvent ev = new TreeNodeEvent(node, payload);
         ev.setEvent(type.name());
 
         TreeNodeApplicationEvent appev = new TreeNodeApplicationEvent(this, ev);
         applicationEventPublisher.publishEvent(appev);
     }
 
-    public void notify(TreeNode node) {
-        notify(node, Event.EventType.tree);
+    public void notify(TreeNode node, DispatcherPayload payload) {
+        notify(node, payload, Event.EventType.tree);
     }
 
 }

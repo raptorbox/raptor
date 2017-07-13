@@ -39,7 +39,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 @Configuration
 @EnableWebSecurity
-@ConditionalOnExpression("'${spring.config.name}' != 'auth'")
+@ConditionalOnExpression("'${spring.config.name}' != 'auth' and '${spring.config.name}' != 'gateway'")
 public class TokenSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
     @Value("${spring.config.name}")
@@ -67,7 +67,7 @@ public class TokenSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
+        
         http
                 .csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint()).and()

@@ -6,22 +6,28 @@ zuul:
     routes:
         action:
             path: /action/**
-            url: http://action
+            url: http://action/action
+            sensitiveHeaders: Authorization
         inventory:
             path: /inventory/**
-            url: http://inventory
+            url: http://inventory/inventory
+            sensitiveHeaders: Authorization
         profile:
             path: /profile/**
-            url: http://profile
+            url: http://profile/profile
+            sensitiveHeaders: Authorization
         stream:
             path: /stream/**
-            url: http://stream
+            url: http://stream/stream
+            sensitiveHeaders: Authorization
         tree:
             path: /tree/**
-            url: http://tree
+            url: http://tree/tree
+            sensitiveHeaders: Authorization
         auth:
             path: /auth/**
-            url: http://auth
+            url: http://auth/auth
+            sensitiveHeaders: Authorization
 
 ribbon:
     eureka:

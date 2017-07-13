@@ -45,7 +45,6 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.createnet.raptor.models.payload.DispatcherPayload;
-import org.createnet.raptor.sdk.Topics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
@@ -190,27 +189,17 @@ public abstract class BaseApplication {
     }
 
     /**
-     * Create a MQTT connection to the broker listening to all events
-     *
-     * @param messageHandler
-     * @return
-     */
-    public MessageProducer createMqttClient(RaptorMessageHandler messageHandler) {
-        return createMqttClient(messageHandler, String.format(Topics.DEVICE, "+"));
-    }
-
-    /**
      * Create a MQTT connection to the broker
      *
      * @param messageHandler
-     * @param topic
+     * @param topics
      * @return
      */
-    public MessageProducer createMqttClient(RaptorMessageHandler messageHandler, String topic) {
+    public MessageProducer createMqttClient(String[] topics, RaptorMessageHandler messageHandler) {
 
         this.messageHandler = messageHandler;
 
-        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(this.getClass().getName().replace(".", "-"), mqttClientFactory(), topic);
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(this.getClass().getName().replace(".", "-"), mqttClientFactory(), topics);
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(0);

@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.broker;
 
-import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.configuration.AuthConfiguration;
 import org.createnet.raptor.sdk.Raptor;
 
@@ -44,8 +43,8 @@ public class BrokerUser {
     }
     
     public boolean isAdmin() {
-        if(isLocal()) 
-            return getLocalUser().getRoles().contains(Role.Roles.admin.name());
+        if(isLocal())
+            return getLocalUser().isAdmin();
         else 
             return getRaptor().Auth().getUser().isAdmin();
     }

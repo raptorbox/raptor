@@ -31,7 +31,7 @@ public class StreamApplicationEvent extends ApplicationEvent {
         this.dataEvent = dev;
     }
 
-    public DataEvent getActionEvent() {
+    public DataEvent getDataEvent() {
         return dataEvent;
     }
     

@@ -146,11 +146,8 @@ public class EventListenerTest {
 
         log.debug("watch device tree events");
 
-        final Device dev = raptor.Inventory().create(newDevice("dev"));
-
         final TreeNode node = TreeNode.create("parent");
-        raptor.Tree().create(node);
-        raptor.Tree().add(node, dev);
+        final TreeNode devnode = raptor.Tree().create(node);        
 
         raptor.Tree().subscribe(node, new TreeNodeCallback() {
             @Override
@@ -159,6 +156,9 @@ public class EventListenerTest {
 //                Assert.assertEquals(node.getId(), node.getId());
             }
         });
+        
+        final Device dev = raptor.Inventory().create(newDevice("dev"));
+        raptor.Tree().add(node, dev);
 
         dev.addStream("test2", "foo", "boolean");
         dev.addAction("sleep");

@@ -16,6 +16,7 @@
 package org.createnet.raptor.events.type;
 
 import org.createnet.raptor.events.AbstractEvent;
+import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.tree.TreeNode;
 
 /**
@@ -25,13 +26,20 @@ import org.createnet.raptor.models.tree.TreeNode;
 public class TreeNodeEvent extends AbstractEvent {
 
     final private TreeNode node;
+    final private DispatcherPayload payload;
 
-    public TreeNodeEvent(TreeNode node) {
+    public TreeNodeEvent(TreeNode node, DispatcherPayload payload) {
         this.node = node;
+        this.payload = payload;
+        
     }
 
     public TreeNode getNode() {
         return node;
+    }
+
+    public DispatcherPayload getPayload() {
+        return payload;
     }
 
 }

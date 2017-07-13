@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.api.common.dispatcher;
+package org.createnet.raptor.api.common.dispatcher.events.listener;
 
-import org.createnet.raptor.api.common.dispatcher.events.DeviceApplicationEvent;
-import org.createnet.raptor.events.type.DeviceEvent;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.api.common.dispatcher.DispatcherService;
+import org.createnet.raptor.api.common.dispatcher.events.TreeNodeApplicationEvent;
+import org.createnet.raptor.events.type.TreeNodeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -27,20 +27,14 @@ import org.springframework.stereotype.Component;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Component
-public class MqttDispatcherEventListener implements ApplicationListener<DeviceApplicationEvent> {
+public class TreeNodeApplicationEventListener implements ApplicationListener<TreeNodeApplicationEvent> {
 
     @Autowired
     DispatcherService dispatcher;
 
     @Override
-    public void onApplicationEvent(DeviceApplicationEvent event) {
-        
-        DeviceEvent objEvent = event.getDeviceEvent();
-        
-        if (!objEvent.getObject().settings().eventsEnabled()) {
-            return;
-        }
-
-        dispatcher.notifyDeviceEvent(Permissions.valueOf(objEvent.getParentEvent()), objEvent.getObject());
+    public void onApplicationEvent(TreeNodeApplicationEvent event) {
+        TreeNodeEvent nodeEvent = event.getTreeNodeEvent();
+        dispatcher.notifyTreeEvent(nodeEvent.getNode(), nodeEvent.getPayload());
     }
 }

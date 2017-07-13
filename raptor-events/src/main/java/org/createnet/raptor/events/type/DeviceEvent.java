@@ -33,7 +33,7 @@ public class DeviceEvent extends AbstractEvent {
     this.device = device;
   }
 
-  public Device getObject() {
+  public Device getDevice() {
     return device;
   }
   
