@@ -25,7 +25,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 @ConditionalOnProperty(prefix = "raptor", name = "web", matchIfMissing = true)
 @Configuration
-@EnableSwagger2
+//@EnableSwagger2
 public class SwaggerApiDocs {
     
 }
