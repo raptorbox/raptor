@@ -98,6 +98,7 @@ public class AuthClient extends AbstractClient {
         return state.user;
     }
 
+
     /**
      * Login with username and password
      *
@@ -107,10 +108,23 @@ public class AuthClient extends AbstractClient {
      * @return request response
      */
     public LoginState login(String username, String password) {
+        return login(username, password, null);
+    }
+    
+    /**
+     * Login with username and password
+     *
+     * @param username
+     * @param password
+     * @param options
+     *
+     * @return request response
+     */
+    public LoginState login(String username, String password, RequestOptions options) {
         try {
             
             JsonNode cred = Device.getMapper().valueToTree(new LoginCredentialsBody(username, password));
-            JsonNode node = getClient().post(Routes.LOGIN, cred, RequestOptions.defaults().withAuthToken(false));
+            JsonNode node = getClient().post(Routes.LOGIN, cred, options);
 
             return Device.getMapper().convertValue(node, LoginState.class);
         } catch (RequestException ex) {
@@ -129,9 +143,24 @@ public class AuthClient extends AbstractClient {
      * @return
      */
     public LoginState login() {
+        return login(null);
+    }
+    
+    /**
+     * Login with username and password from provided configuration
+     *
+     * @param options
+     * @return
+     */
+    public LoginState login(RequestOptions options) {
+        
+        if (options == null) {
+            options = RequestOptions.defaults();
+        }
+        
         LoginState body;
         if (getConfig().hasCredentials()) {
-            body = login(getConfig().getUsername(), getConfig().getPassword());
+            body = login(getConfig().getUsername(), getConfig().getPassword(), options.withAuthToken(false));
         } else if (getConfig().hasToken()) {
             try {
                 User user = getContainer().Admin().User().get();

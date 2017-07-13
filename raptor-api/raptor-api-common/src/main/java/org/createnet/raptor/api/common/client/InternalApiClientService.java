@@ -17,6 +17,7 @@ package org.createnet.raptor.api.common.client;
 
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.sdk.Raptor;
+import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.api.AuthClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,10 +47,12 @@ public class InternalApiClientService extends Raptor {
         if(Auth().getToken() == null) {
             log.debug("Missing service token, attempt login");
             try {
-                Auth().login();
+                // retry and wait to handle long bootstrap times
+                Auth().login(RequestOptions.retriable().maxRetries(5).waitFor(500));
+                log.debug("Service login done");
             }
             catch(Exception ex) {
-                log.warn("Login failed: {}", ex.getMessage());
+                log.warn("Service login failed: {}", ex.getMessage());
             }
             
             return;
