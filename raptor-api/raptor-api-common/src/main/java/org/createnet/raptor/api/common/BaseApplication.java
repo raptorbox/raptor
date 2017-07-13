@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.createnet.raptor.api.common.dispatcher.RaptorMessageHandler;
 import org.createnet.raptor.models.configuration.BrokerLocalUser;
 import org.createnet.raptor.models.configuration.DispatcherConfiguration;
@@ -56,6 +55,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.messaging.MessagingException;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 
@@ -223,9 +223,18 @@ public abstract class BaseApplication {
     @Bean
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public MessageHandler handler() {
-        return (Message<?> message) -> {
-            if (messageHandler != null) {
-                messageHandler.handle((DispatcherPayload) message.getPayload());
+        return new MessageHandler() {
+            @Override
+            public void handleMessage(Message<?> message) throws MessagingException {
+                if (messageHandler != null) {
+                    try {
+                        DispatcherPayload payload = DispatcherPayload.parseJSON(message.getPayload().toString());
+                        messageHandler.handle(payload);
+                    }
+                    catch(Exception e) {
+                        log.error("Error on message: {}", e.getMessage());
+                    }
+                }
             }
         };
     }

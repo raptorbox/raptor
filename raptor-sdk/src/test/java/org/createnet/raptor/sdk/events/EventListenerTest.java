@@ -152,14 +152,6 @@ public class EventListenerTest {
         raptor.Tree().create(node);
         raptor.Tree().add(node, dev);
 
-        raptor.Inventory().subscribe(dev, new DeviceCallback() {
-            @Override
-            public void callback(Device obj, DevicePayload message) {
-                log.debug("Device event received {}", message.toString());
-                Assert.assertEquals(obj.id(), dev.id());
-            }
-        });
-        
         raptor.Tree().subscribe(node, new TreeNodeCallback() {
             @Override
             public void callback(TreeNode node, TreeNodePayload message) {

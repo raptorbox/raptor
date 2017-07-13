@@ -86,7 +86,7 @@ public class InventoryTest {
 
         Device dev = new Device();
         dev.name("test update");
-        Stream s = dev.addStream("position", "location", "geo_point");
+        Stream s = dev.addStream("position", "location", "string");
         dev.validate();
         raptor.Inventory().create(dev);
 

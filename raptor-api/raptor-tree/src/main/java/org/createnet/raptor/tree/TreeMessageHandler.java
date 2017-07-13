@@ -53,13 +53,15 @@ public class TreeMessageHandler implements RaptorMessageHandler {
                         if(node != null) {
                             log.debug("Drop node %s", payload.device.id());
                             treeService.delete(payload.device.id());
+                            notifyParent(node);
                         }
                         break;
                     case update:
                         if(node != null) {
                             log.debug("Update node %s", payload.device.id());
                             node.name(payload.device.name());
-                            treeService.save(node);
+                            node = treeService.save(node);
+                            notifyParent(node);
                         }
                         break;
                 }
@@ -73,6 +75,7 @@ public class TreeMessageHandler implements RaptorMessageHandler {
         TreeNode parents = treeService.parents(node);
         TreeNode parent = parents;
         while(parent != null) {
+            log.debug("Notifiyng %s (%s)", parent.getId(), parent.path());            
             treeNodePublisher.notify(parent);
             parent = parents.getParent();
         }
