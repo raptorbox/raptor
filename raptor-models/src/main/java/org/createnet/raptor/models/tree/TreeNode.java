@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.objects.RaptorContainer;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -38,9 +39,26 @@ import org.springframework.data.mongodb.core.mapping.Document;
  */
 @Document
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class TreeNode {
+public class TreeNode extends RaptorContainer {
     
     public static final String separator = "/";
+
+    @Override
+    public void validate() throws ValidationException {
+        
+        if(this.getId() == null) {
+            throw new ValidationException("id cannot be null");
+        }
+        if(this.getType() == null) {
+            throw new ValidationException("type cannot be null");
+        }
+        
+    }
+
+    @Override
+    public void parse(String json) throws ParserException {
+        
+    }
     
     public enum NodeType {
         group, user, device, application

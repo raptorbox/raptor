@@ -129,7 +129,7 @@ public class DispatcherService implements InitializingBean, DisposableBean {
     }
 
     protected void notifyTreeEvent(TreeNode n, DispatcherPayload payload) {
-        String topic = String.format(Topics.GROUP, n.path());
+        String topic = String.format(Topics.TREE, n.path());
         notifyEvent(topic, payload);
         
     }

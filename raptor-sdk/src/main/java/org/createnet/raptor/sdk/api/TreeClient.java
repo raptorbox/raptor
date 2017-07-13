@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.tree.TreeNode;
+import org.createnet.raptor.sdk.events.callback.TreeNodeEventCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,17 @@ public class TreeClient extends AbstractClient {
     }
 
     final static Logger logger = LoggerFactory.getLogger(TreeClient.class);
+
+
+    /**
+     * Subscribe to a data stream
+     *
+     * @param node
+     * @param ev
+     */
+    public void subscribe(TreeNode node, TreeNodeEventCallback ev) {
+        getEmitter().subscribe(node, ev);
+    }
 
     /**
      * Return the current tree structure for an user

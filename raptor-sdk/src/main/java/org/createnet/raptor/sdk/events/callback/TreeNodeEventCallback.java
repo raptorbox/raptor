@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.sdk;
+package org.createnet.raptor.sdk.events.callback;
+
+import org.createnet.raptor.sdk.events.MqttEventEmitter.EventCallback;
 
 /**
- * List of topics for Raptor API
+ *
+ * @author Luca Capra <lcapra@fbk.eu>
  */
-final public class Topics {
-    public static final String ACTION = "/action/%s/%s";
-    public static final String STREAM = "/stream/%s/%s";
-    public static final String DEVICE = "/device/%s";
-    public static final String USER = "/user/%s";
-    public static final String TREE = "/tree/%s";
+public interface TreeNodeEventCallback extends RaptorCallback, EventCallback {
 }

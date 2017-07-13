@@ -30,6 +30,7 @@ import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.tree.TreeNode;
 import org.createnet.raptor.sdk.Topics;
+import org.createnet.raptor.sdk.events.callback.TreeNodeEventCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,20 +67,20 @@ public class MqttEventEmitter extends AbstractClient {
     }
 
     protected String getDeviceTopic(Device obj) {
-        return String.format(Topics.DEVICE, obj.id());
+        return String.format(Topics.DEVICE, obj.getId());
     }
 
     protected String getGroupTopic(TreeNode n) {
-        return String.format(Topics.GROUP, n.getId());
+        return String.format(Topics.TREE, n.getId());
     }
 
     protected String getStreamTopic(Stream stream) {
-        String path = String.format(Topics.STREAM, stream.getDevice().id(), stream.name);
+        String path = String.format(Topics.STREAM, stream.getDevice().getId(), stream.name);
         return path;
     }
 
     protected String getActionTopic(Action action) {
-        String path = String.format(Topics.ACTION, action.getDevice().id(), action.name);
+        String path = String.format(Topics.ACTION, action.getDevice().getId(), action.name);
         return path;
     }
 
@@ -110,6 +111,22 @@ public class MqttEventEmitter extends AbstractClient {
         registerCallback();
 
         String topic = getStreamTopic(stream);
+        getMqttClientHandler().subscribe(topic);
+
+        addTopicCallback(topic, ev);
+    }
+
+    /**
+     * Subscribe for tree node events
+     *
+     * @param node
+     * @param ev
+     */
+    public void subscribe(TreeNode node, TreeNodeEventCallback ev) {
+
+        registerCallback();
+
+        String topic = getGroupTopic(node);
         getMqttClientHandler().subscribe(topic);
 
         addTopicCallback(topic, ev);
