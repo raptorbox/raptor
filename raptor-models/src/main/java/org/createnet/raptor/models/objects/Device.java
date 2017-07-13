@@ -138,14 +138,14 @@ public class Device extends DeviceContainer {
             throw new ValidationException("id field missing");
         }
 
-        if (!this.getStreams().isEmpty()) {
-            this.getStreams().entrySet().forEach((item) -> {
+        if (!this.streams().isEmpty()) {
+            this.streams().entrySet().forEach((item) -> {
                 item.getValue().validate();
             });
         }
 
-        if (!this.getActions().isEmpty()) {
-            this.getActions().entrySet().forEach((item) -> {
+        if (!this.actions().isEmpty()) {
+            this.actions().entrySet().forEach((item) -> {
                 item.getValue().validate();
             });
         }

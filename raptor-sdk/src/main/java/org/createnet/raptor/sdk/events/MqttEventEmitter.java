@@ -62,7 +62,6 @@ public class MqttEventEmitter extends AbstractClient {
     }
 
     public interface EventCallback {
-
         public void trigger(DispatcherPayload payload);
     }
 

@@ -18,6 +18,7 @@ package org.createnet.raptor.models.tree;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,7 +58,12 @@ public class TreeNode extends RaptorContainer {
 
     @Override
     public void parse(String json) throws ParserException {
-        
+        try {
+            TreeNode node = mapper.readValue(json, TreeNode.class);
+            this.merge(node);
+        } catch (IOException ex) {
+            throw new ParserException(ex);
+        }
     }
     
     public enum NodeType {

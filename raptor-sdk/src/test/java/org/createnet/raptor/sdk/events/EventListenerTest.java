@@ -31,6 +31,10 @@ import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.payload.ActionPayload;
 import org.createnet.raptor.models.payload.DevicePayload;
+import org.createnet.raptor.models.payload.TreeNodePayload;
+import org.createnet.raptor.models.tree.TreeNode;
+import org.createnet.raptor.sdk.events.callback.TreeNodeCallback;
+import org.createnet.raptor.sdk.events.callback.TreeNodeEventCallback;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -48,7 +52,6 @@ public class EventListenerTest {
 
     final Logger log = LoggerFactory.getLogger(EventListenerTest.class);
 
-    public static Raptor raptor;
     public static Device device;
 
     @BeforeClass
@@ -61,7 +64,7 @@ public class EventListenerTest {
 
     @Before
     public void setUp() {
-        raptor = Utils.getRaptor();
+
     }
 
     private Device newDevice(String name) {
@@ -89,6 +92,8 @@ public class EventListenerTest {
 
     private void pushData(Device dev) {
 
+        Raptor raptor = Utils.getRaptor();
+
         Stream stream = dev.stream("test2");
         RecordSet record = new RecordSet(stream);
         record.channel("foo", true);
@@ -113,6 +118,8 @@ public class EventListenerTest {
     @Test
     public void watchDeviceEvents() {
 
+        Raptor raptor = Utils.getRaptor();
+
         log.debug("watch data events");
 
         final Device dev = Utils.createDevice(newDevice("dev"));
@@ -133,7 +140,46 @@ public class EventListenerTest {
     }
 
     @Test
+    public void watchDeviceTreeEvents() {
+
+        Raptor raptor = Utils.getRaptor();
+
+        log.debug("watch device tree events");
+
+        final Device dev = raptor.Inventory().create(newDevice("dev"));
+
+        final TreeNode node = TreeNode.create("parent");
+        raptor.Tree().create(node);
+        raptor.Tree().add(node, dev);
+
+        raptor.Inventory().subscribe(dev, new DeviceCallback() {
+            @Override
+            public void callback(Device obj, DevicePayload message) {
+                log.debug("Device event received {}", message.toString());
+                Assert.assertEquals(obj.id(), dev.id());
+            }
+        });
+        
+        raptor.Tree().subscribe(node, new TreeNodeCallback() {
+            @Override
+            public void callback(TreeNode node, TreeNodePayload message) {
+                log.debug("TreeNode event received {}", message.toString());
+//                Assert.assertEquals(node.getId(), node.getId());
+            }
+        });
+
+        dev.addStream("test2", "foo", "boolean");
+        dev.addAction("sleep");
+
+        raptor.Inventory().update(dev);
+        Utils.waitFor(1000);
+
+    }
+
+    @Test
     public void watchDeviceDataEvents() {
+
+        Raptor raptor = Utils.getRaptor();
 
         log.debug("watch data events");
 
@@ -169,6 +215,8 @@ public class EventListenerTest {
     @Test
     public void watchDeviceActionEvents() {
 
+        Raptor raptor = Utils.getRaptor();
+
         log.debug("watch action events");
 
         Device dev = Utils.createDevice(newDevice("dev"));
@@ -183,7 +231,7 @@ public class EventListenerTest {
             }
         });
 
-        Action action = dev.getAction("switch");
+        Action action = dev.action("switch");
         raptor.Action().invoke(action, "on");
 
         Utils.waitFor(1000);
@@ -191,6 +239,8 @@ public class EventListenerTest {
 
     @Test
     public void subscribeWithToken() {
+
+        Raptor raptor = Utils.getRaptor();
 
         log.debug("subscribe with permission token");
 
@@ -223,6 +273,8 @@ public class EventListenerTest {
 
     @Test
     public void checkFailingSubscribePermission() {
+
+        Raptor raptor = Utils.getRaptor();
 
         log.debug("subscribe with failing permissions");
 
@@ -261,6 +313,8 @@ public class EventListenerTest {
     @Test
     public void checkSubscribeForStreamPermission() {
 
+        Raptor raptor = Utils.getRaptor();
+
         log.debug("subscribe to stream topic with permissions (subscribe, pull)");
 
         Raptor r = Utils.createNewInstance();
@@ -291,6 +345,8 @@ public class EventListenerTest {
 
     @Test
     public void checkSubscribeForActionPermission() {
+
+        Raptor raptor = Utils.getRaptor();
 
         log.debug("subscribe to action topic with permissions (subscribe, execute)");
 
