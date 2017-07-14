@@ -13,11 +13,12 @@ services:
       MYSQL_USERNAME: root
       MYSQL_ROOT_PASSWORD: raptor
 
-  busybox:
-    image: busybox
-    container_name: busybox
+  curl:
+    image: byrnedo/alpine-curl
     volumes:
       - ./:/raptor
+    networks:
+      - raptor_net
 
   dbadmin:
     image: phpmyadmin/phpmyadmin

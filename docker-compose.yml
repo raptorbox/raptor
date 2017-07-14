@@ -89,6 +89,13 @@ services:
     networks:
       - raptor_net
 
+  curl:
+    image: byrnedo/alpine-curl
+    volumes:
+      - ./:/raptor
+    networks:
+      - raptor_net
+
   mariadb:
     image: mariadb:latest
     volumes:

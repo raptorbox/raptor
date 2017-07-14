@@ -125,9 +125,8 @@ services:
     ports:
         - 3306:3306
 
-  busybox:
-    image: busybox
-    container_name: busybox
+  curl:
+    image: byrnedo/alpine-curl
     volumes:
       - ./:/raptor
     networks:
