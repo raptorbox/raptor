@@ -192,7 +192,7 @@ public class DataStreamTest {
         RecordSet record = raptor.Stream().lastUpdate(s);
         Assert.assertNotNull(record);
 
-        Assert.assertEquals(record.channels.get("number"), r.channels.get("number"));
+        Assert.assertEquals((Long)record.channels.get("number"), (Long)r.channels.get("number"));
         Assert.assertEquals(record.channels.get("string"), r.channels.get("string"));
         Assert.assertEquals(record.channels.get("boolean"), r.channels.get("boolean"));
 

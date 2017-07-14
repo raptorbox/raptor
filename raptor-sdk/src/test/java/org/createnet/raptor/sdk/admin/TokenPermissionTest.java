@@ -77,8 +77,8 @@ public class TokenPermissionTest {
         assertNotNull(token);
         assertNotNull(token.getId());
 
-        List<String> permissions = raptor.Admin().Token().Permission.get(token);
-
+        List<String> permissions = raptor.Admin().Token().Permission().get(token);
+ 
         log.debug("Got permissions {}", permissions);
         assertNotNull(permissions);
         assertEquals(0, permissions.size());
@@ -95,7 +95,7 @@ public class TokenPermissionTest {
         assertNotNull(token.getId());
 
         List<String> permissions = PermissionUtil.asList(Permissions.create, Permissions.pull, Permissions.push);
-        List<String> result = raptor.Admin().Token().Permission.set(token, permissions);
+        List<String> result = raptor.Admin().Token().Permission().set(token, permissions);
 
         log.debug("Added permissions {}", permissions);
         log.debug("Response permissions {}", result);
