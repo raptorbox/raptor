@@ -1,8 +1,13 @@
 version: "2"
 
 networks:
-  raptor_net:
+  raptor_test:
     driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.238.0/24
+        gateway: 172.16.238.1
 
 services:
 
@@ -14,7 +19,9 @@ services:
     volumes:
       - ./config:/etc/raptor
     networks:
-      - raptor_net
+      - raptor_test
+    extra_hosts:
+      - "raptor.local:172.16.238.1"
 
   action:
     build: ./raptor-api/raptor-action
@@ -26,9 +33,11 @@ services:
     depends_on:
       - mongo
     networks:
-      - raptor_net
+      - raptor_test
     ports:
       - 10081:80
+    extra_hosts:
+      - "raptor.local:172.16.238.1"
 
   inventory:
     build: ./raptor-api/raptor-inventory
@@ -40,9 +49,11 @@ services:
     depends_on:
       - mongo
     networks:
-      - raptor_net
+      - raptor_test
     ports:
       - 10082:80
+    extra_hosts:
+      - "raptor.local:172.16.238.1"
 
   profile:
     build: ./raptor-api/raptor-profile
@@ -54,9 +65,11 @@ services:
     depends_on:
       - mongo
     networks:
-      - raptor_net
+      - raptor_test
     ports:
       - 10083:80
+    extra_hosts:
+      - "raptor.local:172.16.238.1"
 
   stream:
     build: ./raptor-api/raptor-stream
@@ -68,9 +81,11 @@ services:
     depends_on:
       - mongo
     networks:
-      - raptor_net
+      - raptor_test
     ports:
       - 10084:80
+    extra_hosts:
+      - "raptor.local:172.16.238.1"
 
   tree:
     build: ./raptor-api/raptor-tree
@@ -82,9 +97,11 @@ services:
     depends_on:
       - mongo
     networks:
-      - raptor_net
+      - raptor_test
     ports:
       - 10085:80
+    extra_hosts:
+      - "raptor.local:172.16.238.1"
 
   auth:
     build: ./raptor-api/raptor-auth
@@ -97,19 +114,23 @@ services:
       - mariadb
       - broker
     networks:
-      - raptor_net
+      - raptor_test
     ports:
       - 10086:80
+    extra_hosts:
+      - "raptor.local:172.16.238.1"
 
-  apigateway:
-    build: ./raptor-api/raptor-gateway
-    container_name: raptor-gateway
-    volumes:
-      - ./config:/etc/raptor
-    networks:
-      - raptor_net
-    ports:
-      - 10080:80
+  # apigateway:
+  #   build: ./raptor-api/raptor-gateway
+  #   container_name: raptor-gateway
+  #   volumes:
+  #     - ./config:/etc/raptor
+  #   networks:
+  #     - raptor_test
+  #   ports:
+  #     - 10080:80
+  #   extra_hosts:
+  #     - "raptor.local:172.16.238.1"
 
   mariadb:
     image: mariadb:latest
@@ -121,7 +142,7 @@ services:
       MYSQL_USERNAME: root
       MYSQL_ROOT_PASSWORD: raptor
     networks:
-      - raptor_net
+      - raptor_test
     ports:
         - 3306:3306
 
@@ -130,7 +151,7 @@ services:
     volumes:
       - ./:/raptor
     networks:
-      - raptor_net
+      - raptor_test
 
   dbadmin:
     image: phpmyadmin/phpmyadmin
@@ -142,7 +163,7 @@ services:
     links:
       - mariadb:db
     networks:
-      - raptor_net
+      - raptor_test
     ports:
         - 8081:80
 
@@ -154,7 +175,7 @@ services:
     links:
       - mongo
     networks:
-      - raptor_net
+      - raptor_test
     ports:
         - 8082:1234
   mongo:
@@ -164,6 +185,6 @@ services:
       - ./data/mongodb:/data/db
     command: --smallfiles # --rest --auth
     networks:
-      - raptor_net
+      - raptor_test
     ports:
         - 27017:27017

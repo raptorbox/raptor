@@ -25,7 +25,7 @@ logging:
     org.createnet.raptor: DEBUG
 
 raptor:
-  url: http://apigateway
+  url: http://raptor.local
 
   dispatcher:
     protocol: mqtt
