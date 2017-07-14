@@ -103,11 +103,7 @@ public class InventoryTest {
 
         log.debug("Updated, fetch list");
 
-        List<Device> list = raptor.Inventory().list();
-
-        log.debug("found {} devices", list.size());
-
-        Device dev1 = list.stream().filter(d -> d.id().equals(dev.id())).findFirst().get();
+        Device dev1 = raptor.Inventory().load(dev.id());
 
         assertNotNull(dev1);
         assertTrue(dev1.streams().size() == dev.streams().size());

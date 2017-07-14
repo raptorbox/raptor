@@ -63,12 +63,12 @@ public class PreferenceTest {
         
         Raptor r = Utils.createNewInstance();
         
-        ObjectNode json = r.Admin().User.Profile.newObjectNode();
+        ObjectNode json = r.Admin().User().Profile().newObjectNode();
         json.put("test", "foo");
         json.put("size", 1000L);
         json.put("valid", true);
         
-        JsonNode response = r.Admin().User.Profile.set("test1", json);
+        JsonNode response = r.Admin().User().Profile().set("test1", json);
         
         assertEquals(response.get("size").asLong(), json.get("size").asLong());
 
@@ -79,14 +79,14 @@ public class PreferenceTest {
         
         Raptor r = Utils.createNewInstance();
         
-        ObjectNode json = r.Admin().User.Profile.newObjectNode();
+        ObjectNode json = r.Admin().User().Profile().newObjectNode();
         json.put("test", "foo");
         json.put("size", 1000L);
         json.put("valid", true);
         
-        r.Admin().User.Profile.set("test1", json);
+        r.Admin().User().Profile().set("test1", json);
         
-        JsonNode response = r.Admin().User.Profile.get("test1");
+        JsonNode response = r.Admin().User().Profile().get("test1");
         
         assertEquals(response.get("size").asLong(), json.get("size").asLong());
 
@@ -97,18 +97,18 @@ public class PreferenceTest {
         
         Raptor r = Utils.createNewInstance();
         
-        ObjectNode json = r.Admin().User.Profile.newObjectNode();
+        ObjectNode json = r.Admin().User().Profile().newObjectNode();
         json.put("test", "foo");
         json.put("size", 1000L);
         json.put("valid", true);
         
-        r.Admin().User.Profile.set("test1", json);       
-        r.Admin().User.Profile.set("test2", json);
+        r.Admin().User().Profile().set("test1", json);       
+        r.Admin().User().Profile().set("test2", json);
 
         json.put("valid", false);        
-        r.Admin().User.Profile.set("test3", json);
+        r.Admin().User().Profile().set("test3", json);
         
-        JsonNode response = r.Admin().User.Profile.get();
+        JsonNode response = r.Admin().User().Profile().get();
         
         assertTrue(response.isArray());
         assertEquals(3, response.size());

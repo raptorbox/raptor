@@ -36,7 +36,6 @@ import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.geo.Metrics;
-import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
 /**
@@ -128,7 +127,7 @@ public class DataStreamTest {
         log.debug("Push device data");
 
         Device dev = createDevice(raptor);
-        Stream s = dev.getStream("test");
+        Stream s = dev.stream("test");
 
         pushRecords(raptor, s, 1);
     }
@@ -141,7 +140,7 @@ public class DataStreamTest {
         log.debug("Drop device data");
 
         Device dev = createDevice(raptor);
-        Stream s = dev.getStream("test");
+        Stream s = dev.stream("test");
 
         pushRecords(raptor, s, 10);
 
@@ -161,7 +160,7 @@ public class DataStreamTest {
         log.debug("Pull device data");
 
         Device dev = createDevice(raptor);
-        Stream s = dev.getStream("test");
+        Stream s = dev.stream("test");
 
         int qt = 5;
         pushRecords(raptor, s, qt);
@@ -178,7 +177,7 @@ public class DataStreamTest {
         log.debug("Pull device last update");
 
         Device dev = createDevice(raptor);
-        Stream s = dev.getStream("test");
+        Stream s = dev.stream("test");
 
         String msg = "LastUpdate";
 
@@ -207,7 +206,7 @@ public class DataStreamTest {
         log.debug("Pull empty device last update");
 
         Device dev = createDevice(raptor);
-        Stream s = dev.getStream("test");
+        Stream s = dev.stream("test");
 
         RecordSet record = raptor.Stream().lastUpdate(s);
         Assert.assertNull(record);
@@ -221,7 +220,7 @@ public class DataStreamTest {
         log.debug("Search by time range");
 
         Device dev = createDevice(raptor);
-        Stream s = dev.getStream("test");
+        Stream s = dev.stream("test");
 
         Instant i = Instant.now();
         RecordSet record = new RecordSet(s)
@@ -260,7 +259,7 @@ public class DataStreamTest {
         log.debug("Search by numeric range");
 
         Device dev = createDevice(raptor);
-        Stream s = dev.getStream("test");
+        Stream s = dev.stream("test");
 
         int cnt = 6, offset = 2;
         List<RecordSet> records = createRecordSet(s, cnt);
@@ -281,7 +280,7 @@ public class DataStreamTest {
         log.debug("Search by distance");
 
         Device dev = createDevice(raptor);
-        Stream s = dev.getStream("test");
+        Stream s = dev.stream("test");
 
         int qt = 10;
         pushRecords(raptor, s, qt);
@@ -302,7 +301,7 @@ public class DataStreamTest {
         log.debug("Search by bounding box");
 
         Device dev = createDevice(raptor);
-        Stream s = dev.getStream("test");
+        Stream s = dev.stream("test");
 
         int qt = 10;
         pushRecords(raptor, s, qt);

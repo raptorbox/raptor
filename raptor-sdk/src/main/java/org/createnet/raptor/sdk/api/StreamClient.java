@@ -27,6 +27,7 @@ import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.payload.DataPayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.query.DataQuery;
+import org.createnet.raptor.sdk.RequestOptions;
 
 /**
  * Represent a Device data stream
@@ -83,7 +84,7 @@ public class StreamClient extends AbstractClient {
      * @param record the record to send
      */
     public void push(RecordSet record) {
-        getClient().put(String.format(Routes.PUSH, record.getStream().getDevice().id(), record.getStream().name), record.toJsonNode());
+        getClient().put(String.format(Routes.PUSH, record.getStream().getDevice().id(), record.getStream().name), record.toJsonNode(), RequestOptions.retriable().maxRetries(3));
     }
 
     /**

@@ -36,7 +36,6 @@ import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.payload.TreeNodePayload;
 import org.createnet.raptor.models.tree.TreeNode;
 import org.createnet.raptor.sdk.events.callback.TreeNodeCallback;
-import org.createnet.raptor.sdk.events.callback.TreeNodeEventCallback;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -102,23 +101,25 @@ public class EventListenerTest {
 
         raptor.Stream().push(stream, record);
         record.timestamp = new Date(Instant.now().toEpochMilli());
-        Utils.waitFor(500);
+        Utils.waitFor(100);
 
         raptor.Stream().push(stream, record);
         record.timestamp = new Date(Instant.now().toEpochMilli());
-        Utils.waitFor(500);
+        Utils.waitFor(100);
 
         raptor.Stream().push(stream, record);
         record.timestamp = new Date(Instant.now().toEpochMilli());
-        Utils.waitFor(500);
+        Utils.waitFor(100);
 
         raptor.Stream().push(stream, record);
         record.timestamp = new Date(Instant.now().toEpochMilli());
-        Utils.waitFor(500);
+        Utils.waitFor(100);
     }
 
     @Test
     public void watchDeviceEvents() {
+
+        final AtomicBoolean done = new AtomicBoolean(false);
 
         Raptor raptor = Utils.getRaptor();
 
@@ -131,36 +132,35 @@ public class EventListenerTest {
             public void callback(Device obj, DevicePayload message) {
                 log.debug("Device event received {}", message.toString());
                 Assert.assertEquals(obj.id(), dev.id());
+                done.set(true);
             }
         });
         dev.addStream("test2", "foo", "boolean");
         dev.addAction("sleep");
 
         raptor.Inventory().update(dev);
-        Utils.waitFor(1000);
+
+        Utils.waitUntil(5, () -> !done.get());
 
     }
 
     @Test
     public void watchDeviceTreeEvents() {
 
+        final AtomicBoolean done = new AtomicBoolean(false);
+
         Raptor raptor = Utils.getRaptor();
 
         log.debug("watch device tree events");
 
-        final TreeNode node = TreeNode.create("parent");
-        final TreeNode devnode = raptor.Tree().create(node);        
-        final AtomicBoolean done = new AtomicBoolean(false);
+        final TreeNode node = raptor.Tree().create(TreeNode.create("parent"));
 
-        raptor.Tree().subscribe(node, new TreeNodeCallback() {
-            @Override
-            public void callback(TreeNode node, TreeNodePayload message) {
-                log.debug("TreeNode event received {}", message.toString());
-//                Assert.assertEquals(node.getId(), node.getId());
-                done.set(true);
-            }
+        raptor.Tree().subscribe(node, (TreeNode node1, TreeNodePayload message) -> {
+            log.debug("TreeNode event received {}", message.toString());
+            Assert.assertEquals(node1.getId(), node.getId());
+            done.set(true);
         });
-        
+
         final Device dev = raptor.Inventory().create(newDevice("dev"));
         raptor.Tree().add(node, dev);
 
@@ -168,15 +168,8 @@ public class EventListenerTest {
         dev.addAction("sleep");
 
         raptor.Inventory().update(dev);
-        
-        int count = 0, max = 5;
-        while(!done.get()) {
-            Utils.waitFor(1000);
-            count++;
-            Assert.assertTrue(count < max);
-            log.debug("Waiting {} of {} seconds", count, max);
-        }
 
+        Utils.waitUntil(5, () -> !done.get());
     }
 
     @Test
@@ -187,52 +180,48 @@ public class EventListenerTest {
         log.debug("watch device tree events");
 
         final AtomicInteger eventsReceived = new AtomicInteger(4);
-        
+
         final TreeNode root = raptor.Tree().create(TreeNode.create("root"));
         final TreeNode child1 = raptor.Tree().addChild(root, TreeNode.create("child1"));
         final TreeNode child2 = raptor.Tree().addChild(child1, TreeNode.create("child2"));
         final TreeNode child3 = raptor.Tree().addChild(child2, TreeNode.create("child3"));
-        
+
         raptor.Tree().subscribe(root, (TreeNode node, TreeNodePayload message) -> {
             log.debug("TreeNode {} event received {}", node.getName(), message.toString());
             eventsReceived.decrementAndGet();
         });
-        
+
         raptor.Tree().subscribe(child1, (TreeNode node, TreeNodePayload message) -> {
             log.debug("TreeNode {} event received {}", node.getName(), message.toString());
             eventsReceived.decrementAndGet();
         });
-        
+
         raptor.Tree().subscribe(child2, (TreeNode node, TreeNodePayload message) -> {
             log.debug("TreeNode {} event received {}", node.getName(), message.toString());
             eventsReceived.decrementAndGet();
         });
-        
+
         raptor.Tree().subscribe(child3, (TreeNode node, TreeNodePayload message) -> {
             log.debug("TreeNode {} event received {}", node.getName(), message.toString());
             eventsReceived.decrementAndGet();
-        });       
+        });
 
         final Device dev = raptor.Inventory().create(newDevice("dev1"));
         raptor.Tree().add(child3, dev);
-        
+
         dev.description("updated description");
-        
+
         raptor.Inventory().update(dev);
-        
-        int count = 0, max = 5;
-        while(eventsReceived.get() > 0) {
-            Utils.waitFor(1000);
-            count++;
-            Assert.assertTrue(count < max);
-            log.debug("Waiting {} of {} seconds", count, max);
-        }
+
+        Utils.waitUntil(5, () -> eventsReceived.get() == 0);
 
     }
 
     @Test
     public void watchDeviceDataEvents() {
 
+        final AtomicInteger done = new AtomicInteger(2);
+        
         Raptor raptor = Utils.getRaptor();
 
         log.debug("watch data events");
@@ -240,14 +229,13 @@ public class EventListenerTest {
         Device dev = Utils.createDevice(newDevice("dev"));
         Device dev1 = Utils.createDevice(newDevice("dev1"));
 
-        Utils.waitFor(1500);
-
         raptor.Inventory().subscribe(dev, new DataCallback() {
             @Override
             public void callback(Stream stream, RecordSet record) {
                 log.debug("dev: Data received {}", record.toJson());
                 Assert.assertTrue(record.deviceId.equals(dev.getDevice().id()));
                 Assert.assertTrue(stream.name.equals("test2"));
+                done.decrementAndGet();
             }
         });
 
@@ -257,18 +245,21 @@ public class EventListenerTest {
                 log.debug("dev1: Data received {}", record.toJson());
                 Assert.assertTrue(record.deviceId.equals(dev1.getDevice().id()));
                 Assert.assertTrue(stream.name.equals("test2"));
+                done.decrementAndGet();
             }
         });
 
         pushData(dev);
         pushData(dev1);
 
-        Utils.waitFor(1000);
+        Utils.waitUntil(5, () -> done.get() > 0);
     }
 
     @Test
     public void watchDeviceActionEvents() {
 
+        final AtomicBoolean done = new AtomicBoolean(false);        
+        
         Raptor raptor = Utils.getRaptor();
 
         log.debug("watch action events");
@@ -282,17 +273,20 @@ public class EventListenerTest {
                 log.debug("dev: Data received  for {}: {}", payload.actionId, payload.data);
                 Assert.assertTrue(action.name.equals("switch"));
                 Assert.assertTrue(payload.data.equals("on"));
+                done.set(true);
             }
         });
 
         Action action = dev.action("switch");
         raptor.Action().invoke(action, "on");
 
-        Utils.waitFor(1000);
+        Utils.waitUntil(5, () -> !done.get());
     }
 
     @Test
     public void subscribeWithToken() {
+
+        final AtomicBoolean done = new AtomicBoolean(false);
 
         Raptor raptor = Utils.getRaptor();
 
@@ -316,19 +310,22 @@ public class EventListenerTest {
                 log.debug("dev: Data received  for {}: {}", payload.actionId, payload.data);
                 Assert.assertTrue(action.name.equals("switch"));
                 Assert.assertTrue(payload.data.equals("on"));
+                done.set(true);
             }
         });
 
         Action action = dev.action("switch");
         raptor.Action().invoke(action, "on");
 
-        Utils.waitFor(1000);
+        Utils.waitUntil(5, () -> !done.get());
     }
 
     @Test
     public void checkFailingSubscribePermission() {
 
         Raptor raptor = Utils.getRaptor();
+
+        final AtomicBoolean done = new AtomicBoolean(false);
 
         log.debug("subscribe with failing permissions");
 
@@ -348,6 +345,7 @@ public class EventListenerTest {
                 @Override
                 public void callback(Stream stream, RecordSet record) {
                     log.debug("Got data: {}", record.toJson());
+                    done.set(true);
                 }
             });
         } catch (Exception e) {
@@ -361,11 +359,13 @@ public class EventListenerTest {
 
         raptor.Stream().push(record);
 
-        Utils.waitFor(1000);
+        Utils.waitUntil(5, () -> !done.get());
     }
 
     @Test
     public void checkSubscribeForStreamPermission() {
+
+        final AtomicBoolean done = new AtomicBoolean(false);
 
         Raptor raptor = Utils.getRaptor();
 
@@ -387,6 +387,7 @@ public class EventListenerTest {
             @Override
             public void callback(Stream stream, RecordSet record) {
                 log.debug("Got data: {}", record.toJson());
+                done.set(true);
             }
         });
 
@@ -394,12 +395,12 @@ public class EventListenerTest {
         record.channel("string", "test1");
         raptor.Stream().push(record);
 
-        Utils.waitFor(1000);
+        Utils.waitUntil(5, () -> !done.get());
     }
 
     @Test
     public void checkSubscribeForActionPermission() {
-
+        final AtomicBoolean done = new AtomicBoolean(false);
         Raptor raptor = Utils.getRaptor();
 
         log.debug("subscribe to action topic with permissions (subscribe, execute)");
@@ -414,19 +415,19 @@ public class EventListenerTest {
         Utils.waitFor(1500);
 
         Raptor r2 = new Raptor(Utils.loadSettings().getProperty("url"), t);
-        Action action = dev.getAction("switch");
+        Action action = dev.action("switch");
 
         r2.Action().subscribe(action, new ActionCallback() {
             @Override
             public void callback(Action action, ActionPayload message) {
                 log.debug("Got data: {}", message.data);
+                done.set(true);
             }
         });
 
         raptor.Action().invoke(action, "on");
 
-        Utils.waitFor(2000);
-
+        Utils.waitUntil(5, () -> !done.get());
     }
 
 }

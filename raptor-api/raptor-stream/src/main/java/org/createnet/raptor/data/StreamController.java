@@ -216,7 +216,7 @@ public class StreamController {
 
         Device device = raptor.Inventory().load(deviceId);
 
-        Stream stream = device.getStream(streamId);
+        Stream stream = device.stream(streamId);
         if (stream == null) {
             return JsonErrorResponse.notFound("Stream not found");
         }

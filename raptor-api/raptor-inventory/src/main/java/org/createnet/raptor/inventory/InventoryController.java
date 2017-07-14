@@ -161,6 +161,15 @@ public class InventoryController {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Device not found");
         }
 
+        String userId = device.userId();
+        device.merge(body);
+
+        // reset ids
+        device.id(deviceId);
+        device.userId(userId);
+
+        device.validate();
+
         deviceService.save(device);
 
         eventPublisher.update(device);

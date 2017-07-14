@@ -90,6 +90,9 @@ public class Device extends DeviceContainer {
         public boolean storeData = true;
         public boolean eventsEnabled = true;
 
+        public Settings() {
+        }
+
         public boolean storeEnabled() {
             return storeData;
         }
@@ -118,6 +121,44 @@ public class Device extends DeviceContainer {
     @Override
     public String toString() {
         return "Device<" + (this.id != null ? this.id : this.name) + ">";
+    }
+
+    public Device merge(Device raw) {
+
+        this.id(raw.id());
+        this.name(raw.name());
+        this.description(raw.description());
+        this.userId(raw.userId());
+
+        this.createdAt(raw.getCreatedAt());
+        this.updatedAt(raw.getUpdatedAt());
+
+        this.properties().clear();
+        this.properties().putAll(raw.properties());
+
+        this.settings().eventsEnabled = raw.settings().eventsEnabled;
+        this.settings().storeData = raw.settings().storeData;
+
+
+        this.streams().putAll(raw.streams());
+        this.streams().entrySet().stream()
+                .filter((entry) -> {
+                    return raw.stream(entry.getKey()) == null;
+                })
+                .forEach((entry) -> {
+                    this.streams().remove(entry.getKey());
+                });
+
+        this.actions().putAll(raw.actions());
+        this.actions().entrySet().stream()
+                .filter((entry) -> {
+                    return raw.action(entry.getKey()) == null;
+                })
+                .forEach((entry) -> {
+                    this.actions().remove(entry.getKey());
+                });
+
+        return this;
     }
 
     /**
@@ -293,7 +334,7 @@ public class Device extends DeviceContainer {
     public long getCreatedAt() {
         return createdAt;
     }
-    
+
     @JsonProperty
     public long getUpdatedAt() {
         return updatedAt;
@@ -303,7 +344,7 @@ public class Device extends DeviceContainer {
     public String id() {
         return id;
     }
-    
+
     @JsonProperty
     public String userId() {
         return userId;
@@ -338,7 +379,7 @@ public class Device extends DeviceContainer {
     public Map<String, Action> actions() {
         return this.actions;
     }
-    
+
     /**
      * Return a Stream by name
      *
@@ -578,5 +619,5 @@ public class Device extends DeviceContainer {
     public Settings getSettings() {
         return settings;
     }
-    
+
 }
