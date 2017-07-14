@@ -85,9 +85,40 @@ public class TreeController {
     @Autowired
     private TreeService treeService;
 
+
     @RequestMapping(
-            method = RequestMethod.GET,
-            value = "/"
+            method = RequestMethod.POST
+    )
+    @ApiOperation(
+            value = "Create a node of a tree",
+            notes = "",
+            nickname = "create"
+    )
+//    @PreAuthorize("hasPermission(#deviceId, 'push')")
+    public ResponseEntity<?> create(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable("parentId") Optional<String> optionalParentId,
+            @RequestBody TreeNode raw
+    ) {
+               
+        TreeNode node = new TreeNode();
+        node.merge(raw);
+
+        if(node.getUserId() == null) {
+            node.user(currentUser);
+        }
+        if (!currentUser.isAdmin() && !node.getUserId().equals(currentUser.getUuid())) {
+            node.user(currentUser);
+        }
+        
+        treeService.save(node);
+        log.debug("Added node {}", node.getId());
+
+        return ResponseEntity.ok(node);
+    }    
+    
+    @RequestMapping(
+            method = RequestMethod.GET
     )
     @ApiOperation(
             value = "List all trees",
@@ -195,38 +226,6 @@ public class TreeController {
         });
 
         return ResponseEntity.accepted().build();
-    }
-
-    @RequestMapping(
-            method = RequestMethod.POST,
-            value = { "/" }
-    )
-    @ApiOperation(
-            value = "Create a node of a tree",
-            notes = "",
-            nickname = "create"
-    )
-//    @PreAuthorize("hasPermission(#deviceId, 'push')")
-    public ResponseEntity<?> create(
-            @AuthenticationPrincipal User currentUser,
-            @PathVariable("parentId") Optional<String> optionalParentId,
-            @RequestBody TreeNode raw
-    ) {
-
-        TreeNode node = new TreeNode();
-        node.merge(raw);
-
-        if(node.getUserId() == null) {
-            node.user(currentUser);
-        }
-        if (!currentUser.isAdmin() && !node.getUserId().equals(currentUser.getUuid())) {
-            node.user(currentUser);
-        }
-
-        treeService.save(node);
-        log.debug("Added node {}", node.getId());
-
-        return ResponseEntity.ok(node);
     }
 
     @RequestMapping(

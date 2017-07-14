@@ -202,7 +202,7 @@ public abstract class BaseApplication {
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(this.getClass().getName().replace(".", "-"), mqttClientFactory(), topics);
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
-        adapter.setQos(0);
+        adapter.setQos(2);
         adapter.setRecoveryInterval(1000);
         adapter.setOutputChannel(mqttInputChannel());
         return adapter;
@@ -217,10 +217,10 @@ public abstract class BaseApplication {
                 if (messageHandler != null) {
                     try {
                         DispatcherPayload payload = DispatcherPayload.parseJSON(message.getPayload().toString());
-                        messageHandler.handle(payload);
+                        messageHandler.handle(payload, message.getHeaders());
                     }
                     catch(Exception e) {
-                        log.error("Error on message: {}", e.getMessage());
+                        throw new MessagingException("Exception handling message", e);
                     }
                 }
             }

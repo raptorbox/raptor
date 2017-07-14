@@ -25,6 +25,7 @@ import org.createnet.raptor.models.tree.TreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.MessageHeaders;
 
 /**
  *
@@ -41,7 +42,7 @@ public class TreeMessageHandler implements RaptorMessageHandler {
     private TreeNodeEventPublisher treeNodePublisher;
 
     @Override
-    public void handle(DispatcherPayload dispatcherPayload) {
+    public void handle(DispatcherPayload dispatcherPayload, MessageHeaders headers) {
 
         switch (dispatcherPayload.getType()) {
 //            case tree:
@@ -107,7 +108,7 @@ public class TreeMessageHandler implements RaptorMessageHandler {
         while (parent != null) {
             log.debug("Notifiyng {} ({})", parent.getId(), parent.path());
             treeNodePublisher.notify(parent, payload);
-            parent = parents.getParent();
+            parent = parent.getParent();
         }
     }
 

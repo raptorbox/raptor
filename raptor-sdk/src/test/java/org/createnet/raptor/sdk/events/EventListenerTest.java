@@ -17,6 +17,8 @@ package org.createnet.raptor.sdk.events;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.createnet.raptor.models.acl.PermissionUtil;
 import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.auth.Token;
@@ -148,12 +150,14 @@ public class EventListenerTest {
 
         final TreeNode node = TreeNode.create("parent");
         final TreeNode devnode = raptor.Tree().create(node);        
+        final AtomicBoolean done = new AtomicBoolean(false);
 
         raptor.Tree().subscribe(node, new TreeNodeCallback() {
             @Override
             public void callback(TreeNode node, TreeNodePayload message) {
                 log.debug("TreeNode event received {}", message.toString());
 //                Assert.assertEquals(node.getId(), node.getId());
+                done.set(true);
             }
         });
         
@@ -164,7 +168,65 @@ public class EventListenerTest {
         dev.addAction("sleep");
 
         raptor.Inventory().update(dev);
-        Utils.waitFor(1000);
+        
+        int count = 0, max = 5;
+        while(!done.get()) {
+            Utils.waitFor(1000);
+            count++;
+            Assert.assertTrue(count < max);
+            log.debug("Waiting {} of {} seconds", count, max);
+        }
+
+    }
+
+    @Test
+    public void watchDeepTreeEvents() {
+
+        Raptor raptor = Utils.getRaptor();
+
+        log.debug("watch device tree events");
+
+        final AtomicInteger eventsReceived = new AtomicInteger(4);
+        
+        final TreeNode root = raptor.Tree().create(TreeNode.create("root"));
+        final TreeNode child1 = raptor.Tree().addChild(root, TreeNode.create("child1"));
+        final TreeNode child2 = raptor.Tree().addChild(child1, TreeNode.create("child2"));
+        final TreeNode child3 = raptor.Tree().addChild(child2, TreeNode.create("child3"));
+        
+        raptor.Tree().subscribe(root, (TreeNode node, TreeNodePayload message) -> {
+            log.debug("TreeNode {} event received {}", node.getName(), message.toString());
+            eventsReceived.decrementAndGet();
+        });
+        
+        raptor.Tree().subscribe(child1, (TreeNode node, TreeNodePayload message) -> {
+            log.debug("TreeNode {} event received {}", node.getName(), message.toString());
+            eventsReceived.decrementAndGet();
+        });
+        
+        raptor.Tree().subscribe(child2, (TreeNode node, TreeNodePayload message) -> {
+            log.debug("TreeNode {} event received {}", node.getName(), message.toString());
+            eventsReceived.decrementAndGet();
+        });
+        
+        raptor.Tree().subscribe(child3, (TreeNode node, TreeNodePayload message) -> {
+            log.debug("TreeNode {} event received {}", node.getName(), message.toString());
+            eventsReceived.decrementAndGet();
+        });       
+
+        final Device dev = raptor.Inventory().create(newDevice("dev1"));
+        raptor.Tree().add(child3, dev);
+        
+        dev.description("updated description");
+        
+        raptor.Inventory().update(dev);
+        
+        int count = 0, max = 5;
+        while(eventsReceived.get() > 0) {
+            Utils.waitFor(1000);
+            count++;
+            Assert.assertTrue(count < max);
+            log.debug("Waiting {} of {} seconds", count, max);
+        }
 
     }
 

@@ -16,6 +16,7 @@
 package org.createnet.raptor.api.common.dispatcher;
 
 import org.createnet.raptor.models.payload.DispatcherPayload;
+import org.springframework.messaging.MessageHeaders;
 
 /**
  *
@@ -23,6 +24,6 @@ import org.createnet.raptor.models.payload.DispatcherPayload;
  */
 public interface RaptorMessageHandler {
 
-    public void handle(DispatcherPayload dispatcherPayload);
+    public void handle(DispatcherPayload dispatcherPayload, MessageHeaders headers);
 
 }

@@ -19,9 +19,9 @@ package org.createnet.raptor.sdk;
  * List of topics for Raptor API
  */
 final public class Topics {
-    public static final String ACTION = "/action/%s/%s";
-    public static final String STREAM = "/stream/%s/%s";
-    public static final String DEVICE = "/device/%s";
-    public static final String USER = "/user/%s";
-    public static final String TREE = "/tree/%s";
+    public static final String ACTION = "action/%s/%s";
+    public static final String STREAM = "stream/%s/%s";
+    public static final String DEVICE = "device/%s";
+    public static final String USER = "user/%s";
+    public static final String TREE = "tree/%s";
 }

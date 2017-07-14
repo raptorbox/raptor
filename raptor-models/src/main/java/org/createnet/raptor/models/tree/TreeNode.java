@@ -244,12 +244,13 @@ public class TreeNode extends RaptorContainer {
      */
     public String path() {
         
-        List<String> path = Arrays.asList(this.getId());
+        ArrayList<String> path = new ArrayList(Arrays.asList(this.getId()));
         
         TreeNode p = this.getParent();
         if(p != null) {
             while(p != null) {
-                path.add(p.getId());
+                String pid = p.getId();
+                path.add(pid);
                 p = p.getParent();
             }
         }

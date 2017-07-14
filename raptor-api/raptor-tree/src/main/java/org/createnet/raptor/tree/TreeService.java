@@ -131,10 +131,14 @@ public class TreeService {
     public TreeNode parents(TreeNode node) {
         
         TreeNode curr = node;
-        TreeNode parent = parent(node);
+        TreeNode parent = parent(curr);
         while(parent != null) {
+            
             curr.parent(parent);
-            parent = parent(node);
+            
+            curr = parent;
+            parent = parent(curr);
+
         }
 
         return node;

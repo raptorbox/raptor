@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.objects.Device;
@@ -42,7 +43,7 @@ public class TreeClient extends AbstractClient {
     }
 
     final static Logger logger = LoggerFactory.getLogger(TreeClient.class);
-    
+
     /**
      * Subscribe to a data stream
      *
@@ -58,11 +59,12 @@ public class TreeClient extends AbstractClient {
     /**
      * Return the current tree structure for an user
      *
-     * @return the 
+     * @return the
      */
     public List<TreeNode> list() {
         JsonNode json = getClient().get(Routes.TREE_LIST);
-        List<TreeNode> list = Device.getMapper().convertValue(json, new TypeReference<List<TreeNode>>() {});
+        List<TreeNode> list = Device.getMapper().convertValue(json, new TypeReference<List<TreeNode>>() {
+        });
         return list;
     }
 
@@ -70,16 +72,16 @@ public class TreeClient extends AbstractClient {
      * Return the whole tree structure for a node
      *
      * @param node
-     * @return the 
+     * @return the
      */
     public TreeNode tree(TreeNode node) {
-        
+
         JsonNode json = getClient().get(String.format(Routes.TREE_GET, node.getId()));
         TreeNode tree = Device.getMapper().convertValue(json, TreeNode.class);
-        
+
         node.children().clear();
         node.children().addAll(tree.children());
-        
+
         return node;
     }
 
@@ -87,11 +89,12 @@ public class TreeClient extends AbstractClient {
      * Return the direct children of a node
      *
      * @param node
-     * @return the 
+     * @return the
      */
     public List<TreeNode> children(TreeNode node) {
         JsonNode json = getClient().get(String.format(Routes.TREE_CHILDREN, node.getId()));
-        List<TreeNode> list = Device.getMapper().convertValue(json, new TypeReference<List<TreeNode>>() {});
+        List<TreeNode> list = Device.getMapper().convertValue(json, new TypeReference<List<TreeNode>>() {
+        });
         return list;
     }
 
@@ -100,10 +103,10 @@ public class TreeClient extends AbstractClient {
      *
      * @param parent
      * @param devices
-     * @return 
+     * @return
      */
     public List<TreeNode> add(TreeNode parent, Device... devices) {
-        return add(parent, 
+        return add(parent,
                 Arrays.asList(devices).stream()
                         .map((d) -> TreeNode.create(d))
                         .collect(Collectors.toList())
@@ -111,55 +114,73 @@ public class TreeClient extends AbstractClient {
     }
 
     /**
-     * Add nodes to a tree branch
-     *
-     * @param devices
-     * @return 
-     */
-    public List<TreeNode> add(Device... devices) {
-        return add(null, 
-                Arrays.asList(devices).stream()
-                        .map((d) -> TreeNode.create(d))
-                        .collect(Collectors.toList())
-        );
-    }
-    
-    /**
      * Create a node of a tree
      *
      * @param node
-     * @return 
+     * @return
      */
     public TreeNode create(TreeNode node) {
         JsonNode json = getClient().post(Routes.TREE_CREATE, toJsonNode(node));
         TreeNode node1 = Device.getMapper().convertValue(json, TreeNode.class);
         return node.merge(node1);
     }
-    
+
+    /**
+     * Add nodes to a tree branch
+     *
+     * @param devices
+     * @return
+     */
+    public List<TreeNode> add(Device... devices) {
+        List<TreeNode> nodes = Arrays.asList(devices).stream()
+                        .map((d) -> TreeNode.create(d))
+                        .collect(Collectors.toList());
+        add(null, nodes);
+        return nodes;
+    }
+
+    /**
+     * Add a node to a tree branch
+     *
+     * @param parent
+     * @param node
+     * @return
+     */
+    public TreeNode addChild(TreeNode parent, TreeNode node) {
+        add(parent, Arrays.asList(node));
+        return node;
+    }
+
     /**
      * Add nodes to a tree branch
      *
      * @param parent
      * @param nodes
-     * @return 
+     * @return
      */
     public List<TreeNode> add(TreeNode parent, List<TreeNode> nodes) {
-        
         String url = String.format(Routes.TREE_ADD, parent == null ? "" : parent.getId());
         JsonNode json = getClient().put(url, toJsonNode(nodes));
-        
-        List<TreeNode> list = Device.getMapper().convertValue(json, new TypeReference<List<TreeNode>>() {});
-
-        return list;
+        return nodes;
     }
-    
+
     /**
-     * Remove node from a tree branch
+     * Remove a node from a tree branch
      *
      * @param node
      */
     public void remove(TreeNode node) {
         String url = String.format(Routes.TREE_REMOVE, node.getId());
+        getClient().delete(url);
+    }
+
+    /**
+     * Remove a node and all children from a tree branch
+     *
+     * @param node
+     */
+    public void removeTree(TreeNode node) {
+        String url = String.format(Routes.TREE_REMOVE_TREE, node.getId());
         getClient().delete(url);
     }
 
