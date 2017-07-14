@@ -84,7 +84,7 @@ public class StreamClient extends AbstractClient {
      * @param record the record to send
      */
     public void push(RecordSet record) {
-        getClient().put(String.format(Routes.PUSH, record.getStream().getDevice().id(), record.getStream().name), record.toJsonNode(), RequestOptions.retriable().maxRetries(3));
+        getClient().put(String.format(Routes.PUSH, record.getStream().getDevice().id(), record.getStream().name), record.toJsonNode(), RequestOptions.retriable().waitFor(300).maxRetries(5));
     }
 
     /**

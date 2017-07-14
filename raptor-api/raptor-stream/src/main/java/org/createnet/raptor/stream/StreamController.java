@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.data;
+package org.createnet.raptor.stream;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -83,9 +83,9 @@ import org.springframework.web.bind.annotation.RestController;
 })
 @Api(tags = {"Data"})
 public class StreamController {
-    
+
     final private Logger log = LoggerFactory.getLogger(StreamController.class);
-    
+
     @Autowired
     private ApiClientService raptor;
 
@@ -94,13 +94,13 @@ public class StreamController {
 
     @Autowired
     private StreamService streamService;
-    
+
     @Autowired
     private MongoTemplate mongoTemplate;
 
     @RequestMapping(
             method = RequestMethod.PUT,
-            value = "/{deviceId}/{streamId}"
+            value = "{deviceId}/{streamId}"
     )
     @ApiOperation(
             value = "Save stream data",
@@ -117,7 +117,7 @@ public class StreamController {
 
         Device device = raptor.Inventory().load(deviceId);
 
-        Stream stream = device.getStream(streamId);
+        Stream stream = device.stream(streamId);
         if (stream == null) {
             return JsonErrorResponse.notFound("Stream not found");
         }
@@ -130,7 +130,7 @@ public class StreamController {
         if (!currentUser.isAdmin() && !record.userId.equals(currentUser.getUuid())) {
             record.userId = currentUser.getUuid();
         }
-                
+
         // save data!
         streamService.save(record);
 
@@ -142,7 +142,7 @@ public class StreamController {
 
     @RequestMapping(
             method = RequestMethod.DELETE,
-            value = "/{deviceId}/{streamId}"
+            value = "{deviceId}/{streamId}"
     )
     @ApiOperation(
             value = "Remove all the stored data",
@@ -158,7 +158,7 @@ public class StreamController {
 
         Device device = raptor.Inventory().load(deviceId);
 
-        Stream stream = device.getStream(streamId);
+        Stream stream = device.stream(streamId);
         if (stream == null) {
             return JsonErrorResponse.notFound("Stream not found");
         }
@@ -171,7 +171,7 @@ public class StreamController {
 
     @RequestMapping(
             method = RequestMethod.GET,
-            value = "/{deviceId}/{streamId}"
+            value = "{deviceId}/{streamId}"
     )
     @ApiOperation(
             value = "Retrieve all the stored stream data",
@@ -188,7 +188,7 @@ public class StreamController {
 
         Device device = raptor.Inventory().load(deviceId);
 
-        Stream stream = device.getStream(streamId);
+        Stream stream = device.stream(streamId);
         if (stream == null) {
             return JsonErrorResponse.notFound("Stream not found");
         }
@@ -200,7 +200,7 @@ public class StreamController {
 
     @RequestMapping(
             method = RequestMethod.GET,
-            value = "/{deviceId}/{streamId}/lastUpdate"
+            value = "{deviceId}/{streamId}/lastUpdate"
     )
     @ApiOperation(
             value = "Retrieve the last record stored for a stream",
@@ -230,10 +230,9 @@ public class StreamController {
         return ResponseEntity.ok(record);
     }
 
-
     @RequestMapping(
             method = RequestMethod.POST,
-            value = "/{deviceId}/{streamId}"
+            value = "{deviceId}/{streamId}"
     )
     @ApiOperation(
             value = "Retrieve data based on the search query",
@@ -250,29 +249,27 @@ public class StreamController {
 
         Device device = raptor.Inventory().load(deviceId);
 
-        Stream stream = device.getStream(streamId);
+        Stream stream = device.stream(streamId);
         if (stream == null) {
             return JsonErrorResponse.notFound("Stream not found");
         }
-        
+
         query.streamId(streamId);
         query.deviceId(deviceId);
-        
+
         DataQueryBuilder qb = new DataQueryBuilder(query);
 //        Pageable paging = qb.getPaging();
 //        Predicate predicate = qb.getPredicate();
         Query q = qb.getQuery();
 
         ResultSet result = new ResultSet(stream);
-        
+
         List<RecordSet> records = mongoTemplate.find(q, RecordSet.class);
         result.addAll(records);
-        
+
 //        Page<RecordSet> page = streamService.search(q, paging);
 //        result.addAll(page.getContent());
-        
         return ResponseEntity.ok(result);
     }
-    
-    
+
 }

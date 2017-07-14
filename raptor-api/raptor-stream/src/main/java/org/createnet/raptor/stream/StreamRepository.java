@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.data;
+package org.createnet.raptor.stream;
 
 import com.querydsl.core.types.Predicate;
 import java.util.List;

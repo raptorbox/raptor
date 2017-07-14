@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.data;
+package org.createnet.raptor.stream;
 
 import org.createnet.raptor.api.common.dispatcher.events.StreamApplicationEvent;
 import org.createnet.raptor.events.Event;

@@ -14,7 +14,8 @@
     <logger name="io.swagger.jaxrs" level="warn" />
 
     <logger name="org.createnet.raptor" level="debug" />
-    <logger name="springfox.documentation" level="debug" />
+    <!--<logger name="springfox.documentation" level="debug" />-->
+    <logger name="org.springframework.web" level="debug" />
     
     <root level="warn">
         <appender-ref ref="STDOUT" />

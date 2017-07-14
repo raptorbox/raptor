@@ -13,7 +13,6 @@ services:
 
   broker:
     build: ./raptor-broker
-    container_name: raptor-broker
     ports:
       - 1883:1883
     volumes:
@@ -25,7 +24,6 @@ services:
 
   action:
     build: ./raptor-api/raptor-action
-    container_name: raptor-action
     volumes:
       - ./config:/etc/raptor
     links:
@@ -41,7 +39,6 @@ services:
 
   inventory:
     build: ./raptor-api/raptor-inventory
-    container_name: raptor-inventory
     volumes:
       - ./config:/etc/raptor
     links:
@@ -57,7 +54,6 @@ services:
 
   profile:
     build: ./raptor-api/raptor-profile
-    container_name: raptor-profile
     volumes:
       - ./config:/etc/raptor
     links:
@@ -73,7 +69,6 @@ services:
 
   stream:
     build: ./raptor-api/raptor-stream
-    container_name: raptor-stream
     volumes:
       - ./config:/etc/raptor
     links:
@@ -89,7 +84,6 @@ services:
 
   tree:
     build: ./raptor-api/raptor-tree
-    container_name: raptor-tree
     volumes:
       - ./config:/etc/raptor
     links:
@@ -105,7 +99,6 @@ services:
 
   auth:
     build: ./raptor-api/raptor-auth
-    container_name: raptor-auth
     volumes:
       - ./config:/etc/raptor
     links:
@@ -120,21 +113,8 @@ services:
     extra_hosts:
       - "raptor.local:172.16.238.1"
 
-  # apigateway:
-  #   build: ./raptor-api/raptor-gateway
-  #   container_name: raptor-gateway
-  #   volumes:
-  #     - ./config:/etc/raptor
-  #   networks:
-  #     - raptor_test
-  #   ports:
-  #     - 10080:80
-  #   extra_hosts:
-  #     - "raptor.local:172.16.238.1"
-
   mariadb:
     image: mariadb:latest
-    container_name: mariadb
     volumes:
       - ./raptor-auth/src/main/resources/sql:/docker-entrypoint-initdb.d
       - ./data/mariadb:/var/lib/mysql
@@ -180,7 +160,6 @@ services:
         - 8082:1234
   mongo:
     image: mongo:3
-    container_name: mongo
     volumes:
       - ./data/mongodb:/data/db
     command: --smallfiles # --rest --auth

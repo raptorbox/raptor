@@ -121,6 +121,9 @@ public abstract class BaseApplication {
         appName = parts[parts.length - 2];
         String name = "--spring.config.name=" + appName;
 
+        log.debug("Set application name to match package: {}", appName);
+        log.debug("Listening to path /{}", appName);
+
         String[] args2 = new String[args.length + 1];
         System.arraycopy(args, 0, args2, 0, args.length);
         args2[args2.length - 1] = name;
@@ -218,8 +221,7 @@ public abstract class BaseApplication {
                     try {
                         DispatcherPayload payload = DispatcherPayload.parseJSON(message.getPayload().toString());
                         messageHandler.handle(payload, message.getHeaders());
-                    }
-                    catch(Exception e) {
+                    } catch (Exception e) {
                         throw new MessagingException("Exception handling message", e);
                     }
                 }
@@ -238,6 +240,8 @@ public abstract class BaseApplication {
                 .filter(f -> new File(basepath + f).exists())
                 .map(f -> new FileSystemResource(basepath + f))
                 .collect(Collectors.toList());
+
+        log.debug("Configuration sources: {}", resources.toString());
 
         if (resources.isEmpty()) {
             throw new RuntimeException("Cannot find a loadable property file in: " + basepath);
