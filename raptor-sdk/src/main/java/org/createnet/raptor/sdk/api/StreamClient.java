@@ -24,10 +24,12 @@ import org.createnet.raptor.sdk.events.callback.StreamEventCallback;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Stream;
-import org.createnet.raptor.models.payload.DataPayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
+import org.createnet.raptor.models.payload.StreamPayload;
 import org.createnet.raptor.models.query.DataQuery;
 import org.createnet.raptor.sdk.RequestOptions;
+import org.createnet.raptor.sdk.events.callback.RaptorCallback;
+import org.createnet.raptor.sdk.events.callback.StreamCallback;
 
 /**
  * Represent a Device data stream
@@ -38,17 +40,6 @@ public class StreamClient extends AbstractClient {
 
     public StreamClient(Raptor container) {
         super(container);
-    }
-
-    public interface StreamCallback {
-
-        /**
-         * Run when a stream receive data
-         *
-         * @param stream The stream receiving update
-         * @param record The record sent over stream
-         */
-        public void execute(Stream stream, RecordSet record);
     }
 
     /**
@@ -67,13 +58,23 @@ public class StreamClient extends AbstractClient {
      * @param stream
      * @param ev
      */
-    public void subscribe(Stream stream, DataCallback ev) {
+    public void subscribe(Stream stream, RaptorCallback ev) {
         subscribe(stream, new StreamEventCallback() {
             @Override
-            public void trigger(DispatcherPayload payload) {
-                DataPayload dpayload = (DataPayload) payload;
-                RecordSet record = RecordSet.fromJSON(dpayload.toString());
-                ev.callback(stream, record);
+            public void trigger(DispatcherPayload dpayload) {
+
+                StreamPayload payload = (StreamPayload) dpayload;
+
+                if (ev instanceof DataCallback) {
+                    DataCallback ev1 = (DataCallback) ev;
+                    ev1.callback(stream, payload.record);
+                }
+
+                if (ev instanceof StreamCallback) {
+                    StreamCallback ev1 = (StreamCallback) ev;
+                    ev1.callback(stream, payload);
+                }
+
             }
         });
     }
@@ -175,7 +176,7 @@ public class StreamClient extends AbstractClient {
      *
      * @param stream the stream to search in
      * @param query the search query
-     * @return 
+     * @return
      */
     public ResultSet search(Stream stream, DataQuery query) {
         JsonNode results = getClient().post(

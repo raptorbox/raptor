@@ -29,7 +29,7 @@ raptor:
 
   dispatcher:
     protocol: mqtt
-    uri: tcp://broker:1883
+    uri: tcp://raptor.local:1883
 
   auth:
 

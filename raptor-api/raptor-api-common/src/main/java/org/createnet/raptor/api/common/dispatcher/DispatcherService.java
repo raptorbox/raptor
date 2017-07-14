@@ -30,7 +30,6 @@ import org.createnet.raptor.models.payload.DataPayload;
 import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.StreamPayload;
-import org.createnet.raptor.models.payload.TreeNodePayload;
 import org.createnet.raptor.models.tree.TreeNode;
 import org.createnet.raptor.sdk.Topics;
 import org.slf4j.Logger;
@@ -105,6 +104,36 @@ public class DispatcherService implements InitializingBean, DisposableBean {
         return String.format(Topics.DEVICE, id);
     }
 
+    protected String getStreamTopic(Stream s) {
+
+        Device obj = s.getDevice();
+        if (obj == null) {
+            throw new RaptorComponent.ParserException("Device is null");
+        }
+
+        String id = obj.id();
+        if (id == null) {
+            throw new RaptorComponent.ParserException("Device.id is null");
+        }
+
+        return String.format(Topics.STREAM, id, s.name);
+    }
+
+    protected String getActionTopic(Action a) {
+
+        Device obj = a.getDevice();
+        if (obj == null) {
+            throw new RaptorComponent.ParserException("Device is null");
+        }
+
+        String id = obj.id();
+        if (id == null) {
+            throw new RaptorComponent.ParserException("Device.id is null");
+        }
+
+        return String.format(Topics.ACTION, id, a.name);
+    }
+
     protected String getUserEventsTopic(DeviceContainer c) {
 
         Device obj = c.getDevice();
@@ -126,8 +155,11 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      * @param message
      */
     protected void notifyEvent(String topic, DispatcherPayload message) {
+        
         logger.debug("Notifying {} {}.{}", topic, message.getType(), message.getOp());
+        
         getDispatcher().add(topic, message.toString());
+
     }
 
     /**
@@ -136,8 +168,11 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      * @param payload
      */
     public void notifyTreeEvent(TreeNode node, DispatcherPayload payload) {
+        
         String topic = String.format(Topics.TREE, node.getId());
+        
         notifyEvent(topic, payload);
+        
     }
 
     /**
@@ -147,8 +182,11 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      * @param payload
      */
     protected void notifyUserEvent(Permissions op, Device obj, DispatcherPayload payload) {
+        
         String topic = getUserEventsTopic(obj);
+        
         notifyEvent(topic, payload);
+
     }
 
     /**
@@ -162,7 +200,6 @@ public class DispatcherService implements InitializingBean, DisposableBean {
         DevicePayload payload = new DevicePayload(obj, op);
 
         notifyEvent(topic, payload);
-        notifyUserEvent(op, obj, payload);
     }
 
     /**
@@ -171,12 +208,12 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      * @param record
      */
     public void notifyDataEvent(Stream stream, RecordSet record) {
-
-        String topic = getEventsTopic(stream);
-        StreamPayload payload = new StreamPayload(stream, Permissions.data, record.toJsonNode());
-
-        notifyEvent(topic, payload);
-        notifyUserEvent(Permissions.push, stream.getDevice(), payload);
+        
+        StreamPayload payload = new StreamPayload(stream, Permissions.data, record);
+        
+        notifyEvent(getStreamTopic(stream), payload);
+        notifyEvent(getEventsTopic(stream), payload);
+        
     }
 
     /**
@@ -187,8 +224,6 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      */
     public void notifyActionEvent(Permissions op, Action action, String status) {
 
-        String topic = getEventsTopic(action);
-
         String data = null;
         if (status != null) {
             data = status;
@@ -196,29 +231,8 @@ public class DispatcherService implements InitializingBean, DisposableBean {
 
         ActionPayload payload = new ActionPayload(action, op, data);
 
-        notifyEvent(topic, payload);
-        notifyUserEvent(op, action.getDevice(), payload);
-    }
-    
-    
-    /**
-     *
-     * @param stream
-     * @param records
-     */
-    public void pushData(Stream stream, RecordSet records) {
-        String topic = stream.getDevice().id() + "/streams/" + stream.name + "/updates";
-        notifyEvent(topic, new DataPayload(records.toJson()));
-    }
-
-    /**
-     *
-     * @param action
-     * @param status
-     */
-    public void actionTrigger(Action action, String status) {
-        String topic = action.getDevice().id() + "/actions/" + action.name;
-        notifyEvent(topic, new DataPayload(status));
+        notifyEvent(getActionTopic(action), payload);        
+        notifyEvent(getEventsTopic(action), payload);
     }
     
 }

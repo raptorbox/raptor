@@ -201,6 +201,18 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public User create(String username, String password, String email) {
+        return create(username, password, email, new HashSet(Arrays.asList(new Role(Role.Roles.user))));
+    }
+
+    /**
+     * Create a new admin user setting the minimum required parameters
+     *
+     * @param username
+     * @param password
+     * @param email
+     * @return
+     */
+    public User createAdmin(String username, String password, String email) {
         return create(username, password, email, new HashSet(Arrays.asList(new Role(Role.Roles.admin))));
     }
 

@@ -19,9 +19,15 @@ package org.createnet.raptor.sdk;
  * List of topics for Raptor API
  */
 final public class Topics {
-    public static final String ACTION = "action/%s/%s";
-    public static final String STREAM = "stream/%s/%s";
-    public static final String DEVICE = "device/%s";
-    public static final String USER = "user/%s";
-    public static final String TREE = "tree/%s";
+    
+    public enum Types {
+        action, stream, device, user, tree
+    }
+    
+    public static final String ACTION = Types.action.name() + "/%s/%s";
+    public static final String STREAM = Types.stream.name() + "/%s/%s";
+    public static final String DEVICE = Types.device.name() + "/%s";
+    public static final String USER = Types.user.name() + "/%s";
+    public static final String TREE = Types.tree.name() + "/%s";
+    
 }

@@ -17,6 +17,7 @@ package org.createnet.raptor.sdk.events;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.createnet.raptor.models.acl.PermissionUtil;
@@ -101,19 +102,15 @@ public class EventListenerTest {
 
         raptor.Stream().push(stream, record);
         record.timestamp = new Date(Instant.now().toEpochMilli());
-        Utils.waitFor(100);
 
         raptor.Stream().push(stream, record);
         record.timestamp = new Date(Instant.now().toEpochMilli());
-        Utils.waitFor(100);
 
         raptor.Stream().push(stream, record);
         record.timestamp = new Date(Instant.now().toEpochMilli());
-        Utils.waitFor(100);
 
         raptor.Stream().push(stream, record);
         record.timestamp = new Date(Instant.now().toEpochMilli());
-        Utils.waitFor(100);
     }
 
     @Test
@@ -222,12 +219,11 @@ public class EventListenerTest {
 
         final AtomicInteger done = new AtomicInteger(2);
         
-        Raptor raptor = Utils.getRaptor();
+        Raptor raptor = Utils.createNewInstance();
 
         log.debug("watch data events");
 
-        Device dev = Utils.createDevice(newDevice("dev"));
-        Device dev1 = Utils.createDevice(newDevice("dev1"));
+        Device dev = Utils.createDevice(raptor, newDevice("dev"));
 
         raptor.Inventory().subscribe(dev, new DataCallback() {
             @Override
@@ -239,18 +235,7 @@ public class EventListenerTest {
             }
         });
 
-        raptor.Inventory().subscribe(dev1, new DataCallback() {
-            @Override
-            public void callback(Stream stream, RecordSet record) {
-                log.debug("dev1: Data received {}", record.toJson());
-                Assert.assertTrue(record.deviceId.equals(dev1.getDevice().id()));
-                Assert.assertTrue(stream.name.equals("test2"));
-                done.decrementAndGet();
-            }
-        });
-
         pushData(dev);
-        pushData(dev1);
 
         Utils.waitUntil(5, () -> done.get() > 0);
     }
@@ -260,12 +245,11 @@ public class EventListenerTest {
 
         final AtomicBoolean done = new AtomicBoolean(false);        
         
-        Raptor raptor = Utils.getRaptor();
+        Raptor raptor = Utils.createNewInstance();
 
         log.debug("watch action events");
 
-        Device dev = Utils.createDevice(newDevice("dev"));
-        Utils.waitFor(1500);
+        Device dev = Utils.createDevice(raptor, newDevice("dev"));
 
         raptor.Inventory().subscribe(dev, new ActionCallback() {
             @Override
@@ -300,7 +284,6 @@ public class EventListenerTest {
         r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.admin));
 
         Device dev = r.Inventory().create(newDevice("dev"));
-        Utils.waitFor(1500);
 
         Raptor r2 = new Raptor(Utils.loadSettings().getProperty("url"), t);
 
@@ -323,8 +306,6 @@ public class EventListenerTest {
     @Test
     public void checkFailingSubscribePermission() {
 
-        Raptor raptor = Utils.getRaptor();
-
         final AtomicBoolean done = new AtomicBoolean(false);
 
         log.debug("subscribe with failing permissions");
@@ -333,11 +314,12 @@ public class EventListenerTest {
         r.Auth().login();
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
-        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.subscribe));
+        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.execute));
 
+        List<String> perms = r.Admin().Token().Permission().get(t);
+        Assert.assertEquals(1, perms.size());
+        
         Device dev = r.Inventory().create(newDevice("dev"));
-        Utils.waitFor(1500);
-
         Raptor r2 = new Raptor(Utils.loadSettings().getProperty("url"), t);
 
         try {
@@ -345,11 +327,11 @@ public class EventListenerTest {
                 @Override
                 public void callback(Stream stream, RecordSet record) {
                     log.debug("Got data: {}", record.toJson());
-                    done.set(true);
                 }
             });
         } catch (Exception e) {
-            log.debug("Exception: {}", e.getMessage());
+            log.debug("Expected exception received: {}", e.getMessage());
+            done.set(true);            
         }
 
         Stream stream = dev.stream("test");
@@ -357,7 +339,7 @@ public class EventListenerTest {
         RecordSet record = new RecordSet(stream);
         record.channel("string", "test1");
 
-        raptor.Stream().push(record);
+        r.Stream().push(record);
 
         Utils.waitUntil(5, () -> !done.get());
     }
@@ -366,8 +348,6 @@ public class EventListenerTest {
     public void checkSubscribeForStreamPermission() {
 
         final AtomicBoolean done = new AtomicBoolean(false);
-
-        Raptor raptor = Utils.getRaptor();
 
         log.debug("subscribe to stream topic with permissions (subscribe, pull)");
 
@@ -378,7 +358,6 @@ public class EventListenerTest {
         r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.pull));
 
         Device dev = r.Inventory().create(newDevice("dev"));
-        Utils.waitFor(1500);
 
         Raptor r2 = new Raptor(Utils.loadSettings().getProperty("url"), t);
         Stream stream = dev.stream("test");
@@ -393,13 +372,14 @@ public class EventListenerTest {
 
         RecordSet record = new RecordSet(stream);
         record.channel("string", "test1");
-        raptor.Stream().push(record);
+        r.Stream().push(record);
 
         Utils.waitUntil(5, () -> !done.get());
     }
 
     @Test
     public void checkSubscribeForActionPermission() {
+
         final AtomicBoolean done = new AtomicBoolean(false);
         Raptor raptor = Utils.getRaptor();
 
@@ -412,7 +392,6 @@ public class EventListenerTest {
         r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.execute));
 
         Device dev = r.Inventory().create(newDevice("dev"));
-        Utils.waitFor(1500);
 
         Raptor r2 = new Raptor(Utils.loadSettings().getProperty("url"), t);
         Action action = dev.action("switch");

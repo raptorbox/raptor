@@ -15,8 +15,8 @@
  */
 package org.createnet.raptor.models.payload;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Stream;
 
 /**
@@ -26,15 +26,15 @@ import org.createnet.raptor.models.objects.Stream;
 public class StreamPayload extends DevicePayload {
 
     public String streamId;
-    public JsonNode data;
+    public RecordSet record;
 
     public StreamPayload() {
     }
     
-    public StreamPayload(Stream stream, Permissions op, JsonNode data) {
+    public StreamPayload(Stream stream, Permissions op, RecordSet record) {
         super(stream.getDevice(), op);
         this.streamId = stream.name;
-        this.data = data;
+        this.record = record;
         this.type = MessageType.stream;
     }
 

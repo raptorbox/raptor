@@ -22,6 +22,22 @@ services:
     extra_hosts:
       - "raptor.local:172.16.238.1"
 
+  auth:
+    build: ./raptor-api/raptor-auth
+    volumes:
+      - ./config:/etc/raptor
+    links:
+      - mariadb
+    depends_on:
+      - mariadb
+      - broker
+    networks:
+      - raptor_test
+    ports:
+      - 10086:80
+    extra_hosts:
+      - "raptor.local:172.16.238.1"
+
   action:
     build: ./raptor-api/raptor-action
     volumes:
@@ -30,6 +46,7 @@ services:
       - mongo
     depends_on:
       - mongo
+      - auth
     networks:
       - raptor_test
     ports:
@@ -45,6 +62,7 @@ services:
       - mongo
     depends_on:
       - mongo
+      - auth
     networks:
       - raptor_test
     ports:
@@ -60,6 +78,7 @@ services:
       - mongo
     depends_on:
       - mongo
+      - auth
     networks:
       - raptor_test
     ports:
@@ -75,6 +94,7 @@ services:
       - mongo
     depends_on:
       - mongo
+      - auth
     networks:
       - raptor_test
     ports:
@@ -90,26 +110,11 @@ services:
       - mongo
     depends_on:
       - mongo
+      - auth
     networks:
       - raptor_test
     ports:
       - 10085:80
-    extra_hosts:
-      - "raptor.local:172.16.238.1"
-
-  auth:
-    build: ./raptor-api/raptor-auth
-    volumes:
-      - ./config:/etc/raptor
-    links:
-      - mariadb
-    depends_on:
-      - mariadb
-      - broker
-    networks:
-      - raptor_test
-    ports:
-      - 10086:80
     extra_hosts:
       - "raptor.local:172.16.238.1"
 

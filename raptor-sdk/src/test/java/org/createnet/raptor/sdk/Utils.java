@@ -90,14 +90,18 @@ public class Utils {
         while (callback.call()) {
             Utils.waitFor(1000);
             count++;
+            Assert.assertTrue(count <= repeat);            
             log.debug("Waiting {} of {} seconds", count, repeat);
-            Assert.assertTrue(count <= repeat);
         }
     }
 
     static public Device createDevice(Device d) {
         Device d1 = getRaptor().Inventory().create(d);
-        waitFor(500);
+        return d1;
+    }
+
+    static public Device createDevice(Raptor r, Device d) {
+        Device d1 = r.Inventory().create(d);
         return d1;
     }
 
@@ -130,7 +134,7 @@ public class Utils {
     static public Raptor createNewInstance(String username) {
 
         String password = username + Math.random();
-        User user = getRaptor().Admin().User().create(username, password, username + "@test.raptor.local");
+        User user = getRaptor().Admin().User().createAdmin(username, password, username + "@test.raptor.local");
         log.debug("Created user {} : {} with uuid {}", username, password, user.getUuid());
         assert user != null;
 
@@ -149,8 +153,10 @@ public class Utils {
 
         String username = rndUsername();
         String password = username + Math.random();
-        User user = getRaptor().Admin().User().create(username, password, username + "@test.raptor.local");
+
+        User user = getRaptor().Admin().User().createAdmin(username, password, username + "@test.raptor.local");
         log.debug("Created user {} : {} with uuid {}", username, password, user.getUuid());
+
         assert user != null;
 
         Raptor r = new Raptor(new Config(instance.getConfig().getUrl(), username, password));

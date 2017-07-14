@@ -16,6 +16,7 @@
 package org.createnet.raptor.api.common.client;
 
 import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.api.AuthClient;
@@ -37,7 +38,7 @@ public class InternalApiClientService extends Raptor {
         super(url, username, password);
     }
 
-    @Scheduled(fixedRate = 360000)
+    @Scheduled(fixedRate = 300*1000)
     public void refreshToken() {
 
         if (Auth().getConfig().getUsername() == null) {
@@ -59,7 +60,17 @@ public class InternalApiClientService extends Raptor {
         }
         
         log.debug("Refreshing service token");
-        Auth().refreshToken();
+        try {
+            Auth().refreshToken();
+        }
+        catch(RequestException e) {
+            if (e.status == 401) {
+                log.debug("Service token expired, force new login");
+                Auth().getConfig().setToken(null);
+                refreshToken();
+                return;
+            }
+        }
         log.debug("Service token updated");
 
     }

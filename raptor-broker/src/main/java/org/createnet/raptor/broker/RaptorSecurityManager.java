@@ -31,6 +31,7 @@ import org.createnet.raptor.models.configuration.AuthConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.Raptor;
+import org.createnet.raptor.sdk.Topics;
 import org.createnet.raptor.sdk.api.AuthClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,15 +44,15 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
-    
+
     @Autowired
     RaptorConfiguration config;
-    
+
     private final Logger logger = LoggerFactory.getLogger(RaptorSecurityManager.class);
 
     protected BrokerUser login(String token) {
         try {
-            
+
             Raptor r = new Raptor(config.getUrl(), token);
             AuthClient.LoginState result = r.Auth().login();
             logger.debug("Authenticated user {}", result.user.getUuid());
@@ -65,26 +66,27 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     }
 
     protected BrokerUser getLocalUser(final String username, final String password) {
-        
-        List<AuthConfiguration.AdminUser> users = config.getAuth().getUsers().stream().filter((AuthConfiguration.AdminUser user) -> { 
-            
-            if(user.getPassword() == null || user.getPassword().isEmpty() || password == null || password.isEmpty()) {
+
+        List<AuthConfiguration.AdminUser> users = config.getAuth().getUsers().stream().filter((AuthConfiguration.AdminUser user) -> {
+
+            if (user.getPassword() == null || user.getPassword().isEmpty() || password == null || password.isEmpty()) {
                 return false;
             }
 
             return user.getPassword().equals(password);
-            
+
         }).collect(Collectors.toList());
-        
-        if(users.isEmpty())
+
+        if (users.isEmpty()) {
             return null;
-        
+        }
+
         return new BrokerUser(users.get(0));
     }
 
     protected BrokerUser login(String username, String password) {
         try {
-            
+
             Raptor r = new Raptor(config.getUrl(), username, password);
             AuthClient.LoginState result = r.Auth().login();
             logger.debug("Login successful for user {}", result.user.getUuid());
@@ -93,7 +95,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         } catch (Exception e) {
             logger.error("Login failed");
         }
-        
+
         return null;
     }
 
@@ -134,7 +136,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     @Override
     public boolean validateUserAndRole(String username, String password, Set<Role> roles, CheckType checkType, String address, RemotingConnection connection) {
 
-        logger.debug("Authenticate user {} with roles {} on topic/address {}", username, roles, address);
+        logger.debug("Authenticating user {} with roles {} on topic {}", username, roles, address);
 
         BrokerUser brokerUser = authenticate(username, password);
 
@@ -143,9 +145,8 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
             return false;
         }
 
-        boolean isAdmin = brokerUser.isAdmin();
-
-        if (isAdmin) {
+        boolean isLocalAdmin = brokerUser.isLocal() && brokerUser.isAdmin();
+        if (isLocalAdmin) {
             return true;
         }
 
@@ -168,7 +169,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
                     return true;
                 case MANAGE:
-                    if (isAdmin) {
+                    if (isLocalAdmin) {
                         return true;
                     }
             }
@@ -186,53 +187,31 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         if (topicTokens.length >= 2) {
 
             Raptor r = brokerUser.getRaptor();
-            
-            if(r == null) {
+
+            if (r == null) {
                 logger.warn("Raptor client not available [local user: {}]", brokerUser.isLocal());
                 return false;
             }
-            
-            int soidIndex = 0;
-            String objectId = topicTokens[soidIndex];
 
+            // eg. device.uuid
             try {
 
-                Device obj = r.Inventory().load(objectId);
-                if (obj == null) {
-                    logger.warn("Object not found, id: `{}`", objectId);
-                    return false;
+                String type = topicTokens[0];
+                String id = topicTokens[1];
+
+                switch (Topics.Types.valueOf(type)) {
+                    case device:
+                        return hasDevicePermission(r, id, Permissions.admin);
+                    case action:
+                        return hasDevicePermission(r, id, Permissions.execute);
+                    case stream:
+                        return hasDevicePermission(r, id, Permissions.pull);
                 }
                 
-                User user = r.Auth().getUser();
-                AuthorizationResponse req;
-
-                // <object>/events -> requires `admin`
-                String subtopic = topicTokens[soidIndex + 1];
-                if (subtopic != null && subtopic.equals("events")) {
-                    req = r.Admin().User().isAuthorized(obj.id(), user.getUuid(), Permissions.admin);
-                    if (!req.result) {
-                        return false;
-                    }
-                }
-
-                // <object>/streams/<stream> -> requires `pull`
-                if (subtopic != null && subtopic.equals("streams")) {
-                    req = r.Admin().User().isAuthorized(obj.id(), user.getUuid(), Permissions.pull);
-                    if (!req.result) {
-                        return false;
-                    }
-                }
-
-                // <object>/actions/<action> -> requires `execute`
-                if (subtopic != null && subtopic.equals("actions")) {
-                    req = r.Admin().User().isAuthorized(obj.id(), user.getUuid(), Permissions.execute);
-                    if (!req.result) {
-                        return false;
-                    }
-                }
-
-                return true;
-
+                logger.error("Unrecognized subscribe topic pattern {}", address);
+                
+                return false;
+                
             } catch (Exception ex) {
                 logger.error("Failed to subscribe: {}", ex.getMessage(), ex);
                 return false;
@@ -240,6 +219,11 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         }
 
         return false;
+    }
+
+    protected boolean hasDevicePermission(Raptor r, String id, Permissions perm) {
+        AuthorizationResponse req = r.Admin().User().isAuthorized(id, r.Auth().getUser().getUuid(), perm);
+        return req.result;
     }
 
     @Override
