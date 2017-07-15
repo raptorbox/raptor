@@ -2,7 +2,7 @@
 
 language: java
 
-script: cd raptor-sdk && mvn verify
+script: cd raptor-sdk && mvn test
 
 jdk:
   - oraclejdk8
@@ -33,6 +33,7 @@ before_script:
   # workaround for 3306 used, see https://github.com/travis-ci/travis-ci/issues/7008#issuecomment-269126128
   - sudo /etc/init.d/mysql stop
   - sudo nginx -c "/tmp/nginx/nginx.conf"
+  - mvn package -DskipTests=true
   - docker-compose -f test.yml up -d --build
   - sleep 30
 
