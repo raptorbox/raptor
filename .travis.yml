@@ -2,7 +2,7 @@
 
 language: java
 
-script: mvn verify
+script: cd raptor-sdk && mvn verify
 
 jdk:
   - oraclejdk8
@@ -10,12 +10,12 @@ jdk:
 addons:
   hosts:
     - raptor.local
-    - api.raptor.local
 
 sudo: required
 
 services:
   - docker
+  - nginx
 
 env:
   DOCKER_COMPOSE_VERSION: 1.8.1
@@ -25,20 +25,22 @@ before_install:
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
-  - sudo ln -s `pwd`/config /etc/raptor
+  - sudo rm /etc/nginx/sites-enabled/default
+  - sudo ln -s `pwd`/config/nginx.test.conf /etc/nginx/sites-enabled/nginx.test.conf
 
 before_script:
-  - docker-compose -f docker-compose.dev.yml up -d
+  - docker-compose -f test.yml up -d
+  - sleep 30
 
 after_script:
-  - docker-compose -f docker-compose.dev.yml down
+  - docker-compose -f test.yml down
 
 after_success:
-  - if [ "$TRAVIS_BRANCH" == "master" ]; then
-    ./scripts/docker-setup.sh
-    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-    ./scripts/docker-publish.sh
-    fi
+  # - if [ "$TRAVIS_BRANCH" == "master" ]; then
+  #   ./scripts/docker-setup.sh
+  #   docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+  #   ./scripts/docker-publish.sh
+  #   fi
   - mvn clean cobertura:cobertura coveralls:report -DrepoToken=$COVERALLS_TOKEN
 
 # after_failure:
