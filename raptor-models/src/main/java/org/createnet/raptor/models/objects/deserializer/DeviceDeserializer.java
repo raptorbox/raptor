@@ -78,14 +78,14 @@ public class DeviceDeserializer extends JsonDeserializer<Device> {
                     JsonNode jsonStream = tree.get("streams").get(name);
 
                     Stream stream = new Stream(name, jsonStream, device);
-                    device.streams().put(stream.name, stream);
+                    device.streams().put(stream.name(), stream);
                 }
             }
 
             if (tree.get("streams").isArray()) {
                 for (JsonNode jsonStream : tree.get("streams")) {
                     Stream stream = new Stream(jsonStream);
-                    device.streams().put(stream.name, stream);
+                    device.streams().put(stream.name(), stream);
                 }
             }
 
@@ -96,7 +96,7 @@ public class DeviceDeserializer extends JsonDeserializer<Device> {
             if (tree.get("actions").isArray()) {
                 for (JsonNode json : tree.get("actions")) {
                     Action actuation = new Action(json, device);
-                    device.actions().put(actuation.name, actuation);
+                    device.actions().put(actuation.name(), actuation);
                 }
             }
 
@@ -108,7 +108,7 @@ public class DeviceDeserializer extends JsonDeserializer<Device> {
                     JsonNode json = tree.get("actions").get(name);
 
                     Action actuation = new Action(name, json, device);
-                    device.actions().put(actuation.name, actuation);
+                    device.actions().put(actuation.name(), actuation);
                 }
             }
 

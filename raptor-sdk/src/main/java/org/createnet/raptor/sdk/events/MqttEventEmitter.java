@@ -74,12 +74,12 @@ public class MqttEventEmitter extends AbstractClient {
     }
 
     protected String getStreamTopic(Stream stream) {
-        String path = String.format(Topics.STREAM, stream.getDevice().getId(), stream.name);
+        String path = String.format(Topics.STREAM, stream.getDevice().getId(), stream.name());
         return path;
     }
 
     protected String getActionTopic(Action action) {
-        String path = String.format(Topics.ACTION, action.getDevice().getId(), action.name);
+        String path = String.format(Topics.ACTION, action.getDevice().getId(), action.name());
         return path;
     }
 

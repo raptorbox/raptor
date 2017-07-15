@@ -12,7 +12,7 @@
   
     <modules>
     
-        <module>raptor-models</module>    
+        <module>raptor-models</module>
         <module>raptor-events</module>    
         <module>raptor-sdk</module>
         

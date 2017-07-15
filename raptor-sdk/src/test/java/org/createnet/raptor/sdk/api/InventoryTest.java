@@ -108,9 +108,9 @@ public class InventoryTest {
         assertNotNull(dev1);
         assertTrue(dev1.streams().size() == dev.streams().size());
 
-        log.debug("position channels {} == {}", dev1.streams().get("position").channels.size(), dev.streams().get("position").channels.size());
-        assertTrue(dev1.streams().get("position").channels.size() == dev.streams().get("position").channels.size());
-        assertTrue(dev1.streams().get("position").channels.containsKey("color"));
+        log.debug("position channels {} == {}", dev1.streams().get("position").channels().size(), dev.streams().get("position").channels().size());
+        assertTrue(dev1.streams().get("position").channels().size() == dev.streams().get("position").channels().size());
+        assertTrue(dev1.streams().get("position").channels().containsKey("color"));
 
     }
 

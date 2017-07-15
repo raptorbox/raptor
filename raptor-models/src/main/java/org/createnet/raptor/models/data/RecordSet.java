@@ -17,6 +17,7 @@ package org.createnet.raptor.models.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -56,25 +57,30 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class RecordSet {
 
     @Id
-    public String id;
+    protected String id;
     
     @Indexed
-    public Date timestamp;
+    protected Date timestamp;
 
     @Indexed
-    final public Map<String, Object> channels = new HashMap();
+    @JsonProperty
+    final protected Map<String, Object> channels = new HashMap();
 
     @Indexed
-    public String userId;
+    @JsonProperty
+    protected String userId;
 
     @Indexed
-    public String streamId;
+    @JsonProperty
+    protected String streamId;
 
     @Indexed
-    public String deviceId;
+    @JsonProperty
+    protected String deviceId;
 
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
-    public GeoJsonPoint location;
+    @JsonProperty
+    protected GeoJsonPoint location;
 
     @JsonIgnore
     @Transient
@@ -175,15 +181,6 @@ public class RecordSet {
         this.timestamp = timestamp;
     }
 
-    /**
-     * Get the stored records
-     *
-     * @return
-     */
-    public Map<String, Object> getRecords() {
-        return channels;
-    }
-
     public static Object parseType(JsonNode channelNode) {
         return parseType(channelNode, null);
     }
@@ -213,7 +210,7 @@ public class RecordSet {
         }
 
         if (channel != null && channelType != null) {
-            channel.type = channelType;
+            channel.type(channelType);
         }
 
         return channelValue;
@@ -262,19 +259,42 @@ public class RecordSet {
     }
 
     /**
-     * @param channelName
-     * @return IRecord
+     * Get the stored records
+     *
+     * @return
      */
-    public Object getByChannelName(String channelName) {
-        return channels.get(channelName);
+    public Map<String, Object> channels() {
+        return channels;
     }
-
+    
+    /**
+     * @param channelName
+     * @return 
+     */
+    public ChannelValueWrapper value(String channelName) {
+        if(channels.get(channelName) == null) {
+            return null;
+        }
+        return new ChannelValueWrapper(channels.get(channelName));
+    }
+    
+    /**
+     * @param channelName
+     * @return 
+     */
+    public ChannelValueWrapper channel(String channelName) {
+        if(channels.get(channelName) == null) {
+            return null;
+        }
+        return new ChannelValueWrapper(channels.get(channelName));
+    }
+    
     /**
      * @param channel
      * @return IRecord
      */
     public Object getByChannel(Channel channel) {
-        return getByChannelName(channel.name);
+        return channel(channel.name());
     }
 
     public static RecordSet fromJSON(String raw) {
@@ -295,7 +315,7 @@ public class RecordSet {
 
         if (stream != null) {
 
-            this.streamId = stream.name;
+            this.streamId = stream.name();
 
             if (stream.getDevice() != null) {
 
@@ -310,29 +330,25 @@ public class RecordSet {
         }
 
     }
-
-    public Stream getStream() {
-        return this.stream;
-    }
-
+    
     public void validate() {
 
-        if (getStream() != null) {
+        if (stream() != null) {
             for (String channelName : channels.keySet()) {
                 
-                Channel channel = getStream().channels.getOrDefault(channelName, null);
+                Channel channel = stream().channels().getOrDefault(channelName, null);
                 if (channel == null) {
                     throw new RaptorComponent.ValidationException("Objet model does not define this channel: " + channelName);
                 }
                 
                 Object value = this.channels.get(channelName);
                 
-                if(channel.type.equals("boolean")) {
+                if(channel.type().equals("boolean")) {
                     if(!(value instanceof Boolean)) {
                         throw new RaptorComponent.ValidationException("Channel " + channelName + " should be a boolean");
                     }
                 }
-                if(channel.type.equals("number")) {
+                if(channel.type().equals("number")) {
                     if(
                         !(value instanceof Float) && 
                         !(value instanceof Double) && 
@@ -343,7 +359,7 @@ public class RecordSet {
                         throw new RaptorComponent.ValidationException("Channel " + channelName + " should be a number");
                     }                    
                 }
-                if(channel.type.equals("string")) {
+                if(channel.type().equals("string")) {
                     if(!(value instanceof String)) {
                         throw new RaptorComponent.ValidationException("Channel " + channelName + " should be a string");
                     }                                        
@@ -354,19 +370,36 @@ public class RecordSet {
 
     }
 
+    public String userId() {
+        return userId;
+    }    
+    
     public RecordSet userId(String userId) {
         this.userId = userId;
         return this;
     }
 
+
+    public String streamId() {
+        return streamId;
+    }    
+    
     public RecordSet streamId(String streamId) {
         this.streamId = streamId;
         return this;
     }
 
+    public String deviceId() {
+        return deviceId;
+    }
+    
     public RecordSet deviceId(String deviceId) {
         this.deviceId = deviceId;
         return this;
+    }
+
+    public Stream stream() {
+        return stream;
     }
 
     public RecordSet stream(Stream stream) {
@@ -379,6 +412,10 @@ public class RecordSet {
         return this;
     }
 
+    public Date timestamp() {
+        return timestamp;
+    }
+    
     public RecordSet timestamp(Instant i) {
         setTimestamp(Date.from(i));
         return this;
@@ -397,6 +434,10 @@ public class RecordSet {
     public RecordSet timestamp(Date time) {
         setTimestamp(time);
         return this;
+    }
+
+    public GeoJsonPoint location() {
+        return location;
     }
 
     public RecordSet location(double x, double y) {
@@ -459,4 +500,34 @@ public class RecordSet {
         return this;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public Map<String, Object> getChannels() {
+        return channels;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public String getStreamId() {
+        return streamId;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public GeoJsonPoint getLocation() {
+        return location;
+    }
+
+    public Stream getStream() {
+        return stream;
+    }
+
+
+    
 }

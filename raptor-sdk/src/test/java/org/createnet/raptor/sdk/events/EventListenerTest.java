@@ -36,7 +36,6 @@ import org.createnet.raptor.models.payload.ActionPayload;
 import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.payload.TreeNodePayload;
 import org.createnet.raptor.models.tree.TreeNode;
-import org.createnet.raptor.sdk.events.callback.TreeNodeCallback;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -101,16 +100,16 @@ public class EventListenerTest {
         record.channel("foo", true);
 
         raptor.Stream().push(stream, record);
-        record.timestamp = new Date(Instant.now().toEpochMilli());
+        record.timestamp(new Date(Instant.now().toEpochMilli() - 1000 + 200));
 
         raptor.Stream().push(stream, record);
-        record.timestamp = new Date(Instant.now().toEpochMilli());
+        record.timestamp(new Date(Instant.now().toEpochMilli() - 1000 + 400));
 
         raptor.Stream().push(stream, record);
-        record.timestamp = new Date(Instant.now().toEpochMilli());
+        record.timestamp(new Date(Instant.now().toEpochMilli() - 1000 + 600));
 
         raptor.Stream().push(stream, record);
-        record.timestamp = new Date(Instant.now().toEpochMilli());
+        record.timestamp(new Date(Instant.now().toEpochMilli() - 1000 + 800));
     }
 
     @Test
@@ -218,7 +217,7 @@ public class EventListenerTest {
     public void watchDeviceDataEvents() {
 
         final AtomicInteger done = new AtomicInteger(2);
-        
+
         Raptor raptor = Utils.createNewInstance();
 
         log.debug("watch data events");
@@ -229,8 +228,8 @@ public class EventListenerTest {
             @Override
             public void callback(Stream stream, RecordSet record) {
                 log.debug("dev: Data received {}", record.toJson());
-                Assert.assertTrue(record.deviceId.equals(dev.getDevice().id()));
-                Assert.assertTrue(stream.name.equals("test2"));
+                Assert.assertTrue(record.deviceId().equals(dev.getDevice().id()));
+                Assert.assertTrue(stream.name().equals("test2"));
                 done.decrementAndGet();
             }
         });
@@ -243,8 +242,8 @@ public class EventListenerTest {
     @Test
     public void watchDeviceActionEvents() {
 
-        final AtomicBoolean done = new AtomicBoolean(false);        
-        
+        final AtomicBoolean done = new AtomicBoolean(false);
+
         Raptor raptor = Utils.createNewInstance();
 
         log.debug("watch action events");
@@ -255,7 +254,7 @@ public class EventListenerTest {
             @Override
             public void callback(Action action, ActionPayload payload) {
                 log.debug("dev: Data received  for {}: {}", payload.actionId, payload.data);
-                Assert.assertTrue(action.name.equals("switch"));
+                Assert.assertTrue(action.name().equals("switch"));
                 Assert.assertTrue(payload.data.equals("on"));
                 done.set(true);
             }
@@ -291,7 +290,7 @@ public class EventListenerTest {
             @Override
             public void callback(Action action, ActionPayload payload) {
                 log.debug("dev: Data received  for {}: {}", payload.actionId, payload.data);
-                Assert.assertTrue(action.name.equals("switch"));
+                Assert.assertTrue(action.name().equals("switch"));
                 Assert.assertTrue(payload.data.equals("on"));
                 done.set(true);
             }
@@ -318,7 +317,7 @@ public class EventListenerTest {
 
         List<String> perms = r.Admin().Token().Permission().get(t);
         Assert.assertEquals(1, perms.size());
-        
+
         Device dev = r.Inventory().create(newDevice("dev"));
         Raptor r2 = new Raptor(Utils.loadSettings().getProperty("url"), t);
 
@@ -331,7 +330,7 @@ public class EventListenerTest {
             });
         } catch (Exception e) {
             log.debug("Expected exception received: {}", e.getMessage());
-            done.set(true);            
+            done.set(true);
         }
 
         Stream stream = dev.stream("test");

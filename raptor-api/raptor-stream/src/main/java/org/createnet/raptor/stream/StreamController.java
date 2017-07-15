@@ -123,12 +123,12 @@ public class StreamController {
         }
         record.setStream(stream);
 
-        if (record.userId == null) {
-            record.userId = currentUser.getUuid();
+        if (record.userId() == null) {
+            record.userId(currentUser.getUuid());
         }
 
-        if (!currentUser.isAdmin() && !record.userId.equals(currentUser.getUuid())) {
-            record.userId = currentUser.getUuid();
+        if (!currentUser.isAdmin() && !record.userId().equals(currentUser.getUuid())) {
+            record.userId(currentUser.getUuid());
         }
 
         // save data!

@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Channel;
-import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
 /**
@@ -97,7 +96,7 @@ public class RecordSetDeserializer extends JsonDeserializer<RecordSet> {
                 }
 
                 Channel channel = new Channel();
-                channel.name = channelName;
+                channel.name(channelName);
 
                 Object channelValue = RecordSet.parseType(channelNode, channel);
                 if (channelValue != null) {

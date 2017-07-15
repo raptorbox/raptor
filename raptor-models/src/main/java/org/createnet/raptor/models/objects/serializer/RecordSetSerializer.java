@@ -34,7 +34,7 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
     @Override
     public void serialize(RecordSet r, JsonGenerator jg, SerializerProvider sp) throws IOException {
 
-        final Stream stream = r.getStream();
+        final Stream stream = r.stream();
         Device obj = null;
 
         if (stream != null) {
@@ -45,13 +45,13 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
 
         jg.writeObjectFieldStart("channels");
         
-        for (Map.Entry<String, Object> item : r.channels.entrySet()) {
+        for (Map.Entry<String, Object> item : r.channels().entrySet()) {
 
             String channelName = item.getKey();           
 
             // enforce stream schema if available
-            if (r.getStream() != null) {
-                if (!r.getStream().channels.containsKey(channelName)) {
+            if (r.stream() != null) {
+                if (!r.stream().channels().containsKey(channelName)) {
                     // skip unmanaged field
                     continue;
                 }
@@ -71,37 +71,37 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
 
         jg.writeNumberField("timestamp", r.getTimestampTime());
 
-        if (r.location != null) {
-            jg.writeObjectField("location", r.location);
+        if (r.location() != null) {
+            jg.writeObjectField("location", r.location());
         }
         
         // try to get a value
-        if(r.userId == null && obj != null) {
-            r.userId = obj.userId();
+        if(r.userId() == null && obj != null) {
+            r.userId(obj.userId());
         }
         
-        if (r.userId != null) {
-            jg.writeStringField("userId", r.userId);
+        if (r.userId() != null) {
+            jg.writeStringField("userId", r.userId());
         }
 
 
         // try to get a value
-        if(r.deviceId == null && obj != null) {
-            r.deviceId = obj.id();
+        if(r.deviceId() == null && obj != null) {
+            r.deviceId(obj.id());
         }
         
-        if (r.deviceId != null) {
-            jg.writeStringField("objectId", r.deviceId);
+        if (r.deviceId() != null) {
+            jg.writeStringField("objectId", r.deviceId());
         }
 
         
         // try to get a value
-        if(r.streamId == null && stream != null) {
-            r.streamId = stream.name;
+        if(r.streamId() == null && stream != null) {
+            r.streamId(stream.name());
         }
         
-        if (r.streamId != null) {
-            jg.writeStringField("streamId", r.streamId);
+        if (r.streamId() != null) {
+            jg.writeStringField("streamId", r.streamId());
         }
         
         jg.writeEndObject();

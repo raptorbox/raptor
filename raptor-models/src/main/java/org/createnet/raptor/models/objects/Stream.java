@@ -38,9 +38,11 @@ public class Stream extends StreamContainer {
     @Transient
     private final Logger logger = LoggerFactory.getLogger(Stream.class);
 
-    public String name;
-    public String type;
-    public String description;
+    protected String name;
+    protected String type;
+    protected String description;
+    
+    final protected Map<String, Channel> channels = new HashMap();
     
     public static Stream create(String name, String type, String description) {
         Stream s = new Stream();
@@ -57,8 +59,6 @@ public class Stream extends StreamContainer {
     public static Stream create(String name) {
         return create(name, null, null);
     }
-        
-    final public Map<String, Channel> channels = new HashMap();
 
     public Stream(String json, Device object) {
 
@@ -222,4 +222,38 @@ public class Stream extends StreamContainer {
         }
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Map<String, Channel> getChannels() {
+        return channels;
+    }
+    
+    public String name() {
+        return name;
+    }
+
+    public String type() {
+        return type;
+    }
+
+    public String description() {
+        return description;
+    }
+
+    public Map<String, Channel> channels() {
+        return channels;
+    }
+
+    
+    
 }

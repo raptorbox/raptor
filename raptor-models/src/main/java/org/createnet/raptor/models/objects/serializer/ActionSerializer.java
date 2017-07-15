@@ -16,7 +16,6 @@
 package org.createnet.raptor.models.objects.serializer;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
@@ -33,15 +32,15 @@ public class ActionSerializer extends JsonSerializer<Action> {
 
         jg.writeStartObject();
         
-        if(t.id != null) {
-            jg.writeStringField("id", t.id);
+        if(t.id() != null) {
+            jg.writeStringField("id", t.id());
         }
-        if(t.status != null) {
-            jg.writeStringField("status", t.status);
+        if(t.status() != null) {
+            jg.writeStringField("status", t.status());
         }
         
-        jg.writeStringField("name", t.name);
-        jg.writeStringField("description", t.description);
+        jg.writeStringField("name", t.name());
+        jg.writeStringField("description", t.description());
 
         jg.writeEndObject();
 

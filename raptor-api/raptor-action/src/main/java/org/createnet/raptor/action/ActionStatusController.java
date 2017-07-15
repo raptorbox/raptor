@@ -184,7 +184,7 @@ public class ActionStatusController {
             return JsonErrorResponse.notFound("Action not found");
         }
 
-        ActionStatus status = actionStatusService.get(deviceId, action.name);
+        ActionStatus status = actionStatusService.get(deviceId, action.name());
 
         return ResponseEntity.ok(status);
     }
@@ -216,7 +216,7 @@ public class ActionStatusController {
             return JsonErrorResponse.notFound("Action not found");
         }
 
-        ActionStatus status = actionStatusService.get(deviceId, action.name);
+        ActionStatus status = actionStatusService.get(deviceId, action.name());
 
         return ResponseEntity.ok(status);
     }
@@ -255,7 +255,7 @@ public class ActionStatusController {
             return JsonErrorResponse.notFound("Action not found");
         }
 
-        ActionStatus status = actionStatusService.get(deviceId, action.name);
+        ActionStatus status = actionStatusService.get(deviceId, action.name());
         if (status == null) {
             return ResponseEntity.noContent().build();
         }

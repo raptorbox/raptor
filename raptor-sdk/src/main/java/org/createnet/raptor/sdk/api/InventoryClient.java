@@ -139,7 +139,7 @@ public class InventoryClient extends AbstractClient {
                             return;
                         }
                         StreamPayload dpayload = (StreamPayload) payload;
-                        ev.callback(dev.stream(dpayload.record.streamId), dpayload.record);
+                        ev.callback(dev.stream(dpayload.record.streamId()), dpayload.record);
                         break;
                 }
             }

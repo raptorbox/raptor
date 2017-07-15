@@ -39,11 +39,11 @@ public class Action extends DeviceContainer {
     @JsonIgnore
     @Transient
     private final Logger logger = LoggerFactory.getLogger(Action.class);
-
-    public String id = null;
-    public String status = null;
-    public String name;
-    public String description;
+    
+    protected String id = null;
+    protected String status = null;
+    protected String name;
+    protected String description;
 
     public static Action create(String name, String status) {
         Action a = new Action();
@@ -152,4 +152,69 @@ public class Action extends DeviceContainer {
         return new ActionStatus(this, this.status);
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+    
+    public String id() {
+        return id;
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public String description() {
+        return description;
+    }
+
+    public String status() {
+        return status;
+    }
+    
+    public Action id(String id) {
+        this.id = id;
+        return this;
+    }
+
+    public Action status(String status) {
+        this.status = status;
+        return this;
+    }
+
+    public Action name(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public Action description(String description) {
+        this.description = description;
+        return this;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    
 }

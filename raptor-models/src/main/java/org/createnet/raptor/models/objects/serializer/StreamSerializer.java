@@ -33,12 +33,12 @@ public class StreamSerializer extends JsonSerializer<Stream> {
 
         jg.writeStartObject();
         
-        jg.writeStringField("name", t.name);
-        jg.writeStringField("type", t.type);
-        jg.writeStringField("description", t.description);
+        jg.writeStringField("name", t.name());
+        jg.writeStringField("type", t.type());
+        jg.writeStringField("description", t.description());
 
-        if(!t.channels.isEmpty()) {
-            jg.writeObjectField("channels", t.channels);
+        if(!t.channels().isEmpty()) {
+            jg.writeObjectField("channels", t.channels());
         }
 
         jg.writeEndObject();

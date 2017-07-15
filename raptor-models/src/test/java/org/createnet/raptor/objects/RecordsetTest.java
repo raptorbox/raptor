@@ -57,10 +57,9 @@ public class RecordsetTest extends TestUtils {
         Stream stream = device.streams().get("mylocation");
         RecordSet records = mapper.readValue(data.toString(), RecordSet.class);
 
-        records.userId = "Mr. foobar";
+        records.userId("Mr. foobar");
 
-        Object channel = records.getByChannelName("happy");
-        assertTrue(channel instanceof Boolean);
+        Boolean channel = records.value("happy").getBoolean();
         assertTrue(channel.equals(true));
 
         String strjson = records.toJson();

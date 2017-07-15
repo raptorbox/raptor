@@ -66,7 +66,7 @@ public class DataStreamTest {
         d.addStream("test", "number", "number");
         d.addStream("test", "boolean", "boolean");
 
-        Assert.assertTrue(d.stream("test").channels.size() == 3);
+        Assert.assertTrue(d.stream("test").channels().size() == 3);
 
         log.debug("Creating {} device", d.name());
 
@@ -114,7 +114,7 @@ public class DataStreamTest {
     }
 
     private void pushRecords(Raptor raptor, Stream s, int len, int waitFor) {
-        log.debug("Pushing {} records on {}", len, s.name);
+        log.debug("Pushing {} records on {}", len, s.name());
         List<RecordSet> records = createRecordSet(s, len);
         records.parallelStream().forEach(record -> raptor.Stream().push(record));
     }
@@ -191,10 +191,13 @@ public class DataStreamTest {
 
         RecordSet record = raptor.Stream().lastUpdate(s);
         Assert.assertNotNull(record);
-
-        Assert.assertTrue(record.channels.get("number") == r.channels.get("number"));
-        Assert.assertEquals(record.channels.get("string"), r.channels.get("string"));
-        Assert.assertEquals(record.channels.get("boolean"), r.channels.get("boolean"));
+        
+        Long val1 = record.value("number").getNumber().longValue();
+        Long val2 = r.value("number").getNumber().longValue();
+        
+        Assert.assertTrue(val1.equals(val2));
+        Assert.assertEquals(record.value("string").getString(), r.value("string").getString());
+        Assert.assertEquals(record.value("boolean").getBoolean(), r.value("boolean").getBoolean());
 
     }
 

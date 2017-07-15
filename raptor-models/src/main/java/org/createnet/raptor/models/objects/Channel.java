@@ -35,9 +35,9 @@ public class Channel extends StreamContainer {
             "boolean"
     ));
 
-    public String name;
-    public String type;
-    public String unit;
+    protected String name;
+    protected String type;
+    protected String unit;
 
     public static Channel create(String name, String type, String unit) {
         Channel channel = new Channel();
@@ -109,6 +109,57 @@ public class Channel extends StreamContainer {
                 unit = json.get("unit").asText();
             }
         }
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public String type() {
+        return type;
+    }
+
+    public String unit() {
+        return unit;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public Channel name(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public Channel type(String type) {
+        this.type = type;
+        return this;
+    }
+
+    public Channel unit(String unit) {
+        this.unit = unit;
+        return this;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
     }
 
 }

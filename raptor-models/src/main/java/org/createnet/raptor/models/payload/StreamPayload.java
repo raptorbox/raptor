@@ -33,7 +33,7 @@ public class StreamPayload extends DevicePayload {
     
     public StreamPayload(Stream stream, Permissions op, RecordSet record) {
         super(stream.getDevice(), op);
-        this.streamId = stream.name;
+        this.streamId = stream.name();
         this.record = record;
         this.type = MessageType.stream;
     }

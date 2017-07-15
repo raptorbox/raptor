@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Luca Capra <luca.capra@fbk.eu>.
+ * Copyright 2017 FBK/CREATE-NET
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.models.payload;
-
-import org.createnet.raptor.models.acl.Permissions;
-import org.createnet.raptor.models.objects.Action;
+package org.createnet.raptor.models.exception;
 
 /**
  *
- * @author Luca Capra <luca.capra@fbk.eu>
+ * @author Luca Capra <luca.capra@gmail.com>
  */
-public class ActionPayload extends DevicePayload {
+public class ValueConversionException extends RuntimeException
+{
 
-    public String actionId;
-    public String data;
-
-    public ActionPayload() {
+    public ValueConversionException(Throwable ex) {
+        super("Error converting value", ex);
     }
     
-    public ActionPayload(Action action, Permissions op, String data) {
-        super(action.getDevice(), op);
-        this.data = data;
-        this.actionId = action.name();
-        this.type = MessageType.action;
+    public ValueConversionException(String reason) {
+        super(reason);
     }
-
+    
 }

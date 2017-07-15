@@ -67,7 +67,7 @@ public class DeviceTest extends TestUtils {
 //    assertTrue(device.parentId == null);
 //    assertTrue(device.path == null);
         assertTrue(device.streams().size() == 1);
-        assertTrue(device.streams().get("mylocation").channels.get("position").type.toLowerCase().equals("geo_point"));
+        assertTrue(device.streams().get("mylocation").channels().get("position").type().toLowerCase().equals("geo_point"));
 
         assertTrue(device.actions().size() == 3);
         assertTrue(device.actions().get("makeCall") != null);
@@ -89,11 +89,11 @@ public class DeviceTest extends TestUtils {
         d.addStream("test", "number", "number");
         d.addStream("test", "string", "string");
         
-        assertTrue(d.stream("test").channels.size() == 3);
+        assertTrue(d.stream("test").channels().size() == 3);
         
-        assertNotNull(d.stream("test").channels.get("boolean"));
-        assertNotNull(d.stream("test").channels.get("number"));
-        assertNotNull(d.stream("test").channels.get("string"));        
+        assertNotNull(d.stream("test").channels().get("boolean"));
+        assertNotNull(d.stream("test").channels().get("number"));
+        assertNotNull(d.stream("test").channels().get("string"));        
         
     }
 

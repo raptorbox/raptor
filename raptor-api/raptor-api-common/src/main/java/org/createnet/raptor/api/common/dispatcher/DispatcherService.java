@@ -26,7 +26,6 @@ import org.createnet.raptor.models.objects.DeviceContainer;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.payload.ActionPayload;
-import org.createnet.raptor.models.payload.DataPayload;
 import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.StreamPayload;
@@ -116,7 +115,7 @@ public class DispatcherService implements InitializingBean, DisposableBean {
             throw new RaptorComponent.ParserException("Device.id is null");
         }
 
-        return String.format(Topics.STREAM, id, s.name);
+        return String.format(Topics.STREAM, id, s.name());
     }
 
     protected String getActionTopic(Action a) {
@@ -131,7 +130,7 @@ public class DispatcherService implements InitializingBean, DisposableBean {
             throw new RaptorComponent.ParserException("Device.id is null");
         }
 
-        return String.format(Topics.ACTION, id, a.name);
+        return String.format(Topics.ACTION, id, a.name());
     }
 
     protected String getUserEventsTopic(DeviceContainer c) {

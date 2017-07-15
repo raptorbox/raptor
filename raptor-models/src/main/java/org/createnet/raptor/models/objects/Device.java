@@ -120,43 +120,37 @@ public class Device extends DeviceContainer {
 
     @Override
     public String toString() {
-        return "Device<" + (this.id != null ? this.id : this.name) + ">";
+        return "Device<" + (id != null ? id : "no id") + "> " + (name != null ? name : "no name");
     }
 
+    /**
+     * Merge a Device instance in the current one, overriding part of its fields
+     * Differs from parse as it will keep previous fields state, like stream list or properties
+     * 
+     * @param raw
+     * @return
+     */
     public Device merge(Device raw) {
 
-        this.id(raw.id());
         this.name(raw.name());
         this.description(raw.description());
-        this.userId(raw.userId());
-
-        this.createdAt(raw.getCreatedAt());
-        this.updatedAt(raw.getUpdatedAt());
-
-        this.properties().clear();
-        this.properties().putAll(raw.properties());
 
         this.settings().eventsEnabled = raw.settings().eventsEnabled;
         this.settings().storeData = raw.settings().storeData;
 
-
+        this.properties().putAll(raw.properties());
+        
         this.streams().putAll(raw.streams());
-        this.streams().entrySet().stream()
-                .filter((entry) -> {
-                    return raw.stream(entry.getKey()) == null;
-                })
-                .forEach((entry) -> {
-                    this.streams().remove(entry.getKey());
-                });
+        // update device internal ref
+        this.streams().entrySet().stream().forEach((el) -> {
+            el.getValue().setDevice(this);
+        });
 
         this.actions().putAll(raw.actions());
-        this.actions().entrySet().stream()
-                .filter((entry) -> {
-                    return raw.action(entry.getKey()) == null;
-                })
-                .forEach((entry) -> {
-                    this.actions().remove(entry.getKey());
-                });
+        // update device internal ref        
+        this.actions().entrySet().stream().forEach((el) -> {
+            el.getValue().setDevice(this);
+        });
 
         return this;
     }
@@ -203,21 +197,25 @@ public class Device extends DeviceContainer {
     }
 
     /**
-     * Merge an device to the current instance
+     * Substitute current device instance with provided one properties
+     * Differs from merge as it will clear previous fields state
      *
      * @param device the device to merge from
      */
     public void parse(Device device) {
 
-        id = device.id;
-        userId = device.userId;
+        id = device.id();
+        userId = device.userId();
 
-        name = device.name;
-        description = device.description;
+        name = device.name();
+        description = device.description();
 
-        createdAt = device.createdAt;
-        updatedAt = device.updatedAt;
+        createdAt = device.getCreatedAt();
+        updatedAt = device.getUpdatedAt();
 
+        settings.eventsEnabled = device.settings().eventsEnabled;
+        settings.storeData = device.settings().storeData;
+        
         properties.clear();
         properties.putAll(device.properties);
 
