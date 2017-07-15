@@ -15,61 +15,6 @@ services:
     networks:
       - raptor_net
 
-  action:
-    image: raptorbox/action
-    volumes:
-      - ./config:/etc/raptor
-    links:
-      - mongo
-    depends_on:
-      - mongo
-    networks:
-      - raptor_net
-
-  inventory:
-    image: raptorbox/inventory
-    volumes:
-      - ./config:/etc/raptor
-    links:
-      - mongo
-    depends_on:
-      - mongo
-    networks:
-      - raptor_net
-
-  profile:
-    image: raptorbox/profile
-    volumes:
-      - ./config:/etc/raptor
-    links:
-      - mongo
-    depends_on:
-      - mongo
-    networks:
-      - raptor_net
-
-  stream:
-    image: raptorbox/stream
-    volumes:
-      - ./config:/etc/raptor
-    links:
-      - mongo
-    depends_on:
-      - mongo
-    networks:
-      - raptor_net
-
-  tree:
-    image: raptorbox/tree
-    volumes:
-      - ./config:/etc/raptor
-    links:
-      - mongo
-    depends_on:
-      - mongo
-    networks:
-      - raptor_net
-
   auth:
     image: raptorbox/auth
     volumes:
@@ -82,10 +27,73 @@ services:
     networks:
       - raptor_net
 
+  action:
+    image: raptorbox/action
+    volumes:
+      - ./config:/etc/raptor
+    links:
+      - mongo
+    depends_on:
+      - mongo
+      - auth
+    networks:
+      - raptor_net
+
+  inventory:
+    image: raptorbox/inventory
+    volumes:
+      - ./config:/etc/raptor
+    links:
+      - mongo
+    depends_on:
+      - mongo
+      - auth
+    networks:
+      - raptor_net
+
+  profile:
+    image: raptorbox/profile
+    volumes:
+      - ./config:/etc/raptor
+    links:
+      - mongo
+    depends_on:
+      - mongo
+      - auth
+    networks:
+      - raptor_net
+
+  stream:
+    image: raptorbox/stream
+    volumes:
+      - ./config:/etc/raptor
+    links:
+      - mongo
+    depends_on:
+      - mongo
+      - auth
+    networks:
+      - raptor_net
+
+  tree:
+    image: raptorbox/tree
+    volumes:
+      - ./config:/etc/raptor
+    links:
+      - mongo
+    depends_on:
+      - mongo
+      - auth
+    networks:
+      - raptor_net
+
   apigateway:
     image: raptorbox/gateway
     volumes:
       - ./config:/etc/raptor
+    depends_on:
+        - broker
+        - auth
     networks:
       - raptor_net
 

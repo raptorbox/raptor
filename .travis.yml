@@ -20,7 +20,7 @@ services:
   - docker
 
 env:
-  DOCKER_COMPOSE_VERSION: 1.8.1
+  DOCKER_COMPOSE_VERSION: 1.11.2
 
 before_install:
   - sudo rm /usr/local/bin/docker-compose
@@ -35,7 +35,8 @@ before_script:
   - sudo nginx -c "/tmp/nginx/nginx.conf"
   - mvn package -DskipTests=true
   - docker-compose -f test.yml up -d --build
-  - sleep 30
+  - sleep 10
+  - netstat -nat
 
 after_script:
   - docker-compose -f test.yml down
