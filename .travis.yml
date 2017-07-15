@@ -30,13 +30,13 @@ before_install:
   - sudo sh ./travis/install-nginx.sh
 
 before_script:
-  - sudo nginx -c "`pwd`/tmp/nginx/nginx.conf"
+  - sudo nginx -c "/tmp/nginx/nginx.conf"
   - docker-compose -f test.yml up -d --build
   - sleep 30
 
 after_script:
   - docker-compose -f test.yml down
-  - nginx -c `pwd`/tmp/nginx/nginx.conf -s stop
+  - nginx -c "/tmp/nginx/nginx.conf" -s stop
 
 
 after_success:
