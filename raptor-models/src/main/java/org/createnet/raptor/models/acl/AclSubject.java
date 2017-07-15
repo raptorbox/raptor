@@ -13,33 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.services;
+package org.createnet.raptor.models.acl;
 
-import org.createnet.raptor.auth.acl.AbstractAclService;
-import org.createnet.raptor.models.auth.Token;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.acls.model.Permission;
-
-
-import org.springframework.stereotype.Service;
+import org.createnet.raptor.models.auth.User;
 
 /**
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@Service
-public class AclTokenService extends AbstractAclService<Token> {
-
-    @Autowired
-    TokenService tokenService;
+public interface AclSubject {
     
-    @Override
-    public Permission[] getDefaultPermissions() {
-        return new Permission[]{};
-    }
-
-    @Override
-    public Token load(Long id) {
-        return tokenService.read(id);
-    }
+    public Long getSubjectId();
+    public Long getSubjectParentId();
+    public User getOwner();
     
 }

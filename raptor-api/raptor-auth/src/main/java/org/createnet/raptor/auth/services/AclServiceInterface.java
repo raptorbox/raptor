@@ -25,8 +25,9 @@ import org.createnet.raptor.models.auth.User;
  */
 public interface AclServiceInterface<S> {
 
-    public void add(S subject, User user, List<Permission> permissions);
+    public Permission[] getDefaultPermissions();
 
+    public void add(S subject, User user, List<Permission> permissions);
     public void set(S subject, User user, List<Permission> permissions);
     public List<Permission> list(S subject, User user);
     public void remove(S subject, User user, Permission permission);
@@ -34,5 +35,6 @@ public interface AclServiceInterface<S> {
     public boolean isGranted(S subject, User user, Permission permission);
     public void register(S subject);
     public boolean check(S subject, User user, Permission permission);
+    public S load(Long id);
 
 }

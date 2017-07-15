@@ -34,6 +34,7 @@ create table if not exists roles (
 
 create table if not exists tokens (
     id bigint not null auto_increment, 
+    parent_id bigint, 
     created datetime not null, 
     enabled bit not null, 
     expires bigint, 
@@ -119,6 +120,7 @@ alter table devices add constraint fk_devices_parent_id_devices_id  foreign key 
 alter table tokens add constraint idx_tokens_token  unique (token);
 alter table tokens add constraint fk_tokens_device_id_id  foreign key (device_id) references devices (id);
 alter table tokens add constraint fk_tokens_user_id_users_id foreign key (user_id) references users (id);
+alter table tokens  add constraint fk_tkns_prnt_id_tkn_id  foreign key (parent_id) references tokens (id);
 
 alter table users_roles add constraint fk_users_roles_role_id_roles_id foreign key (role_id) references roles (id);
 alter table users_roles add constraint fk_users_roles_user_id_users_id foreign key (user_id) references users (id);
