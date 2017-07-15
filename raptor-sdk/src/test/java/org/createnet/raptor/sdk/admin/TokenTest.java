@@ -80,13 +80,14 @@ public class TokenTest {
 
         Token token = new Token("test", "secret" + System.currentTimeMillis() * Math.random());
         //fake token
-        token.setToken("foobar");
+        String faketoken = "foobar";
+        token.setToken(faketoken);
 
         Token newToken = raptor.Admin().Token().create(token);
 
         assertNotNull(newToken);
         assertNotNull(newToken.getId());
-        assertNotEquals(token.getToken(), newToken.getToken());
+        assertNotEquals(faketoken, newToken.getToken());
 
         assertTrue(newToken.isEnabled());
         assertFalse(newToken.isExpired());
@@ -95,9 +96,14 @@ public class TokenTest {
 
     @Test
     public void updateToken() {
-
-        Token newToken = raptor.Admin().Token().create(new Token("test", "secret" + System.currentTimeMillis() * Math.random()));
-
+        
+        
+        String secret = "secret_" + System.currentTimeMillis() * Math.random();
+        String name = "token_" + System.currentTimeMillis() * Math.random();
+        
+        Token newToken = raptor.Admin().Token().create(new Token(name, secret));
+        String token = newToken.getToken();
+        
         assertNotNull(newToken);
 
         newToken.setDevice(new Device("foobar"));
@@ -111,8 +117,8 @@ public class TokenTest {
         assertNotNull(updatedToken);
         assertNotNull(newToken.getId());
 
-        assertNotEquals(newToken.getSecret(), updatedToken.getSecret());
-        assertNotEquals(newToken.getToken(), updatedToken.getToken());
+        assertNotEquals(secret, updatedToken.getSecret());
+        assertNotEquals(token, updatedToken.getToken());
         
         assertFalse(updatedToken.isEnabled());
         

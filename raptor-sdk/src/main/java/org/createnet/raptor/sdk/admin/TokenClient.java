@@ -42,20 +42,20 @@ public class TokenClient extends AbstractClient {
         public JsonToken(Token token) {
             super(token);
         }
-        
+
         @JsonProperty(access = JsonProperty.Access.READ_WRITE)
         protected String secret;
     }
-    
+
     protected TokenPermissionClient Permission;
-    
+
     public TokenPermissionClient Permission() {
         if (Permission == null) {
             Permission = new TokenPermissionClient(getContainer());
         }
         return Permission;
     }
-    
+
     public TokenClient(Raptor container) {
         super(container);
     }
@@ -70,9 +70,10 @@ public class TokenClient extends AbstractClient {
      */
     public List<Token> get(String userUuid) {
         JsonNode node = getClient().get(String.format(Routes.TOKEN_GET, userUuid));
-        return getMapper().convertValue(node, new TypeReference<List<Token>>() {});
+        return getMapper().convertValue(node, new TypeReference<List<Token>>() {
+        });
     }
-    
+
     /**
      * Get current user token
      *
@@ -80,11 +81,13 @@ public class TokenClient extends AbstractClient {
      */
     public List<Token> get() {
         JsonNode node = getClient().get(String.format(Routes.TOKEN_GET, getContainer().Auth().getUser().getUuid()));
-        return getMapper().convertValue(node, new TypeReference<List<Token>>() {});
+        return getMapper().convertValue(node, new TypeReference<List<Token>>() {
+        });
     }
 
     /**
      * Create a new token
+     *
      * @param token
      * @return
      */
@@ -97,6 +100,7 @@ public class TokenClient extends AbstractClient {
 
     /**
      * Update a token
+     *
      * @param token
      * @return
      */
@@ -105,15 +109,15 @@ public class TokenClient extends AbstractClient {
         JsonToken jsonToken = new JsonToken(token);
         JsonNode node = getClient().put(String.format(Routes.TOKEN_UPDATE, token.getId()), toJsonNode(jsonToken));
         Token t1 = getMapper().convertValue(node, Token.class);
-        
+
         return mergeToken(token, t1);
     }
-    
+
     private Token mergeToken(Token token, Token t1) {
         token.merge(t1);
         token.setToken(t1.getToken());
-        token.setId(t1.getId());        
+        token.setId(t1.getId());
         return token;
     }
-    
+
 }
