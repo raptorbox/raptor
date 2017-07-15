@@ -164,7 +164,7 @@ public class StreamClient extends AbstractClient {
      * @return
      */
     public RecordSet lastUpdate(Stream stream) {
-        JsonNode result = getClient().get(String.format(Routes.LAST_UPDATE, stream.getDevice().id(), stream.name()));
+        JsonNode result = getClient().get(String.format(Routes.LAST_UPDATE, stream.getDevice().id(), stream.name()), RequestOptions.retriable().maxRetries(3).waitFor(500));
         if (result == null) {
             return null;
         }
@@ -181,7 +181,8 @@ public class StreamClient extends AbstractClient {
     public ResultSet search(Stream stream, DataQuery query) {
         JsonNode results = getClient().post(
                 String.format(Routes.SEARCH_DATA, stream.getDevice().id(), stream.name()),
-                query.toJSON()
+                query.toJSON(),
+                RequestOptions.retriable().maxRetries(3).waitFor(500)
         );
         return ResultSet.fromJSON(stream, results);
     }
