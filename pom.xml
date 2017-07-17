@@ -11,14 +11,10 @@
     <packaging>pom</packaging>
   
     <modules>
-    
         <module>raptor-models</module>
         <module>raptor-events</module>    
         <module>raptor-sdk</module>
-        
         <module>raptor-api</module>
-        <module>raptor-broker</module>
-
     </modules>
   
     <properties>

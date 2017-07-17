@@ -1,5 +1,9 @@
 #!/bin/sh
 
-./scripts/mvn-build.sh
+# echo "Rebuilding packages"
+# ./scripts/mvn-build.sh >> /dev/null
 
-docker-compose build
+for file in ./*/*/Dockerfile
+do
+    echo "- ${file}"
+done

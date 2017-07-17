@@ -13,7 +13,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>raptor-api-common</module>      
+        <module>raptor-api-common</module>
+        <module>raptor-broker</module>        
         <module>raptor-profile</module>
         <module>raptor-inventory</module>
         <module>raptor-auth</module>

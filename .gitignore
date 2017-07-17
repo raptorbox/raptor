@@ -18,3 +18,4 @@ nb*
 /raptor-api/raptor-tree/target/
 /raptor-api/raptor-auth/target/
 /raptor-api/raptor-gateway/target/
+/raptor-api/raptor-broker/target/
