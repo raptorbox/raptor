@@ -1,11 +1,17 @@
 #!/bin/sh
 
+currdir=$(pwd)
+
+gittag=$(git describe --tag)
+tag=$(echo $gittag | awk -F- '{print $1 "-" $2}' | sed 's/\-$//')
+basetag=$(echo $tag | awk -F. '{print $1}')
+
+echo "Tag release is ${tag} for branch release ${basetag}"
+
 echo "Rebuilding packages"
 ./scripts/mvn-build.sh >> /dev/null
 
-tag=$(git describe --tag)
-
-currdir=$(pwd)
+echo "Building containers"
 
 for file in ./*/*/Dockerfile
 do
@@ -17,5 +23,8 @@ do
     echo "Building $imagename"
     cd "$currdir/$prjpath"
     docker build . -t "raptorbox/${prj}:${tag}" >> /dev/null
-    # docker tag "raptorbox/${prj}:${tag}" "raptorbox/${prj}:latest"
+
+    echo "Tag branch release raptorbox/${prj}:${basetag}"
+    docker tag "raptorbox/${prj}:${tag}" "raptorbox/${prj}:${basetag}"
+
 done

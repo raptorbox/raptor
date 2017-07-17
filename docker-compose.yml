@@ -7,7 +7,7 @@ networks:
 services:
 
   broker:
-    image: raptorbox/broker
+    image: raptorbox/broker:v4
     ports:
       - 1883:1883
     volumes:
@@ -16,7 +16,7 @@ services:
       - raptor_net
 
   auth:
-    image: raptorbox/auth
+    image: raptorbox/auth:v4
     volumes:
       - ./config:/etc/raptor
     links:
@@ -28,7 +28,7 @@ services:
       - raptor_net
 
   action:
-    image: raptorbox/action
+    image: raptorbox/action:v4
     volumes:
       - ./config:/etc/raptor
     links:
@@ -40,7 +40,7 @@ services:
       - raptor_net
 
   inventory:
-    image: raptorbox/inventory
+    image: raptorbox/inventory:v4
     volumes:
       - ./config:/etc/raptor
     links:
@@ -52,7 +52,7 @@ services:
       - raptor_net
 
   profile:
-    image: raptorbox/profile
+    image: raptorbox/profile:v4
     volumes:
       - ./config:/etc/raptor
     links:
@@ -64,7 +64,7 @@ services:
       - raptor_net
 
   stream:
-    image: raptorbox/stream
+    image: raptorbox/stream:v4
     volumes:
       - ./config:/etc/raptor
     links:
@@ -76,7 +76,7 @@ services:
       - raptor_net
 
   tree:
-    image: raptorbox/tree
+    image: raptorbox/tree:v4
     volumes:
       - ./config:/etc/raptor
     links:
@@ -88,7 +88,7 @@ services:
       - raptor_net
 
   apigateway:
-    image: raptorbox/gateway
+    image: raptorbox/gateway:v4
     volumes:
       - ./config:/etc/raptor
     depends_on:
