@@ -16,7 +16,7 @@
 package org.createnet.raptor.auth.services;
 
 import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.api.common.authentication.RaptorUserDetails;
+import org.createnet.raptor.common.authentication.RaptorUserDetails;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.inventory;
 
-import org.createnet.raptor.api.common.BaseApplication;
+import org.createnet.raptor.common.BaseApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -24,7 +24,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.inventory"})
+@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.common", "org.createnet.raptor.inventory"})
 @EnableMongoRepositories
 @EnableSpringDataWebSupport
 public class Application extends BaseApplication {

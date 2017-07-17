@@ -17,8 +17,8 @@ package org.createnet.raptor.auth;
 
 import java.util.List;
 import javax.sql.DataSource;
-import org.createnet.raptor.api.common.BaseApplication;
-import org.createnet.raptor.api.common.configuration.TokenHelper;
+import org.createnet.raptor.common.BaseApplication;
+import org.createnet.raptor.common.configuration.TokenHelper;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.repository.UserRepository;
@@ -47,7 +47,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Profile("default")
-@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.auth"})
+@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.common", "org.createnet.raptor.auth"})
 @EntityScan(basePackages = "org.createnet.raptor.models.auth")
 @EnableScheduling
 @EnableCaching

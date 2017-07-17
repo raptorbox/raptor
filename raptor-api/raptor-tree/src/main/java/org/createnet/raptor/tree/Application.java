@@ -16,7 +16,7 @@
  */
 package org.createnet.raptor.tree;
 
-import org.createnet.raptor.api.common.BaseApplication;
+import org.createnet.raptor.common.BaseApplication;
 import org.createnet.raptor.sdk.Topics;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +29,7 @@ import org.springframework.integration.core.MessageProducer;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @SpringBootApplication(
-        scanBasePackages = {"org.createnet.raptor.api.common", "org.createnet.raptor.tree"}
+        scanBasePackages = {"org.createnet.raptor.common", "org.createnet.raptor.tree"}
 )
 @EnableSpringDataWebSupport
 @EnableMongoRepositories(basePackages = "org.createnet.raptor.tree")

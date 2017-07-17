@@ -16,7 +16,7 @@
 package org.createnet.raptor.gateway;
 
 
-import org.createnet.raptor.api.common.BaseApplication;
+import org.createnet.raptor.common.BaseApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 
@@ -24,7 +24,7 @@ import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.gateway", "org.createnet.raptor.api.common"})
+@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.gateway", "org.createnet.raptor.common"})
 @EnableZuulProxy
 public class Application extends BaseApplication {
 

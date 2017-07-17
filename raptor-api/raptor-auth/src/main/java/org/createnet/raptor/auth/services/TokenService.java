@@ -16,7 +16,7 @@
 package org.createnet.raptor.auth.services;
 
 import java.util.List;
-import org.createnet.raptor.api.common.configuration.TokenHelper;
+import org.createnet.raptor.common.configuration.TokenHelper;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.repository.TokenRepository;

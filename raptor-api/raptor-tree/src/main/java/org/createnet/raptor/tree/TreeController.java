@@ -22,7 +22,7 @@ import io.swagger.annotations.ApiResponses;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.createnet.raptor.api.common.client.ApiClientService;
+import org.createnet.raptor.common.client.ApiClientService;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.tree.TreeNode;

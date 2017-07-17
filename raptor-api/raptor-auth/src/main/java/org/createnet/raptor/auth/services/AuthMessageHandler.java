@@ -15,8 +15,8 @@
  */
 package org.createnet.raptor.auth.services;
 
-import org.createnet.raptor.api.common.authentication.RaptorUserDetails;
-import org.createnet.raptor.api.common.dispatcher.RaptorMessageHandler;
+import org.createnet.raptor.common.authentication.RaptorUserDetails;
+import org.createnet.raptor.common.dispatcher.RaptorMessageHandler;
 import org.createnet.raptor.models.auth.request.SyncRequest;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.payload.DevicePayload;

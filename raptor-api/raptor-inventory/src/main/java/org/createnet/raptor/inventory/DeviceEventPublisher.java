@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.inventory;
 
-import org.createnet.raptor.api.common.dispatcher.events.DeviceApplicationEvent;
+import org.createnet.raptor.common.dispatcher.events.DeviceApplicationEvent;
 import org.createnet.raptor.events.Event;
 import org.createnet.raptor.events.type.DeviceEvent;
 import org.createnet.raptor.models.objects.Device;

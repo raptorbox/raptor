@@ -30,7 +30,7 @@
         </dependency>
         <dependency>
             <groupId>org.createnet</groupId>
-            <artifactId>raptor-api-common</artifactId>
+            <artifactId>raptor-common</artifactId>
             <version>1.0</version>
         </dependency>
     </dependencies>

@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.tree;
 
-import org.createnet.raptor.api.common.dispatcher.events.TreeNodeApplicationEvent;
+import org.createnet.raptor.common.dispatcher.events.TreeNodeApplicationEvent;
 import org.createnet.raptor.events.Event;
 import org.createnet.raptor.events.type.TreeNodeEvent;
 import org.createnet.raptor.models.payload.DispatcherPayload;

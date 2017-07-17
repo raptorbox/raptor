@@ -17,7 +17,7 @@ package org.createnet.raptor.auth.configuration;
 
 import org.createnet.raptor.auth.services.RaptorUserDetailsService;
 import org.createnet.raptor.auth.authentcation.JsonUsernamePasswordFilter;
-import org.createnet.raptor.api.common.authentication.RaptorAuthenticationEntryPoint;
+import org.createnet.raptor.common.authentication.RaptorAuthenticationEntryPoint;
 import org.createnet.raptor.auth.authentcation.RaptorAuthenticationTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

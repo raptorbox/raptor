@@ -19,7 +19,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.createnet.raptor.api.common.client.ApiClientService;
+import org.createnet.raptor.common.client.ApiClientService;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.objects.Action;

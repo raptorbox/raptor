@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.tree;
 
-import org.createnet.raptor.api.common.dispatcher.RaptorMessageHandler;
+import org.createnet.raptor.common.dispatcher.RaptorMessageHandler;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.payload.ActionPayload;
 import org.createnet.raptor.models.payload.DevicePayload;

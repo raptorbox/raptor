@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.profile;
 
-import org.createnet.raptor.api.common.BaseApplication;
+import org.createnet.raptor.common.BaseApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
@@ -23,7 +23,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.profile", "org.createnet.raptor.api.common"})
+@SpringBootApplication(scanBasePackages = {"org.createnet.raptor.profile", "org.createnet.raptor.common"})
 @EnableMongoRepositories
 public class Application extends BaseApplication {
 

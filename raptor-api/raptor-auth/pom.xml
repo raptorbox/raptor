@@ -63,7 +63,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>raptor-api-common</artifactId>
+            <artifactId>raptor-common</artifactId>
             <version>${project.version}</version>
         </dependency>
 
