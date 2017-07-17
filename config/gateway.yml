@@ -3,7 +3,9 @@ server:
   contextPath: /
 
 zuul:
-    # stripPrefix: false
+    # prefix: v4
+    # stripPrefix: true
+    # ignoredServices: *
     sensitiveHeaders:
     routes:
         action:

@@ -76,6 +76,8 @@ public abstract class BaseApplication {
     static private ConfigurableApplicationContext instance;
     static public String appName;
 
+    static public boolean developmentMode = false;
+
     protected RaptorMessageHandler messageHandler;
 
     public static SpringApplicationBuilder createInstance(Class clazz) {
@@ -124,13 +126,24 @@ public abstract class BaseApplication {
         log.debug("Set application name to match package: {}", appName);
         log.debug("Listening to path /{}", appName);
 
+        for (String arg : args) {
+            if (arg.equals("--dev")) {
+                log.debug("Development mode enabled");
+                developmentMode = true;
+            }
+        }
+        
         String[] args2 = new String[args.length + 1];
         System.arraycopy(args, 0, args2, 0, args.length);
         args2[args2.length - 1] = name;
 
         return args2;
     }
-
+    
+    static public boolean isDevelopmentMode() {
+        return developmentMode;
+    }
+    
     @Bean
     @ConfigurationProperties(prefix = "raptor")
     public RaptorConfiguration raptorConfiguration() {
@@ -235,8 +248,16 @@ public abstract class BaseApplication {
 
         propertySourcesPlaceholderConfigurer.setIgnoreResourceNotFound(false);
 
-        List<Resource> resources = new ArrayList<String>(Arrays.asList("raptor.yml", appName + ".yml"))
-                .stream()
+        ArrayList<String> defaultSources = new ArrayList(Arrays.asList("raptor.yml", appName + ".yml"));
+        ArrayList<String> sources = new ArrayList(defaultSources);
+        
+        if (developmentMode) {
+            defaultSources.forEach((source) -> {
+                sources.add(source.replace(".yml", ".dev.yml"));
+            });
+        }
+
+        List<Resource> resources = sources.stream()
                 .filter(f -> new File(basepath + f).exists())
                 .map(f -> new FileSystemResource(basepath + f))
                 .collect(Collectors.toList());

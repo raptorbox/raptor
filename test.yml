@@ -12,7 +12,7 @@ networks:
 services:
 
   broker:
-    build: ./raptor-broker
+    build: ./raptor-api/raptor-broker
     ports:
       - 1883:1883
     volumes:

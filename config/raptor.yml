@@ -25,11 +25,11 @@ logging:
     org.createnet.raptor: DEBUG
 
 raptor:
-  url: http://raptor.local
+  url: http://apigateway
 
   dispatcher:
     protocol: mqtt
-    uri: tcp://raptor.local:1883
+    uri: tcp://broker:1883
 
   auth:
 

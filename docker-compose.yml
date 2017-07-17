@@ -89,6 +89,8 @@ services:
 
   apigateway:
     image: raptorbox/gateway:v4
+    ports:
+        - 10080:80
     volumes:
       - ./config:/etc/raptor
     depends_on:

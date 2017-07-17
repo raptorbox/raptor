@@ -13,13 +13,6 @@ services:
       MYSQL_USERNAME: root
       MYSQL_ROOT_PASSWORD: raptor
 
-  curl:
-    image: byrnedo/alpine-curl
-    volumes:
-      - ./:/raptor
-    networks:
-      - raptor_net
-
   dbadmin:
     image: phpmyadmin/phpmyadmin
     environment:
