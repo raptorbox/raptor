@@ -373,7 +373,7 @@ public class EventListenerTest {
         record.channel("string", "test1");
         r.Stream().push(record);
 
-        Utils.waitUntil(10, () -> !done.get());
+        Utils.waitUntil(5, () -> !done.get());
     }
 
     @Test
