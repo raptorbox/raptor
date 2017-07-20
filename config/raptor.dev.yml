@@ -1,6 +1,6 @@
 raptor:
-  url: http://raptor.local
+  url: http://localhost
 
   dispatcher:
     protocol: mqtt
-    uri: tcp://raptor.local:1883
+    uri: tcp://localhost:1883

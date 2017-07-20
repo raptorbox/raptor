@@ -12,6 +12,7 @@ services:
       - 1883:1883
     volumes:
       - ./config:/etc/raptor
+      - ./data:/data
     networks:
       - raptor_net
 

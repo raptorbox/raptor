@@ -22,6 +22,7 @@ server:
 
 logging:
   level:
+    root: warn
     org.createnet.raptor: DEBUG
 
 raptor:

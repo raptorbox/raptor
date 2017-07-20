@@ -36,10 +36,10 @@
         <paho>1.1.1</paho>
         <ehcache>3.1.3</ehcache>
         <swagger>1.5.10</swagger>
-        <spring-boot>1.5.3.RELEASE</spring-boot>
+        <spring-boot>1.5.4.RELEASE</spring-boot>
         <unirest>1.4.9</unirest>
     
-        <artemis>2.1.0</artemis>
+        <artemis>1.5.5</artemis>
         <flyway>4.1.2</flyway>
         <springfox>2.7.0</springfox>
         
