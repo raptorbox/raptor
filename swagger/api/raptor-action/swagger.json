@@ -1,0 +1,183 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "Action API handles action state and triggering",
+    "version" : "1.0",
+    "title" : "raptor-action",
+    "termsOfService" : "http://github.com/raptorbox",
+    "contact" : {
+      "name" : "OpenIoT research unit",
+      "url" : "http://github.com/raptorbox",
+      "email" : "openiot@fbk.eu"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host" : "raptor.local",
+  "basePath" : "/action",
+  "tags" : [ {
+    "name" : "Action"
+  } ],
+  "schemes" : [ "http", "https" ],
+  "paths" : {
+    "/{deviceId}/{actionId}" : {
+      "get" : {
+        "tags" : [ "Action" ],
+        "summary" : "Return the status information for an action",
+        "description" : "",
+        "operationId" : "getActionStatus",
+        "produces" : [ "application/json", "application/json;charset=UTF-8" ],
+        "parameters" : [ {
+          "name" : "deviceId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "actionId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/ActionStatus"
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Action" ],
+        "summary" : "Trigger an action, updating the state with the request body if provided",
+        "description" : "The whole body is stored as a text value",
+        "operationId" : "execute",
+        "consumes" : [ "text/plain" ],
+        "parameters" : [ {
+          "name" : "deviceId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "actionId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "object"
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Action" ],
+        "summary" : "Update the status for an action",
+        "description" : "The whole body is stored as a text value",
+        "operationId" : "setActionStatus",
+        "consumes" : [ "text/plain" ],
+        "produces" : [ "application/json;charset=UTF-8", "application/json" ],
+        "parameters" : [ {
+          "name" : "deviceId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "actionId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/ActionStatus"
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Action" ],
+        "summary" : "Delete the current status of an action",
+        "description" : "When an action status is reset the listening devices may stop triggering the action",
+        "operationId" : "delete",
+        "parameters" : [ {
+          "name" : "deviceId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "actionId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "object"
+            }
+          },
+          "202" : {
+            "description" : "Accepted"
+          },
+          "204" : {
+            "description" : "No content"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions" : {
+    "Authorization" : {
+      "type" : "apiKey"
+    },
+    "oauth2" : {
+      "type" : "oauth2"
+    }
+  },
+  "definitions" : {
+    "ActionStatus" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "status" : {
+          "type" : "string"
+        },
+        "createdAt" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "actionId" : {
+          "type" : "string"
+        },
+        "objectId" : {
+          "type" : "string"
+        }
+      }
+    }
+  }
+}

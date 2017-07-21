@@ -1,0 +1,410 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "Inventory API handles Device definitions",
+    "version" : "1.0",
+    "title" : "raptor-inventory",
+    "termsOfService" : "http://github.com/raptorbox",
+    "contact" : {
+      "name" : "OpenIoT research unit",
+      "url" : "http://github.com/raptorbox",
+      "email" : "openiot@fbk.eu"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host" : "raptor.local",
+  "basePath" : "/inventory",
+  "tags" : [ {
+    "name" : "Inventory"
+  } ],
+  "schemes" : [ "http", "https" ],
+  "paths" : {
+    "/" : {
+      "get" : {
+        "tags" : [ "Inventory" ],
+        "summary" : "Return the user devices",
+        "description" : "",
+        "operationId" : "getDevices",
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Device"
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Inventory" ],
+        "summary" : "Create a device instance",
+        "description" : "",
+        "operationId" : "createDevice",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/Device"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Device"
+            }
+          }
+        }
+      }
+    },
+    "/search" : {
+      "post" : {
+        "tags" : [ "Inventory" ],
+        "summary" : "Search for device instances",
+        "description" : "",
+        "operationId" : "searchDevices",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            }
+          }
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/DeviceQuery"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Device"
+            }
+          }
+        }
+      }
+    },
+    "/{deviceId}" : {
+      "get" : {
+        "tags" : [ "Inventory" ],
+        "summary" : "Return a device instance definition",
+        "description" : "",
+        "operationId" : "getDevice",
+        "parameters" : [ {
+          "name" : "deviceId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Device"
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Inventory" ],
+        "summary" : "Update a device instance",
+        "description" : "",
+        "operationId" : "updateDevice",
+        "parameters" : [ {
+          "name" : "deviceId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/Device"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Device"
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Inventory" ],
+        "summary" : "Delete a device instance",
+        "description" : "",
+        "operationId" : "deleteDevice",
+        "parameters" : [ {
+          "name" : "deviceId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Device"
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions" : {
+    "Authorization" : {
+      "type" : "apiKey"
+    },
+    "oauth2" : {
+      "type" : "oauth2"
+    }
+  },
+  "definitions" : {
+    "Action" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "status" : {
+          "$ref" : "#/definitions/ActionStatus"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "description" : {
+          "type" : "string"
+        }
+      }
+    },
+    "ActionStatus" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "status" : {
+          "type" : "string"
+        },
+        "createdAt" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "actionId" : {
+          "type" : "string"
+        },
+        "objectId" : {
+          "type" : "string"
+        }
+      }
+    },
+    "Channel" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "type" : {
+          "type" : "string"
+        },
+        "unit" : {
+          "type" : "string"
+        }
+      }
+    },
+    "Device" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "readOnly" : true
+        },
+        "userId" : {
+          "type" : "string",
+          "readOnly" : true
+        },
+        "name" : {
+          "type" : "string",
+          "readOnly" : true
+        },
+        "description" : {
+          "type" : "string",
+          "readOnly" : true
+        },
+        "createdAt" : {
+          "type" : "integer",
+          "format" : "int64",
+          "readOnly" : true
+        },
+        "updatedAt" : {
+          "type" : "integer",
+          "format" : "int64",
+          "readOnly" : true
+        },
+        "properties" : {
+          "type" : "object",
+          "readOnly" : true,
+          "additionalProperties" : {
+            "type" : "object"
+          }
+        },
+        "settings" : {
+          "readOnly" : true,
+          "$ref" : "#/definitions/Settings"
+        },
+        "streams" : {
+          "type" : "object",
+          "readOnly" : true,
+          "additionalProperties" : {
+            "$ref" : "#/definitions/Stream"
+          }
+        },
+        "actions" : {
+          "type" : "object",
+          "readOnly" : true,
+          "additionalProperties" : {
+            "$ref" : "#/definitions/Action"
+          }
+        }
+      }
+    },
+    "DeviceQuery" : {
+      "type" : "object",
+      "properties" : {
+        "userId" : {
+          "type" : "string"
+        },
+        "deviceId" : {
+          "type" : "string"
+        },
+        "offset" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "limit" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "sortBy" : {
+          "$ref" : "#/definitions/SortQuery"
+        },
+        "id" : {
+          "$ref" : "#/definitions/TextQuery"
+        },
+        "name" : {
+          "$ref" : "#/definitions/TextQuery"
+        },
+        "description" : {
+          "$ref" : "#/definitions/TextQuery"
+        },
+        "properties" : {
+          "$ref" : "#/definitions/MapQuery"
+        },
+        "empty" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "MapQuery" : {
+      "type" : "object",
+      "properties" : {
+        "containsKey" : {
+          "type" : "string"
+        },
+        "containsValue" : {
+          "type" : "object"
+        },
+        "has" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "object"
+          }
+        }
+      }
+    },
+    "Settings" : {
+      "type" : "object",
+      "properties" : {
+        "storeData" : {
+          "type" : "boolean"
+        },
+        "eventsEnabled" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "SortQuery" : {
+      "type" : "object",
+      "properties" : {
+        "direction" : {
+          "type" : "string"
+        },
+        "fields" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "Stream" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "type" : {
+          "type" : "string"
+        },
+        "description" : {
+          "type" : "string"
+        },
+        "channels" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "$ref" : "#/definitions/Channel"
+          }
+        }
+      }
+    },
+    "TextQuery" : {
+      "type" : "object",
+      "properties" : {
+        "startWith" : {
+          "type" : "string"
+        },
+        "endWith" : {
+          "type" : "string"
+        },
+        "contains" : {
+          "type" : "string"
+        },
+        "equals" : {
+          "type" : "string"
+        },
+        "in" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,228 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "Profile API handles local key-value storage per user",
+    "version" : "1.0",
+    "title" : "raptor-profile",
+    "termsOfService" : "http://github.com/raptorbox",
+    "contact" : {
+      "name" : "OpenIoT research unit",
+      "url" : "http://github.com/raptorbox",
+      "email" : "openiot@fbk.eu"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host" : "raptor.local",
+  "basePath" : "/profile",
+  "tags" : [ {
+    "name" : "UserProfile"
+  } ],
+  "schemes" : [ "http", "https" ],
+  "paths" : {
+    "/{userId}" : {
+      "get" : {
+        "tags" : [ "UserProfile" ],
+        "summary" : "Return all the user preferences",
+        "description" : "",
+        "operationId" : "getPreferences",
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/UserProfile"
+            }
+          }
+        }
+      }
+    },
+    "/{userId}/{name}" : {
+      "get" : {
+        "tags" : [ "UserProfile" ],
+        "summary" : "Return a user preference by name",
+        "description" : "",
+        "operationId" : "getPreference",
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/UserProfile"
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "UserProfile" ],
+        "summary" : "Set an user preference by name",
+        "description" : "",
+        "operationId" : "setPreference",
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/JsonNode"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/UserProfile"
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "UserProfile" ],
+        "summary" : "Drop an user preference by name",
+        "description" : "",
+        "operationId" : "deletePreference",
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/UserProfile"
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions" : {
+    "Authorization" : {
+      "type" : "apiKey"
+    },
+    "oauth2" : {
+      "type" : "oauth2"
+    }
+  },
+  "definitions" : {
+    "JsonNode" : {
+      "type" : "object",
+      "properties" : {
+        "nodeType" : {
+          "type" : "string",
+          "enum" : [ "ARRAY", "BINARY", "BOOLEAN", "MISSING", "NULL", "NUMBER", "OBJECT", "POJO", "STRING" ]
+        },
+        "float" : {
+          "type" : "boolean"
+        },
+        "int" : {
+          "type" : "boolean"
+        },
+        "number" : {
+          "type" : "boolean"
+        },
+        "valueNode" : {
+          "type" : "boolean"
+        },
+        "containerNode" : {
+          "type" : "boolean"
+        },
+        "missingNode" : {
+          "type" : "boolean"
+        },
+        "object" : {
+          "type" : "boolean"
+        },
+        "pojo" : {
+          "type" : "boolean"
+        },
+        "integralNumber" : {
+          "type" : "boolean"
+        },
+        "floatingPointNumber" : {
+          "type" : "boolean"
+        },
+        "short" : {
+          "type" : "boolean"
+        },
+        "long" : {
+          "type" : "boolean"
+        },
+        "double" : {
+          "type" : "boolean"
+        },
+        "bigDecimal" : {
+          "type" : "boolean"
+        },
+        "bigInteger" : {
+          "type" : "boolean"
+        },
+        "textual" : {
+          "type" : "boolean"
+        },
+        "boolean" : {
+          "type" : "boolean"
+        },
+        "binary" : {
+          "type" : "boolean"
+        },
+        "array" : {
+          "type" : "boolean"
+        },
+        "null" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "UserProfile" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "userId" : {
+          "type" : "string"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "value" : {
+          "type" : "string"
+        }
+      }
+    }
+  }
+}

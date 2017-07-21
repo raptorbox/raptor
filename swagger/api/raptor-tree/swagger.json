@@ -1,0 +1,217 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "Tree API handles relations between devices and users",
+    "version" : "1.0",
+    "title" : "raptor-tree",
+    "termsOfService" : "http://github.com/raptorbox",
+    "contact" : {
+      "name" : "OpenIoT research unit",
+      "url" : "http://github.com/raptorbox",
+      "email" : "openiot@fbk.eu"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host" : "raptor.local",
+  "basePath" : "/tree",
+  "tags" : [ {
+    "name" : "Inventory"
+  }, {
+    "name" : "Tree"
+  } ],
+  "schemes" : [ "http", "https" ],
+  "paths" : {
+    "/" : {
+      "get" : {
+        "tags" : [ "Tree", "Inventory" ],
+        "summary" : "List all trees",
+        "description" : "",
+        "operationId" : "list",
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/TreeNode"
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Tree", "Inventory" ],
+        "summary" : "Create a node of a tree",
+        "description" : "",
+        "operationId" : "create",
+        "parameters" : [ {
+          "name" : "parentId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/TreeNode"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "object"
+            }
+          }
+        }
+      }
+    },
+    "/{nodeId}" : {
+      "get" : {
+        "tags" : [ "Tree", "Inventory" ],
+        "summary" : "Return the whole tree a node belongs to",
+        "description" : "",
+        "operationId" : "tree",
+        "parameters" : [ {
+          "name" : "nodeId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/TreeNode"
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Tree", "Inventory" ],
+        "summary" : "Delete a node from a tree",
+        "description" : "",
+        "operationId" : "delete",
+        "parameters" : [ {
+          "name" : "nodeId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "object"
+            }
+          }
+        }
+      }
+    },
+    "/{nodeId}/children" : {
+      "get" : {
+        "tags" : [ "Tree", "Inventory" ],
+        "summary" : "Return the children for this node",
+        "description" : "",
+        "operationId" : "children",
+        "parameters" : [ {
+          "name" : "nodeId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/TreeNode"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{parentId}" : {
+      "put" : {
+        "tags" : [ "Tree", "Inventory" ],
+        "summary" : "Add items to the tree node",
+        "description" : "",
+        "operationId" : "add",
+        "parameters" : [ {
+          "name" : "parentId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/definitions/TreeNode"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "object"
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions" : {
+    "Authorization" : {
+      "type" : "apiKey"
+    },
+    "oauth2" : {
+      "type" : "oauth2"
+    }
+  },
+  "definitions" : {
+    "TreeNode" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "type" : {
+          "type" : "string",
+          "enum" : [ "group", "user", "device", "application" ]
+        },
+        "userId" : {
+          "type" : "string"
+        },
+        "parentId" : {
+          "type" : "string"
+        },
+        "order" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "children" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/TreeNode"
+          }
+        }
+      }
+    }
+  }
+}
