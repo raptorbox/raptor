@@ -6,8 +6,11 @@
         <artifactId>raptor-api</artifactId>
         <version>1.0</version>
     </parent>
+    
     <artifactId>raptor-stream</artifactId>
+    <description>Stream API handles Device data pipelines</description>
     <packaging>jar</packaging>
+    
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -46,6 +49,80 @@
                     <showDeprecation>false</showDeprecation>
                 </configuration>
             </plugin>
+            
+            
+ 
+
+            <plugin>
+                <groupId>com.github.kongchen</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <version>3.1.5</version>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <apiSources>
+                        <apiSource>
+                            <springmvc>true</springmvc>
+                            
+                            <locations>
+                                <location>org.createnet.raptor.stream</location>
+                            </locations>
+                            
+                            <templatePath>${basedir}/../../swagger/templates/strapdown.html.hbs</templatePath>
+                            <outputPath>${basedir}/../../swagger/api/${project.artifactId}.html</outputPath>
+                            <swaggerDirectory>${basedir}/../../swagger/api/${project.artifactId}/</swaggerDirectory>
+                            <attachSwaggerArtifact>true</attachSwaggerArtifact>
+                            
+                            <basePath>/stream</basePath>                                                        
+                                                                                                                
+                            <schemes>
+                                <scheme>http</scheme>
+                                <scheme>https</scheme>
+                            </schemes>
+                            
+                            <host>raptor.local</host>
+                            
+                            <info>
+                                <title>${project.artifactId}</title>
+                                <version>${project.version}</version>
+                                <description>${project.description}</description>
+                                <termsOfService>http://github.com/raptorbox</termsOfService>
+                                <contact>
+                                    <email>openiot@fbk.eu</email>
+                                    <name>OpenIoT research unit</name>
+                                    <url>http://github.com/raptorbox</url>
+                                </contact>
+                                <license>
+                                    <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+                                    <name>Apache 2.0</name>
+                                </license>
+                            </info>
+                            
+                            <securityDefinitions>
+                                <securityDefinition>
+                                    <name>oauth2</name>
+                                    <type>oauth2</type>
+                                </securityDefinition>
+                                <securityDefinition>
+                                    <type>apiKey</type>
+                                    <name>Authorization</name>
+                                    <!--<in>header</in>-->
+                                </securityDefinition>
+                            </securityDefinitions>
+
+                        </apiSource>
+                    </apiSources>
+                </configuration>
+            </plugin>            
+                        
+                        
+            
         </plugins>    
     </build>        
 </project>
