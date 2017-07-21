@@ -1,0 +1,10 @@
+{
+    "name": {
+        "equals": "memosa-car"
+    },
+    "properties": {
+        "has": {
+            "userId": "12345"
+        }
+    }
+}

@@ -16,13 +16,16 @@
 package org.createnet.raptor.models.query;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.List;
+import org.createnet.raptor.models.query.deserializer.DeviceQueryDeserializer;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonDeserialize(using = DeviceQueryDeserializer.class)
 public class DeviceQuery extends BaseQuery {
 
     public final TextQuery id = new TextQuery();
