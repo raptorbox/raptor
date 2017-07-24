@@ -17,7 +17,6 @@ package org.createnet.raptor.models.query;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +26,6 @@ import java.util.List;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonTypeName("text")
 public class TextQuery implements IQuery {
     
     private String startWith;
@@ -58,6 +56,11 @@ public class TextQuery implements IQuery {
 
     public TextQuery in(String... values) {
         this.in.addAll(Arrays.asList(values));
+        return this;
+    }
+    
+    public TextQuery in(String value) {
+        this.in.add(value);
         return this;
     }
     

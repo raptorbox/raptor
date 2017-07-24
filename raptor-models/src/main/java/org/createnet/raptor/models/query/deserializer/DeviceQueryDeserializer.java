@@ -34,7 +34,6 @@ import org.createnet.raptor.models.query.TextQuery;
  */
 public class DeviceQueryDeserializer extends JsonDeserializer<DeviceQuery> {
 
-
     protected void handleTextQuery(String key, TextQuery t, JsonNode json) {
 
         if (!json.has(key)) {
@@ -44,6 +43,14 @@ public class DeviceQueryDeserializer extends JsonDeserializer<DeviceQuery> {
         JsonNode node = json.get(key);
         if (node.isTextual()) {
             t.contains(node.asText());
+            return;
+        }
+        if (node.isArray()) {
+            
+            for (int i = 0; i < node.size(); i++) {
+                t.in(node.get(i).asText());
+            }
+            
             return;
         }
 
@@ -97,7 +104,7 @@ public class DeviceQueryDeserializer extends JsonDeserializer<DeviceQuery> {
 
         if (node.has("has") && !node.get("has").isNull()) {
             
-            Map<String, Object> hasMap = Device.getMapper().convertValue(node.get("containsValue"), new TypeReference<Map<String, Object>>() {
+            Map<String, Object> hasMap = Device.getMapper().convertValue(node.get("has"), new TypeReference<Map<String, Object>>() {
             });
             
             map.has(hasMap);

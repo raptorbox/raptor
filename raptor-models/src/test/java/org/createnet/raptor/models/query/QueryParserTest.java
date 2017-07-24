@@ -20,6 +20,7 @@ import java.io.IOException;
 import org.createnet.raptor.utils.TestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -56,12 +57,20 @@ public class QueryParserTest extends TestUtils {
     public void parseDeviceQuery() throws IOException {
 
         JsonNode json = loadData("devicequery1");
-        String raw = json.toString();
-
         DeviceQuery q = mapper.readValue(json.toString(), DeviceQuery.class);
-       
-//        assertTrue(statusPublicJson.has("actionId"));
 
+        Assert.assertTrue(q.properties.getHas().getOrDefault("userId", null) != null);
+        Assert.assertEquals(json.get("name").get("equals").asText(), q.name.getEquals());
+    }
+
+    @Test
+    public void parseDeviceQuery2() throws IOException {
+
+        JsonNode json = loadData("devicequery2");
+        DeviceQuery q = mapper.readValue(json.toString(), DeviceQuery.class);
+
+        Assert.assertEquals(json.get("id").size(), q.id.getIn().size());
+        Assert.assertEquals(json.get("name").asText(), q.name.getContains());
     }
 
 }
