@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-@JsonTypeName("boolean")
+@JsonTypeName("bool")
 public class BoolQuery implements IQuery {
     
     private final boolean match;

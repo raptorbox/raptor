@@ -15,9 +15,12 @@
  */
 package org.createnet.raptor.models.query;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import org.createnet.raptor.models.query.deserializer.DataQueryDeserializer;
 import org.springframework.data.geo.Metrics;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
@@ -25,6 +28,8 @@ import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonDeserialize(using = DataQueryDeserializer.class)
 public class DataQuery extends BaseQuery {  
     
     protected final NumberQuery timestamp = new NumberQuery();

@@ -29,9 +29,9 @@ import org.junit.Test;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class QueryParserTest extends TestUtils {
+public class DeviceQueryParserTest extends TestUtils {
 
-    public QueryParserTest() {
+    public DeviceQueryParserTest() {
 
     }
 
