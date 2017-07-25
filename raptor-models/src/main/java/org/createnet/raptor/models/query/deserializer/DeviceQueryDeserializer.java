@@ -109,6 +109,15 @@ public class DeviceQueryDeserializer extends JsonDeserializer<DeviceQuery> {
             
             map.has(hasMap);
         }
+        
+        // map an object without specific fields to "has"
+        if (node.isObject() && !node.has("has") && !node.has("containsValue") && !node.has("containsKey")) {
+            
+            Map<String, Object> hasMap = Device.getMapper().convertValue(node, new TypeReference<Map<String, Object>>() {
+            });
+            
+            map.has(hasMap);
+        }
 
     }
 

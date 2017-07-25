@@ -27,15 +27,15 @@ final public class Routes {
     public static final String LOAD = UPDATE;
     public static final String DELETE = UPDATE;
     
-    public static final String STREAM = "/stream/%s/%s";
-    public static final String PUSH = STREAM;
+    public static final String STREAM_GET = "/stream/%s/%s";
+    public static final String STREAM_PUSH = STREAM_GET;
     
-    public static final String LAST_UPDATE = PUSH + "/lastUpdate";
-    public static final String PULL = PUSH;
-    public static final String SEARCH_DATA = PUSH;
+    public static final String STREAM_LAST_UPDATE = STREAM_PUSH + "/lastUpdate";
+    public static final String STREAM_PULL = STREAM_PUSH;
+    public static final String STREAM_SEARCH = STREAM_PUSH;
     
-    public static final String INVOKE = "/action/%s/%s";
-    public static final String ACTION_STATUS = INVOKE;
+    public static final String ACTION_INVOKE = "/action/%s/%s";
+    public static final String ACTION_STATUS = ACTION_INVOKE;
     
     public static final String PERMISSION_CHECK = "/auth/check";
     public static final String LOGIN = "/auth/login";
