@@ -30,8 +30,7 @@ import org.createnet.raptor.models.query.NumberQuery;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public class DataQueryDeserializer extends AbstractQueryDeserializer<DataQuery> {
-
-
+    
     @Override
     public DataQuery deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
 

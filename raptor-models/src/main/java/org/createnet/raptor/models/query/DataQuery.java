@@ -16,7 +16,6 @@
 package org.createnet.raptor.models.query;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +31,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonDeserialize(using = DataQueryDeserializer.class)
-public class DataQuery extends BaseQuery {  
-    
+public class DataQuery extends BaseQuery {
+
     protected final NumberQuery timestamp = new NumberQuery();
     protected final Map<String, IQuery> channels = new HashMap();
     protected final GeoQuery location = new GeoQuery();
