@@ -216,7 +216,15 @@ public class InventoryController {
             @RequestParam MultiValueMap<String, String> parameters,
             @RequestBody DeviceQuery query
     ) {
-
+            
+        if(query.isEmpty()) {
+            return JsonErrorResponse.badRequest();
+        }
+        
+        if(query.getUserId() == null || query.getUserId().isEmpty()) {
+            query.userId(currentUser.getUuid());
+        }
+        
         DeviceQueryBuilder qb = new DeviceQueryBuilder(query);
         Predicate predicate = qb.getPredicate();
         Pageable paging = qb.getPaging();

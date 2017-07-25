@@ -40,6 +40,14 @@ public class JsonErrorResponse {
     }
     
     public static ResponseEntity<?> notFound() {
-        return entity(HttpStatus.NOT_FOUND, "Not found");
+        return notFound("Not found");
+    }
+    
+    public static ResponseEntity<?> badRequest(String message) {
+        return entity(HttpStatus.BAD_REQUEST, message);
+    }
+    
+    public static ResponseEntity<?> badRequest() {
+        return badRequest("Bad request");
     }
 }
