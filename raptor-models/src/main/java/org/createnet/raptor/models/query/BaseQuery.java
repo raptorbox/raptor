@@ -15,8 +15,9 @@
  */
 package org.createnet.raptor.models.query;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.models.objects.Device;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  *
@@ -24,57 +25,56 @@ import org.createnet.raptor.models.objects.Device;
  */
 abstract public class BaseQuery implements IQuery, QueryBuilder {
 
-    protected String userId;
-    protected String deviceId;
+	protected String userId;
+	protected String deviceId;
 
-    protected Integer offset = 0;
-    protected Integer limit = 1000;
-    public final SortQuery sortBy = new SortQuery();
+	protected Integer offset = 0;
+	protected Integer limit = 1000;
+	public final SortQuery sortBy = new SortQuery();
 
+	public Integer getOffset() {
+		return offset;
+	}
 
-    public Integer getOffset() {
-        return offset;
-    }
+	public BaseQuery offset(Integer offset) {
+		this.offset = offset;
+		return this;
+	}
 
-    public BaseQuery offset(Integer offset) {
-        this.offset = offset;
-        return this;
-    }
+	public Integer getLimit() {
+		return limit;
+	}
 
-    public Integer getLimit() {
-        return limit;
-    }
+	public BaseQuery limit(Integer limit) {
+		this.limit = limit;
+		return this;
+	}
 
-    public BaseQuery limit(Integer limit) {
-        this.limit = limit;
-        return this;
-    }
+	public String getUserId() {
+		return userId;
+	}
 
-    public String getUserId() {
-        return userId;
-    }
+	public String getDeviceId() {
+		return deviceId;
+	}
 
-    public String getDeviceId() {
-        return deviceId;
-    }
+	public BaseQuery userId(String userId) {
+		this.userId = userId;
+		return this;
+	}
 
-    public BaseQuery userId(String userId) {
-        this.userId = userId;
-        return this;
-    }
-    
-    public BaseQuery deviceId(String deviceId) {
-        this.deviceId = deviceId;
-        return this;
-    }
+	public BaseQuery deviceId(String deviceId) {
+		this.deviceId = deviceId;
+		return this;
+	}
 
-    public JsonNode toJSON() {
-        return Device.getMapper().valueToTree(this);
-    }
-    
-    @Override
-    public boolean isEmpty() {
-        return false;
-    }
-    
+	public JsonNode toJSON() {
+		return Device.getMapper().valueToTree(this);
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return false;
+	}
+
 }

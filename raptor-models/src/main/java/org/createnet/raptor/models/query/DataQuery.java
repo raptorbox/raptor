@@ -24,6 +24,8 @@ import org.createnet.raptor.models.query.deserializer.DataQueryDeserializer;
 import org.springframework.data.geo.Metrics;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>

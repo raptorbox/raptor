@@ -15,18 +15,13 @@
  */
 package org.createnet.raptor.common.query;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.MapPath;
-import com.querydsl.core.types.dsl.SimplePath;
-import com.querydsl.core.types.dsl.StringPath;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.createnet.raptor.models.query.BoolQuery;
 import org.createnet.raptor.models.query.DataQuery;
 import org.createnet.raptor.models.query.GeoQuery;
@@ -44,6 +39,13 @@ import org.springframework.data.mongodb.core.query.CriteriaDefinition;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.TextCriteria;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.MapPath;
+import com.querydsl.core.types.dsl.SimplePath;
+import com.querydsl.core.types.dsl.StringPath;
+
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
@@ -54,7 +56,7 @@ public class DataQueryBuilder extends BaseQueryBuilder {
     final private Logger log = LoggerFactory.getLogger(DataQueryBuilder.class);
 
     private final DataQuery query;
-    private final List<CriteriaDefinition> criteria = new ArrayList();
+    private final List<CriteriaDefinition> criteria = new ArrayList<>();
 
     public DataQueryBuilder(DataQuery query) {
         this.query = query;

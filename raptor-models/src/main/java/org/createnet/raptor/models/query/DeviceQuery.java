@@ -37,7 +37,7 @@ public class DeviceQuery extends BaseQuery {
     }
 
     public DeviceQuery(String userId) {
-        this.userId = userId;
+        super.userId = userId;
     }
     
     public static DeviceQuery queryByDeviceId(String... deviceId) {
