@@ -30,6 +30,7 @@ import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -76,10 +77,16 @@ public class UserProfileController {
             response = UserProfile.class,
             nickname = "getPreferences"
     )
+    @PreAuthorize("anyRole(['super_admin', 'admin') or #userId == principal.uuid")
     public ResponseEntity<?> getPreferences(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("userId") String userId
-    ) {
+    ) {  
+        
+        if(userId == null || userId.isEmpty()) {
+            return JsonErrorResponse.badRequest();
+        }        
+        
         List<UserProfile> prefs = profileService.list(userId);
         return ResponseEntity.ok(prefs.stream().map(p -> toJSON(p.getValue())).collect(Collectors.toList()));
     }
@@ -91,11 +98,17 @@ public class UserProfileController {
             response = UserProfile.class,
             nickname = "getPreference"
     )
+    @PreAuthorize("anyRole(['super_admin', 'admin') or #userId == principal.uuid")
     public ResponseEntity<?> getPreference(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("userId") String userId,
             @PathVariable("name") String name
     ) {
+        
+        if((userId == null || name == null) || (userId.isEmpty() || name.isEmpty())) {
+            return JsonErrorResponse.badRequest();
+        }        
+        
         UserProfile pref = profileService.get(userId, name);
         if (pref == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Not found");
@@ -110,12 +123,18 @@ public class UserProfileController {
             response = UserProfile.class,
             nickname = "setPreference"
     )
+    @PreAuthorize("anyRole(['super_admin', 'admin') or #userId == principal.uuid")
     public ResponseEntity<?> setPreference(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("userId") String userId,
             @PathVariable("name") String name,
             @RequestBody JsonNode body
     ) {
+        
+        if((userId == null || name == null) || (userId.isEmpty() || name.isEmpty())) {
+            return JsonErrorResponse.badRequest();
+        }
+        
         UserProfile pref = new UserProfile(userId, name, body.toString());
         profileService.save(pref);
         return ResponseEntity.ok(toJSON(pref.getValue()));
@@ -128,12 +147,17 @@ public class UserProfileController {
             response = UserProfile.class,
             nickname = "deletePreference"
     )
+    @PreAuthorize("anyRole(['super_admin', 'admin') or #userId == principal.uuid")
     public ResponseEntity<?> deletePreference(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("userId") String userId,
             @PathVariable("name") String name
     ) {
 
+        if((userId == null || name == null) || (userId.isEmpty() || name.isEmpty())) {
+            return JsonErrorResponse.badRequest();
+        }        
+        
         UserProfile pref = profileService.get(userId, name);
         if (pref == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Not found");
