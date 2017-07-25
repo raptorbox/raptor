@@ -15,14 +15,10 @@
  */
 package org.createnet.raptor.models.query;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public interface IQuery {
-    public boolean isEmpty();
+	public boolean isEmpty();
 }

@@ -18,77 +18,82 @@ package org.createnet.raptor.models.query;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.createnet.raptor.models.query.deserializer.DataQueryDeserializer;
 import org.springframework.data.geo.Metrics;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class DataQuery extends BaseQuery {  
-    
-    protected final NumberQuery timestamp = new NumberQuery();
-    protected final Map<String, IQuery> channels = new HashMap();
-    protected final GeoQuery location = new GeoQuery();
-    protected String streamId = null;
+@JsonDeserialize(using = DataQueryDeserializer.class)
+public class DataQuery extends BaseQuery {
 
-    public DataQuery timeRange(Instant from, Instant to) {
-        timestamp.between(from.toEpochMilli(), to.toEpochMilli());
-        return this;
-    }
+	public final NumberQuery timestamp = new NumberQuery();
+	public final Map<String, IQuery> channels = new HashMap<>();
+	public final GeoQuery location = new GeoQuery();
+	public String streamId = null;
 
-    public DataQuery timeRange(Instant from) {
-        return timeRange(from, Instant.now());
-    }
+	public DataQuery timeRange(Instant from, Instant to) {
+		timestamp.between(from.toEpochMilli(), to.toEpochMilli());
+		return this;
+	}
 
-    public DataQuery range(String channelName, Number from, Number to) {
-        this.channels.put(channelName, new NumberQuery().between(from, to));
-        return this;
-    }
+	public DataQuery timeRange(Instant from) {
+		return timeRange(from, Instant.now());
+	}
 
-    public DataQuery match(String channelName, String match) {
-        this.channels.put(channelName, new TextQuery().match(match));
-        return this;
-    }
+	public DataQuery range(String channelName, Number from, Number to) {
+		this.channels.put(channelName, new NumberQuery().between(from, to));
+		return this;
+	}
 
-    public DataQuery match(String channelName, boolean match) {
-        this.channels.put(channelName, new BoolQuery(match));
-        return this;
-    }
+	public DataQuery match(String channelName, String match) {
+		this.channels.put(channelName, new TextQuery().match(match));
+		return this;
+	}
 
-    public DataQuery distance(GeoJsonPoint center, double radius, Metrics unit) {
-        this.location.distance(center, radius, unit);
-        return this;
-    }
+	public DataQuery match(String channelName, boolean match) {
+		this.channels.put(channelName, new BoolQuery(match));
+		return this;
+	}
 
-    public DataQuery distance(GeoJsonPoint center, double radius) {
-        return distance(center, radius, Metrics.KILOMETERS);
-    }
+	public DataQuery distance(GeoJsonPoint center, double radius, Metrics unit) {
+		this.location.distance(center, radius, unit);
+		return this;
+	}
 
-    public DataQuery boundingBox(GeoJsonPoint nw, GeoJsonPoint sw) {
-        this.location.boundingBox(nw, sw);
-        return this;
-    }
+	public DataQuery distance(GeoJsonPoint center, double radius) {
+		return distance(center, radius, Metrics.KILOMETERS);
+	}
 
-    public DataQuery streamId(String s) {
-        this.streamId = s;
-        return this;
-    }
+	public DataQuery boundingBox(GeoJsonPoint nw, GeoJsonPoint sw) {
+		this.location.boundingBox(nw, sw);
+		return this;
+	}
 
-    public NumberQuery getTimestamp() {
-        return timestamp;
-    }
+	public DataQuery streamId(String s) {
+		this.streamId = s;
+		return this;
+	}
 
-    public Map<String, IQuery> getChannels() {
-        return channels;
-    }
+	public NumberQuery getTimestamp() {
+		return timestamp;
+	}
 
-    public GeoQuery getLocation() {
-        return location;
-    }
+	public Map<String, IQuery> getChannels() {
+		return channels;
+	}
 
-    public String getStreamId() {
-        return streamId;
-    }
+	public GeoQuery getLocation() {
+		return location;
+	}
+
+	public String getStreamId() {
+		return streamId;
+	}
 
 }
