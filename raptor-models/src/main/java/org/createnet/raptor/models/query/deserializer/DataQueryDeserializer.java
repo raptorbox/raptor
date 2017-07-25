@@ -43,7 +43,6 @@ public class DataQueryDeserializer extends AbstractQueryDeserializer<DataQuery> 
         }
         
         JsonNode nodeInner = node.get("channels");
-        
         Map<String, IQuery> channelName = query.getChannels();
         
         if(channelName.containsKey(nodeInner.textValue()) && nodeInner.has("between")) {

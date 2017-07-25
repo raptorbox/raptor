@@ -15,23 +15,10 @@
  */
 package org.createnet.raptor.models.query;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME, 
-        include = JsonTypeInfo.As.PROPERTY, 
-        property = "type"
-)
-@JsonSubTypes({
-    @JsonSubTypes.Type(value=NumberQuery.class, name="number"),
-    @JsonSubTypes.Type(value=BoolQuery.class, name="bool"),
-    @JsonSubTypes.Type(value=TextQuery.class, name="text"),
-})
 public interface IQuery {
     public boolean isEmpty();
 }

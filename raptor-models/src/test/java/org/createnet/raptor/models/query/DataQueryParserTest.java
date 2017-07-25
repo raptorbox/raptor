@@ -37,7 +37,6 @@ public class DataQueryParserTest extends TestUtils {
 
     @BeforeClass
     public static void setUpClass() {
-
     }
 
     @AfterClass
