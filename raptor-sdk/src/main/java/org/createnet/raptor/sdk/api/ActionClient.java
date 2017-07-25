@@ -154,7 +154,7 @@ public class ActionClient extends AbstractClient {
      */
     public void invoke(Action action, String payload) {
         getClient().post(
-                String.format(Routes.INVOKE, action.getDevice().id(), action.name()), payload
+                String.format(Routes.ACTION_INVOKE, action.getDevice().id(), action.name()), payload
         );
     }
 

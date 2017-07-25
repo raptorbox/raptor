@@ -85,7 +85,7 @@ public class StreamClient extends AbstractClient {
      * @param record the record to send
      */
     public void push(RecordSet record) {
-        getClient().put(String.format(Routes.PUSH, record.getStream().getDevice().id(), record.getStream().name()), record.toJsonNode(), RequestOptions.retriable().waitFor(300).maxRetries(5));
+        getClient().put(String.format(Routes.STREAM_PUSH, record.getStream().getDevice().id(), record.getStream().name()), record.toJsonNode(), RequestOptions.retriable().waitFor(300).maxRetries(5));
     }
 
     /**
@@ -95,7 +95,7 @@ public class StreamClient extends AbstractClient {
      * @param record the record to send
      */
     public void push(Stream s, RecordSet record) {
-        getClient().put(String.format(Routes.PUSH, s.getDevice().id(), s.name()), record.toJsonNode());
+        getClient().put(String.format(Routes.STREAM_PUSH, s.getDevice().id(), s.name()), record.toJsonNode());
     }
 
     /**
@@ -106,7 +106,7 @@ public class StreamClient extends AbstractClient {
      * @param data data to send
      */
     public void push(String objectId, String streamId, RecordSet data) {
-        getClient().put(String.format(Routes.PUSH, objectId, streamId), data.toJsonNode());
+        getClient().put(String.format(Routes.STREAM_PUSH, objectId, streamId), data.toJsonNode());
     }
 
     /**
@@ -129,7 +129,7 @@ public class StreamClient extends AbstractClient {
      */
     public ResultSet pull(Stream stream, Integer offset, Integer limit) {
         String qs = buildQueryString(offset, limit);
-        return ResultSet.fromJSON(stream, getClient().get(String.format(Routes.PULL, stream.getDevice().id(), stream.name()) + qs));
+        return ResultSet.fromJSON(stream, getClient().get(String.format(Routes.STREAM_PULL, stream.getDevice().id(), stream.name()) + qs));
     }
 
     /**
@@ -143,7 +143,7 @@ public class StreamClient extends AbstractClient {
      */
     public JsonNode pull(String objectId, String streamId, Integer offset, Integer limit) {
         String qs = buildQueryString(offset, limit);
-        return getClient().get(String.format(Routes.PULL, objectId, streamId) + qs);
+        return getClient().get(String.format(Routes.STREAM_PULL, objectId, streamId) + qs);
     }
 
     /**
@@ -164,7 +164,7 @@ public class StreamClient extends AbstractClient {
      * @return
      */
     public RecordSet lastUpdate(Stream stream) {
-        JsonNode result = getClient().get(String.format(Routes.LAST_UPDATE, stream.getDevice().id(), stream.name()), RequestOptions.retriable().maxRetries(3).waitFor(500));
+        JsonNode result = getClient().get(String.format(Routes.STREAM_LAST_UPDATE, stream.getDevice().id(), stream.name()), RequestOptions.retriable().maxRetries(3).waitFor(500));
         if (result == null) {
             return null;
         }
@@ -180,7 +180,7 @@ public class StreamClient extends AbstractClient {
      */
     public ResultSet search(Stream stream, DataQuery query) {
         JsonNode results = getClient().post(
-                String.format(Routes.SEARCH_DATA, stream.getDevice().id(), stream.name()),
+                String.format(Routes.STREAM_SEARCH, stream.getDevice().id(), stream.name()),
                 query.toJSON(),
                 RequestOptions.retriable().maxRetries(3).waitFor(500)
         );
@@ -194,7 +194,7 @@ public class StreamClient extends AbstractClient {
      */
     public void delete(Stream stream) {
         getClient().delete(
-                String.format(Routes.STREAM, stream.getDevice().id(), stream.name())
+                String.format(Routes.STREAM_GET, stream.getDevice().id(), stream.name())
         );
     }
 
