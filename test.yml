@@ -119,6 +119,20 @@ services:
     extra_hosts:
       - "raptor.local:172.16.238.1"
 
+  apigateway:
+    image: raptorbox/gateway:v4
+    ports:
+        - 10080:80
+    volumes:
+      - ./config:/etc/raptor
+    depends_on:
+        - broker
+        - auth
+    networks:
+      - raptor_test
+    extra_hosts:
+      - "raptor.local:172.16.238.1"
+
   mariadb:
     image: mariadb:latest
     volumes:

@@ -7,7 +7,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import org.createnet.raptor.common.client.ApiClientService;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.api.AuthClient;
@@ -24,7 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 @Component
-@ConditionalOnExpression("'${spring.config.name}' != 'auth'")
+@ConditionalOnExpression("'${spring.config.name}' != 'auth' and '${spring.config.name}' != 'gateway'")
 public class HttpTokenFilter extends GenericFilterBean {
 
     protected final static Logger logger = LoggerFactory.getLogger(HttpTokenFilter.class);
