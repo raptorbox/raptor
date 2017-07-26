@@ -77,7 +77,7 @@ public class UserProfileController {
             response = UserProfile.class,
             nickname = "getPreferences"
     )
-    @PreAuthorize("anyRole(['super_admin', 'admin') or #userId == principal.uuid")
+    @PreAuthorize("hasAnyRole('super_admin', 'admin') or #userId == principal.uuid")
     public ResponseEntity<?> getPreferences(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("userId") String userId
@@ -98,7 +98,7 @@ public class UserProfileController {
             response = UserProfile.class,
             nickname = "getPreference"
     )
-    @PreAuthorize("anyRole(['super_admin', 'admin') or #userId == principal.uuid")
+    @PreAuthorize("hasAnyRole('super_admin', 'admin') or #userId == principal.uuid")
     public ResponseEntity<?> getPreference(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("userId") String userId,
@@ -123,7 +123,7 @@ public class UserProfileController {
             response = UserProfile.class,
             nickname = "setPreference"
     )
-    @PreAuthorize("anyRole(['super_admin', 'admin') or #userId == principal.uuid")
+    @PreAuthorize("hasAnyRole('super_admin', 'admin') or #userId == principal.uuid")
     public ResponseEntity<?> setPreference(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("userId") String userId,
@@ -147,7 +147,7 @@ public class UserProfileController {
             response = UserProfile.class,
             nickname = "deletePreference"
     )
-    @PreAuthorize("anyRole(['super_admin', 'admin') or #userId == principal.uuid")
+    @PreAuthorize("hasAnyRole('super_admin', 'admin') or #userId == principal.uuid")
     public ResponseEntity<?> deletePreference(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("userId") String userId,

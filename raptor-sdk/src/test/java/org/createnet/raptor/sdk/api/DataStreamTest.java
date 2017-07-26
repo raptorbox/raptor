@@ -237,6 +237,7 @@ public class DataStreamTest {
 
 		log.debug("Searching........ \n\n\n" + q.toJSON().toString());
 		ResultSet results = raptor.Stream().search(s, q);
+		log.debug("Results " + results.size() + " \n" + results.toJson().toString());
 
 		Assert.assertEquals(2, results.size());
 	}
@@ -256,11 +257,11 @@ public class DataStreamTest {
 		records.parallelStream().forEach(record -> raptor.Stream().push(record));
 		DataQuery q = new DataQuery();
 		q.range("number", offset, cnt);
-//		log.debug("Searching........ \n\n" + q.toJSON().toString());
-		
+		// log.debug("Searching........ \n\n" + q.toJSON().toString());
+
 		ResultSet results = raptor.Stream().search(s, q);
-//		log.debug("Results \n" + results.toJson().toString());
-		
+		log.debug("Results \n" + results.toJson().toString());
+
 		Assert.assertEquals(cnt - offset, results.size());
 	}
 
