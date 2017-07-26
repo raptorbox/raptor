@@ -333,6 +333,10 @@ public class RecordSet {
     
     public void validate() {
 
+        if(channels.isEmpty()) {
+            throw new RaptorComponent.ValidationException("Channel data is empty");
+        }
+        
         if (stream() != null) {
             for (String channelName : channels.keySet()) {
                 
@@ -365,9 +369,10 @@ public class RecordSet {
                     }                                        
                 }
             }
-            
         }
-
+        
+        
+        
     }
 
     public String userId() {
