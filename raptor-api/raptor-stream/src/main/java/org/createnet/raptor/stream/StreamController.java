@@ -26,6 +26,7 @@ import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.query.DataQuery;
 import org.createnet.raptor.models.response.JsonErrorResponse;
@@ -131,7 +132,12 @@ public class StreamController {
             record.userId(currentUser.getUuid());
         }
         
-        record.validate();
+        try {
+            record.validate();
+        }
+        catch(RaptorComponent.ValidationException ex) {
+            return JsonErrorResponse.badRequest(ex.getMessage());
+        }
         
         // save data!
         streamService.save(record);
