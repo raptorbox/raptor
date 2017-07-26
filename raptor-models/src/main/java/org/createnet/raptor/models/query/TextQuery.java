@@ -15,12 +15,13 @@
  */
 package org.createnet.raptor.models.query;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  *
@@ -34,7 +35,7 @@ public class TextQuery implements IQuery {
     private String endWith;
     private String contains;
     private String equals;
-    private final List<String> in = new ArrayList();
+    private final List<String> in = new ArrayList<String>();
 
     public TextQuery startWith(String startWith) {
         this.startWith = startWith;
