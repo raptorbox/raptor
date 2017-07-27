@@ -15,11 +15,13 @@
  */
 package org.createnet.raptor.models.objects;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-public interface RaptorComponent {
+public interface RaptorComponent extends Serializable {
     
     public class ValidationException extends RuntimeException {
 

@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.querydsl.core.annotations.QueryEntity;
 import java.io.IOException;
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
@@ -85,7 +86,7 @@ public class Device extends DeviceContainer {
     /**
      * A serializable class containing the settings for a Device
      */
-    static public class Settings {
+    static public class Settings implements Serializable {
 
         public boolean storeData = true;
         public boolean eventsEnabled = true;

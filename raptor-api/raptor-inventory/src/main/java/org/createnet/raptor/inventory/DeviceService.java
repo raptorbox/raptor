@@ -19,6 +19,9 @@ import com.querydsl.core.types.Predicate;
 import java.util.List;
 import org.createnet.raptor.models.objects.Device;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,15 +31,19 @@ import org.springframework.stereotype.Service;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
+@CacheConfig(cacheNames = "inventory")
 public class DeviceService {
     
     @Autowired
     private DeviceRepository repository;
     
-    public void save(Device device) {
-        repository.save(device);
+    @CacheEvict(key = "#device.id")
+    public Device save(Device device) {
+        Device saved = repository.save(device);
+        return get(saved.getId());
     }
     
+    @Cacheable(key="#deviceId")
     public Device get(String deviceId) {
         return repository.findOne(deviceId);
     }
@@ -44,9 +51,10 @@ public class DeviceService {
     public List<Device> list(String userId) {
         return repository.findByUserId(userId);
     }
-
-    public void delete(String devId) {
-        repository.delete(devId);
+    
+    @CacheEvict(key = "#deviceId")
+    public void delete(String deviceId) {
+        repository.delete(deviceId);
     }
 
     public void delete(Device dev) {

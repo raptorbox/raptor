@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
  * @author Luca Capra <luca.capra@gmail.com>
  */
 @Component
-public class InternalApiClientService extends Raptor {
+public class InternalApiClientService extends RaptorSdk {
     
     private Logger log = LoggerFactory.getLogger(InternalApiClientService.class);
     

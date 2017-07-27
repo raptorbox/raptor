@@ -6,6 +6,12 @@ spring:
       trigger-file: raptor-${spring.config.name}-1.0.jar
       additional-paths: target
 
+  redis:
+    host: redis
+    password:
+    ssl: false
+    port: 6379
+
   data:
     mongodb:
       host: mongo
