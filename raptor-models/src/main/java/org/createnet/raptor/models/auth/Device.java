@@ -29,6 +29,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import org.createnet.raptor.models.acl.AclSubject;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
@@ -38,84 +39,94 @@ import org.hibernate.annotations.CascadeType;
  */
 @Entity
 @Table(name = "devices")
-public class Device {
+public class Device implements AclSubject {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
-  @NotNull
-  private String uuid;
+    @NotNull
+    private String uuid;
 
-  @JsonIgnore
-  @ManyToOne(fetch = FetchType.EAGER)
-  private User owner;
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER)
+    private User owner;
 
-  @JsonIgnore
-  @OneToOne(fetch = FetchType.LAZY)
-  private Device parent;
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
+    private Device parent;
 
-  @JsonIgnore
-  @OneToMany(mappedBy = "device", fetch = FetchType.LAZY)
-  @Cascade(value = {CascadeType.REMOVE, CascadeType.SAVE_UPDATE})
-  final private List<Token> tokens = new ArrayList();
+    @JsonIgnore
+    @OneToMany(mappedBy = "device", fetch = FetchType.LAZY)
+    @Cascade(value = {CascadeType.REMOVE, CascadeType.SAVE_UPDATE})
+    final private List<Token> tokens = new ArrayList();
 
-  public Device() {
-    this.uuid = UUID.randomUUID().toString();
-  }
-  
-  public Device(String uuid) {
-    this.uuid = uuid;
-  }
+    public Device() {
+        this.uuid = UUID.randomUUID().toString();
+    }
 
-  public Long getId() {
-    return id;
-  }
+    public Device(String uuid) {
+        this.uuid = uuid;
+    }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    public Long getId() {
+        return id;
+    }
 
-  public String getUuid() {
-    return uuid;
-  }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
-  }
+    public String getUuid() {
+        return uuid;
+    }
 
-  public User getOwner() {
-    return owner;
-  }
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
-  public void setOwner(User owner) {
-    this.owner = owner;
-  }
+    public User getOwner() {
+        return owner;
+    }
 
-  public Device getParent() {
-    return parent;
-  }
-  
-  @JsonIgnore
-  public Long getParentId() {
-    return hasParent() ? getParent().getId() : null;
-  }
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
 
-  public void setParent(Device parent) {
-    this.parent = parent;
-  }
+    public Device getParent() {
+        return parent;
+    }
 
-  public List<Token> getTokens() {
-    return tokens;
-  }
+    @JsonIgnore
+    public Long getParentId() {
+        return hasParent() ? getParent().getId() : null;
+    }
 
-  public boolean hasParent() {
-    return this.getParent() != null;
-  }
+    public void setParent(Device parent) {
+        this.parent = parent;
+    }
 
-  @Override
-  public String toString() {
-    return "Device{" + "uuid=" + uuid + '}';
-  }
-  
+    public List<Token> getTokens() {
+        return tokens;
+    }
+
+    public boolean hasParent() {
+        return this.getParent() != null;
+    }
+
+    @Override
+    public String toString() {
+        return "Device{" + "uuid=" + uuid + '}';
+    }
+
+    @Override
+    public Long getSubjectId() {
+        return getId();
+    }
+
+    @Override
+    public Long getSubjectParentId() {
+        return getParentId();
+    }
+
 }

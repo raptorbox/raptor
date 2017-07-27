@@ -31,11 +31,13 @@ import java.util.Date;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import org.createnet.raptor.models.acl.AclSubject;
 import org.hibernate.validator.constraints.NotEmpty;
 
 /**
@@ -45,7 +47,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "tokens")
-public class Token implements Serializable {
+public class Token implements Serializable, AclSubject {
 
     public static enum Type {
         LOGIN, DEFAULT
@@ -100,6 +102,10 @@ public class Token implements Serializable {
     @Column(name = "token_type")
     private TokenType tokenType = TokenType.DEFAULT;
 
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
+    private Token parent;
+
     public Token() {
     }
 
@@ -116,9 +122,9 @@ public class Token implements Serializable {
         this.enabled = token.getEnabled();
         this.user = token.getUser();
     }
-    
+
     public void merge(Token rawToken) {
-        
+
         if (rawToken.getDevice() != null) {
             this.setDevice(rawToken.getDevice());
         }
@@ -141,10 +147,10 @@ public class Token implements Serializable {
 
         if (rawToken.getSecret() != null) {
             this.setSecret(rawToken.getSecret());
-        }        
-        
+        }
+
     }
-    
+
     public Long getId() {
         return id;
     }
@@ -242,7 +248,7 @@ public class Token implements Serializable {
     public void setType(Type type) {
         this.type = type;
     }
-    
+
     @JsonIgnore
     public boolean isLoginToken() {
         return this.getType().equals(Type.LOGIN);
@@ -266,6 +272,32 @@ public class Token implements Serializable {
 
     public void setTokenType(String tokenType) {
         this.tokenType = TokenType.valueOf(tokenType);
+    }
+
+    public Token getParent() {
+        return parent;
+    }
+
+    public void setParent(Token parent) {
+        this.parent = parent;
+    }
+
+    @Override
+    public Long getSubjectId() {
+        return getId();
+    }
+
+    @Override
+    public Long getSubjectParentId() {
+        if (getParent() == null) {
+            return null;
+        }
+        return getParent().getId();
+    }
+
+    @Override
+    public User getOwner() {
+        return getUser();
     }
 
 }
