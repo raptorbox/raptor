@@ -110,11 +110,11 @@ services:
   mariadb:
     image: mariadb:latest
     volumes:
-      - ./raptor-auth/src/main/resources/sql:/docker-entrypoint-initdb.d
       - ./data/mariadb:/var/lib/mysql
     environment:
       MYSQL_USERNAME: root
       MYSQL_ROOT_PASSWORD: raptor
+      MYSQL_DATABASE: raptor
     networks:
       - raptor_net
 
