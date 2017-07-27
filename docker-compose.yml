@@ -125,3 +125,8 @@ services:
     command: --smallfiles # --rest --auth
     networks:
       - raptor_net
+
+  redis:
+    image: redis:alpine
+    networks:
+      - raptor_net

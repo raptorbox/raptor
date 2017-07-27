@@ -7,7 +7,6 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./raptor-auth/src/main/resources/sql:/docker-entrypoint-initdb.d
       - ./data/mariadb:/var/lib/mysql
     environment:
       MYSQL_USERNAME: root
@@ -43,3 +42,8 @@ services:
     ports:
       - 27017:27017
     command: --smallfiles # --rest --auth
+
+  redis:
+    image: redis:alpine
+    ports:
+        - 6379:6379

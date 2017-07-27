@@ -136,7 +136,6 @@ services:
   mariadb:
     image: mariadb:latest
     volumes:
-      - ./raptor-auth/src/main/resources/sql:/docker-entrypoint-initdb.d
       - ./data/mariadb:/var/lib/mysql
     environment:
       MYSQL_USERNAME: root
@@ -187,3 +186,10 @@ services:
       - raptor_test
     ports:
         - 27017:27017
+
+  redis:
+    image: redis:alpine
+    networks:
+      - raptor_test
+    ports:
+        - 6379:6379
