@@ -25,6 +25,9 @@ import org.createnet.raptor.auth.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
+@CacheConfig(cacheNames = "users")
 public class UserService {
 
     final private Logger logger = LoggerFactory.getLogger(UserService.class);
@@ -50,12 +54,16 @@ public class UserService {
     public Iterable<User> list() {
         return userRepository.findAll();
     }
-
+    
+    @CacheEvict(key = "#user.uuid")
     public User save(User user) {
         loadRoles(user);
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+        //populate cache again
+        return getByUuid(saved.getUuid());
     }
 
+    @Cacheable(key = "#uuid")
     public User getByUuid(String uuid) {
         return userRepository.findByUuid(uuid);
     }
@@ -120,7 +128,7 @@ public class UserService {
 
         logger.debug("Update user data id:{}", user.getId());
 
-        return userRepository.save(user);
+        return save(user);
     }
 
     public User create(User rawUser) {
@@ -135,9 +143,10 @@ public class UserService {
         loadRoles(rawUser);
         
         logger.debug("Create new user {}", rawUser.getUsername());
-        return userRepository.save(rawUser);
+        return save(rawUser);
     }
-
+    
+    @CacheEvict(key = "#user.uuid")
     public void delete(User user) {
         userRepository.delete(user.getId());
     }
@@ -146,6 +155,7 @@ public class UserService {
         return passwordEncoder.encode(secret);
     }
 
+    @Cacheable(key = "#user.uuid")
     public boolean exists(User rawUser) {
 
         User user = getByUuid(rawUser.getUuid());
@@ -153,7 +163,19 @@ public class UserService {
             return true;
         }
 
-        return userRepository.findByUsername(rawUser.getUsername()) != null;
+        if(rawUser.getUsername() != null && !rawUser.getUsername().isEmpty()) {
+            if(findByUsername(rawUser.getUsername()) != null) {
+                return true;
+            }
+        }
+        
+        if(rawUser.getEmail() != null && !rawUser.getEmail().isEmpty()) {
+            if(findByEmail(rawUser.getEmail()) != null) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     @Transactional

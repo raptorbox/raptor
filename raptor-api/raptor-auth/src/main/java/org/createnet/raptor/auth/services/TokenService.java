@@ -16,7 +16,6 @@
 package org.createnet.raptor.auth.services;
 
 import java.util.List;
-import org.createnet.raptor.common.configuration.TokenHelper;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.repository.TokenRepository;
@@ -24,6 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -36,8 +39,12 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
+@CacheConfig(cacheNames = "tokens")
 public class TokenService {
 
+    @Autowired
+    private CacheManager cacheManager;
+    
     private static final Logger logger = LoggerFactory.getLogger(TokenService.class);
 
     public class TokenHandlingException extends RuntimeException {
@@ -71,15 +78,42 @@ public class TokenService {
     public Iterable<Token> list(String uuid) {
         return tokenRepository.findByUserUuid(uuid);
     }
-
+    
+    protected void evictCachedToken(Token token) {
+        try {
+            cacheManager.getCache("auth_token").evict(token.getToken());
+        }
+        catch(Exception e){}
+    }
+    
+    protected void putCachedToken(Token token) {
+        try {
+            cacheManager.getCache("auth_token").put(token.getToken(), token);
+        }
+        catch(Exception e){}
+    }
+    
+    protected Token getCachedToken(String stoken) {
+        
+        try {
+            return (Token) cacheManager.getCache("auth_token").get(stoken);
+        }
+        catch(Exception e){}
+        
+        return null;
+    }
+    
     /**
      * Load a token by ID
      *
      * @param tokenId
      * @return
      */
+    @Cacheable(key = "#tokenId")
     public Token read(Long tokenId) {
-        return tokenRepository.findOne(tokenId);
+        Token saved = tokenRepository.findOne(tokenId);
+        putCachedToken(saved);
+        return saved;
     }
 
     /**
@@ -87,16 +121,14 @@ public class TokenService {
      *
      * @param token
      */
+    @CacheEvict(key = "#token.id")
     public void delete(Token token) {
-        Token t2 = tokenRepository.findOne(token.getId());
-        if (t2 == null) {
-            return;
-        }
-        tokenRepository.delete(t2.getId());
+        tokenRepository.delete(token.getId());
+        evictCachedToken(token);
     }
 
     public void delete(List<Token> list) {
-        tokenRepository.delete(list);
+        list.forEach((t) -> delete(t));
     }
 
     /**
@@ -105,8 +137,11 @@ public class TokenService {
      * @param token
      * @return
      */
+    @CacheEvict(key = "#token.id")
     public Token save(Token token) {
-        return tokenRepository.save(token);
+       Token saved = tokenRepository.save(token);
+       evictCachedToken(saved);
+       return read(saved.getId());
     }
 
     /**
@@ -116,9 +151,16 @@ public class TokenService {
      * @return
      */
     public Token read(String authToken) {
-        if (authToken == null) {
+        
+        if (authToken == null || authToken.isEmpty()) {
             return null;
         }
+        
+        Token cached = getCachedToken(authToken);
+        if(cached != null) {
+            return cached;
+        }
+        
         return tokenRepository.findByToken(authToken);
     }
 
@@ -132,6 +174,7 @@ public class TokenService {
     public Token createLoginToken(User user) {
 
         logger.debug("Creating login token for user:{}", user.getId());
+        
         Token token = tokenUtil.createToken("login", user, expiration, passwordEncoder.encode(user.getPassword() + this.secret));
         token.setType(Token.Type.LOGIN);
 

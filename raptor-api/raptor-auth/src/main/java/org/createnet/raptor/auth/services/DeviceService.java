@@ -26,6 +26,9 @@ import org.createnet.raptor.auth.exception.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.acls.model.Permission;
 import org.springframework.stereotype.Service;
@@ -35,6 +38,7 @@ import org.springframework.stereotype.Service;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
+@CacheConfig(cacheNames = "acl_device")
 public class DeviceService {
 
     protected static final Logger logger = LoggerFactory.getLogger(DeviceService.class);
@@ -47,23 +51,34 @@ public class DeviceService {
 
     @Autowired
     private AclDeviceService aclDeviceService;
-
+    
+    @CacheEvict(key = "#device.id")
     public Device save(Device device) {
 
-        deviceRepository.save(device);
+        Device saved = deviceRepository.save(device);
         aclDeviceService.register(device);
 
-        return device;
+        return get(saved.getId());
     }
 
     public Device getByUuid(String uuid) {
         return deviceRepository.findByUuid(uuid);
     }
 
+    @Cacheable(key = "#id")
     public Device get(Long id) {
         return deviceRepository.findOne(id);
     }
-
+    
+    @CacheEvict(key = "#id")
+    public void delete(Long id) {
+        deviceRepository.delete(id);
+    }
+    
+    public void delete(Device device) {
+        delete(device.getId());
+    }
+    
     public Device sync(User user, SyncRequest req) {
 
         Permission p = RaptorPermission.fromLabel(req.operation);

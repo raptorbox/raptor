@@ -21,6 +21,8 @@ import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.services.TokenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 
 public class RaptorAuthenticationTokenFilter extends GenericFilterBean {
 
@@ -31,10 +33,13 @@ public class RaptorAuthenticationTokenFilter extends GenericFilterBean {
     
     @Autowired
     private TokenHelper tokenHelper;
-
+    
+    @Autowired
+    private CacheManager cacheManager;
+        
     @Value("${raptor.auth.header}")
     private String tokenHeader;
-
+    
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
@@ -44,8 +49,8 @@ public class RaptorAuthenticationTokenFilter extends GenericFilterBean {
         if (authToken != null && !authToken.isEmpty()) {
             
             authToken = tokenHelper.extractToken(authToken);
+            
             Token token = tokenService.read(authToken);
-
             if (token != null) {
                 boolean tokenIsValid = tokenService.isValid(token);
                 if (tokenIsValid) {
