@@ -48,9 +48,6 @@ public class AclConfiguration {
     @Autowired
     private DataSource dataSource;
 
-    @Autowired
-    private CacheManager cacheManager;
-
     @Value("${spring.datasource.lastInsertQuery}")
     private String lastInsertQuery;
 
@@ -67,9 +64,25 @@ public class AclConfiguration {
     }
 
     @Bean
-    public RedisBasedAclCache aclCache() {
-        return new RedisBasedAclCache((RedisCache) cacheManager.getCache("acl"), permissionGrantingStrategy(), aclAuthorizationStrategy());
+    public EhCacheBasedAclCache aclCache() {
+        return new EhCacheBasedAclCache(aclEhCacheFactoryBean().getObject(), permissionGrantingStrategy(), aclAuthorizationStrategy());
     }
+
+    @Bean
+    public EhCacheFactoryBean aclEhCacheFactoryBean() {
+        EhCacheFactoryBean ehCacheFactoryBean = new EhCacheFactoryBean();
+        ehCacheFactoryBean.setCacheManager(aclCacheManager().getObject());
+        ehCacheFactoryBean.setCacheName("aclCache");
+        return ehCacheFactoryBean;
+    }
+
+    @Bean
+    public EhCacheManagerFactoryBean aclCacheManager() {
+        EhCacheManagerFactoryBean m = new EhCacheManagerFactoryBean();
+        m.setShared(true);
+        return m;
+    }
+    
     
     @Bean
     public DefaultPermissionGrantingStrategy permissionGrantingStrategy() {

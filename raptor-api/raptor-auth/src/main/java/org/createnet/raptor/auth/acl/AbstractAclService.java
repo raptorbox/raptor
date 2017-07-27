@@ -20,7 +20,6 @@ import org.createnet.raptor.models.acl.AclSubject;
 import org.createnet.raptor.auth.services.*;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,12 +126,12 @@ public abstract class AbstractAclService<T extends AclSubject> implements AclSer
 
     @Override
     public void remove(T subj, User user, Permission permission) {
-        aclManagerService.removePermission(Token.class, subj.getSubjectId(), new UserSid(user), permission);
+        aclManagerService.removePermission(subj.getClass(), subj.getSubjectId(), new UserSid(user), permission);
     }
 
     @Override
     public boolean isGranted(T subj, User user, Permission permission) {
-        return aclManagerService.isPermissionGranted(Token.class, subj.getSubjectId(), new UserSid(user), permission);
+        return aclManagerService.isPermissionGranted(subj.getClass(), subj.getSubjectId(), new UserSid(user), permission);
     }
 
     @Override

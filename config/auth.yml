@@ -14,16 +14,19 @@ spring:
 
   jpa:
     show-sql: false
-    # database-platform: org.hibernate.dialect.MySQL5Dialect
-    properties:
-        hibernate:
-            enable_lazy_load_no_trans: true
+
     # Hibernate ddl auto (none, validate, update, create, create-drop)
-    hibernate:
-      ddl: true
-      ddl-auto: validate
-      naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
-      # dialect: org.hibernate.dialect.MySQL5Dialect
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
+        ddl: true
+        ddl-auto: validate
+        naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+        cache:
+            use_second_level_cache: true
+            use_query_cache: true
+            region:
+                factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
 
   devtools:
     restart:

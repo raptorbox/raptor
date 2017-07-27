@@ -12,6 +12,7 @@ networks:
 services:
 
   broker:
+    command: ["java","-jar","/raptor.jar", "--dev"]
     build: ./raptor-api/raptor-broker
     ports:
       - 1883:1883
@@ -24,6 +25,7 @@ services:
       - "raptor.local:172.16.238.1"
 
   auth:
+    command: ["java","-jar","/raptor.jar", "--dev"]
     build: ./raptor-api/raptor-auth
     volumes:
       - ./config:/etc/raptor
@@ -31,7 +33,6 @@ services:
       - mariadb
     depends_on:
       - mariadb
-      - broker
     networks:
       - raptor_test
     ports:
@@ -40,6 +41,7 @@ services:
       - "raptor.local:172.16.238.1"
 
   action:
+    command: ["java","-jar","/raptor.jar", "--dev"]
     build: ./raptor-api/raptor-action
     volumes:
       - ./config:/etc/raptor
@@ -47,7 +49,6 @@ services:
       - mongo
     depends_on:
       - mongo
-      - auth
     networks:
       - raptor_test
     ports:
@@ -56,6 +57,7 @@ services:
       - "raptor.local:172.16.238.1"
 
   inventory:
+    command: ["java","-jar","/raptor.jar", "--dev"]
     build: ./raptor-api/raptor-inventory
     volumes:
       - ./config:/etc/raptor
@@ -63,7 +65,6 @@ services:
       - mongo
     depends_on:
       - mongo
-      - auth
     networks:
       - raptor_test
     ports:
@@ -72,6 +73,7 @@ services:
       - "raptor.local:172.16.238.1"
 
   profile:
+    command: ["java","-jar","/raptor.jar", "--dev"]
     build: ./raptor-api/raptor-profile
     volumes:
       - ./config:/etc/raptor
@@ -79,7 +81,6 @@ services:
       - mongo
     depends_on:
       - mongo
-      - auth
     networks:
       - raptor_test
     ports:
@@ -88,6 +89,7 @@ services:
       - "raptor.local:172.16.238.1"
 
   stream:
+    command: ["java","-jar","/raptor.jar", "--dev"]
     build: ./raptor-api/raptor-stream
     volumes:
       - ./config:/etc/raptor
@@ -95,7 +97,6 @@ services:
       - mongo
     depends_on:
       - mongo
-      - auth
     networks:
       - raptor_test
     ports:
@@ -104,6 +105,7 @@ services:
       - "raptor.local:172.16.238.1"
 
   tree:
+    command: ["java","-jar","/raptor.jar", "--dev"]
     build: ./raptor-api/raptor-tree
     volumes:
       - ./config:/etc/raptor
@@ -111,7 +113,6 @@ services:
       - mongo
     depends_on:
       - mongo
-      - auth
     networks:
       - raptor_test
     ports:
@@ -120,6 +121,7 @@ services:
       - "raptor.local:172.16.238.1"
 
   apigateway:
+    command: ["java","-jar","/raptor.jar", "--dev"]
     image: raptorbox/gateway:v4
     ports:
         - 10080:80
@@ -127,7 +129,6 @@ services:
       - ./config:/etc/raptor
     depends_on:
         - broker
-        - auth
     networks:
       - raptor_test
     extra_hosts:

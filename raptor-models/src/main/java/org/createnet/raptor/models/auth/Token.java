@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Date;
+import javax.persistence.Cacheable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
@@ -38,6 +39,8 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import org.createnet.raptor.models.acl.AclSubject;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
 /**
@@ -46,6 +49,8 @@ import org.hibernate.validator.constraints.NotEmpty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
+@Cacheable(value = true)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(name = "tokens")
 public class Token implements Serializable, AclSubject {
 

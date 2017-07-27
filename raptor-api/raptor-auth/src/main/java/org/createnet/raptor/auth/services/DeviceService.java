@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-@CacheConfig(cacheNames = "acl_device")
+//@CacheConfig(cacheNames = "acl_device")
 public class DeviceService {
 
     protected static final Logger logger = LoggerFactory.getLogger(DeviceService.class);
@@ -52,7 +52,7 @@ public class DeviceService {
     @Autowired
     private AclDeviceService aclDeviceService;
     
-    @CacheEvict(key = "#device.id")
+    //@CacheEvict(key = "#device.id")
     public Device save(Device device) {
 
         Device saved = deviceRepository.save(device);
@@ -65,12 +65,12 @@ public class DeviceService {
         return deviceRepository.findByUuid(uuid);
     }
 
-    @Cacheable(key = "#id")
+    //@Cacheable(key = "#id")
     public Device get(Long id) {
         return deviceRepository.findOne(id);
     }
     
-    @CacheEvict(key = "#id")
+    //@CacheEvict(key = "#id")
     public void delete(Long id) {
         deviceRepository.delete(id);
     }

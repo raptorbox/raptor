@@ -39,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-@CacheConfig(cacheNames = "tokens")
+//@CacheConfig(cacheNames = "tokens")
 public class TokenService {
 
     @Autowired
@@ -109,7 +109,7 @@ public class TokenService {
      * @param tokenId
      * @return
      */
-    @Cacheable(key = "#tokenId")
+    //@Cacheable(key = "#tokenId")
     public Token read(Long tokenId) {
         Token saved = tokenRepository.findOne(tokenId);
         putCachedToken(saved);
@@ -121,7 +121,7 @@ public class TokenService {
      *
      * @param token
      */
-    @CacheEvict(key = "#token.id")
+    //@CacheEvict(key = "#token.id")
     public void delete(Token token) {
         tokenRepository.delete(token.getId());
         evictCachedToken(token);
@@ -137,7 +137,7 @@ public class TokenService {
      * @param token
      * @return
      */
-    @CacheEvict(key = "#token.id")
+    //@CacheEvict(key = "#token.id")
     public Token save(Token token) {
        Token saved = tokenRepository.save(token);
        evictCachedToken(saved);
@@ -174,7 +174,6 @@ public class TokenService {
     public Token createLoginToken(User user) {
 
         logger.debug("Creating login token for user:{}", user.getId());
-        
         Token token = tokenUtil.createToken("login", user, expiration, passwordEncoder.encode(user.getPassword() + this.secret));
         token.setType(Token.Type.LOGIN);
 

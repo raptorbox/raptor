@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-@CacheConfig(cacheNames = "users")
+//@CacheConfig(cacheNames = "users")
 public class UserService {
 
     final private Logger logger = LoggerFactory.getLogger(UserService.class);
@@ -55,7 +55,7 @@ public class UserService {
         return userRepository.findAll();
     }
     
-    @CacheEvict(key = "#user.uuid")
+    //@CacheEvict(key = "#user.uuid")
     public User save(User user) {
         loadRoles(user);
         User saved = userRepository.save(user);
@@ -63,7 +63,7 @@ public class UserService {
         return getByUuid(saved.getUuid());
     }
 
-    @Cacheable(key = "#uuid")
+    //@Cacheable(key = "#uuid")
     public User getByUuid(String uuid) {
         return userRepository.findByUuid(uuid);
     }
@@ -146,7 +146,7 @@ public class UserService {
         return save(rawUser);
     }
     
-    @CacheEvict(key = "#user.uuid")
+    //@CacheEvict(key = "#user.uuid")
     public void delete(User user) {
         userRepository.delete(user.getId());
     }
@@ -155,7 +155,7 @@ public class UserService {
         return passwordEncoder.encode(secret);
     }
 
-    @Cacheable(key = "#user.uuid")
+    //@Cacheable(key = "#user.uuid")
     public boolean exists(User rawUser) {
 
         User user = getByUuid(rawUser.getUuid());
@@ -165,12 +165,6 @@ public class UserService {
 
         if(rawUser.getUsername() != null && !rawUser.getUsername().isEmpty()) {
             if(findByUsername(rawUser.getUsername()) != null) {
-                return true;
-            }
-        }
-        
-        if(rawUser.getEmail() != null && !rawUser.getEmail().isEmpty()) {
-            if(findByEmail(rawUser.getEmail()) != null) {
                 return true;
             }
         }
