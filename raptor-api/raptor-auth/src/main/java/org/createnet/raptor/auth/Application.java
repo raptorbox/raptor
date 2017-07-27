@@ -31,7 +31,6 @@ import org.createnet.raptor.sdk.Topics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.integration.core.MessageProducer;
@@ -50,7 +49,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @SpringBootApplication(scanBasePackages = {"org.createnet.raptor.common", "org.createnet.raptor.auth"})
 @EntityScan(basePackages = "org.createnet.raptor.models.auth")
 @EnableScheduling
-@EnableCaching
 @EnableRetry
 @EnableWebMvc
 public class Application extends BaseApplication {

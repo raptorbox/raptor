@@ -18,12 +18,7 @@ package org.createnet.raptor.sdk.admin;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.math.BigDecimal;
-import java.util.Map;
-import java.util.UUID;
 import org.createnet.raptor.sdk.Raptor;
-import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.sdk.Utils;
 import org.junit.After;
 import org.junit.AfterClass;

@@ -17,6 +17,7 @@ package org.createnet.raptor.auth.configuration;
 
 import javax.sql.DataSource;
 import org.createnet.raptor.auth.acl.RaptorPermission;
+import org.createnet.raptor.auth.cache.RedisBasedAclCache;
 import org.createnet.raptor.models.auth.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,7 @@ import org.springframework.cache.ehcache.EhCacheFactoryBean;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCache;
 import org.springframework.security.acls.domain.AclAuthorizationStrategy;
 import org.springframework.security.acls.domain.AclAuthorizationStrategyImpl;
 import org.springframework.security.acls.domain.AuditLogger;
@@ -65,23 +67,10 @@ public class AclConfiguration {
     }
 
     @Bean
-    public EhCacheBasedAclCache aclCache() {
-        return new EhCacheBasedAclCache(aclEhCacheFactoryBean().getObject(), permissionGrantingStrategy(), aclAuthorizationStrategy());
+    public RedisBasedAclCache aclCache() {
+        return new RedisBasedAclCache((RedisCache) cacheManager.getCache("acl"), permissionGrantingStrategy(), aclAuthorizationStrategy());
     }
-
-    @Bean
-    public EhCacheFactoryBean aclEhCacheFactoryBean() {
-        EhCacheFactoryBean ehCacheFactoryBean = new EhCacheFactoryBean();
-        ehCacheFactoryBean.setCacheManager(aclCacheManager().getObject());
-        ehCacheFactoryBean.setCacheName("aclCache");
-        return ehCacheFactoryBean;
-    }
-
-    @Bean
-    public EhCacheManagerFactoryBean aclCacheManager() {
-        return new EhCacheManagerFactoryBean();
-    }
-
+    
     @Bean
     public DefaultPermissionGrantingStrategy permissionGrantingStrategy() {
         DefaultPermissionGrantingStrategy pgs = new DefaultPermissionGrantingStrategy(auditLogger());
@@ -89,6 +78,7 @@ public class AclConfiguration {
     }
 
     /**
+     * @return 
      * @TODO Add additional support for @setSidIdentityQuery
      */
     @Bean
