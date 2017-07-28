@@ -8,8 +8,8 @@ basetag=$(echo $tag | awk -F. '{print $1}')
 
 echo "Tag release is ${tag} for branch release ${basetag}"
 
-echo "Rebuilding packages"
-./scripts/mvn-build.sh >> /dev/null
+# echo "Rebuilding packages"
+# ./scripts/mvn-build.sh >> /dev/null
 
 echo "Building containers"
 
