@@ -35,11 +35,11 @@ public class AuthConfiguration {
     private int expiration = 1800;
 
     public boolean userHasLock(final String username) {
-        return getUsers().stream().filter(u -> u.getUsername().equals(username)).filter(u -> u.isLocked()).count() == 1;
+        return getUsers().stream().filter(u -> u.getUsername() != null && u.getUsername().equals(username)).filter(u -> u.isLocked()).count() == 1;
     }
     
     public AdminUser getServiceUser() {
-        Optional<AdminUser> user = getUsers().stream().filter(u -> u.getUsername().equals(serviceUserType)).findFirst();
+        Optional<AdminUser> user = getUsers().stream().filter(u -> u.getType() != null && u.getType().equals(serviceUserType)).findFirst();
         return user.isPresent() ? user.get() : null;
     }
     
