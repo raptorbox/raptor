@@ -23,6 +23,7 @@ import org.createnet.raptor.sdk.api.AuthClient;
 import org.createnet.raptor.sdk.api.StreamClient;
 import org.createnet.raptor.sdk.events.MqttEventEmitter;
 import org.createnet.raptor.models.objects.RaptorComponent;
+import org.createnet.raptor.sdk.admin.ProfileClient;
 import org.createnet.raptor.sdk.api.InventoryClient;
 import org.createnet.raptor.sdk.api.TreeClient;
 
@@ -87,6 +88,10 @@ public class Raptor implements IClient, RaptorComponent {
         return Tree;
     }
 
+    public ProfileClient Profile() {
+        return Admin().User().Profile();
+    }
+    
     /**
      * Instantiate the client
      *
