@@ -70,8 +70,12 @@ public class InventoryTest {
         Raptor raptor = Utils.getRaptor();
 
         Device dev = new Device();
-        dev.name("test create");
-
+        dev.name("test create")
+            .description("info about");
+        
+        dev.properties().put("active", true);
+        dev.properties().put("version", 15L);
+        
         dev.validate();
         raptor.Inventory().create(dev);
 
