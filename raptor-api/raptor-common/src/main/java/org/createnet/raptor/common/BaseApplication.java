@@ -70,7 +70,9 @@ public abstract class BaseApplication {
 
     static public Logger log = null;
 
-    static final String basepath = "/etc/raptor/";
+    static final String defaultBasePath = "/etc/raptor/";
+    static String basepath = defaultBasePath;
+    
     static final public ObjectMapper mapper = new ObjectMapper();
 
     static private ConfigurableApplicationContext instance;
@@ -257,6 +259,13 @@ public abstract class BaseApplication {
             });
         }
 
+        try {
+            basepath = System.getenv("CONFIG_BASEPATH");
+        }
+        catch(Exception e) {
+            log.warn("Failed to read environment variable CONFIG_BASEPATH: %s", e.getMessage());
+        }
+        
         List<Resource> resources = sources.stream()
                 .filter(f -> new File(basepath + f).exists())
                 .map(f -> new FileSystemResource(basepath + f))
