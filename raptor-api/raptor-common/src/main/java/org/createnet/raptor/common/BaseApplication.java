@@ -260,11 +260,17 @@ public abstract class BaseApplication {
         }
 
         try {
-            basepath = System.getenv("CONFIG_BASEPATH");
+            String envPath = System.getenv("CONFIG_BASEPATH");
+            if (envPath != null && envPath.isEmpty()) {
+                log.debug("Using CONFIG_BASEPATH={}", envPath);
+                basepath = envPath;
+            }
         }
         catch(Exception e) {
             log.warn("Failed to read environment variable CONFIG_BASEPATH: %s", e.getMessage());
         }
+        
+        log.debug("Configuration path {}", basepath);
         
         List<Resource> resources = sources.stream()
                 .filter(f -> new File(basepath + f).exists())
