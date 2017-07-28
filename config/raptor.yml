@@ -46,8 +46,10 @@ raptor:
         email: admin@raptor.local
         roles:
           - super_admin
-      - username: serviceskldfnsdklfsdnklfsdlfsdnklf
-        password: sdlfjsdlkfjsdlkfsdlkfsdj
+    #   - username: service
+    #     password: service
+      - username: service
+        password: s3rvice
         email: service@raptor.local
         roles:
           - super_admin
@@ -56,6 +58,7 @@ raptor:
 
     header: Authorization
     headerPrefix: Bearer
+
     # Used for login token generation
     secret: ${random.value}
     # TTL in seconds, 1800 = 30 minutes
