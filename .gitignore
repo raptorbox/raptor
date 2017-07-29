@@ -21,3 +21,4 @@ nb*
 /raptor-api/raptor-broker/target/
 /raptor-api/raptor-common/target/
 /swagger/api
+/raptor-api/raptor-standalone/target/

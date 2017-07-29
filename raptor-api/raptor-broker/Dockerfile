@@ -23,5 +23,5 @@ RUN apt-get clean
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 
-COPY target/raptor-broker-1.0.jar /raptor.jar
+COPY target/raptor-broker-1.0-exec.jar /raptor.jar
 CMD ["java","-jar","/raptor.jar"]

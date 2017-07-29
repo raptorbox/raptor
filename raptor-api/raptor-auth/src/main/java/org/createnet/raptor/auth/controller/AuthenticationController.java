@@ -40,9 +40,12 @@ import org.createnet.raptor.models.auth.request.LoginRequest;
 import org.createnet.raptor.models.auth.request.LoginResponse;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.auth.services.TokenService;
+import org.createnet.raptor.auth.services.UserService;
 import org.createnet.raptor.models.apidocs.ApiDocsLoginResponse;
+import org.createnet.raptor.models.apidocs.ApiDocsUser;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -55,6 +58,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+@RequestMapping(value = "/auth")
 @RestController
 @Api(tags = {"User", "Authentication"})
 @ApiResponses(value = {
@@ -97,6 +101,13 @@ public class AuthenticationController {
     @Autowired
     private TokenHelper tokenHelper;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private RaptorConfiguration configuration;
+    
+    
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ApiOperation(
             value = "Login an user with the provided credentials",
@@ -125,6 +136,20 @@ public class AuthenticationController {
         }
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/logout", method = RequestMethod.POST)
+    @ApiOperation(
+            value = "Logout an user invalidating the token used for login",
+            notes = "",
+            nickname = "logout"
+    )
+    public ResponseEntity<?> logout1(
+            HttpServletRequest request,
+            Principal principal
+    ) {
+        return logout(request, principal);
+    }    
+    
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/login", method = RequestMethod.DELETE)
     @ApiOperation(
@@ -185,4 +210,39 @@ public class AuthenticationController {
         return ResponseEntity.ok(new LoginResponse(currentUser, refreshedToken));
     }
 
+
+    @RequestMapping(value = "/me", method = RequestMethod.GET)
+    @ApiOperation(
+            value = "Get the current user profile",
+            notes = "",
+            response = ApiDocsUser.class,
+            nickname = "getProfile"
+    )
+    public User getProfile(
+            @AuthenticationPrincipal User user
+    ) {
+        return user;
+    }
+
+    @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
+    @RequestMapping(value = "/me", method = RequestMethod.PUT)
+    @ApiOperation(
+            value = "Update current user profile",
+            notes = "",
+            response = ApiDocsUser.class,
+            nickname = "updateProfile"
+    )
+    public ResponseEntity updateProfile(
+            @AuthenticationPrincipal User currentUser,
+            @RequestBody User rawUser
+    ) {
+
+        if (configuration.getAuth().userHasLock(rawUser.getUsername())) {
+            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "User cannot be modified");
+        }
+
+        return ResponseEntity.ok(userService.update(currentUser.getUuid(), rawUser));
+    }
+    
+    
 }

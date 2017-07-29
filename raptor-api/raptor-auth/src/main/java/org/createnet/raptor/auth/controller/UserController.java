@@ -34,7 +34,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+@RequestMapping(value = "/auth/user")
 @RestController
 @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
 @Api(tags = {"User"})
@@ -81,7 +81,7 @@ public class UserController {
     private RaptorConfiguration configuration;
 
     @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
-    @RequestMapping(value = "/user", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
             value = "List available user",
             notes = "",
@@ -94,7 +94,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
-    @RequestMapping(value = {"/user"}, method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(
             value = "Create a new user",
             notes = "",
@@ -114,41 +114,8 @@ public class UserController {
         return ResponseEntity.ok(userService.create(new User(rawUser, true)));
     }
 
-    @RequestMapping(value = {"/me"}, method = RequestMethod.GET)
-    @ApiOperation(
-            value = "Get the current user profile",
-            notes = "",
-            response = ApiDocsUser.class,
-            nickname = "getProfile"
-    )
-    public User getProfile(
-            @AuthenticationPrincipal User user
-    ) {
-        return user;
-    }
-
     @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
-    @RequestMapping(value = {"/me"}, method = RequestMethod.PUT)
-    @ApiOperation(
-            value = "Update current user profile",
-            notes = "",
-            response = ApiDocsUser.class,
-            nickname = "updateProfile"
-    )
-    public ResponseEntity updateProfile(
-            @AuthenticationPrincipal User currentUser,
-            @RequestBody User rawUser
-    ) {
-
-        if (configuration.getAuth().userHasLock(rawUser.getUsername())) {
-            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "User cannot be modified");
-        }
-
-        return ResponseEntity.ok(userService.update(currentUser.getUuid(), rawUser));
-    }
-
-    @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
-    @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.GET)
+    @RequestMapping(value = "/{uuid}", method = RequestMethod.GET)
     @ApiOperation(
             value = "Get an user profile",
             notes = "",
@@ -170,7 +137,7 @@ public class UserController {
     }
 
     @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
-    @RequestMapping(value = {"/user/{uuid}/impersonate"}, method = RequestMethod.GET)
+    @RequestMapping(value = "/{uuid}/impersonate", method = RequestMethod.GET)
     @ApiOperation(
             value = "Retrieve a login token for the user",
             notes = "",
@@ -200,7 +167,7 @@ public class UserController {
     }
 
     @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
-    @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.PUT)
+    @RequestMapping(value = "/{uuid}", method = RequestMethod.PUT)
     @ApiOperation(
             value = "Update an user profile",
             notes = "",
@@ -239,7 +206,7 @@ public class UserController {
     }
 
     @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
-    @RequestMapping(value = {"/user/{uuid}"}, method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{uuid}", method = RequestMethod.DELETE)
     @ApiOperation(
             value = "Delete an user profile",
             notes = "",

@@ -20,7 +20,8 @@ spring:
 
 server:
   port: 80
-  contextPath: /${spring.config.name}
+  contextPath: /
+  # contextPath: /${spring.config.name}
   address: 0.0.0.0
   error:
     whitelabel:

@@ -1,0 +1,6 @@
+raptor:
+  url: http://apigateway
+
+  dispatcher:
+    protocol: mqtt
+    uri: tcp://broker:1883

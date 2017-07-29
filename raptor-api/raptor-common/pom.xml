@@ -7,9 +7,9 @@
         <version>1.0</version>
     </parent>
 
+    <name>raptor-common</name>
     <artifactId>raptor-common</artifactId>
     <packaging>jar</packaging>
-    
 
     <dependencies>
 
@@ -133,5 +133,5 @@
             </exclusions>
         </dependency>               
     </dependencies>
-    <name>raptor-common</name>
+
 </project>

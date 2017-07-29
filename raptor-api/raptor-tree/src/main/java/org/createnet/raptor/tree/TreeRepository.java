@@ -22,11 +22,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.stereotype.Repository;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+@Repository
 public interface TreeRepository extends MongoRepository<TreeNode, String>, QueryDslPredicateExecutor<TreeNode> {
     
     public TreeNode findByParentId(String deviceId);

@@ -15,20 +15,11 @@
  */
 package org.createnet.raptor.auth;
 
-import java.util.List;
-import javax.sql.DataSource;
-import org.createnet.raptor.common.BaseApplication;
-import org.createnet.raptor.common.configuration.TokenHelper;
-import org.createnet.raptor.models.auth.Role;
-import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.auth.repository.UserRepository;
 import org.createnet.raptor.auth.services.AuthMessageHandler;
-import org.createnet.raptor.auth.services.UserService;
-import org.createnet.raptor.models.configuration.AuthConfiguration;
-import org.createnet.raptor.models.configuration.RaptorConfiguration;
+import org.createnet.raptor.common.BaseApplication;
 import org.createnet.raptor.sdk.Topics;
-
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
@@ -36,9 +27,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
@@ -56,80 +44,14 @@ public class Application extends BaseApplication {
     public static void main(String[] args) {
         start(Application.class, args);
     }
-
+    
     @Autowired
-    private RaptorConfiguration configuration;
-
-    @Autowired
-    private DataSource dataSource;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public TokenHelper tokenHelper() {
-        return new TokenHelper();
-    }
-
-    @Bean
-    AuthMessageHandler authMessageHandler() {
-        return new AuthMessageHandler();
-    }
-
+    AuthMessageHandler authMessageHandler;
+    
     @Bean
     public MessageProducer mqttClient() {
-        return createMqttClient(new String[]{ 
-            String.format(Topics.DEVICE, "+"),
-        }, authMessageHandler());
-    }
-
-    @Autowired
-    public void authenticationManagerBuilder(AuthenticationManagerBuilder auth) throws Exception {
-        auth.jdbcAuthentication().dataSource(dataSource);
-        createDefaultUser();
-    }
-
-    protected void createDefaultUser() {
-
-        List<AuthConfiguration.AdminUser> users = configuration.getAuth().getUsers();
-
-        users.forEach((AuthConfiguration.AdminUser admin) -> {
-
-            User defaultUser = userRepository.findByUsername(admin.getUsername());
-            if (defaultUser != null) {
-                log.debug("User `{}` exists (id: {})", defaultUser.getUsername(), defaultUser.getId());
-                
-                if (admin.isLocked()) {
-                    log.debug("Recreating user `{}`", defaultUser.getUsername());    
-                    userService.delete(defaultUser);
-                }
-                else {
-                    return;
-                }
-            }
-
-            User adminUser = new User();
-
-            adminUser.setUsername(admin.getUsername());
-            adminUser.setPassword(passwordEncoder().encode(admin.getPassword()));
-            adminUser.setEmail(admin.getEmail());
-            
-            admin.getRoles().forEach((r) -> {
-                adminUser.addRole(new Role(r));
-            });
-
-            userService.save(adminUser);
-
-        });
-
+        return createMqttClient(new String[]{
+            String.format(Topics.DEVICE, "+"),}, authMessageHandler);
     }
 
 }

@@ -19,7 +19,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.createnet.raptor.auth.services.RaptorUserDetailsService;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.auth.services.RoleService;
 import org.createnet.raptor.models.auth.User;
@@ -41,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+@RequestMapping(value = "/auth/role")
 @RestController
 @PreAuthorize("hasAuthority('super_admin')")
 @Api(tags = {"Role"})
@@ -73,7 +73,7 @@ public class RoleController {
     private RoleService roleService;
 
     @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
-    @RequestMapping(value = "/role", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
             value = "List available roles",
             notes = "",
@@ -87,7 +87,7 @@ public class RoleController {
     }
 
     @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
-    @RequestMapping(value = {"/role/{roleId}"}, method = RequestMethod.PUT)
+    @RequestMapping(value = {"/{roleId}"}, method = RequestMethod.PUT)
     @ApiOperation(
             value = "Update a role",
             notes = "",
@@ -120,7 +120,7 @@ public class RoleController {
     }
 
     @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
-    @RequestMapping(value = {"/role"}, method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(
             value = "Create a new role",
             notes = "",
@@ -162,7 +162,7 @@ public class RoleController {
     }
 
     @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
-    @RequestMapping(value = {"/role/{roleId}"}, method = RequestMethod.DELETE)
+    @RequestMapping(value = {"/{roleId}"}, method = RequestMethod.DELETE)
     @ApiOperation(
             value = "Delete a role",
             notes = "",

@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @RestController
-@RequestMapping(value = "/")
+@RequestMapping(value = "/tree")
 @ApiResponses(value = {
     @ApiResponse(
             code = 200,

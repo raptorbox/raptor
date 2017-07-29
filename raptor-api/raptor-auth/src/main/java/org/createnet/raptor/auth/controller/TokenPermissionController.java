@@ -21,7 +21,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.createnet.raptor.auth.services.RaptorUserDetailsService;
 import org.createnet.raptor.auth.acl.RaptorPermission;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.exception.PermissionNotFoundException;
@@ -49,6 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+@RequestMapping(value = "/auth/permission/token")
 @RestController
 @PreAuthorize("isAuthenticated()")
 @Api(tags = {"User", "Permission"})
@@ -86,7 +86,7 @@ public class TokenPermissionController {
     @Autowired
     private AclTokenService aclTokenService;
 
-    @RequestMapping(value = "/permission/token/{tokenId}/{userUuid}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{tokenId}/{userUuid}", method = RequestMethod.GET)
     @ApiOperation(
             value = "List user permissions on a token",
             notes = "",
@@ -119,7 +119,7 @@ public class TokenPermissionController {
         return ResponseEntity.status(HttpStatus.OK).body(permissions);
     }
 
-    @RequestMapping(value = "/permission/token/{tokenId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{tokenId}", method = RequestMethod.GET)
     @ApiOperation(
             value = "List current user permissions on a token",
             notes = "",
@@ -146,7 +146,7 @@ public class TokenPermissionController {
         return ResponseEntity.status(HttpStatus.OK).body(permissions);
     }
 
-    @RequestMapping(value = "/permission/token/{tokenId}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{tokenId}", method = RequestMethod.PUT)
     @ApiOperation(
             value = "Save user permissions on a token",
             notes = "",

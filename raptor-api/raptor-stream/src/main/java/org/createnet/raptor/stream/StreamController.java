@@ -50,7 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @RestController
-@RequestMapping(value = "/")
+@RequestMapping(value = "/stream")
 @ApiResponses(value = {
     @ApiResponse(
             code = 200,
@@ -101,7 +101,7 @@ public class StreamController {
 
     @RequestMapping(
             method = RequestMethod.PUT,
-            value = "{deviceId}/{streamId}"
+            value = "/{deviceId}/{streamId}"
     )
     @ApiOperation(
             value = "Save stream data",
@@ -150,7 +150,7 @@ public class StreamController {
 
     @RequestMapping(
             method = RequestMethod.DELETE,
-            value = "{deviceId}/{streamId}"
+            value = "/{deviceId}/{streamId}"
     )
     @ApiOperation(
             value = "Remove all the stored data",
@@ -179,7 +179,7 @@ public class StreamController {
 
     @RequestMapping(
             method = RequestMethod.GET,
-            value = "{deviceId}/{streamId}"
+            value = "/{deviceId}/{streamId}"
     )
     @ApiOperation(
             value = "Retrieve all the stored stream data",
@@ -208,7 +208,7 @@ public class StreamController {
 
     @RequestMapping(
             method = RequestMethod.GET,
-            value = "{deviceId}/{streamId}/lastUpdate"
+            value = "/{deviceId}/{streamId}/lastUpdate"
     )
     @ApiOperation(
             value = "Retrieve the last record stored for a stream",
@@ -240,7 +240,7 @@ public class StreamController {
 
     @RequestMapping(
             method = RequestMethod.POST,
-            value = "{deviceId}/{streamId}"
+            value = "/{deviceId}/{streamId}"
     )
     @ApiOperation(
             value = "Retrieve data based on the search query",

@@ -1,2 +1,2 @@
 #raptor named host mapping
-127.0.0.1 api.raptor.local raptor.local apigateway tree inventory profile auth api action data stream broker dbadmin mariadb mongo redis 
+127.0.0.1 api.raptor.local raptor.local default.raptor.local standalone.raptor.local test.raptor.local apigateway tree inventory profile auth api action data stream broker dbadmin mariadb mongo redis 

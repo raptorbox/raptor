@@ -56,7 +56,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.messaging.MessagingException;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 
 /**
  *
@@ -69,9 +68,11 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 public abstract class BaseApplication {
 
     static public Logger log = null;
-
+    
     static final String defaultBasePath = "/etc/raptor/";
     static String basepath = defaultBasePath;
+
+    static protected List<String> additionalConfigNames = null;
     
     static final public ObjectMapper mapper = new ObjectMapper();
 
@@ -118,7 +119,7 @@ public abstract class BaseApplication {
             instance = null;
         }
     }
-
+    
     static public String[] buildArgs(Class clazz, String[] args) {
 
         String[] parts = clazz.getCanonicalName().split("\\.");
@@ -126,7 +127,7 @@ public abstract class BaseApplication {
         String name = "--spring.config.name=" + appName;
 
         log.debug("Set application name to match package: {}", appName);
-        log.debug("Listening to path /{}", appName);
+//        log.debug("Listening to path /{}", appName);
 
         for (String arg : args) {
             if (arg.equals("--dev")) {
@@ -155,16 +156,6 @@ public abstract class BaseApplication {
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurerAdapter() {
-
-            @Override
-            public void addResourceHandlers(ResourceHandlerRegistry registry) {
-
-                registry.addResourceHandler("swagger-ui.html")
-                        .addResourceLocations("classpath:/META-INF/resources/");
-
-                registry.addResourceHandler("/webjars/**")
-                        .addResourceLocations("classpath:/META-INF/resources/webjars/");
-            }
 
             @Override
             public void addCorsMappings(CorsRegistry registry) {
@@ -223,6 +214,7 @@ public abstract class BaseApplication {
         adapter.setQos(2);
         adapter.setRecoveryInterval(1000);
         adapter.setOutputChannel(mqttInputChannel());
+
         return adapter;
     }
 
@@ -251,6 +243,11 @@ public abstract class BaseApplication {
         propertySourcesPlaceholderConfigurer.setIgnoreResourceNotFound(false);
 
         ArrayList<String> defaultSources = new ArrayList(Arrays.asList("raptor.yml", appName + ".yml"));
+        
+        if(additionalConfigNames != null && !additionalConfigNames.isEmpty()) {
+            defaultSources.addAll(additionalConfigNames);
+        }
+        
         ArrayList<String> sources = new ArrayList(defaultSources);
         
         if (developmentMode) {

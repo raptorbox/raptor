@@ -16,16 +16,20 @@
 package org.createnet.raptor.profile;
 
 import java.util.List;
-import org.createnet.raptor.models.profile.UserProfile;
+import org.createnet.raptor.models.profile.Profile;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface UserProfileRepository extends MongoRepository<UserProfile, String> {
+@Repository
+@Component
+public interface UserProfileRepository extends MongoRepository<Profile, String> {
 
-    public List<UserProfile> findByUserId(String userId);
-    public UserProfile findOneByUserIdAndName(String userId, String name);
+    public List<Profile> findByUserId(String userId);
+    public Profile findOneByUserIdAndName(String userId, String name);
 
 }

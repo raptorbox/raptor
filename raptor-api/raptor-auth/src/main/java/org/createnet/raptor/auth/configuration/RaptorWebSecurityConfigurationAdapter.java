@@ -75,7 +75,7 @@ public class RaptorWebSecurityConfigurationAdapter extends WebSecurityConfigurer
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .cors().and()
                 .authorizeRequests()
-                .antMatchers("/login", "/refresh", "/v2/api-docs").permitAll()
+                .antMatchers("/auth/login", "/auth/refresh", "/auth/v2/api-docs").permitAll()
                 .anyRequest().authenticated();
 
         // Custom JWT based security filter

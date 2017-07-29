@@ -8,6 +8,7 @@
     </parent>
     
     <artifactId>raptor-tree</artifactId>
+    <name>Tree API</name>
     <description>Tree API handles relations between devices and users</description>
     <packaging>jar</packaging>
     
@@ -28,21 +29,23 @@
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot}</version>
-                <configuration>
-                    <fork>true</fork>
-                </configuration>
                 <executions>
                     <execution>
                         <goals>
                             <goal>repackage</goal>
                         </goals>
+                        <configuration>
+                            <classifier>exec</classifier>
+                        </configuration>
                     </execution>
                 </executions>
-            </plugin>            
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -51,9 +54,6 @@
                     <showDeprecation>false</showDeprecation>
                 </configuration>
             </plugin>
-            
-            
-
  
 
             <plugin>
@@ -92,7 +92,7 @@
                             <host>raptor.local</host>
                             
                             <info>
-                                <title>${project.artifactId}</title>
+                                <title>${project.name}</title>
                                 <version>${project.version}</version>
                                 <description>${project.description}</description>
                                 <termsOfService>http://github.com/raptorbox</termsOfService>

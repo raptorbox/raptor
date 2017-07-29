@@ -44,7 +44,7 @@ public class AuthMessageHandler implements RaptorMessageHandler {
     private UserService userService;
 
     @Autowired
-    private DeviceService deviceService;
+    private AuthDeviceService deviceService;
 
     @Override
     public void handle(DispatcherPayload dispatcherPayload, MessageHeaders headers) {    

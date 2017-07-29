@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @RestController
-@RequestMapping(value = "/")
+@RequestMapping(value = "/action")
 @ApiResponses(value = {
     @ApiResponse(
             code = 200,
@@ -143,7 +143,7 @@ public class ActionStatusController {
 
         Device device = raptor.Inventory().load(deviceId);
 
-        Action action = device.getAction(actionId);
+        Action action = device.action(actionId);
         if (action == null) {
             return JsonErrorResponse.notFound("Action not found");
         }
@@ -179,7 +179,7 @@ public class ActionStatusController {
 
         Device device = raptor.Inventory().load(deviceId);
 
-        Action action = device.getAction(actionId);
+        Action action = device.action(actionId);
         if (action == null) {
             return JsonErrorResponse.notFound("Action not found");
         }
@@ -211,7 +211,7 @@ public class ActionStatusController {
 
         Device device = raptor.Inventory().load(deviceId);
 
-        Action action = device.getAction(actionId);
+        Action action = device.action(actionId);
         if (action == null) {
             return JsonErrorResponse.notFound("Action not found");
         }
@@ -250,7 +250,7 @@ public class ActionStatusController {
 
         Device device = raptor.Inventory().load(deviceId);
 
-        Action action = device.getAction(actionId);
+        Action action = device.action(actionId);
         if (action == null) {
             return JsonErrorResponse.notFound("Action not found");
         }

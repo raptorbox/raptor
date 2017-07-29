@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+@RequestMapping(value = "/auth/token")
 @RestController
 @Api(tags = {"Token"})
 @ApiResponses(value = {
@@ -79,7 +80,7 @@ public class TokenController {
     private UserService userService;
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/token", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
             value = "List tokens",
             notes = "",
@@ -121,7 +122,7 @@ public class TokenController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/token/{tokenId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{tokenId}", method = RequestMethod.GET)
     @ApiOperation(
             value = "Get a token by ID",
             notes = "",
@@ -148,7 +149,7 @@ public class TokenController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/token", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(
             value = "Create a token",
             notes = "",
@@ -182,7 +183,7 @@ public class TokenController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/token/{tokenId}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{tokenId}", method = RequestMethod.PUT)
     @ApiOperation(
             value = "Update a token",
             notes = "",
@@ -230,7 +231,7 @@ public class TokenController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/token/{tokenId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{tokenId}", method = RequestMethod.DELETE)
     @ApiOperation(
             value = "Delete a token",
             notes = "",

@@ -17,16 +17,13 @@ package org.createnet.raptor.auth.configuration;
 
 import javax.sql.DataSource;
 import org.createnet.raptor.auth.acl.RaptorPermission;
-import org.createnet.raptor.auth.cache.RedisBasedAclCache;
 import org.createnet.raptor.models.auth.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.ehcache.EhCacheFactoryBean;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.cache.RedisCache;
 import org.springframework.security.acls.domain.AclAuthorizationStrategy;
 import org.springframework.security.acls.domain.AclAuthorizationStrategyImpl;
 import org.springframework.security.acls.domain.AuditLogger;
@@ -82,8 +79,7 @@ public class AclConfiguration {
         m.setShared(true);
         return m;
     }
-    
-    
+
     @Bean
     public DefaultPermissionGrantingStrategy permissionGrantingStrategy() {
         DefaultPermissionGrantingStrategy pgs = new DefaultPermissionGrantingStrategy(auditLogger());
@@ -91,8 +87,7 @@ public class AclConfiguration {
     }
 
     /**
-     * @return 
-     * @TODO Add additional support for @setSidIdentityQuery
+     * @return @TODO Add additional support for @setSidIdentityQuery
      */
     @Bean
     public JdbcMutableAclService aclService() {

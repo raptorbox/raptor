@@ -48,7 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @RestController
-@RequestMapping(value = "/")
+@RequestMapping(value = "/inventory")
 @ApiResponses(value = {
     @ApiResponse(
             code = 200,
@@ -79,7 +79,7 @@ public class InventoryController {
     @Autowired
     private DeviceEventPublisher eventPublisher;
 
-    @RequestMapping(method = RequestMethod.GET, value = "/")
+    @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
             value = "Return the user devices",
             notes = "",
@@ -93,7 +93,7 @@ public class InventoryController {
         return ResponseEntity.ok(devices);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/")
+    @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(
             value = "Create a device instance",
             notes = "",

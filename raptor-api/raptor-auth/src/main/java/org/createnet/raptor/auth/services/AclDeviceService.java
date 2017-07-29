@@ -34,7 +34,7 @@ public class AclDeviceService extends AbstractAclService<Device> {
     private final Logger logger = LoggerFactory.getLogger(AclDeviceService.class);
 
     @Autowired
-    DeviceService deviceService;
+    AuthDeviceService deviceService;
     
     @Override
     public Permission[] getDefaultPermissions() {

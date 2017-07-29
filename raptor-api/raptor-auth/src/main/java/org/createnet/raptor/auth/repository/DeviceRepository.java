@@ -19,12 +19,14 @@ import org.createnet.raptor.models.auth.Device;
 import org.createnet.raptor.models.auth.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+@Repository
 public interface DeviceRepository extends CrudRepository<Device, Long>, JpaRepository<Device, Long> {
 
   Device findByUuid(String uuid);

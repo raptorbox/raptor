@@ -29,7 +29,7 @@ import org.createnet.raptor.auth.exception.PermissionNotFoundException;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.auth.request.PermissionRequestBatch;
 import org.createnet.raptor.auth.services.AclDeviceService;
-import org.createnet.raptor.auth.services.DeviceService;
+import org.createnet.raptor.auth.services.AuthDeviceService;
 import org.createnet.raptor.auth.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +49,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+@RequestMapping(value = "/auth/permission/device")
 @RestController
 @PreAuthorize("isAuthenticated()")
 @Api(tags = {"User", "Permission"})
@@ -78,7 +79,7 @@ public class DevicePermissionController {
     private static final Logger logger = LoggerFactory.getLogger(DevicePermissionController.class);
 
     @Autowired
-    private DeviceService deviceService;
+    private AuthDeviceService deviceService;
 
     @Autowired
     private UserService userService;
@@ -86,7 +87,7 @@ public class DevicePermissionController {
     @Autowired
     private AclDeviceService aclDeviceService;
 
-    @RequestMapping(value = "/permission/device/{deviceUuid}/{userUuid}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{deviceUuid}/{userUuid}", method = RequestMethod.GET)
     @ApiOperation(
             value = "List user permissions on a device",
             notes = "",
@@ -113,7 +114,7 @@ public class DevicePermissionController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
     }
 
-    @RequestMapping(value = "/permission/device/{deviceUuid}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{deviceUuid}", method = RequestMethod.GET)
     @ApiOperation(
             value = "List current user permissions on a device",
             notes = "",
@@ -140,7 +141,7 @@ public class DevicePermissionController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(permissions);
     }
 
-    @RequestMapping(value = "/permission/device/{deviceUuid}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{deviceUuid}", method = RequestMethod.PUT)
     @ApiOperation(
             value = "Save user permissions on a device",
             notes = "",

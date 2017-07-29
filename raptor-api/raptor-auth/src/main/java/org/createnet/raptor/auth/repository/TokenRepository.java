@@ -20,6 +20,7 @@ import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+@Component
 @Repository
 public interface TokenRepository extends CrudRepository<Token, Long>, JpaRepository<Token, Long> {
 

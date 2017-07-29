@@ -1,0 +1,96 @@
+version: "2"
+
+networks:
+  raptor_test:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.238.0/24
+        gateway: 172.16.238.1
+
+services:
+
+  broker:
+    command: ["java","-jar","/raptor.jar", "--dev"]
+    build: ./raptor-api/raptor-standalone
+    ports:
+      - 1883:1883
+      - 10090:10090
+    volumes:
+      - ./config:/etc/raptor
+      - ./data:/data
+    networks:
+      - raptor_test
+    extra_hosts:
+      - "standalone.raptor.local:172.16.238.1"
+
+  auth:
+    command: ["java","-jar","/raptor.jar", "--dev"]
+    build: ./raptor-api/raptor-auth
+    volumes:
+      - ./config:/etc/raptor
+    links:
+      - mariadb
+    depends_on:
+      - mariadb
+    networks:
+      - raptor_test
+    ports:
+      - 10086:80
+    extra_hosts:
+      - "standalone.raptor.local:172.16.238.1"
+
+  mariadb:
+    image: mariadb:latest
+    volumes:
+      - ./data/mariadb:/var/lib/mysql
+    environment:
+      MYSQL_USERNAME: root
+      MYSQL_ROOT_PASSWORD: raptor
+    networks:
+      - raptor_test
+    ports:
+        - 3306:3306
+
+  dbadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      MYSQL_ROOT_PASSWORD: raptor
+    restart: always
+    volumes:
+     - ./data/phpmyadmin:/sessions
+    links:
+      - mariadb:db
+    networks:
+      - raptor_test
+    ports:
+        - 8081:80
+
+  mongoadmin:
+    image: adicom/admin-mongo
+    # environment:
+    restart: always
+    # volumes:
+    links:
+      - mongo
+    networks:
+      - raptor_test
+    ports:
+        - 8082:1234
+  mongo:
+    image: mongo:3
+    volumes:
+      - ./data/mongodb:/data/db
+    command: --smallfiles
+    networks:
+      - raptor_test
+    ports:
+        - 27017:27017
+
+  redis:
+    image: redis:alpine
+    networks:
+      - raptor_test
+    ports:
+        - 6379:6379

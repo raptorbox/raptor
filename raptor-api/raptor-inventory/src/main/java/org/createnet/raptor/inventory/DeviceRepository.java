@@ -22,11 +22,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+@Repository
+@Component
 public interface DeviceRepository extends MongoRepository<Device, String>, QueryDslPredicateExecutor<Device> {
 
     public List<Device> findByUserId(String userId);
