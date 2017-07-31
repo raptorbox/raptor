@@ -25,9 +25,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.models.payload.DispatcherPayload;
+import org.createnet.raptor.models.payload.StreamPayload;
 import org.createnet.raptor.models.payload.TreeNodePayload;
 import org.createnet.raptor.models.tree.TreeNode;
+import org.createnet.raptor.sdk.events.callback.DataCallback;
+import org.createnet.raptor.sdk.events.callback.RaptorCallback;
+import org.createnet.raptor.sdk.events.callback.StreamCallback;
+import org.createnet.raptor.sdk.events.callback.StreamEventCallback;
 import org.createnet.raptor.sdk.events.callback.TreeNodeCallback;
+import org.createnet.raptor.sdk.events.callback.TreeNodeEventCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +60,7 @@ public class TreeClient extends AbstractClient {
      */
     public void subscribe(TreeNode node, TreeNodeCallback ev) {
         getEmitter().subscribe(node, (payload) -> {
-            ev.callback(node, new TreeNodePayload(node, payload.getOp()));
+            ev.callback(node, new TreeNodePayload(node, payload));
         });
     }
 
@@ -72,17 +80,22 @@ public class TreeClient extends AbstractClient {
      * Return the whole tree structure for a node
      *
      * @param node
-     * @return the
+     * @return
      */
     public TreeNode tree(TreeNode node) {
+        return tree(node.getId());
+    }
 
-        JsonNode json = getClient().get(String.format(Routes.TREE_GET, node.getId()));
+    /**
+     * Return the whole tree structure for a node
+     *
+     * @param nodeId
+     * @return
+     */
+    public TreeNode tree(String nodeId) {
+        JsonNode json = getClient().get(String.format(Routes.TREE_GET, nodeId));
         TreeNode tree = Device.getMapper().convertValue(json, TreeNode.class);
-
-        node.children().clear();
-        node.children().addAll(tree.children());
-
-        return node;
+        return tree;
     }
 
     /**

@@ -35,5 +35,7 @@ public enum Permissions {
     execute,
     
     data,
+    
+    tree,
 
 }

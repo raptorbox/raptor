@@ -37,20 +37,24 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
     @Override
     public boolean hasPermission(Authentication auth, Object deviceObject, Object permission) {
 
-        if ((auth == null) || (deviceObject == null) || !(permission instanceof String)) {
+        if ((auth == null) || !(permission instanceof String)) {
             return false;
         }
+        
+        String deviceId = null;
 
-        String deviceId = deviceObject.toString();
+        if(deviceObject != null) {
+            deviceId = deviceObject.toString();
 
-        if (deviceObject instanceof ResponseEntity) {
-            ResponseEntity entity = (ResponseEntity) deviceObject;
-            deviceObject = (Device) entity.getBody();
-        }
+            if (deviceObject instanceof ResponseEntity) {
+                ResponseEntity entity = (ResponseEntity) deviceObject;
+                deviceObject = (Device) entity.getBody();
+            }
 
-        if (deviceObject instanceof Device) {
-            Device dev = (Device) deviceObject;
-            deviceId = dev.id();
+            if (deviceObject instanceof Device) {
+                Device dev = (Device) deviceObject;
+                deviceId = dev.id();
+            }
         }
 
         return isAuthorized(auth, deviceId, permission.toString().toLowerCase());
@@ -74,7 +78,6 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
 
         try {
             Permissions p = Permissions.valueOf(permission);
-            deviceId = (p == Permissions.create || p == Permissions.list) ? null : deviceId;
             AuthorizationResponse response = api.Admin().User().isAuthorized(deviceId, tokenAuthentication.getUser().getUuid(), p);
             return response.result;
         } catch (Exception ex) {

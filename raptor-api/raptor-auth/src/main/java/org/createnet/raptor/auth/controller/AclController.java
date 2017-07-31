@@ -116,18 +116,6 @@ public class AclController {
         AuthorizationResponse response = new AuthorizationResponse();
 
         switch (body.getOperation()) {
-            case User:
-
-                response.result = true;
-                response.userId = currentUser.getUuid();
-                response.roles = currentUser.getRoles()
-                        .stream()
-                        .map((r) -> r.getName())
-                        .collect(Collectors.toList());
-                
-                logger.debug("User check result: [operation:{}, user:{}, result:{}]", body.getOperation(), currentUser.getUsername(), response.result);
-                
-                break;
             case Permission:
 
                 User user = currentUser;
@@ -143,9 +131,7 @@ public class AclController {
                     return JsonErrorResponse.entity(HttpStatus.NOT_FOUND);
                 }
 
-                
-
-                if (body.objectId == null && (permission == RaptorPermission.CREATE || permission == RaptorPermission.LIST)) {
+                if (body.objectId == null && (permission == RaptorPermission.CREATE || permission == RaptorPermission.LIST || permission == RaptorPermission.TREE)) {
                     // set true here, token permission will check over permission without objectId
                     response.result = true;
                 }

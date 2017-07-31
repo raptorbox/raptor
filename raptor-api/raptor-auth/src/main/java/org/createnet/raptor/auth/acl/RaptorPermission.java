@@ -35,17 +35,17 @@ public class RaptorPermission extends BasePermission {
         super(mask, code);
     }
 
-    public static final Permission READ = new RaptorPermission(1 << 0, 'R'); // 1
-    public static final Permission WRITE = new RaptorPermission(1 << 1, 'W'); // 2
-    public static final Permission CREATE = new RaptorPermission(1 << 2, 'C'); // 4
-    public static final Permission DELETE = new RaptorPermission(1 << 3, 'D'); // 8
+    public static final Permission READ =           new RaptorPermission(1 << 0, 'R'); // 1
+    public static final Permission WRITE =          new RaptorPermission(1 << 1, 'W'); // 2
+    public static final Permission CREATE =         new RaptorPermission(1 << 2, 'C'); // 4
+    public static final Permission DELETE =         new RaptorPermission(1 << 3, 'D'); // 8
     public static final Permission ADMINISTRATION = new RaptorPermission(1 << 4, 'A'); // 16
-
-    public static final Permission PUSH = new RaptorPermission(1 << 5, 'P'); // 32
-    public static final Permission PULL = new RaptorPermission(1 << 6, 'U'); // 64
-    public static final Permission SUBSCRIBE = new RaptorPermission(1 << 7, 'S'); // 128
-    public static final Permission EXECUTE = new RaptorPermission(1 << 8, 'E'); // 256
-    public static final Permission LIST = new RaptorPermission(1 << 9, 'L'); // 512
+    public static final Permission PUSH =           new RaptorPermission(1 << 5, 'P'); // 32
+    public static final Permission PULL =           new RaptorPermission(1 << 6, 'U'); // 64
+    public static final Permission SUBSCRIBE =      new RaptorPermission(1 << 7, 'S'); // 128
+    public static final Permission EXECUTE =        new RaptorPermission(1 << 8, 'E'); // 256
+    public static final Permission LIST =           new RaptorPermission(1 << 9, 'L'); // 512
+    public static final Permission TREE =           new RaptorPermission(1 << 10, 'T'); // 1024
 
     // Aliasing
     public static final Permission UPDATE = WRITE; // 2
@@ -72,6 +72,8 @@ public class RaptorPermission extends BasePermission {
                 return Permissions.execute.name();
             case 512:
                 return Permissions.list.name();
+            case 1024:
+                return Permissions.tree.name();
         }
         return null;
     }
@@ -115,6 +117,8 @@ public class RaptorPermission extends BasePermission {
                 return RaptorPermission.EXECUTE;
             case list:
                 return RaptorPermission.LIST;
+            case tree:
+                return RaptorPermission.TREE;
         }
         return null;
     }

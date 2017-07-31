@@ -167,14 +167,17 @@ public class TokenPermissionController {
 
         User user = currentUser;
         if (body.user != null) {
+
             user = userService.getByUuid(body.user);
             if (user == null) {
                 return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "User not found");
             }
 
             //todo: add acl checks
-            if (!user.getUuid().equals(currentUser.getUuid()) || !currentUser.isAdmin()) {
-                return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
+            if (!user.getUuid().equals(currentUser.getUuid())) {
+                if (!currentUser.isAdmin()) {
+                    return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
+                }
             }
 
         }

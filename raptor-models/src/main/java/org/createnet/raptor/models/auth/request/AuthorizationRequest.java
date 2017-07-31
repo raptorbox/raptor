@@ -22,7 +22,7 @@ package org.createnet.raptor.models.auth.request;
 public class AuthorizationRequest {
   
   public static enum Operation {
-    User, Permission
+    Permission
   }
   
   public AuthorizationRequest() {}

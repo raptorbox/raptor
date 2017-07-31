@@ -29,15 +29,16 @@ public class TreeNodePayload extends AbstractPayload {
 
     public String userId;
     public TreeNode node;
+    public DispatcherPayload payload;
 
     public TreeNodePayload() {
     }
 
-    public TreeNodePayload(TreeNode node, Permissions op) {
+    public TreeNodePayload(TreeNode node, DispatcherPayload payload) {
         userId = node.getUserId();
         this.node = node;
         type = DispatcherPayload.MessageType.tree;
-        this.op = op;
+        this.op = payload.getOp();
     }
 
     @Override
@@ -65,4 +66,8 @@ public class TreeNodePayload extends AbstractPayload {
         this.node = node;
     }
 
+    public DispatcherPayload getPayload() {
+        return payload;
+    }
+    
 }

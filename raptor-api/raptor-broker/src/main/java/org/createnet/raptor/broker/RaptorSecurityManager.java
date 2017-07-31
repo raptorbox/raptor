@@ -24,12 +24,10 @@ import org.apache.activemq.artemis.core.security.Role;
 import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
 import org.apache.activemq.artemis.spi.core.security.ActiveMQSecurityManager2;
 import org.createnet.raptor.models.acl.Permissions;
-import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.auth.Role.Roles;
 import org.createnet.raptor.models.configuration.AuthConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
-import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Topics;
 import org.createnet.raptor.sdk.api.AuthClient;
@@ -207,8 +205,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
                     case stream:
                         return hasDevicePermission(r, id, Permissions.pull);
                     case tree:
-//                        return hasDevicePermission(r, id, Permissions.list);
-                        return true // @fixme
+                        return hasDevicePermission(r, null, Permissions.tree);
                 }
                 
                 logger.error("Unrecognized subscribe topic pattern {}", address);

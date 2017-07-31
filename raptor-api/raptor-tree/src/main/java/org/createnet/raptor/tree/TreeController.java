@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -94,7 +95,7 @@ public class TreeController {
             notes = "",
             nickname = "create"
     )
-//    @PreAuthorize("hasPermission(#deviceId, 'push')")
+    @PreAuthorize("hasPermission(null, 'tree')")
     public ResponseEntity<?> create(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("parentId") Optional<String> optionalParentId,
@@ -127,6 +128,7 @@ public class TreeController {
             responseContainer = "List",
             nickname = "list"
     )
+    @PreAuthorize("hasPermission(null, 'tree')")
     public ResponseEntity<?> list(
             @AuthenticationPrincipal User currentUser
     ) {
@@ -147,7 +149,7 @@ public class TreeController {
             responseContainer = "List",
             nickname = "tree"
     )
-//    @PreAuthorize("hasPermission(#deviceId, 'read')")
+    @PreAuthorize("hasPermission(null, 'tree')")
     public ResponseEntity<?> tree(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("nodeId") String nodeId
@@ -167,7 +169,7 @@ public class TreeController {
             responseContainer = "List",
             nickname = "children"
     )
-//    @PreAuthorize("hasPermission(#deviceId, 'read')")
+    @PreAuthorize("hasPermission(null, 'tree')")
     public ResponseEntity<?> children(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("nodeId") String nodeId
@@ -188,7 +190,7 @@ public class TreeController {
             notes = "",
             nickname = "add"
     )
-//    @PreAuthorize("hasPermission(#deviceId, 'push')")
+    @PreAuthorize("hasPermission(null, 'tree')")
     public ResponseEntity<?> add(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("parentId") Optional<String> optionalParentId,
@@ -237,7 +239,7 @@ public class TreeController {
             notes = "",
             nickname = "delete"
     )
-//    @PreAuthorize("hasPermission(#deviceId, 'delete')")
+    @PreAuthorize("hasPermission(null, 'tree')")
     public ResponseEntity<?> delete(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("nodeId") String nodeId
