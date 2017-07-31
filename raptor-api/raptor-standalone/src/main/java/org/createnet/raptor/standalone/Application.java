@@ -24,6 +24,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.retry.annotation.EnableRetry;
@@ -38,6 +39,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @SpringBootApplication(scanBasePackages = {
     "org.createnet.raptor.common",
     "org.createnet.raptor.stream",
+    "org.createnet.raptor.auth",
     "org.createnet.raptor.action",
     "org.createnet.raptor.tree",
     "org.createnet.raptor.inventory",
@@ -46,6 +48,14 @@ import org.springframework.test.context.web.WebAppConfiguration;
     "org.createnet.raptor.standalone",
 }, exclude = {
     ArtemisAutoConfiguration.class
+})
+
+@EntityScan(basePackages = {
+    "org.createnet.raptor.models.auth"
+})
+
+@EnableJpaRepositories(basePackages = {
+    "org.createnet.raptor.auth.repository"
 })
 
 @EnableMongoRepositories(basePackages = {
@@ -63,7 +73,7 @@ public class Application extends BaseApplication {
     
     public static void main(String[] args) {
         additionalConfigNames = Arrays.asList(
-//                "auth.yml", 
+                "auth.yml", 
                 "broker.yml"
         );
         start(Application.class, args);
