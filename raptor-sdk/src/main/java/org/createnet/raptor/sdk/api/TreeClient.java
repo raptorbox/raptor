@@ -21,21 +21,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.objects.Device;
-import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.models.payload.DataPayload;
+import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.StreamPayload;
 import org.createnet.raptor.models.payload.TreeNodePayload;
 import org.createnet.raptor.models.tree.TreeNode;
 import org.createnet.raptor.sdk.events.callback.DataCallback;
-import org.createnet.raptor.sdk.events.callback.RaptorCallback;
-import org.createnet.raptor.sdk.events.callback.StreamCallback;
-import org.createnet.raptor.sdk.events.callback.StreamEventCallback;
+import org.createnet.raptor.sdk.events.callback.DeviceCallback;
 import org.createnet.raptor.sdk.events.callback.TreeNodeCallback;
-import org.createnet.raptor.sdk.events.callback.TreeNodeEventCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +50,7 @@ public class TreeClient extends AbstractClient {
     final static Logger logger = LoggerFactory.getLogger(TreeClient.class);
 
     /**
-     * Subscribe to a data stream
+     * Subscribe to a tree event
      *
      * @param node
      * @param ev
@@ -64,6 +61,38 @@ public class TreeClient extends AbstractClient {
         });
     }
 
+    /**
+     * Subscribe to a data stream
+     *
+     * @param node
+     * @param ev
+     */
+    public void subscribe(TreeNode node, DataCallback ev) {
+        getEmitter().subscribe(node, (payload) -> {
+            if(payload instanceof StreamPayload) {
+                StreamPayload p = (StreamPayload) payload;
+                ev.callback(p.device.stream(p.streamId), p.record);
+            }
+        });
+    }
+
+   /**
+     * Subscribe only to device related events like update or delete
+     *
+     * @param node
+     * @param ev
+     */
+    public void subscribe(TreeNode node, DeviceCallback ev) {
+        getEmitter().subscribe(node, (payload) -> {
+            switch (payload.getType()) {
+                case device:
+                    DevicePayload dp = (DevicePayload) payload;
+                    ev.callback(dp.device, dp);
+                    break;
+            }
+        });
+    }    
+    
     /**
      * Return the current tree structure for an user
      *

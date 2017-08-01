@@ -33,7 +33,6 @@ import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.payload.ActionPayload;
 import org.createnet.raptor.models.payload.StreamPayload;
 import org.createnet.raptor.models.query.DeviceQuery;
