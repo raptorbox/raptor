@@ -52,8 +52,9 @@ final public class Routes {
     
     public static final String TOKEN_CREATE = "/auth/token";
     public static final String TOKEN_UPDATE = TOKEN_CREATE + "/%s";
+    public static final String TOKEN_GET = TOKEN_UPDATE;
     public static final String TOKEN_DELETE = TOKEN_UPDATE;
-    public static final String TOKEN_GET = TOKEN_CREATE + "?uuid=%s";
+    public static final String TOKEN_LIST = TOKEN_CREATE + "?uuid=%s";
     
     public static final String PROFILE_GET_ALL = "/profile/%s";
     public static final String PROFILE_GET = PROFILE_GET_ALL + "/%s";

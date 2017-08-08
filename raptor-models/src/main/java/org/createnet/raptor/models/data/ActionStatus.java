@@ -49,7 +49,7 @@ public class ActionStatus {
     public String actionId;
     
     @Indexed
-    public String objectId;
+    public String deviceId;
 
     public ActionStatus() {
     }
@@ -57,7 +57,7 @@ public class ActionStatus {
     public ActionStatus(Action action, String status) {
         this(status);
         this.actionId = action.name();
-        this.objectId = action.getDevice().id();
+        this.deviceId = action.getDevice().id();
     }
 
     public ActionStatus(String status) {

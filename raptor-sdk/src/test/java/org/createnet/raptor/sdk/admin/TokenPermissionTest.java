@@ -115,7 +115,7 @@ public class TokenPermissionTest {
 
         testSet();
         
-        List<Token> tokens = raptor.Admin().Token().get();
+        List<Token> tokens = raptor.Admin().Token().list();
         
         assertFalse(tokens.isEmpty());
         

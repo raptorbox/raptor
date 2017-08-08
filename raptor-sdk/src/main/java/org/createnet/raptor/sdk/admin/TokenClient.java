@@ -22,7 +22,6 @@ import java.util.List;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
-import org.createnet.raptor.sdk.HttpClient;
 import org.createnet.raptor.sdk.Routes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,13 +62,13 @@ public class TokenClient extends AbstractClient {
     final static Logger logger = LoggerFactory.getLogger(TokenClient.class);
 
     /**
-     * Get user token
+     * Get user tokens
      *
      * @param userUuid token owner
      * @return
      */
-    public List<Token> get(String userUuid) {
-        JsonNode node = getClient().get(String.format(Routes.TOKEN_GET, userUuid));
+    public List<Token> list(String userUuid) {
+        JsonNode node = getClient().get(String.format(Routes.TOKEN_LIST, userUuid));
         return getMapper().convertValue(node, new TypeReference<List<Token>>() {
         });
     }
@@ -79,10 +78,20 @@ public class TokenClient extends AbstractClient {
      *
      * @return
      */
-    public List<Token> get() {
-        JsonNode node = getClient().get(String.format(Routes.TOKEN_GET, getContainer().Auth().getUser().getUuid()));
-        return getMapper().convertValue(node, new TypeReference<List<Token>>() {
-        });
+    public List<Token> list() {
+        return list(getContainer().Auth().getUser().getUuid());
+    }
+    
+    /**
+     * Read a token
+     *
+     * @param tokenId
+     * @return
+     */
+    public Token read(long tokenId) {
+        JsonNode node = getClient().get(String.format(Routes.TOKEN_GET, tokenId));
+        Token t1 = getMapper().convertValue(node, Token.class);
+        return t1;
     }
 
     /**
