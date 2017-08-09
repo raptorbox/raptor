@@ -46,7 +46,7 @@ public class DevicePermissionClient extends AbstractClient {
      * @return
      */
     public List<String> get(Long tokenId) {
-        JsonNode node = getClient().get(String.format(Routes.TOKEN_PERMISSION_GET, tokenId));
+        JsonNode node = getClient().get(String.format(Routes.PERMISSION_GET, "device", tokenId));
         return getMapper().convertValue(node, new TypeReference<List<String>>() {
         });
     }
@@ -83,7 +83,7 @@ public class DevicePermissionClient extends AbstractClient {
         PermissionRequestBatch req = new PermissionRequestBatch();
         req.permissions = permissions;
         
-        JsonNode node = getClient().put(String.format(Routes.TOKEN_PERMISSION_SET, tokenId), toJsonNode(req));
+        JsonNode node = getClient().put(String.format(Routes.PERMISSION_SET, "device", tokenId), toJsonNode(req));
         return getMapper().convertValue(node, new TypeReference<List<String>>() {
         });
     }

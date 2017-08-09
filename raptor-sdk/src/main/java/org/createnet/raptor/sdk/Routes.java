@@ -61,9 +61,9 @@ final public class Routes {
     public static final String PROFILE_SET = PROFILE_GET;
     public static final String PREFERENCES_DELETE = PROFILE_GET;
     
-    public static final String TOKEN_PERMISSION_GET = "/auth/permission/token/%s";
-    public static final String TOKEN_PERMISSION_BY_USER = TOKEN_PERMISSION_GET + "/%s";
-    public static final String TOKEN_PERMISSION_SET = TOKEN_PERMISSION_GET;
+    public static final String PERMISSION_GET = "/auth/permission/%s/%s";
+    public static final String PERMISSION_BY_USER = PERMISSION_GET + "/%s";
+    public static final String PERMISSION_SET = PERMISSION_GET;
     
     public static final String INVENTORY_LIST = "/inventory/";
     public static final String INVENTORY_SEARCH = INVENTORY_LIST + "search";
