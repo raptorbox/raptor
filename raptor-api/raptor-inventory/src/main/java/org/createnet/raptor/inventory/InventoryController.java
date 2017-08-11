@@ -106,6 +106,8 @@ public class InventoryController {
             @RequestBody Device device
     ) {
 
+        device.setDefaults();
+        
         try {
             device.validate();
         } catch (RaptorComponent.ValidationException ex) {
@@ -162,6 +164,7 @@ public class InventoryController {
         }
 
         String userId = device.userId();
+        
         device.merge(body);
 
         // reset ids

@@ -156,6 +156,12 @@ public class Device extends DeviceContainer {
         return this;
     }
 
+    public void setDefaults() {
+        this.id = Device.generateUUID();
+        this.createdAt = Instant.now().getEpochSecond();
+        this.updatedAt = createdAt;        
+    }
+    
     /**
      * Set the current time in seconds
      */
@@ -170,10 +176,10 @@ public class Device extends DeviceContainer {
             throw new ValidationException("name field missing");
         }
 
-        if (!this.isNew() && this.id == null) {
+        if (!this.isNew() && (this.id == null || this.id.isEmpty())) {
             throw new ValidationException("id field missing");
         }
-
+        
         if (!this.streams().isEmpty()) {
             this.streams().entrySet().forEach((item) -> {
                 item.getValue().validate();
