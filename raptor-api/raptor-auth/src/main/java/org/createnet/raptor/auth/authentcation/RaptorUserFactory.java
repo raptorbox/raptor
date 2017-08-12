@@ -3,7 +3,6 @@ package org.createnet.raptor.auth.authentcation;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.createnet.raptor.common.authentication.RaptorUserDetails;
-import org.createnet.raptor.auth.services.RaptorUserDetailsService;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.auth.User;
 

@@ -69,6 +69,7 @@ public class AuthTest {
     public void failLogin() {
         log.debug("Try to fake login");
         AuthClient.LoginState loginInfo = raptor.Auth().login("admin", "apple");
+        log.error("Shoud have failied..");
     }
 
     @Test(expected = AuthenticationFailedException.class)

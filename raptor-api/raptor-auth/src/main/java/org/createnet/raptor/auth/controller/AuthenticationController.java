@@ -50,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -115,19 +116,18 @@ public class AuthenticationController {
             response = ApiDocsLoginResponse.class,
             nickname = "login"
     )
-    public ResponseEntity<?> login(@RequestBody LoginRequest authenticationRequest) throws AuthenticationException {
+    public ResponseEntity<?> login(@RequestBody LoginRequest req) throws AuthenticationException {
         try {
 
             // Reload password post-security so we can generate token
-            final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.username);
+            final UserDetails userDetails = userDetailsService.loadUserByUsername(req.username);
             final Token token = tokenService.createLoginToken((User) userDetails);
 
             final Authentication authentication = authenticationManager.authenticate(
-                    new LoginAuthenticationToken(userDetails, token.getToken(), userDetails.getAuthorities())
-//                    new UsernamePasswordAuthenticationToken(authenticationRequest.username, authenticationRequest.password)
+                    new UsernamePasswordAuthenticationToken(req.username, req.password)
             );
             
-            SecurityContextHolder.getContext().setAuthentication(authentication);            
+            SecurityContextHolder.getContext().setAuthentication(authentication);
             
             // Return the token
             return ResponseEntity.ok(new LoginResponse((User) userDetails, token));

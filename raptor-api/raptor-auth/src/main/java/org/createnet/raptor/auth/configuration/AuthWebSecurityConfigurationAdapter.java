@@ -18,7 +18,6 @@ package org.createnet.raptor.auth.configuration;
 import org.createnet.raptor.auth.services.RaptorUserDetailsService;
 import org.createnet.raptor.auth.authentcation.DatabaseTokenFilter;
 import org.createnet.raptor.auth.services.TokenService;
-import org.createnet.raptor.common.authentication.JsonUsernamePasswordFilter;
 import org.createnet.raptor.common.configuration.TokenHelper;
 import org.createnet.raptor.common.configuration.TokenSecurityConfigurerAdapter;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
@@ -31,6 +30,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  *
@@ -73,7 +74,7 @@ public class AuthWebSecurityConfigurationAdapter extends TokenSecurityConfigurer
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         configureShared(http);
-        http.addFilterBefore(databaseTokenFilter(), JsonUsernamePasswordFilter.class);
+        http.addFilterBefore(databaseTokenFilter(), AnonymousAuthenticationFilter.class);
     }
     
 }
