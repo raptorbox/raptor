@@ -101,7 +101,7 @@ public class TreeTest {
 
         TreeNode tree = raptor.Tree().tree(node1);
 
-        assertEquals(tree, node1);
+        assertEquals(tree.getId(), node1.getId());
         assertEquals(1, tree.children().size());
         assertEquals("child1", tree.children().get(0).getName());
         assertEquals("child2", tree.children().get(0).children().get(0).getName());
@@ -125,7 +125,7 @@ public class TreeTest {
 
         TreeNode tree = raptor.Tree().tree(node1);
 
-        assertEquals(tree, node1);
+        assertEquals(tree.getId(), node1.getId());
         assertEquals(2, tree.children().size());
 
         raptor.Tree().remove(tree.children().get(0));
