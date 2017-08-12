@@ -24,6 +24,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public interface ActionStatusRepository extends MongoRepository<ActionStatus, String> {
-    public ActionStatus findOneByObjectIdAndActionId(String deviceId, String actionId);
-    public List<ActionStatus> findByObjectId(String deviceId, String actionId);
+    public ActionStatus findOneByDeviceIdAndActionId(String deviceId, String actionId);
+    public List<ActionStatus> findByDeviceId(String deviceId, String actionId);
 }

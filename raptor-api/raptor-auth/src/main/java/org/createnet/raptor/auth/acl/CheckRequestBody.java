@@ -18,7 +18,6 @@ package org.createnet.raptor.auth.acl;
 import java.util.List;
 import java.util.UUID;
 import javax.validation.ValidationException;
-import org.createnet.raptor.auth.acl.RaptorPermission;
 import org.springframework.security.acls.model.Permission;
 
 /**

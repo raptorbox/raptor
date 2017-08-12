@@ -412,8 +412,8 @@ public class RecordSet {
         return this;
     }
 
-    public RecordSet setObjectId(String objectId) {
-        this.deviceId = objectId;
+    public RecordSet setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
         return this;
     }
 

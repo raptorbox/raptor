@@ -16,21 +16,21 @@
 package org.createnet.raptor.auth.configuration;
 
 import org.createnet.raptor.auth.services.RaptorUserDetailsService;
-import org.createnet.raptor.auth.authentcation.JsonUsernamePasswordFilter;
-import org.createnet.raptor.common.authentication.RaptorAuthenticationEntryPoint;
-import org.createnet.raptor.auth.authentcation.RaptorAuthenticationTokenFilter;
+import org.createnet.raptor.auth.authentcation.DatabaseTokenFilter;
+import org.createnet.raptor.auth.services.TokenService;
+import org.createnet.raptor.common.authentication.JsonUsernamePasswordFilter;
+import org.createnet.raptor.common.configuration.TokenHelper;
+import org.createnet.raptor.common.configuration.TokenSecurityConfigurerAdapter;
+import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 
 /**
  *
@@ -39,49 +39,41 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@Order(10)
-public class RaptorWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-    @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
-        return new RaptorAuthenticationEntryPoint();
-    }
+@Order(5)
+@ConditionalOnExpression("{'auth', 'standalone'}.contains('${spring.config.name}')")
+public class AuthWebSecurityConfigurationAdapter extends TokenSecurityConfigurerAdapter {
 
     @Autowired
     private RaptorUserDetailsService userDetailsService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private TokenService tokenService;
+    
+    @Autowired
+    private TokenHelper tokenHelper;
 
+    @Autowired
+    public RaptorConfiguration config;
+    
+    
+    protected DatabaseTokenFilter databaseTokenFilter() {
+        return new DatabaseTokenFilter(config, tokenService, tokenHelper);
+    }
+    
     @Autowired
     public void configureAuthentication(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
         authenticationManagerBuilder
-                .userDetailsService(this.userDetailsService)
+                .userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder);
     }
-
-    @Bean
-    public RaptorAuthenticationTokenFilter authenticationTokenFilterBean() throws Exception {
-        return new RaptorAuthenticationTokenFilter();
-    }
-
+    
     @Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-                // we don't need CSRF because our token is invulnerable
-                .csrf().disable()
-                .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint()).and()
-                // don't create session
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .cors().and()
-                .authorizeRequests()
-                .antMatchers("/auth/login", "/auth/refresh", "/auth/v2/api-docs").permitAll()
-                .anyRequest().authenticated();
-
-        // Custom JWT based security filter
-        httpSecurity.addFilterBefore(authenticationTokenFilterBean(), JsonUsernamePasswordFilter.class);
-
-        // disable page caching
-        httpSecurity.headers().cacheControl();
+    protected void configure(HttpSecurity http) throws Exception {
+        configureShared(http);
+        http.addFilterBefore(databaseTokenFilter(), JsonUsernamePasswordFilter.class);
     }
+    
 }

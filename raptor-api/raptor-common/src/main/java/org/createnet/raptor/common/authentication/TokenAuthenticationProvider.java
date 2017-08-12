@@ -29,7 +29,6 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-//        LoginAuthenticationToken tokenAuthentication = (LoginAuthenticationToken ) authentication;
         return authentication;
     }
 

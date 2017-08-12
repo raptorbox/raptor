@@ -15,24 +15,21 @@
  */
 package org.createnet.raptor.common.configuration;
 
-import org.createnet.raptor.common.authentication.HttpTokenFilter;
-import org.createnet.raptor.common.authentication.RaptorAuthenticationEntryPoint;
-import org.createnet.raptor.common.authentication.TokenAuthenticationProvider;
+import org.createnet.raptor.common.authentication.JsonUsernamePasswordFilter;
+import org.createnet.raptor.common.authentication.RestTokenFilter;
+import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  *
@@ -40,49 +37,50 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 @Configuration
 @EnableWebSecurity
-@Order(5)
-@ConditionalOnExpression("'${spring.config.name}' != 'auth' and '${spring.config.name}' != 'gateway'")
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+@Order(10)
+@ConditionalOnExpression("!({'auth', 'standalone'}.contains('${spring.config.name}'))")
 public class TokenSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
-    @Value("${spring.config.name}")
-    String appName;
 
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        return new TokenAuthenticationProvider();
-    }
-
-    @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
-        return new RaptorAuthenticationEntryPoint();
-    }
-
-    @Bean
-    public HttpTokenFilter httpTokenFilter() {
-        return new HttpTokenFilter();
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        
-        http
-                .csrf().disable()
-                .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint()).and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .cors().and()
-                .authorizeRequests()
-                .antMatchers("/v2/api-docs").permitAll() // swagger api docs
-                .anyRequest().authenticated()
-                .and().addFilterBefore(httpTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-    }
+    @Autowired
+    AuthenticationEntryPoint authenticationEntryPoint;   
+    
+    @Autowired
+    private AuthenticationProvider authenticationProvider;
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(authenticationProvider());
+        auth.authenticationProvider(authenticationProvider);
     }
+    
+    @Autowired
+    public TokenHelper tokenHelper;
+
+    @Autowired
+    public RaptorConfiguration config;    
+    
+    RestTokenFilter restTokenFilter() {
+        return new RestTokenFilter(config, tokenHelper);
+    }
+    
+    protected void configureShared(HttpSecurity http) throws Exception {
+        http
+                .csrf().disable()
+                .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                .cors().and()
+                .authorizeRequests()
+                .antMatchers("/auth/login").permitAll()
+                .anyRequest().authenticated()
+                .and().headers().cacheControl();
+        
+    }
+    
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        configureShared(http);
+        http.addFilterBefore(restTokenFilter(), JsonUsernamePasswordFilter.class);
+    }
+
 }

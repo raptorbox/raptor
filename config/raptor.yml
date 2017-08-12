@@ -19,6 +19,7 @@ spring:
       database: raptor
 
 server:
+  web: true
   port: 80
   contextPath: /
   # contextPath: /${spring.config.name}
@@ -29,8 +30,9 @@ server:
 
 logging:
   level:
-    root: warn
     org.createnet.raptor: DEBUG
+    org.spring: WARN
+    root: WARN
 
 raptor:
   url: http://apigateway

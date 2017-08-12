@@ -17,9 +17,8 @@ package org.createnet.raptor.auth.services;
 
 import org.createnet.raptor.models.auth.request.SyncRequest;
 import org.createnet.raptor.auth.acl.RaptorPermission;
-import org.createnet.raptor.models.auth.Device;
+import org.createnet.raptor.models.auth.AclDevice;
 import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.auth.repository.DeviceRepository;
 import org.createnet.raptor.auth.repository.UserRepository;
 import org.createnet.raptor.auth.exception.DeviceNotFoundException;
 import org.createnet.raptor.auth.exception.UserNotFoundException;
@@ -32,6 +31,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.acls.model.Permission;
 import org.springframework.stereotype.Service;
+import org.createnet.raptor.auth.repository.AclDeviceRepository;
 
 /**
  *
@@ -47,26 +47,26 @@ public class AuthDeviceService {
     private UserRepository userRepository;
 
     @Autowired
-    private DeviceRepository deviceRepository;
+    private AclDeviceRepository deviceRepository;
 
     @Autowired
     private AclDeviceService aclDeviceService;
     
     //@CacheEvict(key = "#device.id")
-    public Device save(Device device) {
+    public AclDevice save(AclDevice device) {
 
-        Device saved = deviceRepository.save(device);
+        AclDevice saved = deviceRepository.save(device);
         aclDeviceService.register(device);
 
         return get(saved.getId());
     }
 
-    public Device getByUuid(String uuid) {
+    public AclDevice getByUuid(String uuid) {
         return deviceRepository.findByUuid(uuid);
     }
 
     //@Cacheable(key = "#id")
-    public Device get(Long id) {
+    public AclDevice get(Long id) {
         return deviceRepository.findOne(id);
     }
     
@@ -75,15 +75,15 @@ public class AuthDeviceService {
         deviceRepository.delete(id);
     }
     
-    public void delete(Device device) {
+    public void delete(AclDevice device) {
         delete(device.getId());
     }
     
-    public Device sync(User user, SyncRequest req) {
+    public AclDevice sync(User user, SyncRequest req) {
 
         Permission p = RaptorPermission.fromLabel(req.operation);
 
-        Device device = null;
+        AclDevice device = null;
         if (req.objectId != null) {
             device = deviceRepository.findByUuid(req.objectId);
         }
@@ -117,7 +117,7 @@ public class AuthDeviceService {
 
         // create or update device record
         if (device == null) {
-            device = new Device();
+            device = new AclDevice();
             device.setUuid(req.objectId);
         }
 
@@ -132,14 +132,14 @@ public class AuthDeviceService {
         }
 
         if (req.parentId != null) {
-            Device parentDevice = deviceRepository.findByUuid(req.parentId);
+            AclDevice parentDevice = deviceRepository.findByUuid(req.parentId);
             if (parentDevice == null) {
                 throw new DeviceNotFoundException();
             }
             device.setParent(parentDevice);
         }
 
-        Device dev = save(device);
+        AclDevice dev = save(device);
 
         return dev;
     }

@@ -212,9 +212,9 @@ public abstract class BaseApplication {
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(2);
-        adapter.setRecoveryInterval(1000);
+        adapter.setRecoveryInterval(2500);
         adapter.setOutputChannel(mqttInputChannel());
-
+        
         return adapter;
     }
 

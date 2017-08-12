@@ -89,7 +89,7 @@ public class Token implements Serializable, AclSubject {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    private Device device;
+    private AclDevice device;
 
     @Column(name = "created")
     @Temporal(TemporalType.TIMESTAMP)
@@ -259,11 +259,11 @@ public class Token implements Serializable, AclSubject {
         return this.getType().equals(Type.LOGIN);
     }
 
-    public Device getDevice() {
+    public AclDevice getDevice() {
         return device;
     }
 
-    public void setDevice(Device device) {
+    public void setDevice(AclDevice device) {
         this.device = device;
     }
 

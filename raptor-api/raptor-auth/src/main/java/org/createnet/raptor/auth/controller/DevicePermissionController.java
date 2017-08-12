@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.createnet.raptor.auth.services.RaptorUserDetailsService;
 import org.createnet.raptor.auth.acl.RaptorPermission;
-import org.createnet.raptor.models.auth.Device;
+import org.createnet.raptor.models.auth.AclDevice;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.exception.PermissionNotFoundException;
 import org.createnet.raptor.models.response.JsonErrorResponse;
@@ -100,7 +100,7 @@ public class DevicePermissionController {
             @PathVariable("userUuid") String userUuid
     ) {
 
-        Device device = deviceService.getByUuid(deviceUuid);
+        AclDevice device = deviceService.getByUuid(deviceUuid);
         if (device == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Device not found");
         }
@@ -127,7 +127,7 @@ public class DevicePermissionController {
             @AuthenticationPrincipal User currentUser
     ) {
 
-        Device device = deviceService.getByUuid(deviceUuid);
+        AclDevice device = deviceService.getByUuid(deviceUuid);
         if (device == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Device not found");
         }
@@ -154,7 +154,7 @@ public class DevicePermissionController {
             @PathVariable("deviceUuid") String deviceUuid
     ) {
 
-        Device device = deviceService.getByUuid(deviceUuid);
+        AclDevice device = deviceService.getByUuid(deviceUuid);
         if (device == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Device not found");
         }

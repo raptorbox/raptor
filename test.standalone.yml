@@ -23,23 +23,7 @@ services:
     networks:
       - raptor_test
     extra_hosts:
-      - "standalone.raptor.local:172.16.238.1"
-
-  auth:
-    command: ["java","-jar","/raptor.jar", "--dev"]
-    build: ./raptor-api/raptor-auth
-    volumes:
-      - ./config:/etc/raptor
-    links:
-      - mariadb
-    depends_on:
-      - mariadb
-    networks:
-      - raptor_test
-    ports:
-      - 10086:80
-    extra_hosts:
-      - "standalone.raptor.local:172.16.238.1"
+      - "raptor.local:172.16.238.1"
 
   mariadb:
     image: mariadb:latest

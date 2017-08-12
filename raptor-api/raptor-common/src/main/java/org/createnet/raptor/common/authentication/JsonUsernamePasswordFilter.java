@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.authentcation;
+package org.createnet.raptor.common.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;

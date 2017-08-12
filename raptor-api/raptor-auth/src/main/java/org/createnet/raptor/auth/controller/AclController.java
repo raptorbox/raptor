@@ -26,7 +26,7 @@ import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.auth.request.SyncRequest;
 import org.createnet.raptor.auth.acl.RaptorPermission;
 import org.createnet.raptor.models.response.JsonErrorResponse;
-import org.createnet.raptor.models.auth.Device;
+import org.createnet.raptor.models.auth.AclDevice;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.services.AclDeviceService;
 import org.createnet.raptor.auth.services.AclTokenService;
@@ -137,7 +137,7 @@ public class AclController {
                 }
                 else {
 
-                    Device device = deviceService.getByUuid(body.objectId);
+                    AclDevice device = deviceService.getByUuid(body.objectId);
                     if (device == null) {
                         return JsonErrorResponse.entity(HttpStatus.NOT_FOUND);
                     }

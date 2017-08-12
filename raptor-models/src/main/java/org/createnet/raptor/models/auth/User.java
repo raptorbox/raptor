@@ -79,7 +79,7 @@ public class User implements Serializable {
     @JsonIgnore
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
     @Cascade(value = {CascadeType.REMOVE, CascadeType.SAVE_UPDATE})
-    final protected List<Device> devices = new ArrayList();
+    final protected List<AclDevice> devices = new ArrayList();
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
@@ -312,7 +312,7 @@ public class User implements Serializable {
         this.created = created;
     }
 
-    public List<Device> getDevices() {
+    public List<AclDevice> getDevices() {
         return devices;
     }
 

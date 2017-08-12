@@ -83,13 +83,13 @@ public class ActionClient extends AbstractClient {
     /**
      * Get the action status for an object
      *
-     * @param objectId id of the object
+     * @param deviceId id of the object
      * @param actionId name of the action
      * @return return the list of available action for an object
      */
-    public ActionStatus getStatus(String objectId, String actionId) {
+    public ActionStatus getStatus(String deviceId, String actionId) {
         return ActionStatus.parseJSON(getClient().get(
-            String.format(Routes.ACTION_STATUS, objectId, actionId)
+            String.format(Routes.ACTION_STATUS, deviceId, actionId)
         ));
     }
 
@@ -120,27 +120,27 @@ public class ActionClient extends AbstractClient {
     /**
      * Remove the action status for an object
      *
-     * @param objectId id of the object
+     * @param deviceId id of the object
      * @param actionId name of the action
      */
-    public void removeStatus(String objectId, String actionId) {
+    public void removeStatus(String deviceId, String actionId) {
         getClient().delete(
-                String.format(Routes.ACTION_STATUS, objectId, actionId)
+                String.format(Routes.ACTION_STATUS, deviceId, actionId)
         );
     }
 
     /**
      * Set the action status for an object
      *
-     * @param objectId id of the object
+     * @param deviceId id of the object
      * @param actionId name of the action
      * @param status the current status
      * @return return the list of available action for an object
      */
-    public ActionStatus setStatus(String objectId, String actionId, ActionStatus status) {
+    public ActionStatus setStatus(String deviceId, String actionId, ActionStatus status) {
         return Device.getMapper().convertValue(
                 getClient().post(
-                        String.format(Routes.ACTION_STATUS, objectId, actionId), status.toJsonNode()
+                        String.format(Routes.ACTION_STATUS, deviceId, actionId), status.toJsonNode()
                 ),
                 ActionStatus.class
         );

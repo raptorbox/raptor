@@ -58,25 +58,17 @@ public class AuthTest {
 
     @Test
     public void login() {
-
         log.debug("Try to login");
-
         Properties p = Utils.loadSettings();
-
         AuthClient.LoginState loginInfo = raptor.Auth().login(p.getProperty("username"), p.getProperty("password"));
-
         Assert.assertEquals(loginInfo.user.getUsername(), p.getProperty("username"));
         Assert.assertNotNull(loginInfo.token);
-
     }
 
     @Test(expected = AuthenticationFailedException.class)
     public void failLogin() {
-
         log.debug("Try to fake login");
-
         AuthClient.LoginState loginInfo = raptor.Auth().login("admin", "apple");
-
     }
 
     @Test(expected = AuthenticationFailedException.class)

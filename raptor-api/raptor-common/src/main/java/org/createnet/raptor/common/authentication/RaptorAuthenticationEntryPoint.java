@@ -16,6 +16,7 @@ public class RaptorAuthenticationEntryPoint implements AuthenticationEntryPoint,
      * Invoked when the user credentials are missing
      *
      * @param request
+     * @param response
      * @param authException
      * @throws java.io.IOException
      */

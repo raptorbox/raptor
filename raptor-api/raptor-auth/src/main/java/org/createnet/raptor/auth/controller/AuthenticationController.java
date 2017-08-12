@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,6 +40,7 @@ import org.createnet.raptor.models.auth.request.LoginResponse;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.auth.services.TokenService;
 import org.createnet.raptor.auth.services.UserService;
+import org.createnet.raptor.common.authentication.LoginAuthenticationToken;
 import org.createnet.raptor.models.apidocs.ApiDocsLoginResponse;
 import org.createnet.raptor.models.apidocs.ApiDocsUser;
 import org.createnet.raptor.models.auth.Token;
@@ -118,15 +118,17 @@ public class AuthenticationController {
     public ResponseEntity<?> login(@RequestBody LoginRequest authenticationRequest) throws AuthenticationException {
         try {
 
-            final Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authenticationRequest.username, authenticationRequest.password)
-            );
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
             // Reload password post-security so we can generate token
             final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.username);
             final Token token = tokenService.createLoginToken((User) userDetails);
 
+            final Authentication authentication = authenticationManager.authenticate(
+                    new LoginAuthenticationToken(userDetails, token.getToken(), userDetails.getAuthorities())
+//                    new UsernamePasswordAuthenticationToken(authenticationRequest.username, authenticationRequest.password)
+            );
+            
+            SecurityContextHolder.getContext().setAuthentication(authentication);            
+            
             // Return the token
             return ResponseEntity.ok(new LoginResponse((User) userDetails, token));
 

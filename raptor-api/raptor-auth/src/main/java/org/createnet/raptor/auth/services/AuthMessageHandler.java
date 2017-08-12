@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.auth.services;
 
+import org.createnet.raptor.common.authentication.LoginAuthenticationToken;
 import org.createnet.raptor.common.authentication.RaptorUserDetails;
 import org.createnet.raptor.common.dispatcher.RaptorMessageHandler;
 import org.createnet.raptor.models.auth.request.SyncRequest;
@@ -25,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -57,7 +57,9 @@ public class AuthMessageHandler implements RaptorMessageHandler {
                 DevicePayload payload = (DevicePayload) dispatcherPayload;
                 User user = userService.getByUuid(payload.getUserId());
                 UserDetails details = new RaptorUserDetails(user);
-                final Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), details.getAuthorities());
+                
+                // Login is required by spring ACL services implementation
+                final Authentication authentication = new LoginAuthenticationToken(user, null, details.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 
                 SyncRequest req = new SyncRequest();

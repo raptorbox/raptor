@@ -101,12 +101,12 @@ public class StreamClient extends AbstractClient {
     /**
      * Send stream data
      *
-     * @param objectId id of the object
+     * @param deviceId id of the object
      * @param streamId name of the stream
      * @param data data to send
      */
-    public void push(String objectId, String streamId, RecordSet data) {
-        getClient().put(String.format(Routes.STREAM_PUSH, objectId, streamId), data.toJsonNode());
+    public void push(String deviceId, String streamId, RecordSet data) {
+        getClient().put(String.format(Routes.STREAM_PUSH, deviceId, streamId), data.toJsonNode());
     }
 
     /**
@@ -135,26 +135,26 @@ public class StreamClient extends AbstractClient {
     /**
      * Retrieve data from a stream
      *
-     * @param objectId id of the object
+     * @param deviceId id of the object
      * @param streamId name of the stream
      * @param offset results start from offset
      * @param limit limit the total size of result
      * @return the data resultset
      */
-    public JsonNode pull(String objectId, String streamId, Integer offset, Integer limit) {
+    public JsonNode pull(String deviceId, String streamId, Integer offset, Integer limit) {
         String qs = buildQueryString(offset, limit);
-        return getClient().get(String.format(Routes.STREAM_PULL, objectId, streamId) + qs);
+        return getClient().get(String.format(Routes.STREAM_PULL, deviceId, streamId) + qs);
     }
 
     /**
      * Retrieve data from a stream
      *
-     * @param objectId id of the object
+     * @param deviceId id of the object
      * @param streamId name of the stream
      * @return the data resultset
      */
-    public JsonNode pull(String objectId, String streamId) {
-        return pull(objectId, streamId, null, null);
+    public JsonNode pull(String deviceId, String streamId) {
+        return pull(deviceId, streamId, null, null);
     }
 
     /**

@@ -44,7 +44,7 @@ import org.hibernate.annotations.CascadeType;
 @Cacheable(value = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(name = "devices")
-public class Device implements AclSubject {
+public class AclDevice implements AclSubject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -59,18 +59,18 @@ public class Device implements AclSubject {
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
-    private Device parent;
+    private AclDevice parent;
 
     @JsonIgnore
     @OneToMany(mappedBy = "device", fetch = FetchType.LAZY)
     @Cascade(value = {CascadeType.REMOVE, CascadeType.SAVE_UPDATE})
     final private List<Token> tokens = new ArrayList();
 
-    public Device() {
+    public AclDevice() {
         this.uuid = UUID.randomUUID().toString();
     }
 
-    public Device(String uuid) {
+    public AclDevice(String uuid) {
         this.uuid = uuid;
     }
 
@@ -98,7 +98,7 @@ public class Device implements AclSubject {
         this.owner = owner;
     }
 
-    public Device getParent() {
+    public AclDevice getParent() {
         return parent;
     }
 
@@ -107,7 +107,7 @@ public class Device implements AclSubject {
         return hasParent() ? getParent().getId() : null;
     }
 
-    public void setParent(Device parent) {
+    public void setParent(AclDevice parent) {
         this.parent = parent;
     }
 

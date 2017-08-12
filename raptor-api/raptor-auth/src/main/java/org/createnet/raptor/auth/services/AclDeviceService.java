@@ -17,7 +17,7 @@ package org.createnet.raptor.auth.services;
 
 import org.createnet.raptor.auth.acl.AbstractAclService;
 import org.createnet.raptor.auth.acl.RaptorPermission;
-import org.createnet.raptor.models.auth.Device;
+import org.createnet.raptor.models.auth.AclDevice;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-public class AclDeviceService extends AbstractAclService<Device> {
+public class AclDeviceService extends AbstractAclService<AclDevice> {
 
     private final Logger logger = LoggerFactory.getLogger(AclDeviceService.class);
 
@@ -45,7 +45,7 @@ public class AclDeviceService extends AbstractAclService<Device> {
     }
 
     @Override
-    public Device load(Long id) {
+    public AclDevice load(Long id) {
         return deviceService.get(id);
     }
 

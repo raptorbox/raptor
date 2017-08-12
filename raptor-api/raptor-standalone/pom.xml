@@ -58,18 +58,11 @@
             <version>2.1.0</version>
         </dependency>
 
-
-
-
-<!-- TODO: Integrate auth component too -->       
-<!--
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>raptor-auth</artifactId>
             <version>${project.version}</version>
         </dependency>
--->
-
 
         <dependency>
             <groupId>${project.groupId}</groupId>

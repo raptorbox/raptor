@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.auth.repository;
 
-import org.createnet.raptor.models.auth.Device;
+import org.createnet.raptor.models.auth.AclDevice;
 import org.createnet.raptor.models.auth.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
@@ -27,14 +27,14 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Repository
-public interface DeviceRepository extends CrudRepository<Device, Long>, JpaRepository<Device, Long> {
+public interface AclDeviceRepository extends CrudRepository<AclDevice, Long>, JpaRepository<AclDevice, Long> {
 
-  Device findByUuid(String uuid);
-  Device findByOwner(User owner);
+  AclDevice findByUuid(String uuid);
+  AclDevice findByOwner(User owner);
 
   @Transactional
   @Override
-  public void delete(Device entity);
+  public void delete(AclDevice entity);
 
   @Transactional
   @Override
@@ -44,10 +44,10 @@ public interface DeviceRepository extends CrudRepository<Device, Long>, JpaRepos
   public boolean exists(Long id);
 
   @Override
-  public Device findOne(Long id);
+  public AclDevice findOne(Long id);
 
   @Transactional
   @Override
-  public <S extends Device> S save(S entity);
+  public <S extends AclDevice> S save(S entity);
   
 }

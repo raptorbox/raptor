@@ -38,7 +38,7 @@ public class ActionStatusService {
     }
     
     public ActionStatus get(String deviceId, String actionId) {
-        return repository.findOneByObjectIdAndActionId(deviceId, actionId);
+        return repository.findOneByDeviceIdAndActionId(deviceId, actionId);
     }
     
     public void delete(String id) {

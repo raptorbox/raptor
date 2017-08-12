@@ -91,7 +91,7 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
         }
         
         if (r.deviceId() != null) {
-            jg.writeStringField("objectId", r.deviceId());
+            jg.writeStringField("deviceId", r.deviceId());
         }
 
         

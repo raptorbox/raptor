@@ -13,27 +13,24 @@ import org.createnet.raptor.sdk.api.AuthClient;
 import org.createnet.raptor.sdk.exception.AuthenticationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
-@Component
-@ConditionalOnExpression("'${spring.config.name}' != 'auth' and '${spring.config.name}' != 'gateway'")
-public class HttpTokenFilter extends GenericFilterBean {
+public class RestTokenFilter extends GenericFilterBean {
 
-    protected final static Logger logger = LoggerFactory.getLogger(HttpTokenFilter.class);
+    protected final static Logger logger = LoggerFactory.getLogger(RestTokenFilter.class);
 
-    @Autowired
+    public RaptorConfiguration config;
     public TokenHelper tokenHelper;
 
-    @Autowired
-    public RaptorConfiguration config;
-    
+    public RestTokenFilter(RaptorConfiguration config, TokenHelper tokenHelper) {
+        this.config = config;
+        this.tokenHelper = tokenHelper;
+    }
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
@@ -44,7 +41,7 @@ public class HttpTokenFilter extends GenericFilterBean {
             try {
 
                 logger.debug("Attempting token authentication..");
-                
+
                 Raptor client = new Raptor(config.getUrl(), tokenHelper.extractToken(authToken));
                 AuthClient.LoginState state = client.Auth().login();
 
