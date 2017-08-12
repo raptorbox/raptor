@@ -58,10 +58,6 @@ else
   exit 1
 fi
 
-# set vm.max_map_count for elasticsearch
-sysctl -w vm.max_map_count=262144
-echo "vm.max_map_count=262144" | tee /etc/sysctl.d/90-raptor.conf
-
 if [ ! -e "/opt/raptor" ]; then
   git clone https://github.com/raptorbox/raptor /opt/raptor
 fi

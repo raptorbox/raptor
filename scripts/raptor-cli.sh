@@ -1,4 +1,2 @@
 #!/bin/sh
-
-cd /opt/raptor
-docker-compose $@
+docker-compose -f /opt/raptor/docker-compose.yml $@
