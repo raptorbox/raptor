@@ -1,7 +1,7 @@
 #!/bin/sh
 
-DOCKER_V=1.12.0
-COMPOSE_V=1.9.0
+DOCKER_V=17.06.0
+COMPOSE_V=1.11.0
 
 # check root / ask sudo
 USRID=$(id -u)
@@ -27,9 +27,11 @@ else
 fi
 
 # check docker version is ok
-DOCKER_CV=`docker -v | awk  '{ print $3 }' | sed 's/,//'`
+DOCKER_CV=`docker -v | awk  '{ print $3 }' | sed 's/,//' | awk -F  "-"  '{ print $1 }' `
 DOCKER_V_val=`echo $DOCKER_V | sed -e 's/\.//g'`
 DOCKER_CV_val=`echo $DOCKER_CV | sed -e 's/\.//g'`
+
+echo $DOCKER_CV_val
 
 if [ "$DOCKER_CV_val" -ge "$DOCKER_V_val" ]; then
   echo "Docker version is $DOCKER_CV"
