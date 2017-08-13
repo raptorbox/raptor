@@ -12,9 +12,9 @@ fi
 
 # check git is avail
 if hash git 2>/dev/null; then
-  echo "git found"
+  echo "GIT found"
 else
-  echo "git is missing, exiting"
+  echo "GIT is missing, exiting. Install with eg. `apt-get install git`"
   exit 1
 fi
 
@@ -22,7 +22,8 @@ fi
 if hash docker 2>/dev/null; then
   echo "Docker found"
 else
-  echo "Docker is missing, exiting"
+  echo "Docker is missing, exiting."
+  echo "You can install docker running this script `curl -sSL https://get.docker.com/ | sh`"
   exit 1
 fi
 
@@ -45,6 +46,7 @@ if hash docker-compose 2>/dev/null; then
   echo "Docker Compose found"
 else
   echo "Docker Compose is missing, exiting"
+  echo "You can install it with `sudo apt-get install python-pip -y && sudo  pip install docker-compose`"
   exit 1
 fi
 
@@ -76,6 +78,6 @@ chmod +x scripts/raptor-cli.sh
 ln -s `pwd`/scripts/raptor-cli.sh /usr/bin/raptor
 
 echo "Install completed!"
-echo "run 'raptor up -d' to start Raptor"
+echo "run `sudo raptor up -d` to start Raptor"
 
 exit 0
