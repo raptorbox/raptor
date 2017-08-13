@@ -31,7 +31,7 @@ DOCKER_CV=`docker -v | awk  '{ print $3 }' | sed 's/,//'`
 DOCKER_V_val=`echo $DOCKER_V | sed -e 's/\.//g'`
 DOCKER_CV_val=`echo $DOCKER_CV | sed -e 's/\.//g'`
 
-if [ $DOCKER_CV_val -ge $DOCKER_V_val ]; then
+if [ "$DOCKER_CV_val" -ge "$DOCKER_V_val" ]; then
   echo "Docker version is $DOCKER_CV"
 else
   echo "Docker version must be $DOCKER_V or greater, but version $DOCKER_CV found. Exiting"
@@ -51,7 +51,7 @@ COMPOSE_CV=`docker-compose -v | awk  '{ print $3 }' | sed 's/,//'`
 COMPOSE_V_val=`echo $COMPOSE_V | sed -e 's/\.//g'`
 COMPOSE_CV_val=`echo $COMPOSE_CV | sed -e 's/\.//g'`
 
-if [ $COMPOSE_CV_val -ge $COMPOSE_V_val ]; then
+if [ "$COMPOSE_CV_val" -ge "$COMPOSE_V_val" ]; then
   echo "Compose version is $COMPOSE_CV"
 else
   echo "Compose version must be $COMPOSE_V or greater, but version $COMPOSE_CV found. Exiting"
