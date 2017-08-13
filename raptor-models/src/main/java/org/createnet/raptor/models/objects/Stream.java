@@ -181,7 +181,7 @@ public class Stream extends StreamContainer {
             return;
         }
 
-        if (json.has("name")) {
+        if (json.has("name") && !json.get("name").asText().isEmpty()) {
             name = json.get("name").asText();
         }
 
@@ -210,16 +210,17 @@ public class Stream extends StreamContainer {
 
     @Override
     public void validate() {
+        
         if (this.name == null || this.name.isEmpty()) {
             throw new ValidationException("Stream name is required");
         }
-        if (this.channels.isEmpty()) {
-            throw new ValidationException("Stream must have at least a channel");
-        } else {
+
+        if (!this.channels.isEmpty()) {
             for (Map.Entry<String, Channel> item : this.channels.entrySet()) {
                 item.getValue().validate();
             }
         }
+
     }
 
     public String getName() {

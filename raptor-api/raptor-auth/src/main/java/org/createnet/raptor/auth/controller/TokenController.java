@@ -108,17 +108,17 @@ public class TokenController {
         }
         
         Iterable<Token> tokens = tokenService.list(uuid);
-        final List<Token> userToken = new ArrayList();
+        final List<Token> userTokens = new ArrayList();
         
         tokens.forEach((Token token) -> {
             if(token.getType().equals(Token.Type.DEFAULT)) {
-                userToken.add(token);
+                userTokens.add(token);
             }
         });
         
-        logger.debug("Found {} tokens", userToken.size());
+        logger.debug("Found {} tokens", userTokens.size());
         
-        return ResponseEntity.ok(userToken);
+        return ResponseEntity.ok(userTokens);
     }
 
     @PreAuthorize("isAuthenticated()")
