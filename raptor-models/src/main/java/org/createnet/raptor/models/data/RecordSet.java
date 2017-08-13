@@ -334,7 +334,8 @@ public class RecordSet {
     public void validate() {
 
         if(channels.isEmpty()) {
-            throw new RaptorComponent.ValidationException("Channel data is empty");
+            // no channels specified, nothing to validate
+            return;
         }
         
         if (stream() != null) {
