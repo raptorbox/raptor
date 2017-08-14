@@ -1,0 +1,13 @@
+{
+    "channels": {
+        "position": [11.45, 45.11],
+        "ratio": 91.9,
+        "name": "My place",
+        "happy": true,
+        "list": [0, 1, 0, 0, 1],
+        "foobar": {
+            "subtype": true
+        }
+    },
+    "timestamp": 1463124861
+}

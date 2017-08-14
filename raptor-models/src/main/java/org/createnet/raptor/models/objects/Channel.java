@@ -30,9 +30,13 @@ import org.createnet.raptor.models.objects.RaptorComponent.ValidationException;
 public class Channel extends StreamContainer {
 
     public static final List<String> Types = new ArrayList(Arrays.asList(
+            
             "number",
             "string",
-            "boolean"
+            "boolean",
+            "geopoint",
+            "object",
+            "array"
     ));
 
     protected String name;

@@ -209,15 +209,27 @@ public class RecordSet {
             channelValue = channelNode.asText();
         }
 
-        if (channel != null && channelType != null) {
-            channel.type(channelType);
+        if (channelNode.isArray()) {
+            channelType = "array";
+            channelValue = channelNode;
+        }
+        
+        if (channel != null) {
+            if (channelType != null) {
+                channel.type(channelType);
+            } else {
+                channel.type("object");
+                channelValue = channelNode;
+            }
         }
 
         return channelValue;
     }
 
     private void parseJson(Stream stream, JsonNode row) {
-
+        
+        this.setStream(stream);
+        
         JsonNode channels = row;
         if (row.has("channels")) {
 

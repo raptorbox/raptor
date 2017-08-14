@@ -36,6 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -56,13 +58,15 @@ public class Device extends DeviceContainer {
     private boolean isNew = true;
 
     @Id
-    private String id = Device.generateUUID();
+    private String id = generateUUID();
 
     @Indexed
     private String userId;
 
     @Indexed
     private String name;
+    
+    @Indexed
     private String description = "";
 
     @Indexed
@@ -74,13 +78,8 @@ public class Device extends DeviceContainer {
     @Indexed
     final private Map<String, Object> properties = new HashMap();
 
-    @Indexed
     final private Settings settings = new Settings();
-
-    @Indexed
     final private Map<String, Stream> streams = new HashMap();
-
-    @Indexed
     final private Map<String, Action> actions = new HashMap();
 
     /**

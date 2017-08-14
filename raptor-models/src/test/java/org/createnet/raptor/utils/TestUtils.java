@@ -42,9 +42,7 @@ abstract public class TestUtils {
         device = new Device();
     }
 
-    ;
-  
-  protected JsonNode loadData(String filename) {
+    protected JsonNode loadData(String filename) {
 
         try {
             String filepath = filename + ".json";

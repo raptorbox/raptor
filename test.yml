@@ -182,7 +182,7 @@ services:
     image: mongo:3
     volumes:
       - ./data/mongodb:/data/db
-    command: --smallfiles # --rest --auth
+        command: --smallfiles --setParameter failIndexKeyTooLong=false 
     networks:
       - raptor_test
     ports:

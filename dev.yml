@@ -41,7 +41,7 @@ services:
       - ./data/mongodb:/data/db
     ports:
       - 27017:27017
-    command: --smallfiles # --rest --auth
+    command: --smallfiles --setParameter failIndexKeyTooLong=false
 
   redis:
     image: redis:alpine

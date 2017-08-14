@@ -1,9 +1,25 @@
+/*
+ * Copyright 2017 FBK/CREATE-NET
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.createnet.raptor.objects;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.utils.TestUtils;
@@ -67,6 +83,23 @@ public class RecordsetTest extends TestUtils {
 
         assertTrue(json.get("channels").get("happy").isBoolean());
         assertTrue(!json.get("userId").isNull());
+
+    }
+
+    @Test
+    public void testParseRecordNewTypes() throws IOException {
+
+        JsonNode devjson = loadData("device2");
+        Device dev = Device.fromJSON(devjson);
+        
+        JsonNode data = loadData("record2");
+
+        Stream stream = device.streams().get("data");
+        RecordSet record = mapper.readValue(data.toString(), RecordSet.class);
+        
+        assertTrue(record.channel("foobar").getObject() != null);
+        assertTrue(record.channel("list").getList().size() == 5);
+        assertTrue(record.channel("position").getPosition().getX() == 11.45);
 
     }
 
