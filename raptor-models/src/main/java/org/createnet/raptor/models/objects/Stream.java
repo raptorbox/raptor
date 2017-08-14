@@ -33,7 +33,7 @@ import org.springframework.data.annotation.Transient;
  */
 @JsonSerialize(using = StreamSerializer.class)
 public class Stream extends StreamContainer {
-    
+
     @JsonIgnore
     @Transient
     private final Logger logger = LoggerFactory.getLogger(Stream.class);
@@ -41,9 +41,9 @@ public class Stream extends StreamContainer {
     protected String name;
     protected String type;
     protected String description;
-    
+
     final protected Map<String, Channel> channels = new HashMap();
-    
+
     public static Stream create(String name, String type, String description) {
         Stream s = new Stream();
         s.name = name;
@@ -51,11 +51,11 @@ public class Stream extends StreamContainer {
         s.description = description;
         return s;
     }
-    
+
     public static Stream create(String name, String type) {
         return create(name, type, null);
     }
-    
+
     public static Stream create(String name) {
         return create(name, null, null);
     }
@@ -106,6 +106,7 @@ public class Stream extends StreamContainer {
 
     /**
      * Add a Channel to the stream
+     *
      * @param name
      * @param type
      * @param unit
@@ -118,6 +119,7 @@ public class Stream extends StreamContainer {
 
     /**
      * Add a Channel to the stream
+     *
      * @param name
      * @param type
      * @return
@@ -125,25 +127,26 @@ public class Stream extends StreamContainer {
     public Stream addChannel(String name, String type) {
         return addChannel(name, type, null);
     }
-    
+
     /**
      * Add a Channel to the stream
+     *
      * @param channel
      * @return
      */
     public Stream addChannel(final Channel channel) {
-        
+
         // skip if it exists
         final Channel prevChannel = this.channels.get(channel.name);
         if (prevChannel != null && prevChannel.type.equals(channel.type)) {
             return this;
         }
-        
+
         channel.setContainer(this);
         this.channels.put(channel.name, channel);
         return this;
     }
-    
+
     protected void parse(JsonNode json, Device object) {
         this.setDevice(object);
         parse(json);
@@ -176,9 +179,21 @@ public class Stream extends StreamContainer {
 
     protected void parse(JsonNode json) {
 
-        if (!json.has("channels")) {
-            parseChannels(json);
+        if (json.size() == 0) {
             return;
+        }
+
+        if (!json.has("channels")) {
+            
+            if (!(json.has("name") && json.has("type") && json.has("description"))) {
+                parseChannels(json);            
+                return;
+            }
+            
+        } else {
+            if (json.get("channels").size() == 0) {
+                return;
+            }
         }
 
         if (json.has("name") && !json.get("name").asText().isEmpty()) {
@@ -210,7 +225,7 @@ public class Stream extends StreamContainer {
 
     @Override
     public void validate() {
-        
+
         if (this.name == null || this.name.isEmpty()) {
             throw new ValidationException("Stream name is required");
         }
@@ -238,7 +253,7 @@ public class Stream extends StreamContainer {
     public Map<String, Channel> getChannels() {
         return channels;
     }
-    
+
     public String name() {
         return name;
     }
@@ -255,6 +270,4 @@ public class Stream extends StreamContainer {
         return channels;
     }
 
-    
-    
 }

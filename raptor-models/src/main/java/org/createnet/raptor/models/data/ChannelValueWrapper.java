@@ -56,11 +56,14 @@ public class ChannelValueWrapper {
             if(json.isArray()) {
                 return new GeoJsonPoint(json.get(0).asDouble(), json.get(1).asDouble());
             }
+            if(json.has("x") && json.has("y")) {
+                return new GeoJsonPoint(json.get("x").asDouble(), json.get("y").asDouble());
+            }
             if(json.has("lat") && json.has("lon")) {
-                return new GeoJsonPoint(json.get("lat").asDouble(), json.get("long").asDouble());
+                return new GeoJsonPoint(json.get("lon").asDouble(), json.get("lat").asDouble());
             }
             if(json.has("latitude") && json.has("longitude")) {
-                return new GeoJsonPoint(json.get("latitude").asDouble(), json.get("longitude").asDouble());
+                return new GeoJsonPoint(json.get("longitude").asDouble(), json.get("latitude").asDouble());
             }
         }
         throw new ValueConversionException("Cannot cast value to GeoJsonPoint");

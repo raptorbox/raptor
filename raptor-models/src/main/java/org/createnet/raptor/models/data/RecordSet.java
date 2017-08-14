@@ -58,7 +58,7 @@ public class RecordSet {
 
     @Id
     protected String id;
-    
+
     @Indexed
     protected Date timestamp;
 
@@ -213,7 +213,7 @@ public class RecordSet {
             channelType = "array";
             channelValue = channelNode;
         }
-        
+
         if (channel != null) {
             if (channelType != null) {
                 channel.type(channelType);
@@ -227,9 +227,9 @@ public class RecordSet {
     }
 
     private void parseJson(Stream stream, JsonNode row) {
-        
+
         this.setStream(stream);
-        
+
         JsonNode channels = row;
         if (row.has("channels")) {
 
@@ -278,29 +278,29 @@ public class RecordSet {
     public Map<String, Object> channels() {
         return channels;
     }
-    
+
     /**
      * @param channelName
-     * @return 
+     * @return
      */
     public ChannelValueWrapper value(String channelName) {
-        if(channels.get(channelName) == null) {
+        if (channels.get(channelName) == null) {
             return null;
         }
         return new ChannelValueWrapper(channels.get(channelName));
     }
-    
+
     /**
      * @param channelName
-     * @return 
+     * @return
      */
     public ChannelValueWrapper channel(String channelName) {
-        if(channels.get(channelName) == null) {
+        if (channels.get(channelName) == null) {
             return null;
         }
         return new ChannelValueWrapper(channels.get(channelName));
     }
-    
+
     /**
      * @param channel
      * @return IRecord
@@ -342,70 +342,65 @@ public class RecordSet {
         }
 
     }
-    
+
     public void validate() {
 
-        if(channels.isEmpty()) {
+        if (channels.isEmpty()) {
             throw new RaptorComponent.ValidationException("No data provided");
         }
-        
+
         if (stream() != null) {
-            
+
             if (stream().getChannels().isEmpty()) {
                 return;
             }
-            
+
             for (String channelName : channels.keySet()) {
-                
+
                 Channel channel = stream().channels().getOrDefault(channelName, null);
                 if (channel == null) {
-                    throw new RaptorComponent.ValidationException("Objet model does not define this channel: " + channelName);
+                    throw new RaptorComponent.ValidationException("Object model does not define this channel: " + channelName);
                 }
-                
+
                 Object value = this.channels.get(channelName);
-                
-                if(channel.type().equals("boolean")) {
-                    if(!(value instanceof Boolean)) {
+
+                if (channel.type().equals("boolean")) {
+                    if (!(value instanceof Boolean)) {
                         throw new RaptorComponent.ValidationException("Channel " + channelName + " should be a boolean");
                     }
                 }
-                if(channel.type().equals("number")) {
-                    if(
-                        !(value instanceof Float) && 
-                        !(value instanceof Double) && 
-                        !(value instanceof Integer) && 
-                        !(value instanceof Long) && 
-                        !(value instanceof Short)
-                    ) {
+                if (channel.type().equals("number")) {
+                    if (!(value instanceof Float)
+                            && !(value instanceof Double)
+                            && !(value instanceof Integer)
+                            && !(value instanceof Long)
+                            && !(value instanceof Short)) {
                         throw new RaptorComponent.ValidationException("Channel " + channelName + " should be a number");
-                    }                    
+                    }
                 }
-                if(channel.type().equals("string")) {
-                    if(!(value instanceof String)) {
+                if (channel.type().equals("string")) {
+                    if (!(value instanceof String)) {
                         throw new RaptorComponent.ValidationException("Channel " + channelName + " should be a string");
-                    }                                        
+                    }
                 }
             }
         }
-        
-        
-        
+
     }
 
     public String userId() {
         return userId;
-    }    
-    
+    }
+
     public RecordSet userId(String userId) {
         this.userId = userId;
         return this;
     }
 
-
     public String streamId() {
         return streamId;
-    }    
-    
+    }
+
     public RecordSet streamId(String streamId) {
         this.streamId = streamId;
         return this;
@@ -414,7 +409,7 @@ public class RecordSet {
     public String deviceId() {
         return deviceId;
     }
-    
+
     public RecordSet deviceId(String deviceId) {
         this.deviceId = deviceId;
         return this;
@@ -437,12 +432,12 @@ public class RecordSet {
     public Date timestamp() {
         return timestamp;
     }
-    
+
     public RecordSet timestamp(Instant i) {
         setTimestamp(Date.from(i));
         return this;
     }
-    
+
     public RecordSet timestamp(int time) {
         setTimestamp(new Date(time));
         return this;
@@ -466,7 +461,7 @@ public class RecordSet {
         this.location = new GeoJsonPoint(x, y);
         return this;
     }
-    
+
     public RecordSet location(GeoJsonPoint location) {
         this.location = location;
         return this;
@@ -550,6 +545,4 @@ public class RecordSet {
         return stream;
     }
 
-
-    
 }
