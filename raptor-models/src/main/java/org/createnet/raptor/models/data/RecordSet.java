@@ -351,7 +351,8 @@ public class RecordSet {
 
         if (stream() != null) {
 
-            if (stream().getChannels().isEmpty()) {
+            if (stream().isDynamic()) {
+                // no channels schema defined
                 return;
             }
 
