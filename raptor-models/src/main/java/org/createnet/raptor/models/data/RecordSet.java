@@ -346,11 +346,15 @@ public class RecordSet {
     public void validate() {
 
         if(channels.isEmpty()) {
-            // no channels specified, nothing to validate
-            return;
+            throw new RaptorComponent.ValidationException("No data provided");
         }
         
         if (stream() != null) {
+            
+            if (stream().getChannels().isEmpty()) {
+                return;
+            }
+            
             for (String channelName : channels.keySet()) {
                 
                 Channel channel = stream().channels().getOrDefault(channelName, null);
