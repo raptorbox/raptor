@@ -192,9 +192,17 @@ public class UserController {
 
         // change username, but ensure it does not exists already
         if (!rawUser.getUsername().equals(user.getUsername())) {
-            boolean exists = userService.exists(rawUser);
-            if (exists) {
+            User exists = userService.findByUsername(rawUser.getUsername());
+            if (exists != null) {
                 return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Username already taken");
+            }
+        }
+        
+        // change email, but ensure it does not exists already
+        if (!rawUser.getEmail().equals(user.getEmail())) {
+            User exists = userService.findByEmail(rawUser.getEmail());
+            if (exists != null) {
+                return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Email already registered");
             }
         }
 
