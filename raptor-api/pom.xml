@@ -23,6 +23,7 @@
         <module>raptor-tree</module>
         <module>raptor-gateway</module>
         <module>raptor-standalone</module>
+        <module>raptor-application</module>
     </modules>
     
     <dependencyManagement>

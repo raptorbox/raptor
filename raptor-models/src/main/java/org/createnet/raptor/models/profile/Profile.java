@@ -17,6 +17,7 @@ package org.createnet.raptor.models.profile;
 
 import java.util.UUID;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
@@ -30,7 +31,10 @@ public class Profile {
     protected String id = UUID.randomUUID().toString();
     
     protected String userId;
+    
+    @Indexed
     protected String name;
+    
     protected String value;
 
     public Profile() {

@@ -23,3 +23,4 @@ nb*
 /swagger/api
 /raptor-api/raptor-standalone/target/
 /raptor-api/raptor-standalone/data/
+/raptor-api/raptor-application/target/
