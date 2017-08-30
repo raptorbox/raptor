@@ -107,6 +107,7 @@ public class App {
     }
 
     public void setOptions(Map<String, Object> options) {
+        this.options.clear();
         this.options.putAll(options);
     }
 
@@ -115,6 +116,7 @@ public class App {
     }
 
     public void setUsers(List<User> users) {
+        this.users.clear();
         this.users.addAll(users);
     }
 
@@ -123,6 +125,7 @@ public class App {
     }
 
     public void setDevices(List<Device> devices) {
+        this.devices.clear();
         this.devices.addAll(devices);
     }
 
@@ -131,6 +134,7 @@ public class App {
     }
 
     public void setTokens(List<Token> tokens) {
+        this.tokens.clear();
         this.tokens.addAll(tokens);
     }
 

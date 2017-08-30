@@ -30,6 +30,7 @@ import org.springframework.stereotype.Repository;
 public interface AppRepository extends MongoRepository<App, String> {
 
     public List<App> findByUserId(String userId);
+    public App findOneById(String id);
     public App findOneByUserIdAndName(String userId, String name);
 
 }

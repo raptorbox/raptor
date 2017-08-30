@@ -50,4 +50,12 @@ public class JsonErrorResponse {
     public static ResponseEntity<?> badRequest() {
         return badRequest("Bad request");
     }
+    
+    public static ResponseEntity<?> unauthorized() {
+        return entity(HttpStatus.UNAUTHORIZED);
+    }
+    
+    public static ResponseEntity<?> forbidden() {
+        return entity(HttpStatus.FORBIDDEN);
+    }
 }

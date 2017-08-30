@@ -38,6 +38,10 @@ public class AppService {
         return repository.findOneByUserIdAndName(userId, name);
     }
     
+    public App get(String id) {
+        return repository.findOneById(id);
+    }
+    
     public List<App> list(String userId) {
         return repository.findByUserId(userId);
     }

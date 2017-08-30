@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -108,6 +109,71 @@ public class AppController {
         App saved = appService.save(app);
         log.debug("Created app %s (%s)", app.getName(), app.getId());
         return ResponseEntity.ok(saved);
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, value = "/{appId}")
+    @ApiOperation(
+            value = "Update an app",
+            notes = "",
+            response = org.createnet.raptor.models.app.App.class,
+            nickname = "updateApp"
+    )
+    @PreAuthorize("hasAnyRole('super_admin', 'admin') or #userId == principal.uuid")
+    public ResponseEntity<?> updateApp(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable("appId") String appId,
+            @RequestBody App app
+    ) {
+        
+        App stored = appService.get(appId);
+        if(stored == null) {
+            return JsonErrorResponse.notFound();
+        }
+        
+        if (!(currentUser.isAdmin() || currentUser.getUuid().equals(stored.getUserId()))) {
+            return JsonErrorResponse.unauthorized();
+        }
+        
+        app.setId(stored.getId());
+        app.setUserId(stored.getUserId());
+        
+        try {
+            app.validate();
+        } catch (RaptorComponent.ValidationException ex) {
+            return JsonErrorResponse.badRequest(ex.getMessage());
+        }
+
+        App saved = appService.save(app);
+        log.debug("Updated app %s (%s)", app.getName(), app.getId());
+        return ResponseEntity.ok(saved);
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/{appId}")
+    @ApiOperation(
+            value = "Delete an app",
+            notes = "",
+            response = org.createnet.raptor.models.app.App.class,
+            nickname = "deleteApp"
+    )
+    @PreAuthorize("hasAnyRole('super_admin', 'admin')")
+    public ResponseEntity<?> deleteApp(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable("appId") String appId
+    ) {
+        
+        App app = appService.get(appId);
+        if(app == null) {
+            return JsonErrorResponse.notFound();
+        }
+        
+        if (!(currentUser.isAdmin() || currentUser.getUuid().equals(app.getUserId()))) {
+            return JsonErrorResponse.unauthorized();
+        }
+
+        appService.delete(app);
+        
+        log.debug("Deleted app %s (%s)", app.getName(), app.getId());
+        return ResponseEntity.accepted().build();
     }
 
 }
