@@ -45,6 +45,8 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.MapPath;
 import com.querydsl.core.types.dsl.SimplePath;
 import com.querydsl.core.types.dsl.StringPath;
+import org.springframework.data.geo.Box;
+import org.springframework.data.geo.Point;
 
 /**
  *
@@ -101,14 +103,23 @@ public class DataQueryBuilder extends BaseQueryBuilder {
         }
 
         if (!query.getLocation().isEmpty()) {
+
             GeoQuery.Distance d = query.getLocation().getDistance();
             if (d.center != null) {
-                addCriteria(Criteria.where("location").withinSphere(
-                        new Circle(d.center, 
-                                new Distance(d.radius, d.unit)
-                        )
-                ));
+                addCriteria(Criteria.where("location").withinSphere(new Circle(
+                        d.center, new Distance(d.radius, d.unit)
+                )));
             }
+
+            GeoQuery.BoundingBox b = query.getLocation().getBoundingBox();
+            if (b.northWest != null && b.southWest != null) {
+                Box box = new Box(
+                        new Point(b.northWest.getX(), b.northWest.getY()),
+                        new Point(b.southWest.getX(), b.southWest.getY())
+                );
+                addCriteria(Criteria.where("location").within(box));
+            }
+
         }
 
         for (Map.Entry<String, IQuery> en : query.getChannels().entrySet()) {
@@ -117,9 +128,11 @@ public class DataQueryBuilder extends BaseQueryBuilder {
             String channelFieldName = "channels." + channelName;
 
             IQuery channelQuery = en.getValue();
-            
-            if(channelQuery.isEmpty()) continue;
-            
+
+            if (channelQuery.isEmpty()) {
+                continue;
+            }
+
             if (channelQuery instanceof TextQuery) {
 
                 TextQuery txtQuery = (TextQuery) channelQuery;
