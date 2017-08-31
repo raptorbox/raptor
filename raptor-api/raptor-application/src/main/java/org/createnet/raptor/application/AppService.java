@@ -70,22 +70,22 @@ public class AppService {
         
         app.validate();
         
-        app.getUsers().forEach((uuid) -> {
+        app.getUsers().forEach((appUser) -> {
             try {
-                raptor.Admin().User().get(uuid);
+                raptor.Admin().User().get(appUser.getId());
             }
             catch(RequestException ex) {
-                log.error("Failed to load user {}: {}", uuid, ex.getBody());
+                log.error("Failed to load user {}: {}", appUser.getId(), ex.getBody());
                 throw new RaptorComponent.ValidationException(ex);
             }
         });
 
-        app.getDevices().forEach((uuid) -> {
+        app.getDevices().forEach((appDevice) -> {
             try {
-                raptor.Inventory().load(uuid);
+                raptor.Inventory().load(appDevice.getId());
             }
             catch(RequestException ex) {
-                log.error("Failed to load device {}: {}", uuid, ex.getBody());
+                log.error("Failed to load device {}: {}", appDevice.getId(), ex.getBody());
                 throw new RaptorComponent.ValidationException(ex);
             }
         });

@@ -44,12 +44,12 @@ public class App {
     protected String name;
     protected String description;
     
-    protected final Map<String, Object> options = new HashMap();
-    protected final List<String> users = new ArrayList();
-    protected final List<String> devices = new ArrayList();
-
-    public App() {
-    }
+    protected Map<String, Object> options = new HashMap();
+    protected List<AppUser> users = new ArrayList();
+    protected List<AppDevice> devices = new ArrayList();
+    protected List<AppRole> roles = new ArrayList();
+    
+    public App() {}
 
     public void validate() throws RaptorComponent.ValidationException {
         
@@ -108,12 +108,28 @@ public class App {
         this.options.putAll(options);
     }
 
-    public List<String> getUsers() {
+    public List<AppUser> getUsers() {
         return users;
     }
 
-    public List<String> getDevices() {
+    public void setUsers(List<AppUser> users) {
+        this.users = users;
+    }
+
+    public List<AppDevice> getDevices() {
         return devices;
     }
 
+    public void setDevices(List<AppDevice> devices) {
+        this.devices = devices;
+    }
+
+    public List<AppRole> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<AppRole> roles) {
+        this.roles = roles;
+    }
+    
 }

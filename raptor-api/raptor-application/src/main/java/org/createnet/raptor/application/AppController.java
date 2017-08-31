@@ -125,7 +125,6 @@ public class AppController {
             response = org.createnet.raptor.models.app.App.class,
             nickname = "updateApp"
     )
-    @PreAuthorize("hasAnyRole('super_admin', 'admin') or #userId == principal.uuid")
     public ResponseEntity<?> updateApp(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("appId") String appId,
@@ -162,7 +161,6 @@ public class AppController {
             response = org.createnet.raptor.models.app.App.class,
             nickname = "deleteApp"
     )
-    @PreAuthorize("hasAnyRole('super_admin', 'admin')")
     public ResponseEntity<?> deleteApp(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("appId") String appId
