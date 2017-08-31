@@ -43,7 +43,7 @@ public class Stream extends StreamContainer {
     private final Logger logger = LoggerFactory.getLogger(Stream.class);
 
     protected String name;
-    protected StreamType type;
+    protected StreamType type = StreamType.schema;
     protected String description;
 
     final protected Map<String, Channel> channels = new HashMap();
