@@ -13,22 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.sdk;
+package org.createnet.raptor.sdk.events.callback;
+
+import org.createnet.raptor.models.auth.Token;
+import org.createnet.raptor.models.payload.TokenPayload;
 
 /**
- * List of topics for Raptor API
+ *
+ * @author Luca Capra <lcapra@fbk.eu>
  */
-final public class Topics {
-    
-    public enum Types {
-        action, stream, device, user, tree, token
-    }
-    
-    public static final String ACTION = Types.action.name() + "/%s/%s";
-    public static final String STREAM = Types.stream.name() + "/%s/%s";
-    public static final String DEVICE = Types.device.name() + "/%s";
-    public static final String USER = Types.user.name() + "/%s";
-    public static final String TOKEN = Types.token.name() + "/%s";
-    public static final String TREE = Types.tree.name() + "/%s";
-    
+public interface TokenCallback extends RaptorCallback {
+    public void callback(Token obj, TokenPayload message);
 }

@@ -31,7 +31,8 @@ public interface DispatcherPayload {
 
     public enum MessageType {
         device, stream, action, data, 
-        user, permission, role, tree
+        user, permission, role, tree,
+        token
     }
     
     /**
@@ -87,8 +88,10 @@ public interface DispatcherPayload {
 //                    return RaptorContainer.getMapper().treeToValue(json, PermissionPayload.class);
 //                case role:
 //                    return RaptorContainer.getMapper().treeToValue(json, RolePayload.class);
-//                case user:
-//                    return RaptorContainer.getMapper().treeToValue(json, UserPayload.class);
+                case user:
+                    return RaptorContainer.getMapper().treeToValue(json, UserPayload.class);
+                case token:
+                    return RaptorContainer.getMapper().treeToValue(json, TokenPayload.class);
                 default:
                     throw new Exception("Field `type` does not match a known payload: " + type);
             }

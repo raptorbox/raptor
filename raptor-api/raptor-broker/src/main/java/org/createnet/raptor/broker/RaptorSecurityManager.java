@@ -206,6 +206,9 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
                         return hasDevicePermission(r, id, Permissions.pull);
                     case tree:
                         return hasDevicePermission(r, null, Permissions.tree);
+                    case token:
+                    case user:
+                        return r.Auth().getUser().isSuperAdmin();
                 }
                 
                 logger.error("Unrecognized subscribe topic pattern {}", address);

@@ -16,6 +16,8 @@
 package org.createnet.raptor.sdk.admin;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.exception.RequestException;
@@ -62,6 +64,29 @@ public class UserTest {
         return (rnd % 2 == 0 ? "test_fil_" : "user_ippo_") + rnd;
     }
 
+    @Test
+    public void receiveUserUpdate() {
+        
+        AtomicBoolean done = new AtomicBoolean(false);
+        
+        String username = rndUsername();
+        log.debug("Create user {}", username);
+        final User user = raptor.Admin().User().create(username, "pass_" + rndUsername(), "test@test.raptor.local");
+  
+        raptor.Admin().User().subscribe(user, (u, message) -> {
+            
+            assertEquals(false, message.getUser().getEnabled());
+            assertEquals(user.getUuid(), u.getUuid());
+            
+            done.set(true);
+        });        
+        
+        user.setEnabled(false);
+        raptor.Admin().User().update(user);
+          
+        Utils.waitUntil(5, () -> !done.get());
+    }
+    
     @Test
     public void createUser() {
 

@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.ArrayList;
 import java.util.List;
+import org.createnet.raptor.auth.events.TokenEventPublisher;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
@@ -73,6 +74,9 @@ public class TokenController {
 
     private final Logger logger = LoggerFactory.getLogger(TokenController.class);
 
+    @Autowired
+    private TokenEventPublisher eventPublisher;
+    
     @Autowired
     private TokenService tokenService;
 
@@ -178,7 +182,9 @@ public class TokenController {
         }
 
         logger.debug("User {} created new token {} {}", currentUser.getUuid(), token2.getName(),  token2.getId());
-
+        
+        eventPublisher.create(token2);
+        
         return ResponseEntity.status(HttpStatus.CREATED).body(token2);
     }
 
@@ -227,6 +233,8 @@ public class TokenController {
 
         logger.debug("User {} update token {}", user.getUuid(), token2.getId());
 
+        eventPublisher.update(token2);
+        
         return ResponseEntity.status(HttpStatus.OK).body(token2);
     }
 
@@ -255,9 +263,10 @@ public class TokenController {
         }
 
         tokenService.delete(token);
+        eventPublisher.delete(token);
 
         logger.debug("User {} deleted token {}", user.getUuid(), token.getId());
-
+        
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
     }
 

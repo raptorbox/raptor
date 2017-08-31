@@ -29,9 +29,13 @@ import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationRequest;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.payload.DispatcherPayload;
+import org.createnet.raptor.models.payload.UserPayload;
 import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.Routes;
 import org.createnet.raptor.sdk.api.AuthClient;
+import org.createnet.raptor.sdk.events.callback.UserCallback;
+import org.createnet.raptor.sdk.events.callback.UserEventCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +76,33 @@ public class UserClient extends AbstractClient {
 
     final static Logger logger = LoggerFactory.getLogger(UserClient.class);
 
+
+    /**
+     * Register for user events
+     *
+     * @param user
+     * @param callback The callback to fire on event arrival
+     */
+    public void subscribe(User user, UserEventCallback callback) {
+        getEmitter().subscribe(user, callback);
+    }
+
+    /**
+     * Subscribe to user related events 
+     *
+     * @param user
+     * @param ev
+     */
+    public void subscribe(User user, UserCallback ev) {
+        getEmitter().subscribe(user, (DispatcherPayload payload) -> {
+            switch (payload.getType()) {
+                case user:
+                    ev.callback(user, (UserPayload) payload);
+                    break;
+            }
+        });
+    }
+    
     /**
      * Check if an user is authorized to operate on a device
      *

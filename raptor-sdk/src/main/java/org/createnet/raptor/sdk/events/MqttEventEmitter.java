@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.createnet.raptor.models.auth.Token;
+import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.objects.Action;
@@ -30,7 +32,9 @@ import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.tree.TreeNode;
 import org.createnet.raptor.sdk.Topics;
+import org.createnet.raptor.sdk.events.callback.TokenEventCallback;
 import org.createnet.raptor.sdk.events.callback.TreeNodeEventCallback;
+import org.createnet.raptor.sdk.events.callback.UserEventCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +71,14 @@ public class MqttEventEmitter extends AbstractClient {
 
     protected String getDeviceTopic(Device obj) {
         return String.format(Topics.DEVICE, obj.getId());
+    }
+
+    protected String getUserTopic(User obj) {
+        return String.format(Topics.USER, obj.getUuid());
+    }
+
+    protected String getTokenTopic(Token obj) {
+        return String.format(Topics.TOKEN, obj.getId().toString());
     }
 
     protected String getGroupTopic(TreeNode n) {
@@ -142,6 +154,40 @@ public class MqttEventEmitter extends AbstractClient {
         registerCallback();
 
         String topic = getDeviceTopic(dev);
+        getMqttClientHandler().subscribe(topic);
+
+        addTopicCallback(topic, ev);
+
+    }
+
+    /**
+     * Subscribe for user events
+     *
+     * @param user the user to listen for
+     * @param ev
+     */
+    public void subscribe(User user, UserEventCallback ev) {
+
+        registerCallback();
+
+        String topic = getUserTopic(user);
+        getMqttClientHandler().subscribe(topic);
+
+        addTopicCallback(topic, ev);
+
+    }
+
+    /**
+     * Subscribe for token events
+     *
+     * @param token the token to listen for
+     * @param ev
+     */
+    public void subscribe(Token token, TokenEventCallback ev) {
+
+        registerCallback();
+
+        String topic = getTokenTopic(token);
         getMqttClientHandler().subscribe(topic);
 
         addTopicCallback(topic, ev);
