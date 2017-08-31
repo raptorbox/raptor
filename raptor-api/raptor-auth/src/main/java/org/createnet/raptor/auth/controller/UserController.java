@@ -19,6 +19,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.createnet.raptor.auth.events.UserEventPublisher;
 import org.createnet.raptor.auth.services.TokenService;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.auth.User;
@@ -72,6 +73,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     @Autowired
+    private UserEventPublisher eventPublisher;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
@@ -111,7 +115,10 @@ public class UserController {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Username already taken");
         }
 
-        return ResponseEntity.ok(userService.create(new User(rawUser, true)));
+        User saved = userService.create(new User(rawUser, true));
+        eventPublisher.create(saved);
+        
+        return ResponseEntity.ok(saved);
     }
 
     @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
@@ -153,7 +160,7 @@ public class UserController {
         if (u == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "User not found");
         }
-        
+
         if (u.hasRole(Role.Roles.super_admin)) {
             return JsonErrorResponse.entity(HttpStatus.FORBIDDEN, "Cannot impersonat this user");
         }
@@ -197,7 +204,7 @@ public class UserController {
                 return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Username already taken");
             }
         }
-        
+
         // change email, but ensure it does not exists already
         if (!rawUser.getEmail().equals(user.getEmail())) {
             User exists = userService.findByEmail(rawUser.getEmail());
@@ -210,7 +217,11 @@ public class UserController {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "User cannot be modified");
         }
 
-        return ResponseEntity.ok(userService.update(user, rawUser));
+        User saved = userService.update(user, rawUser);
+
+        eventPublisher.update(saved);
+
+        return ResponseEntity.ok(saved);
     }
 
     @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
@@ -233,6 +244,8 @@ public class UserController {
         }
 
         userService.delete(user);
+
+        eventPublisher.delete(user);
 
         return ResponseEntity.accepted().body(null);
     }

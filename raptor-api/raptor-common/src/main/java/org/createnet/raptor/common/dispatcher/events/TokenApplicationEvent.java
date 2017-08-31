@@ -13,22 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.sdk;
+package org.createnet.raptor.common.dispatcher.events;
+
+import org.createnet.raptor.events.type.TokenEvent;
+import org.springframework.context.ApplicationEvent;
 
 /**
- * List of topics for Raptor API
+ *
+ * @author Luca Capra <lcapra@fbk.eu>
  */
-final public class Topics {
+public class TokenApplicationEvent extends ApplicationEvent {
+
+    private final TokenEvent tokenEvent;
     
-    public enum Types {
-        action, stream, device, user, tree, token
+    public TokenApplicationEvent(Object source, TokenEvent dev) {
+        super(source);
+        this.tokenEvent = dev;
     }
-    
-    public static final String ACTION = Types.action.name() + "/%s/%s";
-    public static final String STREAM = Types.stream.name() + "/%s/%s";
-    public static final String DEVICE = Types.device.name() + "/%s";
-    public static final String USER = Types.user.name() + "/%s";
-    public static final String TOKEN = Types.token.name() + "/%s";
-    public static final String TREE = Types.tree.name() + "/%s";
+
+    public TokenEvent getTokenEvent() {
+        return tokenEvent;
+    }
     
 }

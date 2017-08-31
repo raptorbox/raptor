@@ -16,6 +16,8 @@
 package org.createnet.raptor.common.dispatcher;
 
 import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.auth.Token;
+import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.configuration.AuthConfiguration;
 import org.createnet.raptor.models.configuration.DispatcherConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
@@ -29,6 +31,8 @@ import org.createnet.raptor.models.payload.ActionPayload;
 import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.StreamPayload;
+import org.createnet.raptor.models.payload.TokenPayload;
+import org.createnet.raptor.models.payload.UserPayload;
 import org.createnet.raptor.models.tree.TreeNode;
 import org.createnet.raptor.sdk.Topics;
 import org.slf4j.Logger;
@@ -147,6 +151,14 @@ public class DispatcherService implements InitializingBean, DisposableBean {
 
         return String.format(Topics.USER, userId);
     }
+    
+    protected String getUserEventsTopic(User u) {
+        return String.format(Topics.USER, u.getUuid());
+    }
+    
+    protected String getTokenEventsTopic(Token t) {
+        return String.format(Topics.TOKEN, t.getId().toString());
+    }
 
     /**
      *
@@ -198,6 +210,29 @@ public class DispatcherService implements InitializingBean, DisposableBean {
         String topic = getEventsTopic(obj);
         DevicePayload payload = new DevicePayload(obj, op);
 
+        notifyEvent(topic, payload);
+    }
+
+
+    /**
+     *
+     * @param op
+     * @param user
+     */
+    public void notifyUserEvent(Permissions op, User user) {
+        String topic = getUserEventsTopic(user);
+        UserPayload payload = new UserPayload(user, op);
+        notifyEvent(topic, payload);
+    }
+    
+    /**
+     *
+     * @param op
+     * @param token
+     */
+    public void notifyTokenEvent(Permissions op, Token token) {
+        String topic = getTokenEventsTopic(token);
+        TokenPayload payload = new TokenPayload(token, op);
         notifyEvent(topic, payload);
     }
 

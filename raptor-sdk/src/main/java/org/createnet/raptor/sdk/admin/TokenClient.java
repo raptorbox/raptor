@@ -20,9 +20,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import org.createnet.raptor.models.auth.Token;
+import org.createnet.raptor.models.payload.DispatcherPayload;
+import org.createnet.raptor.models.payload.TokenPayload;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Routes;
+import org.createnet.raptor.sdk.events.callback.TokenCallback;
+import org.createnet.raptor.sdk.events.callback.TokenEventCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +65,33 @@ public class TokenClient extends AbstractClient {
 
     final static Logger logger = LoggerFactory.getLogger(TokenClient.class);
 
+
+    /**
+     * Register for token events
+     *
+     * @param token
+     * @param callback The callback to fire on event arrival
+     */
+    public void subscribe(Token token, TokenEventCallback callback) {
+        getEmitter().subscribe(token, callback);
+    }
+
+    /**
+     * Subscribe to token related events 
+     *
+     * @param token
+     * @param ev
+     */
+    public void subscribe(Token token, TokenCallback ev) {
+        getEmitter().subscribe(token, (DispatcherPayload payload) -> {
+            switch (payload.getType()) {
+                case token:
+                    ev.callback(token, (TokenPayload) payload);
+                    break;
+            }
+        });
+    }    
+    
     /**
      * Get user tokens
      *
