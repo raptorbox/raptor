@@ -39,7 +39,7 @@
         <spring-boot>1.5.4.RELEASE</spring-boot>
         <unirest>1.4.9</unirest>
     
-        <artemis>1.5.5</artemis>
+        <artemis>2.2.0</artemis>
         <flyway>4.1.2</flyway>
         <springfox>2.7.0</springfox>
         

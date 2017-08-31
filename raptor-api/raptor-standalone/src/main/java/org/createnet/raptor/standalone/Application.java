@@ -54,6 +54,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
     "org.createnet.raptor.inventory",
     "org.createnet.raptor.profile",    
     "org.createnet.raptor.tree",
+    "org.createnet.raptor.application",
 })
 
 @EnableWebMvc

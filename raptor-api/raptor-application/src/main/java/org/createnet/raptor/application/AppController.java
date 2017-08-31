@@ -15,11 +15,11 @@
  */
 package org.createnet.raptor.application;
 
+import com.querydsl.core.types.Predicate;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.util.List;
 import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -27,13 +27,17 @@ import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -65,9 +69,9 @@ import org.springframework.web.bind.annotation.RestController;
 })
 @Api(tags = {"Application"})
 public class AppController {
-    
+
     private final Logger log = LoggerFactory.getLogger(AppController.class);
-    
+
     @Autowired
     private AppService appService;
 
@@ -76,14 +80,17 @@ public class AppController {
             value = "Return the apps owned by an user",
             notes = "",
             response = org.createnet.raptor.models.app.App.class,
-            nickname = "getUserApps"
+            nickname = "getApps"
     )
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getUserApps(
-            @AuthenticationPrincipal User currentUser
+    public ResponseEntity<?> geApps(
+            @AuthenticationPrincipal User currentUser,
+            @QuerydslPredicate(root = User.class) Predicate predicate,
+            Pageable pageable,
+            @RequestParam MultiValueMap<String, String> parameters
     ) {
-        List<App> apps = appService.list(currentUser.getUuid());
-        log.debug("Found %s apps", apps.size());
+
+        Iterable<App> apps = appService.find(predicate, pageable);
         return ResponseEntity.ok(apps);
     }
 
@@ -101,11 +108,11 @@ public class AppController {
     ) {
 
         try {
-            app.validate();
+            appService.validate(app);
         } catch (RaptorComponent.ValidationException ex) {
             return JsonErrorResponse.badRequest(ex.getMessage());
         }
-
+        
         App saved = appService.save(app);
         log.debug("Created app %s (%s)", app.getName(), app.getId());
         return ResponseEntity.ok(saved);
@@ -124,21 +131,21 @@ public class AppController {
             @PathVariable("appId") String appId,
             @RequestBody App app
     ) {
-        
+
         App stored = appService.get(appId);
-        if(stored == null) {
+        if (stored == null) {
             return JsonErrorResponse.notFound();
         }
-        
+
         if (!(currentUser.isAdmin() || currentUser.getUuid().equals(stored.getUserId()))) {
             return JsonErrorResponse.unauthorized();
         }
-        
+
         app.setId(stored.getId());
         app.setUserId(stored.getUserId());
-        
+
         try {
-            app.validate();
+            appService.validate(app);
         } catch (RaptorComponent.ValidationException ex) {
             return JsonErrorResponse.badRequest(ex.getMessage());
         }
@@ -160,18 +167,18 @@ public class AppController {
             @AuthenticationPrincipal User currentUser,
             @PathVariable("appId") String appId
     ) {
-        
+
         App app = appService.get(appId);
-        if(app == null) {
+        if (app == null) {
             return JsonErrorResponse.notFound();
         }
-        
+
         if (!(currentUser.isAdmin() || currentUser.getUuid().equals(app.getUserId()))) {
             return JsonErrorResponse.unauthorized();
         }
 
         appService.delete(app);
-        
+
         log.debug("Deleted app %s (%s)", app.getName(), app.getId());
         return ResponseEntity.accepted().build();
     }

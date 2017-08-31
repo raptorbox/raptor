@@ -15,15 +15,12 @@
  */
 package org.createnet.raptor.models.app;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.querydsl.core.annotations.QueryEntity;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.createnet.raptor.models.auth.Token;
-import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -34,6 +31,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Document
+@QueryEntity
 public class App {
     
     @Id
@@ -47,9 +45,8 @@ public class App {
     protected String description;
     
     protected final Map<String, Object> options = new HashMap();
-    protected final List<User> users = new ArrayList();
-    protected final List<Device> devices = new ArrayList();
-    protected final List<Token> tokens = new ArrayList();
+    protected final List<String> users = new ArrayList();
+    protected final List<String> devices = new ArrayList();
 
     public App() {
     }
@@ -111,31 +108,12 @@ public class App {
         this.options.putAll(options);
     }
 
-    public List<User> getUsers() {
+    public List<String> getUsers() {
         return users;
     }
 
-    public void setUsers(List<User> users) {
-        this.users.clear();
-        this.users.addAll(users);
-    }
-
-    public List<Device> getDevices() {
+    public List<String> getDevices() {
         return devices;
-    }
-
-    public void setDevices(List<Device> devices) {
-        this.devices.clear();
-        this.devices.addAll(devices);
-    }
-
-    public List<Token> getTokens() {
-        return tokens;
-    }
-
-    public void setTokens(List<Token> tokens) {
-        this.tokens.clear();
-        this.tokens.addAll(tokens);
     }
 
 }

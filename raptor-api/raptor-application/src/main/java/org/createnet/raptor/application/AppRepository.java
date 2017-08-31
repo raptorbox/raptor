@@ -17,7 +17,8 @@ package org.createnet.raptor.application;
 
 import java.util.List;
 import org.createnet.raptor.models.app.App;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
@@ -27,7 +28,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 @Component
-public interface AppRepository extends MongoRepository<App, String> {
+public interface AppRepository extends CrudRepository<App, String>, QueryDslPredicateExecutor<App> {
 
     public List<App> findByUserId(String userId);
     public App findOneById(String id);

@@ -18,6 +18,7 @@ package org.createnet.raptor.application;
 import org.createnet.raptor.common.BaseApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 
 /**
  *
@@ -25,6 +26,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  */
 @SpringBootApplication(scanBasePackages = {"org.createnet.raptor.application", "org.createnet.raptor.common"})
 @EnableMongoRepositories
+@EnableSpringDataWebSupport
 public class Application extends BaseApplication {
 
     public static void main(String[] args) {

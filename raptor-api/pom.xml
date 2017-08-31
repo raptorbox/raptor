@@ -21,9 +21,10 @@
         <module>raptor-action</module>
         <module>raptor-stream</module>
         <module>raptor-tree</module>
+        <module>raptor-application</module>
+                
         <module>raptor-gateway</module>
         <module>raptor-standalone</module>
-        <module>raptor-application</module>
     </modules>
     
     <dependencyManagement>
