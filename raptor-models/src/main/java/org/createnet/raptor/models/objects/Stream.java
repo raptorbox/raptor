@@ -34,21 +34,18 @@ import org.springframework.data.annotation.Transient;
 @JsonSerialize(using = StreamSerializer.class)
 public class Stream extends StreamContainer {
 
-    public enum StreamType {
-        schema, dynamic
-    }
-    
     @JsonIgnore
     @Transient
     private final Logger logger = LoggerFactory.getLogger(Stream.class);
 
     protected String name;
-    protected StreamType type = StreamType.schema;
+    protected String type;
     protected String description;
-
+    protected boolean dynamic = false;
+    
     final protected Map<String, Channel> channels = new HashMap();
 
-    public static Stream create(String name, StreamType type, String description) {
+    public static Stream create(String name, String type, String description) {
         Stream s = new Stream();
         s.name = name;
         s.type = type;
@@ -56,12 +53,12 @@ public class Stream extends StreamContainer {
         return s;
     }
 
-    public static Stream create(String name, StreamType type) {
+    public static Stream create(String name, String type) {
         return create(name, type, null);
     }
 
     public static Stream create(String name) {
-        return create(name, StreamType.schema, null);
+        return create(name, null, null);
     }
 
     public Stream(String json, Device object) {
@@ -183,9 +180,7 @@ public class Stream extends StreamContainer {
 
     protected void parse(JsonNode json) {
         
-        boolean isDynamic = (json.has("type") && json.get("type").asText().equals(StreamType.dynamic.name()));
-        
-        if (!isDynamic && !json.has("channels")) {
+        if (!dynamic && !json.has("channels")) {
                 parseChannels(json);            
                 return;
         }
@@ -195,14 +190,18 @@ public class Stream extends StreamContainer {
         }
 
         if (json.has("type")) {
-            type = StreamType.valueOf(json.get("type").asText());
+            type = json.get("type").asText();
+        }
+        
+        if (json.has("dynamic")) {
+            dynamic = json.get("dynamic").asBoolean(false);
         }
 
         if (json.has("description")) {
             description = json.get("description").asText();
         }
 
-        if (!isDynamic && json.has("channels")) {
+        if (!dynamic && json.has("channels")) {
             parseChannels(json.get("channels"));
         }
 
@@ -236,7 +235,7 @@ public class Stream extends StreamContainer {
         return name;
     }
 
-    public StreamType getType() {
+    public String getType() {
         return type;
     }
 
@@ -252,7 +251,7 @@ public class Stream extends StreamContainer {
         return name;
     }
 
-    public StreamType type() {
+    public String type() {
         return type;
     }
 
@@ -265,7 +264,11 @@ public class Stream extends StreamContainer {
     }
 
     public boolean isDynamic() {
-        return this.type != null && this.type == StreamType.dynamic;
+        return this.dynamic;
     }
-
+    
+    public void setDynamic(boolean dynamic) {
+        this.dynamic = dynamic;
+    }
+    
 }

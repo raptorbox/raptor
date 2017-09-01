@@ -28,20 +28,22 @@ import org.createnet.raptor.models.objects.Stream;
 public class StreamSerializer extends JsonSerializer<Stream> {
 
     @Override
-    public void serialize(Stream t, JsonGenerator jg, SerializerProvider sp) throws IOException {
+    public void serialize(Stream stream, JsonGenerator jg, SerializerProvider sp) throws IOException {
 
         jg.writeStartObject();
         
-        jg.writeStringField("name", t.name());
+        jg.writeStringField("name", stream.name());
         
-        if (t.type() != null) {
-            jg.writeStringField("type", t.type().name());
+        if (stream.type() != null) {
+            jg.writeStringField("type", stream.type());
         }
         
-        jg.writeStringField("description", t.description());
+        jg.writeBooleanField("dynamic", stream.isDynamic());
+        
+        jg.writeStringField("description", stream.description());
 
-        if(!t.channels().isEmpty()) {
-            jg.writeObjectField("channels", t.channels());
+        if(!stream.channels().isEmpty()) {
+            jg.writeObjectField("channels", stream.channels());
         }
 
         jg.writeEndObject();
