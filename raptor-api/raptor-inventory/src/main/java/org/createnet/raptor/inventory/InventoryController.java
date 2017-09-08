@@ -224,10 +224,10 @@ public class InventoryController {
             return JsonErrorResponse.badRequest();
         }
         
-        if(query.getUserId() == null || query.getUserId().isEmpty()) {
+        if(!currentUser.isAdmin()) {
             query.userId(currentUser.getUuid());
         }
-        
+
         DeviceQueryBuilder qb = new DeviceQueryBuilder(query);
         Predicate predicate = qb.getPredicate();
         Pageable paging = qb.getPaging();
