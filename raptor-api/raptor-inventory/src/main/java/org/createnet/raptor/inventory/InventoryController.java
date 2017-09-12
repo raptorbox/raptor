@@ -89,7 +89,12 @@ public class InventoryController {
     public ResponseEntity<?> getDevices(
             @AuthenticationPrincipal User currentUser
     ) {
-        List<Device> devices = deviceService.list(currentUser.getUuid());
+    	List<Device> devices = null;
+    	if(currentUser.isSuperAdmin()) {
+    		devices = deviceService.search(null);
+    	} else {
+    		devices = deviceService.list(currentUser.getUuid());
+    	}
         return ResponseEntity.ok(devices);
     }
 
