@@ -15,8 +15,10 @@
  */
 package org.createnet.raptor.sdk.api;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.models.objects.Device;
@@ -199,4 +201,59 @@ public class InventoryTest {
 
     }
 
+    @Test
+    public void searchByUserId() {
+
+        Raptor raptor = Utils.getRaptor();
+        
+        
+        Raptor r = Utils.createNewInstance();
+        
+        log.debug("Create device by user {}", r.Auth().getUser().getUsername());
+        Device dev1 = new Device();
+        dev1.name("test dev with prop");
+        r.Inventory().create(dev1);
+        
+        String userId = r.Auth().getUser().getUuid();
+        
+        DeviceQuery q = new DeviceQuery();
+        q.userId(userId);
+        
+        log.debug("Searching for {}", q.toJSON().toString());
+
+        List<Device> results = raptor.Inventory().search(q);
+
+        log.debug("Results found {}", results.stream().map(d -> d.name()).collect(Collectors.toList()));
+        assertEquals(1, results.size());
+
+    }
+
+    @Test
+    public void searchByUserIdAndProperties() {
+
+        Raptor raptor = Utils.getRaptor();
+        Raptor r = Utils.createNewInstance();
+        
+        log.debug("Create device by user {}", r.Auth().getUser().getUsername());
+        Device dev1 = new Device();
+        dev1.name("test dev");
+        dev1.properties().put("test", true);
+        
+        r.Inventory().create(dev1);
+        
+        String userId = r.Auth().getUser().getUuid();
+        
+        DeviceQuery q = new DeviceQuery();
+        q.userId(userId);
+        q.properties.has("test", true);
+        
+        log.debug("Searching for {}", q.toJSON().toString());
+
+        List<Device> results = raptor.Inventory().search(q);
+
+        log.debug("Results found {}", results.stream().map(d -> d.name()).collect(Collectors.toList()));
+        assertEquals(1, results.size());
+
+    }
+    
 }

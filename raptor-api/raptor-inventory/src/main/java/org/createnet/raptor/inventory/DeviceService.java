@@ -49,6 +49,9 @@ public class DeviceService {
     }
     
     public List<Device> list(String userId) {
+        if(userId == null) {
+            return repository.findAll();
+        }
         return repository.findByUserId(userId);
     }
     

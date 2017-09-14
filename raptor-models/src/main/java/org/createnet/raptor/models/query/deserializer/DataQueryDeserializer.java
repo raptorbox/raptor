@@ -40,114 +40,119 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class DataQueryDeserializer extends AbstractQueryDeserializer<DataQuery> {
 
-	@Override
-	public DataQuery deserialize(JsonParser jp, DeserializationContext ctxt)
-			throws IOException, JsonProcessingException {
+    @Override
+    public DataQuery deserialize(JsonParser jp, DeserializationContext ctxt)
+            throws IOException, JsonProcessingException {
 
-		DataQuery query = new DataQuery();
-		JsonNode node = jp.getCodec().readTree(jp);
+        DataQuery query = new DataQuery();
+        JsonNode node = jp.getCodec().readTree(jp);
 
-		if (node.has("channels")) {
-			JsonNode channelNode = node.get("channels");
-			Map<String, IQuery> channels = new HashMap<String, IQuery>();
+        if (node.has("userId")) {
+            query.userId(node.get("userId").asText());
+        }
 
-			Iterator<Map.Entry<String, JsonNode>> fields = channelNode.fields();
-			while (fields.hasNext()) {
-				Map.Entry<String, JsonNode> entry = fields.next();
-				System.out.println(entry.getKey() + ":" + entry.getValue());
-				JsonNode jsonNode = channelNode.get(entry.getKey());
-				if (!jsonNode.isNull()) {
-					// channelName.containsKey(nodeInner.textValue()) &&
-					if (jsonNode.has("between")) {
-						JsonNode between = jsonNode.get("between");
-						if (between.isArray()) {
-							NumberQuery numQ = new NumberQuery();
-							// for (int i = 0; i < between.size(); i++) {
-							// numQ.between(between.get(0).asInt(), between.get(1).asInt());
-							// }
-							query.range(entry.getKey(), between.get(0).asInt(), between.get(1).asInt());
-						}
-					} else if (jsonNode.has("match")) {
-						JsonNode match = jsonNode.get("match");
-						BoolQuery boolQ = new BoolQuery(match.asBoolean());
-						channels.put(jsonNode.textValue(), boolQ);
-					} else if (jsonNode.has("contains")) {
-						JsonNode contains = jsonNode.get("contains");
-						TextQuery textQ = new TextQuery();
-						textQ.contains(contains.asText());
-						channels.put(jsonNode.textValue(), textQ);
-					}
-				}
-			}
-		}
-		if (node.has("timestamp")) {
-			JsonNode timestampNode = node.get("timestamp");
+        if (node.has("channels")) {
+            JsonNode channelNode = node.get("channels");
+            Map<String, IQuery> channels = new HashMap<String, IQuery>();
 
-			if (timestampNode.has("between")) {
-				JsonNode between = timestampNode.get("between");
-				if (between.isArray()) {
-					if (!between.get(0).isNull() && !between.get(1).isNull())
-						query.timeRange(Instant.ofEpochMilli(between.get(0).asLong()),
-								Instant.ofEpochMilli(between.get(1).asLong()));
-				}
-			}
-		}
-		if (node.has("location")) {
-			JsonNode locationNode = node.get("location");
-			if (!locationNode.isNull() && locationNode.has("distance")) {
-				JsonNode distanceNode = locationNode.get("distance");
-				if (!distanceNode.isNull()) {
-					Iterator<Map.Entry<String, JsonNode>> fields = distanceNode.fields();
-					GeoJsonPoint geo = null;
-					double radius = 0.0;
-					Metrics unit = null;
-					while (fields.hasNext()) {
-						Map.Entry<String, JsonNode> entry = fields.next();
-						System.out.println(entry.getKey() + ":" + entry.getValue());
+            Iterator<Map.Entry<String, JsonNode>> fields = channelNode.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> entry = fields.next();
+                System.out.println(entry.getKey() + ":" + entry.getValue());
+                JsonNode jsonNode = channelNode.get(entry.getKey());
+                if (!jsonNode.isNull()) {
+                    // channelName.containsKey(nodeInner.textValue()) &&
+                    if (jsonNode.has("between")) {
+                        JsonNode between = jsonNode.get("between");
+                        if (between.isArray()) {
+                            NumberQuery numQ = new NumberQuery();
+                            // for (int i = 0; i < between.size(); i++) {
+                            // numQ.between(between.get(0).asInt(), between.get(1).asInt());
+                            // }
+                            query.range(entry.getKey(), between.get(0).asInt(), between.get(1).asInt());
+                        }
+                    } else if (jsonNode.has("match")) {
+                        JsonNode match = jsonNode.get("match");
+                        BoolQuery boolQ = new BoolQuery(match.asBoolean());
+                        channels.put(jsonNode.textValue(), boolQ);
+                    } else if (jsonNode.has("contains")) {
+                        JsonNode contains = jsonNode.get("contains");
+                        TextQuery textQ = new TextQuery();
+                        textQ.contains(contains.asText());
+                        channels.put(jsonNode.textValue(), textQ);
+                    }
+                }
+            }
+        }
+        if (node.has("timestamp")) {
+            JsonNode timestampNode = node.get("timestamp");
 
-						JsonNode jsonNode = distanceNode.get(entry.getKey());
-						if (!jsonNode.isNull()) {
-							// channelName.containsKey(nodeInner.textValue()) &&
-							if (jsonNode.has("center")) {
-								geo = getGeoJsonPoint(jsonNode, "center");
-								// JsonNode centerNode = jsonNode.get("center");
-								// geo = new GeoJsonPoint(centerNode.get("x").asDouble(),
-								// centerNode.get("y").asDouble());
+            if (timestampNode.has("between")) {
+                JsonNode between = timestampNode.get("between");
+                if (between.isArray()) {
+                    if (!between.get(0).isNull() && !between.get(1).isNull()) {
+                        query.timeRange(Instant.ofEpochMilli(between.get(0).asLong()),
+                                Instant.ofEpochMilli(between.get(1).asLong()));
+                    }
+                }
+            }
+        }
+        if (node.has("location")) {
+            JsonNode locationNode = node.get("location");
+            if (!locationNode.isNull() && locationNode.has("distance")) {
+                JsonNode distanceNode = locationNode.get("distance");
+                if (!distanceNode.isNull()) {
+                    Iterator<Map.Entry<String, JsonNode>> fields = distanceNode.fields();
+                    GeoJsonPoint geo = null;
+                    double radius = 0.0;
+                    Metrics unit = null;
+                    while (fields.hasNext()) {
+                        Map.Entry<String, JsonNode> entry = fields.next();
+                        System.out.println(entry.getKey() + ":" + entry.getValue());
 
-								// if (centerNode.isArray()) {
-								// NumberQuery numQ = new NumberQuery();
-								// GeoJsonPoint geo = new GeoJsonPoint(centerNode.get(0).asInt(),
-								// centerNode.get(1).asInt());
-								// }
-							}
-							if (jsonNode.has("radius")) {
-								radius = jsonNode.get("radius").asDouble();
-							}
-							if (jsonNode.has("unit")) {
-								unit = Metrics.valueOf(jsonNode.get("unit").asText());
-							}
-							query.distance(geo, radius, unit);
-						}
+                        JsonNode jsonNode = distanceNode.get(entry.getKey());
+                        if (!jsonNode.isNull()) {
+                            // channelName.containsKey(nodeInner.textValue()) &&
+                            if (jsonNode.has("center")) {
+                                geo = getGeoJsonPoint(jsonNode, "center");
+                                // JsonNode centerNode = jsonNode.get("center");
+                                // geo = new GeoJsonPoint(centerNode.get("x").asDouble(),
+                                // centerNode.get("y").asDouble());
 
-					}
-				}
-			} else if (locationNode.has("boundingBox")) {
-				JsonNode jsonNode = locationNode.get("boundingBox");
-				if (!jsonNode.isNull()) {
-					GeoJsonPoint northWest = getGeoJsonPoint(jsonNode,"northWest");
-					GeoJsonPoint southWest = getGeoJsonPoint(jsonNode,"southWest");
-					query.boundingBox(northWest, southWest);
-				}
-			}
-		}
+                                // if (centerNode.isArray()) {
+                                // NumberQuery numQ = new NumberQuery();
+                                // GeoJsonPoint geo = new GeoJsonPoint(centerNode.get(0).asInt(),
+                                // centerNode.get(1).asInt());
+                                // }
+                            }
+                            if (jsonNode.has("radius")) {
+                                radius = jsonNode.get("radius").asDouble();
+                            }
+                            if (jsonNode.has("unit")) {
+                                unit = Metrics.valueOf(jsonNode.get("unit").asText());
+                            }
+                            query.distance(geo, radius, unit);
+                        }
 
-		return query;
-	}
+                    }
+                }
+            } else if (locationNode.has("boundingBox")) {
+                JsonNode jsonNode = locationNode.get("boundingBox");
+                if (!jsonNode.isNull()) {
+                    GeoJsonPoint northWest = getGeoJsonPoint(jsonNode, "northWest");
+                    GeoJsonPoint southWest = getGeoJsonPoint(jsonNode, "southWest");
+                    query.boundingBox(northWest, southWest);
+                }
+            }
+        }
 
-	private GeoJsonPoint getGeoJsonPoint(JsonNode parent, String node) {
-		JsonNode centerNode = parent.get(node);
-		GeoJsonPoint geo = new GeoJsonPoint(centerNode.get("x").asDouble(), centerNode.get("y").asDouble());
+        return query;
+    }
 
-		return geo;
-	}
+    private GeoJsonPoint getGeoJsonPoint(JsonNode parent, String node) {
+        JsonNode centerNode = parent.get(node);
+        GeoJsonPoint geo = new GeoJsonPoint(centerNode.get("x").asDouble(), centerNode.get("y").asDouble());
+
+        return geo;
+    }
 }

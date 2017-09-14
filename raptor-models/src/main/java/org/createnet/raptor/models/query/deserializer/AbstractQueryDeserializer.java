@@ -43,7 +43,7 @@ abstract public class AbstractQueryDeserializer<T extends IQuery> extends JsonDe
 
         JsonNode node = json.get(key);
         if (node.isTextual()) {
-            t.contains(node.asText());
+            t.match(node.asText());
             return;
         }
         if (node.isArray()) {

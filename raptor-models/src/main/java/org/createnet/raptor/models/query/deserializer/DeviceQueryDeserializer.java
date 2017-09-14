@@ -34,7 +34,11 @@ public class DeviceQueryDeserializer extends AbstractQueryDeserializer<DeviceQue
         DeviceQuery query = new DeviceQuery();
 
         JsonNode node = jp.getCodec().readTree(jp);
-
+        
+        if(node.has("userId")) {
+            query.userId(node.get("userId").asText());
+        }
+        
         handleTextQuery("name", query.name, node);
         handleTextQuery("description", query.description, node);
         handleTextQuery("id", query.id, node);

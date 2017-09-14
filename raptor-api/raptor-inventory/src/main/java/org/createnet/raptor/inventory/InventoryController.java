@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
+import java.util.Optional;
 import org.createnet.raptor.common.query.DeviceQueryBuilder;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
@@ -89,12 +90,13 @@ public class InventoryController {
     public ResponseEntity<?> getDevices(
             @AuthenticationPrincipal User currentUser
     ) {
-    	List<Device> devices = null;
+            
+        String deviceId = currentUser.getUuid();
     	if(currentUser.isSuperAdmin()) {
-    		devices = deviceService.search(null);
-    	} else {
-    		devices = deviceService.list(currentUser.getUuid());
+            deviceId = null;
     	}
+        
+        List<Device> devices = deviceService.list(deviceId);
         return ResponseEntity.ok(devices);
     }
 
