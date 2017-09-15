@@ -15,6 +15,10 @@ services:
       - ./data:/data
     networks:
       - raptor_net
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
 
   mariadb:
     image: mariadb:latest
