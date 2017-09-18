@@ -31,8 +31,8 @@ before_script:
   - mvn package -DskipTests=true
   - docker-compose -f test.yml up -d --build
   - sleep 30
+  - docker-compose -f test.yml restart nginx
   - docker-compose -f test.yml logs
-  - wget http://raptor.local/inventory/
 
 after_script:
   - docker-compose -f test.yml kill
