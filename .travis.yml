@@ -30,8 +30,9 @@ before_script:
   - sudo /etc/init.d/mysql stop
   - mvn package -DskipTests=true
   - docker-compose -f test.yml up -d --build
-  - sleep 30
-  - docker-compose -f test.yml restart nginx
+  - sleep 60
+  - docker-compose -f test.yml logs
+  - wget http://raptor.local/inventory/
   - docker-compose -f test.yml logs
 
 after_script:
