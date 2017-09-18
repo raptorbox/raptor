@@ -37,7 +37,7 @@ before_script:
   - docker-compose -f test.yml logs
 
 after_script:
-  - docker-compose -f test.yml kill
+  - cd .. && docker-compose -f test.yml kill
 
 after_success:
   # - if [ "$TRAVIS_BRANCH" == "master" ]; then
