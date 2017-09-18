@@ -37,7 +37,7 @@ before_script:
   - docker-compose -f test.yml logs
 
 after_script:
-  - cd .. && docker-compose -f test.yml kill
+  - docker-compose -f test.yml kill
 
 after_success:
   # - if [ "$TRAVIS_BRANCH" == "master" ]; then
@@ -48,5 +48,5 @@ after_success:
   - mvn clean cobertura:cobertura coveralls:report -DrepoToken=$COVERALLS_TOKEN
 
 after_failure:
-    - docker-compose -f test.yml logs
+    - docker-compose -f ../test.yml logs
     - sleep 5
