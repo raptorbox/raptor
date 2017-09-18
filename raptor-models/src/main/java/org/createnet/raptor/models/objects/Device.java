@@ -139,6 +139,13 @@ public class Device extends DeviceContainer {
         this.properties().putAll(raw.properties());
         
         this.streams().putAll(raw.streams());
+        
+        this.streams().entrySet().stream().forEach((el) -> {
+        	if(!raw.streams().containsKey(el.getKey())) {
+        		this.streams().remove(el.getKey());
+        	}
+        });
+        
         // update device internal ref
         this.streams().entrySet().stream().forEach((el) -> {
             el.getValue().setDevice(this);
