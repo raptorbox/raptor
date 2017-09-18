@@ -29,10 +29,11 @@ before_script:
   # workaround for 3306 used, see https://github.com/travis-ci/travis-ci/issues/7008#issuecomment-269126128
   - sudo /etc/init.d/mysql stop
   - mvn package -DskipTests=true
-  - docker-compose -f test.yml up -d --build
-  - sleep 60
+  - docker-compose -f test.yml up -d mariadb mongo redis
+  - sleep 30
   - docker-compose -f test.yml logs
-  - wget http://raptor.local/inventory/
+  - docker-compose -f test.yml up -d --build broker apigateway
+  - sleep 30
   - docker-compose -f test.yml logs
 
 after_script:
