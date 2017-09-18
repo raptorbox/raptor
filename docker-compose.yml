@@ -44,6 +44,11 @@ services:
     networks:
       - raptor_net
 
+  ui:
+    image: raptorbox/raptor-ui
+    networks:
+      - raptor_net
+
   apigateway:
     image: nginx
     volumes:
@@ -51,6 +56,7 @@ services:
     ports:
       - 80:80
     depends_on:
+        - ui
         - broker
     command: nginx -g 'daemon off;'
     networks:
