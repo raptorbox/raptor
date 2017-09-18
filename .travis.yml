@@ -30,10 +30,10 @@ before_script:
   - sudo /etc/init.d/mysql stop
   - mvn package -DskipTests=true
   - docker-compose -f test.yml up -d mariadb mongo redis
-  - sleep 30
+  - sleep 60
   - docker-compose -f test.yml logs
   - docker-compose -f test.yml up -d --build broker apigateway
-  - sleep 30
+  - sleep 60
   - docker-compose -f test.yml logs
 
 after_script:
