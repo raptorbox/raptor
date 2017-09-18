@@ -30,8 +30,7 @@ before_script:
   - sudo /etc/init.d/mysql stop
   - mvn package -DskipTests=true
   - docker-compose -f test.yml up -d --build
-  - sleep 20
-  - netstat -nat
+  - sleep 30
 
 after_script:
   - docker-compose -f test.yml kill
@@ -44,4 +43,5 @@ after_success:
   #   fi
   - mvn clean cobertura:cobertura coveralls:report -DrepoToken=$COVERALLS_TOKEN
 
-# after_failure:
+after_failure:
+    - docker-compose -f test.yml logs
