@@ -8,9 +8,6 @@ jdk:
   - oraclejdk8
 
 addons:
-  apt:
-    packages:
-      - nginx
   hosts:
     - raptor.local
 
@@ -27,21 +24,17 @@ before_install:
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
-  - sudo sh ./travis/install-nginx.sh
 
 before_script:
   # workaround for 3306 used, see https://github.com/travis-ci/travis-ci/issues/7008#issuecomment-269126128
   - sudo /etc/init.d/mysql stop
-  - sudo nginx -c "/tmp/nginx/nginx.conf"
   - mvn package -DskipTests=true
   - docker-compose -f test.yml up -d --build
-  - sleep 10
+  - sleep 20
   - netstat -nat
 
 after_script:
-  - docker-compose -f test.yml down
-  - nginx -c "/tmp/nginx/nginx.conf" -s stop
-
+  - docker-compose -f test.yml kill
 
 after_success:
   # - if [ "$TRAVIS_BRANCH" == "master" ]; then
