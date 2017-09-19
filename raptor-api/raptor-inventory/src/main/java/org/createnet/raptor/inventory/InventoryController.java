@@ -106,6 +106,7 @@ public class InventoryController {
     	}
         
         List<Device> devices = deviceService.list(deviceId);
+        
         return ResponseEntity.ok(devices);
     }
 
@@ -129,8 +130,10 @@ public class InventoryController {
         } catch (RaptorComponent.ValidationException ex) {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Device definition is not valid: " + ex.getMessage());
         }
-
-        device.userId(currentUser.getUuid());
+        
+        if (!currentUser.isSuperAdmin()) {
+            device.userId(currentUser.getUuid());
+        }
         deviceService.save(device);
 
         eventPublisher.create(device);
@@ -199,7 +202,9 @@ public class InventoryController {
 
         // reset ids
         device.id(deviceId);
-        device.userId(userId);
+        if (!currentUser.isSuperAdmin()) {
+            device.userId(currentUser.getUuid());
+        }        
 
         device.validate();
 
