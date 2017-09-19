@@ -15,17 +15,16 @@
  */
 package org.createnet.raptor.inventory;
 
-import com.querydsl.core.types.Predicate;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map.Entry;
+
+import org.createnet.raptor.common.client.ApiClientService;
 import org.createnet.raptor.common.query.DeviceQueryBuilder;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.RaptorComponent;
+import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.query.DeviceQuery;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +42,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.querydsl.core.types.Predicate;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  *
@@ -79,6 +85,9 @@ public class InventoryController {
 
     @Autowired
     private DeviceEventPublisher eventPublisher;
+    
+    @Autowired
+    private ApiClientService raptor;
 
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
@@ -171,6 +180,20 @@ public class InventoryController {
         }
 
         String userId = device.userId();
+        
+        for (Iterator<Entry<String, Stream>> iterator = device.streams().entrySet().iterator(); iterator.hasNext();) {
+			Entry<String, Stream> entry = (Entry<String, Stream>) iterator.next();
+			String key = entry.getKey();
+			if (!body.streams().containsKey(key)) {				 
+				Stream stream = device.stream(key);
+		        if (stream == null) {
+		            return JsonErrorResponse.notFound("Stream not found");
+		        }
+		        stream.setDevice(device);
+		        raptor.Stream().delete(stream);
+		        iterator.remove();
+			}
+		}
         
         device.merge(body);
 
