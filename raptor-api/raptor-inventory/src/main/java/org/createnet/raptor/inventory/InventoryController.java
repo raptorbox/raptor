@@ -259,7 +259,7 @@ public class InventoryController {
             return JsonErrorResponse.badRequest();
         }
         
-        if(!currentUser.isAdmin()) {
+        if(!currentUser.isSuperAdmin()) {
             query.userId(currentUser.getUuid());
         }
 
