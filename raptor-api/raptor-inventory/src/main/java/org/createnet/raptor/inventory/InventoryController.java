@@ -106,6 +106,7 @@ public class InventoryController {
     	}
         
         List<Device> devices = deviceService.list(deviceId);
+        
         return ResponseEntity.ok(devices);
     }
 
@@ -129,8 +130,11 @@ public class InventoryController {
         } catch (RaptorComponent.ValidationException ex) {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Device definition is not valid: " + ex.getMessage());
         }
+        
+        if (!currentUser.isSuperAdmin() || (device.userId() == null || device.userId().isEmpty())) {
+            device.userId(currentUser.getUuid());
+        }
 
-        device.userId(currentUser.getUuid());
         deviceService.save(device);
 
         eventPublisher.create(device);
@@ -179,8 +183,6 @@ public class InventoryController {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Device not found");
         }
 
-        String userId = device.userId();
-        
         for (Iterator<Entry<String, Stream>> iterator = device.streams().entrySet().iterator(); iterator.hasNext();) {
 			Entry<String, Stream> entry = (Entry<String, Stream>) iterator.next();
 			String key = entry.getKey();
@@ -200,7 +202,10 @@ public class InventoryController {
         // reset ids
         device.id(deviceId);
         device.userId(body.userId());
-
+        
+//        if (!currentUser.isSuperAdmin() || (device.userId() == null || device.userId().isEmpty())) {
+//            device.userId(currentUser.getUuid());
+//        }
         device.validate();
 
         deviceService.save(device);
@@ -254,7 +259,7 @@ public class InventoryController {
             return JsonErrorResponse.badRequest();
         }
         
-        if(!currentUser.isAdmin()) {
+        if(!currentUser.isSuperAdmin()) {
             query.userId(currentUser.getUuid());
         }
 
