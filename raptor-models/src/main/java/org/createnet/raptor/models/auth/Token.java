@@ -47,7 +47,7 @@ import org.hibernate.validator.constraints.NotEmpty;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"}, ignoreUnknown = true)
 @Entity
 @Cacheable(value = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

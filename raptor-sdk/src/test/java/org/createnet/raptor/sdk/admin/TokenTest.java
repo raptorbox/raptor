@@ -75,6 +75,7 @@ public class TokenTest {
         
     }
 
+
     @Test
     public void createToken() {
 
@@ -92,6 +93,18 @@ public class TokenTest {
         assertTrue(newToken.isEnabled());
         assertFalse(newToken.isExpired());
 
+    }
+
+
+    @Test
+    public void loadToken() {
+
+        Token token = new Token("test", "secret" + System.currentTimeMillis() * Math.random());
+        Token newToken = raptor.Admin().Token().create(token);
+        
+        Token savedToken = raptor.Admin().Token().read(newToken.getId());
+        
+        assertEquals(newToken.getToken(), savedToken.getToken());
     }
 
     @Test

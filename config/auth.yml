@@ -12,6 +12,11 @@ spring:
     validationQuery: SELECT 1
     lastInsertQuery: SELECT LAST_INSERT_ID()
 
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+      FAIL_ON_EMPTY_BEANS: false
+
   jpa:
     show-sql: false
 
