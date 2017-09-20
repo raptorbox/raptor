@@ -52,6 +52,7 @@ import org.hibernate.validator.constraints.Email;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"}, ignoreUnknown = true)
 @Entity
 @Cacheable(value = true)
