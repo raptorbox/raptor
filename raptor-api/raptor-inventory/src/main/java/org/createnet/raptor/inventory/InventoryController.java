@@ -199,7 +199,7 @@ public class InventoryController {
 
         // reset ids
         device.id(deviceId);
-        device.userId(userId);
+        device.userId(body.userId());
 
         device.validate();
 
