@@ -16,7 +16,7 @@
 package org.createnet.raptor.models.payload;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.Operation;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -32,7 +32,7 @@ public class TokenPayload extends AbstractPayload {
     public TokenPayload() {
     }
 
-    public TokenPayload(Token obj, Permissions op) {
+    public TokenPayload(Token obj, Operation op) {
         token = obj;
         type = MessageType.token;
         this.op = op;

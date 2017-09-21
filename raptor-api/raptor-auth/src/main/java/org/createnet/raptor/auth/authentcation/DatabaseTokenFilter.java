@@ -16,6 +16,7 @@ import org.createnet.raptor.common.configuration.TokenHelper;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.services.TokenService;
+import org.createnet.raptor.auth.services.UserService;
 import org.createnet.raptor.common.authentication.LoginAuthenticationToken;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ public class DatabaseTokenFilter extends GenericFilterBean {
 
     private RaptorConfiguration config;
     private TokenService tokenService;
+    private UserService userService;
     private TokenHelper tokenHelper;
     
     public DatabaseTokenFilter(RaptorConfiguration config, TokenService tokenService, TokenHelper tokenHelper) {
@@ -47,8 +49,8 @@ public class DatabaseTokenFilter extends GenericFilterBean {
             if (token != null) {
                 boolean tokenIsValid = tokenService.isValid(token);
                 if (tokenIsValid) {
-
-                    User user = token.getUser() != null ? token.getUser() : null;
+                        
+                    User user = userService.getByUuid(token.getUserId());
                     if (user != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                         UserDetails userDetails = new RaptorUserDetails(user);
                         

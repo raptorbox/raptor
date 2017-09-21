@@ -83,13 +83,12 @@ public class AppController {
             nickname = "getApps"
     )
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> geApps(
+    public ResponseEntity<?> getApps(
             @AuthenticationPrincipal User currentUser,
             @QuerydslPredicate(root = User.class) Predicate predicate,
             Pageable pageable,
             @RequestParam MultiValueMap<String, String> parameters
     ) {
-
         Iterable<App> apps = appService.find(predicate, pageable);
         return ResponseEntity.ok(apps);
     }

@@ -15,7 +15,8 @@
  */
 package org.createnet.raptor.models.auth.request;
 
-import org.createnet.raptor.models.acl.Permissions;
+import java.util.List;
+import org.createnet.raptor.models.auth.Permission;
 
 /**
  *
@@ -26,5 +27,5 @@ public class SyncRequest {
   public String userId;
   public String parentId;  
   public Long created;
-  public Permissions operation;
+  public List<Permission> operation;
 }

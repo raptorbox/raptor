@@ -16,8 +16,6 @@
 package org.createnet.raptor.auth.services;
 
 import org.createnet.raptor.models.auth.request.SyncRequest;
-import org.createnet.raptor.auth.acl.RaptorPermission;
-import org.createnet.raptor.models.auth.AclDevice;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.repository.UserRepository;
 import org.createnet.raptor.auth.exception.DeviceNotFoundException;
@@ -28,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.acls.model.Permission;
 import org.springframework.stereotype.Service;
-import org.createnet.raptor.auth.repository.AclDeviceRepository;
 
 /**
  *
@@ -42,12 +39,6 @@ public class AuthDeviceService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private AclDeviceRepository deviceRepository;
-
-    @Autowired
-    private AclDeviceService aclDeviceService;
     
     //@CacheEvict(key = "#device.id")
     public AclDevice save(AclDevice device) {
@@ -76,7 +67,7 @@ public class AuthDeviceService {
         delete(device.getId());
     }
     
-    public AclDevice sync(User user, SyncRequest req) {
+    public void sync(User user, SyncRequest req) {
 
         Permission p = RaptorPermission.fromLabel(req.operation);
 
@@ -109,7 +100,7 @@ public class AuthDeviceService {
             }
 
             deviceRepository.delete(device);
-            return null;
+            return;
         }
 
         // create or update device record

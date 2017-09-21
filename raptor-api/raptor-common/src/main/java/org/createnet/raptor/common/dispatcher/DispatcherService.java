@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.common.dispatcher;
 
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.Operation;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.configuration.AuthConfiguration;
@@ -192,7 +192,7 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      * @param obj
      * @param payload
      */
-    protected void notifyUserEvent(Permissions op, Device obj, DispatcherPayload payload) {
+    protected void notifyUserEvent(Operation op, Device obj, DispatcherPayload payload) {
         
         String topic = getUserEventsTopic(obj);
         
@@ -205,7 +205,7 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      * @param op
      * @param obj
      */
-    public void notifyDeviceEvent(Permissions op, Device obj) {
+    public void notifyDeviceEvent(Operation op, Device obj) {
 
         String topic = getEventsTopic(obj);
         DevicePayload payload = new DevicePayload(obj, op);
@@ -219,7 +219,7 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      * @param op
      * @param user
      */
-    public void notifyUserEvent(Permissions op, User user) {
+    public void notifyUserEvent(Operation op, User user) {
         String topic = getUserEventsTopic(user);
         UserPayload payload = new UserPayload(user, op);
         notifyEvent(topic, payload);
@@ -230,7 +230,7 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      * @param op
      * @param token
      */
-    public void notifyTokenEvent(Permissions op, Token token) {
+    public void notifyTokenEvent(Operation op, Token token) {
         String topic = getTokenEventsTopic(token);
         TokenPayload payload = new TokenPayload(token, op);
         notifyEvent(topic, payload);
@@ -243,7 +243,7 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      */
     public void notifyDataEvent(Stream stream, RecordSet record) {
         
-        StreamPayload payload = new StreamPayload(stream, Permissions.data, record);
+        StreamPayload payload = new StreamPayload(stream, Operation.data, record);
         
         notifyEvent(getStreamTopic(stream), payload);
         notifyEvent(getEventsTopic(stream), payload);
@@ -256,7 +256,7 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      * @param action
      * @param status
      */
-    public void notifyActionEvent(Permissions op, Action action, String status) {
+    public void notifyActionEvent(Operation op, Action action, String status) {
 
         String data = null;
         if (status != null) {

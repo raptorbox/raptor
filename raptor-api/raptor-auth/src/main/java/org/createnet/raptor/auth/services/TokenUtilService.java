@@ -63,7 +63,7 @@ public class TokenUtilService implements TokenGenerator {
     public Token createToken(String name, User user, Long expires, String secret) {
 
         Token token = new Token();
-        token.setUser(user);
+        token.setUserId(user.getId());
         token.setExpires(expires);
         token.setSecret(secret);
         token.setName(name);

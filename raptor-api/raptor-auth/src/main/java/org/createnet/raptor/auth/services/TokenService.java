@@ -110,7 +110,7 @@ public class TokenService {
      * @return
      */
     //@Cacheable(key = "#tokenId")
-    public Token read(Long tokenId) {
+    public Token read(String tokenId) {
         Token saved = tokenRepository.findOne(tokenId);
         putCachedToken(saved);
         return saved;
@@ -150,7 +150,7 @@ public class TokenService {
      * @param authToken
      * @return
      */
-    public Token read(String authToken) {
+    public Token readByToken(String authToken) {
         
         if (authToken == null || authToken.isEmpty()) {
             return null;

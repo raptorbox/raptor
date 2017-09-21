@@ -19,8 +19,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
@@ -111,8 +111,20 @@ public class UserClient extends AbstractClient {
      * @param permission
      * @return
      */
-    public AuthorizationResponse isAuthorized(Device device, User user, Permissions permission) {
-        return isAuthorized(device.id(), user.getUuid(), permission);
+    public AuthorizationResponse isAuthorized(Device device, User user, String permission) {
+        return isAuthorized(device.id(), user.getUuid(), Arrays.asList(permission));
+    }
+    
+    /**
+     * Check if an user is authorized to operate on a device
+     *
+     * @param device
+     * @param user
+     * @param permissions
+     * @return
+     */
+    public AuthorizationResponse isAuthorized(Device device, User user, List<String> permissions) {
+        return isAuthorized(device.id(), user.getUuid(), permissions);
     }
 
     /**
@@ -122,8 +134,19 @@ public class UserClient extends AbstractClient {
      * @param permission
      * @return
      */
-    public AuthorizationResponse isAuthorized(Device device, Permissions permission) {
-        return isAuthorized(device.id(), getContainer().Auth().getUser().getUuid(), permission);
+    public AuthorizationResponse isAuthorized(Device device, String permission) {
+        return isAuthorized(device.id(), getContainer().Auth().getUser().getUuid(), Arrays.asList(permission));
+    }
+
+    /**
+     * Check if the current user is authorized to operate on a device
+     *
+     * @param device
+     * @param permissions
+     * @return
+     */
+    public AuthorizationResponse isAuthorized(Device device, List<String> permissions) {
+        return isAuthorized(device.id(), getContainer().Auth().getUser().getUuid(), permissions);
     }
 
     /**
@@ -134,12 +157,22 @@ public class UserClient extends AbstractClient {
      * @param permission
      * @return
      */
-    public AuthorizationResponse isAuthorized(String deviceId, String userId, Permissions permission) {
+    public AuthorizationResponse isAuthorized(String deviceId, String userId, String permission) {
+        return isAuthorized(deviceId, userId, Arrays.asList(permission));
+    }
 
-        AuthorizationRequest auth = new AuthorizationRequest();
+    /**
+     * Check if an user is authorized to operate on a device
+     *
+     * @param deviceId
+     * @param userId
+     * @param permissions
+     * @return
+     */
+    public AuthorizationResponse isAuthorized(String deviceId, String userId, List<String> permissions) {
+
+        AuthorizationRequest auth = new AuthorizationRequest(permissions);
         auth.objectId = deviceId;
-        auth.operation = AuthorizationRequest.Operation.Permission.name();
-        auth.permission = permission.name();
         auth.userId = userId;
 
         JsonNode node = getClient().post(Routes.PERMISSION_CHECK, toJsonNode(auth), RequestOptions.retriable());
@@ -232,7 +265,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public User create(String username, String password, String email) {
-        return create(username, password, email, new HashSet(Arrays.asList(new Role(Role.Roles.user))));
+        return create(username, password, email, new HashSet(Arrays.asList(Role.user)));
     }
 
     /**
@@ -244,7 +277,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public User createAdmin(String username, String password, String email) {
-        return create(username, password, email, new HashSet(Arrays.asList(new Role(Role.Roles.admin))));
+        return create(username, password, email, new HashSet(Arrays.asList(Role.admin)));
     }
 
     /**

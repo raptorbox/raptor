@@ -18,7 +18,7 @@ package org.createnet.raptor.models.payload;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.Operation;
 import org.createnet.raptor.models.exception.PayloadParserException;
 import org.createnet.raptor.models.objects.RaptorContainer;
 
@@ -47,7 +47,7 @@ public interface DispatcherPayload {
      * 
      * @return label of the operation
      */    
-    public Permissions getOp();
+    public Operation getOp();
     
     @Override
     public String toString();

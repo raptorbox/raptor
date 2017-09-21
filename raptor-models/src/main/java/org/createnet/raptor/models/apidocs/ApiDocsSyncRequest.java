@@ -15,7 +15,9 @@
  */
 package org.createnet.raptor.models.apidocs;
 
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.auth.Permission;
+import java.util.List;
+
 
 /**
  *
@@ -26,5 +28,5 @@ public class ApiDocsSyncRequest {
   public String userId;
   public String parentId;  
   public Long created;
-  public Permissions operation;
+  public List<Permission> operation;
 }

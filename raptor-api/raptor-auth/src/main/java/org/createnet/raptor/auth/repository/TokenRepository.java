@@ -19,6 +19,7 @@ import java.util.List;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
@@ -30,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Component
 @Repository
-public interface TokenRepository extends CrudRepository<Token, Long>, JpaRepository<Token, Long> {
+public interface TokenRepository extends CrudRepository<Token, String>, MongoRepository<Token, String> {
 
     Token findByToken(String token);
     List<Token> findByUserId(String userId);
@@ -40,7 +41,7 @@ public interface TokenRepository extends CrudRepository<Token, Long>, JpaReposit
 
     @Override
     @Transactional
-    Token findOne(Long id);
+    Token findOne(String id);
 
     @Override
     @Transactional
@@ -48,7 +49,7 @@ public interface TokenRepository extends CrudRepository<Token, Long>, JpaReposit
 
     @Override
     @Transactional
-    public void delete(Long id);
+    public void delete(String id);
     
     @Override
     @Transactional

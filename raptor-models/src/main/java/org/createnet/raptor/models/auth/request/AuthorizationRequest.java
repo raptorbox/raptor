@@ -15,30 +15,27 @@
  */
 package org.createnet.raptor.models.auth.request;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public class AuthorizationRequest {
   
-  public static enum Operation {
-    Permission
-  }
-  
   public AuthorizationRequest() {}
   
-  public AuthorizationRequest(Operation op) {
-    this.operation = op.name();
+  public AuthorizationRequest(String op) {
+    this.permissions.add(op);
   }
   
-  public String operation = Operation.Permission.name();
-
-  public String permission;
+  public AuthorizationRequest(List<String> ops) {
+    this.permissions.addAll(ops);
+  }
+  
+  public List<String> permissions = new ArrayList();
   public String objectId;
   public String userId;
-  
-  public Operation getOperation() {
-    return Operation.valueOf(operation);
-  }
 
 }

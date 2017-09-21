@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.models.payload;
 
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.Operation;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Stream;
 
@@ -31,7 +31,7 @@ public class StreamPayload extends DevicePayload {
     public StreamPayload() {
     }
     
-    public StreamPayload(Stream stream, Permissions op, RecordSet record) {
+    public StreamPayload(Stream stream, Operation op, RecordSet record) {
         super(stream.getDevice(), op);
         this.streamId = stream.name();
         this.record = record;

@@ -99,7 +99,7 @@ public class AuthConfiguration {
             adminUser.setEmail(admin.getEmail());
             
             admin.getRoles().forEach((r) -> {
-                adminUser.addRole(new Role(r));
+                adminUser.addRole(r);
             });
 
             userService.save(adminUser);

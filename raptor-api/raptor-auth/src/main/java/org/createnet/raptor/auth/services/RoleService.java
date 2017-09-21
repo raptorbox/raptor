@@ -28,57 +28,55 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class RoleService {
-  
-  private static final Logger logger = LoggerFactory.getLogger(RoleService.class);
 
-  @Autowired
-  private RoleRepository roleRepository;
+    private static final Logger logger = LoggerFactory.getLogger(RoleService.class);
 
-  public Role update(Long roleId, Role rawRole) {
+    @Autowired
+    private RoleRepository roleRepository;
 
-    Role role = roleRepository.findOne(roleId);
-    
-    if(role == null) {
-      return null;
-    } 
-   
-    if (rawRole.getName() != null && !rawRole.getName().isEmpty()) {
-      role.setName(rawRole.getName());
+    public Role update(String roleId, Role rawRole) {
+
+        Role role = roleRepository.findOne(roleId);
+
+        if (role == null) {
+            return null;
+        }
+
+        if (rawRole.getName() != null && !rawRole.getName().isEmpty()) {
+            role.setName(rawRole.getName());
+        }
+
+        return roleRepository.save(role);
     }
 
-    return roleRepository.save(role);
-  }
-
-  public Iterable<Role> list() {
-    return roleRepository.findAll();
-  }
-
-  public Role create(Role rawRole) {
-
-    Role existsRole = roleRepository.findByName(rawRole.getName());
-    if (existsRole != null) {
-      return null;
-    }
-    
-    Role role = new Role();
-    role.setName(rawRole.getName());
-    
-    return roleRepository.save(role);
-  }
-  
-  public boolean delete(Long roleId) {
-    
-    if (!roleRepository.exists(roleId)) {
-      return false;
+    public Iterable<Role> list() {
+        return roleRepository.findAll();
     }
 
-    roleRepository.delete(roleId);
-    return true;
-  }
+    public Role create(Role rawRole) {
 
-  public Role getByName(String name) {
-    if(name == null || name.isEmpty()) return null;
-    return roleRepository.findByName(name);
-  }
-  
+        Role existsRole = roleRepository.findByName(rawRole.getName());
+        if (existsRole != null) {
+            return null;
+        }
+
+        Role role = new Role(rawRole.getName());
+        return roleRepository.save(role);
+    }
+
+    public boolean delete(String roleId) {
+        if (!roleRepository.exists(roleId)) {
+            return false;
+        }
+        roleRepository.delete(roleId);
+        return true;
+    }
+
+    public Role getByName(String name) {
+        if (name == null || name.isEmpty()) {
+            return null;
+        }
+        return roleRepository.findByName(name);
+    }
+
 }

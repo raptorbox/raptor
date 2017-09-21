@@ -54,7 +54,7 @@ public class JwtTokenService implements Serializable, TokenGenerator {
 
         Map<String, Object> claims = new HashMap<>();
 
-        claims.put(CLAIM_KEY_UUID, token.getUser().getUuid());
+        claims.put(CLAIM_KEY_UUID, token.getUserId());
         claims.put(CLAIM_KEY_CREATED, token.getCreated().getTime() / 1000L);
 
         String tokenValue = generateToken(claims, secret, expires);

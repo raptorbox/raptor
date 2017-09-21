@@ -15,94 +15,83 @@
  */
 package org.createnet.raptor.models.auth;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 
 import org.hibernate.validator.constraints.NotEmpty;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.Cacheable;
-import javax.persistence.Table;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-@Entity
-@Cacheable(value = true)
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@Table(name = "roles")
+//@Cacheable(value = true)
+//@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Document
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Role implements GrantedAuthority {
-
-  public static enum Roles {
-    super_admin, admin, user, guest
-  }
-
-  private static final long serialVersionUID = 1L;
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
-
-  @NotEmpty
-  private String name;
-
-  @JsonIgnore
-  @ManyToMany(fetch = FetchType.LAZY, mappedBy = "roles")
-  private List<User> users = new ArrayList();
-
-  public Role() {
-  }
-
-  public Role(String name) {
-    this.name = name;
-  }
-
-  public Role(Roles role) {
-    this.name = role.name();
-  }
-
-  @JsonIgnore
-  @Override
-  public String getAuthority() {
-    return name;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj instanceof Roles) {
-      return ((Roles) obj).equals(this.name);
+    
+    final static public Role super_admin = new Role("super_admin");
+    static public Role user = new Role("user", defaultUserPermissions());
+    static public Role admin = new Role("admin", defaultUserPermissions());
+    
+    public Role(String name) {
+        this.name = name;
     }
-    return super.equals(obj);
-  }
+    
+    public Role(String name, List<Permission> permissions) {
+        this.name = name;
+        this.permissions.addAll(permissions);
+    }
+    
+    @NotEmpty
+    @Id
+    private String name;
+    
+    private String description;
+    
+    private final List<Permission> permissions = new ArrayList();
 
-  public Long getId() {
-    return id;
-  }
+    public String getName() {
+        return name;
+    }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-  public String getName() {
-    return name;
-  }
+    public String getDescription() {
+        return description;
+    }
 
-  public void setName(String name) {
-    this.name = name;
-  }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-  public List<User> getUsers() {
-    return users;
-  }
+    public List<Permission> getPermissions() {
+        return permissions;
+    }
+    
+    static protected List<Permission> defaultUserPermissions() {
+        return Arrays.asList(
+                Permission.create,
+                Permission.read,
+                Permission.update,
+                Permission.delete,
+                Permission.push,
+                Permission.pull,
+                Permission.execute,
+                Permission.tree
+        );
+    }
+    
+    static protected List<Permission> defaultAdminPermissions() {
+        return Arrays.asList(Permission.admin);
+    }
 
-  public void setUsers(List<User> users) {
-    this.users = users;
-  }
-
+    @Override
+    public String getAuthority() {
+        return this.name;
+    }
+    
 }

@@ -15,11 +15,7 @@
  */
 package org.createnet.raptor.models.auth;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -27,32 +23,29 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
-import javax.persistence.Cacheable;
+import java.util.List;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import org.createnet.raptor.models.acl.AclSubject;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"}, ignoreUnknown = true)
-@Entity
-@Cacheable(value = true)
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@Table(name = "tokens")
-public class Token implements Serializable, AclSubject {
+@Document
+//@Cacheable(value = true)
+//@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class Token implements Serializable {
 
     public static enum Type {
         LOGIN, DEFAULT
@@ -63,8 +56,7 @@ public class Token implements Serializable, AclSubject {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private String id;
 
     @NotNull
     @Size(min = 1)
@@ -72,44 +64,33 @@ public class Token implements Serializable, AclSubject {
 
     @NotNull
     @Size(min = 1)
-    @Column(unique = true, nullable = false)
+    @Indexed(unique = true)
     private String token;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Column(unique = false, nullable = true)
     @NotEmpty
     private String secret;
 
-    @Column(unique = false, nullable = false)
     private boolean enabled = true;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User user;
+    private String userId;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    private AclDevice device;
+    @Indexed
+    private List<String> devices = new ArrayList();
 
-    @Column(name = "created")
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull
     private Date created = new Date();
 
-    @Column(name = "expires")
     private Long expires = 1000L * 60 * 60; // default to 60min
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type")
     private Type type = Type.DEFAULT;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "token_type")
     private TokenType tokenType = TokenType.DEFAULT;
-
-    @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY)
-    private Token parent;
 
     public Token() {
     }
@@ -123,15 +104,15 @@ public class Token implements Serializable, AclSubject {
         this.name = token.getName();
         this.secret = token.getSecret();
         this.expires = token.getExpires();
-        this.device = token.getDevice();
+        this.setDevices(token.getDevices());
         this.enabled = token.getEnabled();
-        this.user = token.getUser();
+        this.userId = token.getUserId();
     }
 
     public void merge(Token rawToken) {
 
-        if (rawToken.getDevice() != null) {
-            this.setDevice(rawToken.getDevice());
+        if (rawToken.getDevices() != null && !rawToken.getDevices().isEmpty()) {
+            this.setDevices(rawToken.getDevices());
         }
 
         if (rawToken.getEnabled() != null) {
@@ -146,8 +127,8 @@ public class Token implements Serializable, AclSubject {
             this.setName(rawToken.getName());
         }
 
-        if (rawToken.getUser() != null) {
-            this.setUser(rawToken.getUser());
+        if (rawToken.getUserId() != null) {
+            this.setUserId(rawToken.getUserId());
         }
 
         if (rawToken.getSecret() != null) {
@@ -156,11 +137,11 @@ public class Token implements Serializable, AclSubject {
 
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -178,14 +159,6 @@ public class Token implements Serializable, AclSubject {
 
     public void setToken(String token) {
         this.token = token;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public Boolean getEnabled() {
@@ -235,7 +208,7 @@ public class Token implements Serializable, AclSubject {
     }
 
     public boolean isValid() {
-        return isEnabled() && !isExpired() && (getUser() != null && getUser().isEnabled());
+        return isEnabled() && !isExpired();
     }
 
     public void setEnabled(Boolean enabled) {
@@ -259,14 +232,6 @@ public class Token implements Serializable, AclSubject {
         return this.getType().equals(Type.LOGIN);
     }
 
-    public AclDevice getDevice() {
-        return device;
-    }
-
-    public void setDevice(AclDevice device) {
-        this.device = device;
-    }
-
     public TokenType getTokenType() {
         return tokenType;
     }
@@ -279,30 +244,21 @@ public class Token implements Serializable, AclSubject {
         this.tokenType = TokenType.valueOf(tokenType);
     }
 
-    public Token getParent() {
-        return parent;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setParent(Token parent) {
-        this.parent = parent;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    @Override
-    public Long getSubjectId() {
-        return getId();
+    public List<String> getDevices() {
+        return devices;
     }
 
-    @Override
-    public Long getSubjectParentId() {
-        if (getParent() == null) {
-            return null;
-        }
-        return getParent().getId();
-    }
-
-    @Override
-    public User getOwner() {
-        return getUser();
+    public void setDevices(List<String> devices) {
+        this.devices.clear();
+        this.devices.addAll(devices);
     }
 
 }

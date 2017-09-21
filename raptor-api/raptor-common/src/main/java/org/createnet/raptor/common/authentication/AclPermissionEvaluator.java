@@ -17,7 +17,6 @@ package org.createnet.raptor.common.authentication;
 
 import java.io.Serializable;
 import org.createnet.raptor.common.client.ApiClientService;
-import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.objects.Device;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,8 +76,7 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
         }
 
         try {
-            Permissions p = Permissions.valueOf(permission);
-            AuthorizationResponse response = api.Admin().User().isAuthorized(deviceId, tokenAuthentication.getUser().getUuid(), p);
+            AuthorizationResponse response = api.Admin().User().isAuthorized(deviceId, tokenAuthentication.getUser().getUuid(), permission);
             return response.result;
         } catch (Exception ex) {
             return false;

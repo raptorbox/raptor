@@ -16,7 +16,7 @@
 package org.createnet.raptor.auth.repository;
 
 import org.createnet.raptor.models.auth.Role;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Component
 @Repository
-public interface RoleRepository extends CrudRepository<Role, Long>, JpaRepository<Role, Long> {
+public interface RoleRepository extends CrudRepository<Role, String>, MongoRepository<Role, String> {
 
   Role findByName(String name);
   
@@ -38,13 +38,13 @@ public interface RoleRepository extends CrudRepository<Role, Long>, JpaRepositor
 
   @Transactional
   @Override
-  public void delete(Long id);
+  public void delete(String id);
 
   @Override
-  public boolean exists(Long id);
+  public boolean exists(String id);
 
   @Override
-  public Role findOne(Long id);
+  public Role findOne(String id);
 
   @Transactional
   @Override

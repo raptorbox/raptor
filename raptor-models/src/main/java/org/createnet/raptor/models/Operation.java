@@ -13,29 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.models.acl;
+package org.createnet.raptor.models;
 
 /**
  *
- * @author Luca Capra <lcapra@fbk.eu>
+ * @author Luca Capra <luca.capra@fbk.eu>
  */
-public enum Permissions {
-
-    admin,
-    list,
-    
-    @Deprecated
-    subscribe,
-    
-    // object level permissions
-    read, update, create, delete,
-    // data level permissions
-    push, pull,
-    // action level permissions
-    execute,
-    
+public enum Operation {
+    stream,
     data,
-    
     tree,
-
+    action,
+    device,
+    user,
+    token,
+    role,
+    permission,
+    
 }

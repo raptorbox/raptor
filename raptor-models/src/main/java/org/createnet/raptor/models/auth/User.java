@@ -17,15 +17,7 @@ package org.createnet.raptor.models.auth;
 
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -35,18 +27,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import javax.persistence.Cacheable;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 import org.hibernate.validator.constraints.Email;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  *
@@ -54,71 +41,51 @@ import org.hibernate.validator.constraints.Email;
  */
 
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"}, ignoreUnknown = true)
-@Entity
-@Cacheable(value = true)
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Document
+//@Cacheable(value = true)
+//@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(name = "users")
 public class User implements Serializable {
 
     @JsonIgnore
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    protected Long id;
+    protected String id;
 
     @NotEmpty
     protected String uuid = UUID.randomUUID().toString();
 
     @NotEmpty
-    @Column(unique = true, nullable = false, length = 128)
     @Size(min = 4, max = 128)
     protected String username;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotEmpty
-    @Column(length = 128)
     @Size(min = 4, max = 128)
     protected String password;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
-    @Cascade(value = {CascadeType.REMOVE, CascadeType.SAVE_UPDATE})
-    final protected List<AclDevice> devices = new ArrayList();
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    @Cascade(value = {CascadeType.REMOVE, CascadeType.SAVE_UPDATE})
     final protected List<Token> tokens = new ArrayList();
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_roles", joinColumns = {
-        @JoinColumn(name = "user_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "role_id")})
     final protected List<Role> roles = new ArrayList();
 
-    @Column(length = 64)
     @Size(min = 4, max = 64)
     protected String firstname;
 
-    @Column(length = 64)
     @Size(min = 4, max = 64)
     protected String lastname;
 
-    @Column(length = 128)
     @NotNull
     @Email
     protected String email;
 
-    @Column()
     @NotNull
     protected boolean enabled = true;
 
     @JsonIgnore
-    @Column(name = "last_password_reset")
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull
     protected Date lastPasswordResetDate = new Date();
 
-    @Column(name = "created")
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull
     protected Date created = new Date();
@@ -150,28 +117,23 @@ public class User implements Serializable {
     }
 
     @JsonIgnore
-    public boolean isAdmin() {
-        return isSuperAdmin() || this.hasRole(Role.Roles.admin);
-    }
-
-    @JsonIgnore
     public boolean isSuperAdmin() {
-        return this.hasRole(Role.Roles.super_admin);
+        return this.hasRole(Role.super_admin);
     }
 
-    public boolean hasRole(Role.Roles name) {
-        return hasRole(name.name());
+    public boolean hasRole(Role role) {
+        return this.getRoles().contains(role);
     }
 
     public boolean hasRole(String name) {
-        return this.getRoles().stream().filter(r -> r.getName().equals(name)).count() >= 1;
+        return hasRole(new Role(name));
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -198,7 +160,7 @@ public class User implements Serializable {
 
     @JsonProperty("roles")
     public void setListRoles(List<String> list) {
-        list.forEach(r -> addRole(new Role(r)));
+        list.forEach(r -> this.addRole(new Role(r)));
     }
 
     public List<Role> getRoles() {
@@ -211,27 +173,19 @@ public class User implements Serializable {
     }
 
     public void addRole(Role role) {
-        if (!this.hasRole(role.getName())) {
+        if (!this.hasRole(role)) {
             this.roles.add(role);
         }
     }
 
-    public void addRole(Role.Roles role) {
-        if (!this.hasRole(role)) {
-            this.roles.add(new Role(role));
-        }
-    }
-
     public void removeRole(Role role) {
-        if (this.hasRole(role.getName())) {
+        if (this.hasRole(role)) {
             this.roles.remove(role);
         }
     }
 
-    public void removeRole(Role.Roles role) {
-        if (this.hasRole(role)) {
-            this.roles.remove(new Role(role));
-        }
+    public void removeRole(String role) {
+        this.removeRole(new Role(role));
     }
 
     public String getUuid() {
@@ -313,10 +267,6 @@ public class User implements Serializable {
 
     public void setCreated(Date created) {
         this.created = created;
-    }
-
-    public List<AclDevice> getDevices() {
-        return devices;
     }
 
     @Override

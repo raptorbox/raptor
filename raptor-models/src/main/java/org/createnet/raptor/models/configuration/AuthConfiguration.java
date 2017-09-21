@@ -50,14 +50,10 @@ public class AuthConfiguration {
         private String email;
         private String type;
         private boolean lock;
-        private List<Role.Roles> roles = new ArrayList();
-        
-        public boolean isAdmin() {
-            return isSuperAdmin() || getRoles().contains(Role.Roles.admin);
-        }
-        
+        private List<Role> roles = new ArrayList();
+
         public boolean isSuperAdmin() {
-            return getRoles().contains(Role.Roles.super_admin);
+            return getRoles().contains(Role.super_admin);
         }
         
         public String getType() {
@@ -80,11 +76,11 @@ public class AuthConfiguration {
             this.lock = lock;
         }
         
-        public List<Role.Roles> getRoles() {
+        public List<Role> getRoles() {
             return roles;
         }
 
-        public void setRoles(List<Role.Roles> roles) {
+        public void setRoles(List<Role> roles) {
             this.roles = roles;
         }
         

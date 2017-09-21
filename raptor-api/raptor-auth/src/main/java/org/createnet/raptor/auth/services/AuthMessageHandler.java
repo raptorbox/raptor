@@ -64,7 +64,6 @@ public class AuthMessageHandler implements RaptorMessageHandler {
                 
                 SyncRequest req = new SyncRequest();
                 req.userId = user.getUuid();
-                req.operation = payload.getOp();
                 req.objectId = payload.getDevice().id();
                 req.created = payload.getDevice().createdAt().getEpochSecond();
 

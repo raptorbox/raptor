@@ -16,7 +16,7 @@
 package org.createnet.raptor.auth.repository;
 
 import org.createnet.raptor.models.auth.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Repository
 @Transactional
-public interface UserRepository extends CrudRepository<User, Long>, JpaRepository<User, Long> {
+public interface UserRepository extends CrudRepository<User, String>, MongoRepository<User, String> {
 
     User findByUsername(String username);
 
@@ -41,13 +41,13 @@ public interface UserRepository extends CrudRepository<User, Long>, JpaRepositor
     public void delete(User entity);
 
     @Override
-    public void delete(Long id);
+    public void delete(String id);
 
     @Override
-    public boolean exists(Long id);
+    public boolean exists(String id);
 
     @Override
-    public User findOne(Long id);
+    public User findOne(String id);
 
     @Override
     public <S extends User> S save(S entity);
