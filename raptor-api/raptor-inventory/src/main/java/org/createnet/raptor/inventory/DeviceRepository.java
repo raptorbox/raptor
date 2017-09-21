@@ -35,7 +35,10 @@ public interface DeviceRepository extends MongoRepository<Device, String>, Query
 
     public List<Device> findByUserId(String userId);
     public List<Device> findByNameAndUserId(String name, String userId);
-
+    
+    @Override
+    public List<Device> findAll();
+    
     @Override
     public Page<Device> findAll(Predicate predicate, Pageable pageable);
 

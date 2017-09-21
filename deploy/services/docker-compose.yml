@@ -11,15 +11,15 @@ services:
     ports:
       - 1883:1883
     volumes:
-      - ./config:/etc/raptor
-      - ./data:/data
+      - ../../config:/etc/raptor
+      - ../../data:/data
     networks:
       - raptor_net
 
   auth:
     image: raptorbox/auth:v4
     volumes:
-      - ./config:/etc/raptor
+      - ../../config:/etc/raptor
     links:
       - mariadb
     depends_on:
@@ -31,7 +31,7 @@ services:
   action:
     image: raptorbox/action:v4
     volumes:
-      - ./config:/etc/raptor
+      - ../../config:/etc/raptor
     links:
       - mongo
     depends_on:
@@ -43,7 +43,7 @@ services:
   inventory:
     image: raptorbox/inventory:v4
     volumes:
-      - ./config:/etc/raptor
+      - ../../config:/etc/raptor
     links:
       - mongo
     depends_on:
@@ -55,7 +55,7 @@ services:
   profile:
     image: raptorbox/profile:v4
     volumes:
-      - ./config:/etc/raptor
+      - ../../config:/etc/raptor
     links:
       - mongo
     depends_on:
@@ -67,7 +67,7 @@ services:
   stream:
     image: raptorbox/stream:v4
     volumes:
-      - ./config:/etc/raptor
+      - ../../config:/etc/raptor
     links:
       - mongo
     depends_on:
@@ -79,7 +79,7 @@ services:
   tree:
     image: raptorbox/tree:v4
     volumes:
-      - ./config:/etc/raptor
+      - ../../config:/etc/raptor
     links:
       - mongo
     depends_on:
@@ -93,7 +93,7 @@ services:
     ports:
         - 80:80
     volumes:
-      - ./config:/etc/raptor
+      - ../../config:/etc/raptor
     depends_on:
         - broker
         - auth
@@ -103,14 +103,14 @@ services:
   curl:
     image: byrnedo/alpine-curl
     volumes:
-      - ./:/raptor
+      - ../../:/raptor
     networks:
       - raptor_net
 
   mariadb:
     image: mariadb:latest
     volumes:
-      - ./data/mariadb:/var/lib/mysql
+      - ../../data/mariadb:/var/lib/mysql
     environment:
       MYSQL_USERNAME: root
       MYSQL_ROOT_PASSWORD: raptor
@@ -121,7 +121,7 @@ services:
   mongo:
     image: mongo:3
     volumes:
-      - ./data/mongodb:/data/db
+      - ../../data/mongodb:/data/db
     command: --smallfiles --setParameter failIndexKeyTooLong=false
     networks:
       - raptor_net

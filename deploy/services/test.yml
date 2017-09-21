@@ -13,12 +13,12 @@ services:
 
   broker:
     command: ["java","-jar","/raptor.jar", "--dev"]
-    build: ./raptor-api/raptor-broker
+    build: ../../raptor-api/raptor-broker
     ports:
       - 1883:1883
     volumes:
-      - ./config:/etc/raptor
-      - ./data:/data
+      - ../../config:/etc/raptor
+      - ../../data:/data
     networks:
       - raptor_test
     extra_hosts:
@@ -26,9 +26,9 @@ services:
 
   auth:
     command: ["java","-jar","/raptor.jar", "--dev"]
-    build: ./raptor-api/raptor-auth
+    build: ../../raptor-api/raptor-auth
     volumes:
-      - ./config:/etc/raptor
+      - ../../config:/etc/raptor
     links:
       - mariadb
     depends_on:
@@ -42,9 +42,9 @@ services:
 
   action:
     command: ["java","-jar","/raptor.jar", "--dev"]
-    build: ./raptor-api/raptor-action
+    build: ../../raptor-api/raptor-action
     volumes:
-      - ./config:/etc/raptor
+      - ../../config:/etc/raptor
     links:
       - mongo
     depends_on:
@@ -58,9 +58,9 @@ services:
 
   inventory:
     command: ["java","-jar","/raptor.jar", "--dev"]
-    build: ./raptor-api/raptor-inventory
+    build: ../../raptor-api/raptor-inventory
     volumes:
-      - ./config:/etc/raptor
+      - ../../config:/etc/raptor
     links:
       - mongo
     depends_on:
@@ -74,9 +74,9 @@ services:
 
   profile:
     command: ["java","-jar","/raptor.jar", "--dev"]
-    build: ./raptor-api/raptor-profile
+    build: ../../raptor-api/raptor-profile
     volumes:
-      - ./config:/etc/raptor
+      - ../../config:/etc/raptor
     links:
       - mongo
     depends_on:
@@ -90,9 +90,9 @@ services:
 
   stream:
     command: ["java","-jar","/raptor.jar", "--dev"]
-    build: ./raptor-api/raptor-stream
+    build: ../../raptor-api/raptor-stream
     volumes:
-      - ./config:/etc/raptor
+      - ../../config:/etc/raptor
     links:
       - mongo
     depends_on:
@@ -106,9 +106,9 @@ services:
 
   tree:
     command: ["java","-jar","/raptor.jar", "--dev"]
-    build: ./raptor-api/raptor-tree
+    build: ../../raptor-api/raptor-tree
     volumes:
-      - ./config:/etc/raptor
+      - ../../config:/etc/raptor
     links:
       - mongo
     depends_on:
@@ -126,7 +126,7 @@ services:
     ports:
         - 10080:80
     volumes:
-      - ./config:/etc/raptor
+      - ../../config:/etc/raptor
     depends_on:
         - broker
     networks:
@@ -137,7 +137,7 @@ services:
   mariadb:
     image: mariadb:latest
     volumes:
-      - ./data/mariadb:/var/lib/mysql
+      - ../../data/mariadb:/var/lib/mysql
     environment:
       MYSQL_USERNAME: root
       MYSQL_ROOT_PASSWORD: raptor
@@ -146,20 +146,13 @@ services:
     ports:
         - 3306:3306
 
-  curl:
-    image: byrnedo/alpine-curl
-    volumes:
-      - ./:/raptor
-    networks:
-      - raptor_test
-
   dbadmin:
     image: phpmyadmin/phpmyadmin
     environment:
       MYSQL_ROOT_PASSWORD: raptor
     restart: always
     volumes:
-     - ./data/phpmyadmin:/sessions
+     - ../../data/phpmyadmin:/sessions
     links:
       - mariadb:db
     networks:
@@ -181,8 +174,8 @@ services:
   mongo:
     image: mongo:3
     volumes:
-      - ./data/mongodb:/data/db
-        command: --smallfiles --setParameter failIndexKeyTooLong=false 
+      - ../../data/mongodb:/data/db
+        command: --smallfiles --setParameter failIndexKeyTooLong=false
     networks:
       - raptor_test
     ports:

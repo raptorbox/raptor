@@ -15,8 +15,10 @@
  */
 package org.createnet.raptor.sdk.api;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.models.objects.Device;
@@ -199,4 +201,105 @@ public class InventoryTest {
 
     }
 
+    @Test
+    public void searchByUserId() {
+
+        Raptor raptor = Utils.getRaptor();
+        
+        
+        Raptor r = Utils.createNewInstance();
+        
+        log.debug("Create device by user {}", r.Auth().getUser().getUsername());
+        Device dev1 = new Device();
+        dev1.name("test dev with prop");
+        r.Inventory().create(dev1);
+        
+        String userId = r.Auth().getUser().getUuid();
+        
+        DeviceQuery q = new DeviceQuery();
+        q.userId(userId);
+        
+        log.debug("Searching for {}", q.toJSON().toString());
+
+        List<Device> results = raptor.Inventory().search(q);
+
+        log.debug("Results found {}", results.stream().map(d -> d.name()).collect(Collectors.toList()));
+        assertEquals(1, results.size());
+
+    }
+
+    @Test
+    public void searchByUserIdAndProperties() {
+
+        Raptor raptor = Utils.getRaptor();
+        Raptor r = Utils.createNewInstance();
+        
+        log.debug("Create device by user {}", r.Auth().getUser().getUsername());
+        Device dev1 = new Device();
+        dev1.name("test dev");
+        dev1.properties().put("test", true);
+        
+        r.Inventory().create(dev1);
+        
+        String userId = r.Auth().getUser().getUuid();
+        
+        DeviceQuery q = new DeviceQuery();
+        q.userId(userId);
+        q.properties.has("test", true);
+        
+        log.debug("Searching for {}", q.toJSON().toString());
+
+        List<Device> results = raptor.Inventory().search(q);
+
+        log.debug("Results found {}", results.stream().map(d -> d.name()).collect(Collectors.toList()));
+        assertEquals(1, results.size());
+
+    }
+    
+    @Test
+    public void changeUserIdForDevice() {
+
+        Raptor raptor = Utils.getRaptor();
+        Raptor r = Utils.createNewInstance();
+        
+        log.debug("Create device by user {}", r.Auth().getUser().getUsername());
+        Device dev1 = new Device();
+        dev1.name("test dev");
+        dev1.properties().put("test", true); 
+        
+        r.Inventory().create(dev1);
+        
+        String userId = r.Auth().getUser().getUuid();
+        String newUser = "ac8b3312-0648-432b-8d9d-faacb7b2875d";
+        
+        DeviceQuery q = new DeviceQuery();
+        q.userId(userId);
+        q.properties.has("test", true);
+        
+        log.debug("Searching for {}", q.toJSON().toString());
+
+        List<Device> results = raptor.Inventory().search(q);
+
+        log.debug("Results found {}", results.stream().map(d -> d.name()).collect(Collectors.toList()));
+        
+        if(results.size() == 1) {
+        	Device d = results.get(0).userId(newUser);
+        	d.name("user id changed");
+        	Device dd = raptor.Inventory().update(d);
+        	dd.toString();
+        }
+        
+        DeviceQuery q1 = new DeviceQuery();
+        q1.userId(newUser);
+        q1.properties.has("test", true);
+        
+        log.debug("Searching for {}", q1.toJSON().toString());
+
+        List<Device> newResults = raptor.Inventory().search(q1);
+
+        log.debug("Results found {}", newResults.stream().map(d -> d.toString()).collect(Collectors.toList()));
+        assertEquals(1, newResults.size());
+
+    }
+    
 }
