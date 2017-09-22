@@ -16,12 +16,12 @@
 package org.createnet.raptor.sdk.events;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.createnet.raptor.models.acl.PermissionUtil;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
@@ -280,7 +280,7 @@ public class EventListenerTest {
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
 
-        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.admin));
+        r.Admin().Token().Permission().set(t, Arrays.asList(Permission.admin.getName()));
 
         Device dev = r.Inventory().create(newDevice("dev"));
 
@@ -313,7 +313,7 @@ public class EventListenerTest {
         r.Auth().login();
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
-        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.execute));
+        r.Admin().Token().Permission().set(t, Arrays.asList(Permission.execute.getName()));
 
         List<String> perms = r.Admin().Token().Permission().get(t);
         Assert.assertEquals(1, perms.size());
@@ -354,7 +354,7 @@ public class EventListenerTest {
         r.Auth().login();
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
-        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.pull));
+        r.Admin().Token().Permission().set(t, Arrays.asList(Permission.pull.getName()));
 
         Device dev = r.Inventory().create(newDevice("dev"));
 
@@ -388,7 +388,7 @@ public class EventListenerTest {
         r.Auth().login();
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
-        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.execute));
+        r.Admin().Token().Permission().set(t, Arrays.asList(Permission.execute.getName()));
 
         Device dev = r.Inventory().create(newDevice("dev"));
 

@@ -109,7 +109,7 @@ public class UserTest {
         user.setUsername(username);
         user.setPassword("secret_" + rndUsername());
         user.setEmail("foobar+" + username + "@test.raptor.local");
-        user.setId(123456L);
+        user.setId(UUID.randomUUID().toString());
 
         String uuid = UUID.randomUUID().toString();
         user.setUuid(uuid);

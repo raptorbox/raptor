@@ -108,7 +108,7 @@ public class TreeController {
         if(node.getUserId() == null) {
             node.user(currentUser);
         }
-        if (!currentUser.isAdmin() && !node.getUserId().equals(currentUser.getUuid())) {
+        if (!currentUser.isSuperAdmin() && !node.getUserId().equals(currentUser.getUuid())) {
             node.user(currentUser);
         }
         
@@ -219,7 +219,7 @@ public class TreeController {
             if(node.getUserId() == null) {
                 node.user(currentUser);
             }
-            if (!currentUser.isAdmin() && !node.getUserId().equals(currentUser.getUuid())) {
+            if (!currentUser.isSuperAdmin() && !node.getUserId().equals(currentUser.getUuid())) {
                 node.user(currentUser);
             }
 

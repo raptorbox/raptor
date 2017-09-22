@@ -13,29 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.models.payload;
-
-import org.createnet.raptor.models.OperationName;
-import org.createnet.raptor.models.OperationType;
-import org.createnet.raptor.models.auth.Permission;
+package org.createnet.raptor.models;
 
 /**
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public class AbstractPayload implements DispatcherPayload {
-    
-    public OperationType type;
-    public OperationName op;
-    
-    @Override
-    public OperationType getType() {
-        return type;
-    }
-
-    @Override
-    public OperationName getOp() {
-        return op;
-    }
-    
+public enum OperationName {
+    create, read, update, delete, push, pull, execute
 }

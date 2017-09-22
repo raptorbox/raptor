@@ -28,21 +28,20 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Permission {
 
-    static final Permission admin = new Permission("admin");
-    static final Permission list = new Permission("list");
+    public static final Permission admin = new Permission("admin");
+    public static final Permission list = new Permission("list");
     
-    static final Permission read = new Permission("read");
-    static final Permission update = new Permission("update");
-    static final Permission create = new Permission("create");
-    static final Permission delete = new Permission("delete");
+    public static final Permission read = new Permission("read");
+    public static final Permission update = new Permission("update");
+    public static final Permission create = new Permission("create");
+    public static final Permission delete = new Permission("delete");
 
-    static final Permission data = new Permission("data");    
-    static final Permission push = new Permission("push");
-    static final Permission pull = new Permission("pull");
+    public static final Permission data = new Permission("data");    
+    public static final Permission push = new Permission("push");
+    public static final Permission pull = new Permission("pull");
     
-    static final Permission execute = new Permission("execute");
-    static final Permission tree = new Permission("tree");
-    
+    public static final Permission execute = new Permission("execute");
+    public static final Permission tree = new Permission("tree");
     
     public Permission() {
     }
@@ -63,5 +62,34 @@ public class Permission {
     protected String name;
     
     protected String description;
+
+    @Override
+    public String toString() {
+        return this.getName();
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
     
 }

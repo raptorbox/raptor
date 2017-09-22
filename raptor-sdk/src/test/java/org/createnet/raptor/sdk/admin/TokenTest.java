@@ -16,7 +16,6 @@
 package org.createnet.raptor.sdk.admin;
 
 import java.util.List;
-import org.createnet.raptor.models.auth.AclDevice;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
@@ -119,9 +118,8 @@ public class TokenTest {
         
         assertNotNull(newToken);
 
-        newToken.setDevice(new AclDevice("foobar"));
         newToken.setSecret("test2");
-        newToken.setUser(raptor.Auth().getUser());
+        newToken.setUserId(raptor.Auth().getUser().getUuid());
         newToken.setEnabled(false);
         newToken.setExpires(1L);
 

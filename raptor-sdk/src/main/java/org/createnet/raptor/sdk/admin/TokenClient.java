@@ -119,7 +119,7 @@ public class TokenClient extends AbstractClient {
      * @param tokenId
      * @return
      */
-    public Token read(long tokenId) {
+    public Token read(String tokenId) {
         JsonNode node = getClient().get(String.format(Routes.TOKEN_GET, tokenId));
         Token t1 = getMapper().convertValue(node, Token.class);
         return t1;

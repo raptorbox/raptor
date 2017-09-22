@@ -15,7 +15,8 @@
  */
 package org.createnet.raptor.models.payload;
 
-import org.createnet.raptor.models.Operation;
+import org.createnet.raptor.models.OperationName;
+import org.createnet.raptor.models.OperationType;
 import org.createnet.raptor.models.objects.Action;
 
 /**
@@ -30,11 +31,11 @@ public class ActionPayload extends DevicePayload {
     public ActionPayload() {
     }
     
-    public ActionPayload(Action action, Operation op, String data) {
+    public ActionPayload(Action action, OperationName op, String data) {
         super(action.getDevice(), op);
         this.data = data;
         this.actionId = action.name();
-        this.type = MessageType.action;
+        this.type = OperationType.action;
     }
 
 }

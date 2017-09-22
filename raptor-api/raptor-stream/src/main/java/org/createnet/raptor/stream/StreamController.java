@@ -128,7 +128,7 @@ public class StreamController {
             record.userId(currentUser.getUuid());
         }
 
-        if (!currentUser.isAdmin() && !record.userId().equals(currentUser.getUuid())) {
+        if (!currentUser.isSuperAdmin() && !record.userId().equals(currentUser.getUuid())) {
             record.userId(currentUser.getUuid());
         }
         

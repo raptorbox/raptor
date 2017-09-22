@@ -16,6 +16,7 @@
 package org.createnet.raptor.models.payload;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.createnet.raptor.models.OperationType;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.tree.TreeNode;
@@ -36,7 +37,7 @@ public class TreeNodePayload extends AbstractPayload {
     public TreeNodePayload(TreeNode node, DispatcherPayload payload) {
         userId = node.getUserId();
         this.node = node;
-        type = DispatcherPayload.MessageType.tree;
+        type = OperationType.tree;
         this.op = payload.getOp();
     }
 

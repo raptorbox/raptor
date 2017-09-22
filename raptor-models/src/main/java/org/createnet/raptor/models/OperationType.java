@@ -19,7 +19,7 @@ package org.createnet.raptor.models;
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public enum Operation {
+public enum OperationType {
     stream,
     data,
     tree,
@@ -29,5 +29,4 @@ public enum Operation {
     token,
     role,
     permission,
-    
 }

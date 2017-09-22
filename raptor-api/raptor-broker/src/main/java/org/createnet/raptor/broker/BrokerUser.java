@@ -43,15 +43,15 @@ public class BrokerUser {
         return raptor;
     }
     
-    public boolean isAdmin() {
+    public boolean isSuperAdmin() {
         if(isLocal())
-            return getLocalUser().isAdmin();
+            return getLocalUser().isSuperAdmin();
         else {
             User u = getRaptor().Auth().getUser();
             if(u == null) {
                 return false;
             }
-            return u.isAdmin();
+            return u.isSuperAdmin();
         }
     }
     

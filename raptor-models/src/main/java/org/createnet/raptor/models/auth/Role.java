@@ -32,8 +32,9 @@ import org.springframework.security.core.GrantedAuthority;
 public class Role implements GrantedAuthority {
     
     final static public Role super_admin = new Role("super_admin");
+    
     static public Role user = new Role("user", defaultUserPermissions());
-    static public Role admin = new Role("admin", defaultUserPermissions());
+    static public Role admin = new Role("admin", defaultAdminPermissions());
     
     public Role(String name) {
         this.name = name;

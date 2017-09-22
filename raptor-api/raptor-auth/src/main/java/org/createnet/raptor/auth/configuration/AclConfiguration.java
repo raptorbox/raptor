@@ -56,7 +56,7 @@ public class AclConfiguration {
 
     @Bean
     public AclAuthorizationStrategy aclAuthorizationStrategy() {
-        return new AclAuthorizationStrategyImpl(new Role(Role.Roles.super_admin.name()));
+        return new AclAuthorizationStrategyImpl(Role.super_admin);
     }
 
     @Bean

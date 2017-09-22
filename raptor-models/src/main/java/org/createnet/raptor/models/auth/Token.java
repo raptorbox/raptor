@@ -251,6 +251,10 @@ public class Token implements Serializable {
     public void setUserId(String userId) {
         this.userId = userId;
     }
+    
+    public void setUser(User user) {
+        this.setUserId(user.getUuid());
+    }
 
     public List<String> getDevices() {
         return devices;

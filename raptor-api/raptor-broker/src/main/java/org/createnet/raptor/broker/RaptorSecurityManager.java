@@ -23,9 +23,8 @@ import org.apache.activemq.artemis.core.security.CheckType;
 import org.apache.activemq.artemis.core.security.Role;
 import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
 import org.apache.activemq.artemis.spi.core.security.ActiveMQSecurityManager2;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
-import org.createnet.raptor.models.auth.Role.Roles;
 import org.createnet.raptor.models.configuration.AuthConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.createnet.raptor.sdk.Raptor;
@@ -143,7 +142,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
             return false;
         }
 
-        boolean isLocalAdmin = brokerUser.isLocal() && brokerUser.isAdmin();
+        boolean isLocalAdmin = brokerUser.isLocal() && brokerUser.isSuperAdmin();
         if (isLocalAdmin) {
             return true;
         }
@@ -199,13 +198,13 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
                 switch (Topics.Types.valueOf(type)) {
                     case device:
-                        return hasDevicePermission(r, id, Permissions.admin);
+                        return hasDevicePermission(r, id, Permission.admin);
                     case action:
-                        return hasDevicePermission(r, id, Permissions.execute);
+                        return hasDevicePermission(r, id, Permission.execute);
                     case stream:
-                        return hasDevicePermission(r, id, Permissions.pull);
+                        return hasDevicePermission(r, id, Permission.pull);
                     case tree:
-                        return hasDevicePermission(r, null, Permissions.tree);
+                        return hasDevicePermission(r, null, Permission.tree);
                     case token:
                     case user:
                         return r.Auth().getUser().isSuperAdmin();
@@ -224,8 +223,8 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         return false;
     }
 
-    protected boolean hasDevicePermission(Raptor r, String id, Permissions perm) {
-        AuthorizationResponse req = r.Admin().User().isAuthorized(id, r.Auth().getUser().getUuid(), perm);
+    protected boolean hasDevicePermission(Raptor r, String id, Permission perm) {
+        AuthorizationResponse req = r.Admin().User().isAuthorized(id, r.Auth().getUser().getUuid(), perm.toString());
         return req.result;
     }
 
@@ -238,7 +237,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     @Override
     public boolean validateUserAndRole(String user, String password, Set<Role> roles, CheckType checkType) {
         logger.warn("validateUserAndRole(user, password, roles, checkType): NOT IMPLEMENTED");
-        return roles.contains(Roles.admin.name()) && validateUser(user, password);
+        return roles.contains(org.createnet.raptor.models.auth.Role.super_admin.getName()) && validateUser(user, password);
     }
 
 }
