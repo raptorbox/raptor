@@ -94,6 +94,10 @@ public class TextQuery implements IQuery {
         return this.equals;
     }
     
+    public String getMatch() {
+        return this.equals;
+    }
+    
     public List<String> getIn() {
         return this.in;
     }

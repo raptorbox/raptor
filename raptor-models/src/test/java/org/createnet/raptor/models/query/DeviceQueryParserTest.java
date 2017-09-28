@@ -70,7 +70,7 @@ public class DeviceQueryParserTest extends TestUtils {
         DeviceQuery q = mapper.readValue(json.toString(), DeviceQuery.class);
 
         Assert.assertEquals(json.get("id").size(), q.id.getIn().size());
-        Assert.assertEquals(json.get("name").asText(), q.name.getContains());
+        Assert.assertEquals(json.get("name").asText(), q.name.getEquals());
     }
 
 }
