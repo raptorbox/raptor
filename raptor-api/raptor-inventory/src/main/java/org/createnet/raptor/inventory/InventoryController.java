@@ -56,220 +56,158 @@ import io.swagger.annotations.ApiResponses;
  */
 @RestController
 @RequestMapping(value = "/inventory")
-@ApiResponses(value = {
-    @ApiResponse(
-            code = 200,
-            message = "Ok"
-    )
-    ,
-    @ApiResponse(
-            code = 401,
-            message = "Not authorized"
-    )
-    ,
-    @ApiResponse(
-            code = 403,
-            message = "Forbidden"
-    )
-    ,
-    @ApiResponse(
-            code = 500,
-            message = "Internal error"
-    )
-})
-@Api(tags = {"Inventory"})
+@ApiResponses(value = { @ApiResponse(code = 200, message = "Ok"), @ApiResponse(code = 401, message = "Not authorized"),
+		@ApiResponse(code = 403, message = "Forbidden"), @ApiResponse(code = 500, message = "Internal error") })
+@Api(tags = { "Inventory" })
 public class InventoryController {
 
-    @Autowired
-    private DeviceService deviceService;
+	@Autowired
+	private DeviceService deviceService;
 
-    @Autowired
-    private DeviceEventPublisher eventPublisher;
-    
-    @Autowired
-    private ApiClientService raptor;
+	@Autowired
+	private DeviceEventPublisher eventPublisher;
 
-    @RequestMapping(method = RequestMethod.GET)
-    @ApiOperation(
-            value = "Return the user devices",
-            notes = "",
-            response = Device.class,
-            nickname = "getDevices"
-    )
-    public ResponseEntity<?> getDevices(
-            @AuthenticationPrincipal User currentUser
-    ) {
-            
-        String deviceId = currentUser.getUuid();
-    	if(currentUser.isSuperAdmin()) {
-            deviceId = null;
-    	}
-        
-        List<Device> devices = deviceService.list(deviceId);
-        
-        return ResponseEntity.ok(devices);
-    }
+	@Autowired
+	private ApiClientService raptor;
 
-    @RequestMapping(method = RequestMethod.POST)
-    @ApiOperation(
-            value = "Create a device instance",
-            notes = "",
-            response = Device.class,
-            nickname = "createDevice"
-    )
-    @PreAuthorize("hasPermission(null, 'create')")
-    public ResponseEntity<?> createDevice(
-            @AuthenticationPrincipal User currentUser,
-            @RequestBody Device device
-    ) {
+	@RequestMapping(method = RequestMethod.GET)
+	@ApiOperation(value = "Return the user devices", notes = "", response = Device.class, nickname = "getDevices")
+	public ResponseEntity<?> getDevices(@AuthenticationPrincipal User currentUser) {
 
-        device.setDefaults();
-        
-        try {
-            device.validate();
-        } catch (RaptorComponent.ValidationException ex) {
-            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Device definition is not valid: " + ex.getMessage());
-        }
-        
-        if (!currentUser.isSuperAdmin() || (device.userId() == null || device.userId().isEmpty())) {
-            device.userId(currentUser.getUuid());
-        }
+		String deviceId = currentUser.getUuid();
+		if (currentUser.isSuperAdmin()) {
+			deviceId = null;
+		}
 
-        deviceService.save(device);
+		List<Device> devices = deviceService.list(deviceId);
 
-        eventPublisher.create(device);
+		return ResponseEntity.ok(devices);
+	}
 
-        return ResponseEntity.ok(device.toJSON());
-    }
+	@RequestMapping(method = RequestMethod.POST)
+	@ApiOperation(value = "Create a device instance", notes = "", response = Device.class, nickname = "createDevice")
+	@PreAuthorize("hasPermission(null, 'create')")
+	public ResponseEntity<?> createDevice(@AuthenticationPrincipal User currentUser, @RequestBody Device device) {
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{deviceId}")
-    @ApiOperation(
-            value = "Return a device instance definition",
-            notes = "",
-            response = Device.class,
-            nickname = "getDevice"
-    )
-    @PostAuthorize("hasPermission(returnObject, 'read')")
-    public ResponseEntity<?> getDevice(
-            @AuthenticationPrincipal User currentUser,
-            @PathVariable("deviceId") String deviceId
-    ) {
+		device.setDefaults();
 
-        Device device = deviceService.get(deviceId);
-        if (device == null) {
-            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Not found");
-        }
+		try {
+			device.validate();
+		} catch (RaptorComponent.ValidationException ex) {
+			return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST,
+					"Device definition is not valid: " + ex.getMessage());
+		}
 
-        return ResponseEntity.ok(device);
-    }
+		if (!currentUser.isSuperAdmin() || (device.userId() == null || device.userId().isEmpty())) {
+			device.userId(currentUser.getUuid());
+		}
 
-    @RequestMapping(method = RequestMethod.PUT, value = "/{deviceId}")
-    @ApiOperation(
-            value = "Update a device instance",
-            notes = "",
-            response = Device.class,
-            nickname = "updateDevice"
-    )
-    @PreAuthorize("hasPermission(#deviceId, 'update')")
-    public ResponseEntity<?> updateDevice(
-            @AuthenticationPrincipal User currentUser,
-            @PathVariable("deviceId") String deviceId,
-            @RequestBody Device body
-    ) {
+		deviceService.save(device);
 
-        Device device = deviceService.get(deviceId);
+		eventPublisher.create(device);
 
-        if (device == null) {
-            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Device not found");
-        }
+		return ResponseEntity.ok(device.toJSON());
+	}
 
-        for (Iterator<Entry<String, Stream>> iterator = device.streams().entrySet().iterator(); iterator.hasNext();) {
+	@RequestMapping(method = RequestMethod.GET, value = "/{deviceId}")
+	@ApiOperation(value = "Return a device instance definition", notes = "", response = Device.class, nickname = "getDevice")
+	@PostAuthorize("hasPermission(returnObject, 'read')")
+	public ResponseEntity<?> getDevice(@AuthenticationPrincipal User currentUser,
+			@PathVariable("deviceId") String deviceId) {
+
+		Device device = deviceService.get(deviceId);
+		if (device == null) {
+			return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Not found");
+		}
+
+		return ResponseEntity.ok(device);
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/{deviceId}")
+	@ApiOperation(value = "Update a device instance", notes = "", response = Device.class, nickname = "updateDevice")
+	@PreAuthorize("hasPermission(#deviceId, 'update')")
+	public ResponseEntity<?> updateDevice(@AuthenticationPrincipal User currentUser,
+			@PathVariable("deviceId") String deviceId, @RequestBody Device body) {
+
+		Device device = deviceService.get(deviceId);
+
+		if (device == null) {
+			return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Device not found");
+		}
+
+		for (Iterator<Entry<String, Stream>> iterator = device.streams().entrySet().iterator(); iterator.hasNext();) {
 			Entry<String, Stream> entry = (Entry<String, Stream>) iterator.next();
 			String key = entry.getKey();
-			if (!body.streams().containsKey(key)) {				 
+			if (!body.streams().containsKey(key)) {
 				Stream stream = device.stream(key);
-		        if (stream == null) {
-		            return JsonErrorResponse.notFound("Stream not found");
-		        }
-		        stream.setDevice(device);
-		        raptor.Stream().delete(stream);
-		        iterator.remove();
+				if (stream == null) {
+					return JsonErrorResponse.notFound("Stream not found");
+				}
+				stream.setDevice(device);
+				raptor.Stream().delete(stream);
+				iterator.remove();
 			}
 		}
-        
-        device.merge(body);
 
-        // reset ids
-        device.id(deviceId);
-        device.userId(body.userId());
-        
-//        if (!currentUser.isSuperAdmin() || (device.userId() == null || device.userId().isEmpty())) {
-//            device.userId(currentUser.getUuid());
-//        }
-        device.validate();
+		device.merge(body);
 
-        deviceService.save(device);
+		// reset ids
+		// device.id(deviceId);
+		// device.userId(body.userId());
 
-        eventPublisher.update(device);
+		if (!currentUser.isSuperAdmin() || (device.userId() == null || device.userId().isEmpty())) {
+			device.userId(currentUser.getUuid());
+		}
+		device.validate();
 
-        return ResponseEntity.ok(device.toJSON());
-    }
+		deviceService.save(device);
 
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{deviceId}")
-    @ApiOperation(
-            value = "Delete a device instance",
-            notes = "",
-            response = Device.class,
-            nickname = "deleteDevice"
-    )
-    @PreAuthorize("hasPermission(#deviceId, 'delete')")
-    public ResponseEntity<?> deleteDevice(
-            @AuthenticationPrincipal User currentUser,
-            @PathVariable("deviceId") String deviceId
-    ) {
+		eventPublisher.update(device);
 
-        Device device = deviceService.get(deviceId);
-        if (device == null) {
-            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Device not found");
-        }
+		return ResponseEntity.ok(device.toJSON());
+	}
 
-        deviceService.delete(device);
+	@RequestMapping(method = RequestMethod.DELETE, value = "/{deviceId}")
+	@ApiOperation(value = "Delete a device instance", notes = "", response = Device.class, nickname = "deleteDevice")
+	@PreAuthorize("hasPermission(#deviceId, 'delete')")
+	public ResponseEntity<?> deleteDevice(@AuthenticationPrincipal User currentUser,
+			@PathVariable("deviceId") String deviceId) {
 
-        eventPublisher.delete(device);
+		Device device = deviceService.get(deviceId);
+		if (device == null) {
+			return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Device not found");
+		}
 
-        return ResponseEntity.accepted().build();
-    }
+		deviceService.delete(device);
 
-    @RequestMapping(method = RequestMethod.POST, value = "/search")
-    @ApiOperation(
-            value = "Search for device instances",
-            notes = "",
-            response = Device.class,
-            nickname = "searchDevices"
-    )
-    @PreAuthorize("hasPermission(null, 'list')")
-//    @PostAuthorize("hasPermission(returnObject.body, 'read')") // TODO: enable shared access
-    public ResponseEntity<?> searchDevices(
-            @AuthenticationPrincipal User currentUser,
-            @RequestParam MultiValueMap<String, String> parameters,
-            @RequestBody DeviceQuery query
-    ) {
-            
-        if(query.isEmpty()) {
-            return JsonErrorResponse.badRequest();
-        }
-        
-        if(!currentUser.isSuperAdmin()) {
-            query.userId(currentUser.getUuid());
-        }
+		eventPublisher.delete(device);
 
-        DeviceQueryBuilder qb = new DeviceQueryBuilder(query);
-        Predicate predicate = qb.getPredicate();
-        Pageable paging = qb.getPaging();
+		return ResponseEntity.accepted().build();
+	}
 
-        Page<Device> pagedList = deviceService.search(predicate, paging);
+	@RequestMapping(method = RequestMethod.POST, value = "/search")
+	@ApiOperation(value = "Search for device instances", notes = "", response = Device.class, nickname = "searchDevices")
+	@PreAuthorize("hasPermission(null, 'list')")
+	// @PostAuthorize("hasPermission(returnObject.body, 'read')") // TODO: enable
+	// shared access
+	public ResponseEntity<?> searchDevices(@AuthenticationPrincipal User currentUser,
+			@RequestParam MultiValueMap<String, String> parameters, @RequestBody DeviceQuery query) {
 
-        return ResponseEntity.ok(pagedList.getContent());
-    }
+		if (query.isEmpty()) {
+			return JsonErrorResponse.badRequest();
+		}
+
+		if (!currentUser.isSuperAdmin()) {
+			query.userId(currentUser.getUuid());
+		}
+
+		DeviceQueryBuilder qb = new DeviceQueryBuilder(query);
+		Predicate predicate = qb.getPredicate();
+		Pageable paging = qb.getPaging();
+
+		Page<Device> pagedList = deviceService.search(predicate, paging);
+
+		return ResponseEntity.ok(pagedList.getContent());
+	}
 
 }
