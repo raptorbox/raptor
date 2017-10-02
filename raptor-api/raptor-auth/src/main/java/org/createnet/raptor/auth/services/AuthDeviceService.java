@@ -103,11 +103,9 @@ public class AuthDeviceService {
 
         // delete device record
         if (p == RaptorPermission.DELETE) {
-
             if (device == null) {
                 throw new DeviceNotFoundException();
             }
-
             deviceRepository.delete(device);
             return null;
         }

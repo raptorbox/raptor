@@ -100,6 +100,21 @@ public class AclController {
     @Autowired
     private AclTokenService aclTokenService;
 
+    @RequestMapping(value = "/sync", method = RequestMethod.POST)
+    @ApiOperation(
+            value = "Sync device permissions",
+            notes = "",
+            nickname = "syncDevicePermission"
+    )
+    public ResponseEntity<?> syncDevicePermission(
+            @AuthenticationPrincipal User user,
+            @RequestBody SyncRequest req
+    ) {
+        logger.debug("Sync device permission");
+        AclDevice dev = deviceService.sync(user, req);
+        return ResponseEntity.accepted().build();
+    }
+
     @RequestMapping(value = "/check", method = RequestMethod.POST)
     @ApiOperation(
             value = "Check user permission on a device",
