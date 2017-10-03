@@ -98,8 +98,9 @@ public class InventoryController {
 					"Device definition is not valid: " + ex.getMessage());
 		}
 
-		if (!currentUser.isSuperAdmin() || (device.userId() == null || device.userId().isEmpty())) {
-			device.userId(currentUser.getUuid());
+                // not super admin
+		if (device.userId() == null || device.userId().isEmpty()) {
+                    device.userId(currentUser.getUuid());
 		}
 
 		deviceService.save(device);
@@ -151,13 +152,17 @@ public class InventoryController {
 
 		device.merge(body);
 
-		// reset ids
-		// device.id(deviceId);
-		// device.userId(body.userId());
-
-		if (!currentUser.isSuperAdmin() || (device.userId() == null || device.userId().isEmpty())) {
-			device.userId(currentUser.getUuid());
+                // not super admin
+		if (device.userId() == null || device.userId().isEmpty()) {
+                    device.userId(currentUser.getUuid());
 		}
+
+                // super_admin want to update userId ownership
+                if (currentUser.isSuperAdmin()) {
+                    device.userId(body.userId());
+                }
+                
+                
 		device.validate();
 
 		deviceService.save(device);
