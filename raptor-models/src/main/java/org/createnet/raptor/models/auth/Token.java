@@ -54,6 +54,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Table(name = "tokens")
 public class Token implements Serializable, AclSubject {
 
+    static final long serialVersionUID = 1000000000000011L;
+    
     public static enum Type {
         LOGIN, DEFAULT
     }

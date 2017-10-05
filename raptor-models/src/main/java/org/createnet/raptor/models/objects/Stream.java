@@ -34,6 +34,8 @@ import org.springframework.data.annotation.Transient;
 @JsonSerialize(using = StreamSerializer.class)
 public class Stream extends StreamContainer {
 
+    static final long serialVersionUID = 1000000000000105L;
+    
     @JsonIgnore
     @Transient
     private final Logger logger = LoggerFactory.getLogger(Stream.class);

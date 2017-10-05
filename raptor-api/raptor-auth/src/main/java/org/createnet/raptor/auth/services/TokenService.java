@@ -24,9 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -39,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-//@CacheConfig(cacheNames = "tokens")
 public class TokenService {
 
     @Autowired
@@ -121,7 +117,6 @@ public class TokenService {
      *
      * @param token
      */
-    //@CacheEvict(key = "#token.id")
     public void delete(Token token) {
         tokenRepository.delete(token.getId());
         evictCachedToken(token);
@@ -137,7 +132,6 @@ public class TokenService {
      * @param token
      * @return
      */
-    //@CacheEvict(key = "#token.id")
     public Token save(Token token) {
        Token saved = tokenRepository.save(token);
        evictCachedToken(saved);

@@ -5,12 +5,10 @@ spring:
       enabled: true
       trigger-file: raptor-${spring.config.name}-1.0.jar
       additional-paths: target
-
-  redis:
-    host: redis
-    password:
-    ssl: false
-    port: 6379
+  cache:
+    ehcache:
+      shared: true
+      config: classpath:/ehcache.xml
 
   data:
     mongodb:
@@ -27,6 +25,9 @@ server:
   error:
     whitelabel:
       enabled: true
+
+  tomcat:
+    max-threads: 8
 
 logging:
   level:

@@ -36,6 +36,8 @@ import org.springframework.data.annotation.Transient;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Action extends DeviceContainer {
 
+    static final long serialVersionUID = 1000000000000265L;
+    
     @JsonIgnore
     @Transient
     private final Logger logger = LoggerFactory.getLogger(Action.class);

@@ -59,7 +59,9 @@ import org.hibernate.validator.constraints.Email;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(name = "users")
 public class User implements Serializable {
-
+    
+    static final long serialVersionUID = 1000000000000001L;
+    
     @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

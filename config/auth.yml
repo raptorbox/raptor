@@ -28,6 +28,8 @@ spring:
         ddl-auto: validate
         naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
         cache:
+            ehcache:
+              configurationResourceName: /ehcache.xml
             use_second_level_cache: true
             use_query_cache: true
             region:

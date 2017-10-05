@@ -29,6 +29,8 @@ import org.createnet.raptor.models.objects.RaptorComponent.ValidationException;
  */
 public class Channel extends StreamContainer {
 
+    static final long serialVersionUID = 1000000000000165L;
+    
     public static final List<String> Types = new ArrayList(Arrays.asList(
             
             "number",
