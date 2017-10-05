@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   annotations:
     kompose.cmd: kompose -f ../../docker-compose.yml convert
-    kompose.version: 1.1.0 (HEAD)
+    kompose.version: 1.2.0 (HEAD)
   creationTimestamp: null
   labels:
     io.kompose.service: broker

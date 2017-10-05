@@ -125,8 +125,3 @@ services:
     command: --smallfiles --setParameter failIndexKeyTooLong=false
     networks:
       - raptor_net
-
-  redis:
-    image: redis:alpine
-    networks:
-      - raptor_net

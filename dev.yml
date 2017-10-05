@@ -43,7 +43,4 @@ services:
       - 27017:27017
     command: --smallfiles --setParameter failIndexKeyTooLong=false
 
-  redis:
-    image: redis:alpine
-    ports:
-        - 6379:6379
+  

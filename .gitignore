@@ -1,3 +1,5 @@
+
+*.iml
 /raptor*/target/*
 .vagrant
 nb*
