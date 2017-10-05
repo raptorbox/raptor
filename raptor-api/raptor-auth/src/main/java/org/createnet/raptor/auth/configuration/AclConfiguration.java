@@ -20,6 +20,8 @@ import org.createnet.raptor.auth.acl.RaptorPermission;
 import org.createnet.raptor.models.auth.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.ehcache.EhCacheCacheManager;
 import org.springframework.cache.ehcache.EhCacheFactoryBean;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.annotation.Bean;
@@ -45,6 +47,9 @@ public class AclConfiguration {
     @Autowired
     private DataSource dataSource;
 
+    @Autowired
+    CacheManager cacheManager;
+
     @Value("${spring.datasource.lastInsertQuery}")
     private String lastInsertQuery;
 
@@ -68,19 +73,18 @@ public class AclConfiguration {
     @Bean
     public EhCacheFactoryBean aclEhCacheFactoryBean() {
         EhCacheFactoryBean ehCacheFactoryBean = new EhCacheFactoryBean();
-        ehCacheFactoryBean.setCacheManager(aclCacheManager().getObject());
+        ehCacheFactoryBean.setCacheManager(cacheManagerFactory().getObject());
         ehCacheFactoryBean.setCacheName("aclCache");
         return ehCacheFactoryBean;
     }
 
     @Bean
-    public EhCacheManagerFactoryBean aclCacheManager() {
+    public EhCacheManagerFactoryBean cacheManagerFactory() {
         EhCacheManagerFactoryBean m = new EhCacheManagerFactoryBean();
-        m.setCacheManagerName("aclCacheManager");
         m.setShared(true);
         return m;
     }
-
+    
     @Bean
     public DefaultPermissionGrantingStrategy permissionGrantingStrategy() {
         DefaultPermissionGrantingStrategy pgs = new DefaultPermissionGrantingStrategy(auditLogger());

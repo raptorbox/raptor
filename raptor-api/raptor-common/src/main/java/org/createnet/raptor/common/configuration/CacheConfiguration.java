@@ -15,12 +15,8 @@
  */
 package org.createnet.raptor.common.configuration;
 
-import net.sf.ehcache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.ehcache.EhCacheCacheManager;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
 /**
  *
@@ -30,17 +26,4 @@ import org.springframework.context.annotation.Primary;
 @EnableCaching
 public class CacheConfiguration {
 
-    
-    @Bean
-    @Primary
-    public org.springframework.cache.CacheManager cacheManager() {
-        return new EhCacheCacheManager(ehCacheManager());
-    }
-    
-    @Bean
-    public CacheManager ehCacheManager() {
-        CacheManager m = CacheManager.create();
-        return m;
-    }
-    
 }

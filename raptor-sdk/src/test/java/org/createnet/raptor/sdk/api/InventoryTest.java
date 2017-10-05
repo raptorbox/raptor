@@ -127,7 +127,8 @@ public class InventoryTest {
         dev.name("modified device");
         dev.validate();
         raptor.Inventory().create(dev);
-
+        
+        Utils.waitFor(500);
         raptor.Inventory().update(dev);
 
         List<Device> list = raptor.Inventory().list();

@@ -5,10 +5,9 @@ spring:
       enabled: true
       trigger-file: raptor-${spring.config.name}-1.0.jar
       additional-paths: target
-  cache:
-    ehcache:
-      shared: true
-      config: classpath:/ehcache.xml
+  # cache:
+  #   ehcache:
+  #     config: classpath:/ehcache.xml
 
   data:
     mongodb:
