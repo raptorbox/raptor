@@ -205,6 +205,8 @@ public class DataStreamTest {
 
 		Device dev = createDevice(raptor);
 		Stream s = dev.stream("test");
+                
+                Utils.waitFor(100);
 
 		RecordSet record = raptor.Stream().lastUpdate(s);
 		Assert.assertNull(record);

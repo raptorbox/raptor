@@ -260,6 +260,7 @@ public class InventoryTest {
 
         Raptor raptor = Utils.getRaptor();
         Raptor r = Utils.createNewInstance();
+        Raptor r2 = Utils.createNewInstance();
         
         log.debug("Create device by user {}", r.Auth().getUser().getUsername());
         Device dev1 = new Device();
@@ -269,7 +270,7 @@ public class InventoryTest {
         r.Inventory().create(dev1);
         
         String userId = r.Auth().getUser().getUuid();
-        String newUser = "ac8b3312-0648-432b-8d9d-faacb7b2875d";
+        String newUser = r2.Auth().getUser().getUuid();
         
         DeviceQuery q = new DeviceQuery();
         q.userId(userId);
