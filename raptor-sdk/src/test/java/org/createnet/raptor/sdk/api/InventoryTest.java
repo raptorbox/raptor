@@ -15,10 +15,8 @@
  */
 package org.createnet.raptor.sdk.api;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.models.objects.Device;

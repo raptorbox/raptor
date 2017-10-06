@@ -185,7 +185,7 @@ public class Device extends DeviceContainer {
         if (this.name == null) {
             throw new ValidationException("name field missing");
         }
-
+        
         if (!this.isNew() && (this.id == null || this.id.isEmpty())) {
             throw new ValidationException("id field missing");
         }

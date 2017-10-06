@@ -23,6 +23,7 @@ import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.sdk.api.AuthClient;
+import org.createnet.raptor.sdk.exception.ClientException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -133,13 +134,39 @@ public class UserTest {
         log.debug("Create user {}", username);
         User user = raptor.Admin().User().create(username, "pass_" + rndUsername(), email);
 
-        user.setEmail("newemail@example.com");
+        user.setEmail(username + "_newemail@example.com");
         user.setEnabled(false);
 
         User updatedUser = raptor.Admin().User().update(user);
 
         assertNotEquals(email, updatedUser.getEmail());
         assertEquals(false, updatedUser.getEnabled());
+
+    }
+
+    @Test
+    public void failUpdateUserDuplicateEmail() {
+
+        String username1 = rndUsername();
+        String email1 = username1 + "@test.raptor.local";
+        log.debug("Create user {}", username1);
+        User user1 = raptor.Admin().User().create(username1, "pass_" + rndUsername(), email1);
+        
+        String username2 = rndUsername();
+        String email2 = username2 + "@test.raptor.local";        
+        log.debug("Create user {}", username2);
+        User user2 = raptor.Admin().User().create(username2, "pass_" + rndUsername(), email2);
+
+        user1.setEmail(email2);
+        
+        try {
+            User updatedUser1 = raptor.Admin().User().update(user1);
+        } catch(RequestException e) {
+            assertEquals(e.getStatus(), 400);
+            return;
+        }
+
+        fail("Should not update user1");
 
     }
 

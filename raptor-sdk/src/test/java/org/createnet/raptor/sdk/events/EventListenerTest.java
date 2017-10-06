@@ -209,7 +209,7 @@ public class EventListenerTest {
 
         raptor.Inventory().update(dev);
 
-        Utils.waitUntil(5, () -> eventsReceived.get() == 0);
+        Utils.waitUntil(10, () -> eventsReceived.get() == 0);
 
     }
 
