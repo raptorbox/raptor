@@ -111,7 +111,7 @@ public class AclController {
             @RequestBody AuthorizationRequest body,
             @RequestHeader("${raptor.auth.header}") String rawToken
     ) {
-
+        
         AuthorizationResponse response = new AuthorizationResponse();
 
         switch (body.getOperation()) {

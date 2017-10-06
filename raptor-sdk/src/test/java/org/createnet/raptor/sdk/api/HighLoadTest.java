@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.sdk.api;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -82,56 +84,52 @@ public class HighLoadTest {
     @Test
     public void testPush() throws InterruptedException {
 
-        ExecutorService pool = Executors.newCachedThreadPool();
-        CompletableFuture<String> completableFuture = new CompletableFuture<>();
+        ExecutorService pool = Executors.newFixedThreadPool(100);
         final AtomicInteger jobCounter = new AtomicInteger(0);
 
         Raptor raptor = Utils.getRaptor();
 
-        int devSize = 200;
-        int recordSize = 1000;
+        int devSize = 10;
+        int recordSize = 100;
 
         int len = jobCounter.addAndGet(devSize + devSize * recordSize);
 
         log.debug("Sending about {} request, hold tight and prepare to reboot :)", len);
 
-        pool.submit(() -> {
-            for (int i = 0; i < devSize; i++) {
+        for (int i = 0; i < devSize; i++) {
 
-                Device dev = create();
+            Device dev = create();
+            log.debug("Created device {}", dev.name());
 
-                log.debug("Created device {}", dev.name());
-                int rem = jobCounter.decrementAndGet();
-                log.debug("Remainging job {}", rem);
+            int rem = jobCounter.decrementAndGet();
+            log.debug("Remainging job {}", rem);
 
+            for (int i1 = 0; i1 < recordSize; i1++) {
                 final int v = i;
+                final int v1 = i1;
                 pool.submit(() -> {
-                    for (int i1 = 0; i1 < recordSize; i1++) {
-                        RecordSet record = new RecordSet(dev.stream("values"))
-                                .channel("temperature", i1 + 11.22 * Math.random())
-                                .channel("light", i1 + 2.1 * Math.random())
-                                .channel("pressure", i1 + 551 * Math.random());
-                        log.debug("Parrallel push {}.{}", v, i1);
-                        raptor.Stream().push(record);
-                    }
-
+                    RecordSet record = new RecordSet(dev.stream("values"))
+                            .channel("temperature", v1 + 11.22 * Math.random())
+                            .channel("light", v1 + 2.1 * Math.random())
+                            .channel("pressure", v1 + 551 * Math.random());
+                    log.debug("Parrallel push {}.{}", v, v1);
+                    raptor.Stream().push(record);
                     int rrem = jobCounter.decrementAndGet();
                     log.debug("Remainging job {}", rrem);
-
                     return null;
                 });
-
             }
-        });
-        
-        pool.awaitTermination(1000, TimeUnit.SECONDS);
-        
-        Utils.waitUntil(1000, () -> {
+
+        }
+
+        pool.shutdown();
+
+        Utils.waitUntil(devSize * (recordSize / 10), () -> {
             int cout = jobCounter.get();
-            return cout == 0;
+            log.debug("Work status {}, pool done {}, finished {}", cout, pool.isTerminated(), (pool.isTerminated() && cout == 0));
+            return !(pool.isTerminated() && cout == 0);
         });
-        
-        
+
     }
 
 }

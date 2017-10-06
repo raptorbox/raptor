@@ -72,13 +72,6 @@ services:
     ports:
         - 27017:27017
 
-  redis:
-    image: redis:alpine
-    networks:
-      - raptor_test
-    ports:
-        - 6379:6379
-
   apigateway:
     image: nginx
     volumes:

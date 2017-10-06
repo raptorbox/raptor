@@ -39,11 +39,6 @@ services:
     networks:
       - raptor_net
 
-  redis:
-    image: redis:alpine
-    networks:
-      - raptor_net
-
   ui:
     image: raptorbox/raptor-ui
     networks:

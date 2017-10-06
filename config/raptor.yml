@@ -5,9 +5,6 @@ spring:
       enabled: true
       trigger-file: raptor-${spring.config.name}-1.0.jar
       additional-paths: target
-  # cache:
-  #   ehcache:
-  #     config: classpath:/ehcache.xml
 
   data:
     mongodb:
@@ -26,7 +23,7 @@ server:
       enabled: true
 
   tomcat:
-    max-threads: 8
+    max-threads: 48
 
 logging:
   level:

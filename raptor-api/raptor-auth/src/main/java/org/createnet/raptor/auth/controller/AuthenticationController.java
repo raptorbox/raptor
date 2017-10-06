@@ -40,7 +40,6 @@ import org.createnet.raptor.models.auth.request.LoginResponse;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.auth.services.TokenService;
 import org.createnet.raptor.auth.services.UserService;
-import org.createnet.raptor.common.authentication.LoginAuthenticationToken;
 import org.createnet.raptor.models.apidocs.ApiDocsLoginResponse;
 import org.createnet.raptor.models.apidocs.ApiDocsUser;
 import org.createnet.raptor.models.auth.Token;
