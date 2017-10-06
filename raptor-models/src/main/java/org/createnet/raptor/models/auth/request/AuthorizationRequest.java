@@ -21,24 +21,10 @@ package org.createnet.raptor.models.auth.request;
  */
 public class AuthorizationRequest {
   
-  public static enum Operation {
-    Permission
-  }
-  
   public AuthorizationRequest() {}
   
-  public AuthorizationRequest(Operation op) {
-    this.operation = op.name();
-  }
-  
-  public String operation = Operation.Permission.name();
-
   public String permission;
   public String objectId;
   public String userId;
-  
-  public Operation getOperation() {
-    return Operation.valueOf(operation);
-  }
 
 }

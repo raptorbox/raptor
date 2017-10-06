@@ -138,7 +138,6 @@ public class UserClient extends AbstractClient {
 
         AuthorizationRequest auth = new AuthorizationRequest();
         auth.objectId = deviceId;
-        auth.operation = AuthorizationRequest.Operation.Permission.name();
         auth.permission = permission.name();
         auth.userId = userId;
 

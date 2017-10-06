@@ -22,7 +22,6 @@ import org.createnet.raptor.models.auth.request.AuthorizationRequest;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public class ApiDocsAuthorizationRequest {
-  public String operation = AuthorizationRequest.Operation.Permission.name();
   public String permission;
   public String objectId;
   public String userId;

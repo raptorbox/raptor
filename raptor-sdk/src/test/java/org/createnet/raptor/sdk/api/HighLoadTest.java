@@ -84,7 +84,7 @@ public class HighLoadTest {
     @Test
     public void testPush() throws InterruptedException {
 
-        ExecutorService pool = Executors.newFixedThreadPool(100);
+        ExecutorService pool = Executors.newFixedThreadPool(50);
         final AtomicInteger jobCounter = new AtomicInteger(0);
 
         Raptor raptor = Utils.getRaptor();

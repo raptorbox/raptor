@@ -92,10 +92,10 @@ public class AclController {
 
     @Autowired
     private TokenHelper tokenHelper;
-    
+
     @Autowired
     private AclDeviceService aclDeviceService;
-    
+
     @Autowired
     private AclTokenService aclTokenService;
 
@@ -111,55 +111,45 @@ public class AclController {
             @RequestBody AuthorizationRequest body,
             @RequestHeader("${raptor.auth.header}") String rawToken
     ) {
-        
+
         AuthorizationResponse response = new AuthorizationResponse();
 
-        switch (body.getOperation()) {
-            case Permission:
-
-                User user = currentUser;
-                if (body.userId != null) {
-                    user = userService.getByUuid(body.userId);
-                }
-
-                logger.debug("Check if user {} can `{}` on object {}", user.getUuid(), body.permission, body.objectId);
-
-                Permission permission = RaptorPermission.fromLabel(body.permission);
-                if (permission == null) {
-                    logger.warn("Permission not found for user {} `{}` on object {}", user.getUuid(), body.permission, body.objectId);
-                    return JsonErrorResponse.entity(HttpStatus.NOT_FOUND);
-                }
-
-                if (body.objectId == null && (permission == RaptorPermission.CREATE || permission == RaptorPermission.LIST || permission == RaptorPermission.TREE)) {
-                    // set true here, token permission will check over permission without objectId
-                    response.result = true;
-                }
-                else {
-
-                    AclDevice device = deviceService.getByUuid(body.objectId);
-                    if (device == null) {
-                        return JsonErrorResponse.entity(HttpStatus.NOT_FOUND);
-                    }
-
-                    response.result = aclDeviceService.check(device, user, permission);
-                }
-                
-                // check for token specific permission if user level ACL are ok
-                if (response.result) {
-                    // check token level ACL
-                    Token token = tokenService.read(tokenHelper.extractToken(rawToken));
-                    if(!aclTokenService.list(token, user).isEmpty()) {
-                        response.result = aclTokenService.check(token, user, permission);
-                    }
-                }
-                
-                logger.debug("Device permission check result: [operation:{}, deviceId:{}, result:{}]", body.getOperation(), body.objectId, response.result);
-                
-                break;
-            default:
-                response.result = false;
-                break;
+        User user = currentUser;
+        if (body.userId != null) {
+            user = userService.getByUuid(body.userId);
         }
+
+        logger.debug("Check if user {} can `{}` on object {}", user.getUuid(), body.permission, body.objectId);
+
+        Permission permission = RaptorPermission.fromLabel(body.permission);
+        if (permission == null) {
+            logger.warn("Permission not found for user {} `{}` on object {}", user.getUuid(), body.permission, body.objectId);
+            return JsonErrorResponse.entity(HttpStatus.NOT_FOUND);
+        }
+
+        if (body.objectId == null && (permission == RaptorPermission.CREATE || permission == RaptorPermission.LIST || permission == RaptorPermission.TREE)) {
+            // set true here, token permission will check over permission without objectId
+            response.result = true;
+        } else {
+
+            AclDevice device = deviceService.getByUuid(body.objectId);
+            if (device == null) {
+                return JsonErrorResponse.entity(HttpStatus.NOT_FOUND);
+            }
+
+            response.result = aclDeviceService.check(device, user, permission);
+        }
+
+        // check for token specific permission if user level ACL are ok
+        if (response.result) {
+            // check token level ACL
+            Token token = tokenService.read(tokenHelper.extractToken(rawToken));
+            if (!aclTokenService.list(token, user).isEmpty()) {
+                response.result = aclTokenService.check(token, user, permission);
+            }
+        }
+
+        logger.debug("Device permission check result: [deviceId:{}, result:{}]", body.objectId, response.result);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -170,7 +160,7 @@ public class AclController {
             notes = "",
             code = 202,
             nickname = "syncPermission"
-    )    
+    )
     public ResponseEntity<?> syncPermission(
             @AuthenticationPrincipal User currentUser,
             @RequestBody SyncRequest body
