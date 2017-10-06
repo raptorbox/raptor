@@ -29,13 +29,16 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.acls.model.Permission;
 import org.springframework.stereotype.Service;
 import org.createnet.raptor.auth.repository.AclDeviceRepository;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-//@CacheConfig(cacheNames = "acl_device")
+@CacheConfig(cacheNames = "aclDevice")
 public class AuthDeviceService {
 
     protected static final Logger logger = LoggerFactory.getLogger(AuthDeviceService.class);
@@ -49,7 +52,7 @@ public class AuthDeviceService {
     @Autowired
     private AclDeviceService aclDeviceService;
     
-    //@CacheEvict(key = "#device.id")
+    @CacheEvict(key = "#device.id")
     public AclDevice save(AclDevice device) {
 
         AclDevice saved = deviceRepository.save(device);
@@ -62,12 +65,12 @@ public class AuthDeviceService {
         return deviceRepository.findByUuid(uuid);
     }
 
-    //@Cacheable(key = "#id")
+    @Cacheable(key = "#id")
     public AclDevice get(Long id) {
         return deviceRepository.findOne(id);
     }
     
-    //@CacheEvict(key = "#id")
+    @CacheEvict(key = "#id")
     public void delete(Long id) {
         deviceRepository.delete(id);
     }

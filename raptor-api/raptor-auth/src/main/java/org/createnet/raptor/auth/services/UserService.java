@@ -25,6 +25,9 @@ import org.createnet.raptor.auth.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
+@CacheConfig(cacheNames = "users")
 public class UserService {
 
     final private Logger logger = LoggerFactory.getLogger(UserService.class);
@@ -51,6 +55,7 @@ public class UserService {
         return userRepository.findAll();
     }
     
+    @CacheEvict(key = "#user.uuid")
     public User save(User user) {
         loadRoles(user);
         User saved = userRepository.save(user);
@@ -58,6 +63,7 @@ public class UserService {
         return getByUuid(saved.getUuid());
     }
 
+    @Cacheable(key = "#uuid")
     public User getByUuid(String uuid) {
         return userRepository.findByUuid(uuid);
     }
@@ -87,6 +93,7 @@ public class UserService {
         return update(user, rawUser);
     }    
     
+    @CacheEvict(key = "#user.uuid")
     public User update(User user, User rawUser) {
         
         if (rawUser.getUsername() != null && !rawUser.getUsername().isEmpty()) {
@@ -140,7 +147,7 @@ public class UserService {
         return save(rawUser);
     }
     
-    //@CacheEvict(key = "#user.uuid")
+    @CacheEvict(key = "#user.uuid")
     public void delete(User user) {
         userRepository.delete(user.getId());
     }
@@ -149,7 +156,6 @@ public class UserService {
         return passwordEncoder.encode(secret);
     }
 
-    //@Cacheable(key = "#user.uuid")
     public boolean exists(User rawUser) {
 
         User user = getByUuid(rawUser.getUuid());
