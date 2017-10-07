@@ -36,7 +36,6 @@ before_script:
   - sleep 30
   - docker-compose up -d broker apigateway
   - sleep 20
-  - docker-compose logs broker apigateway
 
 after_script:
   - docker-compose kill
