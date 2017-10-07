@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public class HighLoadTest {
 
     // Ensure those values are compatible with the setup of CI
-    int poolSize = 5
+    int poolSize = 5;
     int devSize = 2;
     int recordSize = 10;
 
