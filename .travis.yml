@@ -10,6 +10,9 @@ jdk:
 addons:
   hosts:
     - raptor.local
+    - mariadb
+    - mongo
+    - apigateway
 
 sudo: required
 
@@ -29,11 +32,11 @@ before_script:
   # workaround for 3306 used, see https://github.com/travis-ci/travis-ci/issues/7008#issuecomment-269126128
   - sudo /etc/init.d/mysql stop
   - mvn package -DskipTests=true
-  - docker-compose -f test.yml up -d mariadb mongo redis
-  - sleep 60
+  - docker-compose -f test.yml up -d mariadb mongo
+  - sleep 20
   - docker-compose -f test.yml logs
   - docker-compose -f test.yml up -d --build broker apigateway
-  - sleep 60
+  - sleep 40
   - docker-compose -f test.yml logs
 
 after_script:
