@@ -12,7 +12,7 @@ It can be reused as a standalone library in external application for a direct in
   - [Create a device](#create-a-device)
   - [Update a device](#update-a-device)
   - [Load a device](#load-a-device)
-  - [Search for devices](#search for devices)
+  - [Search for devices](#search-for-devices)
   - [Events notifications](#events-notifications)
     - [Watch device events](#watch-device-events)
     - [Watch data events](#watch-data-events)
