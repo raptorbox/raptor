@@ -39,8 +39,8 @@ public class HighLoadTest {
 
     // Ensure those values are compatible with the setup of CI
     int poolSize = 5;
-    int devSize = 10;
-    int recordSize = 100;
+    int devSize = 5;
+    int recordSize = 10;
 
     final Logger log = LoggerFactory.getLogger(HighLoadTest.class);
 
