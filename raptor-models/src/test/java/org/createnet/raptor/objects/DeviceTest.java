@@ -18,6 +18,7 @@ package org.createnet.raptor.objects;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.utils.TestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -25,13 +26,17 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public class DeviceTest extends TestUtils {
-
+    
+    Logger log = LoggerFactory.getLogger(DeviceTest.class);
+    
     protected JsonNode jsonData;
 
     public DeviceTest() {
@@ -85,12 +90,41 @@ public class DeviceTest extends TestUtils {
      */
     @Test
     public void testParse2() {
-
         jsonDevice = loadData("device2");
         Device dev = Device.fromJSON(jsonDevice);
-
         assertEquals(dev.name(), jsonDevice.get("name").asText());
+    }
 
+    /**
+     * Test json parse
+     *
+     * @throws
+     * org.createnet.raptor.models.objects.RaptorComponent.ParserException
+     */
+    @Test
+    public void testEmptyStreamName() {
+
+        jsonDevice = loadData("device_empty_stream_name");
+        Device raw = Device.fromJSON(jsonDevice);
+        
+        Device dev1 = new Device();
+        dev1.merge(raw);        
+        dev1.streams().remove("");
+        
+        log.debug("dev1 JSON {}", dev1.toJSON());
+        dev1.validate();
+
+        Device dev2 = new Device();
+        dev2.merge(raw);        
+        dev2.streams().remove("data");
+        
+        log.debug("dev2 JSON {}", dev2.toJSON());
+        try {
+            dev2.validate();
+            fail("Validation MUST throw excepion");
+        } catch(RaptorComponent.ValidationException ex) {
+        }
+        
     }
 
     /**

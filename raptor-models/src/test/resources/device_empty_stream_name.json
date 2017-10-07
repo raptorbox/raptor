@@ -1,0 +1,17 @@
+{
+    "name": "test",
+    "streams": {
+        "": {    
+            "name": "",
+            "channels": {
+                "noname_all": "number"
+            }
+        },
+        "data": {    
+            "name": "",
+            "channels": {
+                "noname_inner": "number"
+            }
+        }
+    }
+}

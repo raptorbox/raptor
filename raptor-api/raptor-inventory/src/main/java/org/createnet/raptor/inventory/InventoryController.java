@@ -50,7 +50,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.createnet.raptor.models.acl.Permissions;
-import org.createnet.raptor.models.auth.request.SyncRequest;
 import org.createnet.raptor.models.exception.RequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

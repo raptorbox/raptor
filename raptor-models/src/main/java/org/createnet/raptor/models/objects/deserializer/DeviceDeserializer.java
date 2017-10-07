@@ -76,7 +76,17 @@ public class DeviceDeserializer extends JsonDeserializer<Device> {
 
                     String name = fieldNames.next();
                     JsonNode jsonStream = tree.get("streams").get(name);
-
+                    
+                    if (name.isEmpty()) {
+                        if(jsonStream.has("name")) {
+                            name = jsonStream.get("name").asText();
+                        }
+                    }
+                    
+                    if(name.isEmpty()) {
+                        continue;
+                    }
+                    
                     Stream stream = new Stream(name, jsonStream, device);
                     device.streams().put(stream.name(), stream);
                 }
@@ -106,7 +116,17 @@ public class DeviceDeserializer extends JsonDeserializer<Device> {
 
                     String name = fieldNames.next();
                     JsonNode json = tree.get("actions").get(name);
-
+                    
+                    if (name.isEmpty()) {
+                        if (json.has("name")) {
+                            name = json.get("name").asText();
+                        }
+                    }
+                    
+                    if(name.isEmpty()) {
+                        continue;
+                    }
+                    
                     Action actuation = new Action(name, json, device);
                     device.actions().put(actuation.name(), actuation);
                 }
