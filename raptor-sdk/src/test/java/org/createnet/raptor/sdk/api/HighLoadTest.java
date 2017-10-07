@@ -132,7 +132,7 @@ public class HighLoadTest {
     @Test
     public void testParallelPush() throws InterruptedException {
         
-        int jobSize = 10;
+        int jobSize = 2;
         
         ExecutorService pool = Executors.newFixedThreadPool(jobSize);
 
