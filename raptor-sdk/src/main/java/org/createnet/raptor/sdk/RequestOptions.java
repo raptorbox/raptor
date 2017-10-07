@@ -28,16 +28,16 @@ public class RequestOptions {
     protected boolean auth = true;
     protected boolean textBody = false;
     
-    protected int timeoutRequest = 3*1000;
-    protected int timeoutSocket = 5*1000;
-
-    public int getTimeoutRequest() {
-        return timeoutRequest;
-    }
-
-    public int getTimeoutSocket() {
-        return timeoutSocket;
-    }
+//    protected int timeoutRequest = 3*1000;
+//    protected int timeoutSocket = 5*1000;
+//
+//    public int getTimeoutRequest() {
+//        return timeoutRequest;
+//    }
+//
+//    public int getTimeoutSocket() {
+//        return timeoutSocket;
+//    }
     
     public int getMaxRetry() {
         return maxRetry;
@@ -74,15 +74,15 @@ public class RequestOptions {
         return this;
     }
     
-    public RequestOptions timeoutRequest(int n) {
-        this.timeoutRequest = n;
-        return this;
-    }
-    
-    public RequestOptions timeoutSocket(int n) {
-        this.timeoutSocket = n;
-        return this;
-    }
+//    public RequestOptions timeoutRequest(int n) {
+//        this.timeoutRequest = n;
+//        return this;
+//    }
+//    
+//    public RequestOptions timeoutSocket(int n) {
+//        this.timeoutSocket = n;
+//        return this;
+//    }
     
     public RequestOptions maxRetries(int n) {
         this.maxRetry = n;

@@ -39,10 +39,13 @@ import org.slf4j.LoggerFactory;
 public class HttpClient extends AbstractClient {
 
     static {
-        
+
+//        Unirest.setConcurrency(200, 20); // defaults maxTotal, maxPerRoute
+        Unirest.setConcurrency(500, 100);
+
 //        Unirest.setTimeouts(60*1000, 30*1000); // defaults socket + req timeout
-        Unirest.setTimeouts(6*1000, 3*1000);
-        
+        Unirest.setTimeouts(6 * 1000, 3 * 1000);
+
         // Only one time
         Unirest.setObjectMapper(new ObjectMapper() {
 
@@ -118,7 +121,7 @@ public class HttpClient extends AbstractClient {
         }
 
         req.header("Content-Type", opts.withTextBody() ? "text/plain" : "application/json");
-        
+
         return req;
     }
 
@@ -150,30 +153,42 @@ public class HttpClient extends AbstractClient {
         int waitFor = opts.getWaitFor();
 
         while (tries < maxRetry) {
+            RuntimeException requestFailure = null;
             try {
                 HttpResponse<JsonNode> objResponse = req.asObject(JsonNode.class);
                 checkResponse(objResponse);
                 return objResponse.getBody();
 
             } catch (RequestException ex) {
-
-                tries++;
-
-                if (!opts.withRetry() || tries == maxRetry) {
-                    logger.error("Request failed after {} tries. Last exception: {}", tries, ex.getMessage());
-                    throw ex;
-                }
-
-                logger.warn("Request error: {}. Retrying {}/{}", ex.getMessage(), tries, maxRetry);
-
-                try {
-                    Thread.sleep(waitFor);
-                } catch (InterruptedException ex1) {
-                }
-
+                requestFailure = ex;
             } catch (UnirestException ex) {
-                logger.error("HTTP Client error: {}", ex.getMessage());
-                throw new ClientException(ex);
+
+                // Catch socket timeout
+                if (ex.getCause() instanceof java.net.SocketTimeoutException) {
+                    logger.error("Socket timeout: {}", ex.getMessage());
+                    requestFailure = new RuntimeException(ex);
+                } else {
+                    // fail otherwise
+                    logger.error("HTTP Client error: {}", ex.getMessage());
+                    throw new ClientException(ex);
+                }
+            } finally {
+                if (requestFailure != null) {
+
+                    tries++;
+
+                    if (!opts.withRetry() || tries == maxRetry) {
+                        logger.error("Request failed after {} tries. Last exception: {}", tries, requestFailure.getMessage());
+                        throw requestFailure;
+                    }
+
+                    logger.warn("Request error: {}. Retrying {}/{}", requestFailure.getMessage(), tries, maxRetry);
+
+                    try {
+                        Thread.sleep(waitFor);
+                    } catch (InterruptedException ex1) {
+                    }
+                }
             }
         }
 

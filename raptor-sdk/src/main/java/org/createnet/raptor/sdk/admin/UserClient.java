@@ -162,7 +162,7 @@ public class UserClient extends AbstractClient {
      * @param req
      */
     public void sync(SyncRequest req) {
-        getClient().post(Routes.PERMISSION_SYNC, toJsonNode(req), RequestOptions.retriable());
+        getClient().post(Routes.PERMISSION_SYNC, toJsonNode(req), RequestOptions.retriable().maxRetries(5).waitFor(100));
     }
     
     /**

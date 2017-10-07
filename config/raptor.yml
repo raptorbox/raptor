@@ -27,7 +27,7 @@ server:
 
 logging:
   level:
-    org.createnet.raptor: DEBUG
+    org.createnet.raptor: INFO
     org.spring: WARN
     root: WARN
 

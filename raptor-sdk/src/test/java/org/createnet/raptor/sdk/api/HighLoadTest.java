@@ -39,8 +39,8 @@ public class HighLoadTest {
 
     // Ensure those values are compatible with the setup of CI
     int poolSize = 5;
-    int devSize = 2;
-    int recordSize = 10;
+    int devSize = 10;
+    int recordSize = 100;
 
     final Logger log = LoggerFactory.getLogger(HighLoadTest.class);
 
@@ -60,9 +60,7 @@ public class HighLoadTest {
     public void tearDown() {
     }
 
-    public Device create() {
-
-        Raptor raptor = Utils.getRaptor();
+    public Device create(Raptor raptor) {
 
         Device dev = new Device();
         dev.name("highload " + (System.currentTimeMillis() * Math.random()));
@@ -86,9 +84,8 @@ public class HighLoadTest {
     public void testPush() throws InterruptedException {
 
         ExecutorService pool = Executors.newFixedThreadPool(poolSize);
+        
         final AtomicInteger jobCounter = new AtomicInteger(0);
-
-        Raptor raptor = Utils.getRaptor();
 
         int len = jobCounter.addAndGet(devSize * recordSize);
 
@@ -96,7 +93,8 @@ public class HighLoadTest {
 
         for (int i = 0; i < devSize; i++) {
 
-            Device dev = create();
+            Raptor r = Utils.createNewInstance();
+            Device dev = create(r);
             log.debug("Created device {}", dev.name());
 
             for (int i1 = 0; i1 < recordSize; i1++) {
@@ -107,10 +105,13 @@ public class HighLoadTest {
                             .channel("temperature", v1 + 11.22 * Math.random())
                             .channel("light", v1 + 2.1 * Math.random())
                             .channel("pressure", v1 + 551 * Math.random());
+                    
                     log.debug("Parrallel push {}.{}", v, v1);
-                    raptor.Stream().push(record);
+                    r.Stream().push(record);
+                    
                     int rrem = jobCounter.decrementAndGet();
                     log.debug("Remainging job {}", rrem);
+                    
                     return null;
                 });
             }
@@ -126,5 +127,31 @@ public class HighLoadTest {
         });
 
     }
+    
 
+    @Test
+    public void testParallelPush() throws InterruptedException {
+        
+        int jobSize = 10;
+        
+        ExecutorService pool = Executors.newFixedThreadPool(jobSize);
+
+        for (int i = 0; i < jobSize; i++) {
+            final int v = i;
+            pool.submit(() -> {
+                testPush();
+                return null;
+            });
+
+        }
+
+        pool.shutdown();
+
+        Utils.waitUntil(jobSize * (25 + (devSize * (recordSize / 10))), () -> {
+            return !(pool.isTerminated());
+        });
+
+    }
+    
+    
 }
