@@ -39,7 +39,10 @@ import org.slf4j.LoggerFactory;
 public class HttpClient extends AbstractClient {
 
     static {
-
+        
+//        Unirest.setTimeouts(60*1000, 30*1000); // defaults socket + req timeout
+        Unirest.setTimeouts(6*1000, 3*1000);
+        
         // Only one time
         Unirest.setObjectMapper(new ObjectMapper() {
 
@@ -115,7 +118,7 @@ public class HttpClient extends AbstractClient {
         }
 
         req.header("Content-Type", opts.withTextBody() ? "text/plain" : "application/json");
-
+        
         return req;
     }
 
