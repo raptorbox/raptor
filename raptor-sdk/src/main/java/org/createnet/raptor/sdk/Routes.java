@@ -37,6 +37,8 @@ final public class Routes {
     public static final String ACTION_INVOKE = "/action/%s/%s";
     public static final String ACTION_STATUS = ACTION_INVOKE;
     
+    
+    public static final String PERMISSION_SYNC = "/auth/sync";
     public static final String PERMISSION_CHECK = "/auth/check";
     public static final String LOGIN = "/auth/login";
     public static final String LOGOUT = LOGIN;

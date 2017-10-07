@@ -15,15 +15,17 @@
  */
 package org.createnet.raptor.sdk.admin;
 
+import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.exception.RequestException;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.sdk.api.AuthClient;
-import org.createnet.raptor.sdk.exception.ClientException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -226,6 +228,37 @@ public class UserTest {
         assertNotNull(user);
         assertEquals(user.getUuid(), user1.getUuid());
         assertEquals(user.getUsername(), user1.getUsername());
+        
+    }
+    
+    @Test
+    public void isAuthorized() throws IOException {
+        
+        String username1 = rndUsername();
+        Raptor r1 = Utils.createNewInstance(username1);
+        String username2 = rndUsername();
+        Raptor r2 = Utils.createNewInstance(username2);
+        String userId2 = r2.Auth().getUser().getUuid();
+        
+        Device dev = new Device();
+        dev.name("auth_test");
+        r1.Inventory().create(dev);
+        
+        assertNotNull(dev.id());
+        
+        AuthorizationResponse res;
+        
+        res = r1.Admin().User().isAuthorized(dev, Permissions.admin);
+        assertEquals(res.result, true);
+        
+        res = r1.Admin().User().isAuthorized(dev, Permissions.read);
+        assertEquals(res.result, true);
+        
+        res = r1.Admin().User().isAuthorized(dev.id(), userId2, Permissions.admin);
+        assertEquals(res.result, false);       
+        
+        res = r1.Admin().User().isAuthorized(dev.id(), userId2, Permissions.read);
+        assertEquals(res.result, false);       
         
     }
 

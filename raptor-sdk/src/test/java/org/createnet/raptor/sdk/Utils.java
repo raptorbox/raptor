@@ -117,10 +117,10 @@ public class Utils {
         User user = getRaptor().Admin().User().create(username, username + Math.random(), username + "@test.raptor.local", roles);
 
         assert user != null;
-        assert getRaptor().Auth.getToken() != null;
+        assert getRaptor().Auth().getToken() != null;
 
         Raptor r = new Raptor(new Config(instance.getConfig().getUrl(), username, username));
-        r.Auth.login();
+        r.Auth().login();
 
         return r;
     }
@@ -139,7 +139,7 @@ public class Utils {
         assert user != null;
 
         Raptor r = new Raptor(new Config(instance.getConfig().getUrl(), username, password));
-        r.Auth.login();
+        r.Auth().login();
 
         return r;
     }

@@ -50,4 +50,12 @@ public class JsonErrorResponse {
     public static ResponseEntity<?> badRequest() {
         return badRequest("Bad request");
     }
+    
+    public static ResponseEntity<?> internalError(String message) {
+        return entity(HttpStatus.INTERNAL_SERVER_ERROR, message);
+    }
+    
+    public static ResponseEntity<?> internalError() {
+        return badRequest("Internal server error");
+    }
 }

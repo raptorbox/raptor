@@ -37,8 +37,6 @@ public class AuthTest {
 
     final Logger log = LoggerFactory.getLogger(AuthTest.class);
 
-    public static Raptor raptor;
-
     @BeforeClass
     public static void setUpClass() {
     }
@@ -47,17 +45,13 @@ public class AuthTest {
     public static void tearDownClass() {
     }
 
-    @Before
-    public void setUp() {
-        raptor = Utils.getRaptor();
-    }
-
     @After
     public void tearDown() {
     }
 
     @Test
     public void login() {
+        Raptor raptor = Utils.getRaptor();
         log.debug("Try to login");
         Properties p = Utils.loadSettings();
         AuthClient.LoginState loginInfo = raptor.Auth().login(p.getProperty("username"), p.getProperty("password"));
@@ -67,6 +61,7 @@ public class AuthTest {
 
     @Test(expected = AuthenticationFailedException.class)
     public void failLogin() {
+        Raptor raptor = Utils.getRaptor();
         log.debug("Try to fake login");
         AuthClient.LoginState loginInfo = raptor.Auth().login("admin", "apple");
         log.error("Shoud have failied..");
@@ -74,6 +69,8 @@ public class AuthTest {
 
     @Test(expected = AuthenticationFailedException.class)
     public void failTokenLogin() {
+
+        Raptor raptor = Utils.getRaptor();
 
         log.debug("Try to fake token login");
 
@@ -85,6 +82,8 @@ public class AuthTest {
 
     @Test
     public void multipleLogin() {
+
+        Raptor raptor = Utils.getRaptor();
 
         // ensure we have a token
         Utils.getRaptor().Auth().login();
@@ -113,31 +112,31 @@ public class AuthTest {
 
     @Test
     public void refresh() {
-
+        Raptor raptor = Utils.getRaptor();
         log.debug("Refresh token");
 
         Properties p = Utils.loadSettings();
         long now = Instant.now().toEpochMilli();
-        
+
         AuthClient.LoginState loginInfo = raptor.Auth().login();
         AuthClient.LoginState refreshInfo = raptor.Auth().refreshToken();
 
         Assert.assertNotNull(refreshInfo.token);
         Assert.assertNotEquals(refreshInfo.token, loginInfo.token);
         Assert.assertTrue(now < refreshInfo.expires);
-        
+
         log.debug("Refresh token, again");
         AuthClient.LoginState refreshInfo2 = raptor.Auth().refreshToken();
 
         Assert.assertNotNull(refreshInfo2.token);
         Assert.assertNotEquals(refreshInfo.token, refreshInfo2.token);
         Assert.assertTrue(now < refreshInfo2.expires);
-        
+
     }
 
     @Test
     public void logout() {
-
+        Raptor raptor = Utils.getRaptor();
         log.debug("Logout");
 
         Properties p = Utils.loadSettings();

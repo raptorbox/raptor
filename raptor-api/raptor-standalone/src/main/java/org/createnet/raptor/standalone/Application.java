@@ -78,16 +78,16 @@ public class Application extends BaseApplication {
         return new TreeMessageHandler();
     }
     
-    @Bean
-    AuthMessageHandler authMessageHandler(){
-        return new AuthMessageHandler();
-    }
+//    @Bean
+//    AuthMessageHandler authMessageHandler(){
+//        return new AuthMessageHandler();
+//    }
     
     @Bean
     MultipleMessageHandler multipleMessageHandler() {
         MultipleMessageHandler m = new MultipleMessageHandler();
         m.addHandler(treeMessageHandler());
-        m.addHandler(authMessageHandler());
+//        m.addHandler(authMessageHandler());
         return m;
     }
     

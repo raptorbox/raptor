@@ -49,6 +49,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.auth.request.SyncRequest;
+import org.createnet.raptor.models.exception.RequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,9 +69,9 @@ import org.slf4j.LoggerFactory;
     , @ApiResponse(code = 500, message = "Internal error")})
 @Api(tags = {"Inventory"})
 public class InventoryController {
-    
+
     protected final Logger log = LoggerFactory.getLogger(InventoryController.class);
-    
+
     @Autowired
     private DeviceService deviceService;
 
@@ -78,6 +81,24 @@ public class InventoryController {
     @Autowired
     private ApiClientService raptor;
 
+    /**
+     * Register device ACL on Auth API
+     * 
+     * @param op
+     * @param device
+     * @return 
+     */
+    protected boolean syncACL(Permissions op, Device device) {
+        try {
+            raptor.Admin().User().sync(op, device);
+        } catch (RequestException ex) {
+            log.error("Failed to sync ACL", ex.getMessage());                        
+            return false;
+        }
+        return true;
+    }
+    
+    
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(value = "Return the user devices", notes = "", response = Device.class, nickname = "getDevices")
     public ResponseEntity<?> getDevices(@AuthenticationPrincipal User currentUser) {
@@ -105,16 +126,16 @@ public class InventoryController {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST,
                     "Device definition is not valid: " + ex.getMessage());
         }
-        
+
         String devUserId = device.userId();
         // set current user if empty
         if (devUserId == null || devUserId.isEmpty()) {
             devUserId = currentUser.getUuid();
         }
-        
+
         // set ownership to current user
         device.userId(currentUser.getUuid());
-        
+
         // super_admin can set ownership
         if (currentUser.isSuperAdmin()) {
             // set ownership as per request, fallback to current user if empty
@@ -125,10 +146,17 @@ public class InventoryController {
         }
 
         deviceService.save(device);
+
+        if (!syncACL(Permissions.create, device)) {
+            log.debug("Dropping device record from database..");
+            deviceService.delete(device);
+            return JsonErrorResponse.internalError("Failed to sync acl");
+        }
+                
         eventPublisher.create(device);
-        
+
         log.info("Created device {} for user {}", device.id(), device.userId());
-        
+
         return ResponseEntity.ok(device.toJSON());
     }
 
@@ -173,29 +201,33 @@ public class InventoryController {
         }
 
         device.merge(body);
-        
-        
+
         // A std user can NOT change ownership even if has `update` permission
         // Admin users can change ownership
         if (currentUser.isSuperAdmin()) {
-            
+
             // set ownership as per request if not empty
             if (body.userId() != null && !body.userId().isEmpty()) {
                 device.userId(body.userId());
             }
-                        
+
         }
-        
+
         // ensure a default is always set (cover legacy cases where userId may be null)
         if (device.userId() == null && device.userId().isEmpty()) {
             device.userId(currentUser.getUuid());
-        }            
-        
+        }
+
         device.validate();
 
         deviceService.save(device);
-        eventPublisher.update(device);
         
+        if (!syncACL(Permissions.update, device)) {
+            return JsonErrorResponse.internalError("Failed to sync acl");
+        }
+        
+        eventPublisher.update(device);
+
         log.info("Updated device {} for user {}", device.id(), device.userId());
         return ResponseEntity.ok(device.toJSON());
     }
@@ -212,9 +244,13 @@ public class InventoryController {
         }
 
         deviceService.delete(device);
-
+        
         eventPublisher.delete(device);
 
+        if (!syncACL(Permissions.delete, device)) {
+            return JsonErrorResponse.internalError("Failed to sync acl");
+        }        
+        
         return ResponseEntity.accepted().build();
     }
 

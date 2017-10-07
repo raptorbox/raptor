@@ -28,6 +28,7 @@ import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationRequest;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
+import org.createnet.raptor.models.auth.request.SyncRequest;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.UserPayload;
@@ -143,6 +144,40 @@ public class UserClient extends AbstractClient {
 
         JsonNode node = getClient().post(Routes.PERMISSION_CHECK, toJsonNode(auth), RequestOptions.retriable());
         return getMapper().convertValue(node, AuthorizationResponse.class);
+    }
+
+    /**
+     * Register a device for an user in ACL system
+     *
+     * @param req
+     * @param opts
+     */
+    public void sync(SyncRequest req, RequestOptions opts) {
+        getClient().post(Routes.PERMISSION_SYNC, toJsonNode(req), opts);
+    }
+    
+    /**
+     * Register a device for an user in ACL system
+     *
+     * @param req
+     */
+    public void sync(SyncRequest req) {
+        getClient().post(Routes.PERMISSION_SYNC, toJsonNode(req), RequestOptions.retriable());
+    }
+    
+    /**
+     * Register a device for an user in ACL system
+     *
+     * @param op
+     * @param device
+     */
+    public void sync(Permissions op, Device device) {
+        SyncRequest req = new SyncRequest();
+        req.objectId = device.id();
+        req.userId = device.userId();
+        req.created = device.getCreatedAt();
+        req.operation = op;
+        sync(req);
     }
 
     /**

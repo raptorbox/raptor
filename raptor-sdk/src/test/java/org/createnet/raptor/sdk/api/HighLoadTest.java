@@ -15,12 +15,8 @@
  */
 package org.createnet.raptor.sdk.api;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.sdk.Raptor;
@@ -89,8 +85,8 @@ public class HighLoadTest {
 
         Raptor raptor = Utils.getRaptor();
 
-        int devSize = 10;
-        int recordSize = 100;
+        int devSize = 25;
+        int recordSize = 200;
 
         int len = jobCounter.addAndGet(devSize + devSize * recordSize);
 
