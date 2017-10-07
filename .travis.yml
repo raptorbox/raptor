@@ -41,11 +41,11 @@ after_script:
   - docker-compose kill
 
 after_success:
-  # - if [ "$TRAVIS_BRANCH" == "master" ]; then
-  #   ./scripts/docker-setup.sh
-  #   docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-  #   ./scripts/docker-publish.sh
-  #   fi
+  - if [ "$TRAVIS_BRANCH" == "master" ]
+    then
+      docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+      ./scripts/docker-push.sh
+    fi
   - mvn clean cobertura:cobertura coveralls:report -DrepoToken=$COVERALLS_TOKEN
 
 after_failure:
