@@ -37,6 +37,11 @@ import org.slf4j.LoggerFactory;
  */
 public class HighLoadTest {
 
+    // Ensure those values are compatible with the setup of CI
+    int poolSize = 5
+    int devSize = 2;
+    int recordSize = 10;
+
     final Logger log = LoggerFactory.getLogger(HighLoadTest.class);
 
     @BeforeClass
@@ -80,13 +85,10 @@ public class HighLoadTest {
     @Test
     public void testPush() throws InterruptedException {
 
-        ExecutorService pool = Executors.newFixedThreadPool(10);
+        ExecutorService pool = Executors.newFixedThreadPool(poolSize);
         final AtomicInteger jobCounter = new AtomicInteger(0);
 
         Raptor raptor = Utils.getRaptor();
-
-        int devSize = 5;
-        int recordSize = 20;
 
         int len = jobCounter.addAndGet(devSize + devSize * recordSize);
 
