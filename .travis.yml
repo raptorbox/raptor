@@ -10,8 +10,6 @@ jdk:
 addons:
   hosts:
     - raptor.local
-    - mariadb
-    - mongo
     - apigateway
 
 sudo: required
@@ -34,16 +32,14 @@ before_script:
   - ./scripts/mvn-build.sh
   - ./scripts/docker-build.sh
   - docker-compose pull
-  - docker-compose -f test.yml up -d mariadb mongo
+  - docker-compose up -d mariadb mongo
   - sleep 30
-  - docker-compose -f test.yml logs
-  - docker-compose -f test.yml up -d broker
-  - docker-compose -f test.yml up -d apigateway
+  - docker-compose up -d broker apigateway
   - sleep 20
-  - docker-compose -f test.yml logs
+  - docker-compose logs broker apigateway
 
 after_script:
-  - docker-compose -f test.yml kill
+  - docker-compose kill
 
 after_success:
   # - if [ "$TRAVIS_BRANCH" == "master" ]; then
@@ -54,5 +50,4 @@ after_success:
   - mvn clean cobertura:cobertura coveralls:report -DrepoToken=$COVERALLS_TOKEN
 
 after_failure:
-    - docker-compose -f ../test.yml logs
-    - sleep 5
+    - docker-compose logs broker apigateway
