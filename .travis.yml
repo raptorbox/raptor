@@ -31,11 +31,14 @@ before_install:
 before_script:
   # workaround for 3306 used, see https://github.com/travis-ci/travis-ci/issues/7008#issuecomment-269126128
   - sudo /etc/init.d/mysql stop
-  - mvn package -DskipTests=true
+  - ./scripts/mvn-build.sh
+  - ./scripts/docker-build.sh
+  - docker-compose pull
   - docker-compose -f test.yml up -d mariadb mongo
-  - sleep 40
+  - sleep 30
   - docker-compose -f test.yml logs
-  - docker-compose -f test.yml up -d --build broker apigateway
+  - docker-compose -f test.yml up -d broker
+  - docker-compose -f test.yml up -d apigateway
   - sleep 20
   - docker-compose -f test.yml logs
 
