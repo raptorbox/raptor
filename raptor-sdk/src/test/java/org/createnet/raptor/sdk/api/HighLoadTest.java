@@ -90,7 +90,7 @@ public class HighLoadTest {
 
         Raptor raptor = Utils.getRaptor();
 
-        int len = jobCounter.addAndGet(devSize + devSize * recordSize);
+        int len = jobCounter.addAndGet(devSize * recordSize);
 
         log.debug("Sending about {} request, hold tight and prepare to reboot :)", len);
 
@@ -98,9 +98,6 @@ public class HighLoadTest {
 
             Device dev = create();
             log.debug("Created device {}", dev.name());
-
-            int rem = jobCounter.decrementAndGet();
-            log.debug("Remainging job {}", rem);
 
             for (int i1 = 0; i1 < recordSize; i1++) {
                 final int v = i;
@@ -122,7 +119,7 @@ public class HighLoadTest {
 
         pool.shutdown();
 
-        Utils.waitUntil(devSize * (recordSize / 10), () -> {
+        Utils.waitUntil(25 + (devSize * (recordSize / 10)), () -> {
             int cout = jobCounter.get();
             log.debug("Work status {}, pool done {}, finished {}", cout, pool.isTerminated(), (pool.isTerminated() && cout == 0));
             return !(pool.isTerminated() && cout == 0);
