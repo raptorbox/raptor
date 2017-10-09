@@ -13,6 +13,7 @@ import org.createnet.raptor.sdk.api.AuthClient;
 import org.createnet.raptor.sdk.exception.AuthenticationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -36,7 +37,9 @@ public class RestTokenFilter extends GenericFilterBean {
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String authToken = httpRequest.getHeader(config.getAuth().getHeader());
-
+        
+        MDC.put("host", request.getRemoteHost());
+        
         if (authToken != null && !authToken.isEmpty()) {
             try {
 
@@ -51,7 +54,9 @@ public class RestTokenFilter extends GenericFilterBean {
 
                 LoginAuthenticationToken authentication = new LoginAuthenticationToken(userDetails, authToken, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpRequest));
-
+                
+                MDC.put("user", userDetails.getUsername());
+                
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
             } catch (AuthenticationFailedException ex) {

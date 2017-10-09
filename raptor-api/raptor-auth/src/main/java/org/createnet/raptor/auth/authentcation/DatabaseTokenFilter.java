@@ -20,6 +20,7 @@ import org.createnet.raptor.common.authentication.LoginAuthenticationToken;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 public class DatabaseTokenFilter extends GenericFilterBean {
     
@@ -41,6 +42,8 @@ public class DatabaseTokenFilter extends GenericFilterBean {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String authToken = httpRequest.getHeader(config.getAuth().getHeader());
 
+        MDC.put("host", request.getRemoteHost());
+        
         if (authToken != null && !authToken.isEmpty()) {
             authToken = tokenHelper.extractToken(authToken);
             Token token = tokenService.read(authToken);
@@ -54,7 +57,9 @@ public class DatabaseTokenFilter extends GenericFilterBean {
                         
 //                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 //                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpRequest));
-                        
+
+                        MDC.put("user", userDetails.getUsername());
+
                         LoginAuthenticationToken authentication = new LoginAuthenticationToken(userDetails, authToken, userDetails.getAuthorities());
                         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpRequest));                        
                         
