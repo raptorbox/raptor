@@ -139,7 +139,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     @Override
     public boolean validateUserAndRole(String username, String password, Set<Role> roles, CheckType checkType, String address, RemotingConnection connection) {
 
-        logger.debug("Authenticating user {} with roles {} on topic {}", username, roles, address);
+        logger.debug("Authenticating user {} with roles {} on topic {} [clientId={} host={}]", username, roles, address, connection.getClientID(), connection.getRemoteAddress());
 
         BrokerUser brokerUser = authenticate(username, password);
 

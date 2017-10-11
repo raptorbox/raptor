@@ -46,6 +46,10 @@ public class MqttClientHandler extends AbstractClient {
         super(container);
     }
 
+    protected boolean hasLoginCredentials() {
+        return (getContainer().getConfig().hasCredentials() || getContainer().getConfig().hasToken());
+    }
+
     /**
      * Return and lazily creates an MQTT client
      *
@@ -80,11 +84,13 @@ public class MqttClientHandler extends AbstractClient {
                     connOpts.setUserName(getContainer().getConfig().getUsername());
                     connOpts.setPassword(getContainer().getConfig().getPassword().toCharArray());
                     logger.debug("Using user credentials");
-                }
-                else {
+                } else if (getContainer().getConfig().hasToken()) {
                     connOpts.setUserName("*"); // username  len < 3 trigger token authentication
                     connOpts.setPassword(getContainer().getConfig().getToken().toCharArray());
                     logger.debug("Using user token");
+                } else {
+                    logger.debug("No token or credentials available for connection, ignoring");
+                    return mqttClient;
                 }
 
                 mqttClient.connect(connOpts);
@@ -104,8 +110,13 @@ public class MqttClientHandler extends AbstractClient {
      * @param topic the topic to listen for
      */
     public void subscribe(String topic) {
-        try {
 
+        if (!hasLoginCredentials()) {
+            logger.warn("No user credentials or token provided to connect");
+            return;
+        }
+
+        try {
             if (topics.contains(topic)) {
                 logger.debug("MQTT topic is already subscribed{}", topic);
                 return;
@@ -117,13 +128,13 @@ public class MqttClientHandler extends AbstractClient {
             topics.add(topic);
 
         } catch (MqttException ex) {
-            
+
             // Disconnection may be caused by lack of permissions
             int code = ex.getReasonCode();
-            if(code == MqttException.REASON_CODE_CONNECTION_LOST) {
+            if (code == MqttException.REASON_CODE_CONNECTION_LOST) {
                 logger.warn("Client disconnected, try checking user / token permission to access the topic {}", topic);
             }
-            
+
             throw new ClientException(ex);
         }
     }
@@ -176,7 +187,14 @@ public class MqttClientHandler extends AbstractClient {
      * @param topic the topic to listen for
      */
     public void unsubscribe(String topic) {
+
+        if (!hasLoginCredentials()) {
+            logger.warn("No user credentials or token provided to connect");
+            return;
+        }
+
         try {
+
             getMqttClient().unsubscribe(topic);
             topics.remove(topic);
             if (topics.isEmpty()) {
