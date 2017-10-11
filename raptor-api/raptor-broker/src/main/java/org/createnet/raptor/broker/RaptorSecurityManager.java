@@ -50,7 +50,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
     protected BrokerUser login(String token) {
         try {
-
+            
             Raptor r = new Raptor(config.getUrl(), token);
             AuthClient.LoginState result = r.Auth().login();
             logger.debug("Authenticated user {}", result.user.getUuid());
@@ -58,7 +58,8 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
             return new BrokerUser(r);
 
         } catch (Exception e) {
-            logger.error("Authentication failed ({})", e.getMessage());
+            logger.error("Token authentication failed ({})", e.getMessage());
+            logger.debug("Faulty token={}", token);
         }
         return null;
     }
@@ -91,7 +92,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
             return new BrokerUser(r);
         } catch (Exception e) {
-            logger.error("Login failed");
+            logger.error("Credential login failed [user={}]", username);
         }
 
         return null;
@@ -102,7 +103,11 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         BrokerUser brokerUser = null;
 
         // 1. if no username, try with apiKey authentication
-        if (username == null || username.isEmpty() || username.length() < 3) {
+        if (username == null || username.isEmpty() || username.length() <= 3) {
+            if (password == null || password.isEmpty()) {
+                logger.debug("Attempt to login with empty token! [user={}]", username);
+                return null;
+            }
             logger.debug("Trying token login");
             brokerUser = login(password);
         } else {
