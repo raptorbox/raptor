@@ -41,7 +41,7 @@ public class BrokerClient {
   private static MqttClient connection = null;
   private DispatcherConfiguration configuration;
     
-  private final String clientName = "raptor";
+  private final String clientName = "raptor" + System.currentTimeMillis();
   private final int connectionTimeout = 10;
   private final MemoryPersistence clientPersistence = new MemoryPersistence();
   
@@ -74,7 +74,7 @@ public class BrokerClient {
       MqttConnectOptions connOpts = new MqttConnectOptions();
       
       connOpts.setCleanSession(true);
-      connOpts.setConnectionTimeout(connectionTimeout);
+      connOpts.setConnectionTimeout(connectionTimeout);  
       
       if(username != null && password != null) {
         connOpts.setUserName(username);

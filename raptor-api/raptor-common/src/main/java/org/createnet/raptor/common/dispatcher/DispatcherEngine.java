@@ -23,7 +23,6 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +84,7 @@ public class DispatcherEngine {
             public void rejectedExecution(Runnable r, ThreadPoolExecutor executor1) {
                 try {
                     logger.warn("Message delivery failed, add back to queue");
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                     requeue(((MessageDispatcher) r).getQm());
                 } catch (InterruptedException e) {
 
@@ -132,7 +131,7 @@ public class DispatcherEngine {
             logger.debug("Message added back to queue due to dispatcher error: {}/{}", qm.tries, qm.maxRetries);
             add(qm);
         } else {
-            logger.debug("Message dropped");
+            logger.error("Message dropped [topic={}]", qm.topic);
         }
     }
 
