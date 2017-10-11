@@ -25,7 +25,7 @@ import org.createnet.raptor.models.auth.User;
  */
 public interface AclServiceInterface<S> {
 
-    public Permission[] getDefaultPermissions();
+    public List<Permission> getDefaultPermissions();
 
     public void add(S subject, User user, List<Permission> permissions);
     public void set(S subject, User user, List<Permission> permissions);

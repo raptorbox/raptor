@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.auth.services;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.createnet.raptor.auth.acl.AbstractAclService;
 import org.createnet.raptor.models.auth.Token;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +35,8 @@ public class AclTokenService extends AbstractAclService<Token> {
     TokenService tokenService;
     
     @Override
-    public Permission[] getDefaultPermissions() {
-        return new Permission[]{};
+    public List<Permission> getDefaultPermissions() {
+        return new ArrayList<Permission>();
     }
 
     @Override

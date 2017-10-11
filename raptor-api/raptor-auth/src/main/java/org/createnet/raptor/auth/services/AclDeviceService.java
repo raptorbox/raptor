@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.auth.services;
 
+import java.util.Arrays;
+import java.util.List;
 import org.createnet.raptor.auth.acl.AbstractAclService;
 import org.createnet.raptor.auth.acl.RaptorPermission;
 import org.createnet.raptor.models.auth.AclDevice;
@@ -37,11 +39,11 @@ public class AclDeviceService extends AbstractAclService<AclDevice> {
     AuthDeviceService deviceService;
     
     @Override
-    public Permission[] getDefaultPermissions() {
-        return new Permission[]{
+    public List<Permission> getDefaultPermissions() {
+        return Arrays.asList(
             RaptorPermission.READ,
             RaptorPermission.WRITE
-        };
+        );
     }
 
     @Override

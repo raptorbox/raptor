@@ -47,7 +47,7 @@ public abstract class AbstractAclService<T extends AclSubject> implements AclSer
     protected AclManagerService aclManagerService;
 
     @Override
-    abstract public Permission[] getDefaultPermissions();
+    abstract public List<Permission> getDefaultPermissions();
 
     @Override
     abstract public T load(Long id);
@@ -57,36 +57,31 @@ public abstract class AbstractAclService<T extends AclSubject> implements AclSer
     public void register(T subj) {
 
         // skip if no default permissions
-        Permission[] defaultPermissions = getDefaultPermissions();
-        if (defaultPermissions.length == 0) {
-            return;
-        }
+        List<Permission> defaultPermissions = getDefaultPermissions();
 
         User owner = subj.getOwner();
         List<Permission> permissions = list(subj, owner);
-        Sid sid = new UserSid(owner);
-
-        logger.debug("Found {} permissions for {}", permissions.size(), owner.getUuid());
 
         if (permissions.isEmpty()) {
+            permissions.addAll(defaultPermissions);
+        }
 
-            logger.debug("Set default permission");
-            List<Permission> newPerms = Arrays.stream(defaultPermissions).collect(Collectors.toList());
+        if (owner.getId().equals(subj.getOwner().getId())) {
+            logger.debug("Setting admin flag to owner {}", owner.getUuid());
+            permissions.add(RaptorPermission.ADMINISTRATION);
+        }
 
-            if (owner.getId().equals(subj.getOwner().getId())) {
-                newPerms.add(RaptorPermission.ADMINISTRATION);
-            }
+        permissions = permissions.stream().distinct().collect(Collectors.toList());
+        logger.debug("Saving {} permissions for {}", permissions.size(), owner.getUuid());
 
-            try {
-                add(subj, newPerms);
-            } catch (AclManagerService.AclManagerException ex) {
-                logger.warn("Failed to store default permission for {} ({}): {}", subj.getSubjectId(), sid, ex.getMessage());
-                throw ex;
-            }
+        try {
+            set(subj, owner, permissions);
+        } catch (AclManagerService.AclManagerException ex) {
+            logger.warn("Failed to store permissions for {} ({}): {}", subj.getSubjectId(), owner.getUuid(), ex.getMessage());
+            throw ex;
+        }
 
-            permissions.addAll(newPerms);
-
-        } else {
+        if (subj.getSubjectParentId() != null) {
             logger.debug("Set node id:{} parent id:{} ", subj.getSubjectId(), subj.getSubjectParentId());
             aclManagerService.setParent(subj.getClass(), subj.getSubjectId(), subj.getSubjectParentId());
         }

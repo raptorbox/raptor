@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.common;
 
+import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.util.ArrayList;
@@ -71,6 +72,7 @@ public abstract class BaseApplication {
     
     static final String defaultBasePath = "/etc/raptor/";
     static String basepath = defaultBasePath;
+    static boolean enableDebugLogging = false;
 
     static protected List<String> additionalConfigNames = null;
     
@@ -100,12 +102,16 @@ public abstract class BaseApplication {
     public static void start(SpringApplicationBuilder builder, String[] args) {
         if (instance == null) {
             instance = builder.run(args);
+            //enable debug log if requested
+            enableDebugLogging();
         }
     }
 
     public static void start(Class clazz, String[] args) {
         if (instance == null) {
             createInstance(clazz).run(buildArgs(clazz, args));
+            //enable debug log if requested
+            enableDebugLogging();
         }
     }
 
@@ -134,6 +140,10 @@ public abstract class BaseApplication {
                 log.debug("Development mode enabled");
                 developmentMode = true;
             }
+            if (arg.equals("--debug")) {
+                log.debug("Debug logging enabled");                
+                enableDebugLogging = true;
+            }
         }
         
         String[] args2 = new String[args.length + 1];
@@ -141,6 +151,18 @@ public abstract class BaseApplication {
         args2[args2.length - 1] = name;
 
         return args2;
+    }
+    
+    static public void enableDebugLogging() {
+        if(enableDebugLogging) {
+            
+            ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+            rootLogger.setLevel(Level.INFO);
+            
+            ch.qos.logback.classic.Logger raptorLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger("org.createnet.raptor");
+            raptorLogger.setLevel(Level.DEBUG);
+
+        }
     }
     
     static public boolean isDevelopmentMode() {
