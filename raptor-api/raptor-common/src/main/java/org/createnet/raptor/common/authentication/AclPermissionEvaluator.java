@@ -20,6 +20,9 @@ import org.createnet.raptor.common.client.ApiClientService;
 import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.response.JsonError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.PermissionEvaluator;
@@ -30,7 +33,9 @@ import org.springframework.security.core.Authentication;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public class AclPermissionEvaluator implements PermissionEvaluator {
-
+    
+    Logger log = LoggerFactory.getLogger(AclPermissionEvaluator.class);
+    
     @Autowired
     ApiClientService api;
 
@@ -48,6 +53,12 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
 
             if (deviceObject instanceof ResponseEntity) {
                 ResponseEntity entity = (ResponseEntity) deviceObject;
+                if (entity.getBody() instanceof JsonError) {
+                    LoginAuthenticationToken tokenAuthentication = (LoginAuthenticationToken) auth;
+                    JsonError err = (JsonError) entity.getBody();
+                    log.warn("Got error response for [user={} permission={}] {}", tokenAuthentication.getUser().getUsername(), permission, err.message);
+                    return false;
+                }
                 deviceObject = (Device) entity.getBody();
             }
 
@@ -78,6 +89,7 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
 
         try {
             Permissions p = Permissions.valueOf(permission);
+            log.debug("Check authorization for user={} device={} permission={}", deviceId, tokenAuthentication.getUser().getUuid(), p);
             AuthorizationResponse response = api.Admin().User().isAuthorized(deviceId, tokenAuthentication.getUser().getUuid(), p);
             return response.result;
         } catch (Exception ex) {
