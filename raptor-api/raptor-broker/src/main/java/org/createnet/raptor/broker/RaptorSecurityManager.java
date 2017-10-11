@@ -33,6 +33,7 @@ import org.createnet.raptor.sdk.Topics;
 import org.createnet.raptor.sdk.api.AuthClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -138,8 +139,15 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
     @Override
     public boolean validateUserAndRole(String username, String password, Set<Role> roles, CheckType checkType, String address, RemotingConnection connection) {
+        
+        MDC.put("clientId", connection.getClientID());
+        MDC.put("host", connection.getRemoteAddress());
 
-        logger.debug("Authenticating user {} with roles {} on topic {} [clientId={} host={}]", username, roles, address, connection.getClientID(), connection.getRemoteAddress());
+        if(connection.getSubject() != null) {
+            MDC.put("subj", connection.getSubject().toString());
+        }
+        
+        logger.debug("Authenticating user {} with roles {} on topic {} [clientId={}]", username, roles, address, connection.getClientID());
 
         BrokerUser brokerUser = authenticate(username, password);
 
