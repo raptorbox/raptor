@@ -23,6 +23,7 @@ import org.apache.activemq.artemis.core.security.CheckType;
 import org.apache.activemq.artemis.core.security.Role;
 import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
 import org.apache.activemq.artemis.spi.core.security.ActiveMQSecurityManager2;
+import org.createnet.raptor.common.client.InternalApiClientService;
 import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.auth.Role.Roles;
@@ -46,7 +47,10 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
     @Autowired
     RaptorConfiguration config;
-
+    
+    @Autowired
+    InternalApiClientService apiClient;
+    
     private final Logger logger = LoggerFactory.getLogger(RaptorSecurityManager.class);
 
     protected BrokerUser login(String token) {
@@ -238,7 +242,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     }
 
     protected boolean hasDevicePermission(Raptor r, String id, Permissions perm) {
-        AuthorizationResponse req = r.Admin().User().isAuthorized(id, r.Auth().getUser().getUuid(), perm);
+        AuthorizationResponse req = apiClient.Admin().User().isAuthorized(id, r.Auth().getUser().getUuid(), perm);
         return req.result;
     }
 
