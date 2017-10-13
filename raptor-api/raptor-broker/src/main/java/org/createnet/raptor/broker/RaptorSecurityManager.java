@@ -47,15 +47,15 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
     @Autowired
     RaptorConfiguration config;
-    
+
     @Autowired
     InternalApiClientService apiClient;
-    
+
     private final Logger logger = LoggerFactory.getLogger(RaptorSecurityManager.class);
 
     protected BrokerUser login(String token) {
         try {
-            
+
             Raptor r = new Raptor(config.getUrl(), token);
             AuthClient.LoginState result = r.Auth().login();
             logger.debug("Authenticated user {}", result.user.getUuid());
@@ -110,7 +110,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         // 1. if no username, try with apiKey authentication
         if (username == null || username.isEmpty() || username.length() <= 3) {
             if (password == null || password.isEmpty()) {
-                logger.debug("Attempt to login with empty token! [user={}]", username);
+//                logger.debug("Attempt to login with empty token! [user={}]", username);
                 return null;
             }
             logger.debug("Trying token login");
@@ -143,7 +143,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
     @Override
     public boolean validateUserAndRole(String username, String password, Set<Role> roles, CheckType checkType, String address, RemotingConnection connection) {
-        
+
         logger.debug("Authenticating user {} with roles {} on topic {}", username, roles, address);
 
         BrokerUser brokerUser = authenticate(username, password);
@@ -220,11 +220,11 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
                     case user:
                         return r.Auth().getUser().isSuperAdmin();
                 }
-                
+
                 logger.error("Unrecognized subscribe topic pattern {}", address);
-                
+
                 return false;
-                
+
             } catch (Exception ex) {
                 logger.error("Failed to subscribe: {}", ex.getMessage(), ex);
                 return false;

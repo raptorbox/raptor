@@ -37,8 +37,6 @@ public class TokenTest {
 
     final Logger log = LoggerFactory.getLogger(TokenTest.class);
 
-    public static Raptor raptor;
-
     @BeforeClass
     public static void setUpClass() {
     }
@@ -49,7 +47,6 @@ public class TokenTest {
 
     @Before
     public void setUp() {
-        raptor = Utils.createNewInstance();
     }
 
     @After
@@ -58,26 +55,29 @@ public class TokenTest {
 
     @Test
     public void listToken() {
-        
+
+        Raptor raptor = Utils.createNewInstance();
+
         List<Token> tokens = raptor.Admin().Token().list();
-        
+
         log.debug("Create new token for user {}", raptor.Auth().getUser().getUuid());
-        
+
         assertNotNull(tokens);
         assertEquals(0, tokens.size());
-        
+
         raptor.Admin().Token().create(new Token("test", "secret" + System.currentTimeMillis() * Math.random()));
 
         tokens = raptor.Admin().Token().list();
-        
+
         assertNotNull(tokens);
         assertEquals(1, tokens.size());
-        
-    }
 
+    }
 
     @Test
     public void createToken() {
+
+        Raptor raptor = Utils.createNewInstance();
 
         Token token = new Token("test", "secret" + System.currentTimeMillis() * Math.random());
         //fake token
@@ -95,28 +95,49 @@ public class TokenTest {
 
     }
 
-
     @Test
     public void loadToken() {
 
+        Raptor raptor = Utils.createNewInstance();
+
         Token token = new Token("test", "secret" + System.currentTimeMillis() * Math.random());
         Token newToken = raptor.Admin().Token().create(token);
-        
+
         Token savedToken = raptor.Admin().Token().read(newToken.getId());
-        
+
         assertEquals(newToken.getToken(), savedToken.getToken());
     }
 
     @Test
+    public void currentToken() {
+
+        Raptor raptor = Utils.createNewInstance();
+        
+        Token loginToken = raptor.Admin().Token().current();
+        
+        assertEquals(loginToken.getToken(), raptor.Auth().getToken());
+        assertEquals(loginToken.getType(), Token.Type.LOGIN);
+        
+        Token token = new Token("test", "secret" + System.currentTimeMillis() * Math.random());
+        Token newToken = raptor.Admin().Token().create(token);
+
+        Token savedToken = raptor.Admin().Token().read(newToken.getId());
+
+        assertEquals(savedToken.getType(), Token.Type.DEFAULT);
+        
+    }
+
+    @Test
     public void updateToken() {
-        
-        
+
+        Raptor raptor = Utils.createNewInstance();
+
         String secret = "secret_" + System.currentTimeMillis() * Math.random();
         String name = "token_" + System.currentTimeMillis() * Math.random();
-        
+
         Token newToken = raptor.Admin().Token().create(new Token(name, secret));
         String token = newToken.getToken();
-        
+
         assertNotNull(newToken);
 
         newToken.setDevice(new AclDevice("foobar"));
@@ -132,9 +153,9 @@ public class TokenTest {
 
         assertNotEquals(secret, updatedToken.getSecret());
         assertNotEquals(token, updatedToken.getToken());
-        
+
         assertFalse(updatedToken.isEnabled());
-        
+
         Utils.waitFor(1000); // wait for expiration
         assertTrue(updatedToken.isExpired());
 

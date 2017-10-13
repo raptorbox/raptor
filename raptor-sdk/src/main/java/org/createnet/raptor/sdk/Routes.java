@@ -57,6 +57,7 @@ final public class Routes {
     public static final String TOKEN_GET = TOKEN_UPDATE;
     public static final String TOKEN_DELETE = TOKEN_UPDATE;
     public static final String TOKEN_LIST = TOKEN_CREATE + "?uuid=%s";
+    public static final String TOKEN_CURRENT = TOKEN_CREATE + "/current";
     
     public static final String PROFILE_GET_ALL = "/profile/%s";
     public static final String PROFILE_GET = PROFILE_GET_ALL + "/%s";

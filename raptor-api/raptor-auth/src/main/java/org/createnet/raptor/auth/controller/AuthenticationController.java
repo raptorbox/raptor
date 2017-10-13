@@ -200,7 +200,11 @@ public class AuthenticationController {
         if (token == null) {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST);
         }
-
+        
+        if (token.getType() != Token.Type.LOGIN) {
+            return JsonErrorResponse.badRequest("Only login token can be refreshed");
+        }
+        
         logger.debug("Refreshing token id:{} for user {}", token.getId(), currentUser.getUuid());
 
         Token refreshedToken = tokenService.generateToken(token);

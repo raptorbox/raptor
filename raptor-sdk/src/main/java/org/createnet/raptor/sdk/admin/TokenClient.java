@@ -124,6 +124,17 @@ public class TokenClient extends AbstractClient {
         Token t1 = getMapper().convertValue(node, Token.class);
         return t1;
     }
+    
+    /**
+     * Get details on the current token
+     *
+     * @return
+     */
+    public Token current() {
+        JsonNode node = getClient().get(Routes.TOKEN_CURRENT);
+        Token t1 = getMapper().convertValue(node, Token.class);
+        return t1;
+    }
 
     /**
      * Create a new token

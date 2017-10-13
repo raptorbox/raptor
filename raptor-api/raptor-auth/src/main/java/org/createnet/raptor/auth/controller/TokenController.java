@@ -27,16 +27,19 @@ import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.services.TokenService;
 import org.createnet.raptor.auth.services.UserService;
+import org.createnet.raptor.common.configuration.TokenHelper;
 import org.createnet.raptor.models.apidocs.ApiDocsToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -76,13 +79,16 @@ public class TokenController {
 
     @Autowired
     private TokenEventPublisher eventPublisher;
-    
+
     @Autowired
     private TokenService tokenService;
 
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private TokenHelper tokenHelper;    
+    
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
@@ -110,19 +116,41 @@ public class TokenController {
         if (!user.getUuid().equals(uuid) && !user.isSuperAdmin()) {
             return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
         }
-        
+
         Iterable<Token> tokens = tokenService.list(uuid);
         final List<Token> userTokens = new ArrayList();
-        
+
         tokens.forEach((Token token) -> {
-            if(token.getType().equals(Token.Type.DEFAULT)) {
+            if (token.getType().equals(Token.Type.DEFAULT)) {
                 userTokens.add(token);
             }
         });
-        
+
         logger.debug("Found {} tokens", userTokens.size());
-        
+
         return ResponseEntity.ok(userTokens);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/current", method = RequestMethod.GET)
+    @ApiOperation(
+            value = "Get details about the current token",
+            notes = "",
+            response = ApiDocsToken.class,
+            nickname = "getCurrentToken"
+    )
+    public ResponseEntity<?> getCurrentToken(
+            @AuthenticationPrincipal User user,
+            @RequestHeader("${raptor.auth.header}") String reqToken
+    ) {
+
+        reqToken = tokenHelper.extractToken(reqToken);
+        Token token = tokenService.read(reqToken);
+        if (token == null) {
+            return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST);
+        }
+
+        return ResponseEntity.ok(token);
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -181,10 +209,10 @@ public class TokenController {
             return JsonErrorResponse.entity(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot create the token");
         }
 
-        logger.debug("User {} created new token {} {}", currentUser.getUuid(), token2.getName(),  token2.getId());
-        
+        logger.debug("User {} created new token {} {}", currentUser.getUuid(), token2.getName(), token2.getId());
+
         eventPublisher.create(token2);
-        
+
         return ResponseEntity.status(HttpStatus.CREATED).body(token2);
     }
 
@@ -203,11 +231,11 @@ public class TokenController {
     ) {
 
         Token token = tokenService.read(tokenId);
-        
-        if(token == null) {
+
+        if (token == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Token not found");
         }
-        
+
         // TODO add ACL checks        
         if (token.getUser() == null || user.getId().longValue() != token.getUser().getId().longValue()) {
             return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
@@ -234,7 +262,7 @@ public class TokenController {
         logger.debug("User {} update token {}", user.getUuid(), token2.getId());
 
         eventPublisher.update(token2);
-        
+
         return ResponseEntity.status(HttpStatus.OK).body(token2);
     }
 
@@ -253,10 +281,10 @@ public class TokenController {
 
         Token token = tokenService.read(tokenId);
 
-        if(token == null) {
+        if (token == null) {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "Token not found");
         }
-        
+
         // TODO add ACL checks        
         if (token.getUser() == null || user.getId().longValue() != token.getUser().getId().longValue()) {
             return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
@@ -266,7 +294,7 @@ public class TokenController {
         eventPublisher.delete(token);
 
         logger.debug("User {} deleted token {}", user.getUuid(), token.getId());
-        
+
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
     }
 
