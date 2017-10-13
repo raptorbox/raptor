@@ -48,8 +48,6 @@ raptor:
         email: admin@raptor.local
         roles:
           - super_admin
-    #   - username: service
-    #     password: service
       - username: service
         password: s3rvice
         email: service@raptor.local

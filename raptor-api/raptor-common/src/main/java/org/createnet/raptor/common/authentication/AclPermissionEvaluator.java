@@ -67,7 +67,8 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
                 deviceId = dev.id();
             }
         }
-
+        
+        log.debug("Check authorization for user={} device={} permission={}", auth.getPrincipal(), deviceId, permission.toString().toLowerCase());
         return isAuthorized(auth, deviceId, permission.toString().toLowerCase());
     }
 

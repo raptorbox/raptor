@@ -9,7 +9,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.createnet.raptor" level="DEBUG" />
+    <logger name="org.createnet.raptor" level="INFO" />
 
     <root level="WARN">
         <appender-ref ref="CONSOLE" />

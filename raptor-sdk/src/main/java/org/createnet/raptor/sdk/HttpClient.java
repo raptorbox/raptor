@@ -40,12 +40,9 @@ public class HttpClient extends AbstractClient {
 
     static {
 
-//        Unirest.setConcurrency(200, 20); // defaults maxTotal, maxPerRoute
-        Unirest.setConcurrency(500, 100);
-
-//        Unirest.setTimeouts(60*1000, 30*1000); // defaults socket + req timeout
+        Unirest.setConcurrency(500, 100);        
         Unirest.setTimeouts(6 * 1000, 3 * 1000);
-
+        
         // Only one time
         Unirest.setObjectMapper(new ObjectMapper() {
 
@@ -85,6 +82,11 @@ public class HttpClient extends AbstractClient {
         super(container);
     }
 
+    public void configureTimeout(int socketTimeout, int reqTimeout) {
+//        Unirest.setConcurrency(200, 20); // defaults maxTotal, maxPerRoute
+        Unirest.setTimeouts(socketTimeout, reqTimeout); // defaults socket + req timeout    
+    }
+    
     /**
      * Add the configured base url to path
      *
