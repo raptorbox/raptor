@@ -51,28 +51,20 @@ public abstract class AbstractAclService<T extends AclSubject> implements AclSer
     @Override
     abstract public T load(Long id);
 
-    @Override
-    @Retryable(maxAttempts = 3, value = AclManagerService.AclManagerException.class, backoff = @Backoff(delay = 500, multiplier = 3))
-    public void register(T subj) {
-
-        // skip if no default permissions
-        List<Permission> defaultPermissions = getDefaultPermissions();
-
-        User owner = subj.getOwner();
-        List<Permission> permissions = list(subj, owner);
-
+    protected List<Permission> getPermissions(T subj) {
+        List<Permission> permissions = list(subj, subj.getOwner());
         if (permissions.isEmpty()) {
+            // skip if no default permissions
+            List<Permission> defaultPermissions = getDefaultPermissions();
             permissions.addAll(defaultPermissions);
         }
-
-        if (owner.getId().equals(subj.getOwner().getId())) {
-            logger.debug("Setting admin flag to owner {}", owner.getUuid());
-            permissions.add(RaptorPermission.ADMINISTRATION);
-        }
-
-        permissions = permissions.stream().distinct().collect(Collectors.toList());
-        logger.debug("Saving {} permissions for {}", permissions.size(), owner.getUuid());
-
+        return permissions;
+    }
+    
+    protected void savePermissions(T subj, List<Permission> permissions) {
+        
+        User owner = subj.getOwner();
+        
         try {
             set(subj, owner, permissions);
         } catch (AclManagerService.AclManagerException ex) {
@@ -87,7 +79,12 @@ public abstract class AbstractAclService<T extends AclSubject> implements AclSer
 
         String perms = String.join(", ", RaptorPermission.toLabel(permissions));
         logger.debug("Permission set for device {} to {} - {}", subj.getSubjectId(), subj.getOwner().getUuid(), perms);
-
+    }
+    
+    @Override
+    @Retryable(maxAttempts = 3, value = AclManagerService.AclManagerException.class, backoff = @Backoff(delay = 500, multiplier = 3))
+    public void register(T subj) {
+        savePermissions(subj, getPermissions(subj));
     }
 
     public void add(T subj, Permission permission) {
@@ -109,6 +106,11 @@ public abstract class AbstractAclService<T extends AclSubject> implements AclSer
 
     @Override
     public void set(T subj, User user, List<Permission> permissions) {
+        
+        // distinct
+        permissions = permissions.stream().distinct().collect(Collectors.toList());
+        logger.debug("Saving {} permissions for {}", permissions.size(), user.getUuid());
+        
         aclManagerService.setPermissions(subj.getClass(), subj.getSubjectId(), new UserSid(user), permissions, subj.getSubjectParentId());
     }
 

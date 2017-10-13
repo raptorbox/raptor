@@ -128,7 +128,7 @@ public class TokenTest {
     }
 
     @Test
-    public void updateToken() {
+    public void updateTokenChangingSecret() {
 
         Raptor raptor = Utils.createNewInstance();
 
@@ -159,6 +159,38 @@ public class TokenTest {
         Utils.waitFor(1000); // wait for expiration
         assertTrue(updatedToken.isExpired());
 
+    }
+
+    @Test
+    public void updateWithSameSecret() {
+
+        Raptor raptor = Utils.createNewInstance();
+
+        String secret = "secret_" + System.currentTimeMillis() * Math.random();
+        String name = "token_" + System.currentTimeMillis() * Math.random();
+
+        Token newToken = raptor.Admin().Token().create(new Token(name, secret));
+        String token = newToken.getToken();
+
+        assertNotNull(newToken);
+
+        newToken.setDevice(new AclDevice("foobar"));
+        newToken.setUser(raptor.Auth().getUser());
+        newToken.setEnabled(false);
+        newToken.setExpires(1L);
+
+        Token updatedToken = raptor.Admin().Token().update(newToken);
+
+        assertNotNull(updatedToken);
+        assertNotNull(newToken.getId());
+
+        assertEquals(secret, updatedToken.getSecret());
+        assertEquals(token, updatedToken.getToken());
+
+        assertFalse(updatedToken.isEnabled());
+
+        Utils.waitFor(1000); // wait for expiration
+        assertTrue(updatedToken.isExpired());
     }
 
 }

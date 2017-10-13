@@ -36,12 +36,12 @@ public class AclTokenService extends AbstractAclService<Token> {
     
     @Override
     public List<Permission> getDefaultPermissions() {
-        return new ArrayList<Permission>();
+        return new ArrayList();
     }
 
     @Override
     public Token load(Long id) {
         return tokenService.read(id);
-    }
+    }    
     
 }

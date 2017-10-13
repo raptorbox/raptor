@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
 import org.createnet.raptor.common.client.ApiClientService;
+import org.createnet.raptor.common.client.InternalApiClientService;
 import org.createnet.raptor.common.query.DataQueryBuilder;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.data.RecordSet;
@@ -91,6 +92,9 @@ public class StreamController {
     private ApiClientService raptor;
 
     @Autowired
+    private InternalApiClientService serviceApi;
+
+    @Autowired
     private StreamEventPublisher streamPublisher;
 
     @Autowired
@@ -116,7 +120,7 @@ public class StreamController {
             @RequestBody RecordSet record
     ) {
 
-        Device device = raptor.Inventory().load(deviceId);
+        Device device = serviceApi.Inventory().load(deviceId);
 
         Stream stream = device.stream(streamId);
         if (stream == null) {
@@ -164,7 +168,7 @@ public class StreamController {
             @PathVariable("streamId") String streamId
     ) {
 
-        Device device = raptor.Inventory().load(deviceId);
+        Device device = serviceApi.Inventory().load(deviceId);
 
         Stream stream = device.stream(streamId);
         if (stream == null) {
@@ -194,7 +198,7 @@ public class StreamController {
             Pageable pager
     ) {
 
-        Device device = raptor.Inventory().load(deviceId);
+        Device device = serviceApi.Inventory().load(deviceId);
 
         Stream stream = device.stream(streamId);
         if (stream == null) {
@@ -222,7 +226,7 @@ public class StreamController {
             @PathVariable("streamId") String streamId
     ) {
 
-        Device device = raptor.Inventory().load(deviceId);
+        Device device = serviceApi.Inventory().load(deviceId);
 
         Stream stream = device.stream(streamId);
         if (stream == null) {
@@ -255,7 +259,7 @@ public class StreamController {
             @RequestBody DataQuery query
     ) {
 
-        Device device = raptor.Inventory().load(deviceId);
+        Device device = serviceApi.Inventory().load(deviceId);
 
         Stream stream = device.stream(streamId);
         if (stream == null) {

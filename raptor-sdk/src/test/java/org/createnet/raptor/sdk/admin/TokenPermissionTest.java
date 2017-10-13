@@ -15,11 +15,13 @@
  */
 package org.createnet.raptor.sdk.admin;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import org.createnet.raptor.models.acl.PermissionUtil;
 import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.auth.Token;
+import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.models.objects.Device;
@@ -29,6 +31,7 @@ import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.sdk.config.Config;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -82,10 +85,7 @@ public class TokenPermissionTest {
         assertEquals(0, permissions.size());
     }
 
-    @Test
-    public void testSet() {
-
-        Raptor raptor = Utils.createNewInstance();
+    protected void createToken(Raptor raptor) {
 
         log.debug("Test set token permission");
 
@@ -104,6 +104,15 @@ public class TokenPermissionTest {
         assertNotNull(result);
         assertEquals(permissions.size(), result.size());
 
+    }
+
+    @Test
+    public void testSet() {
+
+        Raptor raptor = Utils.createNewInstance();
+
+        createToken(raptor);
+
         testGet();
 
     }
@@ -115,7 +124,7 @@ public class TokenPermissionTest {
 
         log.debug("Test ACL check on token permission");
 
-        testSet();
+        createToken(raptor);
 
         List<Token> tokens = raptor.Admin().Token().list();
 
@@ -181,9 +190,7 @@ public class TokenPermissionTest {
         admin.Auth().login();
         Device d2 = admin.Inventory().load(d.id());
 
-        RecordSet record2 = new RecordSet(s);
-        record.channel("test", "hello world 2");
-        admin.Stream().push(record2);
+        admin.Stream().push(record);
 
     }
 

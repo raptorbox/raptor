@@ -235,7 +235,9 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     }
 
     protected boolean hasDevicePermission(Raptor r, String id, Permissions perm) {
-        AuthorizationResponse req = apiClient.Admin().User().isAuthorized(id, r.Auth().getUser().getUuid(), perm);
+        // if using credentials, use the service client so the login won't expire
+        Raptor client = (r.getConfig().hasCredentials()) ? apiClient : r;
+        AuthorizationResponse req =  client.Admin().User().isAuthorized(id, r.Auth().getUser().getUuid(), perm);
         return req.result;
     }
 

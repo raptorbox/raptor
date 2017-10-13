@@ -64,7 +64,7 @@ public class TokenService {
 
     @Autowired
     private TokenRepository tokenRepository;
-
+    
     /**
      * List token for an user
      *

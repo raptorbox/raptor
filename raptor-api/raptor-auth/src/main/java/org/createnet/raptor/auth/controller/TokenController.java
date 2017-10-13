@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiResponses;
 import java.util.ArrayList;
 import java.util.List;
 import org.createnet.raptor.auth.events.TokenEventPublisher;
+import org.createnet.raptor.auth.services.AclTokenService;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
@@ -32,7 +33,6 @@ import org.createnet.raptor.models.apidocs.ApiDocsToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -87,8 +87,11 @@ public class TokenController {
     private UserService userService;
 
     @Autowired
-    private TokenHelper tokenHelper;    
-    
+    private TokenHelper tokenHelper;
+
+    @Autowired
+    AclTokenService aclTokenService;
+
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
@@ -201,14 +204,16 @@ public class TokenController {
         token.setUser(currentUser);
         token.setType(Token.Type.DEFAULT);
 
-        // Generate the token based on provided secret
         tokenService.generateToken(token);
+
         Token token2 = tokenService.save(token);
 
         if (token2 == null) {
             return JsonErrorResponse.entity(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot create the token");
         }
 
+        aclTokenService.register(token);
+        
         logger.debug("User {} created new token {} {}", currentUser.getUuid(), token2.getName(), token2.getId());
 
         eventPublisher.create(token2);
@@ -245,7 +250,9 @@ public class TokenController {
         if (token.getType() == Token.Type.LOGIN) {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Login token cannot be modified");
         }
-
+        
+        String prevSecret = token.getSecret();
+        
         token.merge(rawToken);
         token.setUser(user);
         token.setType(Token.Type.DEFAULT);
@@ -254,13 +261,17 @@ public class TokenController {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Secret cannot be empty");
         }
 
-        // Generate the JWT token
-        tokenService.generateToken(token);
+        // Generate the token based on provided secret, but only if the secret has changed
+        if (!token.getSecret().equals(prevSecret)) {
+            tokenService.generateToken(token);
+        }
 
         Token token2 = tokenService.save(token);
-
+        
+        aclTokenService.register(token2);
+        
         logger.debug("User {} update token {}", user.getUuid(), token2.getId());
-
+        
         eventPublisher.update(token2);
 
         return ResponseEntity.status(HttpStatus.OK).body(token2);
