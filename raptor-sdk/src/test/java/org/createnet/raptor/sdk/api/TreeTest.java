@@ -17,7 +17,11 @@ package org.createnet.raptor.sdk.api;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.createnet.raptor.models.auth.Token;
+import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.models.tree.TreeNode;
@@ -159,6 +163,47 @@ public class TreeTest {
         assertEquals(1, nodes.stream().filter((d) -> d.isDevice() && d.getId().equals(dev.getId())).count());
         assertTrue(nodes.get(0).isDevice());
 
+    }
+
+    @Test
+    public void createDeviceAccessWithToken() {
+
+        Raptor raptor = Utils.createNewInstance();
+
+        log.debug("create tree");
+
+        TreeNode root = TreeNode.create("Root");
+        raptor.Tree().create(root);
+
+        Device dev = new Device();
+        dev.name("test create");
+        Stream s = dev.addStream("test", "string");
+        raptor.Inventory().create(dev);
+
+        raptor.Tree().add(root, dev);
+        
+        TreeNode node = raptor.Tree().tree(root.getId());
+        
+        Token token = raptor.Admin().Token().create(new Token("n", "sec"));
+        raptor.Admin().Token().Permission().set(token, Arrays.asList("tree"));
+        
+        Raptor r = new Raptor(raptor.getConfig().getUrl(), token);
+        r.Auth().login();
+        
+        AtomicBoolean done = new AtomicBoolean(false);
+        r.Tree().subscribe(node, (Stream stream, RecordSet record) -> {
+            log.debug("Got data {}", record);
+            done.set(true);
+        });
+        
+        RecordSet record = new RecordSet(s);
+        record.channel("test", "ciao");
+        raptor.Stream().push(record);
+        
+        Utils.waitUntil(1000, () -> {
+            return !done.get();
+        });
+        
     }
 
 }

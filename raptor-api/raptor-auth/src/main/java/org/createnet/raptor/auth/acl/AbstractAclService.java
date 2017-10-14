@@ -78,7 +78,7 @@ public abstract class AbstractAclService<T extends AclSubject> implements AclSer
         }
 
         String perms = String.join(", ", RaptorPermission.toLabel(permissions));
-        logger.debug("Permission set for device {} to {} - {}", subj.getSubjectId(), subj.getOwner().getUuid(), perms);
+        logger.debug("Permission set for object {} to {} - {}", subj.getSubjectId(), subj.getOwner().getUuid(), perms);
     }
     
     @Override
@@ -164,7 +164,7 @@ public abstract class AbstractAclService<T extends AclSubject> implements AclSer
 
         // check subject specific permission first
         if (isGranted(subj, user, permission)) {
-            logger.debug("ACL: User has {} permission", permission);
+            logger.debug("ACL: User has `{}` permission", RaptorPermission.toLabel(permission));
             return true;
         }
 

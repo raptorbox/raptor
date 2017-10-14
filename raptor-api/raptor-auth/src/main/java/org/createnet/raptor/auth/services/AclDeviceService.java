@@ -20,7 +20,6 @@ import java.util.List;
 import org.createnet.raptor.auth.acl.AbstractAclService;
 import org.createnet.raptor.auth.acl.RaptorPermission;
 import org.createnet.raptor.models.auth.AclDevice;
-import org.createnet.raptor.models.auth.User;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

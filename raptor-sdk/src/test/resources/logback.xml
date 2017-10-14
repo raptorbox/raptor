@@ -13,7 +13,7 @@
     <logger name="io.swagger.converter" level="warn" />
     <logger name="io.swagger.jaxrs" level="warn" />
 
-    <logger name="org.createnet.raptor" level="debug" >
+    <logger name="org.createnet.raptor" level="debug" additivity="false" >
         <appender-ref ref="STDOUT" />
     </logger>
     

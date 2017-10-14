@@ -144,7 +144,11 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     @Override
     public boolean validateUserAndRole(String username, String password, Set<Role> roles, CheckType checkType, String address, RemotingConnection connection) {
 
-        logger.debug("Authenticating user {} with roles {} on topic {}", username, roles, address);
+        logger.debug("Authenticating user {} with roles {} on topic {}", 
+                username, 
+                roles.stream().map((r) -> r.getName()).collect(Collectors.toList()), 
+                address
+        );
 
         BrokerUser brokerUser = authenticate(username, password);
 
@@ -237,8 +241,15 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     protected boolean hasDevicePermission(Raptor r, String id, Permissions perm) {
         // if using credentials, use the service client so the login won't expire
         Raptor client = (r.getConfig().hasCredentials()) ? apiClient : r;
-        AuthorizationResponse req =  client.Admin().User().isAuthorized(id, r.Auth().getUser().getUuid(), perm);
-        return req.result;
+        try {
+            AuthorizationResponse req =  client.Admin().User().isAuthorized(id, r.Auth().getUser().getUuid(), perm);
+            logger.debug("Authorization to user={} permission={} result={}", r.Auth().getUser().getUsername(), perm, req.result);
+            return req.result;
+        }
+        catch(Exception ex) {
+            logger.error("Authorization request failed: {}", ex.getMessage());
+        }
+        return false;
     }
 
     @Override

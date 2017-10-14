@@ -85,7 +85,7 @@ public class MqttClientHandler extends AbstractClient {
                     connOpts.setPassword(getContainer().getConfig().getPassword().toCharArray());
                     logger.debug("Using user credentials");
                 } else if (getContainer().getConfig().hasToken()) {
-                    connOpts.setUserName("*"); // username  len < 3 trigger token authentication
+                    connOpts.setUserName("***"); // username  len <= 3 trigger token authentication
                     connOpts.setPassword(getContainer().getConfig().getToken().toCharArray());
                     logger.debug("Using user token");
                 } else {
@@ -126,7 +126,8 @@ public class MqttClientHandler extends AbstractClient {
 
             getMqttClient().subscribe(topic);
             topics.add(topic);
-
+            
+            logger.debug("Subscribed");
         } catch (MqttException ex) {
 
             // Disconnection may be caused by lack of permissions

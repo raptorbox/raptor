@@ -175,9 +175,9 @@ public class AclManagerService implements AclManager {
         try {
             log.debug("Check if {} can {} on {}:{}", sid, RaptorPermission.toLabel(permission), clazz, identifier);
             isGranted = acl.isGranted(Arrays.asList(permission), Arrays.asList(sid), false);
-            log.debug("{} {}ALLOWED {} on {}:{}", sid, (isGranted ? "" : "NOT "), RaptorPermission.toLabel(permission), clazz, identifier);
+            log.debug("User={} is {}ALLOWED to `{}` on {}:{}", sid, (isGranted ? "" : "NOT "), RaptorPermission.toLabel(permission), clazz, identifier);
         } catch (NotFoundException e) {
-            log.info("Unable to find an ACE for {} on {}:{} - {}", RaptorPermission.toLabel(permission), clazz, identifier, e.getMessage());
+            log.info("No permission `{}` found for {}:{} - {}", RaptorPermission.toLabel(permission), clazz, identifier, e.getMessage());
         } catch (UnloadedSidException e) {
             log.error("Unloaded Sid for {} on {}:{} - {}", RaptorPermission.toLabel(permission), clazz, identifier, e.getMessage(), e);
         }
