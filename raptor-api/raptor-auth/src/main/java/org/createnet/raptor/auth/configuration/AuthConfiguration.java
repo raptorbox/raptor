@@ -18,16 +18,21 @@ package org.createnet.raptor.auth.configuration;
 import java.util.List;
 import javax.sql.DataSource;
 import org.createnet.raptor.auth.repository.UserRepository;
+import org.createnet.raptor.auth.services.AclTokenService;
 import org.createnet.raptor.auth.services.AuthMessageHandler;
+import org.createnet.raptor.auth.services.TokenService;
 import org.createnet.raptor.auth.services.UserService;
 import static org.createnet.raptor.common.BaseApplication.log;
 import org.createnet.raptor.common.configuration.TokenHelper;
 import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
+import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -51,6 +56,12 @@ public class AuthConfiguration {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private TokenService tokenService;
+
+    @Autowired
+    AclTokenService aclTokenService;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -66,7 +77,6 @@ public class AuthConfiguration {
         return new AuthMessageHandler();
     }
 
-
     @Autowired
     public void authenticationManagerBuilder(AuthenticationManagerBuilder auth) throws Exception {
         auth.jdbcAuthentication().dataSource(dataSource);
@@ -79,30 +89,62 @@ public class AuthConfiguration {
 
         users.forEach((org.createnet.raptor.models.configuration.AuthConfiguration.AdminUser admin) -> {
 
-            User defaultUser = userRepository.findByUsername(admin.getUsername());
-            if (defaultUser != null) {
-                log.debug("User `{}` exists (id: {})", defaultUser.getUsername(), defaultUser.getId());
-                
+            boolean createUser = true;
+
+            User adminUser = userRepository.findByUsername(admin.getUsername());
+            if (adminUser != null) {
+                log.debug("User `{}` exists (id: {})", adminUser.getUsername(), adminUser.getId());
+
                 if (admin.isLocked()) {
-                    log.debug("Recreating user `{}`", defaultUser.getUsername());    
-                    userService.delete(defaultUser);
-                }
-                else {
-                    return;
+                    log.debug("Recreating user `{}`", adminUser.getUsername());
+                    userService.delete(adminUser);
+                } else {
+                    createUser = false;
                 }
             }
 
-            User adminUser = new User();
+            if (createUser) {
+                adminUser = new User();
 
-            adminUser.setUsername(admin.getUsername());
-            adminUser.setPassword(passwordEncoder().encode(admin.getPassword()));
-            adminUser.setEmail(admin.getEmail());
-            
-            admin.getRoles().forEach((r) -> {
-                adminUser.addRole(new Role(r));
-            });
+                adminUser.setUsername(admin.getUsername());
+                
+                assert admin.getPassword() != null;
+                
+                adminUser.setPassword(passwordEncoder().encode(admin.getPassword()));
+                adminUser.setEmail(admin.getEmail());
 
-            userService.save(adminUser);
+                for (Role.Roles role : admin.getRoles()) {
+                    adminUser.addRole(new Role(role));
+                }
+
+                userService.save(adminUser);
+                log.debug("Created user `{}` (id={})", adminUser.getUsername(), adminUser.getUuid());
+            }
+
+            if (admin.isLocked()) {
+
+                log.debug("Registering `{}` token", admin.getUsername());
+
+                Token t = tokenService.findByToken(admin.getToken());
+
+                if (t == null) {
+                    Token token = new Token();
+                    token.setUser(adminUser);
+                    token.setEnabled(true);
+                    token.setExpires(0L);
+                    token.setName("service-default");
+                    
+                    token.setSecret(admin.getPassword());
+                    token.setType(Token.Type.DEFAULT);
+                    
+                    tokenService.generateToken(token);
+                    
+                    Token token2 = tokenService.save(token);
+                    admin.setToken(token.getToken());
+                    
+                    log.debug("Created `{}` token (id={})", token.getName(), token.getId());
+                }
+            }
 
         });
 

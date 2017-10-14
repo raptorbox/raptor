@@ -37,8 +37,8 @@ raptor:
   dispatcher:
     protocol: mqtt
     uri: tcp://broker:1883
-    queueLength: 2500
-    poolSize: 1000
+    queueLength: 24
+    poolSize: 10
 
   auth:
 

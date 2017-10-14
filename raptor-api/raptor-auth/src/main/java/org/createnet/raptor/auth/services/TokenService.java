@@ -231,4 +231,9 @@ public class TokenService {
         return tokenRepository.findByType(type);
     }
 
+    @Transactional
+    public Token findByToken(String token) {
+        return tokenRepository.findByToken(token);
+    }
+
 }
