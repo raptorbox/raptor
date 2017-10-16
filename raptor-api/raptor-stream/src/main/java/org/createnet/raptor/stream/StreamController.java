@@ -148,7 +148,9 @@ public class StreamController {
 
         // notify of invocation       
         streamPublisher.push(record);
-
+        
+        log.info("Stored record [stream={} deviceId={}]", record.getStreamId(), record.getDeviceId());
+        
         return ResponseEntity.accepted().build();
     }
 
