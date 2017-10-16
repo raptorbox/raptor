@@ -16,6 +16,7 @@
 package org.createnet.raptor.sdk.events;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -166,6 +167,54 @@ public class EventListenerTest {
         raptor.Inventory().update(dev);
 
         Utils.waitUntil(5, () -> !done.get());
+    }
+
+    @Test
+    public void watchDeviceTreeStreamData() {
+
+        final AtomicInteger done = new AtomicInteger(0);
+
+        Raptor r = Utils.getRaptor();
+        Token token = r.Admin().Token().create(new Token("test", "secret" + System.currentTimeMillis() * Math.random()));
+
+        Raptor raptor = new Raptor(r.getConfig().getUrl(), token.getToken());
+
+        final int len = 5;
+
+        List<Device> devices = new ArrayList();
+        List<TreeNode> nodes = new ArrayList();
+
+        for (int i = 0; i < len; i++) {
+            Device dev = newDevice("dev" + i);
+            dev.addStream("test2", "foo", "boolean");
+            dev.addAction("sleep");
+            raptor.Inventory().create(dev);
+
+            TreeNode node = raptor.Tree().create(TreeNode.create("parent1"));
+            raptor.Tree().add(node, dev);
+
+            nodes.add(node);
+            devices.add(dev);
+        }
+
+        for (int i = 0; i < len; i++) {
+            final int ii = i;
+            raptor.Tree().subscribe(nodes.get(i), new DataCallback() {
+                @Override
+                public void callback(Stream stream, RecordSet record) {
+                    log.debug("Node {} event received {}", ii, record.toString());
+                    done.addAndGet(1);
+                }
+            });
+        }
+
+        devices.forEach((d) -> {
+            RecordSet record = new RecordSet(d.stream("test2"));
+            record.channel("foo", true);
+            raptor.Stream().push(record);
+        });
+
+        Utils.waitUntil(10, () -> done.get() != len);
     }
 
     @Test
