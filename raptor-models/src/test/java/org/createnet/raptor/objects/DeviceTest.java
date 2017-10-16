@@ -90,9 +90,12 @@ public class DeviceTest extends TestUtils {
      */
     @Test
     public void testParse2() {
+        
         jsonDevice = loadData("device2");
         Device dev = Device.fromJSON(jsonDevice);
         assertEquals(dev.name(), jsonDevice.get("name").asText());
+        
+        assertTrue(dev.stream("data2").isDynamic());
     }
 
     /**
@@ -117,14 +120,16 @@ public class DeviceTest extends TestUtils {
         Device dev2 = new Device();
         dev2.merge(raw);        
         dev2.streams().remove("data");
-        
+//        
         log.debug("dev2 JSON {}", dev2.toJSON());
         try {
             dev2.validate();
-            fail("Validation MUST throw excepion");
+
         } catch(RaptorComponent.ValidationException ex) {
+            fail(ex.getMessage());
         }
         
+        assertTrue(dev2.streams().isEmpty());
     }
 
     /**

@@ -181,6 +181,10 @@ public class Stream extends StreamContainer {
     }
 
     protected void parse(JsonNode json) {
+
+        if (json.has("dynamic")) {
+            dynamic = json.get("dynamic").asBoolean(false);
+        }
         
         if (!dynamic && !json.has("channels")) {
                 parseChannels(json);            
@@ -193,10 +197,6 @@ public class Stream extends StreamContainer {
 
         if (json.has("type")) {
             type = json.get("type").asText();
-        }
-        
-        if (json.has("dynamic")) {
-            dynamic = json.get("dynamic").asBoolean(false);
         }
 
         if (json.has("description")) {

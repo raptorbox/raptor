@@ -46,10 +46,6 @@ public class MqttClientHandler extends AbstractClient {
         super(container);
     }
 
-    protected boolean hasLoginCredentials() {
-        return (getContainer().getConfig().hasCredentials() || getContainer().getConfig().hasToken());
-    }
-
     /**
      * Return and lazily creates an MQTT client
      *
@@ -61,7 +57,7 @@ public class MqttClientHandler extends AbstractClient {
             try {
 
                 URL url = new URL(getConfig().getUrl());
-                String clientId = "raptor_client_" + ((int) (System.currentTimeMillis() / 1000));
+                String clientId = "raptorclient" + ((int) (System.currentTimeMillis() / 1000));
                 String serverURI = "tcp://" + url.getHost() + ":1883";
 
                 mqttClient = new org.eclipse.paho.client.mqttv3.MqttClient(serverURI, clientId, new MemoryPersistence());
@@ -72,6 +68,7 @@ public class MqttClientHandler extends AbstractClient {
         }
 
         if (!mqttClient.isConnected()) {
+
             try {
 
                 logger.debug("Connecting to MQTT server {}", mqttClient.getServerURI());
@@ -85,7 +82,7 @@ public class MqttClientHandler extends AbstractClient {
                     connOpts.setPassword(getContainer().getConfig().getPassword().toCharArray());
                     logger.debug("Using user credentials");
                 } else if (getContainer().getConfig().hasToken()) {
-                    connOpts.setUserName("***"); // username  len <= 3 trigger token authentication
+                    connOpts.setUserName("**"); // username  len <= 3 trigger token authentication
                     connOpts.setPassword(getContainer().getConfig().getToken().toCharArray());
                     logger.debug("Using user token");
                 } else {
@@ -99,8 +96,10 @@ public class MqttClientHandler extends AbstractClient {
                 logger.error("Connection failed", ex);
                 throw new ClientException(ex);
             }
+            
+            logger.debug("MQTT client connected={}", mqttClient.isConnected());
+            
         }
-
         return mqttClient;
     }
 
@@ -110,11 +109,6 @@ public class MqttClientHandler extends AbstractClient {
      * @param topic the topic to listen for
      */
     public void subscribe(String topic) {
-
-        if (!hasLoginCredentials()) {
-            logger.warn("No user credentials or token provided to connect");
-            return;
-        }
 
         try {
             if (topics.contains(topic)) {
@@ -126,7 +120,7 @@ public class MqttClientHandler extends AbstractClient {
 
             getMqttClient().subscribe(topic);
             topics.add(topic);
-            
+
             logger.debug("Subscribed");
         } catch (MqttException ex) {
 
@@ -188,14 +182,7 @@ public class MqttClientHandler extends AbstractClient {
      * @param topic the topic to listen for
      */
     public void unsubscribe(String topic) {
-
-        if (!hasLoginCredentials()) {
-            logger.warn("No user credentials or token provided to connect");
-            return;
-        }
-
         try {
-
             getMqttClient().unsubscribe(topic);
             topics.remove(topic);
             if (topics.isEmpty()) {

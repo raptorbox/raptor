@@ -8,6 +8,9 @@
             "happy": "boolean",
             "list": "array",
             "foobar": "object"
+        },
+        "data2": {    
+            "dynamic": true
         }
     }
 }

@@ -34,7 +34,6 @@ import org.createnet.raptor.sdk.Topics;
 import org.createnet.raptor.sdk.api.AuthClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -58,7 +57,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
             Raptor r = new Raptor(config.getUrl(), token);
             AuthClient.LoginState result = r.Auth().login();
-            logger.debug("Authenticated user {}", result.user.getUuid());
+            logger.debug("Authenticated user {} with token", result.user.getUuid());
 
             return new BrokerUser(r);
 
@@ -113,7 +112,6 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 //                logger.debug("Attempt to login with empty token! [user={}]", username);
                 return null;
             }
-            logger.debug("Trying token login");
             brokerUser = login(password);
         } else {
 

@@ -90,7 +90,7 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
 
         try {
             Permissions p = Permissions.valueOf(permission);
-            log.debug("Check authorization for user={} device={} permission={}", deviceId, tokenAuthentication.getUser().getUuid(), p);
+            log.debug("Check authorization for user={} device={} permission={}", tokenAuthentication.getUser().getUuid(), deviceId, p);
             AuthorizationResponse response = api.Admin().User().isAuthorized(deviceId, tokenAuthentication.getUser().getUuid(), p);
             return response.result;
         } catch (Exception ex) {

@@ -149,7 +149,7 @@ public class AclController {
             }
         }
 
-        logger.debug("Device permission check result: [deviceId:{}, result:{}]", body.objectId, response.result);
+        logger.debug("Device permission check result: [deviceId:{} permission:{} result:{}]", body.objectId, body.permission, response.result);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

@@ -94,7 +94,7 @@ public class DeviceDeserializer extends JsonDeserializer<Device> {
 
             if (tree.get("streams").isArray()) {
                 for (JsonNode jsonStream : tree.get("streams")) {
-                    Stream stream = new Stream(jsonStream);
+                    Stream stream = new Stream(jsonStream, device);
                     device.streams().put(stream.name(), stream);
                 }
             }
