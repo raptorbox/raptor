@@ -16,16 +16,19 @@
 package org.createnet.raptor.standalone;
 
 import java.util.Arrays;
-import org.createnet.raptor.auth.services.AuthMessageHandler;
 import org.createnet.raptor.common.BaseApplication;
+import org.createnet.raptor.common.dispatcher.RaptorMessageHandlerWrapper;
 import org.createnet.raptor.sdk.Topics;
 import org.createnet.raptor.tree.TreeMessageHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.integration.core.MessageProducer;
@@ -40,8 +43,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
  */
 @Profile("default")
 @SpringBootApplication(scanBasePackages = {
-    "org.createnet.raptor",
-}, exclude = {
+    "org.createnet.raptor",}, exclude = {
     ArtemisAutoConfiguration.class
 })
 
@@ -52,9 +54,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
     "org.createnet.raptor.stream",
     "org.createnet.raptor.action",
     "org.createnet.raptor.inventory",
-    "org.createnet.raptor.profile",    
-    "org.createnet.raptor.tree",
-})
+    "org.createnet.raptor.profile",
+    "org.createnet.raptor.tree",})
 
 @EnableWebMvc
 @ComponentScan(basePackages = {
@@ -65,37 +66,25 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableRetry
 @WebAppConfiguration
 public class Application extends BaseApplication {
-    
+
     public static void main(String[] args) {
         additionalConfigNames = Arrays.asList(
                 "auth.yml"
         );
         start(Application.class, args);
     }
-   
-    @Bean
-    TreeMessageHandler treeMessageHandler() {
-        return new TreeMessageHandler();
+
+    @Autowired RaptorMessageHandlerWrapper raptorMessageHandlerWrapper;
+    @Autowired TreeMessageHandler treeMessageHandler;
+    
+    @EventListener({ContextRefreshedEvent.class})
+    void contextRefreshedEvent() {
+        raptorMessageHandlerWrapper.registerHandler(treeMessageHandler);
     }
-    
-//    @Bean
-//    AuthMessageHandler authMessageHandler(){
-//        return new AuthMessageHandler();
-//    }
-    
-    @Bean
-    MultipleMessageHandler multipleMessageHandler() {
-        MultipleMessageHandler m = new MultipleMessageHandler();
-        m.addHandler(treeMessageHandler());
-//        m.addHandler(authMessageHandler());
-        return m;
-    }
-    
+
     @Bean
     public MessageProducer mqttClient() {
-        return createMqttClient(new String[]{
-            String.format(Topics.DEVICE, "+"),}, multipleMessageHandler());
-    }    
-    
-    
+        return createMqttClient(new String[]{String.format(Topics.DEVICE, "+")});
+    }
+
 }

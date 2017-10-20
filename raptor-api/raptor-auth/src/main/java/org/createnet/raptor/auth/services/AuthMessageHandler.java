@@ -15,27 +15,19 @@
  */
 package org.createnet.raptor.auth.services;
 
-import org.createnet.raptor.common.authentication.LoginAuthenticationToken;
-import org.createnet.raptor.common.authentication.RaptorUserDetails;
 import org.createnet.raptor.common.dispatcher.RaptorMessageHandler;
-import org.createnet.raptor.models.auth.request.SyncRequest;
-import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-@Service
+@Component
 public class AuthMessageHandler implements RaptorMessageHandler {
     
     final Logger logger = LoggerFactory.getLogger(AuthMessageHandler.class);

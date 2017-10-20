@@ -13,35 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.createnet.raptor.standalone;
-
+package org.createnet.raptor.common.dispatcher;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.createnet.raptor.common.dispatcher.RaptorMessageHandler;
 import org.createnet.raptor.models.payload.DispatcherPayload;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessageHeaders;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class MultipleMessageHandler implements RaptorMessageHandler {
-
-    final Logger log = LoggerFactory.getLogger(MultipleMessageHandler.class);
+public class RaptorMessageHandlerWrapper {
     
     final private List<RaptorMessageHandler> handlers = new ArrayList();
     
-    public void addHandler(RaptorMessageHandler h) {
-        handlers.add(h);
+    public void registerHandler(RaptorMessageHandler handler) {
+        if(!handlers.contains(handler))
+            handlers.add(handler);
     }
     
-    @Override
-    public void handle(final DispatcherPayload dispatcherPayload, final MessageHeaders headers) {
-        handlers.parallelStream().forEach((h) -> h.handle(dispatcherPayload, headers));
+    public void handle(DispatcherPayload dispatcherPayload, MessageHeaders headers) {
+        handlers.forEach((h) -> {
+            h.handle(dispatcherPayload, headers);
+        });
     }
 
 }

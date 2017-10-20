@@ -18,7 +18,6 @@ package org.createnet.raptor.common.dispatcher;
 import org.createnet.raptor.models.acl.Permissions;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.configuration.AuthConfiguration;
 import org.createnet.raptor.models.configuration.DispatcherConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.createnet.raptor.models.data.RecordSet;
@@ -37,9 +36,9 @@ import org.createnet.raptor.models.tree.TreeNode;
 import org.createnet.raptor.sdk.Topics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -47,49 +46,23 @@ import org.springframework.stereotype.Service;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-public class DispatcherService implements InitializingBean, DisposableBean {
+public class DispatcherService {
 
     final private Logger logger = LoggerFactory.getLogger(DispatcherService.class);
-    private DispatcherEngine dispatcher;
-    
+
+
     @Autowired
     RaptorConfiguration config;
-
-    public DispatcherEngine getDispatcher() {
-        if (dispatcher == null) {
-            dispatcher = new DispatcherEngine();
-            
-            AuthConfiguration.AdminUser user = config.getAuth().getServiceUser();
-
-            if(user == null) {
-                throw new RuntimeException("Service user not found, review your raptor.yml configuration");
-            }            
-            
-            getConfiguration().setUsername(user.getUsername());
-            getConfiguration().setPassword(user.getPassword());
-            
-            logger.debug("Connecting as MQTT user {}", getConfiguration().getUsername());
-            dispatcher.initialize(getConfiguration());
-        }
-        return dispatcher;
-    }
+    
+    @Autowired
+    BrokerClient brokerClient;
 
     /**
      * @todo rewrite this to use dispatcher
-     * @return 
+     * @return
      */
     protected DispatcherConfiguration getConfiguration() {
         return config.getDispatcher();
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        getDispatcher();
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        getDispatcher().close();
     }
 
     protected String getEventsTopic(DeviceContainer c) {
@@ -151,11 +124,11 @@ public class DispatcherService implements InitializingBean, DisposableBean {
 
         return String.format(Topics.USER, userId);
     }
-    
+
     protected String getUserEventsTopic(User u) {
         return String.format(Topics.USER, u.getUuid());
     }
-    
+
     protected String getTokenEventsTopic(Token t) {
         return String.format(Topics.TOKEN, t.getId().toString());
     }
@@ -166,11 +139,8 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      * @param message
      */
     protected void notifyEvent(String topic, DispatcherPayload message) {
-        
         logger.debug("Notifying {} {}.{}", topic, message.getType(), message.getOp());
-        
-        getDispatcher().add(topic, message.toString());
-
+        brokerClient.sendMessage(topic, message.toString());
     }
 
     /**
@@ -179,11 +149,8 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      * @param payload
      */
     public void notifyTreeEvent(TreeNode node, DispatcherPayload payload) {
-        
         String topic = String.format(Topics.TREE, node.getId());
-        
         notifyEvent(topic, payload);
-        
     }
 
     /**
@@ -193,11 +160,8 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      * @param payload
      */
     protected void notifyUserEvent(Permissions op, Device obj, DispatcherPayload payload) {
-        
         String topic = getUserEventsTopic(obj);
-        
         notifyEvent(topic, payload);
-
     }
 
     /**
@@ -206,13 +170,10 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      * @param obj
      */
     public void notifyDeviceEvent(Permissions op, Device obj) {
-
         String topic = getEventsTopic(obj);
         DevicePayload payload = new DevicePayload(obj, op);
-
         notifyEvent(topic, payload);
     }
-
 
     /**
      *
@@ -224,7 +185,7 @@ public class DispatcherService implements InitializingBean, DisposableBean {
         UserPayload payload = new UserPayload(user, op);
         notifyEvent(topic, payload);
     }
-    
+
     /**
      *
      * @param op
@@ -242,12 +203,12 @@ public class DispatcherService implements InitializingBean, DisposableBean {
      * @param record
      */
     public void notifyDataEvent(Stream stream, RecordSet record) {
-        
+
         StreamPayload payload = new StreamPayload(stream, Permissions.data, record);
-        
+
         notifyEvent(getStreamTopic(stream), payload);
         notifyEvent(getEventsTopic(stream), payload);
-        
+
     }
 
     /**
@@ -265,8 +226,8 @@ public class DispatcherService implements InitializingBean, DisposableBean {
 
         ActionPayload payload = new ActionPayload(action, op, data);
 
-        notifyEvent(getActionTopic(action), payload);        
+        notifyEvent(getActionTopic(action), payload);
         notifyEvent(getEventsTopic(action), payload);
     }
-    
+
 }

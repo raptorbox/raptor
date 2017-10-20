@@ -23,31 +23,24 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.createnet.raptor.common.dispatcher.RaptorMessageHandler;
-import org.createnet.raptor.models.configuration.AuthConfiguration;
-import org.createnet.raptor.models.configuration.DispatcherConfiguration;
+import org.createnet.raptor.common.dispatcher.RaptorMessageHandlerWrapper;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Profile;
-import org.springframework.integration.annotation.ServiceActivator;
-import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.core.MessageProducer;
-import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
 import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandler;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.Banner;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -55,7 +48,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.messaging.MessagingException;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -82,8 +74,6 @@ public abstract class BaseApplication {
     static public String appName;
 
     static public boolean developmentMode = false;
-
-    protected RaptorMessageHandler messageHandler;
 
     public static SpringApplicationBuilder createInstance(Class clazz) {
 
@@ -190,75 +180,6 @@ public abstract class BaseApplication {
     }
 
     @Bean
-    public MqttPahoClientFactory mqttClientFactory() {
-
-        AuthConfiguration.AdminUser defaultUser = raptorConfiguration().getAuth().getServiceUser();
-
-        if (defaultUser == null) {
-            throw new RuntimeException("Missing service user. Review raptor.yml configuration file under auth.users section");
-        }
-
-        DispatcherConfiguration dispatcherConfig = raptorConfiguration().getDispatcher();
-
-        DefaultMqttPahoClientFactory f = new DefaultMqttPahoClientFactory();
-
-        log.debug("Using local broker user {}", defaultUser.getUsername());
-
-        f.setUserName(defaultUser.getUsername());
-        f.setPassword(defaultUser.getPassword());
-        f.setServerURIs(dispatcherConfig.getUri());
-        f.setCleanSession(true);
-        f.setPersistence(new MemoryPersistence());
-
-        return f;
-    }
-
-    // Add inbound MQTT support
-    @Bean
-    public MessageChannel mqttInputChannel() {
-        return new DirectChannel();
-    }
-
-    /**
-     * Create a MQTT connection to the broker
-     *
-     * @param messageHandler
-     * @param topics
-     * @return
-     */
-    public MessageProducer createMqttClient(String[] topics, RaptorMessageHandler messageHandler) {
-
-        this.messageHandler = messageHandler;
-
-        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(this.getClass().getName().replace(".", "-"), mqttClientFactory(), topics);
-        adapter.setCompletionTimeout(5000);
-        adapter.setConverter(new DefaultPahoMessageConverter());
-        adapter.setQos(2);
-        adapter.setRecoveryInterval(2500);
-        adapter.setOutputChannel(mqttInputChannel());
-        
-        return adapter;
-    }
-
-    @Bean
-    @ServiceActivator(inputChannel = "mqttInputChannel")
-    public MessageHandler handler() {
-        return new MessageHandler() {
-            @Override
-            public void handleMessage(Message<?> message) throws MessagingException {
-                if (messageHandler != null) {
-                    try {
-                        DispatcherPayload payload = DispatcherPayload.parseJSON(message.getPayload().toString());
-                        messageHandler.handle(payload, message.getHeaders());
-                    } catch (Exception e) {
-                        throw new MessagingException("Exception handling message", e);
-                    }
-                }
-            }
-        };
-    }
-
-    @Bean
     public static PropertySourcesPlaceholderConfigurer properties() {
         PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
 
@@ -309,4 +230,30 @@ public abstract class BaseApplication {
         return propertySourcesPlaceholderConfigurer;
     }
 
+    @Bean
+    protected RaptorMessageHandlerWrapper raptorMessageHandlerWrapper() {
+        return new RaptorMessageHandlerWrapper();
+    }
+    
+    @Autowired MqttPahoClientFactory mqttClientFactory;
+    @Autowired MessageChannel mqttInputChannel;
+    
+    /**
+     * Create a MQTT connection to the broker
+     *
+     * @param messageHandler
+     * @param topics
+     * @return
+     */
+    public MessageProducer createMqttClient(String[] topics) {
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter("raptor"+  (System.currentTimeMillis()+Math.random()), mqttClientFactory, topics);
+        adapter.setCompletionTimeout(5000);
+        adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setQos(2);
+        adapter.setRecoveryInterval(2500);
+        adapter.setOutputChannel(mqttInputChannel);
+        
+        return adapter;
+    }    
+    
 }

@@ -26,11 +26,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
+@Component
 public class TreeMessageHandler implements RaptorMessageHandler {
 
     final Logger log = LoggerFactory.getLogger(TreeMessageHandler.class);

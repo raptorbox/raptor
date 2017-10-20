@@ -23,7 +23,5 @@ import org.springframework.messaging.MessageHeaders;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public interface RaptorMessageHandler {
-
     public void handle(DispatcherPayload dispatcherPayload, MessageHeaders headers);
-
 }

@@ -17,6 +17,7 @@ package org.createnet.raptor.auth;
 
 import org.createnet.raptor.auth.services.AuthMessageHandler;
 import org.createnet.raptor.common.BaseApplication;
+import org.createnet.raptor.common.dispatcher.RaptorMessageHandlerWrapper;
 import org.createnet.raptor.sdk.Topics;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -24,6 +25,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -44,14 +47,20 @@ public class Application extends BaseApplication {
     public static void main(String[] args) {
         start(Application.class, args);
     }
-    
+
+    @Autowired AuthMessageHandler authMessageHandler;
+
     @Autowired
-    AuthMessageHandler authMessageHandler;
-    
+    RaptorMessageHandlerWrapper raptorMessageHandlerWrapper;
+
+    @EventListener({ContextRefreshedEvent.class})
+    void contextRefreshedEvent() {
+        raptorMessageHandlerWrapper.registerHandler(authMessageHandler);
+    }
+
     @Bean
     public MessageProducer mqttClient() {
-        return createMqttClient(new String[]{
-            String.format(Topics.DEVICE, "+"),}, authMessageHandler);
+        return createMqttClient(new String[]{String.format(Topics.DEVICE, "+")});
     }
 
 }
