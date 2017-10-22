@@ -40,7 +40,7 @@ public class JsonErrorResponse {
     }
     
     public static ResponseEntity<?> notFound() {
-        return notFound("Not found");
+        return notFound(HttpStatus.NOT_FOUND.getReasonPhrase());
     }
     
     public static ResponseEntity<?> badRequest(String message) {
@@ -48,7 +48,7 @@ public class JsonErrorResponse {
     }
     
     public static ResponseEntity<?> badRequest() {
-        return badRequest("Bad request");
+        return badRequest(HttpStatus.BAD_REQUEST.getReasonPhrase());
     }
     
     public static ResponseEntity<?> internalError(String message) {
@@ -56,6 +56,14 @@ public class JsonErrorResponse {
     }
     
     public static ResponseEntity<?> internalError() {
-        return badRequest("Internal server error");
+        return badRequest(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+    }
+    
+    public static ResponseEntity<?> unauthorized(String message) {
+        return entity(HttpStatus.UNAUTHORIZED, message);
+    }
+    
+    public static ResponseEntity<?> unauthorized() {
+        return unauthorized(HttpStatus.UNAUTHORIZED.getReasonPhrase());
     }
 }
