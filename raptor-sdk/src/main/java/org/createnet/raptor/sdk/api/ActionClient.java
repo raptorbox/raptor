@@ -17,8 +17,6 @@ package org.createnet.raptor.sdk.api;
 
 import org.createnet.raptor.sdk.Routes;
 import org.createnet.raptor.sdk.AbstractClient;
-import com.fasterxml.jackson.core.type.TypeReference;
-import java.util.List;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.events.callback.ActionCallback;
 import org.createnet.raptor.sdk.events.callback.ActionEventCallback;

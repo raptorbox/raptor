@@ -75,6 +75,9 @@ public class AppController {
     @Autowired
     private AppService appService;
 
+    @Autowired
+    private AppEventPublisher eventPublisher;
+
     @RequestMapping(method = RequestMethod.GET, value = "/")
     @ApiOperation(
             value = "Return the apps owned by an user",
@@ -114,6 +117,8 @@ public class AppController {
 
         App saved = appService.save(app);
 
+        eventPublisher.create(app);
+
         log.debug("Created app %s (%s)", app.getName(), app.getId());
         return ResponseEntity.ok(saved);
     }
@@ -150,6 +155,9 @@ public class AppController {
         }
 
         App saved = appService.save(app);
+
+        eventPublisher.update(app);
+
         log.debug("Updated app %s (%s)", app.getName(), app.getId());
         return ResponseEntity.ok(saved);
     }
@@ -176,6 +184,8 @@ public class AppController {
         }
 
         appService.delete(app);
+
+        eventPublisher.delete(app);
 
         log.debug("Deleted app %s (%s)", app.getName(), app.getId());
         return ResponseEntity.accepted().build();

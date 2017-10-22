@@ -21,7 +21,7 @@ package org.createnet.raptor.sdk;
 final public class Topics {
     
     public enum Types {
-        action, stream, device, user, tree, token
+        action, stream, device, user, tree, token, app
     }
     
     public static final String ACTION = Types.action.name() + "/%s/%s";
@@ -30,5 +30,6 @@ final public class Topics {
     public static final String USER = Types.user.name() + "/%s";
     public static final String TOKEN = Types.token.name() + "/%s";
     public static final String TREE = Types.tree.name() + "/%s";
+    public static final String APP = Types.app.name() + "/%s";
     
 }

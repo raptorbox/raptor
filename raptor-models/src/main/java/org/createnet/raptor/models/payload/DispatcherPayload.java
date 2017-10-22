@@ -32,7 +32,8 @@ public interface DispatcherPayload {
     public enum MessageType {
         device, stream, action, data, 
         user, permission, role, tree,
-        token
+        token,
+        app
     }
     
     /**

@@ -16,6 +16,7 @@
 package org.createnet.raptor.common.dispatcher;
 
 import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.configuration.DispatcherConfiguration;
@@ -27,6 +28,7 @@ import org.createnet.raptor.models.objects.DeviceContainer;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.payload.ActionPayload;
+import org.createnet.raptor.models.payload.AppPayload;
 import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.StreamPayload;
@@ -37,8 +39,6 @@ import org.createnet.raptor.sdk.Topics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -50,10 +50,9 @@ public class DispatcherService {
 
     final private Logger logger = LoggerFactory.getLogger(DispatcherService.class);
 
-
     @Autowired
     RaptorConfiguration config;
-    
+
     @Autowired
     BrokerClient brokerClient;
 
@@ -108,6 +107,10 @@ public class DispatcherService {
         }
 
         return String.format(Topics.ACTION, id, a.name());
+    }
+
+    protected String getAppTopic(App a) {
+        return String.format(Topics.APP, a.getId());
     }
 
     protected String getUserEventsTopic(DeviceContainer c) {
@@ -228,6 +231,16 @@ public class DispatcherService {
 
         notifyEvent(getActionTopic(action), payload);
         notifyEvent(getEventsTopic(action), payload);
+    }
+
+    /**
+     *
+     * @param op
+     * @param app
+     */
+    public void notifyAppEvent(Permissions op, App app) {
+        AppPayload payload = new AppPayload(app, op);
+        notifyEvent(getAppTopic(app), payload);
     }
 
 }

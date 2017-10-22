@@ -18,7 +18,6 @@ package org.createnet.raptor.models.app;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -38,7 +37,43 @@ public class App {
     protected String description;
 
     protected List<AppRole> roles = new ArrayList();
+    protected List<String> devices = new ArrayList();
     protected List<AppUser> users = new ArrayList();
+
+    public void merge(App raw) {
+
+        if (raw.getName() != null && !raw.getName().isEmpty()) {
+            setName(raw.getName());
+        }
+        if (raw.getDescription() != null && !raw.getDescription().isEmpty()) {
+            setDescription(raw.getDescription());
+        }
+        if (raw.getUserId() != null && !raw.getUserId().isEmpty()) {
+            setUserId(raw.getUserId());
+        }
+        if (raw.getRoles() != null && !raw.getRoles().isEmpty()) {
+            raw.getRoles().forEach((r) -> {
+                if (!getRoles().contains(r)) {
+                    getRoles().add(r);
+                }
+            });
+        }
+        if (raw.getUsers() != null && !raw.getUsers().isEmpty()) {
+            raw.getUsers().forEach((u) -> {
+                if (!getUsers().contains(u)) {
+                    getUsers().add(u);
+                }
+            });
+        }
+        if (raw.getDevices() != null && !raw.getDevices().isEmpty()) {
+            raw.getDevices().forEach((u) -> {
+                if (!getDevices().contains(u)) {
+                    getDevices().add(u);
+                }
+            });
+        }
+
+    }
 
     public void validate() {
 
@@ -88,20 +123,28 @@ public class App {
         this.description = description;
     }
 
-    public List<AppRole> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(List<AppRole> roles) {
-        this.roles = roles;
-    }
-
     public List<AppUser> getUsers() {
         return users;
     }
 
     public void setUsers(List<AppUser> users) {
         this.users = users;
+    }
+
+    public List<String> getDevices() {
+        return devices;
+    }
+
+    public void setDevices(List<String> devices) {
+        this.devices = devices;
+    }
+
+    public List<AppRole> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<AppRole> roles) {
+        this.roles = roles;
     }
 
 }
