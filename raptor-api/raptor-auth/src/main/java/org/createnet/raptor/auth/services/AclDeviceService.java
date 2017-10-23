@@ -19,11 +19,14 @@ import java.util.Arrays;
 import java.util.List;
 import org.createnet.raptor.auth.acl.AbstractAclService;
 import org.createnet.raptor.auth.acl.RaptorPermission;
+import org.createnet.raptor.models.acl.AclSubject;
 import org.createnet.raptor.models.auth.AclDevice;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.acls.model.Permission;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +34,7 @@ import org.springframework.stereotype.Service;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-public class AclDeviceService extends AbstractAclService {
+public class AclDeviceService extends AbstractAclService<AclDevice> {
 
     private final Logger logger = LoggerFactory.getLogger(AclDeviceService.class);
 
@@ -42,8 +45,7 @@ public class AclDeviceService extends AbstractAclService {
     public List<Permission> getDefaultPermissions() {
         return Arrays.asList(
                 RaptorPermission.READ,
-                RaptorPermission.WRITE,
-                RaptorPermission.ADMINISTRATION
+                RaptorPermission.WRITE
         );
     }
 
@@ -52,4 +54,17 @@ public class AclDeviceService extends AbstractAclService {
         return deviceService.get(id);
     }
 
+    @Override
+    @Retryable(maxAttempts = 3, value = AclManagerService.AclManagerException.class, backoff = @Backoff(delay = 500, multiplier = 3))
+    public void register(AclDevice subj) {
+        
+        List<Permission> permissions = getPermissions(subj);
+        
+        if (subj.getSid().getUser().getUuid().equals(subj.getOwner().getUuid())) {
+            permissions.add(RaptorPermission.ADMINISTRATION);
+        }
+
+        savePermissions(subj, permissions);
+    }
+    
 }

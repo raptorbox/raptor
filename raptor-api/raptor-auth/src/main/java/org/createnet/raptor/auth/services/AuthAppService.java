@@ -128,16 +128,7 @@ public class AuthAppService {
             app.setOwner(owner);
         }
 
-//        if (req.parentId != null) {
-//            AclApp parentDevice = appRepository.findByUuid(req.parentId);
-//            if (parentDevice == null) {
-//                throw new DeviceNotFoundException();
-//            }
-//            app.setParent(parentDevice);
-//        }
-
         AclApp dev = save(app);
-
         return dev;
     }
 

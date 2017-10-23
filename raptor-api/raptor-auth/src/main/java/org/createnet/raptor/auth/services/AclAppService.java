@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-public class AclAppService extends AbstractAclService {
+public class AclAppService extends AbstractAclService<AclApp> {
 
     private final Logger logger = LoggerFactory.getLogger(AclAppService.class);
 

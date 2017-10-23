@@ -42,10 +42,10 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Profile("default")
-@SpringBootApplication(scanBasePackages = {
-    "org.createnet.raptor",}, exclude = {
-    ArtemisAutoConfiguration.class
-})
+@SpringBootApplication(
+        scanBasePackages = {"org.createnet.raptor"},
+        exclude = {ArtemisAutoConfiguration.class}
+)
 
 @EntityScan(basePackages = "org.createnet.raptor.models.auth")
 @EnableJpaRepositories(basePackages = "org.createnet.raptor.auth.repository")
@@ -55,7 +55,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
     "org.createnet.raptor.action",
     "org.createnet.raptor.inventory",
     "org.createnet.raptor.profile",
-    "org.createnet.raptor.tree",})
+    "org.createnet.raptor.tree",
+    "org.createnet.raptor.app"
+})
 
 @EnableWebMvc
 @ComponentScan(basePackages = {
@@ -74,9 +76,11 @@ public class Application extends BaseApplication {
         start(Application.class, args);
     }
 
-    @Autowired RaptorMessageHandlerWrapper raptorMessageHandlerWrapper;
-    @Autowired TreeMessageHandler treeMessageHandler;
-    
+    @Autowired
+    RaptorMessageHandlerWrapper raptorMessageHandlerWrapper;
+    @Autowired
+    TreeMessageHandler treeMessageHandler;
+
     @EventListener({ContextRefreshedEvent.class})
     void contextRefreshedEvent() {
         raptorMessageHandlerWrapper.registerHandler(treeMessageHandler);
