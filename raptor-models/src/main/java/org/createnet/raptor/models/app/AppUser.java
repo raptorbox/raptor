@@ -16,8 +16,8 @@
 package org.createnet.raptor.models.app;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import org.createnet.raptor.models.auth.Role;
 
 /**
  *
@@ -26,7 +26,7 @@ import org.createnet.raptor.models.auth.Role;
 public class AppUser {
 
     protected String id;
-    protected List<Role> roles = new ArrayList();
+    protected List<AppRole> roles = new ArrayList();
 
     public String getId() {
         return id;
@@ -36,12 +36,30 @@ public class AppUser {
         this.id = id;
     }
 
-    public List<Role> getRoles() {
+    public List<AppRole> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<Role> roles) {
+    public void setRoles(List<AppRole> roles) {
         this.roles = roles;
+    }
+
+    public void addRoles(List<AppRole> roles) {
+        roles.forEach((role) -> {
+            if (!getRoles().contains(role)) {
+                getRoles().add(role);
+            }
+        });
+    }
+
+    public void removeRole(AppRole role) {
+        if (getRoles().contains(role)) {
+            getRoles().remove(role);
+        }
+    }
+
+    public void addRole(AppRole role) {
+        addRoles(Arrays.asList(role));
     }
 
 }

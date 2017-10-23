@@ -20,9 +20,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.createnet.raptor.common.query.AppQueryBuilder;
 import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.RaptorComponent;
+import org.createnet.raptor.models.query.AppQuery;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-@RequestMapping(value = "/application")
+@RequestMapping(value = "/app")
 @RestController
 @ApiResponses(value = {
     @ApiResponse(
@@ -78,7 +80,7 @@ public class AppController {
     @Autowired
     private AppEventPublisher eventPublisher;
 
-    @RequestMapping(method = RequestMethod.GET, value = "/")
+    @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
             value = "Return the apps owned by an user",
             notes = "",
@@ -88,15 +90,22 @@ public class AppController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getApps(
             @AuthenticationPrincipal User currentUser,
-            @QuerydslPredicate(root = User.class) Predicate predicate,
             Pageable pageable,
-            @RequestParam MultiValueMap<String, String> parameters
+            @RequestParam MultiValueMap<String, String> parameters,
+            @RequestBody AppQuery query
     ) {
-        Iterable<App> apps = appService.find(predicate, pageable);
+
+        if (!currentUser.isSuperAdmin()) {
+            query.users.in(currentUser.getUuid());
+        }
+
+        AppQueryBuilder qb = new AppQueryBuilder(query);
+        Iterable<App> apps = appService.find(qb.getPredicate(), qb.getPaging());
+
         return ResponseEntity.ok(apps);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/")
+    @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(
             value = "Create a new app",
             notes = "",
@@ -113,6 +122,10 @@ public class AppController {
             appService.validate(app);
         } catch (RaptorComponent.ValidationException ex) {
             return JsonErrorResponse.badRequest(ex.getMessage());
+        }
+
+        if (app.getRoles().isEmpty()) {
+            app.getRoles().addAll(DefaultRoles.getDefaults());
         }
 
         App saved = appService.save(app);

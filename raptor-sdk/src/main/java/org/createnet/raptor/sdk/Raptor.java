@@ -24,6 +24,7 @@ import org.createnet.raptor.sdk.api.StreamClient;
 import org.createnet.raptor.sdk.events.MqttEventEmitter;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.sdk.admin.ProfileClient;
+import org.createnet.raptor.sdk.api.AppClient;
 import org.createnet.raptor.sdk.api.InventoryClient;
 import org.createnet.raptor.sdk.api.TreeClient;
 
@@ -45,6 +46,7 @@ public class Raptor implements IClient, RaptorComponent {
     protected ActionClient Action;
     protected InventoryClient Inventory;
     protected TreeClient Tree;
+    protected AppClient App;
 
     public AdminClient Admin() {
         if (Admin == null) {
@@ -86,6 +88,13 @@ public class Raptor implements IClient, RaptorComponent {
             Tree = new TreeClient(getContainer());
         }
         return Tree;
+    }
+    
+    public AppClient App() {
+        if (App == null) {
+            App = new AppClient(getContainer());
+        }
+        return App;
     }
 
     public ProfileClient Profile() {

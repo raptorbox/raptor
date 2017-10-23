@@ -16,6 +16,7 @@
 package org.createnet.raptor.models.app;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -29,12 +30,12 @@ public class AppRole {
 
     public AppRole() {
     }
-    
+
     public AppRole(String name, List<String> permissions) {
         this.name = name;
         this.permissions.addAll(permissions);
     }
-    
+
     public String getName() {
         return name;
     }
@@ -48,8 +49,38 @@ public class AppRole {
     }
 
     public void setPermissions(List<String> permissions) {
+        if (permissions == null) {
+            return;
+        }
         this.permissions.clear();
         this.permissions.addAll(permissions);
+    }
+
+    public void addPermissions(List<String> permissions) {
+        if (permissions == null) {
+            return;
+        }
+        permissions.forEach((p) -> {
+            if (!getPermissions().contains(p)) {
+                getPermissions().add(p);
+            }
+        });
+    }
+    
+    public void addPermission(String permission) {
+        if (permission == null) {
+            return;
+        }
+        addPermissions(Arrays.asList(permission));
+    }
+
+    public void removePermission(String permission) {
+        if (permission == null) {
+            return;
+        }
+        if (getPermissions().contains(permission)) {
+            getPermissions().remove(permission);
+        }
     }
 
 }

@@ -25,10 +25,13 @@ import org.createnet.raptor.models.payload.AppPayload;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.exception.ClientException;
 import org.createnet.raptor.models.payload.DispatcherPayload;
+import org.createnet.raptor.sdk.PageResponse;
 import org.createnet.raptor.sdk.events.callback.AppCallback;
 import org.createnet.raptor.sdk.events.callback.AppEventCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Methods to interact with Raptor API
@@ -74,7 +77,7 @@ public class AppClient extends AbstractClient {
      * @return the App instance
      */
     public App create(App obj) {
-        JsonNode node = getClient().post(Routes.APP_CREATE, toJson(obj));
+        JsonNode node = getClient().post(Routes.APP_CREATE, toJsonNode(obj));
         if (!node.has("id")) {
             throw new ClientException("Missing ID on object creation");
         }
@@ -125,10 +128,9 @@ public class AppClient extends AbstractClient {
      *
      * @return the App instance
      */
-    public List<App> list() {
+    public PageResponse<App> list() {
         JsonNode json = getClient().get(Routes.APP_LIST);
-        List<App> list = getMapper().convertValue(json, new TypeReference<List<App>>() {
-        });
+        PageResponse<App> list = getMapper().convertValue(json, new TypeReference<PageResponse<App>>() {});
         return list;
     }
 

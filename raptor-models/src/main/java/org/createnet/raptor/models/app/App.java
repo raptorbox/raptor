@@ -16,8 +16,11 @@
 package org.createnet.raptor.models.app;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -36,9 +39,25 @@ public class App {
     protected String name;
     protected String description;
 
-    protected List<AppRole> roles = new ArrayList();
-    protected List<String> devices = new ArrayList();
-    protected List<AppUser> users = new ArrayList();
+    final protected List<AppRole> roles = new ArrayList();
+    final protected List<String> devices = new ArrayList();
+    final protected List<AppUser> users = new ArrayList();
+
+    public App() {
+    }
+
+    public App(String name) {
+        this.name = name;
+    }
+
+    public App(String name, String userId) {
+        this(name);
+        this.userId = userId;
+    }
+
+    public App(String name, User owner) {
+        this(name, owner.getUuid());
+    }
 
     public void merge(App raw) {
 
@@ -89,6 +108,14 @@ public class App {
             throw new RaptorComponent.ValidationException("UserId is missing");
         }
 
+        getUsers().forEach((u) -> {
+            u.getRoles().forEach((r) -> {
+                if (!getRoles().contains(r)) {
+                    throw new RaptorComponent.ValidationException(String.format("User `%s` has an unknown role `%s`", u.getId(), r.getName()));
+                }
+            });
+
+        });
     }
 
     public String getId() {
@@ -128,7 +155,8 @@ public class App {
     }
 
     public void setUsers(List<AppUser> users) {
-        this.users = users;
+        this.users.clear();
+        this.users.addAll(users);
     }
 
     public List<String> getDevices() {
@@ -136,7 +164,8 @@ public class App {
     }
 
     public void setDevices(List<String> devices) {
-        this.devices = devices;
+        this.devices.clear();
+        this.devices.addAll(devices);
     }
 
     public List<AppRole> getRoles() {
@@ -144,7 +173,68 @@ public class App {
     }
 
     public void setRoles(List<AppRole> roles) {
-        this.roles = roles;
+        this.roles.clear();
+        this.roles.addAll(roles);
+    }
+
+    public void setOwner(User user) {
+        this.userId = user.getUuid();
+    }
+
+    public void addUser(User user, List<AppRole> roles) {
+
+        AppUser appUser = new AppUser();
+        appUser.setId(user.getUuid());
+        appUser.addRoles(roles);
+
+        this.getUsers().add(appUser);
+    }
+
+    public void addRoles(List<AppRole> roles) {
+        roles.forEach((r) -> {
+            if (getRoles().contains(r)) {
+                getRoles().remove(r);
+            }
+            getRoles().add(r);
+        });
+    }
+
+    public void addRole(AppRole r) {
+        addRoles(Arrays.asList(r));
+    }
+
+    public void addRole(String r, List<String> permissions) {
+        addRole(new AppRole(name, permissions));
+    }
+
+    public void removeRole(String role) {
+        getRoles().forEach((r) -> {
+            if (r.getName().equals(role)) {
+                getRoles().remove(r);
+            }
+        });
+    }
+
+    public void addDevices(List<Device> devices) {
+        devices.forEach((d) -> {
+            if (!getDevices().contains(d.getId())) {
+                getDevices().add(d.getId());
+            }
+        });
+    }
+
+    public void addDevice(Device d) {
+        addDevices(Arrays.asList(d));
+    }
+
+    public void addDevice(String d) {
+        addDevice(new Device(d));
+    }
+
+    public void removeDevice(String d) {
+        if (getDevices().contains(d)) {
+            getDevices().remove(d);
+        }
     }
 
 }

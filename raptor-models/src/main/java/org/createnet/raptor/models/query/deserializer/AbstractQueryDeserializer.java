@@ -26,6 +26,7 @@ import java.util.Map;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.query.IQuery;
 import org.createnet.raptor.models.query.MapQuery;
+import org.createnet.raptor.models.query.StringListQuery;
 import org.createnet.raptor.models.query.TextQuery;
 
 /**
@@ -47,11 +48,11 @@ abstract public class AbstractQueryDeserializer<T extends IQuery> extends JsonDe
             return;
         }
         if (node.isArray()) {
-            
+
             for (int i = 0; i < node.size(); i++) {
                 t.in(node.get(i).asText());
             }
-            
+
             return;
         }
 
@@ -104,20 +105,34 @@ abstract public class AbstractQueryDeserializer<T extends IQuery> extends JsonDe
         }
 
         if (node.has("has") && !node.get("has").isNull()) {
-            
+
             Map<String, Object> hasMap = Device.getMapper().convertValue(node.get("has"), new TypeReference<Map<String, Object>>() {
             });
-            
+
             map.has(hasMap);
         }
-        
+
         // map an object without specific fields to "has"
         if (node.isObject() && !node.has("has") && !node.has("containsValue") && !node.has("containsKey")) {
-            
+
             Map<String, Object> hasMap = Device.getMapper().convertValue(node, new TypeReference<Map<String, Object>>() {
             });
-            
+
             map.has(hasMap);
+        }
+
+    }
+
+    protected void handleStringListQuery(String key, StringListQuery map, JsonNode json) {
+
+        if (!json.has(key)) {
+            return;
+        }
+
+        JsonNode node = json.get(key);
+
+        if (node.has("contains") && !node.get("contains").isNull()) {
+            map.contains(node.get("containsValue").asText());
         }
 
     }
