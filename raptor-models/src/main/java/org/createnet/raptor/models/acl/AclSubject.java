@@ -15,15 +15,14 @@
  */
 package org.createnet.raptor.models.acl;
 
-import org.createnet.raptor.models.auth.User;
+import java.io.Serializable;
+import org.springframework.security.acls.model.ObjectIdentity;
 
 /**
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public interface AclSubject {
-    
-    public Long getSubjectId();
-    public Long getSubjectParentId();
-    public User getOwner();
-    
+public interface AclSubject extends Serializable {
+    ObjectIdentity getObjectIdentity();
+    public UserSid getSid();
+    public AclSubject getParent();
 }

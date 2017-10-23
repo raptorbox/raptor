@@ -16,10 +16,11 @@
 package org.createnet.raptor.auth.acl;
 
 import java.util.Arrays;
-import org.createnet.raptor.models.acl.AclSubject;
 import org.createnet.raptor.auth.services.*;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.createnet.raptor.models.acl.AclSubject;
+import org.createnet.raptor.models.acl.AclSubjectImpl;
 import org.createnet.raptor.models.auth.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 
-import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Permission;
 import org.springframework.stereotype.Service;
@@ -52,7 +52,7 @@ public abstract class AbstractAclService<T extends AclSubject> implements AclSer
     abstract public T load(Long id);
 
     protected List<Permission> getPermissions(T subj) {
-        List<Permission> permissions = list(subj, subj.getOwner());
+        List<Permission> permissions = list(subj);
         if (permissions.isEmpty()) {
             // skip if no default permissions
             List<Permission> defaultPermissions = getDefaultPermissions();
@@ -60,27 +60,28 @@ public abstract class AbstractAclService<T extends AclSubject> implements AclSer
         }
         return permissions;
     }
-    
+
     protected void savePermissions(T subj, List<Permission> permissions) {
-        
-        User owner = subj.getOwner();
-        
+
+        User owner = subj.getSid().getUser();
+        ObjectIdentity oi = subj.getObjectIdentity();
+
         try {
-            set(subj, owner, permissions);
+            set(subj, permissions);
         } catch (AclManagerService.AclManagerException ex) {
-            logger.warn("Failed to store permissions for {} ({}): {}", subj.getSubjectId(), owner.getUuid(), ex.getMessage());
+            logger.warn("Failed to store permissions for {} ({}): {}", oi.getIdentifier(), owner.getUuid(), ex.getMessage());
             throw ex;
         }
 
-        if (subj.getSubjectParentId() != null) {
-            logger.debug("Set node id:{} parent id:{} ", subj.getSubjectId(), subj.getSubjectParentId());
-            aclManagerService.setParent(subj.getClass(), subj.getSubjectId(), subj.getSubjectParentId());
+        if (subj.getParent() != null) {
+            logger.debug("Set node id:{} parent id:{} ", subj.getObjectIdentity().toString(), subj.getParent().toString());
+            aclManagerService.setParent(subj);
         }
 
         String perms = String.join(", ", RaptorPermission.toLabel(permissions));
-        logger.debug("Permission set for object {} to {} - {}", subj.getSubjectId(), subj.getOwner().getUuid(), perms);
+        logger.debug("Permission set for object {} to {} - {}", oi.getIdentifier(), owner.getUuid(), perms);
     }
-    
+
     @Override
     @Retryable(maxAttempts = 3, value = AclManagerService.AclManagerException.class, backoff = @Backoff(delay = 500, multiplier = 3))
     public void register(T subj) {
@@ -88,59 +89,54 @@ public abstract class AbstractAclService<T extends AclSubject> implements AclSer
     }
 
     public void add(T subj, Permission permission) {
-        add(subj, subj.getOwner(), Arrays.asList(permission));
+        add(subj, Arrays.asList(permission));
     }
 
+    @Override
     public void add(T subj, List<Permission> permissions) {
-        add(subj, subj.getOwner(), permissions);
-    }
-
-    public void add(T subj, User user, Permission permission) {
-        add(subj, user, Arrays.asList(permission));
+        aclManagerService.addPermissions(subj, permissions);
     }
 
     @Override
-    public void add(T subj, User user, List<Permission> permissions) {
-        aclManagerService.addPermissions(subj.getClass(), subj.getSubjectId(), new UserSid(user), permissions);
-    }
+    public void set(T subj, List<Permission> permissions) {
 
-    @Override
-    public void set(T subj, User user, List<Permission> permissions) {
-        
         // distinct
         permissions = permissions.stream().distinct().collect(Collectors.toList());
-        logger.debug("Saving {} permissions for {}", permissions.size(), user.getUuid());
-        
-        aclManagerService.setPermissions(subj.getClass(), subj.getSubjectId(), new UserSid(user), permissions, subj.getSubjectParentId());
+        logger.debug("Saving {} permissions for {}", permissions.size(), subj.getSid().getUser().getUuid());
+
+        aclManagerService.setPermissions(subj, permissions);
     }
 
     @Override
-    public List<Permission> list(T subj, User user) {
-        ObjectIdentity oitoken = new ObjectIdentityImpl(subj.getClass(), subj.getSubjectId());
-        return aclManagerService.getPermissionList(user, oitoken);
+    public List<Permission> list(T subj) {
+        return aclManagerService.getPermissionList(subj);
     }
 
     @Override
-    public void remove(T subj, User user, Permission permission) {
-        aclManagerService.removePermission(subj.getClass(), subj.getSubjectId(), new UserSid(user), permission);
+    public void remove(T subj, Permission permission) {
+        aclManagerService.removePermission(subj, permission);
     }
 
     @Override
-    public boolean isGranted(T subj, User user, Permission permission) {
-        return aclManagerService.isPermissionGranted(subj.getClass(), subj.getSubjectId(), new UserSid(user), permission);
+    public boolean isGranted(T subj, Permission permission) {
+        return aclManagerService.isPermissionGranted(subj, permission);
     }
 
     @Override
-    public boolean check(T subj, User user, Permission permission) {
+    public boolean check(T subj, Permission permission) {
 
         if (subj == null) {
             logger.debug("ACL: Subject is null");
             return false;
         }
+
+        User user = subj.getSid().getUser();
+
         if (user == null) {
             logger.debug("ACL: User is null");
             return false;
         }
+
         if (permission == null) {
             logger.debug("ACL: Permission is null");
             return false;
@@ -157,26 +153,41 @@ public abstract class AbstractAclService<T extends AclSubject> implements AclSer
         }
 
         // check if user has ADMINISTRATION permission on subject
-        if (isGranted(subj, user, RaptorPermission.ADMINISTRATION)) {
+        if (isGranted(subj, RaptorPermission.ADMINISTRATION)) {
             logger.debug("ACL: User has ADMIN permission");
             return true;
         }
 
         // check subject specific permission first
-        if (isGranted(subj, user, permission)) {
+        if (isGranted(subj, permission)) {
             logger.debug("ACL: User has `{}` permission", RaptorPermission.toLabel(permission));
             return true;
         }
 
         // check parent permission if available
-        if (subj.getSubjectParentId() != null) {
+        if (subj.getParent() != null) {
             logger.debug("ACL: Check inherited permissions");
-            T parent = load(subj.getSubjectParentId());
-            return check(parent, user, permission);
+            return check((T) subj.getParent(), permission);
         }
 
         logger.debug("ACL: Not allowed");
         return false;
+    }
+
+    public List<Permission> list(T subj, User user) {
+        return list(createSubject(subj, user));
+    }
+
+    public boolean check(T subj, User user, Permission permission) {
+        return check(createSubject(subj, user), permission);
+    }
+
+    public void set(T subj, User user, List<Permission> permissions) {
+        set(createSubject(subj, user), permissions);
+    }
+
+    protected T createSubject(T subj, User user) {
+        return (T) (new AclSubjectImpl(subj, user));
     }
 
 }

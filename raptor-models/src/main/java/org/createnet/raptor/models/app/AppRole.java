@@ -25,8 +25,16 @@ import java.util.List;
 public class AppRole {
 
     protected String name;
-    protected List<String> permissions = new ArrayList();
+    protected final List<String> permissions = new ArrayList();
 
+    public AppRole() {
+    }
+    
+    public AppRole(String name, List<String> permissions) {
+        this.name = name;
+        this.permissions.addAll(permissions);
+    }
+    
     public String getName() {
         return name;
     }
@@ -40,7 +48,8 @@ public class AppRole {
     }
 
     public void setPermissions(List<String> permissions) {
-        this.permissions = permissions;
+        this.permissions.clear();
+        this.permissions.addAll(permissions);
     }
 
 }

@@ -25,7 +25,6 @@ import javax.persistence.Id;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.Date;
 import javax.persistence.Cacheable;
@@ -38,7 +37,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import org.createnet.raptor.models.acl.AclSubject;
+import org.createnet.raptor.models.acl.AbstractAclSubject;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -52,10 +51,10 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Cacheable(value = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(name = "tokens")
-public class Token implements Serializable, AclSubject {
+public class Token extends AbstractAclSubject {
 
     static final long serialVersionUID = 1000000000000011L;
-    
+
     public static enum Type {
         LOGIN, DEFAULT
     }
@@ -109,10 +108,6 @@ public class Token implements Serializable, AclSubject {
     @Column(name = "token_type")
     private TokenType tokenType = TokenType.DEFAULT;
 
-    @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY)
-    private Token parent;
-
     public Token() {
     }
 
@@ -158,8 +153,14 @@ public class Token implements Serializable, AclSubject {
 
     }
 
+    @Override
     public Long getId() {
         return id;
+    }
+
+    @Override
+    public User getOwner() {
+        return getUser();
     }
 
     public void setId(Long id) {
@@ -279,32 +280,6 @@ public class Token implements Serializable, AclSubject {
 
     public void setTokenType(String tokenType) {
         this.tokenType = TokenType.valueOf(tokenType);
-    }
-
-    public Token getParent() {
-        return parent;
-    }
-
-    public void setParent(Token parent) {
-        this.parent = parent;
-    }
-
-    @Override
-    public Long getSubjectId() {
-        return getId();
-    }
-
-    @Override
-    public Long getSubjectParentId() {
-        if (getParent() == null) {
-            return null;
-        }
-        return getParent().getId();
-    }
-
-    @Override
-    public User getOwner() {
-        return getUser();
     }
 
 }

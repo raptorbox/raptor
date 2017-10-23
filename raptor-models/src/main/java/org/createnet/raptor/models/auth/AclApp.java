@@ -17,9 +17,6 @@ package org.createnet.raptor.models.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -27,15 +24,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import org.createnet.raptor.models.acl.AbstractAclSubject;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 
 /**
  *
@@ -45,9 +38,11 @@ import org.hibernate.annotations.CascadeType;
 @Entity
 @Cacheable(value = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@Table(name = "devices")
-public class AclDevice extends AbstractAclSubject {
+@Table(name = "apps")
+public class AclApp extends AbstractAclSubject {
 
+    static final long serialVersionUID = 1000000000000811L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -59,22 +54,14 @@ public class AclDevice extends AbstractAclSubject {
     @ManyToOne(fetch = FetchType.EAGER)
     private User owner;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "device", fetch = FetchType.LAZY)
-    @Cascade(value = {CascadeType.REMOVE, CascadeType.SAVE_UPDATE})
-    final private List<Token> tokens = new ArrayList();
-
-    public AclDevice() {
-        this.uuid = UUID.randomUUID().toString();
-    }
-
-    public AclDevice(String uuid) {
-        this.uuid = uuid;
-    }
-
     @Override
     public Long getId() {
         return id;
+    }
+
+    @Override
+    public User getOwner() {
+        return owner;
     }
 
     public void setId(Long id) {
@@ -89,22 +76,13 @@ public class AclDevice extends AbstractAclSubject {
         this.uuid = uuid;
     }
 
-    @Override
-    public User getOwner() {
-        return owner;
-    }
-
     public void setOwner(User owner) {
         this.owner = owner;
     }
 
-    public List<Token> getTokens() {
-        return tokens;
-    }
-
     @Override
     public String toString() {
-        return String.format("Device[uuid=%s]", uuid);
+        return String.format("App[uuid=%s]", uuid);
     }
-    
+
 }

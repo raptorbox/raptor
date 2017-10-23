@@ -22,18 +22,17 @@ import org.createnet.raptor.models.auth.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.Permission;
 
-
 import org.springframework.stereotype.Service;
 
 /**
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-public class AclTokenService extends AbstractAclService<Token> {
+public class AclTokenService extends AbstractAclService {
 
     @Autowired
     TokenService tokenService;
-    
+
     @Override
     public List<Permission> getDefaultPermissions() {
         return new ArrayList();
@@ -42,6 +41,6 @@ public class AclTokenService extends AbstractAclService<Token> {
     @Override
     public Token load(Long id) {
         return tokenService.read(id);
-    }    
-    
+    }
+
 }

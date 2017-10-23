@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.createnet.raptor.auth.acl.AbstractAclService;
 import org.createnet.raptor.auth.acl.RaptorPermission;
-import org.createnet.raptor.models.auth.AclDevice;
+import org.createnet.raptor.models.auth.AclApp;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,25 +31,25 @@ import org.springframework.stereotype.Service;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-public class AclDeviceService extends AbstractAclService {
+public class AclAppService extends AbstractAclService {
 
-    private final Logger logger = LoggerFactory.getLogger(AclDeviceService.class);
+    private final Logger logger = LoggerFactory.getLogger(AclAppService.class);
 
     @Autowired
-    AuthDeviceService deviceService;
+    AuthAppService appService;
 
     @Override
     public List<Permission> getDefaultPermissions() {
         return Arrays.asList(
                 RaptorPermission.READ,
-                RaptorPermission.WRITE,
-                RaptorPermission.ADMINISTRATION
+                RaptorPermission.PULL,
+                RaptorPermission.SUBSCRIBE
         );
     }
 
     @Override
-    public AclDevice load(Long id) {
-        return deviceService.get(id);
+    public AclApp load(Long id) {
+        return appService.get(id);
     }
 
 }

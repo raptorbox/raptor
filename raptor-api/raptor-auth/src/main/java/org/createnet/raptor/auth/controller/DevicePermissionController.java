@@ -21,7 +21,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.createnet.raptor.auth.services.RaptorUserDetailsService;
 import org.createnet.raptor.auth.acl.RaptorPermission;
 import org.createnet.raptor.models.auth.AclDevice;
 import org.createnet.raptor.models.auth.User;

@@ -17,7 +17,6 @@ package org.createnet.raptor.auth.services;
 
 import org.createnet.raptor.models.auth.request.SyncRequest;
 import org.createnet.raptor.auth.acl.RaptorPermission;
-import org.createnet.raptor.models.auth.AclDevice;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.repository.UserRepository;
 import org.createnet.raptor.auth.exception.DeviceNotFoundException;
@@ -28,7 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.acls.model.Permission;
 import org.springframework.stereotype.Service;
-import org.createnet.raptor.auth.repository.AclDeviceRepository;
+import org.createnet.raptor.auth.repository.AclAppRepository;
+import org.createnet.raptor.models.auth.AclApp;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -38,106 +38,105 @@ import org.springframework.cache.annotation.Cacheable;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
-@CacheConfig(cacheNames = "aclDevice")
-public class AuthDeviceService {
+@CacheConfig(cacheNames = "aclApp")
+public class AuthAppService {
 
-    protected static final Logger logger = LoggerFactory.getLogger(AuthDeviceService.class);
+    protected static final Logger logger = LoggerFactory.getLogger(AuthAppService.class);
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
-    private AclDeviceRepository deviceRepository;
+    private AclAppRepository appRepository;
 
     @Autowired
-    private AclDeviceService aclDeviceService;
-    
-    @CacheEvict(key = "#device.id")
-    public AclDevice save(AclDevice device) {
+    private AclAppService aclAppService;
 
-        AclDevice saved = deviceRepository.save(device);
-        aclDeviceService.register(device);
+    @CacheEvict(key = "#app.id")
+    public AclApp save(AclApp app) {
+
+        AclApp saved = appRepository.save(app);
+        aclAppService.register(app);
 
         return get(saved.getId());
     }
 
-    public AclDevice getByUuid(String uuid) {
-        return deviceRepository.findByUuid(uuid);
+    public AclApp getByUuid(String uuid) {
+        return appRepository.findByUuid(uuid);
     }
 
     @Cacheable(key = "#id")
-    public AclDevice get(Long id) {
-        return deviceRepository.findOne(id);
+    public AclApp get(Long id) {
+        return appRepository.findOne(id);
     }
-    
+
     @CacheEvict(key = "#id")
     public void delete(Long id) {
-        deviceRepository.delete(id);
+        appRepository.delete(id);
     }
-    
-    public void delete(AclDevice device) {
-        delete(device.getId());
+
+    public void delete(AclApp app) {
+        delete(app.getId());
     }
-    
-    public AclDevice sync(User user, SyncRequest req) {
+
+    public AclApp sync(User user, SyncRequest req) {
 
         Permission p = RaptorPermission.fromLabel(req.operation);
 
-        AclDevice device = null;
+        AclApp app = null;
         if (req.objectId != null) {
-            device = deviceRepository.findByUuid(req.objectId);
+            app = appRepository.findByUuid(req.objectId);
         }
 
         /**
          * @TODO check user permissions and roles
          */
-        
-        if(req.userId == null) {
+        if (req.userId == null) {
             req.userId = user.getUuid();
         }
-        
+
         if (!req.userId.equals(user.getUuid())) {
             if (!user.isSuperAdmin()) {
-                if (!aclDeviceService.isGranted(device, RaptorPermission.ADMINISTRATION)) {
+                if (!aclAppService.isGranted(app, RaptorPermission.ADMINISTRATION)) {
                     throw new AccessDeniedException("Cannot operate on that object");
                 }
             }
         }
 
-        // delete device record
+        // delete app record
         if (p == RaptorPermission.DELETE) {
-            if (device == null) {
+            if (app == null) {
                 throw new DeviceNotFoundException();
             }
-            deviceRepository.delete(device);
+            appRepository.delete(app);
             return null;
         }
 
-        // create or update device record
-        if (device == null) {
-            device = new AclDevice();
-            device.setUuid(req.objectId);
+        // create or update app record
+        if (app == null) {
+            app = new AclApp();
+            app.setUuid(req.objectId);
         }
 
         if (req.userId == null) {
-            device.setOwner(user);
+            app.setOwner(user);
         } else {
             User owner = userRepository.findByUuid(req.userId);
             if (owner == null) {
                 throw new UserNotFoundException();
             }
-            device.setOwner(owner);
+            app.setOwner(owner);
         }
 
-        if (req.parentId != null) {
-            AclDevice parentDevice = deviceRepository.findByUuid(req.parentId);
-            if (parentDevice == null) {
-                throw new DeviceNotFoundException();
-            }
-            device.setParent(parentDevice);
-        }
+//        if (req.parentId != null) {
+//            AclApp parentDevice = appRepository.findByUuid(req.parentId);
+//            if (parentDevice == null) {
+//                throw new DeviceNotFoundException();
+//            }
+//            app.setParent(parentDevice);
+//        }
 
-        AclDevice dev = save(device);
+        AclApp dev = save(app);
 
         return dev;
     }

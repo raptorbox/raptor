@@ -16,25 +16,25 @@
 package org.createnet.raptor.auth.acl;
 
 import java.util.List;
+import org.createnet.raptor.models.acl.AclSubject;
 import org.springframework.security.acls.model.Permission;
-import org.createnet.raptor.models.auth.User;
 
 /**
  * @author Luca Capra <lcapra@fbk.eu>
- * @param <S> subject type
+ * @param <T>
  */
-public interface AclServiceInterface<S> {
+public interface AclServiceInterface<T extends AclSubject> {
 
     public List<Permission> getDefaultPermissions();
 
-    public void add(S subject, User user, List<Permission> permissions);
-    public void set(S subject, User user, List<Permission> permissions);
-    public List<Permission> list(S subject, User user);
-    public void remove(S subject, User user, Permission permission);
+    public void add(T subj, List<Permission> permissions);
+    public void set(T subj, List<Permission> permissions);
+    public List<Permission> list(T subj);
+    public void remove(T subj, Permission permission);
 
-    public boolean isGranted(S subject, User user, Permission permission);
-    public void register(S subject);
-    public boolean check(S subject, User user, Permission permission);
-    public S load(Long id);
+    public boolean isGranted(T subj, Permission permission);
+    public void register(T subj);
+    public boolean check(T subj, Permission permission);
+    public T load(Long id);
 
 }
