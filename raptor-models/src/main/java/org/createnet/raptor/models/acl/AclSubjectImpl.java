@@ -38,7 +38,10 @@ public class AclSubjectImpl extends AbstractAclSubject {
 
     @Override
     public User getUser() {
-        return sid.getUser();
+        if(getSid() != null) {
+            return getSid().getUser();
+        }
+        return subj.getSid().getUser();
     }
 
     @Override

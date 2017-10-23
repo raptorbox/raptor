@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.models.acl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.createnet.raptor.models.auth.User;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -32,15 +33,18 @@ abstract public class AbstractAclSubject implements AclSubject {
     abstract public User getUser();
     abstract public Long getId();
     
+    @JsonIgnore
     @Override
     public UserSid getSid() {
         if (sid == null) {
-            assert getUser() != null;
-            sid = new UserSid(getUser());
+            User u = getUser();
+            assert u != null;
+            sid = new UserSid(u);
         }
         return sid;
     }
 
+    @JsonIgnore
     @Override
     public ObjectIdentity getObjectIdentity() {
         if (oi == null) {
@@ -50,6 +54,7 @@ abstract public class AbstractAclSubject implements AclSubject {
         return oi;
     }
 
+    @JsonIgnore
     @Override
     public AclSubject getParent() {
         return parent;
