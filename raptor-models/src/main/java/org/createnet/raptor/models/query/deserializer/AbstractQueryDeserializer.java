@@ -132,7 +132,13 @@ abstract public class AbstractQueryDeserializer<T extends IQuery> extends JsonDe
         JsonNode node = json.get(key);
 
         if (node.has("contains") && !node.get("contains").isNull()) {
-            map.contains(node.get("containsValue").asText());
+            if (node.get("contains").isArray()) {
+                for (JsonNode el : node.get("contains")) {
+                    map.in(el.asText());
+                }
+            } else {
+                map.in(node.get("containsValue").asText());
+            }
         }
 
     }
