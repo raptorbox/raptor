@@ -15,11 +15,9 @@
  */
 package org.createnet.raptor.application;
 
-import com.querydsl.core.types.EntityPath;
 import java.util.List;
 import org.createnet.raptor.models.app.App;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
-import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
@@ -30,7 +28,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 @Component
-public interface AppRepository extends CrudRepository<App, String>, QueryDslPredicateExecutor<App>, QuerydslBinderCustomizer<EntityPath<App>> {
+public interface AppRepository extends CrudRepository<App, String>, QueryDslPredicateExecutor<App> {
 
     public List<App> findByUserId(String userId);
     public App findOneById(String id);

@@ -19,7 +19,6 @@ import org.createnet.raptor.sdk.Routes;
 import org.createnet.raptor.sdk.AbstractClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.List;
 import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.payload.AppPayload;
 import org.createnet.raptor.sdk.Raptor;
@@ -30,8 +29,6 @@ import org.createnet.raptor.sdk.events.callback.AppCallback;
 import org.createnet.raptor.sdk.events.callback.AppEventCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 /**
  * Methods to interact with Raptor API

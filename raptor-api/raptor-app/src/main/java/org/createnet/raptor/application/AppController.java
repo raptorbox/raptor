@@ -15,11 +15,11 @@
  */
 package org.createnet.raptor.application;
 
-import com.querydsl.core.types.Predicate;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.Optional;
 import org.createnet.raptor.common.query.AppQueryBuilder;
 import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.auth.User;
@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -92,9 +91,14 @@ public class AppController {
             @AuthenticationPrincipal User currentUser,
             Pageable pageable,
             @RequestParam MultiValueMap<String, String> parameters,
-            @RequestBody AppQuery query
+            @RequestBody Optional<AppQuery> rquery
     ) {
-
+        
+        AppQuery query = new AppQuery();
+        if (rquery.isPresent()) {
+            query = rquery.get();
+        }
+        
         if (!currentUser.isSuperAdmin()) {
             query.users.in(currentUser.getUuid());
         }

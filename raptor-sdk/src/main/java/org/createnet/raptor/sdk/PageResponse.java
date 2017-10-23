@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.sdk;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.domain.PageImpl;
@@ -39,6 +40,8 @@ public class PageResponse<T> extends PageImpl<T> {
     protected boolean nextPage;
     protected boolean last;
     protected List<T> content;
+
+    @JsonIgnore
     protected Sort sort;
 
     public PageResponse(List<T> content, Pageable pageable, long total) {
