@@ -60,6 +60,10 @@ public class AclApp extends AbstractAclSubject {
     }
 
     @Override
+    public User getUser() {
+        return getOwner();
+    }
+    
     public User getOwner() {
         return owner;
     }

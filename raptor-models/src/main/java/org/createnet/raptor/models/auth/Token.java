@@ -31,7 +31,6 @@ import javax.persistence.Cacheable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -158,11 +157,6 @@ public class Token extends AbstractAclSubject {
         return id;
     }
 
-    @Override
-    public User getOwner() {
-        return getUser();
-    }
-
     public void setId(Long id) {
         this.id = id;
     }
@@ -183,6 +177,7 @@ public class Token extends AbstractAclSubject {
         this.token = token;
     }
 
+    @Override
     public User getUser() {
         return user;
     }

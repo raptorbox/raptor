@@ -29,14 +29,14 @@ abstract public class AbstractAclSubject implements AclSubject {
     protected UserSid sid;
     protected AclSubject parent;
 
-    abstract public User getOwner();
+    abstract public User getUser();
     abstract public Long getId();
     
     @Override
     public UserSid getSid() {
         if (sid == null) {
-            assert getOwner() != null;
-            sid = new UserSid(getOwner());
+            assert getUser() != null;
+            sid = new UserSid(getUser());
         }
         return sid;
     }

@@ -89,9 +89,13 @@ public class AclDevice extends AbstractAclSubject {
         this.uuid = uuid;
     }
 
-    @Override
     public User getOwner() {
         return owner;
+    }
+    
+    @Override
+    public User getUser() {
+        return getOwner();
     }
 
     public void setOwner(User owner) {

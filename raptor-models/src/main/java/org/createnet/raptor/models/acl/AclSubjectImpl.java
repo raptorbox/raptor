@@ -32,12 +32,12 @@ public class AclSubjectImpl extends AbstractAclSubject {
     }
 
     public AclSubjectImpl(AclSubject subj) {
-        this.sid = null;
+        this.sid = subj.getSid();
         this.subj = subj;
     }
 
     @Override
-    public User getOwner() {
+    public User getUser() {
         return sid.getUser();
     }
 
@@ -58,9 +58,6 @@ public class AclSubjectImpl extends AbstractAclSubject {
 
     @Override
     public UserSid getSid() {
-        if (this.sid == null) {
-            return subj.getSid();
-        }
         return sid;
     }
 
