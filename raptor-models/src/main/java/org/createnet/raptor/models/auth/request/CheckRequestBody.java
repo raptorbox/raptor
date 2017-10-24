@@ -18,7 +18,7 @@ package org.createnet.raptor.models.auth.request;
 import java.util.List;
 import java.util.UUID;
 import javax.validation.ValidationException;
-import org.createnet.raptor.models.acl.RaptorPermission;
+import org.createnet.raptor.models.acl.permission.RaptorPermission;
 import org.springframework.security.acls.model.Permission;
 
 /**

@@ -31,8 +31,12 @@ public class AppRole {
     public AppRole() {
     }
 
-    public AppRole(String name, List<String> permissions) {
+    public AppRole(String name) {
         this.name = name;
+    }
+
+    public AppRole(String name, List<String> permissions) {
+        this(name);
         this.permissions.addAll(permissions);
     }
 
@@ -66,7 +70,7 @@ public class AppRole {
             }
         });
     }
-    
+
     public void addPermission(String permission) {
         if (permission == null) {
             return;

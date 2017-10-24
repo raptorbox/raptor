@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.auth.acl;
 
-import org.createnet.raptor.models.acl.RaptorPermission;
+import org.createnet.raptor.models.acl.permission.RaptorPermission;
 import java.util.Arrays;
 import org.createnet.raptor.auth.services.*;
 import java.util.List;

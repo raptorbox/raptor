@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.models.acl;
+package org.createnet.raptor.models.acl.permission;
 
 /**
  *
@@ -29,13 +29,17 @@ public enum Permissions {
     
     // object level permissions
     read, update, create, delete,
+
     // data level permissions
     push, pull,
+
     // action level permissions
     execute,
     
+    @Deprecated
     data,
     
+    @Deprecated
     tree,
 
 }

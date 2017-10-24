@@ -13,19 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.models.acl;
+package org.createnet.raptor.models.acl.permission;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.createnet.raptor.models.acl.AclClassTypeMapper;
+import org.createnet.raptor.models.acl.ObjectPermission;
+import org.createnet.raptor.models.objects.RaptorComponent;
+import org.springframework.security.acls.model.Permission;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public class PermissionUtil {
-    
+
     /**
-     * Generate a list of strings from a list of Permissions 
+     * Generate a list of strings from a list of Permissions
+     *
      * @param args
      * @return
      */
@@ -36,9 +41,10 @@ public class PermissionUtil {
         }
         return result;
     }
-    
+
     /**
      * Generate a list of Permissions from a list of string
+     *
      * @param args
      * @return
      */
@@ -49,5 +55,27 @@ public class PermissionUtil {
         }
         return result;
     }
-    
+
+    static public ObjectPermission parseObjectPermission(String label) {
+
+        String[] parts = label.split(".");
+        if (parts.length != 2) {
+            throw new RaptorComponent.ValidationException("Failed to parse permission " + label);
+        }
+
+        Class subjType;
+        try {
+            subjType = AclClassTypeMapper.get(parts[0]);
+        } catch (Exception ex) {
+            throw new RaptorComponent.ValidationException("Failed to parse permission subject: " + parts[0], ex);
+        }
+
+        Permission perm = RaptorPermission.fromLabel(parts[1]);
+        if (perm == null) {
+            throw new RaptorComponent.ValidationException("Failed to parse permission: " + parts[1]);
+        }
+
+        return new ObjectPermission(subjType, perm);
+    }
+
 }

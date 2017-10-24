@@ -23,7 +23,7 @@ import org.createnet.raptor.common.configuration.TokenHelper;
 import org.createnet.raptor.models.auth.request.AuthorizationRequest;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.auth.request.SyncRequest;
-import org.createnet.raptor.models.acl.RaptorPermission;
+import org.createnet.raptor.models.acl.permission.RaptorPermission;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.auth.AclDevice;
 import org.createnet.raptor.models.auth.User;

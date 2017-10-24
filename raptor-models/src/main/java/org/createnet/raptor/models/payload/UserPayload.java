@@ -16,7 +16,7 @@
 package org.createnet.raptor.models.payload;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.permission.Permissions;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.RaptorComponent;

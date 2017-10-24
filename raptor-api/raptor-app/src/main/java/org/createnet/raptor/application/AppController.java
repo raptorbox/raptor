@@ -19,9 +19,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.Arrays;
 import java.util.Optional;
 import org.createnet.raptor.common.query.AppQueryBuilder;
 import org.createnet.raptor.models.app.App;
+import org.createnet.raptor.models.app.AppUser;
+import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.models.auth.Role.Roles;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.query.AppQuery;
@@ -93,12 +97,12 @@ public class AppController {
             @RequestParam MultiValueMap<String, String> parameters,
             @RequestBody Optional<AppQuery> rquery
     ) {
-        
+
         AppQuery query = new AppQuery();
         if (rquery.isPresent()) {
             query = rquery.get();
         }
-        
+
         if (!currentUser.isSuperAdmin()) {
             query.users.in(currentUser.getUuid());
         }
@@ -107,6 +111,23 @@ public class AppController {
         Iterable<App> apps = appService.find(qb.getPredicate(), qb.getPaging());
 
         return ResponseEntity.ok(apps);
+    }
+
+    protected void normalizeApp(App app) {
+
+        if (app.getRoles().isEmpty()) {
+            app.getRoles().addAll(DefaultRoles.getDefaults());
+        }
+
+        // ensure admin role is avail
+        if (app.getAdminRole() == null) {
+            app.getRoles().add(DefaultRoles.admin);
+        }
+
+        // ensure user role is avail
+        if (app.getUserRole() == null) {
+            app.getRoles().add(DefaultRoles.user);
+        }
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -128,8 +149,11 @@ public class AppController {
             return JsonErrorResponse.badRequest(ex.getMessage());
         }
 
-        if (app.getRoles().isEmpty()) {
-            app.getRoles().addAll(DefaultRoles.getDefaults());
+        normalizeApp(app);
+
+        // ensure owner is also admin in users list
+        if (!app.getUsers().contains(new AppUser(app.getUserId()))) {
+            app.addUser(currentUser, Arrays.asList(app.getAdminRole()));
         }
 
         App saved = appService.save(app);
@@ -158,12 +182,19 @@ public class AppController {
             return JsonErrorResponse.notFound();
         }
 
-        if (!(currentUser.isAdmin() || currentUser.getUuid().equals(stored.getUserId()))) {
+        if (!currentUser.isAdmin() && !currentUser.getUuid().equals(app.getUserId()) && !app.isAdmin(currentUser)) {
             return JsonErrorResponse.unauthorized();
         }
 
         app.setId(stored.getId());
         app.setUserId(stored.getUserId());
+
+        normalizeApp(app);
+
+        // ensure owner is also admin in users list
+        if (!app.getUsers().contains(new AppUser(app.getUserId()))) {
+            app.addUser(currentUser, Arrays.asList(app.getAdminRole()));
+        }
 
         try {
             appService.validate(app);
@@ -196,7 +227,7 @@ public class AppController {
             return JsonErrorResponse.notFound();
         }
 
-        if (!(currentUser.isAdmin() || currentUser.getUuid().equals(app.getUserId()))) {
+        if (!currentUser.isAdmin() && !currentUser.getUuid().equals(app.getUserId()) && !app.isAdmin(currentUser)) {
             return JsonErrorResponse.unauthorized();
         }
 

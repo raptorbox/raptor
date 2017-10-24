@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.models.apidocs;
 
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.permission.Permissions;
 
 /**
  *

@@ -15,10 +15,13 @@
  */
 package org.createnet.raptor.models.app;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -235,6 +238,34 @@ public class App {
         if (getDevices().contains(d)) {
             getDevices().remove(d);
         }
+    }
+
+    public AppRole getRole(Role.Roles searchedRole) {
+        Optional<AppRole> role = getRoles().stream().filter((r) -> {
+            return r.getName().equals(searchedRole.name());
+        }).findFirst();
+        return role.isPresent() ? role.get() : null;
+    }
+
+    @JsonIgnore
+    public AppRole getAdminRole() {
+        return getRole(Role.Roles.admin);
+    }
+
+    @JsonIgnore
+    public Object getUserRole() {
+        return getRole(Role.Roles.user);
+    }
+    
+    public boolean hasRole(User user, Role.Roles role) {
+        return getUsers().stream().filter((u) -> {
+            return u.getId().equals(user.getUuid()) && u.hasRole(role);
+        }).count() == 1;
+    }
+    
+    @JsonIgnore
+    public boolean isAdmin(User user) {
+        return hasRole(user, Role.Roles.admin);
     }
 
 }

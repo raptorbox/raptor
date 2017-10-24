@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.common.dispatcher;
 
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.permission.Permissions;
 import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;

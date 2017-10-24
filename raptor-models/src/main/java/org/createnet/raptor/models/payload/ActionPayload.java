@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.models.payload;
 
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.permission.Permissions;
 import org.createnet.raptor.models.objects.Action;
 
 /**

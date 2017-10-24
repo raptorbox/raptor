@@ -18,7 +18,7 @@ package org.createnet.raptor.common.dispatcher.events.listener;
 import org.createnet.raptor.common.dispatcher.DispatcherService;
 import org.createnet.raptor.common.dispatcher.events.DeviceApplicationEvent;
 import org.createnet.raptor.events.type.DeviceEvent;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.permission.Permissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;

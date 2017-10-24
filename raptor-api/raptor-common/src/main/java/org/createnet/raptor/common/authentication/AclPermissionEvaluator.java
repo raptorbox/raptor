@@ -17,7 +17,7 @@ package org.createnet.raptor.common.authentication;
 
 import java.io.Serializable;
 import org.createnet.raptor.common.client.ApiClientService;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.permission.Permissions;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.response.JsonError;

@@ -24,7 +24,7 @@ import org.apache.activemq.artemis.core.security.Role;
 import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
 import org.apache.activemq.artemis.spi.core.security.ActiveMQSecurityManager2;
 import org.createnet.raptor.common.client.InternalApiClientService;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.permission.Permissions;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.auth.Role.Roles;
 import org.createnet.raptor.models.configuration.AuthConfiguration;
