@@ -24,8 +24,6 @@ import java.util.Optional;
 import org.createnet.raptor.common.query.AppQueryBuilder;
 import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.app.AppUser;
-import org.createnet.raptor.models.auth.Role;
-import org.createnet.raptor.models.auth.Role.Roles;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.query.AppQuery;
@@ -160,7 +158,7 @@ public class AppController {
 
         eventPublisher.create(app);
 
-        log.debug("Created app %s (%s)", app.getName(), app.getId());
+        log.debug("Created app {} ({})", app.getName(), app.getId());
         return ResponseEntity.ok(saved);
     }
 
@@ -206,7 +204,7 @@ public class AppController {
 
         eventPublisher.update(app);
 
-        log.debug("Updated app %s (%s)", app.getName(), app.getId());
+        log.debug("Updated app {} ({}) by {}", app.getName(), app.getId(), currentUser.getUuid());
         return ResponseEntity.ok(saved);
     }
 
@@ -235,7 +233,7 @@ public class AppController {
 
         eventPublisher.delete(app);
 
-        log.debug("Deleted app %s (%s)", app.getName(), app.getId());
+        log.debug("Deleted app {} ({})", app.getName(), app.getId());
         return ResponseEntity.accepted().build();
     }
 
