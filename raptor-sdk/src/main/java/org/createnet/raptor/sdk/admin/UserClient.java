@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.permission.Permissions;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;

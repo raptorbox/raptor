@@ -18,7 +18,7 @@ package org.createnet.raptor.sdk.admin;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.permission.Permissions;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
