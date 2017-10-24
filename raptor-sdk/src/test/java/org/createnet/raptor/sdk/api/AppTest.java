@@ -63,7 +63,7 @@ public class AppTest {
     @Test
     public void list() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewUserInstance();
 
         log.debug("List apps");
 

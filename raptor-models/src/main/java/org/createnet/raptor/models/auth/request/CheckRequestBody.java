@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.acl;
+package org.createnet.raptor.models.auth.request;
 
 import java.util.List;
 import java.util.UUID;
 import javax.validation.ValidationException;
+import org.createnet.raptor.models.acl.RaptorPermission;
 import org.springframework.security.acls.model.Permission;
 
 /**

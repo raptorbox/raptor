@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.createnet.raptor.auth.acl.AclManager;
-import org.createnet.raptor.auth.acl.RaptorPermission;
+import org.createnet.raptor.models.acl.RaptorPermission;
 import org.createnet.raptor.models.acl.AclSubject;
 import org.createnet.raptor.models.acl.UserSid;
 

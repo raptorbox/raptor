@@ -18,6 +18,7 @@ package org.createnet.raptor.models.query;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -40,7 +41,7 @@ public class StringListQuery {
     }
 
     public StringListQuery in(String val) {
-        return this;
+        return in(Arrays.asList(val));
     }
 
     public List<String> getIn() {

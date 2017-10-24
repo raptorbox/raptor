@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.auth.acl;
+package org.createnet.raptor.models.acl;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import org.createnet.raptor.models.acl.Permissions;
 import org.springframework.security.acls.domain.BasePermission;
 import org.springframework.security.acls.model.Permission;
 

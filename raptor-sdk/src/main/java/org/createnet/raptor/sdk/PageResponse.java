@@ -16,6 +16,7 @@
 package org.createnet.raptor.sdk;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.domain.PageImpl;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.Sort;
  * @author Luca Capra <luca.capra@gmail.com>
  * @param <T>
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PageResponse<T> extends PageImpl<T> {
 
     protected int number;
@@ -156,7 +158,5 @@ public class PageResponse<T> extends PageImpl<T> {
     public void setSort(Sort sort) {
         this.sort = sort;
     }
-    
-    
-    
+
 }

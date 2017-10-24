@@ -16,7 +16,7 @@
 package org.createnet.raptor.auth.services;
 
 import org.createnet.raptor.models.auth.request.SyncRequest;
-import org.createnet.raptor.auth.acl.RaptorPermission;
+import org.createnet.raptor.models.acl.RaptorPermission;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.repository.UserRepository;
 import org.createnet.raptor.auth.exception.DeviceNotFoundException;

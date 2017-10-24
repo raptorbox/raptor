@@ -171,6 +171,23 @@ public class Utils {
 
         return r;
     }
+    
+    static public Raptor createNewUserInstance() {
+
+        String username = rndUsername();
+        String password = username + Math.random();
+
+        User user = getRaptor().Admin().User().create(username, password, username + "@test.raptor.local");
+        log.debug("Created user {} : {} with uuid {}", username, password, user.getUuid());
+
+        assert user != null;
+
+        Raptor r = new Raptor(new Config(instance.getConfig().getUrl(), username, password));
+        r.getClient().configureTimeout(socketTimeout, reqTimeout);
+        r.Auth().login();
+
+        return r;
+    }
 
     public static String rndUsername() {
         int rnd = ((int) (Math.random() * 100000000)) + (int) System.currentTimeMillis();
