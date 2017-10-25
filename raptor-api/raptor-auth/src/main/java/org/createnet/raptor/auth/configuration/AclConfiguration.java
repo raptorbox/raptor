@@ -17,11 +17,11 @@ package org.createnet.raptor.auth.configuration;
 
 import javax.sql.DataSource;
 import org.createnet.raptor.models.acl.permission.RaptorPermission;
-import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.models.auth.DefaultGroup;
+import org.createnet.raptor.models.auth.Permission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.ehcache.EhCacheCacheManager;
 import org.springframework.cache.ehcache.EhCacheFactoryBean;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.annotation.Bean;
@@ -62,7 +62,7 @@ public class AclConfiguration {
 
     @Bean
     public AclAuthorizationStrategy aclAuthorizationStrategy() {
-        return new AclAuthorizationStrategyImpl(new Role(Role.Roles.super_admin.name()));
+        return new AclAuthorizationStrategyImpl(new Permission(DefaultGroup.super_admin.name()));
     }
 
     @Bean
@@ -87,13 +87,9 @@ public class AclConfiguration {
     
     @Bean
     public DefaultPermissionGrantingStrategy permissionGrantingStrategy() {
-        DefaultPermissionGrantingStrategy pgs = new DefaultPermissionGrantingStrategy(auditLogger());
-        return pgs;
+        return new DefaultPermissionGrantingStrategy(auditLogger());
     }
 
-    /**
-     * @return @TODO Add additional support for @setSidIdentityQuery
-     */
     @Bean
     public JdbcMutableAclService aclService() {
         JdbcMutableAclService service = new JdbcMutableAclService(dataSource, lookupStrategy(), aclCache());

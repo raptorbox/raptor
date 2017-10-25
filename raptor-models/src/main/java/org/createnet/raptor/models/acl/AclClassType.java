@@ -17,7 +17,7 @@ package org.createnet.raptor.models.acl;
 
 import org.createnet.raptor.models.auth.AclApp;
 import org.createnet.raptor.models.auth.AclDevice;
-import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.tree.TreeNode;
@@ -30,7 +30,7 @@ public class AclClassType {
 
     public static Class device = AclDevice.class;
     public static Class user = User.class;
-    public static Class role = Role.class;
+    public static Class role = Permission.class;
     public static Class token = Token.class;
     public static Class tree = TreeNode.class;
     public static Class app = AclApp.class;

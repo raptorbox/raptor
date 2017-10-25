@@ -32,14 +32,10 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Cacheable(value = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@Table(name = "roles")
-public class Role implements GrantedAuthority {
+@Table(name = "permissions")
+public class Permission implements GrantedAuthority {
 
-    public static enum Roles {
-        super_admin, admin, user, guest
-    }
-
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1000000000000003L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -48,15 +44,11 @@ public class Role implements GrantedAuthority {
     @NotEmpty
     private String name;
 
-    public Role() {
+    public Permission() {
     }
 
-    public Role(String name) {
+    public Permission(String name) {
         this.name = name;
-    }
-
-    public Role(Roles role) {
-        this.name = role.name();
     }
 
     @JsonIgnore
@@ -67,8 +59,8 @@ public class Role implements GrantedAuthority {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Roles) {
-            return ((Roles) obj).equals(this.name);
+        if (obj instanceof Permission) {
+            return ((Permission) obj).getName().equals(this.name);
         }
         return super.equals(obj);
     }

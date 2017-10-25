@@ -52,16 +52,15 @@ import org.hibernate.validator.constraints.Email;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"}, ignoreUnknown = true)
 @Entity
 @Cacheable(value = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(name = "users")
 public class User implements Serializable {
-    
+
     static final long serialVersionUID = 1000000000000001L;
-    
+
     @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -92,10 +91,10 @@ public class User implements Serializable {
     final protected List<Token> tokens = new ArrayList();
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_roles", joinColumns = {
+    @JoinTable(name = "users_groups", joinColumns = {
         @JoinColumn(name = "user_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "role_id")})
-    final protected List<Role> roles = new ArrayList();
+        @JoinColumn(name = "group_id")})
+    final protected List<Group> groups = new ArrayList();
 
     @Column(length = 64)
     @Size(min = 4, max = 64)
@@ -142,7 +141,7 @@ public class User implements Serializable {
         this.enabled = user.getEnabled();
 
         user.getTokens().stream().forEach((token) -> this.addToken(token));
-        user.getRoles().stream().forEach((role) -> this.addRole(role));
+        user.getGroups().stream().forEach((g) -> this.addGroup(g));
 
         if (!newUser) {
             this.id = user.getId();
@@ -153,20 +152,20 @@ public class User implements Serializable {
 
     @JsonIgnore
     public boolean isAdmin() {
-        return isSuperAdmin() || this.hasRole(Role.Roles.admin);
+        return isSuperAdmin() || this.hasGroup(DefaultGroup.admin);
     }
 
     @JsonIgnore
     public boolean isSuperAdmin() {
-        return this.hasRole(Role.Roles.super_admin);
+        return this.hasGroup(DefaultGroup.super_admin);
     }
 
-    public boolean hasRole(Role.Roles name) {
-        return hasRole(name.name());
+    public boolean hasGroup(String name) {
+        return this.getGroups().stream().filter(r -> r.getName().equals(name)).count() >= 1;
     }
 
-    public boolean hasRole(String name) {
-        return this.getRoles().stream().filter(r -> r.getName().equals(name)).count() >= 1;
+    public boolean hasGroup(DefaultGroup g) {
+        return hasGroup(g.name());
     }
 
     public Long getId() {
@@ -193,46 +192,41 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    @JsonProperty("roles")
-    public Object[] listRoles() {
-        return roles.stream().map(r -> r.getName()).toArray();
+    @JsonProperty("groups")
+    public Object[] listGroups() {
+        return groups.stream().map(g -> g.getName()).toArray();
     }
 
-    @JsonProperty("roles")
-    public void setListRoles(List<String> list) {
-        list.forEach(r -> addRole(new Role(r)));
+    public List<Group> getGroups() {
+        return groups;
     }
 
-    public List<Role> getRoles() {
-        return roles;
+    public void setGroups(Set<Group> groups) {
+        this.groups.clear();
+        this.groups.addAll(groups);
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles.clear();
-        this.roles.addAll(roles);
-    }
-
-    public void addRole(Role role) {
-        if (!this.hasRole(role.getName())) {
-            this.roles.add(role);
+    public void addGroup(Group role) {
+        if (!this.hasGroup(role.getName())) {
+            this.groups.add(role);
         }
     }
 
-    public void addRole(Role.Roles role) {
-        if (!this.hasRole(role)) {
-            this.roles.add(new Role(role));
+    public void addGroup(DefaultGroup g) {
+        if (!this.hasGroup(g)) {
+            this.groups.add(new Group(g));
         }
     }
 
-    public void removeRole(Role role) {
-        if (this.hasRole(role.getName())) {
-            this.roles.remove(role);
+    public void removeGroup(Group role) {
+        if (this.hasGroup(role.getName())) {
+            this.groups.remove(role);
         }
     }
 
-    public void removeRole(Role.Roles role) {
-        if (this.hasRole(role)) {
-            this.roles.remove(new Role(role));
+    public void removeGroup(DefaultGroup g) {
+        if (this.hasGroup(g)) {
+            this.groups.remove(new Group(g));
         }
     }
 
@@ -300,7 +294,7 @@ public class User implements Serializable {
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
-    
+
     public Date getLastPasswordResetDate() {
         return lastPasswordResetDate;
     }

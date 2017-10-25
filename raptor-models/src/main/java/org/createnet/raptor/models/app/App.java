@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.models.auth.DefaultGroup;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -42,7 +42,7 @@ public class App {
     protected String name;
     protected String description;
 
-    final protected List<AppRole> roles = new ArrayList();
+    final protected List<AppGroup> groups = new ArrayList();
     final protected List<String> devices = new ArrayList();
     final protected List<AppUser> users = new ArrayList();
 
@@ -73,10 +73,10 @@ public class App {
         if (raw.getUserId() != null && !raw.getUserId().isEmpty()) {
             setUserId(raw.getUserId());
         }
-        if (raw.getRoles() != null && !raw.getRoles().isEmpty()) {
-            raw.getRoles().forEach((r) -> {
-                if (!getRoles().contains(r)) {
-                    getRoles().add(r);
+        if (raw.getGroups() != null && !raw.getGroups().isEmpty()) {
+            raw.getGroups().forEach((r) -> {
+                if (!getGroups().contains(r)) {
+                    getGroups().add(r);
                 }
             });
         }
@@ -112,9 +112,9 @@ public class App {
         }
 
         getUsers().forEach((u) -> {
-            u.getRoles().forEach((r) -> {
-                if (!getRoles().contains(r)) {
-                    throw new RaptorComponent.ValidationException(String.format("User `%s` has an unknown role `%s`", u.getId(), r.getName()));
+            u.getGroups().forEach((r) -> {
+                if (!getGroups().contains(r)) {
+                    throw new RaptorComponent.ValidationException(String.format("User `%s` has an unknown group `%s`", u.getId(), r.getName()));
                 }
             });
 
@@ -171,49 +171,49 @@ public class App {
         this.devices.addAll(devices);
     }
 
-    public List<AppRole> getRoles() {
-        return roles;
+    public List<AppGroup> getGroups() {
+        return groups;
     }
 
-    public void setRoles(List<AppRole> roles) {
-        this.roles.clear();
-        this.roles.addAll(roles);
+    public void setGroups(List<AppGroup> groups) {
+        this.groups.clear();
+        this.groups.addAll(groups);
     }
 
     public void setOwner(User user) {
         this.userId = user.getUuid();
     }
 
-    public void addUser(User user, List<AppRole> roles) {
+    public void addUser(User user, List<AppGroup> groups) {
 
         AppUser appUser = new AppUser();
         appUser.setId(user.getUuid());
-        appUser.addRoles(roles);
+        appUser.addGroups(groups);
 
         this.getUsers().add(appUser);
     }
 
-    public void addRoles(List<AppRole> roles) {
-        roles.forEach((r) -> {
-            if (getRoles().contains(r)) {
-                getRoles().remove(r);
+    public void addGroups(List<AppGroup> groups) {
+        groups.forEach((r) -> {
+            if (getGroups().contains(r)) {
+                getGroups().remove(r);
             }
-            getRoles().add(r);
+            getGroups().add(r);
         });
     }
 
-    public void addRole(AppRole r) {
-        addRoles(Arrays.asList(r));
+    public void addGroup(AppGroup r) {
+        addGroups(Arrays.asList(r));
     }
 
-    public void addRole(String r, List<String> permissions) {
-        addRole(new AppRole(name, permissions));
+    public void addGroup(String r, List<String> permissions) {
+        addGroup(new AppGroup(name, permissions));
     }
 
-    public void removeRole(String role) {
-        getRoles().forEach((r) -> {
-            if (r.getName().equals(role)) {
-                getRoles().remove(r);
+    public void removeGroup(String group) {
+        getGroups().forEach((r) -> {
+            if (r.getName().equals(group)) {
+                getGroups().remove(r);
             }
         });
     }
@@ -240,32 +240,32 @@ public class App {
         }
     }
 
-    public AppRole getRole(Role.Roles searchedRole) {
-        Optional<AppRole> role = getRoles().stream().filter((r) -> {
-            return r.getName().equals(searchedRole.name());
+    public AppGroup getGroup(DefaultGroup searchedGroup) {
+        Optional<AppGroup> group = getGroups().stream().filter((r) -> {
+            return r.getName().equals(searchedGroup.name());
         }).findFirst();
-        return role.isPresent() ? role.get() : null;
+        return group.isPresent() ? group.get() : null;
     }
 
     @JsonIgnore
-    public AppRole getAdminRole() {
-        return getRole(Role.Roles.admin);
+    public AppGroup getAdminGroup() {
+        return getGroup(DefaultGroup.admin);
     }
 
     @JsonIgnore
-    public Object getUserRole() {
-        return getRole(Role.Roles.user);
+    public Object getUserGroup() {
+        return getGroup(DefaultGroup.user);
     }
     
-    public boolean hasRole(User user, Role.Roles role) {
+    public boolean hasGroup(User user, DefaultGroup group) {
         return getUsers().stream().filter((u) -> {
-            return u.getId().equals(user.getUuid()) && u.hasRole(role);
+            return u.getId().equals(user.getUuid()) && u.hasGroup(group);
         }).count() == 1;
     }
     
     @JsonIgnore
     public boolean isAdmin(User user) {
-        return hasRole(user, Role.Roles.admin);
+        return hasGroup(user, DefaultGroup.admin);
     }
 
 }

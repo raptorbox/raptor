@@ -18,26 +18,38 @@ package org.createnet.raptor.models.app;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.createnet.raptor.models.auth.DefaultGroup;
+import org.createnet.raptor.models.auth.Group;
 
 /**
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-public class AppRole {
+public class AppGroup {
 
     protected String name;
     protected final List<String> permissions = new ArrayList();
 
-    public AppRole() {
+    public AppGroup() {
     }
 
-    public AppRole(String name) {
+    public AppGroup(String name) {
         this.name = name;
     }
+    
+    public AppGroup(DefaultGroup group) {
+        this.name = group.name();
+    }
 
-    public AppRole(String name, List<String> permissions) {
+    public AppGroup(String name, List<String> permissions) {
         this(name);
         this.permissions.addAll(permissions);
+    }
+    
+    public AppGroup(Group group) {
+        this.name = group.getName();
+        this.permissions.addAll(group.getPermissions().stream().map((p) -> p.getName()).collect(Collectors.toList()));
     }
 
     public String getName() {

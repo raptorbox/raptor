@@ -15,7 +15,7 @@
  */
 package org.createnet.raptor.auth.repository;
 
-import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.models.auth.Group;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
@@ -28,26 +28,26 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Component
 @Repository
-public interface RoleRepository extends CrudRepository<Role, Long>, JpaRepository<Role, Long> {
+public interface GroupRepository extends CrudRepository<Group, Long>, JpaRepository<Group, Long> {
 
-  Role findByName(String name);
-  
-  @Transactional
-  @Override
-  public void delete(Role entity);
+    Group findByName(String name);
 
-  @Transactional
-  @Override
-  public void delete(Long id);
+    @Transactional
+    @Override
+    public void delete(Group entity);
 
-  @Override
-  public boolean exists(Long id);
+    @Transactional
+    @Override
+    public void delete(Long id);
 
-  @Override
-  public Role findOne(Long id);
+    @Override
+    public boolean exists(Long id);
 
-  @Transactional
-  @Override
-  public <R extends Role> R save(R entity);
-  
+    @Override
+    public Group findOne(Long id);
+
+    @Transactional
+    @Override
+    public <R extends Group> R save(R entity);
+
 }

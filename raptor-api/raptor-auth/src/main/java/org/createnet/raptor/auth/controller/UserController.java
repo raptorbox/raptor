@@ -24,7 +24,8 @@ import org.createnet.raptor.auth.services.TokenService;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.services.UserService;
-import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.models.auth.DefaultGroup;
+import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.request.LoginResponse;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
@@ -159,7 +160,7 @@ public class UserController {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND, "User not found");
         }
 
-        if (u.hasRole(Role.Roles.super_admin)) {
+        if (u.hasGroup(DefaultGroup.super_admin)) {
             return JsonErrorResponse.entity(HttpStatus.FORBIDDEN, "Cannot impersonat this user");
         }
 

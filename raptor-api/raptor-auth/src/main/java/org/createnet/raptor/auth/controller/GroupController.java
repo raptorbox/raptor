@@ -19,8 +19,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.createnet.raptor.models.auth.Role;
-import org.createnet.raptor.auth.services.RoleService;
+import org.createnet.raptor.models.auth.Group;
+import org.createnet.raptor.auth.services.GroupService;
 import org.createnet.raptor.models.auth.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/auth/role")
 @RestController
 @PreAuthorize("hasAuthority('super_admin')")
-@Api(tags = {"Role"})
+@Api(tags = {"Group"})
 @ApiResponses(value = {
     @ApiResponse(
             code = 200,
@@ -64,24 +64,24 @@ import org.springframework.web.bind.annotation.RestController;
             message = "Internal error"
     )
 })
-public class RoleController {
+public class GroupController {
 
-    private static final Logger logger = LoggerFactory.getLogger(RoleController.class);
+    private static final Logger logger = LoggerFactory.getLogger(GroupController.class);
 
     @Autowired
-    private RoleService roleService;
+    private GroupService roleService;
 
     @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
             value = "List available roles",
             notes = "",
-            response = Role.class,
+            response = Group.class,
             responseContainer = "Iterable",
-            nickname = "getRoles"
+            nickname = "getGroups"
     )
-    public ResponseEntity<?> getRoles() {
-        Iterable<Role> list = roleService.list();
+    public ResponseEntity<?> getGroups() {
+        Iterable<Group> list = roleService.list();
         return ResponseEntity.ok(list);
     }
 
@@ -90,26 +90,26 @@ public class RoleController {
     @ApiOperation(
             value = "Update a role",
             notes = "",
-            response = Role.class,
-            nickname = "updateRole"
+            response = Group.class,
+            nickname = "updateGroup"
     )
     public ResponseEntity<?> update(
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long roleId,
-            @RequestBody Role rawRole
+            @RequestBody Group rawGroup
     ) {
 
-        if ((rawRole.getName().isEmpty() || rawRole.getName() == null)) {
+        if ((rawGroup.getName().isEmpty() || rawGroup.getName() == null)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name property is missing");
         }
 
-        Role role2 = roleService.getByName(rawRole.getName());
+        Group role2 = roleService.getByName(rawGroup.getName());
         if (role2 != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
 
-        rawRole.setId(roleId);
-        Role role = roleService.update(roleId, rawRole);
+        rawGroup.setId(roleId);
+        Group role = roleService.update(roleId, rawGroup);
         if (role == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
@@ -123,8 +123,8 @@ public class RoleController {
     @ApiOperation(
             value = "Create a new role",
             notes = "",
-            response = Role.class,
-            nickname = "createRole"
+            response = Group.class,
+            nickname = "createGroup"
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -139,19 +139,19 @@ public class RoleController {
     })
     public ResponseEntity<?> create(
             @AuthenticationPrincipal User currentUser,
-            @RequestBody Role rawRole
+            @RequestBody Group rawGroup
     ) {
 
-        if ((rawRole.getName().isEmpty() || rawRole.getName() == null)) {
+        if ((rawGroup.getName().isEmpty() || rawGroup.getName() == null)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name property is missing");
         }
 
-        Role role2 = roleService.getByName(rawRole.getName());
+        Group role2 = roleService.getByName(rawGroup.getName());
         if (role2 != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
 
-        Role role = roleService.create(rawRole);
+        Group role = roleService.create(rawGroup);
         if (role == null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
@@ -166,9 +166,9 @@ public class RoleController {
             value = "Delete a role",
             notes = "",
             code = 202,
-            nickname = "deleteRole"
+            nickname = "deleteGroup"
     )
-    public ResponseEntity<Role> delete(
+    public ResponseEntity<Group> delete(
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long roleId
     ) {

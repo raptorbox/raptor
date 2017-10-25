@@ -18,7 +18,7 @@ package org.createnet.raptor.models.app;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.models.auth.DefaultGroup;
 
 /**
  *
@@ -27,7 +27,7 @@ import org.createnet.raptor.models.auth.Role;
 public class AppUser {
 
     protected String id;
-    protected List<AppRole> roles = new ArrayList();
+    protected List<AppGroup> groups = new ArrayList();
 
     public AppUser() {
     }
@@ -44,34 +44,34 @@ public class AppUser {
         this.id = id;
     }
 
-    public List<AppRole> getRoles() {
-        return roles;
+    public List<AppGroup> getGroups() {
+        return groups;
     }
 
-    public void setRoles(List<AppRole> roles) {
-        this.roles = roles;
+    public void setGroups(List<AppGroup> groups) {
+        this.groups = groups;
     }
 
-    public void addRoles(List<AppRole> roles) {
-        roles.forEach((role) -> {
-            if (!getRoles().contains(role)) {
-                getRoles().add(role);
+    public void addGroups(List<AppGroup> groups) {
+        groups.forEach((group) -> {
+            if (!getGroups().contains(group)) {
+                getGroups().add(group);
             }
         });
     }
 
-    public void removeRole(AppRole role) {
-        if (getRoles().contains(role)) {
-            getRoles().remove(role);
+    public void removeGroup(AppGroup group) {
+        if (getGroups().contains(group)) {
+            getGroups().remove(group);
         }
     }
 
-    public void addRole(AppRole role) {
-        addRoles(Arrays.asList(role));
+    public void addGroup(AppGroup group) {
+        addGroups(Arrays.asList(group));
     }
     
-    public boolean hasRole(Role.Roles role) {
-        return getRoles().contains(new AppRole(role.name()));
+    public boolean hasGroup(DefaultGroup group) {
+        return getGroups().contains(new AppGroup(group.name()));
     }
 
 }

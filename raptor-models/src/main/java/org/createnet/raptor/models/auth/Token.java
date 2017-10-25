@@ -52,7 +52,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Table(name = "tokens")
 public class Token extends AbstractAclSubject {
 
-    static final long serialVersionUID = 1000000000000011L;
+    static final long serialVersionUID = 1000000000000002L;
 
     public static enum Type {
         LOGIN, DEFAULT

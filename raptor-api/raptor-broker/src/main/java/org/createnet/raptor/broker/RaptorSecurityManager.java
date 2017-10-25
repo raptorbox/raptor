@@ -25,8 +25,8 @@ import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
 import org.apache.activemq.artemis.spi.core.security.ActiveMQSecurityManager2;
 import org.createnet.raptor.common.client.InternalApiClientService;
 import org.createnet.raptor.models.acl.Operation;
+import org.createnet.raptor.models.auth.DefaultGroup;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
-import org.createnet.raptor.models.auth.Role.Roles;
 import org.createnet.raptor.models.configuration.AuthConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.createnet.raptor.sdk.Raptor;
@@ -259,7 +259,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     @Override
     public boolean validateUserAndRole(String user, String password, Set<Role> roles, CheckType checkType) {
         logger.warn("validateUserAndRole(user, password, roles, checkType): NOT IMPLEMENTED");
-        return roles.contains(Roles.admin.name()) && validateUser(user, password);
+        return roles.contains(DefaultGroup.admin.name()) && validateUser(user, password);
     }
 
 }

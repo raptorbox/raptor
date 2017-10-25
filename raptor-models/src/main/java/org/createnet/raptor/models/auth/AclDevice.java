@@ -28,7 +28,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import org.createnet.raptor.models.acl.AbstractAclSubject;
@@ -48,6 +47,8 @@ import org.hibernate.annotations.CascadeType;
 @Table(name = "devices")
 public class AclDevice extends AbstractAclSubject {
 
+    static final long serialVersionUID = 1000000000000006L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

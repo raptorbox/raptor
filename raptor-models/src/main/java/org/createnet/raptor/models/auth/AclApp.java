@@ -17,6 +17,8 @@ package org.createnet.raptor.models.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -24,6 +26,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import org.createnet.raptor.models.acl.AbstractAclSubject;
@@ -41,7 +44,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Table(name = "apps")
 public class AclApp extends AbstractAclSubject {
 
-    static final long serialVersionUID = 1000000000000811L;
+    static final long serialVersionUID = 1000000000000005L;
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -54,6 +57,9 @@ public class AclApp extends AbstractAclSubject {
     @ManyToOne(fetch = FetchType.EAGER)
     private User owner;
 
+    @OneToMany(mappedBy = "app", fetch = FetchType.LAZY)    
+    private List<Group> groups = new ArrayList();
+    
     @Override
     public Long getId() {
         return id;
@@ -87,6 +93,14 @@ public class AclApp extends AbstractAclSubject {
     @Override
     public String toString() {
         return String.format("App[uuid=%s]", uuid);
+    }
+
+    public List<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<Group> groups) {
+        this.groups = groups;
     }
 
 }

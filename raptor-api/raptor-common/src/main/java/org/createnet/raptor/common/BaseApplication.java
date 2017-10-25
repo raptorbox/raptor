@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.createnet.raptor.common.dispatcher.RaptorMessageHandler;
 import org.createnet.raptor.common.dispatcher.RaptorMessageHandlerWrapper;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -61,13 +60,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public abstract class BaseApplication {
 
     static public Logger log = null;
-    
+
     static final String defaultBasePath = "/etc/raptor/";
     static String basepath = defaultBasePath;
     static boolean enableDebugLogging = false;
 
     static protected List<String> additionalConfigNames = null;
-    
+
     static final public ObjectMapper mapper = new ObjectMapper();
 
     static private ConfigurableApplicationContext instance;
@@ -115,7 +114,7 @@ public abstract class BaseApplication {
             instance = null;
         }
     }
-    
+
     static public String[] buildArgs(Class clazz, String[] args) {
 
         String[] parts = clazz.getCanonicalName().split("\\.");
@@ -131,34 +130,34 @@ public abstract class BaseApplication {
                 developmentMode = true;
             }
             if (arg.equals("--debug")) {
-                log.debug("Debug logging enabled");                
+                log.debug("Debug logging enabled");
                 enableDebugLogging = true;
             }
         }
-        
+
         String[] args2 = new String[args.length + 1];
         System.arraycopy(args, 0, args2, 0, args.length);
         args2[args2.length - 1] = name;
 
         return args2;
     }
-    
+
     static public void enableDebugLogging() {
-        if(enableDebugLogging) {
-            
-            ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+        if (enableDebugLogging) {
+
+            ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
             rootLogger.setLevel(Level.INFO);
-            
-            ch.qos.logback.classic.Logger raptorLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger("org.createnet.raptor");
+
+            ch.qos.logback.classic.Logger raptorLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.createnet.raptor");
             raptorLogger.setLevel(Level.DEBUG);
 
         }
     }
-    
+
     static public boolean isDevelopmentMode() {
         return developmentMode;
     }
-    
+
     @Bean
     @ConfigurationProperties(prefix = "raptor")
     public RaptorConfiguration raptorConfiguration() {
@@ -186,13 +185,13 @@ public abstract class BaseApplication {
         propertySourcesPlaceholderConfigurer.setIgnoreResourceNotFound(false);
 
         ArrayList<String> defaultSources = new ArrayList(Arrays.asList("raptor.yml", appName + ".yml"));
-        
-        if(additionalConfigNames != null && !additionalConfigNames.isEmpty()) {
+
+        if (additionalConfigNames != null && !additionalConfigNames.isEmpty()) {
             defaultSources.addAll(additionalConfigNames);
         }
-        
+
         ArrayList<String> sources = new ArrayList(defaultSources);
-        
+
         if (developmentMode) {
             defaultSources.forEach((source) -> {
                 sources.add(source.replace(".yml", ".dev.yml"));
@@ -205,13 +204,12 @@ public abstract class BaseApplication {
                 log.debug("Using CONFIG_BASEPATH={}", envPath);
                 basepath = envPath;
             }
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             log.warn("Failed to read environment variable CONFIG_BASEPATH: %s", e.getMessage());
         }
-        
+
         log.debug("Configuration path {}", basepath);
-        
+
         List<Resource> resources = sources.stream()
                 .filter(f -> new File(basepath + f).exists())
                 .map(f -> new FileSystemResource(basepath + f))
@@ -234,10 +232,12 @@ public abstract class BaseApplication {
     protected RaptorMessageHandlerWrapper raptorMessageHandlerWrapper() {
         return new RaptorMessageHandlerWrapper();
     }
-    
-    @Autowired MqttPahoClientFactory mqttClientFactory;
-    @Autowired MessageChannel mqttInputChannel;
-    
+
+    @Autowired
+    MqttPahoClientFactory mqttClientFactory;
+    @Autowired
+    MessageChannel mqttInputChannel;
+
     /**
      * Create a MQTT connection to the broker
      *
@@ -246,14 +246,14 @@ public abstract class BaseApplication {
      * @return
      */
     public MessageProducer createMqttClient(String[] topics) {
-        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter("raptor"+  (System.currentTimeMillis()+Math.random()), mqttClientFactory, topics);
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter("raptor" + (System.currentTimeMillis() + Math.random()), mqttClientFactory, topics);
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(2);
         adapter.setRecoveryInterval(2500);
         adapter.setOutputChannel(mqttInputChannel);
-        
+
         return adapter;
-    }    
-    
+    }
+
 }

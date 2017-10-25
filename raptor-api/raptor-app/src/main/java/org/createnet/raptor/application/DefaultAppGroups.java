@@ -18,34 +18,29 @@ package org.createnet.raptor.application;
 import java.util.Arrays;
 import java.util.List;
 import org.createnet.raptor.models.acl.Operation;
-import org.createnet.raptor.models.app.AppRole;
+import org.createnet.raptor.models.app.AppGroup;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class DefaultRoles {
+public class DefaultAppGroups {
 
-    static public AppRole admin = new AppRole("admin", Arrays.asList(
+    static public AppGroup admin = new AppGroup("admin", Arrays.asList(
             Operation.admin.name()
     ));
 
-    static public AppRole viewer = new AppRole("viewer", Arrays.asList(
+    static public AppGroup user = new AppGroup("user", Arrays.asList(
             Operation.read.name(),
             Operation.pull.name()
     ));
 
-    static public AppRole user = new AppRole("user", Arrays.asList(
-            Operation.read.name(),
-            Operation.pull.name()
-    ));
-
-    static public AppRole operator = new AppRole("operator", Arrays.asList(
+    static public AppGroup operator = new AppGroup("operator", Arrays.asList(
             Operation.execute.name()
     ));
 
-    static List<AppRole> getDefaults() {
-        return Arrays.asList(admin, viewer, operator);
+    static List<AppGroup> getDefaults() {
+        return Arrays.asList(admin, operator, user);
     }
 
 }

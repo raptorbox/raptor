@@ -6,7 +6,11 @@
 package org.createnet.raptor.common.authentication;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,7 +30,15 @@ public final class RaptorUserDetails extends User implements UserDetails {
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.getRoles();
+        List<Permission> permissions = new ArrayList();
+        this.getGroups()
+                .forEach((g) -> 
+                    permissions.addAll(g.getPermissions()
+                            .stream()
+                            .filter((p) -> permissions.contains(p))
+                            .collect(Collectors.toList()))
+                );
+        return permissions;
     }
 
     @Override

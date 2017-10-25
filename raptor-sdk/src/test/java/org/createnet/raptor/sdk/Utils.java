@@ -21,7 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.Set;
-import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.models.auth.Group;
+import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.config.Config;
@@ -113,12 +114,12 @@ public class Utils {
      * Create a new user and initialize a raptor instance
      *
      * @param username
-     * @param roles
+     * @param groups
      * @return
      */
-    static public Raptor createNewInstance(String username, Set<Role> roles) {
+    static public Raptor createNewInstance(String username, Set<Group> groups) {
 
-        User user = getRaptor().Admin().User().create(username, username + Math.random(), username + "@test.raptor.local", roles);
+        User user = getRaptor().Admin().User().create(username, username + Math.random(), username + "@test.raptor.local", groups);
 
         assert user != null;
         assert getRaptor().Auth().getToken() != null;

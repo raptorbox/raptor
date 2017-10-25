@@ -24,6 +24,7 @@ import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.TokenPayload;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
+import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.Routes;
 import org.createnet.raptor.sdk.events.callback.TokenCallback;
 import org.createnet.raptor.sdk.events.callback.TokenEventCallback;
@@ -143,8 +144,12 @@ public class TokenClient extends AbstractClient {
      * @return
      */
     public Token create(Token token) {
+        return create(token, null);
+    }
+    
+    public Token create(Token token, RequestOptions opts) {
         JsonToken jsonToken = new JsonToken(token);
-        JsonNode node = getClient().post(Routes.TOKEN_CREATE, toJsonNode(jsonToken));
+        JsonNode node = getClient().post(Routes.TOKEN_CREATE, toJsonNode(jsonToken), opts);
         Token t1 = getMapper().convertValue(node, Token.class);
         return mergeToken(token, t1);
     }

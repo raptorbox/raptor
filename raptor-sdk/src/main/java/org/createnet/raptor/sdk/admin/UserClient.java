@@ -20,10 +20,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import org.createnet.raptor.models.acl.AclClassType;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
-import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.models.auth.DefaultGroup;
+import org.createnet.raptor.models.auth.Group;
+import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
 
@@ -268,7 +269,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public User create(String username, String password, String email) {
-        return create(username, password, email, new HashSet(Arrays.asList(new Role(Role.Roles.user))));
+        return create(username, password, email, new HashSet(Arrays.asList(new Group(DefaultGroup.user))));
     }
 
     /**
@@ -280,7 +281,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public User createAdmin(String username, String password, String email) {
-        return create(username, password, email, new HashSet(Arrays.asList(new Role(Role.Roles.admin))));
+        return create(username, password, email, new HashSet(Arrays.asList(new Group(DefaultGroup.admin))));
     }
 
     /**
@@ -292,12 +293,12 @@ public class UserClient extends AbstractClient {
      * @param roles
      * @return
      */
-    public User create(String username, String password, String email, Set<Role> roles) {
+    public User create(String username, String password, String email, Set<Group> groups) {
         User user = new User();
         user.setUsername(username);
         user.setPassword(password);
         user.setEmail(email);
-        user.setRoles(roles);
+        user.setGroups(groups);
         return create(user);
     }
 

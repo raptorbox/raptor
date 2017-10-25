@@ -18,10 +18,10 @@ package org.createnet.raptor.auth.services;
 import java.util.HashSet;
 import java.util.Set;
 import org.createnet.raptor.auth.exception.PasswordMissingException;
-import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.auth.repository.GroupRepository;
 import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.auth.repository.RoleRepository;
 import org.createnet.raptor.auth.repository.UserRepository;
+import org.createnet.raptor.models.auth.Group;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,15 +49,15 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private RoleRepository roleRepository;
-    
+    private GroupRepository groupRepository;
+
     public Iterable<User> list() {
         return userRepository.findAll();
     }
-    
+
     @CacheEvict(key = "#user.uuid")
     public User save(User user) {
-        loadRoles(user);
+        loadGroups(user);
         User saved = userRepository.save(user);
         //populate cache again
         return getByUuid(saved.getUuid());
@@ -73,33 +73,32 @@ public class UserService {
      *
      * @param user
      */
-    protected void loadRoles(User user) {
-        Set<Role> dbRoles = new HashSet();
-        user.getRoles().forEach((Role r) -> {
-            Role dbrole = roleRepository.findByName(r.getName());
-            if (dbrole == null) {
+    protected void loadGroups(User user) {
+        Set<Group> groups = new HashSet();
+        user.getGroups().forEach((Group g) -> {
+            Group dbgroup = groupRepository.findByName(g.getName());
+            if (dbgroup == null) {
                 // skip unknown
                 return;
-//                dbrole = roleRepository.save(r);                
             }
-            dbRoles.add(dbrole);
+            groups.add(dbgroup);
         });
-        
-        user.setRoles(dbRoles);        
+
+        user.setGroups(groups);
     }
 
     public User update(String uuid, User rawUser) {
         User user = userRepository.findByUuid(uuid);
         return update(user, rawUser);
-    }    
-    
+    }
+
     @CacheEvict(key = "#user.uuid")
     public User update(User user, User rawUser) {
-        
+
         if (rawUser.getUsername() != null && !rawUser.getUsername().isEmpty()) {
             user.setUsername(rawUser.getUsername());
         }
-        
+
         if (rawUser.getFirstname() != null && !rawUser.getFirstname().isEmpty()) {
             user.setFirstname(rawUser.getFirstname());
         }
@@ -116,10 +115,10 @@ public class UserService {
             user.setEnabled(rawUser.getEnabled());
         }
 
-        // TODO add Role repository
-        if (!rawUser.getRoles().isEmpty()) {
-            rawUser.getRoles().stream().forEach(r -> user.addRole(r));
-            loadRoles(user);
+        // TODO add Group repository
+        if (!rawUser.getGroups().isEmpty()) {
+            rawUser.getGroups().stream().forEach(g -> user.addGroup(g));
+            loadGroups(user);
         }
 
         if (rawUser.getPassword() != null && !rawUser.getPassword().isEmpty()) {
@@ -140,13 +139,13 @@ public class UserService {
         } else {
             throw new PasswordMissingException();
         }
-        
-        loadRoles(rawUser);
-        
+
+        loadGroups(rawUser);
+
         logger.debug("Create new user {}", rawUser.getUsername());
         return save(rawUser);
     }
-    
+
     @CacheEvict(key = "#user.uuid")
     public void delete(User user) {
         userRepository.delete(user.getId());
@@ -163,12 +162,12 @@ public class UserService {
             return true;
         }
 
-        if(rawUser.getUsername() != null && !rawUser.getUsername().isEmpty()) {
-            if(findByUsername(rawUser.getUsername()) != null) {
+        if (rawUser.getUsername() != null && !rawUser.getUsername().isEmpty()) {
+            if (findByUsername(rawUser.getUsername()) != null) {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -176,7 +175,7 @@ public class UserService {
     public User findByEmail(String username) {
         return userRepository.findByEmail(username);
     }
-    
+
     @Transactional
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);

@@ -3,7 +3,7 @@ package org.createnet.raptor.auth.authentcation;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.createnet.raptor.common.authentication.RaptorUserDetails;
-import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.User;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -18,7 +18,7 @@ public final class RaptorUserFactory {
     return new RaptorUserDetails(user);
   }
 
-  private static List<GrantedAuthority> mapToGrantedAuthorities(List<Role> roles) {
+  private static List<GrantedAuthority> mapToGrantedAuthorities(List<Permission> roles) {
     return roles.stream()
             .map(role -> new SimpleGrantedAuthority(role.getName()))
             .collect(Collectors.toList());
