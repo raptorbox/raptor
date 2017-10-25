@@ -15,7 +15,8 @@
  */
 package org.createnet.raptor.models.payload;
 
-import org.createnet.raptor.models.acl.permission.Permissions;
+import org.createnet.raptor.models.acl.EntityType;
+import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.app.App;
 
 /**
@@ -29,11 +30,11 @@ public class AppPayload extends AbstractPayload {
     public AppPayload() {
     }
 
-    public AppPayload(App app, Permissions op) {
+    public AppPayload(App app, Operation op) {
         super();
         this.op = op;
         this.appId = app.getId();
-        this.type = MessageType.app;
+        this.type = EntityType.app;
     }
 
 }

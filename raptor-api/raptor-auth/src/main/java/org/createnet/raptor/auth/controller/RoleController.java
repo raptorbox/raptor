@@ -22,7 +22,6 @@ import io.swagger.annotations.ApiResponses;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.auth.services.RoleService;
 import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.apidocs.ApiDocsRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +76,7 @@ public class RoleController {
     @ApiOperation(
             value = "List available roles",
             notes = "",
-            response = ApiDocsRole.class,
+            response = Role.class,
             responseContainer = "Iterable",
             nickname = "getRoles"
     )
@@ -91,7 +90,7 @@ public class RoleController {
     @ApiOperation(
             value = "Update a role",
             notes = "",
-            response = ApiDocsRole.class,
+            response = Role.class,
             nickname = "updateRole"
     )
     public ResponseEntity<?> update(
@@ -124,7 +123,7 @@ public class RoleController {
     @ApiOperation(
             value = "Create a new role",
             notes = "",
-            response = ApiDocsRole.class,
+            response = Role.class,
             nickname = "createRole"
     )
     @ApiResponses(value = {

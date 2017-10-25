@@ -17,8 +17,9 @@ package org.createnet.raptor.models.acl.permission;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.createnet.raptor.models.acl.AclClassTypeMapper;
+import org.createnet.raptor.models.acl.AclClassType;
 import org.createnet.raptor.models.acl.ObjectPermission;
+import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.springframework.security.acls.model.Permission;
 
@@ -29,43 +30,47 @@ import org.springframework.security.acls.model.Permission;
 public class PermissionUtil {
 
     /**
-     * Generate a list of strings from a list of Permissions
+     * Generate a list of strings from a list of Operation
      *
      * @param args
      * @return
      */
-    static public List<String> asList(Permissions... args) {
+    static public List<String> asList(Operation... args) {
         List<String> result = new ArrayList();
-        for (Permissions arg : args) {
+        for (Operation arg : args) {
             result.add(arg.name());
         }
         return result;
     }
 
     /**
-     * Generate a list of Permissions from a list of string
+     * Generate a list of Operation from a list of string
      *
      * @param args
      * @return
      */
-    static public List<Permissions> asList(String... args) {
-        List<Permissions> result = new ArrayList();
+    static public List<Operation> asList(String... args) {
+        List<Operation> result = new ArrayList();
         for (String arg : args) {
-            result.add(Permissions.valueOf(arg));
+            result.add(Operation.valueOf(arg));
         }
         return result;
     }
 
     static public ObjectPermission parseObjectPermission(String label) {
-
+        
+        label = label.toLowerCase().replace("role_", "");
         String[] parts = label.split(".");
+        if (parts.length != 2) {
+            parts = label.split("_");
+        }
         if (parts.length != 2) {
             throw new RaptorComponent.ValidationException("Failed to parse permission " + label);
         }
 
         Class subjType;
         try {
-            subjType = AclClassTypeMapper.get(parts[0]);
+            subjType = AclClassType.getClass(parts[0]);
         } catch (Exception ex) {
             throw new RaptorComponent.ValidationException("Failed to parse permission subject: " + parts[0], ex);
         }

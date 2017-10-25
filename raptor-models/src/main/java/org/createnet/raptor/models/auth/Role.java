@@ -16,18 +16,14 @@
 package org.createnet.raptor.models.auth;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.security.core.GrantedAuthority;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.Cacheable;
 import javax.persistence.Table;
 import org.hibernate.annotations.Cache;
@@ -39,70 +35,58 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Table(name = "roles")
 public class Role implements GrantedAuthority {
 
-  public static enum Roles {
-    super_admin, admin, user, guest
-  }
-
-  private static final long serialVersionUID = 1L;
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
-
-  @NotEmpty
-  private String name;
-
-  @JsonIgnore
-  @ManyToMany(fetch = FetchType.LAZY, mappedBy = "roles")
-  private List<User> users = new ArrayList();
-
-  public Role() {
-  }
-
-  public Role(String name) {
-    this.name = name;
-  }
-
-  public Role(Roles role) {
-    this.name = role.name();
-  }
-
-  @JsonIgnore
-  @Override
-  public String getAuthority() {
-    return name;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj instanceof Roles) {
-      return ((Roles) obj).equals(this.name);
+    public static enum Roles {
+        super_admin, admin, user, guest
     }
-    return super.equals(obj);
-  }
 
-  public Long getId() {
-    return id;
-  }
+    private static final long serialVersionUID = 1L;
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
-  public String getName() {
-    return name;
-  }
+    @NotEmpty
+    private String name;
 
-  public void setName(String name) {
-    this.name = name;
-  }
+    public Role() {
+    }
 
-  public List<User> getUsers() {
-    return users;
-  }
+    public Role(String name) {
+        this.name = name;
+    }
 
-  public void setUsers(List<User> users) {
-    this.users = users;
-  }
+    public Role(Roles role) {
+        this.name = role.name();
+    }
+
+    @JsonIgnore
+    @Override
+    public String getAuthority() {
+        return name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Roles) {
+            return ((Roles) obj).equals(this.name);
+        }
+        return super.equals(obj);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
 }

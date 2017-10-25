@@ -13,26 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.models.apidocs;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+package org.createnet.raptor.models.acl;
 
 /**
  *
- * @author Luca Capra <lcapra@fbk.eu>
+ * @author Luca Capra <luca.capra@gmail.com>
  */
-public class ApiDocsUser {
-    public Long id;
-    public String uuid;
-    public String username;
-    public String password;
-    public List<String> roles = new ArrayList();
-    public String firstname;
-    public String lastname;
-    public String email;
-    public boolean enabled = true;
-    public Date lastPasswordResetDate = new Date();
-    public Date created = new Date();
+public enum EntityType {
+    device, stream, action, data,
+    user, permission, role, tree,
+    token,
+    app
 }

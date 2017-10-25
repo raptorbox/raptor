@@ -13,19 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.models.apidocs;
-
-import org.createnet.raptor.models.auth.request.*;
+package org.createnet.raptor.models.acl;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class PermissionRequest {
+public enum Operation {
+    
+    admin,
+    
+    // object level permissions
+    read, update, create, delete,
 
-    public String permission;
-    public String user;
+    // data level permissions
+    push, pull,
 
-    public PermissionRequest() {
-    }
+    // action level permissions
+    execute, 
+    
+    @Deprecated
+    tree,
+
 }

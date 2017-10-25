@@ -15,13 +15,11 @@
  */
 package org.createnet.raptor.sdk.admin;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.acl.permission.PermissionUtil;
-import org.createnet.raptor.models.acl.permission.Permissions;
 import org.createnet.raptor.models.auth.Token;
-import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.models.objects.Device;
@@ -31,7 +29,6 @@ import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.sdk.config.Config;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -94,7 +91,7 @@ public class TokenPermissionTest {
         assertNotNull(token);
         assertNotNull(token.getId());
 
-        List<String> permissions = PermissionUtil.asList(Permissions.create, Permissions.pull, Permissions.push);
+        List<String> permissions = PermissionUtil.asList(Operation.create, Operation.pull, Operation.push);
         List<String> result = raptor.Admin().Token().Permission().set(token, permissions);
 
         log.debug("Added permissions {}", permissions);

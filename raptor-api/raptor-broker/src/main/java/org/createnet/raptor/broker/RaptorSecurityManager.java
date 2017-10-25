@@ -24,7 +24,7 @@ import org.apache.activemq.artemis.core.security.Role;
 import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
 import org.apache.activemq.artemis.spi.core.security.ActiveMQSecurityManager2;
 import org.createnet.raptor.common.client.InternalApiClientService;
-import org.createnet.raptor.models.acl.permission.Permissions;
+import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.auth.Role.Roles;
 import org.createnet.raptor.models.configuration.AuthConfiguration;
@@ -211,13 +211,13 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
                 switch (Topics.Types.valueOf(type)) {
                     case device:
-                        return hasDevicePermission(r, id, Permissions.admin);
+                        return hasDevicePermission(r, id, Operation.admin);
                     case action:
-                        return hasDevicePermission(r, id, Permissions.execute);
+                        return hasDevicePermission(r, id, Operation.execute);
                     case stream:
-                        return hasDevicePermission(r, id, Permissions.pull);
+                        return hasDevicePermission(r, id, Operation.pull);
                     case tree:
-                        return hasDevicePermission(r, null, Permissions.tree);
+                        return hasDevicePermission(r, null, Operation.tree);
                     case token:
                     case user:
                         return r.Auth().getUser().isSuperAdmin();
@@ -236,7 +236,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         return false;
     }
 
-    protected boolean hasDevicePermission(Raptor r, String id, Permissions perm) {
+    protected boolean hasDevicePermission(Raptor r, String id, Operation perm) {
         // if using credentials, use the service client so the login won't expire
         Raptor client = (r.getConfig().hasCredentials()) ? apiClient : r;
         try {

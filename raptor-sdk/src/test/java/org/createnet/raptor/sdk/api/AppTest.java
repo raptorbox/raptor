@@ -80,13 +80,13 @@ public class AppTest {
         app.setUserId(raptor.Auth().getUser().getUuid());
 
         raptor.App().create(app);
-        
+
         PageResponse<App> pager = raptor.App().list();
         List<App> list = pager.getContent();
-        
+
         log.debug("found {} apps", list.size());
         assertNotNull(list);
-        assertEquals(1, list.size());        
+        assertEquals(1, list.size());
 
     }
 
@@ -103,14 +103,13 @@ public class AppTest {
 
         raptor.App().create(app);
         raptor.App().delete(app);
-        
+
         PageResponse<App> pager = raptor.App().list();
         List<App> list = pager.getContent();
-        
+
         log.debug("found {} apps", list.size());
         assertNotNull(list);
         assertEquals(0, list.size());
-        
 
     }
 

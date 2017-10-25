@@ -18,7 +18,7 @@ package org.createnet.raptor.common.dispatcher.events.listener;
 import org.createnet.raptor.common.dispatcher.DispatcherService;
 import org.createnet.raptor.common.dispatcher.events.AppApplicationEvent;
 import org.createnet.raptor.events.type.AppEvent;
-import org.createnet.raptor.models.acl.permission.Permissions;
+import org.createnet.raptor.models.acl.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ public class AppApplicationEventListener implements ApplicationListener<AppAppli
     @Override
     public void onApplicationEvent(AppApplicationEvent event) {
         AppEvent appEvent = event.getAppEvent();
-        dispatcher.notifyAppEvent(Permissions.valueOf(appEvent.getParentEvent()), appEvent.getApp());
+        dispatcher.notifyAppEvent(Operation.valueOf(appEvent.getParentEvent()), appEvent.getApp());
     }
 
 }

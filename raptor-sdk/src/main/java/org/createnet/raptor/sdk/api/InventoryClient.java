@@ -20,7 +20,7 @@ import org.createnet.raptor.sdk.AbstractClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
-import org.createnet.raptor.models.acl.permission.Permissions;
+import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.events.callback.ActionCallback;
 import org.createnet.raptor.sdk.events.callback.DataCallback;
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 public class InventoryClient extends AbstractClient {
 
     protected DevicePermissionClient Permission;
-    
+
     public DevicePermissionClient Permission() {
         if (Permission == null) {
             Permission = new DevicePermissionClient(getContainer());
@@ -134,7 +134,7 @@ public class InventoryClient extends AbstractClient {
             public void trigger(DispatcherPayload payload) {
                 switch (payload.getType()) {
                     case stream:
-                        if(!payload.getOp().equals(Permissions.data)) {
+                        if (!payload.getOp().equals(Operation.push)) {
                             return;
                         }
                         StreamPayload dpayload = (StreamPayload) payload;

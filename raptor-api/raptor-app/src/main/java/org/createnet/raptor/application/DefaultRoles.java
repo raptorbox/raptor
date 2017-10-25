@@ -17,7 +17,7 @@ package org.createnet.raptor.application;
 
 import java.util.Arrays;
 import java.util.List;
-import org.createnet.raptor.models.acl.permission.Permissions;
+import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.app.AppRole;
 
 /**
@@ -27,26 +27,21 @@ import org.createnet.raptor.models.app.AppRole;
 public class DefaultRoles {
 
     static public AppRole admin = new AppRole("admin", Arrays.asList(
-            Permissions.admin.name()
+            Operation.admin.name()
     ));
 
     static public AppRole viewer = new AppRole("viewer", Arrays.asList(
-            Permissions.list.name(),
-            Permissions.read.name(),
-            Permissions.pull.name(),
-            Permissions.tree.name()
+            Operation.read.name(),
+            Operation.pull.name()
     ));
 
     static public AppRole user = new AppRole("user", Arrays.asList(
-            Permissions.list.name(),
-            Permissions.read.name(),
-            Permissions.pull.name(),
-            Permissions.tree.name()
+            Operation.read.name(),
+            Operation.pull.name()
     ));
 
     static public AppRole operator = new AppRole("operator", Arrays.asList(
-            Permissions.execute.name(),
-            Permissions.tree.name()
+            Operation.execute.name()
     ));
 
     static List<AppRole> getDefaults() {

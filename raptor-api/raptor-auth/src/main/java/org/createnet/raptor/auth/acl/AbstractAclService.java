@@ -64,23 +64,23 @@ public abstract class AbstractAclService<T extends AclSubject> implements AclSer
 
     protected void savePermissions(T subj, List<Permission> permissions) {
 
-        User owner = subj.getSid().getUser();
+        User user = subj.getSid().getUser();
         ObjectIdentity oi = subj.getObjectIdentity();
 
         try {
             set(subj, permissions);
         } catch (AclManagerService.AclManagerException ex) {
-            logger.warn("Failed to store permissions for {} ({}): {}", oi.getIdentifier(), owner.getUuid(), ex.getMessage());
+            logger.warn("Failed to store permissions for {} (owner:{}): {}", oi.toString(), user.getUuid(), ex.getMessage());
             throw ex;
         }
 
         if (subj.getParent() != null) {
-            logger.debug("Set node id:{} parent id:{} ", subj.getObjectIdentity().toString(), subj.getParent().toString());
+            logger.debug("Set node id:{} parent {} ", subj.getObjectIdentity().toString(), subj.getParent().toString());
             aclManagerService.setParent(subj);
         }
 
         String perms = String.join(", ", RaptorPermission.toLabel(permissions));
-        logger.debug("Permission set for object {} to {} - {}", oi.getIdentifier(), owner.getUuid(), perms);
+        logger.debug("Permission set for object {} to {} - {}", oi.getIdentifier(), user.getUuid(), perms);
     }
 
     @Override

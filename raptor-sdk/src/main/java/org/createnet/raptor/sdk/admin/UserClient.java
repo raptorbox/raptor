@@ -20,7 +20,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import org.createnet.raptor.models.acl.permission.Permissions;
+import org.createnet.raptor.models.acl.AclClassType;
+import org.createnet.raptor.models.acl.EntityType;
+import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
@@ -77,7 +79,6 @@ public class UserClient extends AbstractClient {
 
     final static Logger logger = LoggerFactory.getLogger(UserClient.class);
 
-
     /**
      * Register for user events
      *
@@ -89,7 +90,7 @@ public class UserClient extends AbstractClient {
     }
 
     /**
-     * Subscribe to user related events 
+     * Subscribe to user related events
      *
      * @param user
      * @param ev
@@ -103,7 +104,7 @@ public class UserClient extends AbstractClient {
             }
         });
     }
-    
+
     /**
      * Check if an user is authorized to operate on a device
      *
@@ -112,7 +113,7 @@ public class UserClient extends AbstractClient {
      * @param permission
      * @return
      */
-    public AuthorizationResponse isAuthorized(Device device, User user, Permissions permission) {
+    public AuthorizationResponse isAuthorized(Device device, User user, Operation permission) {
         return isAuthorized(device.id(), user.getUuid(), permission);
     }
 
@@ -123,7 +124,7 @@ public class UserClient extends AbstractClient {
      * @param permission
      * @return
      */
-    public AuthorizationResponse isAuthorized(Device device, Permissions permission) {
+    public AuthorizationResponse isAuthorized(Device device, Operation permission) {
         return isAuthorized(device.id(), getContainer().Auth().getUser().getUuid(), permission);
     }
 
@@ -135,7 +136,7 @@ public class UserClient extends AbstractClient {
      * @param permission
      * @return
      */
-    public AuthorizationResponse isAuthorized(String deviceId, String userId, Permissions permission) {
+    public AuthorizationResponse isAuthorized(String deviceId, String userId, Operation permission) {
 
         AuthorizationRequest auth = new AuthorizationRequest();
         auth.objectId = deviceId;
@@ -155,7 +156,7 @@ public class UserClient extends AbstractClient {
     public void sync(SyncRequest req, RequestOptions opts) {
         getClient().post(Routes.PERMISSION_SYNC, toJsonNode(req), opts);
     }
-    
+
     /**
      * Register a device for an user in ACL system
      *
@@ -164,19 +165,20 @@ public class UserClient extends AbstractClient {
     public void sync(SyncRequest req) {
         getClient().post(Routes.PERMISSION_SYNC, toJsonNode(req), RequestOptions.retriable().maxRetries(5).waitFor(100));
     }
-    
+
     /**
      * Register a device for an user in ACL system
      *
      * @param op
      * @param device
      */
-    public void sync(Permissions op, Device device) {
+    public void sync(Operation op, Device device) {
         SyncRequest req = new SyncRequest();
         req.objectId = device.id();
         req.userId = device.userId();
         req.created = device.getCreatedAt();
         req.operation = op;
+        req.type = EntityType.device;
         sync(req);
     }
 

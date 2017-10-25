@@ -40,8 +40,6 @@ import org.createnet.raptor.models.auth.request.LoginResponse;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.auth.services.TokenService;
 import org.createnet.raptor.auth.services.UserService;
-import org.createnet.raptor.models.apidocs.ApiDocsLoginResponse;
-import org.createnet.raptor.models.apidocs.ApiDocsUser;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
@@ -112,7 +110,7 @@ public class AuthenticationController {
     @ApiOperation(
             value = "Login an user with the provided credentials",
             notes = "",
-            response = ApiDocsLoginResponse.class,
+            response = LoginResponse.class,
             nickname = "login"
     )
     public ResponseEntity<?> login(@RequestBody LoginRequest req) throws AuthenticationException {
@@ -185,7 +183,7 @@ public class AuthenticationController {
     @ApiOperation(
             value = "Refresh a login token",
             notes = "The authentication token, provided via `Authorization` header must still be valid.",
-            response = ApiDocsLoginResponse.class,
+            response = LoginResponse.class,
             nickname = "refreshToken"
     )
     public ResponseEntity<?> refreshToken(
@@ -220,7 +218,7 @@ public class AuthenticationController {
     @ApiOperation(
             value = "Get the current user profile",
             notes = "",
-            response = ApiDocsUser.class,
+            response = User.class,
             nickname = "getProfile"
     )
     public User getProfile(
@@ -234,7 +232,7 @@ public class AuthenticationController {
     @ApiOperation(
             value = "Update current user profile",
             notes = "",
-            response = ApiDocsUser.class,
+            response = User.class,
             nickname = "updateProfile"
     )
     public ResponseEntity updateProfile(

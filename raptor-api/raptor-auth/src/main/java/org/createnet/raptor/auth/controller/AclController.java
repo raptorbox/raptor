@@ -32,7 +32,6 @@ import org.createnet.raptor.auth.services.AclTokenService;
 import org.createnet.raptor.auth.services.AuthDeviceService;
 import org.createnet.raptor.auth.services.TokenService;
 import org.createnet.raptor.auth.services.UserService;
-import org.createnet.raptor.models.apidocs.ApiDocsAuthorizationResponse;
 import org.createnet.raptor.models.auth.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,7 +102,7 @@ public class AclController {
     @ApiOperation(
             value = "Check user permission on a device",
             notes = "",
-            response = ApiDocsAuthorizationResponse.class,
+            response = AuthorizationResponse.class,
             nickname = "checkPermission"
     )
     public ResponseEntity<?> checkPermission(
@@ -127,7 +126,7 @@ public class AclController {
             return JsonErrorResponse.entity(HttpStatus.NOT_FOUND);
         }
 
-        if (body.objectId == null && (permission == RaptorPermission.CREATE || permission == RaptorPermission.LIST || permission == RaptorPermission.TREE)) {
+        if (body.objectId == null && (permission == RaptorPermission.CREATE)) {
             // set true here, token permission will check over permission without objectId
             response.result = true;
         } else {

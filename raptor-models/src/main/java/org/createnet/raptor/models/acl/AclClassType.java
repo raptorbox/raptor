@@ -17,33 +17,38 @@ package org.createnet.raptor.models.acl;
 
 import org.createnet.raptor.models.auth.AclApp;
 import org.createnet.raptor.models.auth.AclDevice;
+import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.models.auth.Token;
+import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.tree.TreeNode;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class AclClassTypeMapper {
-
-    public static enum Type {
-        device, 
-        tree, 
-        app
-    }
+public class AclClassType {
 
     public static Class device = AclDevice.class;
+    public static Class user = User.class;
+    public static Class role = Role.class;
+    public static Class token = Token.class;
     public static Class tree = TreeNode.class;
-    public static Class app = AclApp.class;    
+    public static Class app = AclApp.class;
     
-
-    public static Class get(String name) {
-        return get(Type.valueOf(name));
+    public static Class getClass(String name) {
+        return getClass(EntityType.valueOf(name));
     }
 
-    public static Class get(Type name) {
+    public static Class getClass(EntityType name) {
         switch (name) {
             case device:
                 return device;
+            case user:
+                return user;
+            case role:
+                return role;
+            case token:
+                return token;
             case tree:
                 return tree;
             case app:

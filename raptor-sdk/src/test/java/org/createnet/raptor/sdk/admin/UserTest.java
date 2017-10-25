@@ -18,7 +18,7 @@ package org.createnet.raptor.sdk.admin;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.createnet.raptor.models.acl.permission.Permissions;
+import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
@@ -69,27 +69,27 @@ public class UserTest {
 
     @Test
     public void receiveUserUpdate() {
-        
+
         AtomicBoolean done = new AtomicBoolean(false);
-        
+
         String username = rndUsername();
         log.debug("Create user {}", username);
         final User user = raptor.Admin().User().create(username, "pass_" + rndUsername(), "test@test.raptor.local");
-  
+
         raptor.Admin().User().subscribe(user, (u, message) -> {
-            
+
             assertEquals(false, message.getUser().getEnabled());
             assertEquals(user.getUuid(), u.getUuid());
-            
+
             done.set(true);
-        });        
-        
+        });
+
         user.setEnabled(false);
         raptor.Admin().User().update(user);
-          
+
         Utils.waitUntil(5, () -> !done.get());
     }
-    
+
     @Test
     public void createUser() {
 
@@ -153,17 +153,17 @@ public class UserTest {
         String email1 = username1 + "@test.raptor.local";
         log.debug("Create user {}", username1);
         User user1 = raptor.Admin().User().create(username1, "pass_" + rndUsername(), email1);
-        
+
         String username2 = rndUsername();
-        String email2 = username2 + "@test.raptor.local";        
+        String email2 = username2 + "@test.raptor.local";
         log.debug("Create user {}", username2);
         User user2 = raptor.Admin().User().create(username2, "pass_" + rndUsername(), email2);
 
         user1.setEmail(email2);
-        
+
         try {
             User updatedUser1 = raptor.Admin().User().update(user1);
-        } catch(RequestException e) {
+        } catch (RequestException e) {
             assertEquals(e.getStatus(), 400);
             return;
         }
@@ -219,47 +219,47 @@ public class UserTest {
         String username1 = rndUsername();
         log.debug("Create user1 {}", username1);
         User user1 = raptor.Admin().User().createAdmin(username1, "pass_" + rndUsername(), "test@test.raptor.local");
-        
+
         AuthClient.LoginState state = raptor.Admin().User().impersonate(user1.getUuid());
-        
+
         Raptor r2 = new Raptor(raptor.getConfig().getUrl(), state.token);
         User user = r2.Admin().User().get();
-        
+
         assertNotNull(user);
         assertEquals(user.getUuid(), user1.getUuid());
         assertEquals(user.getUsername(), user1.getUsername());
-        
+
     }
-    
+
     @Test
     public void isAuthorized() throws IOException {
-        
+
         String username1 = rndUsername();
         Raptor r1 = Utils.createNewInstance(username1);
         String username2 = rndUsername();
         Raptor r2 = Utils.createNewInstance(username2);
         String userId2 = r2.Auth().getUser().getUuid();
-        
+
         Device dev = new Device();
         dev.name("auth_test");
         r1.Inventory().create(dev);
-        
+
         assertNotNull(dev.id());
-        
+
         AuthorizationResponse res;
-        
-        res = r1.Admin().User().isAuthorized(dev, Permissions.admin);
+
+        res = r1.Admin().User().isAuthorized(dev, Operation.admin);
         assertEquals(res.result, true);
-        
-        res = r1.Admin().User().isAuthorized(dev, Permissions.read);
+
+        res = r1.Admin().User().isAuthorized(dev, Operation.read);
         assertEquals(res.result, true);
-        
-        res = r1.Admin().User().isAuthorized(dev.id(), userId2, Permissions.admin);
-        assertEquals(res.result, false);       
-        
-        res = r1.Admin().User().isAuthorized(dev.id(), userId2, Permissions.read);
-        assertEquals(res.result, false);       
-        
+
+        res = r1.Admin().User().isAuthorized(dev.id(), userId2, Operation.admin);
+        assertEquals(res.result, false);
+
+        res = r1.Admin().User().isAuthorized(dev.id(), userId2, Operation.read);
+        assertEquals(res.result, false);
+
     }
 
 }

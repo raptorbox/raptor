@@ -42,8 +42,7 @@ public class AclAppService extends AbstractAclService<AclApp> {
     public List<Permission> getDefaultPermissions() {
         return Arrays.asList(
                 RaptorPermission.READ,
-                RaptorPermission.PULL,
-                RaptorPermission.SUBSCRIBE
+                RaptorPermission.PULL
         );
     }
 

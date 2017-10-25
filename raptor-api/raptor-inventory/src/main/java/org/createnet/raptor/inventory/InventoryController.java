@@ -49,7 +49,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.createnet.raptor.models.acl.permission.Permissions;
+import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.exception.RequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +87,7 @@ public class InventoryController {
      * @param device
      * @return 
      */
-    protected boolean syncACL(Permissions op, Device device) {
+    protected boolean syncACL(Operation op, Device device) {
         try {
             raptor.Admin().User().sync(op, device);
         } catch (RequestException ex) {
@@ -146,7 +146,7 @@ public class InventoryController {
 
         deviceService.save(device);
 
-        if (!syncACL(Permissions.create, device)) {
+        if (!syncACL(Operation.create, device)) {
             log.debug("Dropping device record from database..");
             deviceService.delete(device);
             return JsonErrorResponse.internalError("Failed to sync acl");
@@ -221,7 +221,7 @@ public class InventoryController {
 
         deviceService.save(device);
         
-        if (!syncACL(Permissions.update, device)) {
+        if (!syncACL(Operation.update, device)) {
             return JsonErrorResponse.internalError("Failed to sync acl");
         }
         
@@ -246,7 +246,7 @@ public class InventoryController {
         
         eventPublisher.delete(device);
 
-        if (!syncACL(Permissions.delete, device)) {
+        if (!syncACL(Operation.delete, device)) {
             return JsonErrorResponse.internalError("Failed to sync acl");
         }        
         

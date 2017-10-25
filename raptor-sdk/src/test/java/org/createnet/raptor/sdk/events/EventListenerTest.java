@@ -21,8 +21,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.acl.permission.PermissionUtil;
-import org.createnet.raptor.models.acl.permission.Permissions;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
@@ -329,7 +329,7 @@ public class EventListenerTest {
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
 
-        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.admin));
+        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Operation.admin));
 
         Device dev = r.Inventory().create(newDevice("dev"));
 
@@ -362,7 +362,7 @@ public class EventListenerTest {
         r.Auth().login();
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
-        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.execute));
+        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Operation.execute));
 
         List<String> perms = r.Admin().Token().Permission().get(t);
         Assert.assertEquals(1, perms.size());
@@ -404,7 +404,7 @@ public class EventListenerTest {
         r.Auth().login();
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
-        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.pull));
+        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Operation.pull));
 
         Device dev = r.Inventory().create(newDevice("dev"));
 
@@ -438,7 +438,7 @@ public class EventListenerTest {
         r.Auth().login();
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
-        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.execute));
+        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Operation.execute));
 
         Device dev = r.Inventory().create(newDevice("dev"));
 

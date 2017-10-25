@@ -24,10 +24,8 @@ import org.createnet.raptor.auth.services.TokenService;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.services.UserService;
-import org.createnet.raptor.models.apidocs.ApiDocsLoginResponse;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.auth.Token;
-import org.createnet.raptor.models.apidocs.ApiDocsUser;
 import org.createnet.raptor.models.auth.request.LoginResponse;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +87,7 @@ public class UserController {
     @ApiOperation(
             value = "List available user",
             notes = "",
-            response = ApiDocsUser.class,
+            response = User.class,
             responseContainer = "Iterable",
             nickname = "getUsers"
     )
@@ -102,7 +100,7 @@ public class UserController {
     @ApiOperation(
             value = "Create a new user",
             notes = "",
-            response = ApiDocsUser.class,
+            response = User.class,
             nickname = "createUser"
     )
     public ResponseEntity<?> createUser(
@@ -126,7 +124,7 @@ public class UserController {
     @ApiOperation(
             value = "Get an user profile",
             notes = "",
-            response = ApiDocsUser.class,
+            response = User.class,
             nickname = "getUser"
     )
     public ResponseEntity getUser(
@@ -148,7 +146,7 @@ public class UserController {
     @ApiOperation(
             value = "Retrieve a login token for the user",
             notes = "",
-            response = ApiDocsLoginResponse.class,
+            response = LoginResponse.class,
             nickname = "impersonateUser"
     )
     public ResponseEntity impersonateUser(
@@ -178,7 +176,7 @@ public class UserController {
     @ApiOperation(
             value = "Update an user profile",
             notes = "",
-            response = ApiDocsUser.class,
+            response = User.class,
             nickname = "updateUser"
     )
     public ResponseEntity<?> updateUser(

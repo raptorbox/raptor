@@ -17,7 +17,7 @@ package org.createnet.raptor.common.authentication;
 
 import java.io.Serializable;
 import org.createnet.raptor.common.client.ApiClientService;
-import org.createnet.raptor.models.acl.permission.Permissions;
+import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.response.JsonError;
@@ -89,7 +89,7 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
         }
 
         try {
-            Permissions p = Permissions.valueOf(permission);
+            Operation p = Operation.valueOf(permission);
             log.debug("Check authorization for user={} device={} permission={}", tokenAuthentication.getUser().getUuid(), deviceId, p);
             AuthorizationResponse response = api.Admin().User().isAuthorized(deviceId, tokenAuthentication.getUser().getUuid(), p);
             return response.result;
