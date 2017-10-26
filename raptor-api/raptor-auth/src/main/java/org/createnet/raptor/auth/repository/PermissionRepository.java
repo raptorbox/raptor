@@ -15,8 +15,7 @@
  */
 package org.createnet.raptor.auth.repository;
 
-import org.createnet.raptor.models.auth.AclApp;
-import org.createnet.raptor.models.auth.Group;
+import org.createnet.raptor.models.auth.Permission;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
@@ -29,17 +28,14 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Component
 @Repository
-public interface GroupRepository extends CrudRepository<Group, Long>, JpaRepository<Group, Long> {
+public interface PermissionRepository extends CrudRepository<Permission, Long>, JpaRepository<Permission, Long> {
 
-    public Group findByName(String name);
-
-    public Group findByNameAndApp(String name, AclApp app);
-    
-    public Group findOneById(Long id);
+    public Permission findOneByName(String name);
+    public Permission findOneById(Long id);
     
     @Transactional
     @Override
-    public void delete(Group entity);
+    public void delete(Permission entity);
 
     @Transactional
     @Override
@@ -49,12 +45,10 @@ public interface GroupRepository extends CrudRepository<Group, Long>, JpaReposit
     public boolean exists(Long id);
 
     @Override
-    public Group findOne(Long id);
+    public Permission findOne(Long id);
 
     @Transactional
     @Override
-    public <G extends Group> G save(G entity);
-
-    public Group findById(Long id);
+    public <G extends Permission> G save(G entity);
 
 }

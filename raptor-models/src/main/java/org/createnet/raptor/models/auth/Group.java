@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.models.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +51,7 @@ public class Group implements Serializable {
 
     @NotEmpty
     private String name;
-        
+
     @ManyToOne(fetch = FetchType.LAZY)
     private AclApp app;
 
@@ -61,11 +63,11 @@ public class Group implements Serializable {
 
     public Group() {
     }
-    
+
     public Group(String name) {
         this.name = name;
     }
-    
+
     public Group(String name, List<Permission> permissions) {
         this.name = name;
         this.permissions.addAll(permissions);
@@ -75,15 +77,15 @@ public class Group implements Serializable {
         this(name);
         this.app = app;
     }
-    
+
     public Group(DefaultGroup g) {
         this.name = g.name();
     }
-    
+
     public Group(DefaultGroup g, List<Permission> permissions) {
         this(g.name(), permissions);
     }
-    
+
     public Long getId() {
         return id;
     }
@@ -100,6 +102,22 @@ public class Group implements Serializable {
         this.name = name;
     }
 
+    @JsonProperty
+    public String getAppId() {
+        return getApp() != null ? getApp().getUuid(): null;
+    }
+    
+    @JsonProperty
+    public void setAppId(String appId) {
+        
+        if (getApp() == null) {
+            setApp(new AclApp());
+        }
+        
+        getApp().setUuid(appId);
+    }
+    
+    @JsonIgnore
     public AclApp getApp() {
         return app;
     }
@@ -115,5 +133,21 @@ public class Group implements Serializable {
     public void setPermissions(List<Permission> permissions) {
         this.permissions = permissions;
     }
-    
+
+    public void merge(Group raw) {
+
+        if (raw.getName() != null && !raw.getName().isEmpty()) {
+            this.setName(raw.getName());
+        }
+
+        setApp(raw.getApp());
+
+        raw.getPermissions().forEach((p) -> {
+            if (!getPermissions().contains(p)) {
+                getPermissions().add(p);
+            }
+        });
+
+    }
+
 }

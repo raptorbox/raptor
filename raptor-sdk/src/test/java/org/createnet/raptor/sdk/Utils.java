@@ -19,10 +19,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import org.createnet.raptor.models.auth.Group;
-import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.config.Config;
@@ -117,7 +117,7 @@ public class Utils {
      * @param groups
      * @return
      */
-    static public Raptor createNewInstance(String username, Set<Group> groups) {
+    static public Raptor createNewInstance(String username, List<Group> groups) {
 
         User user = getRaptor().Admin().User().create(username, username + Math.random(), username + "@test.raptor.local", groups);
 

@@ -26,6 +26,7 @@ import org.springframework.security.core.GrantedAuthority;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Cacheable;
 import javax.persistence.Table;
+import org.createnet.raptor.models.acl.Operation;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -49,6 +50,10 @@ public class Permission implements GrantedAuthority {
 
     public Permission(String name) {
         this.name = name;
+    }
+    
+    public Permission(Operation name) {
+        this.name = name.name();
     }
 
     @JsonIgnore

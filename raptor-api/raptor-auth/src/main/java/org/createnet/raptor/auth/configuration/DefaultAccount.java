@@ -5,12 +5,18 @@
  */
 package org.createnet.raptor.auth.configuration;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.createnet.raptor.auth.repository.UserRepository;
 import org.createnet.raptor.auth.services.AclTokenService;
+import org.createnet.raptor.auth.services.GroupService;
 import org.createnet.raptor.auth.services.UserService;
+import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.auth.DefaultGroup;
+import org.createnet.raptor.models.auth.Group;
+import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
@@ -25,6 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.createnet.raptor.models.configuration.AuthConfiguration.AdminUser;
 
 /**
  *
@@ -45,59 +52,75 @@ public class DefaultAccount {
     private UserRepository userRepository;
 
     @Autowired
+    private GroupService groupService;
+
+    @Autowired
     AclTokenService aclTokenService;
 
     @Autowired
     PasswordEncoder passwordEncoder;
-    
+
     @Bean
     ThreadPoolTaskExecutor threadPoolTaskExecutor() {
         return new ThreadPoolTaskExecutor();
     }
-    
+
     @EventListener(ApplicationReadyEvent.class)
     protected void createUsers() {
         threadPoolTaskExecutor().execute(() -> {
             createDefaultUser();
         });
     }
-    
+
     protected void createDefaultUser() {
 
-        List<org.createnet.raptor.models.configuration.AuthConfiguration.AdminUser> users = configuration.getAuth().getUsers();
+        Group adminGroup = groupService.getByNameAndApp(DefaultGroup.admin.name(), null);
+        if (adminGroup == null) {
+            adminGroup = new Group(DefaultGroup.admin, Arrays.asList(new Permission(Operation.admin)));
+            groupService.save(adminGroup);
+            log.debug("Created group `{}` (id: {})", adminGroup.getName(), adminGroup.getId());
+        }
 
-        users.forEach((org.createnet.raptor.models.configuration.AuthConfiguration.AdminUser admin) -> {
+        Group userGroup = groupService.getByNameAndApp(DefaultGroup.user.name(), null);
+        if (userGroup == null) {
+            userGroup = new Group(DefaultGroup.user, new ArrayList());
+            groupService.save(userGroup);
+            log.debug("Created group `{}` (id: {})", userGroup.getName(), userGroup.getId());
+        }
 
-            boolean createUser = true;
+        List<AdminUser> users = configuration.getAuth().getUsers();
 
-            User adminUser = userRepository.findByUsername(admin.getUsername());
-            if (adminUser != null) {
-                log.debug("User `{}` exists (id: {})", adminUser.getUsername(), adminUser.getId());
+        users.forEach((AdminUser admin) -> {
+
+            User storedUser = userRepository.findByUsername(admin.getUsername());
+            if (storedUser != null) {
+
+                log.debug("User `{}` exists (id: {})", storedUser.getUsername(), storedUser.getId());
 
                 if (admin.isLocked()) {
-                    log.debug("Recreating user `{}`", adminUser.getUsername());
-                    userService.delete(adminUser);
-                } else {
-                    createUser = false;
+                    log.debug("Recreating user `{}`", storedUser.getUsername());
+                    userService.delete(storedUser);
+                    storedUser = null;
                 }
+
             }
 
-            if (createUser) {
-                adminUser = new User();
+            if (storedUser == null) {
 
-                adminUser.setUsername(admin.getUsername());
+                storedUser = new User();
+                storedUser.setUsername(admin.getUsername());
 
                 assert admin.getPassword() != null;
 
-                adminUser.setPassword(passwordEncoder.encode(admin.getPassword()));
-                adminUser.setEmail(admin.getEmail());
+                storedUser.setPassword(passwordEncoder.encode(admin.getPassword()));
+                storedUser.setEmail(admin.getEmail());
 
                 for (DefaultGroup group : admin.getRoles()) {
-                    adminUser.addGroup(group);
+                    storedUser.addGroup(group);
                 }
 
-                userService.save(adminUser);
-                log.debug("Created user `{}` (id={})", adminUser.getUsername(), adminUser.getUuid());
+                userService.save(storedUser);
+                log.debug("Created user `{}` (id={})", storedUser.getUsername(), storedUser.getUuid());
             }
 
             if (admin.isLocked()) {
@@ -115,7 +138,7 @@ public class DefaultAccount {
                 if (!found.isPresent()) {
 
                     Token token = new Token();
-                    token.setUser(adminUser);
+                    token.setUser(storedUser);
                     token.setEnabled(true);
                     token.setExpires(0L);
                     token.setName(tokenName);

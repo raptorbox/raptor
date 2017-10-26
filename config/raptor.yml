@@ -47,12 +47,12 @@ raptor:
         password: admin
         email: admin@raptor.local
         roles:
-          - super_admin
+          - admin
       - username: service
         password: s3rvice
         email: service@raptor.local
         roles:
-          - super_admin
+          - admin
         lock: true
         type: service
 

@@ -35,7 +35,7 @@ public final class RaptorUserDetails extends User implements UserDetails {
                 .forEach((g) -> 
                     permissions.addAll(g.getPermissions()
                             .stream()
-                            .filter((p) -> permissions.contains(p))
+                            .filter((p) -> !permissions.contains(p))
                             .collect(Collectors.toList()))
                 );
         return permissions;

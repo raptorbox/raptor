@@ -8,7 +8,7 @@ drop table if exists users_roles;
 create table if not exists groups (
     id bigint not null auto_increment, 
     name varchar(255) not null, 
-    app_id bigint not null, 
+    app_id bigint, 
     primary key (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

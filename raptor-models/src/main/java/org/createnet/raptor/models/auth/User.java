@@ -201,7 +201,7 @@ public class User implements Serializable {
         return groups;
     }
 
-    public void setGroups(Set<Group> groups) {
+    public void setGroups(List<Group> groups) {
         this.groups.clear();
         this.groups.addAll(groups);
     }

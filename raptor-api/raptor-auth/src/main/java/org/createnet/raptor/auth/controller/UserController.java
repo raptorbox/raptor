@@ -46,7 +46,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RequestMapping(value = "/auth/user")
 @RestController
-@PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
 @Api(tags = {"User"})
 @ApiResponses(value = {
     @ApiResponse(
@@ -96,7 +95,7 @@ public class UserController {
         return userService.list();
     }
 
-    @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
+    @PreAuthorize("hasAuthority('admin')")
     @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(
             value = "Create a new user",

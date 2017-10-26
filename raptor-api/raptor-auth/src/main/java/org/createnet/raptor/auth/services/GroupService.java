@@ -15,11 +15,16 @@
  */
 package org.createnet.raptor.auth.services;
 
+import java.util.stream.Collectors;
 import org.createnet.raptor.models.auth.Group;
 import org.createnet.raptor.auth.repository.GroupRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.createnet.raptor.auth.repository.PermissionRepository;
+import org.createnet.raptor.models.auth.AclApp;
+import org.createnet.raptor.models.auth.Permission;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -27,60 +32,55 @@ import org.springframework.stereotype.Service;
  * @author Luca Capra <lcapra@fbk.eu>
  */
 @Service
+@CacheConfig(cacheNames = "groups")
 public class GroupService {
 
-    private static final Logger logger = LoggerFactory.getLogger(GroupService.class);
+    @Autowired
+    private GroupRepository groupRepository;
 
     @Autowired
-    private GroupRepository roleRepository;
+    private PermissionRepository permissionRepository;
+    
+    @CacheEvict(key = "#group.id")
+    public Group save(Group group) {
 
-    public Group update(Long roleId, Group rawGroup) {
+        group.setPermissions(group.getPermissions().stream().map((p) -> {
+            Permission perm = permissionRepository.findOneByName(p.getName());
+            if (perm == null) {
+                perm = permissionRepository.save(p);
+            }
+            return perm;
+        }).collect(Collectors.toList()));
 
-        Group role = roleRepository.findOne(roleId);
-
-        if (role == null) {
-            return null;
-        }
-
-        if (rawGroup.getName() != null && !rawGroup.getName().isEmpty()) {
-            role.setName(rawGroup.getName());
-        }
-
-        return roleRepository.save(role);
+        groupRepository.save(group);
+        
+        return getById(group.getId());
     }
 
     public Iterable<Group> list() {
-        return roleRepository.findAll();
+        return groupRepository.findAll();
     }
-
-    public Group create(Group rawGroup) {
-
-        Group existsGroup = roleRepository.findByName(rawGroup.getName());
-        if (existsGroup != null) {
-            return null;
-        }
-
-        Group role = new Group();
-        role.setName(rawGroup.getName());
-
-        return roleRepository.save(role);
+    
+    @CacheEvict(key = "#id")
+    public void delete(Long id) {
+        groupRepository.delete(id);
     }
-
-    public boolean delete(Long roleId) {
-
-        if (!roleRepository.exists(roleId)) {
-            return false;
-        }
-
-        roleRepository.delete(roleId);
-        return true;
+    
+    public void delete(Group g) {
+        delete(g.getId());
     }
 
     public Group getByName(String name) {
-        if (name == null || name.isEmpty()) {
-            return null;
-        }
-        return roleRepository.findByName(name);
+        return groupRepository.findByName(name);
+    }
+
+    public Group getByNameAndApp(String name, AclApp app) {
+        return groupRepository.findByNameAndApp(name, app);
+    }
+    
+    @Cacheable(key = "#id")
+    public Group getById(Long id) {
+        return groupRepository.findOneById(id);
     }
 
 }

@@ -15,8 +15,7 @@
  */
 package org.createnet.raptor.auth.services;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.stream.Collectors;
 import org.createnet.raptor.auth.exception.PasswordMissingException;
 import org.createnet.raptor.auth.repository.GroupRepository;
 import org.createnet.raptor.models.auth.User;
@@ -74,17 +73,15 @@ public class UserService {
      * @param user
      */
     protected void loadGroups(User user) {
-        Set<Group> groups = new HashSet();
-        user.getGroups().forEach((Group g) -> {
-            Group dbgroup = groupRepository.findByName(g.getName());
-            if (dbgroup == null) {
-                // skip unknown
-                return;
-            }
-            groups.add(dbgroup);
-        });
-
-        user.setGroups(groups);
+        user.setGroups(
+                user.getGroups()
+                        .stream()
+                        .map((Group g) -> {
+                            return groupRepository.findByName(g.getName());
+                        })
+                        .filter((g) -> g != null)
+                        .collect(Collectors.toList())
+        );
     }
 
     public User update(String uuid, User rawUser) {

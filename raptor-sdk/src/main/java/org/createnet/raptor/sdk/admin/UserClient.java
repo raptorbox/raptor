@@ -17,8 +17,10 @@ package org.createnet.raptor.sdk.admin;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
@@ -269,7 +271,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public User create(String username, String password, String email) {
-        return create(username, password, email, new HashSet(Arrays.asList(new Group(DefaultGroup.user))));
+        return create(username, password, email, new ArrayList());
     }
 
     /**
@@ -281,7 +283,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public User createAdmin(String username, String password, String email) {
-        return create(username, password, email, new HashSet(Arrays.asList(new Group(DefaultGroup.admin))));
+        return create(username, password, email, Arrays.asList(new Group(DefaultGroup.admin)));
     }
 
     /**
@@ -290,10 +292,10 @@ public class UserClient extends AbstractClient {
      * @param username
      * @param password
      * @param email
-     * @param roles
+     * @param groups
      * @return
      */
-    public User create(String username, String password, String email, Set<Group> groups) {
+    public User create(String username, String password, String email, List<Group> groups) {
         User user = new User();
         user.setUsername(username);
         user.setPassword(password);
