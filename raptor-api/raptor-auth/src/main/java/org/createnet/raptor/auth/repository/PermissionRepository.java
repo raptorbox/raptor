@@ -33,6 +33,8 @@ public interface PermissionRepository extends CrudRepository<Permission, Long>, 
     public Permission findOneByName(String name);
     public Permission findOneById(Long id);
     
+    public Permission deleteByName(String name);
+    
     @Transactional
     @Override
     public void delete(Permission entity);

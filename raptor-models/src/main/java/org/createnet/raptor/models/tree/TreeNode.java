@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.createnet.raptor.models.acl.Owneable;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.RaptorContainer;
@@ -40,7 +41,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  */
 @Document
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class TreeNode extends RaptorContainer {
+public class TreeNode extends RaptorContainer implements Owneable {
     
     public static final String separator = "/";
 
@@ -64,6 +65,11 @@ public class TreeNode extends RaptorContainer {
         } catch (IOException ex) {
             throw new ParserException(ex);
         }
+    }
+
+    @Override
+    public String getOwnerId() {
+        return getUserId();
     }
     
     public enum NodeType {

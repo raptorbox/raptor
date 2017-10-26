@@ -16,11 +16,13 @@
 package org.createnet.raptor.models.app;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.createnet.raptor.models.acl.Owneable;
 import org.createnet.raptor.models.auth.DefaultGroup;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
@@ -33,8 +35,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * @author Luca Capra <luca.capra@gmail.com>
  */
 @Document
-public class App {
+public class App implements Serializable, Owneable {
 
+    static final long serialVersionUID = 4441L;
+    
     @Id
     protected String id = UUID.randomUUID().toString();
 
@@ -266,6 +270,11 @@ public class App {
     @JsonIgnore
     public boolean isAdmin(User user) {
         return hasGroup(user, DefaultGroup.admin);
+    }
+
+    @Override
+    public String getOwnerId() {
+        return getUserId();
     }
 
 }

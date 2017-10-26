@@ -103,7 +103,7 @@ public class InventoryController {
     public ResponseEntity<?> getDevices(@AuthenticationPrincipal User currentUser) {
 
         String deviceId = currentUser.getUuid();
-        if (currentUser.isSuperAdmin()) {
+        if (currentUser.isAdmin()) {
             deviceId = null;
         }
 
@@ -136,7 +136,7 @@ public class InventoryController {
         device.userId(currentUser.getUuid());
 
         // super_admin can set ownership
-        if (currentUser.isSuperAdmin()) {
+        if (currentUser.isAdmin()) {
             // set ownership as per request, fallback to current user if empty
             device.userId(devUserId);
         } else {
@@ -203,7 +203,7 @@ public class InventoryController {
 
         // A std user can NOT change ownership even if has `update` permission
         // Admin users can change ownership
-        if (currentUser.isSuperAdmin()) {
+        if (currentUser.isAdmin()) {
 
             // set ownership as per request if not empty
             if (body.userId() != null && !body.userId().isEmpty()) {
@@ -265,7 +265,7 @@ public class InventoryController {
             return JsonErrorResponse.badRequest();
         }
 
-        if (!currentUser.isSuperAdmin()) {
+        if (!currentUser.isAdmin()) {
             query.userId(currentUser.getUuid());
         }
 

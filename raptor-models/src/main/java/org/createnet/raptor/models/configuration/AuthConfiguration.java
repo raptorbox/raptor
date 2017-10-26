@@ -27,7 +27,7 @@ import org.createnet.raptor.models.auth.Permission;
  */
 public class AuthConfiguration {
     
-    private String serviceUserType = "service";
+    private final String serviceUserType = "service";
     
     private List<AdminUser> users = new ArrayList();
     private String header = "authorization";

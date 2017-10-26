@@ -87,10 +87,10 @@ public class AuthTest {
         // ensure we have a token
         Utils.getRaptor().Auth().login();
 
-        Raptor r1 = Utils.createNewInstance();
+        Raptor r1 = Utils.createNewUserInstance();
         log.debug("test1 {}", r1.Auth().getUser().getUuid());
 
-        Raptor r2 = Utils.createNewInstance();
+        Raptor r2 = Utils.createNewUserInstance();
         log.debug("test2 {}", r2.Auth().getUser().getUuid());
 
         Assert.assertNotEquals(r1.Auth().getUser().getUuid(), r2.Auth().getUser().getUuid());

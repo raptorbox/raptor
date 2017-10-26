@@ -9,11 +9,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import org.createnet.raptor.auth.repository.UserRepository;
 import org.createnet.raptor.auth.services.AclTokenService;
 import org.createnet.raptor.auth.services.GroupService;
+import org.createnet.raptor.auth.services.PermissionService;
 import org.createnet.raptor.auth.services.UserService;
 import org.createnet.raptor.models.acl.Operation;
+import org.createnet.raptor.models.acl.permission.PermissionUtil;
 import org.createnet.raptor.models.auth.DefaultGroup;
 import org.createnet.raptor.models.auth.Group;
 import org.createnet.raptor.models.auth.Permission;
@@ -49,10 +50,10 @@ public class DefaultAccount {
     private UserService userService;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private GroupService groupService;
+    
+    @Autowired
+    private PermissionService permissionService;
 
     @Autowired
     AclTokenService aclTokenService;
@@ -68,12 +69,24 @@ public class DefaultAccount {
     @EventListener(ApplicationReadyEvent.class)
     protected void createUsers() {
         threadPoolTaskExecutor().execute(() -> {
-            createDefaultUser();
+            createDefaultGroups();
+            createDefaultUsers();
         });
     }
 
-    protected void createDefaultUser() {
-
+    protected void createDefaultGroups() {
+        
+        //generate permissions
+        List<String> permissionList = PermissionUtil.generatePermissionList();
+        permissionList.forEach((name) -> {
+            if(permissionService.getByName(name) == null) {
+                Permission perm = new Permission(name);
+                permissionService.save(perm);
+                log.debug("Created permission `{}` [id={}]", perm.getName(), perm.getId());
+            }
+        });
+        
+        // platform admin user
         Group adminGroup = groupService.getByNameAndApp(DefaultGroup.admin.name(), null);
         if (adminGroup == null) {
             adminGroup = new Group(DefaultGroup.admin, Arrays.asList(new Permission(Operation.admin)));
@@ -81,18 +94,23 @@ public class DefaultAccount {
             log.debug("Created group `{}` (id: {})", adminGroup.getName(), adminGroup.getId());
         }
 
+        // generic user role
         Group userGroup = groupService.getByNameAndApp(DefaultGroup.user.name(), null);
         if (userGroup == null) {
             userGroup = new Group(DefaultGroup.user, new ArrayList());
             groupService.save(userGroup);
             log.debug("Created group `{}` (id: {})", userGroup.getName(), userGroup.getId());
         }
+        
+    }
+    
+    protected void createDefaultUsers() {
 
         List<AdminUser> users = configuration.getAuth().getUsers();
 
         users.forEach((AdminUser admin) -> {
 
-            User storedUser = userRepository.findByUsername(admin.getUsername());
+            User storedUser = userService.findByUsername(admin.getUsername());
             if (storedUser != null) {
 
                 log.debug("User `{}` exists (id: {})", storedUser.getUsername(), storedUser.getId());

@@ -25,7 +25,6 @@ import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.services.UserService;
 import org.createnet.raptor.models.auth.DefaultGroup;
-import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.request.LoginResponse;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
@@ -82,7 +81,7 @@ public class UserController {
     @Autowired
     private RaptorConfiguration configuration;
 
-    @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'user', 'read')")
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
             value = "List available user",
@@ -95,7 +94,7 @@ public class UserController {
         return userService.list();
     }
 
-    @PreAuthorize("hasAuthority('admin')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'user', 'create')")
     @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(
             value = "Create a new user",
@@ -119,7 +118,7 @@ public class UserController {
         return ResponseEntity.ok(saved);
     }
 
-    @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
+    @PreAuthorize("@raptorSecurity.can(principal, 'user', 'read') or @raptorSecurity.isOwner(principal, #uuid, 'user', 'read')")
     @RequestMapping(value = "/{uuid}", method = RequestMethod.GET)
     @ApiOperation(
             value = "Get an user profile",
@@ -141,7 +140,7 @@ public class UserController {
         return ResponseEntity.ok(u);
     }
 
-    @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
+    @PreAuthorize("(hasAnyRole('admin', 'user_admin')) or principal.uuid == #uuid")
     @RequestMapping(value = "/{uuid}/impersonate", method = RequestMethod.GET)
     @ApiOperation(
             value = "Retrieve a login token for the user",
@@ -171,7 +170,7 @@ public class UserController {
         return ResponseEntity.ok(new LoginResponse(u, token));
     }
 
-    @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
+    @PreAuthorize("(hasAnyRole('admin', 'user_admin')) or principal.uuid == #uuid")
     @RequestMapping(value = "/{uuid}", method = RequestMethod.PUT)
     @ApiOperation(
             value = "Update an user profile",
@@ -222,7 +221,7 @@ public class UserController {
         return ResponseEntity.ok(saved);
     }
 
-    @PreAuthorize("(hasAuthority('admin') or hasAuthority('super_admin')) or principal.uuid == #uuid")
+    @PreAuthorize("(hasAnyRole('admin', 'user_admin')) or principal.uuid == #uuid")
     @RequestMapping(value = "/{uuid}", method = RequestMethod.DELETE)
     @ApiOperation(
             value = "Delete an user profile",

@@ -152,12 +152,13 @@ public class User implements Serializable {
 
     @JsonIgnore
     public boolean isAdmin() {
-        return isSuperAdmin() || this.hasGroup(DefaultGroup.admin);
+        return this.hasGroup(DefaultGroup.admin);
     }
 
     @JsonIgnore
+    @Deprecated
     public boolean isSuperAdmin() {
-        return this.hasGroup(DefaultGroup.super_admin);
+        return isAdmin();
     }
 
     public boolean hasGroup(String name) {

@@ -17,7 +17,6 @@ package org.createnet.raptor.auth.services;
 
 import java.util.stream.Collectors;
 import org.createnet.raptor.auth.exception.PasswordMissingException;
-import org.createnet.raptor.auth.repository.GroupRepository;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.repository.UserRepository;
 import org.createnet.raptor.models.auth.Group;
@@ -48,7 +47,7 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private GroupRepository groupRepository;
+    private GroupService groupService;
 
     public Iterable<User> list() {
         return userRepository.findAll();
@@ -77,7 +76,7 @@ public class UserService {
                 user.getGroups()
                         .stream()
                         .map((Group g) -> {
-                            return groupRepository.findByName(g.getName());
+                            return groupService.getByName(g.getName());
                         })
                         .filter((g) -> g != null)
                         .collect(Collectors.toList())

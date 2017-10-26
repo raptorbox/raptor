@@ -30,7 +30,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import org.createnet.raptor.models.acl.Owneable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
@@ -44,7 +46,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @JsonDeserialize(using = DeviceDeserializer.class)
 @Document
 @QueryEntity
-public class Device extends DeviceContainer {
+public class Device extends DeviceContainer implements Owneable {
     
     static final long serialVersionUID = 1000000000000051L;
     
@@ -80,6 +82,11 @@ public class Device extends DeviceContainer {
     final private Settings settings = new Settings();
     final private Map<String, Stream> streams = new HashMap();
     final private Map<String, Action> actions = new HashMap();
+
+    @Override
+    public String getOwnerId() {
+        return getUserId();
+    }
 
     /**
      * A serializable class containing the settings for a Device
@@ -315,6 +322,13 @@ public class Device extends DeviceContainer {
             }
         }
         return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 67 * hash + Objects.hashCode(this.id);
+        return hash;
     }
 
     @JsonProperty

@@ -86,7 +86,7 @@ public class GroupController {
         return ResponseEntity.ok(list);
     }
 
-    @PreAuthorize("hasRole('admin') or hasRole('group_admin') or hasRole('group_update')")
+    @PreAuthorize("hasAnyRole('admin', 'group_admin', 'group_update')")
     @RequestMapping(value = {"/{groupId}"}, method = RequestMethod.PUT)
     @ApiOperation(
             value = "Update a group",
@@ -120,7 +120,7 @@ public class GroupController {
         return ResponseEntity.ok(group);
     }
 
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasAnyRole('admin', 'group_admin', 'group_create')")
     @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(
             value = "Create a new group",
@@ -167,7 +167,7 @@ public class GroupController {
         return ResponseEntity.ok(group);
     }
 
-    @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
+    @PreAuthorize("hasAnyRole('admin', 'group_admin', 'group_delete')")
     @RequestMapping(value = {"/{groupId}"}, method = RequestMethod.DELETE)
     @ApiOperation(
             value = "Delete a group",

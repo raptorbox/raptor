@@ -18,6 +18,7 @@ package org.createnet.raptor.models.acl.permission;
 import java.util.ArrayList;
 import java.util.List;
 import org.createnet.raptor.models.acl.AclClassType;
+import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.ObjectPermission;
 import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -57,8 +58,33 @@ public class PermissionUtil {
         return result;
     }
 
-    static public ObjectPermission parseObjectPermission(String label) {
+    static public List<String> generatePermissionList() {
+        List<String> list = new ArrayList();
+        Operation[] ops = new Operation[] {
+            Operation.admin, Operation.create, Operation.update, Operation.delete, Operation.read
+        };
         
+        for (EntityType entity : EntityType.values()) {
+            for (Operation operation : ops) {
+                
+                list.add(String.format("%s_%s", entity.name(), operation.name()));
+                
+                if (operation != Operation.create && operation != Operation.admin)
+                    list.add(String.format("%s_%s_own", entity.name(), operation.name()));
+
+            }
+        }
+        
+        list.add(String.format("%s_%s", EntityType.device, Operation.push));
+        list.add(String.format("%s_%s", EntityType.device, Operation.pull));
+        
+        list.add(String.format("%s_%s", EntityType.action, Operation.execute));
+        
+        return list;
+    }
+
+    static public ObjectPermission parseObjectPermission(String label) {
+
         label = label.toLowerCase().replace("role_", "");
         String[] parts = label.split(".");
         if (parts.length != 2) {

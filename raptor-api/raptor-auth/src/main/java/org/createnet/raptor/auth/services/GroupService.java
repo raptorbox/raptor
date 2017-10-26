@@ -18,7 +18,6 @@ package org.createnet.raptor.auth.services;
 import java.util.stream.Collectors;
 import org.createnet.raptor.models.auth.Group;
 import org.createnet.raptor.auth.repository.GroupRepository;
-import org.createnet.raptor.auth.repository.PermissionRepository;
 import org.createnet.raptor.models.auth.AclApp;
 import org.createnet.raptor.models.auth.Permission;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,15 +38,15 @@ public class GroupService {
     private GroupRepository groupRepository;
 
     @Autowired
-    private PermissionRepository permissionRepository;
+    private PermissionService permissionService;
     
     @CacheEvict(key = "#group.id")
     public Group save(Group group) {
 
         group.setPermissions(group.getPermissions().stream().map((p) -> {
-            Permission perm = permissionRepository.findOneByName(p.getName());
+            Permission perm = permissionService.getByName(p.getName());
             if (perm == null) {
-                perm = permissionRepository.save(p);
+                perm = permissionService.save(p);
             }
             return perm;
         }).collect(Collectors.toList()));
