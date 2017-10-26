@@ -29,25 +29,33 @@ public class AdminClient extends AbstractClient {
 
     protected UserClient User;
     protected TokenClient Token;
-    
+    protected GroupClient Group;
+
     public UserClient User() {
         if (User == null) {
             User = new UserClient(getContainer());
         }
         return User;
     }
-    
+
+    public GroupClient Group() {
+        if (Group == null) {
+            Group = new GroupClient(getContainer());
+        }
+        return Group;
+    }
+
     public TokenClient Token() {
         if (Token == null) {
             Token = new TokenClient(getContainer());
         }
         return Token;
     }
-    
+
     public AdminClient(Raptor container) {
-        super(container);        
+        super(container);
     }
 
     final static Logger logger = LoggerFactory.getLogger(AdminClient.class);
-    
+
 }

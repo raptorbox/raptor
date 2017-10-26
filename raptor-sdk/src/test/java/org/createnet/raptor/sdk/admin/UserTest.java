@@ -234,30 +234,29 @@ public class UserTest {
     @Test
     public void isAuthorized() throws IOException {
 
-        String username1 = rndUsername();
-        Raptor r1 = Utils.createNewInstance(username1);
-        String username2 = rndUsername();
-        Raptor r2 = Utils.createNewInstance(username2);
+        Raptor r1 = Utils.createNewUserInstance();
+        
+        Raptor r2 = Utils.createNewUserInstance();
         String userId2 = r2.Auth().getUser().getUuid();
 
-        Device dev = new Device();
-        dev.name("auth_test");
-        r1.Inventory().create(dev);
+        Device dev1 = new Device();
+        dev1.name("auth_test");
+        r1.Inventory().create(dev1);
 
-        assertNotNull(dev.id());
+        assertNotNull(dev1.id());
 
         AuthorizationResponse res;
 
-        res = r1.Admin().User().isAuthorized(dev, Operation.admin);
+        res = r1.Admin().User().isAuthorized(dev1, Operation.admin);
         assertEquals(res.result, true);
 
-        res = r1.Admin().User().isAuthorized(dev, Operation.read);
+        res = r1.Admin().User().isAuthorized(dev1, Operation.read);
         assertEquals(res.result, true);
 
-        res = r1.Admin().User().isAuthorized(dev.id(), userId2, Operation.admin);
+        res = r1.Admin().User().isAuthorized(dev1.id(), userId2, Operation.admin);
         assertEquals(res.result, false);
 
-        res = r1.Admin().User().isAuthorized(dev.id(), userId2, Operation.read);
+        res = r1.Admin().User().isAuthorized(dev1.id(), userId2, Operation.read);
         assertEquals(res.result, false);
 
     }

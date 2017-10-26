@@ -19,35 +19,63 @@ import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.acl.Owneable;
 import org.createnet.raptor.models.auth.Permission;
+import org.createnet.raptor.models.auth.User;
 
 /**
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
 public class RaptorSecurity {
-
+    
     public boolean can(RaptorUserDetails u, EntityType entity, Operation operation) {
+        return can(u, entity, operation, null);
+    }
+    
+    /**
+     * Check if an user has the permission to operate 
+     * 
+     * @param u
+     * @param entity
+     * @param operation
+     * @param obj
+     * @return 
+     */
+    public boolean can(RaptorUserDetails u, EntityType entity, Operation operation, Object obj) {
 
         // is an admin
         if (u.isAdmin()) {
             return true;
         }
 
+        boolean hasPermission = false;        
+        
+        // check if the current user own the subject
+        if (obj != null) {
+            hasPermission = isOwner(u, entity, operation, obj);
+            if (hasPermission) {
+                return true;
+            }
+        }
+
         // can admin the entity type eg. device_admin
         Permission p = new Permission(entity, Operation.admin);
-        boolean hasPermission = u.getAuthorities().contains(p);
+        hasPermission = u.getAuthorities().contains(p);
         if (hasPermission) {
             return true;
         }
 
-        // has specific permission on an entity type eg. device_read
-        p = new Permission(entity, operation);
-        hasPermission = u.getAuthorities().contains(p);
+        // did the check beore
+        if (operation != Operation.admin) {
+            // has specific permission on an entity type eg. device_read
+            p = new Permission(entity, operation);
+            hasPermission = u.getAuthorities().contains(p);
+            return hasPermission;
+        }
 
-        return hasPermission;
+        return false;
     }
 
-    public boolean isOwner(RaptorUserDetails u, Object obj, EntityType entity, Operation operation) {
+    public boolean isOwner(RaptorUserDetails u, EntityType entity, Operation operation, Object obj) {
 
         // has specific permission on own entity type eg. device_read_own
         Permission p = new Permission(entity, operation, true);
@@ -62,6 +90,10 @@ public class RaptorSecurity {
             if (obj instanceof String) {
                 ownerId = (String) obj;
             }
+            
+            if (obj instanceof User) {
+                ownerId = ((User) obj).getUuid();
+            }
 
             if (ownerId == null) {
                 return false;
@@ -69,6 +101,7 @@ public class RaptorSecurity {
 
             return ownerId.equals(u.getUuid());
         }
+
         return false;
     }
 

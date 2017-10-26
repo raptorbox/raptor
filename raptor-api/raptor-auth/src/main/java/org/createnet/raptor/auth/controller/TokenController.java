@@ -91,7 +91,7 @@ public class TokenController {
     @Autowired
     AclTokenService aclTokenService;
 
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@raptorSecurity.can(principal, 'token', 'read')")
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
             value = "List tokens",
@@ -115,7 +115,7 @@ public class TokenController {
         }
 
         // @TODO: add ACL checks. Currently users can list their tokens or must be SuperAdmin
-        if (!user.getUuid().equals(uuid) && !user.isSuperAdmin()) {
+        if (!user.getUuid().equals(uuid) && !user.isAdmin()) {
             return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
         }
 
@@ -155,7 +155,7 @@ public class TokenController {
         return ResponseEntity.ok(token);
     }
 
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@raptorSecurity.can(principal, 'token', 'read', #tokenId)")
     @RequestMapping(value = "/{tokenId}", method = RequestMethod.GET)
     @ApiOperation(
             value = "Get a token by ID",
@@ -182,7 +182,7 @@ public class TokenController {
         return ResponseEntity.ok(token);
     }
 
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@raptorSecurity.can(principal, 'token', 'create')")
     @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(
             value = "Create a token",
@@ -212,7 +212,7 @@ public class TokenController {
         }
 
         aclTokenService.register(token);
-        
+
         logger.debug("User {} created new token {} {}", currentUser.getUuid(), token2.getName(), token2.getId());
 
         eventPublisher.create(token2);
@@ -220,7 +220,7 @@ public class TokenController {
         return ResponseEntity.status(HttpStatus.CREATED).body(token2);
     }
 
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@raptorSecurity.can(principal, 'token', 'update', #tokenId)")
     @RequestMapping(value = "/{tokenId}", method = RequestMethod.PUT)
     @ApiOperation(
             value = "Update a token",
@@ -249,9 +249,9 @@ public class TokenController {
         if (token.getType() == Token.Type.LOGIN) {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Login token cannot be modified");
         }
-        
+
         String prevSecret = token.getSecret();
-        
+
         token.merge(rawToken);
         token.setUser(user);
         token.setType(Token.Type.DEFAULT);
@@ -266,17 +266,17 @@ public class TokenController {
         }
 
         Token token2 = tokenService.save(token);
-        
+
         aclTokenService.register(token2);
-        
+
         logger.debug("User {} update token {}", user.getUuid(), token2.getId());
-        
+
         eventPublisher.update(token2);
 
         return ResponseEntity.status(HttpStatus.OK).body(token2);
     }
 
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@raptorSecurity.can(principal, 'token', 'delete', #tokenId)")
     @RequestMapping(value = "/{tokenId}", method = RequestMethod.DELETE)
     @ApiOperation(
             value = "Delete a token",

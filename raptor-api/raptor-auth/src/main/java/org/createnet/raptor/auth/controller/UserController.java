@@ -114,11 +114,11 @@ public class UserController {
 
         User saved = userService.create(new User(rawUser, true));
         eventPublisher.create(saved);
-        
+
         return ResponseEntity.ok(saved);
     }
 
-    @PreAuthorize("@raptorSecurity.can(principal, 'user', 'read') or @raptorSecurity.isOwner(principal, #uuid, 'user', 'read')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'user', 'read', #uuid)")
     @RequestMapping(value = "/{uuid}", method = RequestMethod.GET)
     @ApiOperation(
             value = "Get an user profile",
@@ -140,7 +140,7 @@ public class UserController {
         return ResponseEntity.ok(u);
     }
 
-    @PreAuthorize("(hasAnyRole('admin', 'user_admin')) or principal.uuid == #uuid")
+    @PreAuthorize("@raptorSecurity.can(principal, 'user', 'admin')")
     @RequestMapping(value = "/{uuid}/impersonate", method = RequestMethod.GET)
     @ApiOperation(
             value = "Retrieve a login token for the user",
@@ -170,7 +170,7 @@ public class UserController {
         return ResponseEntity.ok(new LoginResponse(u, token));
     }
 
-    @PreAuthorize("(hasAnyRole('admin', 'user_admin')) or principal.uuid == #uuid")
+    @PreAuthorize("@raptorSecurity.can(principal, 'user', 'update', #uuid)")
     @RequestMapping(value = "/{uuid}", method = RequestMethod.PUT)
     @ApiOperation(
             value = "Update an user profile",
@@ -221,7 +221,7 @@ public class UserController {
         return ResponseEntity.ok(saved);
     }
 
-    @PreAuthorize("(hasAnyRole('admin', 'user_admin')) or principal.uuid == #uuid")
+    @PreAuthorize("@raptorSecurity.can(principal, 'user', 'delete', #uuid)")
     @RequestMapping(value = "/{uuid}", method = RequestMethod.DELETE)
     @ApiOperation(
             value = "Delete an user profile",

@@ -640,5 +640,5 @@ public class Device extends DeviceContainer implements Owneable {
     public Settings getSettings() {
         return settings;
     }
-
+    
 }

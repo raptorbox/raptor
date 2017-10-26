@@ -50,7 +50,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RequestMapping(value = "/auth/permission/token")
 @RestController
-@PreAuthorize("isAuthenticated()")
 @Api(tags = {"User", "Permission"})
 @ApiResponses(value = {
     @ApiResponse(
@@ -86,6 +85,7 @@ public class TokenPermissionController {
     @Autowired
     private AclTokenService aclTokenService;
 
+    @PreAuthorize("@raptorSecurity.can(principal, 'token', 'read', #tokenId)")
     @RequestMapping(value = "/{tokenId}/{userUuid}", method = RequestMethod.GET)
     @ApiOperation(
             value = "List user permissions on a token",
@@ -119,6 +119,7 @@ public class TokenPermissionController {
         return ResponseEntity.status(HttpStatus.OK).body(permissions);
     }
 
+    @PreAuthorize("@raptorSecurity.can(principal, 'token', 'read', #tokenId)")
     @RequestMapping(value = "/{tokenId}", method = RequestMethod.GET)
     @ApiOperation(
             value = "List current user permissions on a token",
@@ -146,6 +147,7 @@ public class TokenPermissionController {
         return ResponseEntity.status(HttpStatus.OK).body(permissions);
     }
 
+    @PreAuthorize("@raptorSecurity.can(principal, 'token', 'update', #tokenId)")
     @RequestMapping(value = "/{tokenId}", method = RequestMethod.PUT)
     @ApiOperation(
             value = "Save user permissions on a token",

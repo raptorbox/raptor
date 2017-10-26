@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -173,12 +174,12 @@ public class Utils {
         return r;
     }
     
-    static public Raptor createNewUserInstance() {
+    static public Raptor createNewUserInstance(List<Group> g) {
 
         String username = rndUsername();
         String password = username + Math.random();
 
-        User user = getRaptor().Admin().User().create(username, password, username + "@test.raptor.local");
+        User user = getRaptor().Admin().User().create(username, password, username + "@test.raptor.local", g);
         log.debug("Created user {} : {} with uuid {}", username, password, user.getUuid());
 
         assert user != null;
@@ -187,7 +188,11 @@ public class Utils {
         r.getClient().configureTimeout(socketTimeout, reqTimeout);
         r.Auth().login();
 
-        return r;
+        return r;        
+    }
+    
+    static public Raptor createNewUserInstance() {
+        return createNewUserInstance(new ArrayList());
     }
 
     public static String rndUsername() {

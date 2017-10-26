@@ -42,7 +42,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RequestMapping(value = "/auth/group")
 @RestController
-@PreAuthorize("hasAuthority('super_admin')")
 @Api(tags = {"Group"})
 @ApiResponses(value = {
     @ApiResponse(
@@ -72,7 +71,7 @@ public class GroupController {
     @Autowired
     private GroupService groupService;
 
-    @PreAuthorize("hasAuthority('admin') or hasAuthority('super_admin')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'group', 'read')")
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
             value = "List available groups",
@@ -86,7 +85,7 @@ public class GroupController {
         return ResponseEntity.ok(list);
     }
 
-    @PreAuthorize("hasAnyRole('admin', 'group_admin', 'group_update')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'group', 'update')")
     @RequestMapping(value = {"/{groupId}"}, method = RequestMethod.PUT)
     @ApiOperation(
             value = "Update a group",
@@ -120,7 +119,7 @@ public class GroupController {
         return ResponseEntity.ok(group);
     }
 
-    @PreAuthorize("hasAnyRole('admin', 'group_admin', 'group_create')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'group', 'create')")
     @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(
             value = "Create a new group",
@@ -167,7 +166,7 @@ public class GroupController {
         return ResponseEntity.ok(group);
     }
 
-    @PreAuthorize("hasAnyRole('admin', 'group_admin', 'group_delete')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'group', 'delete')")
     @RequestMapping(value = {"/{groupId}"}, method = RequestMethod.DELETE)
     @ApiOperation(
             value = "Delete a group",
