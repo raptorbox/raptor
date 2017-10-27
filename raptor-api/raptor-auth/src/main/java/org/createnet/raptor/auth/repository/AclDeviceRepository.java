@@ -29,8 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface AclDeviceRepository extends CrudRepository<AclDevice, Long>, JpaRepository<AclDevice, Long> {
 
-  AclDevice findByUuid(String uuid);
-  AclDevice findByOwner(User owner);
+  AclDevice findOneByUuid(String uuid);
+  AclDevice findOneByOwner(User owner);
 
   @Transactional
   @Override

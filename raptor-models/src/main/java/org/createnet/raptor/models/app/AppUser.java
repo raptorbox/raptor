@@ -18,7 +18,7 @@ package org.createnet.raptor.models.app;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.createnet.raptor.models.auth.DefaultGroup;
+import org.createnet.raptor.models.auth.StaticGroup;
 
 /**
  *
@@ -70,7 +70,7 @@ public class AppUser {
         addGroups(Arrays.asList(group));
     }
     
-    public boolean hasGroup(DefaultGroup group) {
+    public boolean hasGroup(StaticGroup group) {
         return getGroups().contains(new AppGroup(group.name()));
     }
 

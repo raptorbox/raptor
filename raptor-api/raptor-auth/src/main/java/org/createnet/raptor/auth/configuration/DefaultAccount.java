@@ -13,9 +13,11 @@ import org.createnet.raptor.auth.services.AclTokenService;
 import org.createnet.raptor.auth.services.GroupService;
 import org.createnet.raptor.auth.services.PermissionService;
 import org.createnet.raptor.auth.services.UserService;
+import org.createnet.raptor.common.client.InternalApiClientService;
 import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.acl.permission.PermissionUtil;
-import org.createnet.raptor.models.auth.DefaultGroup;
+import org.createnet.raptor.models.auth.DefaultGroups;
+import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.Group;
 import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.Token;
@@ -51,7 +53,7 @@ public class DefaultAccount {
 
     @Autowired
     private GroupService groupService;
-    
+
     @Autowired
     private PermissionService permissionService;
 
@@ -60,6 +62,9 @@ public class DefaultAccount {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    InternalApiClientService internalApiClientService;
 
     @Bean
     ThreadPoolTaskExecutor threadPoolTaskExecutor() {
@@ -75,35 +80,35 @@ public class DefaultAccount {
     }
 
     protected void createDefaultGroups() {
-        
+
         //generate permissions
         List<String> permissionList = PermissionUtil.generatePermissionList();
         permissionList.forEach((name) -> {
-            if(permissionService.getByName(name) == null) {
+            if (permissionService.getByName(name) == null) {
                 Permission perm = new Permission(name);
                 permissionService.save(perm);
                 log.debug("Created permission `{}` [id={}]", perm.getName(), perm.getId());
             }
         });
-        
+
         // platform admin user
-        Group adminGroup = groupService.getByNameAndApp(DefaultGroup.admin.name(), null);
+        Group adminGroup = groupService.getByNameAndApp(StaticGroup.admin.name(), null);
         if (adminGroup == null) {
-            adminGroup = new Group(DefaultGroup.admin, Arrays.asList(new Permission(Operation.admin)));
+            adminGroup = DefaultGroups.admin;
             groupService.save(adminGroup);
             log.debug("Created group `{}` (id: {})", adminGroup.getName(), adminGroup.getId());
         }
 
         // generic user role
-        Group userGroup = groupService.getByNameAndApp(DefaultGroup.user.name(), null);
+        Group userGroup = groupService.getByNameAndApp(StaticGroup.user.name(), null);
         if (userGroup == null) {
-            userGroup = new Group(DefaultGroup.user, new ArrayList());
+            userGroup = DefaultGroups.user;
             groupService.save(userGroup);
-            log.debug("Created group `{}` (id: {})", userGroup.getName(), userGroup.getId());
+            log.debug("Saved group `{}` (id: {})", userGroup.getName(), userGroup.getId());
         }
-        
+
     }
-    
+
     protected void createDefaultUsers() {
 
         List<AdminUser> users = configuration.getAuth().getUsers();
@@ -133,7 +138,7 @@ public class DefaultAccount {
                 storedUser.setPassword(passwordEncoder.encode(admin.getPassword()));
                 storedUser.setEmail(admin.getEmail());
 
-                for (DefaultGroup group : admin.getRoles()) {
+                for (StaticGroup group : admin.getRoles()) {
                     storedUser.addGroup(group);
                 }
 
@@ -165,7 +170,9 @@ public class DefaultAccount {
                     token.setType(Token.Type.DEFAULT);
 
                     token = r.Admin().Token().create(token);
+
                     admin.setToken(token.getToken());
+                    internalApiClientService.getConfig().setToken(token.getToken());
 
                     log.debug("Created `{}` token (id={})", token.getName(), token.getId());
                 }

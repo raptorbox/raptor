@@ -17,7 +17,7 @@ package org.createnet.raptor.auth.configuration;
 
 import javax.sql.DataSource;
 import org.createnet.raptor.models.acl.permission.RaptorPermission;
-import org.createnet.raptor.models.auth.DefaultGroup;
+import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.Permission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,7 +62,8 @@ public class AclConfiguration {
 
     @Bean
     public AclAuthorizationStrategy aclAuthorizationStrategy() {
-        return new AclAuthorizationStrategyImpl(new Permission(DefaultGroup.super_admin.name()));
+        //The only mandatory parameter relates to the system-wide GrantedAuthority instances that can be held to always permit ACL changes
+        return new AclAuthorizationStrategyImpl(new Permission(StaticGroup.admin.name()));
     }
 
     @Bean

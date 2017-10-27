@@ -62,7 +62,7 @@ public class AuthDeviceService {
     }
 
     public AclDevice getByUuid(String uuid) {
-        return deviceRepository.findByUuid(uuid);
+        return deviceRepository.findOneByUuid(uuid);
     }
 
     @Cacheable(key = "#id")
@@ -85,7 +85,7 @@ public class AuthDeviceService {
 
         AclDevice device = null;
         if (req.objectId != null) {
-            device = deviceRepository.findByUuid(req.objectId);
+            device = deviceRepository.findOneByUuid(req.objectId);
         }
 
         /**
@@ -97,7 +97,7 @@ public class AuthDeviceService {
         }
         
         if (!req.userId.equals(user.getUuid())) {
-            if (!user.isSuperAdmin()) {
+            if (!user.isAdmin()) {
                 if (!aclDeviceService.isGranted(device, RaptorPermission.ADMINISTRATION)) {
                     throw new AccessDeniedException("Cannot operate on that object");
                 }
@@ -130,7 +130,7 @@ public class AuthDeviceService {
         }
 
         if (req.parentId != null) {
-            AclDevice parentDevice = deviceRepository.findByUuid(req.parentId);
+            AclDevice parentDevice = deviceRepository.findOneByUuid(req.parentId);
             if (parentDevice == null) {
                 throw new DeviceNotFoundException();
             }

@@ -71,11 +71,11 @@ public class InventoryTest {
 
         Device dev = new Device();
         dev.name("test create")
-            .description("info about");
-        
+                .description("info about");
+
         dev.properties().put("active", true);
         dev.properties().put("version", 15L);
-        
+
         dev.validate();
         raptor.Inventory().create(dev);
 
@@ -125,7 +125,7 @@ public class InventoryTest {
         dev.name("modified device");
         dev.validate();
         raptor.Inventory().create(dev);
-        
+
         Utils.waitFor(500);
         raptor.Inventory().update(dev);
 
@@ -157,7 +157,7 @@ public class InventoryTest {
             Device dev1 = new Device();
             dev1.name("test-search " + i);
             dev1.properties().put("version", i);
-            dev1.properties().put("active", i%2==0);
+            dev1.properties().put("active", i % 2 == 0);
             raptor.Inventory().create(dev1);
         }
 
@@ -204,20 +204,19 @@ public class InventoryTest {
     public void searchByUserId() {
 
         Raptor raptor = Utils.getRaptor();
-        
-        
+
         Raptor r = Utils.createNewAdminInstance();
-        
+
         log.debug("Create device by user {}", r.Auth().getUser().getUsername());
         Device dev1 = new Device();
         dev1.name("test dev with prop");
         r.Inventory().create(dev1);
-        
+
         String userId = r.Auth().getUser().getUuid();
-        
+
         DeviceQuery q = new DeviceQuery();
         q.userId(userId);
-        
+
         log.debug("Searching for {}", q.toJSON().toString());
 
         List<Device> results = raptor.Inventory().search(q);
@@ -232,20 +231,20 @@ public class InventoryTest {
 
         Raptor raptor = Utils.getRaptor();
         Raptor r = Utils.createNewAdminInstance();
-        
+
         log.debug("Create device by user {}", r.Auth().getUser().getUsername());
         Device dev1 = new Device();
         dev1.name("test dev");
         dev1.properties().put("test", true);
-        
+
         r.Inventory().create(dev1);
-        
+
         String userId = r.Auth().getUser().getUuid();
-        
+
         DeviceQuery q = new DeviceQuery();
         q.userId(userId);
         q.properties.has("test", true);
-        
+
         log.debug("Searching for {}", q.toJSON().toString());
 
         List<Device> results = raptor.Inventory().search(q);
@@ -254,52 +253,52 @@ public class InventoryTest {
         assertEquals(1, results.size());
 
     }
-    
+
     @Test
     public void changeUserIdForDevice() {
 
         Raptor raptor = Utils.getRaptor();
         Raptor r = Utils.createNewAdminInstance();
         Raptor r2 = Utils.createNewAdminInstance();
-        
+
         log.debug("Create device by user {}", r.Auth().getUser().getUsername());
         Device dev1 = new Device();
         dev1.name("test dev");
-        dev1.properties().put("test", true); 
-        
+        dev1.properties().put("test", true);
+
         r.Inventory().create(dev1);
-        
+
         String userId = r.Auth().getUser().getUuid();
         String newUser = r2.Auth().getUser().getUuid();
-        
+
         DeviceQuery q = new DeviceQuery();
         q.userId(userId);
         q.properties.has("test", true);
-        
+
         log.debug("Searching for {}", q.toJSON().toString());
 
         List<Device> results = raptor.Inventory().search(q);
 
         log.debug("Results found {}", results.stream().map(d -> d.name()).collect(Collectors.toList()));
-        
-        if(results.size() == 1) {
-        	Device d = results.get(0).userId(newUser);
-        	d.name("user id changed");
-        	Device dd = raptor.Inventory().update(d);
-        	dd.toString();
-        }
-        
+
+        assertEquals(1, results.size());
+
+        Device d = results.get(0).userId(newUser);
+        d.name("user id changed");
+        Device dd = raptor.Inventory().update(d);
+        dd.toString();
+
         DeviceQuery q1 = new DeviceQuery();
         q1.userId(newUser);
         q1.properties.has("test", true);
-        
+
         log.debug("Searching for {}", q1.toJSON().toString());
 
         List<Device> newResults = raptor.Inventory().search(q1);
 
-        log.debug("Results found {}", newResults.stream().map(d -> d.toString()).collect(Collectors.toList()));
+        log.debug("Results found {}", newResults.stream().map(d1 -> d1.toString()).collect(Collectors.toList()));
         assertEquals(1, newResults.size());
 
     }
-    
+
 }

@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.models.auth;
 
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -152,20 +151,14 @@ public class User implements Serializable {
 
     @JsonIgnore
     public boolean isAdmin() {
-        return this.hasGroup(DefaultGroup.admin);
-    }
-
-    @JsonIgnore
-    @Deprecated
-    public boolean isSuperAdmin() {
-        return isAdmin();
+        return this.hasGroup(StaticGroup.admin);
     }
 
     public boolean hasGroup(String name) {
         return this.getGroups().stream().filter(r -> r.getName().equals(name)).count() >= 1;
     }
 
-    public boolean hasGroup(DefaultGroup g) {
+    public boolean hasGroup(StaticGroup g) {
         return hasGroup(g.name());
     }
 
@@ -213,7 +206,7 @@ public class User implements Serializable {
         }
     }
 
-    public void addGroup(DefaultGroup g) {
+    public void addGroup(StaticGroup g) {
         if (!this.hasGroup(g)) {
             this.groups.add(new Group(g));
         }
@@ -225,7 +218,7 @@ public class User implements Serializable {
         }
     }
 
-    public void removeGroup(DefaultGroup g) {
+    public void removeGroup(StaticGroup g) {
         if (this.hasGroup(g)) {
             this.groups.remove(new Group(g));
         }

@@ -203,17 +203,17 @@ public class AclManagerService implements AclManager {
                 acl.insertAce(acl.getEntries().size(), permission, sid, true);
             }
         } catch (Exception e) {
-            log.warn("Failed to add ACE: {}", e.getMessage());
+            log.warn("Failed to add ACE [sid:{}]: {}", sid, e.getMessage());
             throw new AclManagerException(e);
         }
     }
 
-    public void deleteAllGrantedAcl() {
+//    public void deleteAllGrantedAcl() {
 //        jdbcTemplate.update("delete from acl_entry");
 //        jdbcTemplate.update("delete from acl_object_identity");
 //        jdbcTemplate.update("delete from acl_sid");
 //        jdbcTemplate.update("delete from acl_class");
-    }
+//    }
 
     public List<Permission> getPermissionList(AclSubject subj) {
 

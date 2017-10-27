@@ -74,7 +74,8 @@ public class TreeNode extends RaptorContainer implements Owneable {
             throw new ParserException(ex);
         }
     }
-
+    
+    @JsonIgnore
     @Override
     public String getOwnerId() {
         return getUserId();

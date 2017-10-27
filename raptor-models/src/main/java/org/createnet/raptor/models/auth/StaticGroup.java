@@ -19,8 +19,8 @@ package org.createnet.raptor.models.auth;
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-public enum DefaultGroup {
-    super_admin,
+public enum StaticGroup {
     admin,
-    user
+    user,
+    service
 }

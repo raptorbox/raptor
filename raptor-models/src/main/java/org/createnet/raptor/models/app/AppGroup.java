@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.createnet.raptor.models.auth.DefaultGroup;
+import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.Group;
 
 /**
@@ -38,7 +38,7 @@ public class AppGroup {
         this.name = name;
     }
     
-    public AppGroup(DefaultGroup group) {
+    public AppGroup(StaticGroup group) {
         this.name = group.name();
     }
 

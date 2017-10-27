@@ -143,8 +143,8 @@ public abstract class AbstractAclService<T extends AclSubject> implements AclSer
             return false;
         }
 
-        if (user.isSuperAdmin()) {
-            logger.debug("ACL: User is super admin");
+        if (user.isAdmin()) {
+            logger.debug("ACL: User is admin");
             return true;
         }
 

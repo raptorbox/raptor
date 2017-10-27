@@ -27,7 +27,7 @@ import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.app.AppGroup;
 import org.createnet.raptor.models.app.AppUser;
-import org.createnet.raptor.models.auth.DefaultGroup;
+import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -99,12 +99,12 @@ public class AppController {
 
         // ensure admin role is avail
         if (app.getAdminGroup() == null) {
-            app.getGroups().add(new AppGroup(DefaultGroup.admin));
+            app.getGroups().add(new AppGroup(StaticGroup.admin));
         }
 
         // ensure user role is avail
         if (app.getUserGroup() == null) {
-            app.getGroups().add(new AppGroup(DefaultGroup.user));
+            app.getGroups().add(new AppGroup(StaticGroup.user));
         }
     }
 

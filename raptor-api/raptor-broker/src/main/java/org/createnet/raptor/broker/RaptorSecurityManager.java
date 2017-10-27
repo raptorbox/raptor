@@ -28,7 +28,7 @@ import org.createnet.raptor.common.authentication.RaptorUserDetails;
 import org.createnet.raptor.common.client.InternalApiClientService;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
-import org.createnet.raptor.models.auth.DefaultGroup;
+import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.configuration.AuthConfiguration;
@@ -300,7 +300,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     @Override
     public boolean validateUserAndRole(String user, String password, Set<Role> roles, CheckType checkType) {
         logger.warn("validateUserAndRole(user, password, roles, checkType): NOT IMPLEMENTED");
-        return roles.contains(DefaultGroup.admin.name()) && validateUser(user, password);
+        return roles.contains(StaticGroup.admin.name()) && validateUser(user, password);
     }
 
 }

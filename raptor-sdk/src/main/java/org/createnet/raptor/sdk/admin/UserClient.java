@@ -25,7 +25,7 @@ import java.util.Set;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.app.App;
-import org.createnet.raptor.models.auth.DefaultGroup;
+import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.Group;
 import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.sdk.AbstractClient;
@@ -319,7 +319,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public User createAdmin(String username, String password, String email) {
-        return create(username, password, email, Arrays.asList(new Group(DefaultGroup.admin)));
+        return create(username, password, email, Arrays.asList(new Group(StaticGroup.admin)));
     }
 
     /**

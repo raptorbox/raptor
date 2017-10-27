@@ -78,11 +78,11 @@ public class Group implements Serializable {
         this.app = app;
     }
 
-    public Group(DefaultGroup g) {
+    public Group(StaticGroup g) {
         this.name = g.name();
     }
 
-    public Group(DefaultGroup g, List<Permission> permissions) {
+    public Group(StaticGroup g, List<Permission> permissions) {
         this(g.name(), permissions);
     }
 

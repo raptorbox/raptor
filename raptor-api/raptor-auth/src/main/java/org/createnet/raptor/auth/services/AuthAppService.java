@@ -96,7 +96,7 @@ public class AuthAppService {
         }
 
         if (!req.userId.equals(user.getUuid())) {
-            if (!user.isSuperAdmin()) {
+            if (!user.isAdmin()) {
                 if (!aclAppService.isGranted(app, RaptorPermission.ADMINISTRATION)) {
                     throw new AccessDeniedException("Cannot operate on that object");
                 }

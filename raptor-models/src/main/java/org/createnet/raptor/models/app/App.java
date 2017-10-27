@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.createnet.raptor.models.acl.Owneable;
-import org.createnet.raptor.models.auth.DefaultGroup;
+import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -244,7 +244,7 @@ public class App implements Serializable, Owneable {
         }
     }
 
-    public AppGroup getGroup(DefaultGroup searchedGroup) {
+    public AppGroup getGroup(StaticGroup searchedGroup) {
         Optional<AppGroup> group = getGroups().stream().filter((r) -> {
             return r.getName().equals(searchedGroup.name());
         }).findFirst();
@@ -253,15 +253,15 @@ public class App implements Serializable, Owneable {
 
     @JsonIgnore
     public AppGroup getAdminGroup() {
-        return getGroup(DefaultGroup.admin);
+        return getGroup(StaticGroup.admin);
     }
 
     @JsonIgnore
     public Object getUserGroup() {
-        return getGroup(DefaultGroup.user);
+        return getGroup(StaticGroup.user);
     }
     
-    public boolean hasGroup(User user, DefaultGroup group) {
+    public boolean hasGroup(User user, StaticGroup group) {
         return getUsers().stream().filter((u) -> {
             return u.getId().equals(user.getUuid()) && u.hasGroup(group);
         }).count() == 1;
@@ -269,9 +269,10 @@ public class App implements Serializable, Owneable {
     
     @JsonIgnore
     public boolean isAdmin(User user) {
-        return hasGroup(user, DefaultGroup.admin);
+        return hasGroup(user, StaticGroup.admin);
     }
-
+    
+    @JsonIgnore
     @Override
     public String getOwnerId() {
         return getUserId();

@@ -18,8 +18,7 @@ package org.createnet.raptor.models.configuration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.createnet.raptor.models.auth.DefaultGroup;
-import org.createnet.raptor.models.auth.Permission;
+import org.createnet.raptor.models.auth.StaticGroup;
 
 /**
  *
@@ -52,14 +51,10 @@ public class AuthConfiguration {
         private String email;
         private String type;
         private boolean lock;
-        private List<DefaultGroup> groups = new ArrayList();
+        private List<StaticGroup> groups = new ArrayList();
         
         public boolean isAdmin() {
-            return isSuperAdmin() || getRoles().contains(DefaultGroup.admin);
-        }
-        
-        public boolean isSuperAdmin() {
-            return getRoles().contains(DefaultGroup.super_admin);
+            return getRoles().contains(StaticGroup.admin);
         }
         
         public String getType() {
@@ -82,11 +77,11 @@ public class AuthConfiguration {
             this.lock = lock;
         }
         
-        public List<DefaultGroup> getRoles() {
+        public List<StaticGroup> getRoles() {
             return groups;
         }
 
-        public void setRoles(List<DefaultGroup> groups) {
+        public void setRoles(List<StaticGroup> groups) {
             this.groups = groups;
         }
         

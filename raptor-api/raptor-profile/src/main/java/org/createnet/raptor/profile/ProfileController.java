@@ -108,7 +108,7 @@ public class ProfileController {
             response = org.createnet.raptor.models.profile.Profile.class,
             nickname = "setProfile"
     )
-    @PreAuthorize("@raptorSecurity.can(principal, 'profile', 'write', #userId)")
+    @PreAuthorize("@raptorSecurity.can(principal, 'profile', 'create', #userId) or @raptorSecurity.can(principal, 'profile', 'update', #userId)")
     public ResponseEntity<?> setProfile(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("userId") String userId,
