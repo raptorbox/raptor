@@ -321,4 +321,14 @@ public class User implements Serializable {
         return "User{" + "uuid=" + uuid + '}';
     }
 
+    public boolean hasPermission(Permission p) {
+        return getGroups().stream().filter((g) -> {
+            return g.getPermissions().contains(p);
+        }).count() > 0;
+    }
+    
+    public boolean hasPermission(String p) {
+        return hasPermission(new Permission(p));
+    }
+
 }

@@ -111,7 +111,6 @@ public class UserService {
             user.setEnabled(rawUser.getEnabled());
         }
 
-        // TODO add Group repository
         if (!rawUser.getGroups().isEmpty()) {
             rawUser.getGroups().stream().forEach(g -> user.addGroup(g));
             loadGroups(user);

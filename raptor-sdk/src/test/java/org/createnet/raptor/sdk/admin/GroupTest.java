@@ -15,25 +15,18 @@
  */
 package org.createnet.raptor.sdk.admin;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
-import org.createnet.raptor.models.app.App;
-import org.createnet.raptor.models.auth.AclApp;
 import org.createnet.raptor.models.auth.Group;
 import org.createnet.raptor.models.auth.Permission;
-import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.auth.request.AuthorizationResponse;
+import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.Utils;
-import org.createnet.raptor.sdk.api.AuthClient;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -172,4 +165,43 @@ public class GroupTest {
 
     }
 
+    @Test
+    public void testGroupEnforcement() {
+
+        Raptor adm1 = Utils.createNewAdminInstance();
+        Raptor usr1 = Utils.createNewUserInstance();
+        
+        User admin = adm1.Auth().getUser();
+        User user = usr1.Auth().getUser();
+        
+        // read all users
+        Permission user_read = new Permission(EntityType.user, Operation.read);
+        //admin own devices
+        Permission device_admin_own = new Permission(EntityType.device, Operation.admin, true);
+        
+        String groupName = "g" + adm1.Auth().getUser().getUsername();
+        Group group = new Group(groupName, Arrays.asList(user_read, device_admin_own));
+        adm1.Admin().Group().create(group);
+       
+        user.addGroup(group);
+        adm1.Admin().User().update(user);
+        
+        assertTrue(user.hasPermission(user_read));
+        assertTrue(user.hasPermission(device_admin_own));
+
+        // read own profile
+        User u1 = usr1.Admin().User().get(user.getUuid());
+        assertEquals(user.getUuid(), u1.getUuid());
+        
+        // should be allowed to read other user info
+        User a1 = usr1.Admin().User().get(admin.getUuid());
+        assertEquals(admin.getUuid(), a1.getUuid());
+        
+        Device dev = usr1.Inventory().create(new Device().name("test"));
+        dev.name("test updated");
+        usr1.Inventory().update(dev);
+        usr1.Inventory().delete(dev);
+        
+    }    
+    
 }
