@@ -30,9 +30,22 @@ public class DefaultGroups {
     ));
     
     public static Group user = new Group(StaticGroup.user, Arrays.asList(
-            new Permission(EntityType.device, Operation.admin, true),
-            new Permission(EntityType.tree, Operation.admin, true),
-            new Permission(EntityType.app, Operation.admin, true)
+            
+            new Permission(EntityType.device, Operation.create),
+            new Permission(EntityType.device, Operation.update, true),
+            new Permission(EntityType.device, Operation.delete, true),
+            new Permission(EntityType.device, Operation.push, true),
+            new Permission(EntityType.device, Operation.pull, true),
+            new Permission(EntityType.device, Operation.execute, true),
+            
+            new Permission(EntityType.tree, Operation.create),
+            new Permission(EntityType.tree, Operation.update, true),
+            new Permission(EntityType.tree, Operation.delete, true),
+            
+            new Permission(EntityType.app, Operation.create),
+            new Permission(EntityType.app, Operation.update, true),
+            new Permission(EntityType.app, Operation.delete, true)
+
     ));
     
 }

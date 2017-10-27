@@ -72,7 +72,7 @@ public class AppTest {
     @Test
     public void create() {
 
-        Raptor raptor = Utils.createNewAdminInstance();
+        Raptor raptor = Utils.createNewUserInstance();
 
         log.debug("create app");
 
