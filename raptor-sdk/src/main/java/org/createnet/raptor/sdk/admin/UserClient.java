@@ -119,7 +119,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public AuthorizationResponse isAuthorized(Device device, User user, Operation permission) {
-        return isAuthorized(device.id(), user.getUuid(), permission);
+        return isAuthorized(EntityType.device, device.id(), user.getUuid(), permission);
     }
 
     /**
@@ -130,23 +130,25 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public AuthorizationResponse isAuthorized(Device device, Operation permission) {
-        return isAuthorized(device.id(), getContainer().Auth().getUser().getUuid(), permission);
+        return isAuthorized(EntityType.device, device.id(), getContainer().Auth().getUser().getUuid(), permission);
     }
 
     /**
      * Check if an user is authorized to operate on a device
      *
-     * @param deviceId
+     * @param type
+     * @param objectId
      * @param userId
      * @param permission
      * @return
      */
-    public AuthorizationResponse isAuthorized(String deviceId, String userId, Operation permission) {
+    public AuthorizationResponse isAuthorized(EntityType type, String objectId, String userId, Operation permission) {
 
         AuthorizationRequest auth = new AuthorizationRequest();
-        auth.objectId = deviceId;
+        auth.objectId = objectId;
         auth.permission = permission.name();
         auth.userId = userId;
+        auth.type = type;
 
         JsonNode node = getClient().post(Routes.PERMISSION_CHECK, toJsonNode(auth), RequestOptions.retriable());
         return getMapper().convertValue(node, AuthorizationResponse.class);

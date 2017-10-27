@@ -55,25 +55,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/app")
 @RestController
 @ApiResponses(value = {
-    @ApiResponse(
-            code = 200,
-            message = "Ok"
-    )
-    ,
-    @ApiResponse(
-            code = 401,
-            message = "Not authorized"
-    )
-    ,
-    @ApiResponse(
-            code = 403,
-            message = "Forbidden"
-    )
-    ,
-    @ApiResponse(
-            code = 500,
-            message = "Internal error"
-    )
+    @ApiResponse(code = 200,message = "Ok")
+    ,@ApiResponse(code = 401,message = "Not authorized")
+    ,@ApiResponse(code = 403,message = "Forbidden")
+    ,@ApiResponse(code = 500,message = "Internal error")
 })
 @Api(tags = {"Application"})
 public class AppController {

@@ -18,6 +18,7 @@ package org.createnet.raptor.sdk.admin;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.auth.User;
@@ -253,10 +254,10 @@ public class UserTest {
         res = r1.Admin().User().isAuthorized(dev1, Operation.read);
         assertEquals(res.result, true);
 
-        res = r1.Admin().User().isAuthorized(dev1.id(), userId2, Operation.admin);
+        res = r1.Admin().User().isAuthorized(EntityType.device, dev1.id(), userId2, Operation.admin);
         assertEquals(res.result, false);
 
-        res = r1.Admin().User().isAuthorized(dev1.id(), userId2, Operation.read);
+        res = r1.Admin().User().isAuthorized(EntityType.device, dev1.id(), userId2, Operation.read);
         assertEquals(res.result, false);
 
     }

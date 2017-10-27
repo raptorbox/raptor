@@ -20,6 +20,6 @@ package org.createnet.raptor.models.acl;
  * @author Luca Capra <luca.capra@gmail.com>
  */
 public enum EntityType {
-    app, device, stream, action, data, tree,
+    app, device, stream, action, data, tree, profile,
     user, permission, group, token,
 }

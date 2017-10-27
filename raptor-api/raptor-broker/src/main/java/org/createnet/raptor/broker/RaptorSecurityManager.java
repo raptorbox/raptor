@@ -23,12 +23,18 @@ import org.apache.activemq.artemis.core.security.CheckType;
 import org.apache.activemq.artemis.core.security.Role;
 import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
 import org.apache.activemq.artemis.spi.core.security.ActiveMQSecurityManager2;
+import org.createnet.raptor.common.authentication.RaptorSecurity;
+import org.createnet.raptor.common.authentication.RaptorUserDetails;
 import org.createnet.raptor.common.client.InternalApiClientService;
+import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.auth.DefaultGroup;
+import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.configuration.AuthConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
+import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.tree.TreeNode;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Topics;
 import org.createnet.raptor.sdk.api.AuthClient;
@@ -49,6 +55,9 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
     @Autowired
     InternalApiClientService apiClient;
+    
+    @Autowired
+    RaptorSecurity raptorSecurity;
 
     private final Logger logger = LoggerFactory.getLogger(RaptorSecurityManager.class);
 
@@ -208,19 +217,51 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
                 String type = topicTokens[0];
                 String id = topicTokens[1];
-
-                switch (Topics.Types.valueOf(type)) {
+                
+                User user = r.Auth().getUser();
+                Device device = new Device(id);
+                
+                
+                
+                switch (EntityType.valueOf(type)) {
                     case device:
-                        return hasDevicePermission(r, id, Operation.admin);
+                        return raptorSecurity.can(user, EntityType.device, Operation.read, device);
                     case action:
-                        return hasDevicePermission(r, id, Operation.execute);
+                        return raptorSecurity.can(user, EntityType.device, Operation.execute, device);
                     case stream:
-                        return hasDevicePermission(r, id, Operation.pull);
+                        return raptorSecurity.can(user, EntityType.device, Operation.pull, device);
                     case tree:
-                        return hasDevicePermission(r, null, Operation.tree);
+                        
+                        EntityType treeType = EntityType.tree;
+                        Operation treeOp = Operation.read;
+                        
+                        if (topicTokens[2] != null) {
+                            try {
+                                
+                                treeType = EntityType.valueOf(topicTokens[2]);
+                                
+                                switch(treeType) {
+                                    case device:
+                                        treeOp = Operation.read;
+                                        break;
+                                    case action:
+                                        treeOp = Operation.execute;
+                                        break;
+                                    case stream:
+                                        treeOp = Operation.pull;
+                                        break;
+                                }
+
+                            } catch(Exception ex) {
+                                logger.debug("Cannot parse tree type `{}`", topicTokens[2]);
+                                return false;
+                            }
+                        }
+                        
+                        return raptorSecurity.can(user, treeType, treeOp, new TreeNode(id));
                     case token:
                     case user:
-                        return r.Auth().getUser().isSuperAdmin();
+                        return r.Auth().getUser().isAdmin();
                 }
 
                 logger.error("Unrecognized subscribe topic pattern {}", address);
@@ -240,7 +281,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         // if using credentials, use the service client so the login won't expire
         Raptor client = (r.getConfig().hasCredentials()) ? apiClient : r;
         try {
-            AuthorizationResponse req =  client.Admin().User().isAuthorized(id, r.Auth().getUser().getUuid(), perm);
+            AuthorizationResponse req =  client.Admin().User().isAuthorized(EntityType.device, id, r.Auth().getUser().getUuid(), perm);
             logger.debug("Authorization to user={} permission={} result={}", r.Auth().getUser().getUsername(), perm, req.result);
             return req.result;
         }

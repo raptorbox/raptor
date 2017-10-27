@@ -152,7 +152,7 @@ public class DispatcherService {
      * @param payload
      */
     public void notifyTreeEvent(TreeNode node, DispatcherPayload payload) {
-        String topic = String.format(Topics.TREE, node.getId());
+        String topic = String.format(Topics.TREE, node.getId(), node.getType().name());
         notifyEvent(topic, payload);
     }
 

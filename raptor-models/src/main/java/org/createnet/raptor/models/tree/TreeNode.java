@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Owneable;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
@@ -45,6 +46,13 @@ public class TreeNode extends RaptorContainer implements Owneable {
     
     public static final String separator = "/";
 
+    public TreeNode() {
+    }
+
+    public TreeNode(String id) {
+        this.id = id;
+    }
+    
     @Override
     public void validate() throws ValidationException {
         
@@ -72,10 +80,6 @@ public class TreeNode extends RaptorContainer implements Owneable {
         return getUserId();
     }
     
-    public enum NodeType {
-        group, user, device, app
-    }
-
     @Id
     protected String id = UUID.randomUUID().toString();
 
@@ -83,7 +87,7 @@ public class TreeNode extends RaptorContainer implements Owneable {
     protected String name = "";
 
     @Indexed
-    protected NodeType type;
+    protected EntityType type;
 
     @Indexed
     protected String userId;
@@ -114,7 +118,7 @@ public class TreeNode extends RaptorContainer implements Owneable {
                 .id(device.id())
                 .parentId(null)
                 .userId(device.userId())
-                .type(NodeType.device)
+                .type(EntityType.device)
                 .order(0);
     }
 
@@ -126,7 +130,7 @@ public class TreeNode extends RaptorContainer implements Owneable {
      */
     static public TreeNode create(String name) {
         return new TreeNode()
-                .type(NodeType.group)
+                .type(EntityType.group)
                 .name(name);
     }
 
@@ -152,7 +156,7 @@ public class TreeNode extends RaptorContainer implements Owneable {
         return name;
     }
 
-    public NodeType getType() {
+    public EntityType getType() {
         return type;
     }
 
@@ -182,7 +186,7 @@ public class TreeNode extends RaptorContainer implements Owneable {
         return this;
     }
 
-    public TreeNode type(NodeType type) {
+    public TreeNode type(EntityType type) {
         this.type = type;
         return this;
     }
@@ -229,17 +233,17 @@ public class TreeNode extends RaptorContainer implements Owneable {
     
     @JsonIgnore
     public boolean isDevice() {
-        return getType().equals(NodeType.device);
+        return getType().equals(EntityType.device);
     }
 
     @JsonIgnore
     public boolean isGroup() {
-        return getType().equals(NodeType.group);
+        return getType().equals(EntityType.group);
     }
 
     @JsonIgnore
     public boolean isUser() {
-        return getType().equals(NodeType.user);
+        return getType().equals(EntityType.user);
     }
     
     /**

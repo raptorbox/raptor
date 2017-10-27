@@ -86,7 +86,6 @@ public class TreeController {
     @Autowired
     private TreeService treeService;
 
-
     @RequestMapping(
             method = RequestMethod.POST
     )
@@ -95,29 +94,29 @@ public class TreeController {
             notes = "",
             nickname = "create"
     )
-    @PreAuthorize("hasPermission(null, 'tree')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'create')")
     public ResponseEntity<?> create(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("parentId") Optional<String> optionalParentId,
             @RequestBody TreeNode raw
     ) {
-               
+
         TreeNode node = new TreeNode();
         node.merge(raw);
 
-        if(node.getUserId() == null) {
+        if (node.getUserId() == null) {
             node.user(currentUser);
         }
         if (!currentUser.isAdmin() && !node.getUserId().equals(currentUser.getUuid())) {
             node.user(currentUser);
         }
-        
+
         treeService.save(node);
         log.debug("Added node {}", node.getId());
 
         return ResponseEntity.ok(node);
-    }    
-    
+    }
+
     @RequestMapping(
             method = RequestMethod.GET
     )
@@ -128,7 +127,7 @@ public class TreeController {
             responseContainer = "List",
             nickname = "list"
     )
-    @PreAuthorize("hasPermission(null, 'tree')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'read')")
     public ResponseEntity<?> list(
             @AuthenticationPrincipal User currentUser
     ) {
@@ -149,7 +148,7 @@ public class TreeController {
             responseContainer = "List",
             nickname = "tree"
     )
-    @PreAuthorize("hasPermission(null, 'tree')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'read')")
     public ResponseEntity<?> tree(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("nodeId") String nodeId
@@ -169,13 +168,13 @@ public class TreeController {
             responseContainer = "List",
             nickname = "children"
     )
-    @PreAuthorize("hasPermission(null, 'tree')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'read')")
     public ResponseEntity<?> children(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("nodeId") String nodeId
     ) {
         List<TreeNode> children = treeService.children(nodeId);
-        if(children == null) {
+        if (children == null) {
             return ResponseEntity.ok(new TreeNode[0]);
         }
         return ResponseEntity.ok(children);
@@ -183,14 +182,14 @@ public class TreeController {
 
     @RequestMapping(
             method = RequestMethod.PUT,
-            value = { "/{parentId}", "/" }
+            value = {"/{parentId}", "/"}
     )
     @ApiOperation(
             value = "Add items to the tree node",
             notes = "",
             nickname = "add"
     )
-    @PreAuthorize("hasPermission(null, 'tree')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'create')")
     public ResponseEntity<?> add(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("parentId") Optional<String> optionalParentId,
@@ -198,7 +197,7 @@ public class TreeController {
     ) {
 
         TreeNode parent = new TreeNode();
-        if(optionalParentId.isPresent()) {
+        if (optionalParentId.isPresent()) {
             TreeNode storedParent = treeService.get(optionalParentId.get());
             if (storedParent == null) {
                 return JsonErrorResponse.notFound("Node not found");
@@ -215,8 +214,8 @@ public class TreeController {
 
             node.merge(raw);
             node.parent(parent);
-            
-            if(node.getUserId() == null) {
+
+            if (node.getUserId() == null) {
                 node.user(currentUser);
             }
             if (!currentUser.isAdmin() && !node.getUserId().equals(currentUser.getUuid())) {
@@ -232,22 +231,22 @@ public class TreeController {
 
     @RequestMapping(
             method = RequestMethod.DELETE,
-            value = { "/{nodeId}" }
+            value = {"/{nodeId}"}
     )
     @ApiOperation(
             value = "Delete a node from a tree",
             notes = "",
             nickname = "delete"
     )
-    @PreAuthorize("hasPermission(null, 'tree')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'delete')")
     public ResponseEntity<?> delete(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("nodeId") String nodeId
     ) {
 
         TreeNode node = treeService.get(nodeId);
-        
-        if(node == null) {
+
+        if (node == null) {
             return JsonErrorResponse.notFound();
         }
 

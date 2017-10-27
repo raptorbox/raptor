@@ -32,7 +32,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.MultiValueMap;
@@ -112,7 +111,7 @@ public class InventoryController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(value = "Create a device instance", notes = "", response = Device.class, nickname = "createDevice")
-    @PreAuthorize("hasPermission(null, 'create')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'create')")
     public ResponseEntity<?> createDevice(@AuthenticationPrincipal User currentUser, @RequestBody Device device) {
 
         device.setDefaults();
@@ -159,7 +158,7 @@ public class InventoryController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/{deviceId}")
     @ApiOperation(value = "Return a device instance definition", notes = "", response = Device.class, nickname = "getDevice")
-    @PostAuthorize("hasPermission(returnObject, 'read')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'read', #deviceId)")
     public ResponseEntity<?> getDevice(@AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId) {
 
@@ -173,7 +172,7 @@ public class InventoryController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{deviceId}")
     @ApiOperation(value = "Update a device instance", notes = "", response = Device.class, nickname = "updateDevice")
-    @PreAuthorize("hasPermission(#deviceId, 'update')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'update', #deviceId)")
     public ResponseEntity<?> updateDevice(@AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId, @RequestBody Device body) {
 
@@ -231,7 +230,7 @@ public class InventoryController {
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/{deviceId}")
     @ApiOperation(value = "Delete a device instance", notes = "", response = Device.class, nickname = "deleteDevice")
-    @PreAuthorize("hasPermission(#deviceId, 'delete')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'delete', #deviceId)")
     public ResponseEntity<?> deleteDevice(@AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId) {
 
@@ -253,8 +252,7 @@ public class InventoryController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/search")
     @ApiOperation(value = "Search for device instances", notes = "", response = Device.class, nickname = "searchDevices")
-    @PreAuthorize("hasPermission(null, 'list')")
-    // @PostAuthorize("hasPermission(returnObject.body, 'read')") // TODO: enable
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'read')")
     // shared access
     public ResponseEntity<?> searchDevices(@AuthenticationPrincipal User currentUser,
             @RequestParam MultiValueMap<String, String> parameters, @RequestBody DeviceQuery query) {

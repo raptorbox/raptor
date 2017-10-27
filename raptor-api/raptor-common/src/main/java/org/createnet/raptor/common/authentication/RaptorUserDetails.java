@@ -22,7 +22,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 public final class RaptorUserDetails extends User implements UserDetails {
 
     private static final long serialVersionUID = 1L;
-
+    
+    protected List<Permission> authorities = null;
+    
     public RaptorUserDetails(User user) {
         super(user);
     }
@@ -30,15 +32,12 @@ public final class RaptorUserDetails extends User implements UserDetails {
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<Permission> permissions = new ArrayList();
-        this.getGroups()
-                .forEach((g) -> 
-                    permissions.addAll(g.getPermissions()
-                            .stream()
-                            .filter((p) -> !permissions.contains(p))
-                            .collect(Collectors.toList()))
-                );
-        return permissions;
+        if (authorities == null) {
+            authorities = new ArrayList();
+            this.getGroups().forEach((g) -> authorities.addAll(g.getPermissions()));
+            authorities.stream().distinct().collect(Collectors.toList());
+        }
+        return authorities;
     }
 
     @Override
