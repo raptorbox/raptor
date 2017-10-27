@@ -32,7 +32,8 @@ public class RaptorSecurity {
     }
     
     /**
-     * Check if an user has the permission to operate 
+     * Check if an user has the permission to operate on an object (if available) 
+     * or on an entity type (like users, apps, devices or trees).
      * 
      * @param u
      * @param entity

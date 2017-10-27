@@ -30,7 +30,6 @@ public class AclClassType {
 
     public static Class device = AclDevice.class;
     public static Class user = User.class;
-    public static Class role = Permission.class;
     public static Class token = Token.class;
     public static Class tree = TreeNode.class;
     public static Class app = AclApp.class;
@@ -45,8 +44,6 @@ public class AclClassType {
                 return device;
             case user:
                 return user;
-            case role:
-                return role;
             case token:
                 return token;
             case tree:

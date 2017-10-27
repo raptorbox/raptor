@@ -47,8 +47,9 @@ public class GroupClient extends AbstractClient {
      * @return
      */
     public List<Group> list(String userUuid) {
-        JsonNode node = getClient().get(String.format(Routes.GROUP_READ, userUuid));
-        return getMapper().convertValue(node, new TypeReference<List<Group>>() {});
+        JsonNode node = getClient().get(String.format(Routes.GROUP_LIST, userUuid));
+        return getMapper().convertValue(node, new TypeReference<List<Group>>() {
+        });
     }
 
     /**
@@ -59,7 +60,7 @@ public class GroupClient extends AbstractClient {
     public List<Group> list() {
         return list(getContainer().Auth().getUser().getUuid());
     }
-    
+
     /**
      * Read a group
      *
@@ -73,6 +74,18 @@ public class GroupClient extends AbstractClient {
     }
 
     /**
+     * Read a group
+     *
+     * @param group
+     * @return
+     */
+    public Group read(Group group) {
+        assert group != null;
+        assert group.getId() != null;
+        return read(group.getId());
+    }
+
+    /**
      * Create a new group
      *
      * @param group
@@ -81,16 +94,34 @@ public class GroupClient extends AbstractClient {
     public Group create(Group group) {
         return create(group, null);
     }
-    
+
     public Group create(Group group, RequestOptions opts) {
-        
+
         JsonNode node = getClient().post(Routes.GROUP_CREATE, toJsonNode(group), opts);
         Group t1 = getMapper().convertValue(node, Group.class);
-        
+
         group.merge(t1);
         group.setId(t1.getId());
-        
+
         return group;
+    }
+
+    /**
+     * Delete a group
+     *
+     * @param group
+     */
+    public void delete(Group group) {
+        delete(group.getId());
+    }
+
+    /**
+     * Delete a group
+     *
+     * @param groupId
+     */
+    public void delete(Long groupId) {
+        getClient().delete(String.format(Routes.GROUP_DELETE, groupId.toString()));
     }
 
     /**
@@ -103,7 +134,7 @@ public class GroupClient extends AbstractClient {
 
         JsonNode node = getClient().put(String.format(Routes.GROUP_UPDATE, group.getId()), toJsonNode(group));
         Group t1 = getMapper().convertValue(node, Group.class);
-        
+
         group.merge(t1);
         group.setId(t1.getId());
 

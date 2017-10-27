@@ -93,7 +93,7 @@ public class HighLoadTest {
 
         for (int i = 0; i < devSize; i++) {
 
-            Raptor r = Utils.createNewInstance();
+            Raptor r = Utils.createNewAdminInstance();
             Device dev = create(r);
             log.debug("Created device {}", dev.name());
 

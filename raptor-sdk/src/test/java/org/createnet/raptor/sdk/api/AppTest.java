@@ -71,7 +71,7 @@ public class AppTest {
     @Test
     public void create() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("create app");
 
@@ -93,7 +93,7 @@ public class AppTest {
     @Test
     public void delete() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("create app");
 

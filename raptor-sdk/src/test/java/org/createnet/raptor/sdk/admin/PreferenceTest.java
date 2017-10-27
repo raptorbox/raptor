@@ -56,7 +56,7 @@ public class PreferenceTest {
     @Test
     public void setPreference()  {
         
-        Raptor r = Utils.createNewInstance();
+        Raptor r = Utils.createNewAdminInstance();
         
         ObjectNode json = r.Admin().User().Profile().newObjectNode();
         json.put("test", "foo");
@@ -72,7 +72,7 @@ public class PreferenceTest {
     @Test
     public void getPreference()  {
         
-        Raptor r = Utils.createNewInstance();
+        Raptor r = Utils.createNewAdminInstance();
         
         ObjectNode json = r.Admin().User().Profile().newObjectNode();
         json.put("test", "foo");
@@ -90,7 +90,7 @@ public class PreferenceTest {
     @Test
     public void getAllPreferences()  {
         
-        Raptor r = Utils.createNewInstance();
+        Raptor r = Utils.createNewAdminInstance();
         
         ObjectNode json = r.Admin().User().Profile().newObjectNode();
         json.put("test", "foo");

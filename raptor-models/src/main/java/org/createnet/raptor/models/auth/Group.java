@@ -104,19 +104,22 @@ public class Group implements Serializable {
 
     @JsonProperty
     public String getAppId() {
-        return getApp() != null ? getApp().getUuid(): null;
+        return getApp() != null ? getApp().getUuid() : null;
     }
-    
+
     @JsonProperty
     public void setAppId(String appId) {
-        
+
         if (getApp() == null) {
-            setApp(new AclApp());
+            setApp(null);
+            return;
         }
-        
-        getApp().setUuid(appId);
+
+        AclApp newapp = new AclApp();
+        newapp.setUuid(appId);
+        setApp(newapp);
     }
-    
+
     @JsonIgnore
     public AclApp getApp() {
         return app;
@@ -135,19 +138,11 @@ public class Group implements Serializable {
     }
 
     public void merge(Group raw) {
-
         if (raw.getName() != null && !raw.getName().isEmpty()) {
             this.setName(raw.getName());
         }
-
         setApp(raw.getApp());
-
-        raw.getPermissions().forEach((p) -> {
-            if (!getPermissions().contains(p)) {
-                getPermissions().add(p);
-            }
-        });
-
+        setPermissions(raw.getPermissions());
     }
 
 }

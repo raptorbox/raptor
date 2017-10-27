@@ -40,6 +40,9 @@ public class GroupService {
     @Autowired
     private PermissionService permissionService;
     
+    @Autowired
+    private AuthAppService appService;
+    
     @CacheEvict(key = "#group.id")
     public Group save(Group group) {
 
@@ -50,7 +53,15 @@ public class GroupService {
             }
             return perm;
         }).collect(Collectors.toList()));
-
+        
+        String appUuid = group.getAppId();
+        if(appUuid == null) {
+            group.setApp(null);
+        } else {
+            AclApp app = appService.getByUuid(appUuid);
+            group.setApp(app);
+        }
+        
         groupRepository.save(group);
         
         return getById(group.getId());

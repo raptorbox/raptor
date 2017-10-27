@@ -90,7 +90,7 @@ final public class Routes {
     public static final String APP_DELETE = APP_READ;
     
     public static final String GROUP_CREATE = "/auth/group";
-    public static final String GROUP_LIST = GROUP_CREATE;
+    public static final String GROUP_LIST = GROUP_CREATE + "?uuid=%s";
     public static final String GROUP_READ = GROUP_CREATE + "/%s";
     public static final String GROUP_UPDATE = GROUP_READ;
     public static final String GROUP_DELETE = GROUP_READ;

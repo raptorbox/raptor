@@ -267,7 +267,7 @@ public class EventListenerTest {
 
         final AtomicInteger done = new AtomicInteger(2);
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("watch data events");
 
@@ -293,7 +293,7 @@ public class EventListenerTest {
 
         final AtomicBoolean done = new AtomicBoolean(false);
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("watch action events");
 
@@ -324,7 +324,7 @@ public class EventListenerTest {
 
         log.debug("subscribe with permission token");
 
-        Raptor r = Utils.createNewInstance();
+        Raptor r = Utils.createNewAdminInstance();
         r.Auth().login();
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
@@ -358,7 +358,7 @@ public class EventListenerTest {
 
         log.debug("subscribe with failing permissions");
 
-        Raptor r = Utils.createNewInstance();
+        Raptor r = Utils.createNewAdminInstance();
         r.Auth().login();
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
@@ -400,7 +400,7 @@ public class EventListenerTest {
 
         log.debug("subscribe to stream topic with permissions (subscribe, pull)");
 
-        Raptor r = Utils.createNewInstance();
+        Raptor r = Utils.createNewAdminInstance();
         r.Auth().login();
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
@@ -434,7 +434,7 @@ public class EventListenerTest {
 
         log.debug("subscribe to action topic with permissions (subscribe, execute)");
 
-        Raptor r = Utils.createNewInstance();
+        Raptor r = Utils.createNewAdminInstance();
         r.Auth().login();
 
         Token t = r.Admin().Token().create(new Token("test", "test"));

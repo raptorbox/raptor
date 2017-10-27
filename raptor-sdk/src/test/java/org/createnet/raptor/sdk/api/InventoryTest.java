@@ -206,7 +206,7 @@ public class InventoryTest {
         Raptor raptor = Utils.getRaptor();
         
         
-        Raptor r = Utils.createNewInstance();
+        Raptor r = Utils.createNewAdminInstance();
         
         log.debug("Create device by user {}", r.Auth().getUser().getUsername());
         Device dev1 = new Device();
@@ -231,7 +231,7 @@ public class InventoryTest {
     public void searchByUserIdAndProperties() {
 
         Raptor raptor = Utils.getRaptor();
-        Raptor r = Utils.createNewInstance();
+        Raptor r = Utils.createNewAdminInstance();
         
         log.debug("Create device by user {}", r.Auth().getUser().getUsername());
         Device dev1 = new Device();
@@ -259,8 +259,8 @@ public class InventoryTest {
     public void changeUserIdForDevice() {
 
         Raptor raptor = Utils.getRaptor();
-        Raptor r = Utils.createNewInstance();
-        Raptor r2 = Utils.createNewInstance();
+        Raptor r = Utils.createNewAdminInstance();
+        Raptor r2 = Utils.createNewAdminInstance();
         
         log.debug("Create device by user {}", r.Auth().getUser().getUsername());
         Device dev1 = new Device();

@@ -61,7 +61,7 @@ public class TreeTest {
     @Test
     public void list() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("List trees");
 
@@ -86,7 +86,7 @@ public class TreeTest {
     @Test
     public void create() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("create tree");
 
@@ -115,7 +115,7 @@ public class TreeTest {
     @Test
     public void delete() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("create tree");
 
@@ -145,7 +145,7 @@ public class TreeTest {
     @Test
     public void createDeviceNode() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("create tree");
 
@@ -168,7 +168,7 @@ public class TreeTest {
     @Test
     public void createDeviceAccessWithToken() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("create tree");
 

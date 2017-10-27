@@ -19,8 +19,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.createnet.raptor.auth.services.AuthAppService;
 import org.createnet.raptor.models.auth.Group;
 import org.createnet.raptor.auth.services.GroupService;
+import org.createnet.raptor.models.auth.AclApp;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.slf4j.Logger;
@@ -71,6 +73,9 @@ public class GroupController {
     @Autowired
     private GroupService groupService;
 
+    @Autowired
+    private AuthAppService appService;
+
     @PreAuthorize("@raptorSecurity.can(principal, 'group', 'read')")
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
@@ -83,6 +88,27 @@ public class GroupController {
     public ResponseEntity<?> getGroups() {
         Iterable<Group> list = groupService.list();
         return ResponseEntity.ok(list);
+    }
+
+    @PreAuthorize("@raptorSecurity.can(principal, 'group', 'read')")
+    @RequestMapping(value = {"/{groupId}"}, method = RequestMethod.GET)
+    @ApiOperation(
+            value = "Get a group",
+            notes = "",
+            response = Group.class,
+            nickname = "getGroup"
+    )
+    public ResponseEntity<?> getGroup(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable Long groupId
+    ) {
+        Group group = groupService.getById(groupId);
+        
+        if (group == null) {
+            return JsonErrorResponse.notFound();
+        }
+        
+        return ResponseEntity.ok(group);
     }
 
     @PreAuthorize("@raptorSecurity.can(principal, 'group', 'update')")
@@ -157,6 +183,15 @@ public class GroupController {
             }
         }
 
+        String appUuid = raw.getAppId();
+        if (appUuid != null) {
+            AclApp app = appService.getByUuid(appUuid);
+            if (app == null) {
+                return JsonErrorResponse.notFound("Group refer to an app that cannnot befound");
+            }
+            raw.setApp(app);
+        }
+
         group = groupService.save(raw);
         if (group == null) {
             return JsonErrorResponse.internalError("Failed to store group");
@@ -178,7 +213,7 @@ public class GroupController {
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long groupId
     ) {
-        
+
         groupService.delete(groupId);
 
         logger.debug("Deleted group {}", groupId);

@@ -24,6 +24,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.security.core.GrantedAuthority;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Objects;
 import javax.persistence.Cacheable;
 import javax.persistence.Table;
 import org.createnet.raptor.models.acl.EntityType;
@@ -52,7 +53,7 @@ public class Permission implements GrantedAuthority {
     public Permission(String name) {
         this.name = name;
     }
-    
+
     public Permission(Operation name) {
         this.name = name.name();
     }
@@ -64,10 +65,10 @@ public class Permission implements GrantedAuthority {
     public Permission(EntityType entity, Operation operation, boolean own) {
         buildName(entity, operation, own);
     }
-    
+
     public void buildName(EntityType entity, Operation operation, boolean own) {
         this.name = entity.name() + "_" + operation.name();
-        if(own) {
+        if (own) {
             this.name = "_own";
         }
     }
@@ -87,6 +88,13 @@ public class Permission implements GrantedAuthority {
             return ((String) obj).equals(this.name);
         }
         return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 89 * hash + Objects.hashCode(this.name);
+        return hash;
     }
 
     public Long getId() {

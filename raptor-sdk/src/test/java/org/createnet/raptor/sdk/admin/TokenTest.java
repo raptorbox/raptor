@@ -56,7 +56,7 @@ public class TokenTest {
     @Test
     public void listToken() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         List<Token> tokens = raptor.Admin().Token().list();
 
@@ -77,7 +77,7 @@ public class TokenTest {
     @Test
     public void createToken() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         Token token = new Token("test", "secret" + System.currentTimeMillis() * Math.random());
         //fake token
@@ -98,7 +98,7 @@ public class TokenTest {
     @Test
     public void loadToken() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         Token token = new Token("test", "secret" + System.currentTimeMillis() * Math.random());
         Token newToken = raptor.Admin().Token().create(token);
@@ -111,7 +111,7 @@ public class TokenTest {
     @Test
     public void currentToken() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
         
         Token loginToken = raptor.Admin().Token().current();
         
@@ -130,7 +130,7 @@ public class TokenTest {
     @Test
     public void updateTokenChangingSecret() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         String secret = "secret_" + System.currentTimeMillis() * Math.random();
         String name = "token_" + System.currentTimeMillis() * Math.random();
@@ -164,7 +164,7 @@ public class TokenTest {
     @Test
     public void updateWithSameSecret() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         String secret = "secret_" + System.currentTimeMillis() * Math.random();
         String name = "token_" + System.currentTimeMillis() * Math.random();

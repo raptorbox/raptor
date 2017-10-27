@@ -66,7 +66,7 @@ public class TokenPermissionTest {
     @Test
     public void testGet() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("Test get token permission");
 
@@ -106,7 +106,7 @@ public class TokenPermissionTest {
     @Test
     public void testSet() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         createToken(raptor);
 
@@ -117,7 +117,7 @@ public class TokenPermissionTest {
     @Test
     public void testACLenforcement() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("Test ACL check on token permission");
 
@@ -159,7 +159,7 @@ public class TokenPermissionTest {
 
         Raptor admin = Utils.getRaptor();
 
-        Raptor r1 = Utils.createNewInstance();
+        Raptor r1 = Utils.createNewAdminInstance();
 
         log.debug("Test ACL token permission");
 

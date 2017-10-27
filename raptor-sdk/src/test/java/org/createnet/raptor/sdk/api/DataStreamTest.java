@@ -120,7 +120,7 @@ public class DataStreamTest {
 	@Test
 	public void pushData() {
 
-		Raptor raptor = Utils.createNewInstance();
+		Raptor raptor = Utils.createNewAdminInstance();
 
 		log.debug("Push device data");
 
@@ -133,7 +133,7 @@ public class DataStreamTest {
 	@Test
 	public void dropData() {
 
-		Raptor raptor = Utils.createNewInstance();
+		Raptor raptor = Utils.createNewAdminInstance();
 
 		log.debug("Drop device data");
 
@@ -153,7 +153,7 @@ public class DataStreamTest {
 	@Test
 	public void pullRecords() {
 
-		Raptor raptor = Utils.createNewInstance();
+		Raptor raptor = Utils.createNewAdminInstance();
 
 		log.debug("Pull device data");
 
@@ -170,7 +170,7 @@ public class DataStreamTest {
 	@Test
 	public void pullLastUpdate() {
 
-		Raptor raptor = Utils.createNewInstance();
+		Raptor raptor = Utils.createNewAdminInstance();
 
 		log.debug("Pull device last update");
 
@@ -199,7 +199,7 @@ public class DataStreamTest {
 	@Test
 	public void pullEmptyLastUpdate() {
 
-		Raptor raptor = Utils.createNewInstance();
+		Raptor raptor = Utils.createNewAdminInstance();
 
 		log.debug("Pull empty device last update");
 
@@ -215,7 +215,7 @@ public class DataStreamTest {
 	@Test
 	public void searchByTimeRange() {
 
-		Raptor raptor = Utils.createNewInstance();
+		Raptor raptor = Utils.createNewAdminInstance();
 
 		log.debug("Search by time range");
 
@@ -247,7 +247,7 @@ public class DataStreamTest {
 	@Test
 	public void searchByNumericRange() {
 
-		Raptor raptor = Utils.createNewInstance();
+		Raptor raptor = Utils.createNewAdminInstance();
 
 		log.debug("Search by numeric range");
 
@@ -270,7 +270,7 @@ public class DataStreamTest {
 	@Test
 	public void searchByDistance() {
 
-		Raptor raptor = Utils.createNewInstance();
+		Raptor raptor = Utils.createNewAdminInstance();
 
 		log.debug("Search by distance");
 
@@ -291,7 +291,7 @@ public class DataStreamTest {
 	@Test
 	public void searchByBoundingBox() {
 
-		Raptor raptor = Utils.createNewInstance();
+		Raptor raptor = Utils.createNewAdminInstance();
 
 		log.debug("Search by bounding box");
 

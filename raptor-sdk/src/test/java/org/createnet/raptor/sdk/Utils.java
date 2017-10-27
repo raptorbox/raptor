@@ -138,7 +138,7 @@ public class Utils {
      * @param username
      * @return
      */
-    static public Raptor createNewInstance(String username) {
+    static public Raptor createNewAdminInstance(String username) {
 
         String password = username + Math.random();
         User user = getRaptor().Admin().User().createAdmin(username, password, username + "@test.raptor.local");
@@ -157,7 +157,7 @@ public class Utils {
      *
      * @return
      */
-    static public Raptor createNewInstance() {
+    static public Raptor createNewAdminInstance() {
 
         String username = rndUsername();
         String password = username + Math.random();
@@ -174,9 +174,12 @@ public class Utils {
         return r;
     }
     
-    static public Raptor createNewUserInstance(List<Group> g) {
+    static public Raptor createNewUserInstance(String username, List<Group> g) {
+        
+        if(username == null) {
+            username = rndUsername();
+        }
 
-        String username = rndUsername();
         String password = username + Math.random();
 
         User user = getRaptor().Admin().User().create(username, password, username + "@test.raptor.local", g);
@@ -192,7 +195,11 @@ public class Utils {
     }
     
     static public Raptor createNewUserInstance() {
-        return createNewUserInstance(new ArrayList());
+        return createNewUserInstance(rndUsername(), new ArrayList());
+    }
+    
+    static public Raptor createNewUserInstance(String username) {
+        return createNewUserInstance(username, new ArrayList());
     }
 
     public static String rndUsername() {
