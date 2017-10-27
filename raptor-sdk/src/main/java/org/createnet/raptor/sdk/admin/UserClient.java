@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
+import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.auth.DefaultGroup;
 import org.createnet.raptor.models.auth.Group;
 import org.createnet.raptor.models.auth.Permission;
@@ -37,6 +38,7 @@ import org.createnet.raptor.models.auth.request.SyncRequest;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.UserPayload;
+import org.createnet.raptor.models.tree.TreeNode;
 import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.Routes;
 import org.createnet.raptor.sdk.api.AuthClient;
@@ -170,21 +172,53 @@ public class UserClient extends AbstractClient {
     }
 
     /**
-     * Register a device for an user in ACL system
+     * Register a device in the ACL system
      *
      * @param op
-     * @param device
+     * @param subj
      */
-    public void sync(Operation op, Device device) {
+    public void sync(Operation op, Device subj) {
+        sync(EntityType.device, op, subj.getId(), subj.getUserId());
+    }
+    
+    /**
+     * Register a node in the ACL system
+     *
+     * @param op
+     * @param subj
+     */
+    public void sync(Operation op, TreeNode subj) {
+        sync(EntityType.tree, op, subj.getId(), subj.getOwnerId());
+    }
+    
+    /**
+     * Register an app in the ACL system
+     *
+     * @param op
+     * @param subj
+     */
+    public void sync(Operation op, App subj) {
+        sync(EntityType.app, op, subj.getId(), subj.getOwnerId());
+    }
+    
+    /**
+     * Register an entity in the ACL system
+     *
+     * @param type
+     * @param userId
+     * @param op
+     * @param subjectId
+     */
+    public void sync(EntityType type, Operation op, String subjectId, String userId) {
         SyncRequest req = new SyncRequest();
-        req.objectId = device.id();
-        req.userId = device.userId();
-        req.created = device.getCreatedAt();
+        req.objectId = subjectId;
+        req.userId = userId;
         req.operation = op;
-        req.type = EntityType.device;
+        req.type = type;
         sync(req);
     }
-
+    
+    
     /**
      * Get an user
      *

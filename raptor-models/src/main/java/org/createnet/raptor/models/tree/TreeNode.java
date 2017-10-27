@@ -73,7 +73,7 @@ public class TreeNode extends RaptorContainer implements Owneable {
     }
     
     public enum NodeType {
-        group, user, device, application
+        group, user, device, app
     }
 
     @Id

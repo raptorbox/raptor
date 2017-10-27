@@ -63,8 +63,7 @@ import org.slf4j.LoggerFactory;
 @ApiResponses(value = {
     @ApiResponse(code = 200, message = "Ok")
     , @ApiResponse(code = 401, message = "Not authorized")
-    ,
-		@ApiResponse(code = 403, message = "Forbidden")
+    , @ApiResponse(code = 403, message = "Forbidden")
     , @ApiResponse(code = 500, message = "Internal error")})
 @Api(tags = {"Inventory"})
 public class InventoryController {
@@ -82,22 +81,21 @@ public class InventoryController {
 
     /**
      * Register device ACL on Auth API
-     * 
+     *
      * @param op
      * @param device
-     * @return 
+     * @return
      */
     protected boolean syncACL(Operation op, Device device) {
         try {
             raptor.Admin().User().sync(op, device);
         } catch (RequestException ex) {
-            log.error("Failed to sync ACL", ex.getMessage());                        
+            log.error("Failed to sync ACL", ex.getMessage());
             return false;
         }
         return true;
     }
-    
-    
+
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(value = "Return the user devices", notes = "", response = Device.class, nickname = "getDevices")
     public ResponseEntity<?> getDevices(@AuthenticationPrincipal User currentUser) {
@@ -151,7 +149,7 @@ public class InventoryController {
             deviceService.delete(device);
             return JsonErrorResponse.internalError("Failed to sync acl");
         }
-                
+
         eventPublisher.create(device);
 
         log.info("Created device {} for user {}", device.id(), device.userId());
@@ -220,11 +218,11 @@ public class InventoryController {
         device.validate();
 
         deviceService.save(device);
-        
+
         if (!syncACL(Operation.update, device)) {
             return JsonErrorResponse.internalError("Failed to sync acl");
         }
-        
+
         eventPublisher.update(device);
 
         log.info("Updated device {} for user {}", device.id(), device.userId());
@@ -243,13 +241,13 @@ public class InventoryController {
         }
 
         deviceService.delete(device);
-        
+
         eventPublisher.delete(device);
 
         if (!syncACL(Operation.delete, device)) {
             return JsonErrorResponse.internalError("Failed to sync acl");
-        }        
-        
+        }
+
         return ResponseEntity.accepted().build();
     }
 

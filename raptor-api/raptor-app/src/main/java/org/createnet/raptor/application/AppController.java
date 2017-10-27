@@ -21,12 +21,15 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.Arrays;
 import java.util.Optional;
+import org.createnet.raptor.common.client.ApiClientService;
 import org.createnet.raptor.common.query.AppQueryBuilder;
+import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.app.AppGroup;
 import org.createnet.raptor.models.app.AppUser;
 import org.createnet.raptor.models.auth.DefaultGroup;
 import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.query.AppQuery;
 import org.createnet.raptor.models.response.JsonErrorResponse;
@@ -83,34 +86,24 @@ public class AppController {
     @Autowired
     private AppEventPublisher eventPublisher;
 
-    @RequestMapping(method = RequestMethod.GET)
-    @ApiOperation(
-            value = "Return the apps owned by an user",
-            notes = "",
-            response = org.createnet.raptor.models.app.App.class,
-            nickname = "getApps"
-    )
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getApps(
-            @AuthenticationPrincipal User currentUser,
-            Pageable pageable,
-            @RequestParam MultiValueMap<String, String> parameters,
-            @RequestBody Optional<AppQuery> rquery
-    ) {
+    @Autowired
+    private ApiClientService raptor;
 
-        AppQuery query = new AppQuery();
-        if (rquery.isPresent()) {
-            query = rquery.get();
+    /**
+     * Register app ACL in the auth API
+     *
+     * @param op
+     * @param app
+     * @return
+     */
+    protected boolean syncACL(Operation op, App app) {
+        try {
+            raptor.Admin().User().sync(op, app);
+        } catch (RequestException ex) {
+            log.error("Failed to sync ACL", ex.getMessage());
+            return false;
         }
-
-        if (!currentUser.isSuperAdmin()) {
-            query.users.in(currentUser.getUuid());
-        }
-
-        AppQueryBuilder qb = new AppQueryBuilder(query);
-        Iterable<App> apps = appService.find(qb.getPredicate(), qb.getPaging());
-
-        return ResponseEntity.ok(apps);
+        return true;
     }
 
     protected void normalizeApp(App app) {
@@ -130,6 +123,36 @@ public class AppController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET)
+    @ApiOperation(
+            value = "Return the apps owned by an user",
+            notes = "",
+            response = org.createnet.raptor.models.app.App.class,
+            nickname = "getApps"
+    )
+    @PreAuthorize("@raptorSecurity.can(principal, 'app', 'read')")
+    public ResponseEntity<?> getApps(
+            @AuthenticationPrincipal User currentUser,
+            Pageable pageable,
+            @RequestParam MultiValueMap<String, String> parameters,
+            @RequestBody Optional<AppQuery> rquery
+    ) {
+
+        AppQuery query = new AppQuery();
+        if (rquery.isPresent()) {
+            query = rquery.get();
+        }
+
+        if (!currentUser.isAdmin()) {
+            query.users.in(currentUser.getUuid());
+        }
+
+        AppQueryBuilder qb = new AppQueryBuilder(query);
+        Iterable<App> apps = appService.find(qb.getPredicate(), qb.getPaging());
+
+        return ResponseEntity.ok(apps);
+    }
+
     @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(
             value = "Create a new app",
@@ -137,7 +160,7 @@ public class AppController {
             response = org.createnet.raptor.models.app.App.class,
             nickname = "createApp"
     )
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@raptorSecurity.can(principal, 'app', 'create')")
     public ResponseEntity<?> createApp(
             @AuthenticationPrincipal User currentUser,
             @RequestBody App app
@@ -157,13 +180,15 @@ public class AppController {
         }
 
         App saved = appService.save(app);
-
+        syncACL(Operation.create, app);
+        
         eventPublisher.create(app);
 
         log.debug("Created app {} ({})", app.getName(), app.getId());
         return ResponseEntity.ok(saved);
     }
 
+    @PreAuthorize("@raptorSecurity.can(principal, 'app', 'update', #appId)")
     @RequestMapping(method = RequestMethod.PUT, value = "/{appId}")
     @ApiOperation(
             value = "Update an app",
@@ -203,13 +228,16 @@ public class AppController {
         }
 
         App saved = appService.save(app);
+        syncACL(Operation.update, app);
 
         eventPublisher.update(app);
+
 
         log.debug("Updated app {} ({}) by {}", app.getName(), app.getId(), currentUser.getUuid());
         return ResponseEntity.ok(saved);
     }
 
+    @PreAuthorize("@raptorSecurity.can(principal, 'app', 'delete', #appId)")
     @RequestMapping(method = RequestMethod.DELETE, value = "/{appId}")
     @ApiOperation(
             value = "Delete an app",
@@ -234,6 +262,8 @@ public class AppController {
         appService.delete(app);
 
         eventPublisher.delete(app);
+
+        syncACL(Operation.delete, app);
 
         log.debug("Deleted app {} ({})", app.getName(), app.getId());
         return ResponseEntity.accepted().build();

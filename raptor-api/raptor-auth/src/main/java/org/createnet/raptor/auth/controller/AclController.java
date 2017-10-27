@@ -29,7 +29,9 @@ import org.createnet.raptor.models.auth.AclDevice;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.services.AclDeviceService;
 import org.createnet.raptor.auth.services.AclTokenService;
+import org.createnet.raptor.auth.services.AuthAppService;
 import org.createnet.raptor.auth.services.AuthDeviceService;
+import org.createnet.raptor.auth.services.AuthTreeService;
 import org.createnet.raptor.auth.services.TokenService;
 import org.createnet.raptor.auth.services.UserService;
 import org.createnet.raptor.models.auth.Token;
@@ -82,6 +84,12 @@ public class AclController {
 
     @Autowired
     private AuthDeviceService deviceService;
+
+    @Autowired
+    private AuthAppService appService;
+
+    @Autowired
+    private AuthTreeService treeService;
 
     @Autowired
     private UserService userService;
@@ -155,7 +163,7 @@ public class AclController {
 
     @RequestMapping(value = "/sync", method = RequestMethod.POST)
     @ApiOperation(
-            value = "Sync user permission on a device",
+            value = "Sync permission on an entity",
             notes = "",
             code = 202,
             nickname = "syncPermission"
@@ -165,7 +173,18 @@ public class AclController {
             @RequestBody SyncRequest body
     ) {
 
-        deviceService.sync(currentUser, body);
+        switch (body.type) {
+            case app:
+                appService.sync(currentUser, body);
+                break;
+            case device:
+                deviceService.sync(currentUser, body);
+                break;
+            case tree:
+                treeService.sync(currentUser, body);
+                break;
+        }
+
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(null);
     }
 
