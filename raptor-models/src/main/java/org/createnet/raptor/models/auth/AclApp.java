@@ -30,6 +30,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import org.createnet.raptor.models.acl.AbstractAclSubject;
+import org.createnet.raptor.models.app.App;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -59,6 +60,21 @@ public class AclApp extends AbstractAclSubject {
 
     @OneToMany(mappedBy = "app", fetch = FetchType.LAZY)    
     private List<Group> groups = new ArrayList();
+
+    public AclApp() {
+    }
+
+    public AclApp(Long id, String uuid, User owner) {
+        this.id = id;
+        this.uuid = uuid;
+        this.owner = owner;
+    }
+    
+    public AclApp(App app) {
+        this.uuid = app.getId();
+        this.owner = new User(app.getUserId());
+    }
+
     
     @Override
     public Long getId() {

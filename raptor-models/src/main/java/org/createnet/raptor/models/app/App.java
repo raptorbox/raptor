@@ -38,7 +38,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class App implements Serializable, Owneable {
 
     static final long serialVersionUID = 4441L;
-    
+
     @Id
     protected String id = UUID.randomUUID().toString();
 
@@ -78,25 +78,13 @@ public class App implements Serializable, Owneable {
             setUserId(raw.getUserId());
         }
         if (raw.getGroups() != null && !raw.getGroups().isEmpty()) {
-            raw.getGroups().forEach((r) -> {
-                if (!getGroups().contains(r)) {
-                    getGroups().add(r);
-                }
-            });
+            setGroups(raw.getGroups());
         }
         if (raw.getUsers() != null && !raw.getUsers().isEmpty()) {
-            raw.getUsers().forEach((u) -> {
-                if (!getUsers().contains(u)) {
-                    getUsers().add(u);
-                }
-            });
+            setUsers(raw.getUsers());
         }
         if (raw.getDevices() != null && !raw.getDevices().isEmpty()) {
-            raw.getDevices().forEach((u) -> {
-                if (!getDevices().contains(u)) {
-                    getDevices().add(u);
-                }
-            });
+            setDevices(raw.getDevices());
         }
 
     }
@@ -116,9 +104,9 @@ public class App implements Serializable, Owneable {
         }
 
         getUsers().forEach((u) -> {
-            u.getGroups().forEach((r) -> {
-                if (!getGroups().contains(r)) {
-                    throw new RaptorComponent.ValidationException(String.format("User `%s` has an unknown group `%s`", u.getId(), r.getName()));
+            u.getGroups().forEach((g) -> {
+                if (!getGroups().contains(g)) {
+                    throw new RaptorComponent.ValidationException(String.format("User `%s` has an unknown app group `%s`. Add to the app list to allow it", u.getId(), g.getName()));
                 }
             });
 
@@ -260,18 +248,17 @@ public class App implements Serializable, Owneable {
     public Object getUserGroup() {
         return getGroup(StaticGroup.user);
     }
-    
+
     public boolean hasGroup(User user, StaticGroup group) {
         return getUsers().stream().filter((u) -> {
             return u.getId().equals(user.getUuid()) && u.hasGroup(group);
         }).count() == 1;
     }
-    
-    @JsonIgnore
+
     public boolean isAdmin(User user) {
         return hasGroup(user, StaticGroup.admin);
     }
-    
+
     @JsonIgnore
     @Override
     public String getOwnerId() {

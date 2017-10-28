@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -34,6 +35,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import org.createnet.raptor.models.app.App;
+import org.createnet.raptor.models.app.AppGroup;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -66,6 +69,13 @@ public class Group implements Serializable {
 
     public Group(String name) {
         this.name = name;
+    }
+    
+    public Group(AppGroup ag, App app) {
+        this.name = ag.getName();
+        this.app = new AclApp(app);
+        this.permissions.clear();
+        this.permissions.addAll(ag.getPermissions().stream().map((p) -> new Permission(p)).collect(Collectors.toList()));
     }
 
     public Group(String name, List<Permission> permissions) {

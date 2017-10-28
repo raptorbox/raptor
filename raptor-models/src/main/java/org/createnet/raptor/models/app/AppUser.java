@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.createnet.raptor.models.auth.StaticGroup;
+import org.createnet.raptor.models.auth.User;
 
 /**
  *
@@ -34,6 +35,10 @@ public class AppUser {
     
     public AppUser(String userId) {
         this.id = userId;
+    }
+    
+    public AppUser(User user) {
+        this(user.getUuid());
     }
     
     public String getId() {

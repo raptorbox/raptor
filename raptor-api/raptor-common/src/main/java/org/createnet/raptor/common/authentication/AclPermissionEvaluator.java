@@ -16,6 +16,9 @@
 package org.createnet.raptor.common.authentication;
 
 import java.io.Serializable;
+import org.createnet.raptor.models.acl.EntityType;
+import org.createnet.raptor.models.acl.Operation;
+import org.createnet.raptor.models.auth.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
@@ -28,15 +31,15 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
 
     @Autowired
     protected RaptorSecurity rsec;
-    
+
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
-        return rsec.hasPermission(authentication, permission, permission);
+        return rsec.can((User) authentication.getPrincipal(), EntityType.device, Operation.valueOf((String) permission), targetDomainObject);
     }
 
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
-        return rsec.hasPermission(authentication, targetId, targetType, permission);
+        return rsec.can((User) authentication.getPrincipal(), EntityType.valueOf(targetType), Operation.valueOf((String) permission), targetId);
     }
 
 }

@@ -29,7 +29,6 @@ import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.configuration.AuthConfiguration;
 import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.createnet.raptor.models.objects.Device;
@@ -53,7 +52,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
     @Autowired
     InternalApiClientService apiClient;
-    
+
     @Autowired
     RaptorSecurity raptorSecurity;
 
@@ -149,9 +148,9 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     @Override
     public boolean validateUserAndRole(String username, String password, Set<Role> roles, CheckType checkType, String address, RemotingConnection connection) {
 
-        logger.debug("Authenticating user {} with roles {} on topic {}", 
-                username, 
-                roles.stream().map((r) -> r.getName()).collect(Collectors.toList()), 
+        logger.debug("Authenticating user {} with roles {} on topic {}",
+                username,
+                roles.stream().map((r) -> r.getName()).collect(Collectors.toList()),
                 address
         );
 
@@ -215,10 +214,10 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
 
                 String type = topicTokens[0];
                 String id = topicTokens[1];
-                
+
                 User user = r.Auth().getUser();
-                Device device = new Device(id);                               
-                
+                Device device = new Device(id);
+
                 switch (EntityType.valueOf(type)) {
                     case device:
                         return raptorSecurity.can(user, EntityType.device, Operation.read, device);
@@ -227,16 +226,16 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
                     case stream:
                         return raptorSecurity.can(user, EntityType.device, Operation.pull, device);
                     case tree:
-                        
+
                         EntityType treeType = EntityType.tree;
                         Operation treeOp = Operation.read;
-                        
+
                         if (topicTokens[2] != null) {
                             try {
-                                
+
                                 treeType = EntityType.valueOf(topicTokens[2]);
-                                
-                                switch(treeType) {
+
+                                switch (treeType) {
                                     case device:
                                     case user:
                                     case token:
@@ -251,12 +250,12 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
                                         break;
                                 }
 
-                            } catch(Exception ex) {
+                            } catch (Exception ex) {
                                 logger.debug("Cannot parse tree type `{}`", topicTokens[2]);
                                 return false;
                             }
                         }
-                        
+
                         return raptorSecurity.can(user, treeType, treeOp, new TreeNode(id));
                     case token:
                         return raptorSecurity.can(user, EntityType.token, Operation.read, id);
@@ -277,20 +276,6 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
         return false;
     }
 
-    protected boolean hasDevicePermission(Raptor r, String id, Operation perm) {
-        // if using credentials, use the service client so the login won't expire
-        Raptor client = (r.getConfig().hasCredentials()) ? apiClient : r;
-        try {
-            AuthorizationResponse req =  client.Admin().User().isAuthorized(EntityType.device, id, r.Auth().getUser().getUuid(), perm);
-            logger.debug("Authorization to user={} permission={} result={}", r.Auth().getUser().getUsername(), perm, req.result);
-            return req.result;
-        }
-        catch(Exception ex) {
-            logger.error("Authorization request failed: {}", ex.getMessage());
-        }
-        return false;
-    }
-
     @Override
     public boolean validateUser(String user, String password) {
         logger.debug("Authenticate user {} with token {}", user, password);
@@ -300,7 +285,8 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
     @Override
     public boolean validateUserAndRole(String user, String password, Set<Role> roles, CheckType checkType) {
         logger.warn("validateUserAndRole(user, password, roles, checkType): NOT IMPLEMENTED");
-        return roles.contains(StaticGroup.admin.name()) && validateUser(user, password);
+        return roles.contains(new Role(StaticGroup.admin.name(), true, true, true, true, true, true, true, true))
+                && validateUser(user, password);
     }
 
 }

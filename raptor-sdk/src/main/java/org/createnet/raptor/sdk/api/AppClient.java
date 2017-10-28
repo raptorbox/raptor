@@ -79,6 +79,7 @@ public class AppClient extends AbstractClient {
             throw new ClientException("Missing ID on object creation");
         }
         obj.setId(node.get("id").asText());
+        obj.setUserId(node.get("userId").asText());
         return obj;
     }
 
@@ -102,7 +103,7 @@ public class AppClient extends AbstractClient {
     public App update(App obj) {
         JsonNode n = getClient().put(
                 String.format(Routes.APP_UPDATE, obj.getId()),
-                toJson(obj)
+                toJsonNode(obj)
         );
         obj.merge(getMapper().convertValue(n, App.class));
         return obj;

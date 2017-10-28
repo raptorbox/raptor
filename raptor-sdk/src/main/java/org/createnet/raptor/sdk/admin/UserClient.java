@@ -115,38 +115,38 @@ public class UserClient extends AbstractClient {
      *
      * @param device
      * @param user
-     * @param permission
+     * @param operation
      * @return
      */
-    public AuthorizationResponse isAuthorized(Device device, User user, Operation permission) {
-        return isAuthorized(EntityType.device, device.id(), user.getUuid(), permission);
+    public AuthorizationResponse isAuthorized(Device device, User user, Operation operation) {
+        return isAuthorized(getContainer().Auth().getUser().getUuid(), EntityType.device, operation, device.id());
     }
 
     /**
      * Check if the current user is authorized to operate on a device
      *
      * @param device
-     * @param permission
+     * @param operation
      * @return
      */
-    public AuthorizationResponse isAuthorized(Device device, Operation permission) {
-        return isAuthorized(EntityType.device, device.id(), getContainer().Auth().getUser().getUuid(), permission);
+    public AuthorizationResponse isAuthorized(Device device, Operation operation) {
+        return isAuthorized(getContainer().Auth().getUser().getUuid(), EntityType.device, operation, device.id());
     }
 
     /**
      * Check if an user is authorized to operate on a device
      *
-     * @param type
-     * @param objectId
      * @param userId
-     * @param permission
+     * @param type
+     * @param operation
+     * @param objectId
      * @return
      */
-    public AuthorizationResponse isAuthorized(EntityType type, String objectId, String userId, Operation permission) {
+    public AuthorizationResponse isAuthorized(String userId, EntityType type, Operation operation, String objectId) {
 
         AuthorizationRequest auth = new AuthorizationRequest();
         auth.objectId = objectId;
-        auth.permission = permission.name();
+        auth.permission = operation;
         auth.userId = userId;
         auth.type = type;
 

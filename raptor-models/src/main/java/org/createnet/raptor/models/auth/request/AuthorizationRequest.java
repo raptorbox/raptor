@@ -16,6 +16,7 @@
 package org.createnet.raptor.models.auth.request;
 
 import org.createnet.raptor.models.acl.EntityType;
+import org.createnet.raptor.models.acl.Operation;
 
 /**
  *
@@ -25,7 +26,7 @@ public class AuthorizationRequest {
   
   public AuthorizationRequest() {}
   
-  public String permission;
+  public Operation permission;
   public String objectId;
   public EntityType type;
   public String userId;

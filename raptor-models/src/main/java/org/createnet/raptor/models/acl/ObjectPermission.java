@@ -50,4 +50,8 @@ public class ObjectPermission {
         return permission;
     }
 
+    public boolean isOwn() {
+        return own;
+    }
+    
 }

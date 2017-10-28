@@ -19,11 +19,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
+import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.auth.DefaultGroups;
 import org.createnet.raptor.models.auth.Group;
 import org.createnet.raptor.models.auth.User;
@@ -39,14 +38,15 @@ import org.slf4j.LoggerFactory;
  */
 public class Utils {
 
-    static private final int socketTimeout = 120*1000;
-    static private final int reqTimeout = 120*1000;
-    
+    static private final int socketTimeout = 120 * 1000;
+    static private final int reqTimeout = 120 * 1000;
+
     static final Logger log = LoggerFactory.getLogger(Utils.class);
     static final String settingsFile = "settings.properties";
     static Raptor instance;
 
     public interface Function {
+
         public boolean call();
     }
 
@@ -79,6 +79,10 @@ public class Utils {
         return instance;
     }
 
+    static public Device createDevice() throws IOException {
+        return createDevice(rndName("device"));
+    }
+
     static public Device createDevice(String name) throws IOException {
         Device d = new Device();
         d.name(name);
@@ -98,7 +102,7 @@ public class Utils {
         while (callback.call()) {
             Utils.waitFor(1000);
             count++;
-            Assert.assertTrue(count <= repeat);            
+            Assert.assertTrue(count <= repeat);
             log.debug("Waiting {} of {} seconds", count, repeat);
         }
     }
@@ -161,7 +165,7 @@ public class Utils {
      */
     static public Raptor createNewAdminInstance() {
 
-        String username = rndUsername();
+        String username = rndName("admin");
         String password = username + Math.random();
 
         User user = getRaptor().Admin().User().createAdmin(username, password, username + "@test.raptor.local");
@@ -175,11 +179,11 @@ public class Utils {
 
         return r;
     }
-    
+
     static public Raptor createNewUserInstance(String username, List<Group> g) {
-        
-        if(username == null) {
-            username = rndUsername();
+
+        if (username == null) {
+            username = rndName("user");
         }
 
         String password = username + Math.random();
@@ -193,20 +197,28 @@ public class Utils {
         r.getClient().configureTimeout(socketTimeout, reqTimeout);
         r.Auth().login();
 
-        return r;        
+        return r;
     }
-    
+
     static public Raptor createNewUserInstance() {
-        return createNewUserInstance(rndUsername(), Arrays.asList(DefaultGroups.user));
+        return createNewUserInstance(rndName("user"), Arrays.asList(DefaultGroups.user));
     }
-    
+
     static public Raptor createNewUserInstance(String username) {
         return createNewUserInstance(username, Arrays.asList(DefaultGroups.user));
     }
 
-    public static String rndUsername() {
+    public static String rndName() {
+        return rndName("");
+    }
+    
+    public static String rndName(EntityType t) {
+        return rndName(t.name());
+    }
+
+    public static String rndName(String seed) {
         int rnd = ((int) (Math.random() * 100000000)) + (int) System.currentTimeMillis();
-        return (rnd % 2 == 0 ? "test_fil_" : "user_ippo_") + rnd;
+        return String.format("test_%s_%s_%s", seed, (rnd % 2 == 0 ? "ippo" : "fil"), rnd);
     }
 
 }

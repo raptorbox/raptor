@@ -126,6 +126,10 @@ public class User implements Serializable, Owneable {
 
     public User() {
     }
+    
+    public User(String userId) {
+        this.uuid = userId;
+    }
 
     public User(User user) {
         this(user, false);

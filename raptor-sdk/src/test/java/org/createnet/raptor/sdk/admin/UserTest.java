@@ -236,7 +236,7 @@ public class UserTest {
     public void isAuthorized() throws IOException {
 
         Raptor r1 = Utils.createNewUserInstance();
-        
+
         Raptor r2 = Utils.createNewUserInstance();
         String userId2 = r2.Auth().getUser().getUuid();
 
@@ -254,10 +254,10 @@ public class UserTest {
         res = r1.Admin().User().isAuthorized(dev1, Operation.read);
         assertEquals(res.result, true);
 
-        res = r1.Admin().User().isAuthorized(EntityType.device, dev1.id(), userId2, Operation.admin);
+        res = r1.Admin().User().isAuthorized(userId2, EntityType.device, Operation.admin, dev1.id());
         assertEquals(res.result, false);
 
-        res = r1.Admin().User().isAuthorized(EntityType.device, dev1.id(), userId2, Operation.read);
+        res = r1.Admin().User().isAuthorized(userId2, EntityType.device, Operation.read, dev1.id());
         assertEquals(res.result, false);
 
     }

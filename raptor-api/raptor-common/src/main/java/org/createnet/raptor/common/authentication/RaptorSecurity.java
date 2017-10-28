@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.common.authentication;
 
-import java.io.Serializable;
 import org.createnet.raptor.common.client.InternalApiClientService;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
@@ -23,13 +22,9 @@ import org.createnet.raptor.models.acl.Owneable;
 import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
-import org.createnet.raptor.models.objects.Device;
-import org.createnet.raptor.models.response.JsonError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 
 /**
  *
@@ -43,19 +38,19 @@ public class RaptorSecurity {
     Logger log = LoggerFactory.getLogger(RaptorSecurity.class);
 
     public boolean list(User u, EntityType entity) {
-        
+
         boolean hasPermission = can(u, entity, Operation.read);
         if (hasPermission) {
             return true;
         }
-        
+
         Permission p = new Permission(entity, Operation.read, true);
         hasPermission = u.hasPermission(p);
         log.debug("`{}` can {} list `{}`", u.getUsername(), hasPermission ? "" : "NOT", entity);
 
         return hasPermission;
     }
-    
+
     public boolean can(User u, EntityType entity, Operation operation) {
         return can(u, entity, operation, null);
     }
@@ -71,17 +66,17 @@ public class RaptorSecurity {
      * @return
      */
     public boolean can(User u, EntityType entity, Operation operation, Object obj) {
-        
+
         log.debug("Check if user `{}` can `{}` on  `{}` [id={}]", u.getUsername(), operation, entity, obj);
-        
+
         // is an admin
         if (u.isAdmin()) {
             log.debug("`{}` is admin", u.getUsername());
             return true;
         }
 
-        boolean hasPermission = false;
-
+        boolean hasPermission;
+        
         // check if the current user own the subject        
         hasPermission = isOwner(u, entity, operation, obj);
         if (hasPermission) {
@@ -102,12 +97,19 @@ public class RaptorSecurity {
             // has specific permission on an entity type eg. device_read
             p = new Permission(entity, operation);
             hasPermission = u.hasPermission(p);
-            if(hasPermission) {
+            if (hasPermission) {
                 log.debug("`{}` can `{}` on `{}`", u.getUsername(), operation, entity);
                 return true;
             }
         }
-
+        
+        String subjectId = (String) obj;
+        hasPermission = isAuthorized(u, entity, operation, subjectId);
+        if(hasPermission) {
+            log.debug("`{}` has {}_{} ACL on {}", u.getUsername(), entity, operation, subjectId);
+            return true;
+        }
+        
         log.debug("User `{}` NOT ALLOWED to `{}` on `{}` [id={}]", u.getUsername(), operation, entity, obj);
 
         return false;
@@ -128,8 +130,8 @@ public class RaptorSecurity {
 
             if (obj instanceof String || obj instanceof Long) {
                 try {
-                    obj = loadById(entity, obj);
-                } catch(Exception ex) {
+                    obj = loadEntity(entity, obj);
+                } catch (Exception ex) {
                     log.error("Failed to load `ownerId`: {}", ex.getMessage(), ex);
                     return false;
                 }
@@ -145,69 +147,24 @@ public class RaptorSecurity {
 
             return ownerId.equals(u.getUuid());
         }
-
+        
         return false;
     }
 
-    public boolean hasPermission(Authentication auth, Object deviceObject, Object permission) {
-
-        if ((auth == null) || !(permission instanceof String)) {
-            return false;
-        }
-
-        String deviceId = null;
-
-        if (deviceObject != null) {
-            deviceId = deviceObject.toString();
-
-            if (deviceObject instanceof ResponseEntity) {
-                ResponseEntity entity = (ResponseEntity) deviceObject;
-                if (entity.getBody() instanceof JsonError) {
-                    LoginAuthenticationToken tokenAuthentication = (LoginAuthenticationToken) auth;
-                    JsonError err = (JsonError) entity.getBody();
-                    log.warn("Got error response for [user={} permission={}] {}", tokenAuthentication.getUser().getUsername(), permission, err.message);
-                    return false;
-                }
-                deviceObject = (Device) entity.getBody();
-            }
-
-            if (deviceObject instanceof Device) {
-                Device dev = (Device) deviceObject;
-                deviceId = dev.id();
-            }
-        }
-
-        log.debug("Check authorization for user={} device={} permission={}", auth.getPrincipal(), deviceId, permission.toString().toLowerCase());
-        return isAuthorized(auth, deviceId, permission.toString().toLowerCase());
-    }
-
-    public boolean hasPermission(Authentication auth, Serializable targetId, String targetType, Object permission) {
-        if ((auth == null) || (targetType == null) || !(permission instanceof String)) {
-            return false;
-        }
-        return isAuthorized(auth, targetId.toString(), permission.toString().toLowerCase());
-    }
-
-    private boolean isAuthorized(Authentication auth, String deviceId, String permission) {
-
-        LoginAuthenticationToken tokenAuthentication = (LoginAuthenticationToken) auth;
-
-        if (tokenAuthentication.getUser() == null) {
-            return false;
-        }
-
+    private boolean isAuthorized(User user, EntityType entity, Operation operation, String subjectId) {
         try {
-            Operation p = Operation.valueOf(permission);
-            log.debug("Check authorization for user={} device={} permission={}", tokenAuthentication.getUser().getUuid(), deviceId, p);
-            AuthorizationResponse response = api.Admin().User().isAuthorized(EntityType.device, deviceId, tokenAuthentication.getUser().getUuid(), p);
+            
+            log.debug("Check authorization for user={} type={} op={} subject={}", user.getUsername(), entity, operation, subjectId);
+            AuthorizationResponse response = api.Admin().User().isAuthorized(user.getUuid(), entity, operation, subjectId);
+            
             return response.result;
+            
         } catch (Exception ex) {
             return false;
         }
-
     }
 
-    private Owneable loadById(EntityType entity, Object uuid) {
+    protected Owneable loadEntity(EntityType entity, Object uuid) {
 
         if (uuid == null) {
             return null;
@@ -229,5 +186,5 @@ public class RaptorSecurity {
                 return null;
         }
     }
-
+    
 }

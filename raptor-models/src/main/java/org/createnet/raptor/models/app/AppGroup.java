@@ -18,6 +18,7 @@ package org.createnet.raptor.models.app;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.Group;
@@ -28,6 +29,11 @@ import org.createnet.raptor.models.auth.Group;
  */
 public class AppGroup {
 
+    public static AppGroup from(Group group) {
+        AppGroup g = new AppGroup(group);
+        return g;
+    }
+
     protected String name;
     protected final List<String> permissions = new ArrayList();
 
@@ -37,7 +43,7 @@ public class AppGroup {
     public AppGroup(String name) {
         this.name = name;
     }
-    
+
     public AppGroup(StaticGroup group) {
         this.name = group.name();
     }
@@ -46,7 +52,7 @@ public class AppGroup {
         this(name);
         this.permissions.addAll(permissions);
     }
-    
+
     public AppGroup(Group group) {
         this.name = group.getName();
         this.permissions.addAll(group.getPermissions().stream().map((p) -> p.getName()).collect(Collectors.toList()));
@@ -97,6 +103,31 @@ public class AppGroup {
         if (getPermissions().contains(permission)) {
             getPermissions().remove(permission);
         }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(this.name);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final AppGroup other = (AppGroup) obj;
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        return true;
     }
 
 }

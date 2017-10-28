@@ -150,7 +150,11 @@ public class AppController {
             @AuthenticationPrincipal User currentUser,
             @RequestBody App app
     ) {
-
+        
+        if (app.getUserId() == null) {
+            app.setUserId(currentUser.getUuid());
+        }
+        
         try {
             appService.validate(app);
         } catch (RaptorComponent.ValidationException ex) {
