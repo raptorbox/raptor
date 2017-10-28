@@ -115,7 +115,7 @@ public class AppController {
             response = org.createnet.raptor.models.app.App.class,
             nickname = "getApps"
     )
-    @PreAuthorize("@raptorSecurity.can(principal, 'app', 'read')")
+    @PreAuthorize("@raptorSecurity.list(principal, 'app')")
     public ResponseEntity<?> getApps(
             @AuthenticationPrincipal User currentUser,
             Pageable pageable,

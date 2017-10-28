@@ -29,7 +29,10 @@ import org.createnet.raptor.models.auth.request.PermissionRequestBatch;
 import org.createnet.raptor.auth.services.AclTokenService;
 import org.createnet.raptor.auth.services.TokenService;
 import org.createnet.raptor.auth.services.UserService;
+import org.createnet.raptor.models.acl.ObjectPermission;
+import org.createnet.raptor.models.acl.permission.PermissionUtil;
 import org.createnet.raptor.models.auth.Token;
+import org.createnet.raptor.models.objects.RaptorComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -187,11 +190,15 @@ public class TokenPermissionController {
         List<Permission> permissions = body.permissions
                 .stream()
                 .map((String s) -> {
-                    Permission p = RaptorPermission.fromLabel(s);
-                    if (p == null) {
-                        throw new PermissionNotFoundException("Permission not found ");
+                    try {
+                        ObjectPermission perm = PermissionUtil.parseObjectPermission(s);
+                        return perm;
+                    } catch(RaptorComponent.ValidationException ex) {
+                        throw new PermissionNotFoundException("Permission `"+ s +"` not found ", ex);
                     }
-                    return p;
+                })
+                .map((p) -> {
+                    return p.getPermission();
                 })
                 .distinct()
                 .collect(Collectors.toList());

@@ -37,6 +37,7 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import org.createnet.raptor.models.acl.AbstractAclSubject;
+import org.createnet.raptor.models.acl.Owneable;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -50,7 +51,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Cacheable(value = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(name = "tokens")
-public class Token extends AbstractAclSubject {
+public class Token extends AbstractAclSubject implements Owneable {
 
     static final long serialVersionUID = 1000000000000002L;
 
@@ -275,6 +276,19 @@ public class Token extends AbstractAclSubject {
 
     public void setTokenType(String tokenType) {
         this.tokenType = TokenType.valueOf(tokenType);
+    }
+
+    @JsonProperty("ownerId")
+    @Override
+    public String getOwnerId() {
+        return getUser() == null ? null : getUser().getUuid();
+    }
+    
+    @JsonProperty("ownerId")
+    public void setOwnerId(String ownerId) {
+        User u = new User();
+        u.setUuid(ownerId);
+        this.user = u;
     }
 
 }

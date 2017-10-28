@@ -24,7 +24,6 @@ import org.apache.activemq.artemis.core.security.Role;
 import org.apache.activemq.artemis.spi.core.protocol.RemotingConnection;
 import org.apache.activemq.artemis.spi.core.security.ActiveMQSecurityManager2;
 import org.createnet.raptor.common.authentication.RaptorSecurity;
-import org.createnet.raptor.common.authentication.RaptorUserDetails;
 import org.createnet.raptor.common.client.InternalApiClientService;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
@@ -36,7 +35,6 @@ import org.createnet.raptor.models.configuration.RaptorConfiguration;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.tree.TreeNode;
 import org.createnet.raptor.sdk.Raptor;
-import org.createnet.raptor.sdk.Topics;
 import org.createnet.raptor.sdk.api.AuthClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -219,9 +217,7 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
                 String id = topicTokens[1];
                 
                 User user = r.Auth().getUser();
-                Device device = new Device(id);
-                
-                
+                Device device = new Device(id);                               
                 
                 switch (EntityType.valueOf(type)) {
                     case device:
@@ -242,6 +238,9 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
                                 
                                 switch(treeType) {
                                     case device:
+                                    case user:
+                                    case token:
+                                    case group:
                                         treeOp = Operation.read;
                                         break;
                                     case action:
@@ -260,8 +259,9 @@ public class RaptorSecurityManager implements ActiveMQSecurityManager2 {
                         
                         return raptorSecurity.can(user, treeType, treeOp, new TreeNode(id));
                     case token:
+                        return raptorSecurity.can(user, EntityType.token, Operation.read, id);
                     case user:
-                        return r.Auth().getUser().isAdmin();
+                        return raptorSecurity.can(user, EntityType.user, Operation.read, id);
                 }
 
                 logger.error("Unrecognized subscribe topic pattern {}", address);

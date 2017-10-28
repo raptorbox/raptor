@@ -219,7 +219,7 @@ public class UserTest {
 
         String username1 = rndUsername();
         log.debug("Create user1 {}", username1);
-        User user1 = raptor.Admin().User().createAdmin(username1, "pass_" + rndUsername(), "test@test.raptor.local");
+        User user1 = raptor.Admin().User().create(username1, "pass_" + rndUsername(), "test@test.raptor.local");
 
         AuthClient.LoginState state = raptor.Admin().User().impersonate(user1.getUuid());
 

@@ -41,6 +41,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import org.createnet.raptor.models.acl.Owneable;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Cascade;
@@ -56,7 +57,7 @@ import org.hibernate.validator.constraints.Email;
 @Cacheable(value = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(name = "users")
-public class User implements Serializable {
+public class User implements Serializable, Owneable {
 
     static final long serialVersionUID = 1000000000000001L;
 
@@ -322,6 +323,11 @@ public class User implements Serializable {
     
     public boolean hasPermission(String p) {
         return hasPermission(new Permission(p));
+    }
+
+    @Override
+    public String getOwnerId() {
+        return getUuid();
     }
 
 }

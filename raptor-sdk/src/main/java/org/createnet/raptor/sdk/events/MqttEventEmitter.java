@@ -88,7 +88,7 @@ public class MqttEventEmitter extends AbstractClient {
     }
 
     protected String getGroupTopic(TreeNode n) {
-        return String.format(Topics.TREE, n.getId(), "+");
+        return String.format(Topics.TREE, n.getId(), n.getType().name());
     }
 
     protected String getStreamTopic(Stream stream) {

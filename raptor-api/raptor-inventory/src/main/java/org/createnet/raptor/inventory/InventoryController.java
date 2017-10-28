@@ -97,6 +97,7 @@ public class InventoryController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(value = "Return the user devices", notes = "", response = Device.class, nickname = "getDevices")
+    @PreAuthorize("@raptorSecurity.list(principal, 'device')")
     public ResponseEntity<?> getDevices(@AuthenticationPrincipal User currentUser) {
 
         String deviceId = currentUser.getUuid();

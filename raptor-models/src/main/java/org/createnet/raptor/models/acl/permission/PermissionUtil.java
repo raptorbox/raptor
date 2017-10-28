@@ -86,11 +86,8 @@ public class PermissionUtil {
     static public ObjectPermission parseObjectPermission(String label) {
 
         label = label.toLowerCase().replace("role_", "");
-        String[] parts = label.split(".");
-        if (parts.length != 2) {
-            parts = label.split("_");
-        }
-        if (parts.length != 2) {
+        String[] parts = label.split("_");
+        if (parts.length < 2 || parts.length > 3) {
             throw new RaptorComponent.ValidationException("Failed to parse permission " + label);
         }
 
@@ -103,10 +100,12 @@ public class PermissionUtil {
 
         Permission perm = RaptorPermission.fromLabel(parts[1]);
         if (perm == null) {
-            throw new RaptorComponent.ValidationException("Failed to parse permission: " + parts[1]);
+            throw new RaptorComponent.ValidationException("Failed to parse operation: " + parts[1]);
         }
-
-        return new ObjectPermission(subjType, perm);
+            
+        boolean own = parts.length == 3;
+        
+        return new ObjectPermission(subjType, perm, own);
     }
 
 }

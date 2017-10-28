@@ -32,6 +32,7 @@ public class DefaultGroups {
     public static Group user = new Group(StaticGroup.user, Arrays.asList(
             
             new Permission(EntityType.device, Operation.create),
+            new Permission(EntityType.device, Operation.read, true),
             new Permission(EntityType.device, Operation.update, true),
             new Permission(EntityType.device, Operation.delete, true),
             new Permission(EntityType.device, Operation.push, true),
@@ -39,12 +40,16 @@ public class DefaultGroups {
             new Permission(EntityType.device, Operation.execute, true),
             
             new Permission(EntityType.tree, Operation.create),
+            new Permission(EntityType.tree, Operation.read, true),
             new Permission(EntityType.tree, Operation.update, true),
             new Permission(EntityType.tree, Operation.delete, true),
             
-            new Permission(EntityType.app, Operation.create),
-            new Permission(EntityType.app, Operation.update, true),
-            new Permission(EntityType.app, Operation.delete, true)
+            new Permission(EntityType.token, Operation.create),
+            new Permission(EntityType.token, Operation.read, true),
+            new Permission(EntityType.token, Operation.update, true),
+            new Permission(EntityType.token, Operation.delete, true),
+
+            new Permission(EntityType.app, Operation.read, true)
 
     ));
     

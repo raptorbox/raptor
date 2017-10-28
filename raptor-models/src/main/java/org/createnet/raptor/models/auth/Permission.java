@@ -69,7 +69,7 @@ public class Permission implements GrantedAuthority {
     public void buildName(EntityType entity, Operation operation, boolean own) {
         this.name = entity.name() + "_" + operation.name();
         if (own) {
-            this.name = "_own";
+            this.name += "_own";
         }
     }
 
@@ -111,6 +111,11 @@ public class Permission implements GrantedAuthority {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return getName() + "[id=" + getId() + "]";
     }
 
 }

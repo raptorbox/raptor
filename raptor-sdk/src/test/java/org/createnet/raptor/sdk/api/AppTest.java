@@ -57,7 +57,7 @@ public class AppTest {
     @Test
     public void list() {
 
-        Raptor raptor = Utils.createNewAdminInstance();
+        Raptor raptor = Utils.createNewUserInstance();
 
         log.debug("List apps");
 
@@ -66,13 +66,13 @@ public class AppTest {
 
         log.debug("found {} apps", list.size());
         assertNotNull(list);
-//        assertEquals(0, list.size());
+        assertEquals(0, list.size());
     }
 
     @Test
     public void create() {
 
-        Raptor raptor = Utils.createNewUserInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("create app");
 
@@ -102,15 +102,20 @@ public class AppTest {
         app.setName("test_" + System.currentTimeMillis());
         app.setUserId(raptor.Auth().getUser().getUuid());
 
+        PageResponse<App> pager = raptor.App().list();
+        List<App> list = pager.getContent();
+        int len = list.size();
+        log.debug("found {} apps", len);
+        
         raptor.App().create(app);
         raptor.App().delete(app);
 
-        PageResponse<App> pager = raptor.App().list();
-        List<App> list = pager.getContent();
+        pager = raptor.App().list();
+        list = pager.getContent();
 
         log.debug("found {} apps", list.size());
         assertNotNull(list);
-        assertEquals(0, list.size());
+        assertEquals(len, list.size());
 
     }
 

@@ -76,7 +76,7 @@ public class GroupController {
     @Autowired
     private AuthAppService appService;
 
-    @PreAuthorize("@raptorSecurity.can(principal, 'group', 'read')")
+    @PreAuthorize("@raptorSecurity.list(principal, 'group')")
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
             value = "List available groups",

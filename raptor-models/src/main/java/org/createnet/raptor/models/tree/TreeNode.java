@@ -131,7 +131,7 @@ public class TreeNode extends RaptorContainer implements Owneable {
      */
     static public TreeNode create(String name) {
         return new TreeNode()
-                .type(EntityType.group)
+                .type(EntityType.tree)
                 .name(name);
     }
 

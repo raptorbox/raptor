@@ -127,7 +127,7 @@ public class TreeController {
             responseContainer = "List",
             nickname = "list"
     )
-    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'read')")
+    @PreAuthorize("@raptorSecurity.list(principal, 'tree')")
     public ResponseEntity<?> list(
             @AuthenticationPrincipal User currentUser
     ) {
@@ -148,7 +148,7 @@ public class TreeController {
             responseContainer = "List",
             nickname = "tree"
     )
-    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'read')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'read', #nodeId)")
     public ResponseEntity<?> tree(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("nodeId") String nodeId
@@ -168,7 +168,7 @@ public class TreeController {
             responseContainer = "List",
             nickname = "children"
     )
-    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'read')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'read', #nodeId)")
     public ResponseEntity<?> children(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("nodeId") String nodeId
@@ -189,7 +189,7 @@ public class TreeController {
             notes = "",
             nickname = "add"
     )
-    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'create')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'create', #parentId)")
     public ResponseEntity<?> add(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("parentId") Optional<String> optionalParentId,
@@ -238,7 +238,7 @@ public class TreeController {
             notes = "",
             nickname = "delete"
     )
-    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'delete')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'delete', #nodeId)")
     public ResponseEntity<?> delete(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("nodeId") String nodeId

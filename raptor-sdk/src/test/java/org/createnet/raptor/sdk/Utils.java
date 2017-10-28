@@ -20,9 +20,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import org.createnet.raptor.models.auth.DefaultGroups;
 import org.createnet.raptor.models.auth.Group;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
@@ -195,11 +197,11 @@ public class Utils {
     }
     
     static public Raptor createNewUserInstance() {
-        return createNewUserInstance(rndUsername(), new ArrayList());
+        return createNewUserInstance(rndUsername(), Arrays.asList(DefaultGroups.user));
     }
     
     static public Raptor createNewUserInstance(String username) {
-        return createNewUserInstance(username, new ArrayList());
+        return createNewUserInstance(username, Arrays.asList(DefaultGroups.user));
     }
 
     public static String rndUsername() {

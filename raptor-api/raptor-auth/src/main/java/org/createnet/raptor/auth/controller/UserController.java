@@ -81,7 +81,7 @@ public class UserController {
     @Autowired
     private RaptorConfiguration configuration;
 
-    @PreAuthorize("@raptorSecurity.can(principal, 'user', 'read')")
+    @PreAuthorize("@raptorSecurity.list(principal, 'user')")
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
             value = "List available user",

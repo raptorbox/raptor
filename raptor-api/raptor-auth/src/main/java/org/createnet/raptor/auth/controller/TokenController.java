@@ -91,7 +91,7 @@ public class TokenController {
     @Autowired
     AclTokenService aclTokenService;
 
-    @PreAuthorize("@raptorSecurity.can(principal, 'token', 'read')")
+    @PreAuthorize("@raptorSecurity.list(principal, 'token')")
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
             value = "List tokens",
@@ -169,11 +169,6 @@ public class TokenController {
     ) {
 
         Token token = tokenService.read(tokenId);
-
-        // TODO add ACL checks
-        if (user.getId().longValue() != token.getUser().getId().longValue()) {
-            return JsonErrorResponse.entity(HttpStatus.UNAUTHORIZED);
-        }
 
         if (token.isLoginToken()) {
             return JsonErrorResponse.entity(HttpStatus.BAD_REQUEST, "Can not access this token");

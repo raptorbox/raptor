@@ -30,10 +30,16 @@ public class ObjectPermission {
 
     final protected Class objectType;
     final protected Permission permission;
+    final protected boolean own;
 
     public ObjectPermission(Class objectType, Permission permission) {
+        this(objectType, permission, false);
+    }
+
+    public ObjectPermission(Class objectType, Permission permission, boolean own) {
         this.objectType = objectType;
         this.permission = permission;
+        this.own = own;
     }
 
     public Class getObjectType() {
