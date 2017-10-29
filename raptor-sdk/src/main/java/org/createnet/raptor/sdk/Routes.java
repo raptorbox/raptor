@@ -85,6 +85,7 @@ final public class Routes {
     
     public static final String APP_CREATE = "/app";
     public static final String APP_LIST = APP_CREATE;
+    public static final String APP_SEARCH = APP_CREATE + "/search";
     public static final String APP_READ = APP_CREATE + "/%s";
     public static final String APP_UPDATE = APP_READ;
     public static final String APP_DELETE = APP_READ;

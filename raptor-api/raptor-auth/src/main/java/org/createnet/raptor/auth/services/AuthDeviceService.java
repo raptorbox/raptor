@@ -122,7 +122,7 @@ public class AuthDeviceService {
         if (req.userId == null) {
             device.setOwner(user);
         } else {
-            User owner = userRepository.findByUuid(req.userId);
+            User owner = userRepository.findOneByUuid(req.userId);
             if (owner == null) {
                 throw new UserNotFoundException();
             }

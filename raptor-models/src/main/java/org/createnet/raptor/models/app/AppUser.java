@@ -18,6 +18,7 @@ package org.createnet.raptor.models.app;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.User;
 
@@ -27,14 +28,14 @@ import org.createnet.raptor.models.auth.User;
  */
 public class AppUser {
 
-    protected String id;
-    protected List<AppGroup> groups = new ArrayList();
+    protected String uuid;
+    protected List<String> groups = new ArrayList();
 
     public AppUser() {
     }
     
     public AppUser(String userId) {
-        this.id = userId;
+        this.uuid = userId;
     }
     
     public AppUser(User user) {
@@ -42,22 +43,22 @@ public class AppUser {
     }
     
     public String getId() {
-        return id;
+        return uuid;
     }
 
     public void setId(String id) {
-        this.id = id;
+        this.uuid = id;
     }
 
-    public List<AppGroup> getGroups() {
+    public List<String> getGroups() {
         return groups;
     }
 
-    public void setGroups(List<AppGroup> groups) {
+    public void setGroups(List<String> groups) {
         this.groups = groups;
     }
 
-    public void addGroups(List<AppGroup> groups) {
+    public void addGroups(List<String> groups) {
         groups.forEach((group) -> {
             if (!getGroups().contains(group)) {
                 getGroups().add(group);
@@ -66,17 +67,46 @@ public class AppUser {
     }
 
     public void removeGroup(AppGroup group) {
-        if (getGroups().contains(group)) {
-            getGroups().remove(group);
+        if (getGroups().contains(group.getName())) {
+            getGroups().remove(group.getName());
         }
     }
 
     public void addGroup(AppGroup group) {
-        addGroups(Arrays.asList(group));
+        addGroups(Arrays.asList(group.getName()));
     }
     
     public boolean hasGroup(StaticGroup group) {
-        return getGroups().contains(new AppGroup(group.name()));
+        return hasGroup(group.name());
+    }
+    
+    public boolean hasGroup(String group) {
+        return getGroups().contains(group);
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 41 * hash + Objects.hashCode(this.uuid);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final AppUser other = (AppUser) obj;
+        if (!Objects.equals(this.uuid, other.uuid)) {
+            return false;
+        }
+        return true;
+    }
+    
 }

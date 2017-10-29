@@ -15,13 +15,19 @@
  */
 package org.createnet.raptor.common.authentication;
 
+import java.util.List;
 import org.createnet.raptor.common.client.InternalApiClientService;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.acl.Owneable;
+import org.createnet.raptor.models.app.App;
+import org.createnet.raptor.models.app.AppGroup;
+import org.createnet.raptor.models.app.AppUser;
 import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
+import org.createnet.raptor.models.query.AppQuery;
+import org.createnet.raptor.sdk.PageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +82,7 @@ public class RaptorSecurity {
         }
 
         boolean hasPermission;
-        
+
         // check if the current user own the subject        
         hasPermission = isOwner(u, entity, operation, obj);
         if (hasPermission) {
@@ -102,14 +108,19 @@ public class RaptorSecurity {
                 return true;
             }
         }
-        
+
+        hasPermission = checkAppPermissions(u, entity, operation, obj);
+        if (hasPermission) {
+            return true;
+        }
+
         String subjectId = (String) obj;
         hasPermission = isAuthorized(u, entity, operation, subjectId);
-        if(hasPermission) {
+        if (hasPermission) {
             log.debug("`{}` has {}_{} ACL on {}", u.getUsername(), entity, operation, subjectId);
             return true;
         }
-        
+
         log.debug("User `{}` NOT ALLOWED to `{}` on `{}` [id={}]", u.getUsername(), operation, entity, obj);
 
         return false;
@@ -147,24 +158,24 @@ public class RaptorSecurity {
 
             return ownerId.equals(u.getUuid());
         }
-        
+
         return false;
     }
 
     private boolean isAuthorized(User user, EntityType entity, Operation operation, String subjectId) {
         try {
-            
+
             log.debug("Check authorization for user={} type={} op={} subject={}", user.getUsername(), entity, operation, subjectId);
             AuthorizationResponse response = api.Admin().User().isAuthorized(user.getUuid(), entity, operation, subjectId);
-            
+
             return response.result;
-            
+
         } catch (Exception ex) {
             return false;
         }
     }
 
-    protected Owneable loadEntity(EntityType entity, Object uuid) {
+    public Owneable loadEntity(EntityType entity, Object uuid) {
 
         if (uuid == null) {
             return null;
@@ -186,5 +197,53 @@ public class RaptorSecurity {
                 return null;
         }
     }
-    
+
+    public boolean checkAppPermissions(User user, EntityType entity, Operation operation, Object obj) {
+
+        if (entity != EntityType.device && entity != EntityType.tree) {
+            return false;
+        }
+
+        if (!(obj instanceof String)) {
+            return false;
+        }
+
+        boolean perm = false;
+
+        AppQuery q = new AppQuery();
+        q.devices.in((String) obj);
+        q.users.in(user.getUuid());
+
+        PageResponse<App> response = api.App().search(q);
+        if (response.getTotalElements() == 0) {
+            return false;
+        }
+
+        String p = new org.createnet.raptor.models.auth.Permission(entity, operation).toString();
+        perm = response.getContent().stream()
+                .filter((app) -> {
+
+                    List<AppGroup> groups = app.getGroupsByPermission(p);
+                    if (groups.isEmpty()) {
+                        return false;
+                    }
+
+                    AppUser u = app.getUser(user);
+                    if (u == null) {
+                        return false;
+                    }
+                    
+                    if (groups.stream().anyMatch((group) -> u.hasGroup(group.getName()))) {
+                        log.debug("User `{}` to `{}` on `{}` [id={}] of app `{}` [id={}]", user.getUsername(), operation, entity, obj, app.getName(), app.getId());
+                        return true;
+                    }
+                    
+                    return false;
+                })
+                .count() > 0;
+
+        
+        return perm;
+    }
+
 }

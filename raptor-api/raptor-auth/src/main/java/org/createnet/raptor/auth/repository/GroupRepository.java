@@ -31,9 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface GroupRepository extends CrudRepository<Group, Long>, JpaRepository<Group, Long> {
 
-    public Group findByName(String name);
+    public Group findOneByName(String name);
 
-    public Group findByNameAndApp(String name, AclApp app);
+    public Group findOneByNameAndApp(String name, AclApp app);
     
     public Group findOneById(Long id);
     

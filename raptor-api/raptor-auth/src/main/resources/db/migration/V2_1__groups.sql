@@ -33,3 +33,7 @@ alter table groups_permissions add constraint fk_group_perm_pid foreign key (per
 
 alter table users_groups add constraint fk_usr_grp_gid foreign key (group_id) references groups (id);
 alter table users_groups add constraint fk_usr_grp_uid foreign key (user_id) references users (id);
+
+ALTER TABLE `groups` ADD UNIQUE (`name`, `app_id`);
+ALTER TABLE `groups` ADD UNIQUE (`name`);
+ALTER TABLE `permissions` ADD UNIQUE (`name`);

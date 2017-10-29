@@ -35,6 +35,7 @@ import org.createnet.raptor.auth.services.AuthTreeService;
 import org.createnet.raptor.auth.services.TokenService;
 import org.createnet.raptor.auth.services.UserService;
 import org.createnet.raptor.common.authentication.RaptorSecurity;
+import org.createnet.raptor.common.client.InternalApiClientService;
 import org.createnet.raptor.models.auth.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,29 +60,17 @@ import org.springframework.web.bind.annotation.RestController;
 @PreAuthorize("isAuthenticated()")
 @Api(tags = {"User", "Permission"})
 @ApiResponses(value = {
-    @ApiResponse(
-            code = 200,
-            message = "Ok"
-    )
-    ,
-    @ApiResponse(
-            code = 401,
-            message = "Not authorized"
-    )
-    ,
-    @ApiResponse(
-            code = 403,
-            message = "Forbidden"
-    )
-    ,
-    @ApiResponse(
-            code = 500,
-            message = "Internal error"
-    )
+    @ApiResponse(code = 200, message = "Ok")
+    ,@ApiResponse(code = 401, message = "Not authorized")
+    ,@ApiResponse(code = 403, message = "Forbidden")
+    ,@ApiResponse(code = 500, message = "Internal error")
 })
 public class AclController {
 
     private static final Logger logger = LoggerFactory.getLogger(AclController.class);
+
+    @Autowired
+    InternalApiClientService api;
 
     @Autowired
     private AuthDeviceService deviceService;
@@ -106,12 +95,10 @@ public class AclController {
 
     @Autowired
     private AclTokenService aclTokenService;
-    
+
     @Autowired
     private RaptorSecurity raptorSecurity;
 
-    
-    
     @RequestMapping(value = "/check", method = RequestMethod.POST)
     @ApiOperation(
             value = "Check user permission on a device",
@@ -132,7 +119,7 @@ public class AclController {
             user = userService.getByUuid(body.userId);
         }
 
-        logger.debug("Check if user {} can `{}` on {} {}", user.getUuid(), body.permission, body.type, body.objectId);
+        logger.debug("Check if user {} can `{}` on {} {}", user.getUsername(), body.permission, body.type, body.objectId);
 
         Permission permission = RaptorPermission.fromLabel(body.permission);
         if (permission == null) {
@@ -160,10 +147,10 @@ public class AclController {
             if (!aclTokenService.list(token, user).isEmpty()) {
                 response.result = aclTokenService.check(token, user, permission);
             }
+
         }
 
         logger.debug("Device permission check result: [deviceId:{} permission:{} result:{}]", body.objectId, body.permission, response.result);
-
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

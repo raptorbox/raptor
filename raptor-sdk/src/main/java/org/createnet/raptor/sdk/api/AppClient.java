@@ -24,6 +24,7 @@ import org.createnet.raptor.models.payload.AppPayload;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.exception.ClientException;
 import org.createnet.raptor.models.payload.DispatcherPayload;
+import org.createnet.raptor.models.query.AppQuery;
 import org.createnet.raptor.sdk.PageResponse;
 import org.createnet.raptor.sdk.events.callback.AppCallback;
 import org.createnet.raptor.sdk.events.callback.AppEventCallback;
@@ -74,12 +75,17 @@ public class AppClient extends AbstractClient {
      * @return the App instance
      */
     public App create(App obj) {
+        
         JsonNode node = getClient().post(Routes.APP_CREATE, toJsonNode(obj));
+        App rapp = getMapper().convertValue(node, App.class);
+        
         if (!node.has("id")) {
             throw new ClientException("Missing ID on object creation");
         }
-        obj.setId(node.get("id").asText());
-        obj.setUserId(node.get("userId").asText());
+        
+        obj.merge(rapp);
+        obj.setId(rapp.getId());
+
         return obj;
     }
 
@@ -128,6 +134,12 @@ public class AppClient extends AbstractClient {
      */
     public PageResponse<App> list() {
         JsonNode json = getClient().get(Routes.APP_LIST);
+        PageResponse<App> list = getMapper().convertValue(json, new TypeReference<PageResponse<App>>() {});
+        return list;
+    }
+
+    public PageResponse<App> search(AppQuery q) {
+        JsonNode json = getClient().post(Routes.APP_SEARCH, toJsonNode(q));
         PageResponse<App> list = getMapper().convertValue(json, new TypeReference<PageResponse<App>>() {});
         return list;
     }

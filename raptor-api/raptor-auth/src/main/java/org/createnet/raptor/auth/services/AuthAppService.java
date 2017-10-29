@@ -15,8 +15,8 @@
  */
 package org.createnet.raptor.auth.services;
 
+import java.util.stream.Collectors;
 import org.createnet.raptor.models.auth.request.SyncRequest;
-import org.createnet.raptor.models.acl.permission.RaptorPermission;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.auth.repository.UserRepository;
 import org.createnet.raptor.auth.exception.DeviceNotFoundException;
@@ -25,10 +25,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.acls.model.Permission;
 import org.springframework.stereotype.Service;
 import org.createnet.raptor.auth.repository.AclAppRepository;
+import org.createnet.raptor.common.authentication.RaptorSecurity;
+import org.createnet.raptor.models.acl.EntityType;
+import org.createnet.raptor.models.acl.Operation;
+import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.auth.AclApp;
+import org.createnet.raptor.models.auth.Group;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -50,11 +54,19 @@ public class AuthAppService {
     private AclAppRepository appRepository;
 
     @Autowired
+    private GroupService groupService;
+
+    @Autowired
     private AclAppService aclAppService;
+    
+    @Autowired
+    private RaptorSecurity raptorSecurity;
 
     @CacheEvict(key = "#app.id")
     public AclApp save(AclApp app) {
-
+        
+        app.getGroups().forEach((g) -> groupService.save(g));
+        
         AclApp saved = appRepository.save(app);
         aclAppService.register(app);
 
@@ -81,13 +93,11 @@ public class AuthAppService {
 
     public AclApp sync(User user, SyncRequest req) {
 
-        Permission p = RaptorPermission.fromLabel(req.operation);
-
         AclApp app = null;
         if (req.objectId != null) {
             app = appRepository.findByUuid(req.objectId);
         }
-
+                
         /**
          * @TODO check user permissions and roles
          */
@@ -97,21 +107,23 @@ public class AuthAppService {
 
         if (!req.userId.equals(user.getUuid())) {
             if (!user.isAdmin()) {
-                if (!aclAppService.isGranted(app, RaptorPermission.ADMINISTRATION)) {
+                if (!raptorSecurity.can(user, EntityType.app, Operation.admin, app)) {
                     throw new AccessDeniedException("Cannot operate on that object");
                 }
             }
         }
-
+        
         // delete app record
-        if (p == RaptorPermission.DELETE) {
+        if (req.operation == Operation.delete) {
             if (app == null) {
                 throw new DeviceNotFoundException();
             }
             appRepository.delete(app);
             return null;
         }
-
+        
+        App srcApp = (App) raptorSecurity.loadEntity(req.type, req.objectId);
+        
         // create or update app record
         if (app == null) {
             app = new AclApp();
@@ -121,15 +133,26 @@ public class AuthAppService {
         if (req.userId == null) {
             app.setOwner(user);
         } else {
-            User owner = userRepository.findByUuid(req.userId);
+            User owner = userRepository.findOneByUuid(req.userId);
             if (owner == null) {
                 throw new UserNotFoundException();
             }
             app.setOwner(owner);
         }
+        
+        
+//        if(app.getId() == null) {
+//            app = save(app);
+//        }
+//        final AclApp aclapp1 = app;
+//        app.setGroups(srcApp.getGroups().stream().map((appGroup) -> {
+//            Group g = new Group(appGroup, srcApp);
+//            g.setApp(aclapp1);
+//            return g;
+//        }).collect(Collectors.toList()));
 
-        AclApp dev = save(app);
-        return dev;
+        AclApp saved = save(app);
+        return saved;
     }
 
 }

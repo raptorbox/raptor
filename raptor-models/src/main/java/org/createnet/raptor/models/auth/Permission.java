@@ -115,7 +115,7 @@ public class Permission implements GrantedAuthority {
 
     @Override
     public String toString() {
-        return getName() + "[id=" + getId() + "]";
+        return getName();
     }
 
 }

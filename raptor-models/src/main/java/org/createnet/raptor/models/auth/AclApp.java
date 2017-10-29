@@ -74,7 +74,6 @@ public class AclApp extends AbstractAclSubject {
         this.uuid = app.getId();
         this.owner = new User(app.getUserId());
     }
-
     
     @Override
     public Long getId() {

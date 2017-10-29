@@ -81,11 +81,11 @@ public class GroupService {
     }
 
     public Group getByName(String name) {
-        return groupRepository.findByName(name);
+        return groupRepository.findOneByName(name);
     }
 
     public Group getByNameAndApp(String name, AclApp app) {
-        return groupRepository.findByNameAndApp(name, app);
+        return groupRepository.findOneByNameAndApp(name, app);
     }
     
     @Cacheable(key = "#id")

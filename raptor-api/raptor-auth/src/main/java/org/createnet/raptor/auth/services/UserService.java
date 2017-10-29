@@ -63,7 +63,7 @@ public class UserService {
 
     @Cacheable(key = "#uuid")
     public User getByUuid(String uuid) {
-        return userRepository.findByUuid(uuid);
+        return userRepository.findOneByUuid(uuid);
     }
 
     /**
@@ -76,7 +76,7 @@ public class UserService {
                 user.getGroups()
                         .stream()
                         .map((Group g) -> {
-                            return groupService.getByName(g.getName());
+                            return groupService.getByNameAndApp(g.getName(), null);
                         })
                         .filter((g) -> g != null)
                         .collect(Collectors.toList())
@@ -84,7 +84,7 @@ public class UserService {
     }
 
     public User update(String uuid, User rawUser) {
-        User user = userRepository.findByUuid(uuid);
+        User user = userRepository.findOneByUuid(uuid);
         return update(user, rawUser);
     }
 
@@ -168,12 +168,12 @@ public class UserService {
 
     @Transactional
     public User findByEmail(String username) {
-        return userRepository.findByEmail(username);
+        return userRepository.findOneByEmail(username);
     }
 
     @Transactional
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findOneByUsername(username);
     }
 
 }

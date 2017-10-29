@@ -31,11 +31,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface UserRepository extends CrudRepository<User, Long>, JpaRepository<User, Long> {
 
-    User findByUsername(String username);
+    User findOneByUsername(String username);
 
-    User findByEmail(String email);
+    User findOneByEmail(String email);
 
-    User findByUuid(String uuid);
+    User findOneByUuid(String uuid);
 
     @Override
     public void delete(User entity);

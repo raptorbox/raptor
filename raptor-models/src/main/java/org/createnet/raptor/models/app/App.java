@@ -22,7 +22,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.createnet.raptor.models.acl.Owneable;
+import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
@@ -104,9 +106,9 @@ public class App implements Serializable, Owneable {
         }
 
         getUsers().forEach((u) -> {
-            u.getGroups().forEach((g) -> {
-                if (!getGroups().contains(g)) {
-                    throw new RaptorComponent.ValidationException(String.format("User `%s` has an unknown app group `%s`. Add to the app list to allow it", u.getId(), g.getName()));
+            u.getGroups().forEach((groupname) -> {
+                if (!getGroups().contains(new AppGroup(groupname))) {
+                    throw new RaptorComponent.ValidationException(String.format("User `%s` has an unknown app group `%s`. Add to the app list to allow it", u.getId(), groupname));
                 }
             });
 
@@ -176,7 +178,11 @@ public class App implements Serializable, Owneable {
         this.userId = user.getUuid();
     }
 
-    public void addUser(User user, List<AppGroup> groups) {
+    public void addUser(User user, String group) {
+        addUser(user, Arrays.asList(group));
+    }
+    
+    public void addUser(User user, List<String> groups) {
 
         AppUser appUser = new AppUser();
         appUser.setId(user.getUuid());
@@ -250,9 +256,7 @@ public class App implements Serializable, Owneable {
     }
 
     public boolean hasGroup(User user, StaticGroup group) {
-        return getUsers().stream().filter((u) -> {
-            return u.getId().equals(user.getUuid()) && u.hasGroup(group);
-        }).count() == 1;
+        return getUsers().stream().anyMatch((u) -> u.getId().equals(user.getUuid()) && u.hasGroup(group));
     }
 
     public boolean isAdmin(User user) {
@@ -265,4 +269,31 @@ public class App implements Serializable, Owneable {
         return getUserId();
     }
 
+    public boolean hasPermission(String p) {
+        return getGroups()
+                .stream()
+                .anyMatch((g) -> g.getPermissions().contains(p));
+    }
+    
+    public boolean hasPermission(Permission p) {
+        return hasPermission(p.toString());
+    }
+    
+    public List<AppGroup> getGroupsByPermission(String p) {
+        return getGroups()
+                .stream()
+                .filter((g) -> {
+                    return g.getPermissions().contains(p);
+                })
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    public AppUser getUser(User user) {
+        for (AppUser u : users) {
+            if(u.getId().equals(user.getUuid())) return u;
+        }
+        return null;
+    }
+    
 }

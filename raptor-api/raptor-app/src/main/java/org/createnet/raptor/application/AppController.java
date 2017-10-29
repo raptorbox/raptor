@@ -27,6 +27,7 @@ import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.app.AppGroup;
 import org.createnet.raptor.models.app.AppUser;
+import org.createnet.raptor.models.auth.DefaultGroups;
 import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.exception.RequestException;
@@ -93,18 +94,14 @@ public class AppController {
 
     protected void normalizeApp(App app) {
 
-        if (app.getGroups().isEmpty()) {
-            app.getGroups().addAll(DefaultAppGroups.getDefaults());
-        }
-
         // ensure admin role is avail
         if (app.getAdminGroup() == null) {
-            app.getGroups().add(new AppGroup(StaticGroup.admin));
+            app.getGroups().add(new AppGroup(DefaultGroups.admin));
         }
 
         // ensure user role is avail
         if (app.getUserGroup() == null) {
-            app.getGroups().add(new AppGroup(StaticGroup.user));
+            app.getGroups().add(new AppGroup(DefaultGroups.appUser));
         }
     }
 
@@ -118,15 +115,32 @@ public class AppController {
     @PreAuthorize("@raptorSecurity.list(principal, 'app')")
     public ResponseEntity<?> getApps(
             @AuthenticationPrincipal User currentUser,
-            Pageable pageable,
-            @RequestParam MultiValueMap<String, String> parameters,
-            @RequestBody Optional<AppQuery> rquery
+            Pageable pageable
     ) {
 
         AppQuery query = new AppQuery();
-        if (rquery.isPresent()) {
-            query = rquery.get();
+        if (!currentUser.isAdmin()) {
+            query.users.in(currentUser.getUuid());
         }
+
+        AppQueryBuilder qb = new AppQueryBuilder(query);
+        Iterable<App> apps = appService.find(qb.getPredicate(), pageable);
+
+        return ResponseEntity.ok(apps);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/search")
+    @ApiOperation(
+            value = "Search for apps",
+            notes = "",
+            response = org.createnet.raptor.models.app.App.class,
+            nickname = "searchApps"
+    )
+    @PreAuthorize("@raptorSecurity.list(principal, 'app')")
+    public ResponseEntity<?> searchApps(
+            @AuthenticationPrincipal User currentUser,
+            @RequestBody AppQuery query
+    ) {
 
         if (!currentUser.isAdmin()) {
             query.users.in(currentUser.getUuid());
@@ -154,6 +168,8 @@ public class AppController {
         if (app.getUserId() == null) {
             app.setUserId(currentUser.getUuid());
         }
+
+        normalizeApp(app);
         
         try {
             appService.validate(app);
@@ -161,11 +177,9 @@ public class AppController {
             return JsonErrorResponse.badRequest(ex.getMessage());
         }
 
-        normalizeApp(app);
-
         // ensure owner is also admin in users list
         if (!app.getUsers().contains(new AppUser(app.getUserId()))) {
-            app.addUser(currentUser, Arrays.asList(app.getAdminGroup()));
+            app.addUser(currentUser, Arrays.asList(StaticGroup.admin.name()));
         }
 
         App saved = appService.save(app);
@@ -175,6 +189,25 @@ public class AppController {
 
         log.debug("Created app {} ({})", app.getName(), app.getId());
         return ResponseEntity.ok(saved);
+    }
+
+    @PreAuthorize("@raptorSecurity.can(principal, 'app', 'read', #appId)")
+    @RequestMapping(method = RequestMethod.GET, value = "/{appId}")
+    @ApiOperation(
+            value = "Load an app",
+            notes = "",
+            response = org.createnet.raptor.models.app.App.class,
+            nickname = "readApp"
+    )
+    public ResponseEntity<?> readApp(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable("appId") String appId
+    ) {
+        App stored = appService.get(appId);
+        if (stored == null) {
+            return JsonErrorResponse.notFound();
+        }
+        return ResponseEntity.ok(stored);
     }
 
     @PreAuthorize("@raptorSecurity.can(principal, 'app', 'update', #appId)")
@@ -207,7 +240,7 @@ public class AppController {
 
         // ensure owner is also admin in users list
         if (!app.getUsers().contains(new AppUser(app.getUserId()))) {
-            app.addUser(currentUser, Arrays.asList(app.getAdminGroup()));
+            app.addUser(currentUser, Arrays.asList(StaticGroup.admin.name()));
         }
 
         try {

@@ -75,11 +75,8 @@ public class PermissionTest {
 
         App app = new App(Utils.rndName(EntityType.app));
 
-        AppGroup group = AppGroup.from(DefaultGroups.user);
-        app.addGroup(group);
-
         Raptor r1 = Utils.createNewUserInstance();
-        app.addUser(r1.Auth().getUser(), Arrays.asList(group));
+        app.addUser(r1.Auth().getUser(), DefaultGroups.user.getName());
 
         Device dev = Utils.createDevice(r, new Device().name(Utils.rndName(EntityType.device)));
 
@@ -88,7 +85,7 @@ public class PermissionTest {
         r.App().create(app);
         
         assertEquals(r.Auth().getUser().getUuid(), app.getUserId());
-        assertEquals(1, app.getGroups().size());
+        assertEquals(2, app.getGroups().size());
         assertEquals(1, app.getDevices().size());
         assertEquals(r.Auth().getUser().getUuid(), app.getOwnerId());
         
@@ -111,7 +108,7 @@ public class PermissionTest {
         
         Raptor r1 = Utils.createNewUserInstance();
         
-        app.addUser(r1.Auth().getUser(), Arrays.asList(app.getGroup(StaticGroup.user)));
+        app.addUser(r1.Auth().getUser(), Arrays.asList(StaticGroup.user.name()));
         r.App().update(app);
         
         //2 user +1 admin (owner)

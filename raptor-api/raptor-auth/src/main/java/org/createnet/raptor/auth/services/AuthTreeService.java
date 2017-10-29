@@ -29,7 +29,6 @@ import org.springframework.security.acls.model.Permission;
 import org.springframework.stereotype.Service;
 import org.createnet.raptor.auth.repository.AclTreeRepository;
 import org.createnet.raptor.models.auth.AclTreeNode;
-import org.createnet.raptor.models.tree.TreeNode;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -122,7 +121,7 @@ public class AuthTreeService {
         if (req.userId == null) {
             tree.setOwner(user);
         } else {
-            User owner = userRepository.findByUuid(req.userId);
+            User owner = userRepository.findOneByUuid(req.userId);
             if (owner == null) {
                 throw new UserNotFoundException();
             }
