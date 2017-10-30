@@ -11,11 +11,10 @@ networks:
 
 services:
 
-  broker:
+  api:
     command: ["java","-jar","/raptor.jar", "--dev"]
     build: ./raptor-api/raptor-standalone
     ports:
-      - 1883:1883
       - 10090:10090
     volumes:
       - ./config:/etc/raptor
@@ -24,6 +23,22 @@ services:
       - raptor_test
     extra_hosts:
       - "raptor.local:172.16.238.1"
+
+  broker:
+    image: raptorbox/broker:latest
+    ports:
+      - 1883:1883
+      - 8880:8880
+    depends_on:
+      - mongo
+    environment:
+        DEBUG: r*
+    networks:
+      - raptor_test
+    logging:
+      driver: json-file
+      options:
+        max-size: 1024m
 
   mariadb:
     image: mariadb:latest

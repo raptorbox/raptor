@@ -6,13 +6,25 @@ networks:
 
 services:
 
-  broker:
+  api:
     image: raptorbox/standalone:v4
-    ports:
-      - 1883:1883
     volumes:
       - ./config:/etc/raptor
       - ./data:/data
+    networks:
+      - raptor_net
+    logging:
+      driver: json-file
+      options:
+        max-size: 1024m
+
+  broker:
+    image: raptorbox/broker:latest
+    ports:
+      - 1883:1883
+      - 8880:8880
+    depends_on:
+      - mongo
     networks:
       - raptor_net
     logging:
@@ -53,6 +65,7 @@ services:
     depends_on:
         - ui
         - broker
+        - api
     command: nginx -g 'daemon off;'
     networks:
       - raptor_net

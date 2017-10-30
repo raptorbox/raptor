@@ -375,6 +375,7 @@ public class EventListenerTest {
                 @Override
                 public void callback(Stream stream, RecordSet record) {
                     log.debug("Got data: {}", record.toJson());
+                    done.set(true);
                     Assert.fail("Permission should not allow receive data");
                 }
             });
