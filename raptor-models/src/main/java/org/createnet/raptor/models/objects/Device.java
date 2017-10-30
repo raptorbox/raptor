@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import org.createnet.raptor.models.acl.AclSubject;
 import org.createnet.raptor.models.acl.Owneable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,9 +47,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 @QueryEntity
 public class Device extends DeviceContainer implements Owneable {
-    
+
     static final long serialVersionUID = 1000000000000051L;
-    
+
     @JsonIgnore
     @Transient
     private final Logger logger = LoggerFactory.getLogger(Device.class);
@@ -93,9 +92,9 @@ public class Device extends DeviceContainer implements Owneable {
      * A serializable class containing the settings for a Device
      */
     static public class Settings implements Serializable {
-        
+
         static final long serialVersionUID = 1000000000000055L;
-        
+
         public boolean storeData = true;
         public boolean eventsEnabled = true;
 
@@ -192,7 +191,7 @@ public class Device extends DeviceContainer implements Owneable {
         if (this.name == null) {
             throw new ValidationException("name field missing");
         }
-        
+
         if (!this.isNew() && (this.id == null || this.id.isEmpty())) {
             throw new ValidationException("id field missing");
         }
@@ -641,5 +640,5 @@ public class Device extends DeviceContainer implements Owneable {
     public Settings getSettings() {
         return settings;
     }
-    
+
 }

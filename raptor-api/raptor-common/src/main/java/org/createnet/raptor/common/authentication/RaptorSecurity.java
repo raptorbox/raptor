@@ -208,8 +208,6 @@ public class RaptorSecurity {
             return false;
         }
 
-        boolean perm = false;
-
         AppQuery q = new AppQuery();
         q.devices.in((String) obj);
         q.users.in(user.getUuid());
@@ -220,7 +218,7 @@ public class RaptorSecurity {
         }
 
         String p = new org.createnet.raptor.models.auth.Permission(entity, operation).toString();
-        perm = response.getContent().stream()
+        boolean hasPermission = response.getContent().stream()
                 .filter((app) -> {
 
                     List<AppGroup> groups = app.getGroupsByPermission(p);
@@ -232,18 +230,17 @@ public class RaptorSecurity {
                     if (u == null) {
                         return false;
                     }
-                    
+
                     if (groups.stream().anyMatch((group) -> u.hasGroup(group.getName()))) {
                         log.debug("User `{}` to `{}` on `{}` [id={}] of app `{}` [id={}]", user.getUsername(), operation, entity, obj, app.getName(), app.getId());
                         return true;
                     }
-                    
+
                     return false;
                 })
                 .count() > 0;
 
-        
-        return perm;
+        return hasPermission;
     }
 
 }

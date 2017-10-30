@@ -16,23 +16,13 @@
 package org.createnet.raptor.sdk.admin;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
 import org.createnet.raptor.models.acl.EntityType;
-import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.app.App;
-import org.createnet.raptor.models.app.AppGroup;
 import org.createnet.raptor.models.auth.DefaultGroups;
-import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.StaticGroup;
-import org.createnet.raptor.models.auth.Token;
-import org.createnet.raptor.models.data.RecordSet;
-import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.models.objects.Device;
-import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
-import org.createnet.raptor.sdk.config.Config;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -46,11 +36,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class PermissionTest {
+public class AppPermissionTest {
 
-    Logger log = LoggerFactory.getLogger(PermissionTest.class);
+    Logger log = LoggerFactory.getLogger(AppPermissionTest.class);
 
-    public PermissionTest() {
+    public AppPermissionTest() {
     }
 
     @BeforeClass

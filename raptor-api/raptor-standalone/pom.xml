@@ -16,7 +16,7 @@
             Artemis dependencies: 
             duplicated otherwise seems deps loaded from classpath are not available
         -->
-
+<!--
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>artemis-journal</artifactId>
@@ -56,7 +56,7 @@
             <groupId>org.apache.activemq</groupId>
             <artifactId>artemis-amqp-protocol</artifactId>
             <version>2.1.0</version>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>net.sf.ehcache</groupId>
@@ -75,11 +75,11 @@
             <version>${project.version}</version>
         </dependency>
         
-        <dependency>
+<!--        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>raptor-broker</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency>-->
  
         <dependency>
             <groupId>${project.groupId}</groupId>
