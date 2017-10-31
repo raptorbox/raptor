@@ -15,7 +15,7 @@ services:
     command: ["java","-jar","/raptor.jar", "--dev"]
     build: ./raptor-api/raptor-standalone
     ports:
-      - 10090:10090
+      - 10090:80
     volumes:
       - ./config:/etc/raptor
       - ./data:/data
