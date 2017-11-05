@@ -63,7 +63,7 @@ public class AuthTest {
         Raptor raptor = Utils.getRaptor();
         log.debug("Try to fake login");
         AuthClient.LoginState loginInfo = raptor.Auth().login("admin", "apple");
-        log.error("Shoud have failied..");
+        log.error("Shoud have failed..");
     }
 
     @Test(expected = AuthenticationFailedException.class)
@@ -122,14 +122,14 @@ public class AuthTest {
 
         Assert.assertNotNull(refreshInfo.token);
         Assert.assertNotEquals(refreshInfo.token, loginInfo.token);
-        Assert.assertTrue(now < refreshInfo.expires);
+        Assert.assertTrue(now < refreshInfo.expires*1000);
 
         log.debug("Refresh token, again");
         AuthClient.LoginState refreshInfo2 = raptor.Auth().refreshToken();
 
         Assert.assertNotNull(refreshInfo2.token);
         Assert.assertNotEquals(refreshInfo.token, refreshInfo2.token);
-        Assert.assertTrue(now < refreshInfo2.expires);
+        Assert.assertTrue(now < refreshInfo2.expires*1000);
 
     }
 
