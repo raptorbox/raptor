@@ -24,10 +24,10 @@ import org.createnet.raptor.models.acl.Operation;
  */
 public class SyncRequest {
 
-    public String objectId;
+    public String subjectId;
     public String userId;
     public String parentId;
     public Long created;
     public EntityType type;
-    public Operation operation;
+    public Operation permission;
 }

@@ -213,9 +213,9 @@ public class UserClient extends AbstractClient {
      */
     public void sync(EntityType type, Operation op, String subjectId, String userId) {
         SyncRequest req = new SyncRequest();
-        req.objectId = subjectId;
+        req.subjectId = subjectId;
         req.userId = userId;
-        req.operation = op;
+        req.permission = op;
         req.type = type;
         sync(req);
     }

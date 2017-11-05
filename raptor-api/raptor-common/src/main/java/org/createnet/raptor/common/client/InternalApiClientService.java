@@ -89,7 +89,7 @@ public class InternalApiClientService extends RaptorSdk {
 
         serviceUser.setToken(token.getToken());
         this.getConfig().setToken(token.getToken());
-
+        this.Auth().login();
     }
 
 }
