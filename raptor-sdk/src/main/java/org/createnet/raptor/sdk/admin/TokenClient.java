@@ -23,6 +23,7 @@ import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.TokenPayload;
 import org.createnet.raptor.sdk.AbstractClient;
+import org.createnet.raptor.sdk.PageResponse;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.Routes;
@@ -99,10 +100,9 @@ public class TokenClient extends AbstractClient {
      * @param userUuid token owner
      * @return
      */
-    public List<Token> list(String userUuid) {
+    public PageResponse<Token> list(String userUuid) {
         JsonNode node = getClient().get(String.format(Routes.TOKEN_LIST, userUuid));
-        return getMapper().convertValue(node, new TypeReference<List<Token>>() {
-        });
+        return getMapper().convertValue(node, new TypeReference<PageResponse<Token>>() {});
     }
 
     /**
@@ -110,7 +110,7 @@ public class TokenClient extends AbstractClient {
      *
      * @return
      */
-    public List<Token> list() {
+    public PageResponse<Token> list() {
         return list(getContainer().Auth().getUser().getUuid());
     }
     
@@ -120,7 +120,7 @@ public class TokenClient extends AbstractClient {
      * @param tokenId
      * @return
      */
-    public Token read(long tokenId) {
+    public Token read(String tokenId) {
         JsonNode node = getClient().get(String.format(Routes.TOKEN_GET, tokenId));
         Token t1 = getMapper().convertValue(node, Token.class);
         return t1;

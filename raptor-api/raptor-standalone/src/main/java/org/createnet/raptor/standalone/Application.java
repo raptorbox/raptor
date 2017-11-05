@@ -22,14 +22,12 @@ import org.createnet.raptor.sdk.Topics;
 import org.createnet.raptor.tree.TreeMessageHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jms.artemis.ArtemisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.retry.annotation.EnableRetry;
@@ -46,9 +44,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
         scanBasePackages = {"org.createnet.raptor"},
         exclude = {ArtemisAutoConfiguration.class}
 )
-
-@EntityScan(basePackages = "org.createnet.raptor.models.auth")
-@EnableJpaRepositories(basePackages = "org.createnet.raptor.auth.repository")
 
 @EnableMongoRepositories(basePackages = {
     "org.createnet.raptor.stream",
@@ -70,9 +65,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 public class Application extends BaseApplication {
 
     public static void main(String[] args) {
-        additionalConfigNames = Arrays.asList(
-                "auth.yml"
-        );
+        additionalConfigNames = Arrays.asList();
         start(Application.class, args);
     }
 

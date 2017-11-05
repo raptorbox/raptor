@@ -36,8 +36,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import org.createnet.raptor.models.acl.AbstractAclSubject;
-import org.createnet.raptor.models.acl.Owneable;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -51,7 +49,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Cacheable(value = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(name = "tokens")
-public class Token extends AbstractAclSubject implements Owneable {
+public class Token {
 
     static final long serialVersionUID = 1000000000000002L;
 
@@ -65,7 +63,7 @@ public class Token extends AbstractAclSubject implements Owneable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private String id;
 
     @NotNull
     @Size(min = 1)
@@ -98,7 +96,7 @@ public class Token extends AbstractAclSubject implements Owneable {
     private Date created = new Date();
 
     @Column(name = "expires")
-    private Long expires = 1000L * 60 * 60; // default to 60min
+    private Long expires;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
@@ -153,12 +151,11 @@ public class Token extends AbstractAclSubject implements Owneable {
 
     }
 
-    @Override
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -178,7 +175,6 @@ public class Token extends AbstractAclSubject implements Owneable {
         this.token = token;
     }
 
-    @Override
     public User getUser() {
         return user;
     }
@@ -216,13 +212,14 @@ public class Token extends AbstractAclSubject implements Owneable {
     }
 
     public void setExpires(Long expires) {
-        if (expires == 0) {
-            expires = 622080000L; //20 years, should be enough for our retirement
-        }
         this.expires = expires;
     }
 
+    @JsonIgnore
     public boolean isExpired() {
+        if (this.expires == 0) {
+            return false;
+        }
         if (getExpiresInstant() == null) {
             return true;
         }
@@ -232,7 +229,8 @@ public class Token extends AbstractAclSubject implements Owneable {
     public boolean isEnabled() {
         return enabled;
     }
-
+    
+    @JsonIgnore
     public boolean isValid() {
         return isEnabled() && !isExpired() && (getUser() != null && getUser().isEnabled());
     }
@@ -276,19 +274,6 @@ public class Token extends AbstractAclSubject implements Owneable {
 
     public void setTokenType(String tokenType) {
         this.tokenType = TokenType.valueOf(tokenType);
-    }
-
-    @JsonProperty("ownerId")
-    @Override
-    public String getOwnerId() {
-        return getUser() == null ? null : getUser().getUuid();
-    }
-    
-    @JsonProperty("ownerId")
-    public void setOwnerId(String ownerId) {
-        User u = new User();
-        u.setUuid(ownerId);
-        this.user = u;
     }
 
 }

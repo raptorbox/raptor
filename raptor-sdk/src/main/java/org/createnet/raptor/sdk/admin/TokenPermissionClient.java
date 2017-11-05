@@ -47,7 +47,7 @@ public class TokenPermissionClient extends AbstractClient {
      * @param tokenId token ID
      * @return
      */
-    public List<String> get(Long tokenId) {
+    public List<String> get(String tokenId) {
         JsonNode node = getClient().get(String.format(Routes.PERMISSION_GET, "token", tokenId));
         return getMapper().convertValue(node, new TypeReference<List<String>>() {
         });
@@ -81,7 +81,7 @@ public class TokenPermissionClient extends AbstractClient {
      * @param permissions
      * @return
      */
-    public List<String> set(Long tokenId, List<Permission> permissions) {
+    public List<String> set(String tokenId, List<Permission> permissions) {
         
         PermissionRequestBatch req = new PermissionRequestBatch();
         req.permissions = permissions.stream()

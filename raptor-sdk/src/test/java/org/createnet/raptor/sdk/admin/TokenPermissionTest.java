@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Properties;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
-import org.createnet.raptor.models.acl.permission.PermissionUtil;
 import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.data.RecordSet;
@@ -130,7 +129,7 @@ public class TokenPermissionTest {
 
         createToken(raptor);
 
-        List<Token> tokens = raptor.Admin().Token().list();
+        List<Token> tokens = raptor.Admin().Token().list().getContent();
 
         assertFalse(tokens.isEmpty());
 

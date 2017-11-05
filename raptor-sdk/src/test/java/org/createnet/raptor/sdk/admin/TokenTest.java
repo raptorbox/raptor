@@ -58,7 +58,7 @@ public class TokenTest {
 
         Raptor raptor = Utils.createNewAdminInstance();
 
-        List<Token> tokens = raptor.Admin().Token().list();
+        List<Token> tokens = raptor.Admin().Token().list().getContent();
 
         log.debug("Create new token for user {}", raptor.Auth().getUser().getUuid());
 
@@ -67,7 +67,7 @@ public class TokenTest {
 
         raptor.Admin().Token().create(new Token("test", "secret" + System.currentTimeMillis() * Math.random()));
 
-        tokens = raptor.Admin().Token().list();
+        tokens = raptor.Admin().Token().list().getContent();
 
         assertNotNull(tokens);
         assertEquals(1, tokens.size());

@@ -15,19 +15,12 @@
  */
 package org.createnet.raptor.common.authentication;
 
-import java.util.List;
 import org.createnet.raptor.common.client.InternalApiClientService;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
-import org.createnet.raptor.models.acl.Owneable;
-import org.createnet.raptor.models.app.App;
-import org.createnet.raptor.models.app.AppGroup;
-import org.createnet.raptor.models.app.AppUser;
 import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
-import org.createnet.raptor.models.query.AppQuery;
-import org.createnet.raptor.sdk.PageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,175 +65,9 @@ public class RaptorSecurity {
      * @return
      */
     public boolean can(User u, EntityType entity, Operation operation, Object obj) {
-
-        log.debug("Check if user `{}` can `{}` on  `{}` [id={}]", u.getUsername(), operation, entity, obj);
-
-        // is an admin
-        if (u.isAdmin()) {
-            log.debug("`{}` is admin", u.getUsername());
-            return true;
-        }
-
-        boolean hasPermission;
-
-        // check if the current user own the subject        
-        hasPermission = isOwner(u, entity, operation, obj);
-        if (hasPermission) {
-            log.debug("`{}` is owner", u.getUsername());
-            return true;
-        }
-
-        // can admin the entity type eg. device_admin
-        Permission p = new Permission(entity, Operation.admin);
-        hasPermission = u.hasPermission(p);
-        if (hasPermission) {
-            log.debug("`{}` can `admin` on {}", u.getUsername(), entity);
-            return true;
-        }
-
-        // did the check beore
-        if (operation != Operation.admin) {
-            // has specific permission on an entity type eg. device_read
-            p = new Permission(entity, operation);
-            hasPermission = u.hasPermission(p);
-            if (hasPermission) {
-                log.debug("`{}` can `{}` on `{}`", u.getUsername(), operation, entity);
-                return true;
-            }
-        }
-
-        hasPermission = checkAppPermissions(u, entity, operation, obj);
-        if (hasPermission) {
-            return true;
-        }
-
-        String subjectId = (String) obj;
-        hasPermission = isAuthorized(u, entity, operation, subjectId);
-        if (hasPermission) {
-            log.debug("`{}` has {}_{} ACL on {}", u.getUsername(), entity, operation, subjectId);
-            return true;
-        }
-
-        log.debug("User `{}` NOT ALLOWED to `{}` on `{}` [id={}]", u.getUsername(), operation, entity, obj);
-
-        return false;
-    }
-
-    public boolean isOwner(User u, EntityType entity, Operation operation, Object obj) {
-
-        if (obj == null) {
-            return false;
-        }
-
-        // has specific permission on own entity type eg. device_read_own
-        Permission p = new Permission(entity, operation, true);
-        boolean hasPermission = u.hasPermission(p);
-        if (hasPermission) {
-
-            String ownerId = null;
-
-            if (obj instanceof String || obj instanceof Long) {
-                try {
-                    obj = loadEntity(entity, obj);
-                } catch (Exception ex) {
-                    log.error("Failed to load `ownerId`: {}", ex.getMessage(), ex);
-                    return false;
-                }
-            }
-
-            if (obj instanceof Owneable) {
-                ownerId = ((Owneable) obj).getOwnerId();
-            }
-
-            if (ownerId == null) {
-                return false;
-            }
-
-            return ownerId.equals(u.getUuid());
-        }
-
-        return false;
-    }
-
-    private boolean isAuthorized(User user, EntityType entity, Operation operation, String subjectId) {
-        try {
-
-            log.debug("Check authorization for user={} type={} op={} subject={}", user.getUsername(), entity, operation, subjectId);
-            AuthorizationResponse response = api.Admin().User().isAuthorized(user.getUuid(), entity, operation, subjectId);
-
-            return response.result;
-
-        } catch (Exception ex) {
-            return false;
-        }
-    }
-
-    public Owneable loadEntity(EntityType entity, Object uuid) {
-
-        if (uuid == null) {
-            return null;
-        }
-
-        switch (entity) {
-            case device:
-                return api.Inventory().load((String) uuid);
-            case app:
-                return api.App().load((String) uuid);
-            case tree:
-                return api.Tree().tree((String) uuid);
-            case user:
-            case profile:
-                return api.Admin().User().get((String) uuid);
-            case token:
-                return api.Admin().Token().read((Long) uuid);
-            default:
-                return null;
-        }
-    }
-
-    public boolean checkAppPermissions(User user, EntityType entity, Operation operation, Object obj) {
-
-        if (entity != EntityType.device && entity != EntityType.tree) {
-            return false;
-        }
-
-        if (!(obj instanceof String)) {
-            return false;
-        }
-
-        AppQuery q = new AppQuery();
-        q.devices.in((String) obj);
-        q.users.in(user.getUuid());
-
-        PageResponse<App> response = api.App().search(q);
-        if (response.getTotalElements() == 0) {
-            return false;
-        }
-
-        String p = new org.createnet.raptor.models.auth.Permission(entity, operation).toString();
-        boolean hasPermission = response.getContent().stream()
-                .filter((app) -> {
-
-                    List<AppGroup> groups = app.getGroupsByPermission(p);
-                    if (groups.isEmpty()) {
-                        return false;
-                    }
-
-                    AppUser u = app.getUser(user);
-                    if (u == null) {
-                        return false;
-                    }
-
-                    if (groups.stream().anyMatch((group) -> u.hasGroup(group.getName()))) {
-                        log.debug("User `{}` to `{}` on `{}` [id={}] of app `{}` [id={}]", user.getUsername(), operation, entity, obj, app.getName(), app.getId());
-                        return true;
-                    }
-
-                    return false;
-                })
-                .count() > 0;
-
-        return hasPermission;
+        String objectId = obj == null ? null : (String)obj;
+        AuthorizationResponse r = api.Admin().User().isAuthorized(u.getUuid(), entity, operation, objectId);
+        return r.result;
     }
 
 }

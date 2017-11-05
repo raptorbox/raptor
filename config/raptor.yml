@@ -58,6 +58,7 @@ raptor:
 
     header: Authorization
     headerPrefix: Bearer
+    defaultToken: service-default
 
     # Used for login token generation
     secret: ${random.value}

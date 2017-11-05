@@ -31,6 +31,7 @@ public class AuthConfiguration {
     private List<AdminUser> users = new ArrayList();
     private String header = "authorization";
     private String headerPrefix = "Bearer ";
+    private String defaultToken = "service-default";
     private String secret;
     private int expiration = 1800;
 
@@ -159,4 +160,12 @@ public class AuthConfiguration {
         this.users = users;
     }
 
+    public String getDefaultToken() {
+        return defaultToken;
+    }
+
+    public void setDefaultToken(String defaultToken) {
+        this.defaultToken = defaultToken;
+    }
+    
 }
