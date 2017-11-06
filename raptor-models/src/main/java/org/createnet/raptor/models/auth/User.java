@@ -94,7 +94,7 @@ public class User implements Serializable, Owneable {
     @JoinTable(name = "users_groups", joinColumns = {
         @JoinColumn(name = "user_id")}, inverseJoinColumns = {
         @JoinColumn(name = "group_id")})
-    final protected List<Group> groups = new ArrayList();
+    final protected List<Role> roles = new ArrayList();
 
     @Column(length = 64)
     @Size(min = 4, max = 64)
@@ -145,7 +145,7 @@ public class User implements Serializable, Owneable {
         this.enabled = user.getEnabled();
 
         user.getTokens().stream().forEach((token) -> this.addToken(token));
-        user.getGroups().stream().forEach((g) -> this.addGroup(g));
+        user.getRoles().stream().forEach((g) -> this.addRole(g));
 
         if (!newUser) {
             this.id = user.getId();
@@ -156,15 +156,15 @@ public class User implements Serializable, Owneable {
 
     @JsonIgnore
     public boolean isAdmin() {
-        return this.hasGroup(StaticGroup.admin);
+        return this.hasRole(StaticGroup.admin);
     }
 
-    public boolean hasGroup(String name) {
-        return this.getGroups().stream().filter(r -> r.getName().equals(name)).count() >= 1;
+    public boolean hasRole(String name) {
+        return this.getRoles().stream().filter(r -> r.getName().equals(name)).count() >= 1;
     }
 
-    public boolean hasGroup(StaticGroup g) {
-        return hasGroup(g.name());
+    public boolean hasRole(StaticGroup g) {
+        return hasRole(g.name());
     }
 
     public Long getId() {
@@ -191,41 +191,42 @@ public class User implements Serializable, Owneable {
         this.password = password;
     }
 
-    @JsonProperty("groups")
-    public Object[] listGroups() {
-        return groups.stream().map(g -> g.getName()).toArray();
+    @JsonProperty("roles")
+    public Object[] listRoles() {
+        return roles.stream().map(g -> g.getName()).toArray();
+    }
+    
+    @JsonIgnore
+    public List<Role> getRoles() {
+        return roles;
     }
 
-    public List<Group> getGroups() {
-        return groups;
+    public void setRoles(List<Role> roles) {
+        this.roles.clear();
+        this.roles.addAll(roles);
     }
 
-    public void setGroups(List<Group> groups) {
-        this.groups.clear();
-        this.groups.addAll(groups);
-    }
-
-    public void addGroup(Group role) {
-        if (!this.hasGroup(role.getName())) {
-            this.groups.add(role);
+    public void addRole(Role role) {
+        if (!this.hasRole(role.getName())) {
+            this.roles.add(role);
         }
     }
 
-    public void addGroup(StaticGroup g) {
-        if (!this.hasGroup(g)) {
-            this.groups.add(new Group(g));
+    public void addRole(StaticGroup g) {
+        if (!this.hasRole(g)) {
+            this.roles.add(new Role(g));
         }
     }
 
-    public void removeGroup(Group role) {
-        if (this.hasGroup(role.getName())) {
-            this.groups.remove(role);
+    public void removeRole(Role role) {
+        if (this.hasRole(role.getName())) {
+            this.roles.remove(role);
         }
     }
 
-    public void removeGroup(StaticGroup g) {
-        if (this.hasGroup(g)) {
-            this.groups.remove(new Group(g));
+    public void removeRole(StaticGroup g) {
+        if (this.hasRole(g)) {
+            this.roles.remove(new Role(g));
         }
     }
 
@@ -320,7 +321,7 @@ public class User implements Serializable, Owneable {
     }
 
     public boolean hasPermission(Permission p) {
-        return getGroups().stream().filter((g) -> {
+        return getRoles().stream().filter((g) -> {
             return g.getPermissions().contains(p);
         }).count() > 0;
     }

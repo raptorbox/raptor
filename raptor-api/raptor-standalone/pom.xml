@@ -22,7 +22,7 @@
             <artifactId>raptor-common</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
+ 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>raptor-profile</artifactId>
@@ -96,7 +96,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven.compiler.plugin}</version>
                 <configuration>
-                    <showDeprecation>true</showDeprecation>
+                    <showDeprecation>false</showDeprecation>
                 </configuration>
             </plugin>
             
@@ -123,7 +123,7 @@
                     </execution>
                 </executions>
             </plugin>            
-
+            
         </plugins>
     </build>    
     

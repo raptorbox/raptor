@@ -25,11 +25,11 @@ import org.createnet.raptor.models.acl.Operation;
  */
 public class DefaultGroups {
     
-    public static Group admin = new Group(StaticGroup.admin, Arrays.asList(
+    public static Role admin = new Role(StaticGroup.admin, Arrays.asList(
             new Permission(Operation.admin)
     ));
     
-    public static Group user = new Group(StaticGroup.user, Arrays.asList(
+    public static Role user = new Role(StaticGroup.user, Arrays.asList(
             
             new Permission(EntityType.device, Operation.create),
             new Permission(EntityType.device, Operation.read, true),
@@ -53,7 +53,7 @@ public class DefaultGroups {
 
     ));
     
-    public static Group appUser = new Group(StaticGroup.user, Arrays.asList(
+    public static Role appUser = new Role(StaticGroup.user, Arrays.asList(
             
             new Permission(EntityType.device, Operation.create),
             new Permission(EntityType.device, Operation.read),

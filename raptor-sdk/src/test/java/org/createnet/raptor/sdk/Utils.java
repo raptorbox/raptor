@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Properties;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.auth.DefaultGroups;
-import org.createnet.raptor.models.auth.Group;
+import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.config.Config;
@@ -124,7 +124,7 @@ public class Utils {
      * @param groups
      * @return
      */
-    static public Raptor createNewInstance(String username, List<Group> groups) {
+    static public Raptor createNewInstance(String username, List<Role> groups) {
 
         User user = getRaptor().Admin().User().create(username, username + Math.random(), username + "@test.raptor.local", groups);
 
@@ -180,7 +180,7 @@ public class Utils {
         return r;
     }
 
-    static public Raptor createNewUserInstance(String username, List<Group> g) {
+    static public Raptor createNewUserInstance(String username, List<Role> g) {
 
         if (username == null) {
             username = rndName("user");

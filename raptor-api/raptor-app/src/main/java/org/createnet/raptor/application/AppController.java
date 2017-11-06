@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.application;
 
+import com.querydsl.core.types.Predicate;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -124,7 +125,8 @@ public class AppController {
         }
 
         AppQueryBuilder qb = new AppQueryBuilder(query);
-        Iterable<App> apps = appService.find(qb.getPredicate(), pageable);
+        Predicate p = qb.getPredicate();
+        Iterable<App> apps = appService.find(p, pageable);
 
         return ResponseEntity.ok(apps);
     }

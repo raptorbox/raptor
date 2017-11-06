@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.createnet.raptor.models.auth.StaticGroup;
-import org.createnet.raptor.models.auth.Group;
+import org.createnet.raptor.models.auth.Role;
 
 /**
  *
@@ -29,7 +29,7 @@ import org.createnet.raptor.models.auth.Group;
  */
 public class AppGroup {
 
-    public static AppGroup from(Group group) {
+    public static AppGroup from(Role group) {
         AppGroup g = new AppGroup(group);
         return g;
     }
@@ -53,7 +53,7 @@ public class AppGroup {
         this.permissions.addAll(permissions);
     }
 
-    public AppGroup(Group group) {
+    public AppGroup(Role group) {
         this.name = group.getName();
         this.permissions.addAll(group.getPermissions().stream().map((p) -> p.getName()).collect(Collectors.toList()));
     }

@@ -44,7 +44,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Cacheable(value = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(name = "groups")
-public class Group implements Serializable {
+public class Role implements Serializable {
 
     private static final long serialVersionUID = 1000000000000004L;
 
@@ -55,6 +55,7 @@ public class Group implements Serializable {
     @NotEmpty
     private String name;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     private AclApp app;
 
@@ -64,35 +65,35 @@ public class Group implements Serializable {
         @JoinColumn(name = "permission_id")})
     private List<Permission> permissions = new ArrayList();
 
-    public Group() {
+    public Role() {
     }
 
-    public Group(String name) {
+    public Role(String name) {
         this.name = name;
     }
     
-    public Group(AppGroup ag, App app) {
+    public Role(AppGroup ag, App app) {
         this.name = ag.getName();
         this.app = new AclApp(app);
         this.permissions.clear();
         this.permissions.addAll(ag.getPermissions().stream().map((p) -> new Permission(p)).collect(Collectors.toList()));
     }
 
-    public Group(String name, List<Permission> permissions) {
+    public Role(String name, List<Permission> permissions) {
         this.name = name;
         this.permissions.addAll(permissions);
     }
 
-    public Group(String name, AclApp app) {
+    public Role(String name, AclApp app) {
         this(name);
         this.app = app;
     }
 
-    public Group(StaticGroup g) {
+    public Role(StaticGroup g) {
         this.name = g.name();
     }
 
-    public Group(StaticGroup g, List<Permission> permissions) {
+    public Role(StaticGroup g, List<Permission> permissions) {
         this(g.name(), permissions);
     }
 
@@ -147,7 +148,7 @@ public class Group implements Serializable {
         this.permissions = permissions;
     }
 
-    public void merge(Group raw) {
+    public void merge(Role raw) {
         if (raw.getName() != null && !raw.getName().isEmpty()) {
             this.setName(raw.getName());
         }

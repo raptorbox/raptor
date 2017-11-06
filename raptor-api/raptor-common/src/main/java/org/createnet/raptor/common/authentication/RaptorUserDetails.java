@@ -34,7 +34,7 @@ public final class RaptorUserDetails extends User implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (authorities == null) {
             authorities = new ArrayList();
-            this.getGroups().forEach((g) -> authorities.addAll(g.getPermissions()));
+            this.getRoles().forEach((g) -> authorities.addAll(g.getPermissions()));
             authorities.stream().distinct().collect(Collectors.toList());
         }
         return authorities;

@@ -153,7 +153,7 @@ public class AppQueryBuilder {
         BooleanBuilder predicate = new BooleanBuilder();
 
         if (query.getIn() != null) {
-            predicate.and(list.any().id.in(query.getIn()));
+            predicate.and(list.any().uuid.in(query.getIn()));
         }
 
         return predicate;

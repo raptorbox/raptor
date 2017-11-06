@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
-import org.createnet.raptor.models.auth.Group;
+import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.sdk.Raptor;
@@ -76,7 +76,7 @@ public class GroupTest {
     public void listGroups() {
 
         Raptor adm1 = Utils.createNewAdminInstance();
-        List<Group> list = adm1.Admin().Group().list();
+        List<Role> list = adm1.Admin().Group().list();
 
         assertNotNull(list);
         assertTrue(!list.isEmpty());
@@ -88,18 +88,18 @@ public class GroupTest {
 
         Raptor adm1 = Utils.createNewAdminInstance();
         String groupName = "g" + adm1.Auth().getUser().getUsername();
-        Group group = new Group(groupName, Arrays.asList(
+        Role group = new Role(groupName, Arrays.asList(
                 new Permission(EntityType.app, Operation.admin),
                 new Permission(EntityType.device, Operation.read),
                 new Permission(EntityType.action, Operation.execute)
         ));
         adm1.Admin().Group().create(group);
 
-        List<Group> list = adm1.Admin().Group().list();
+        List<Role> list = adm1.Admin().Group().list();
         assertNotNull(list);
         assertTrue(list.size() >= 3);
 
-        Optional<Group> optGroup = list.stream().filter((g) -> g.getName().equals(groupName)).findFirst();
+        Optional<Role> optGroup = list.stream().filter((g) -> g.getName().equals(groupName)).findFirst();
 
         assertTrue(optGroup.isPresent());
         assertTrue(optGroup.get().getPermissions().contains(new Permission("device_read")));
@@ -116,10 +116,10 @@ public class GroupTest {
         Permission app_read = new Permission(EntityType.app, Operation.read);
         Permission action_exec = new Permission(EntityType.action, Operation.execute);
 
-        Group group = new Group(groupName, Arrays.asList(app_admin));
+        Role group = new Role(groupName, Arrays.asList(app_admin));
         adm1.Admin().Group().create(group);
 
-        Group g1 = adm1.Admin().Group().read(group.getId());
+        Role g1 = adm1.Admin().Group().read(group.getId());
         assertTrue(g1.getPermissions().size() == 1);
         assertTrue(g1.getPermissions().contains(app_admin));
 
@@ -129,7 +129,7 @@ public class GroupTest {
 
         adm1.Admin().Group().update(g1);
 
-        Group g2 = adm1.Admin().Group().read(g1.getId());
+        Role g2 = adm1.Admin().Group().read(g1.getId());
 
         assertTrue(g2.getPermissions().size() == 2);
         assertTrue(g2.getPermissions().contains(action_exec));
@@ -146,17 +146,17 @@ public class GroupTest {
 
         Permission app_read = new Permission(EntityType.app, Operation.read);
 
-        Group group = new Group(groupName, Arrays.asList(app_read));
+        Role group = new Role(groupName, Arrays.asList(app_read));
         adm1.Admin().Group().create(group);
 
-        Group g1 = adm1.Admin().Group().read(group.getId());
+        Role g1 = adm1.Admin().Group().read(group.getId());
         assertTrue(g1.getPermissions().size() == 1);
         assertTrue(g1.getPermissions().contains(app_read));
 
         adm1.Admin().Group().delete(g1);
         
         try {
-            Group g3 = adm1.Admin().Group().read(g1.getId());
+            Role g3 = adm1.Admin().Group().read(g1.getId());
             fail("Group has not been deleted");
         }
         catch(RequestException ex) {
@@ -180,10 +180,10 @@ public class GroupTest {
         Permission device_admin_own = new Permission(EntityType.device, Operation.admin, true);
         
         String groupName = "g" + adm1.Auth().getUser().getUsername();
-        Group group = new Group(groupName, Arrays.asList(user_read, device_admin_own));
+        Role group = new Role(groupName, Arrays.asList(user_read, device_admin_own));
         adm1.Admin().Group().create(group);
        
-        user.addGroup(group);
+        user.addRole(group);
         adm1.Admin().User().update(user);
         
         assertTrue(user.hasPermission(user_read));

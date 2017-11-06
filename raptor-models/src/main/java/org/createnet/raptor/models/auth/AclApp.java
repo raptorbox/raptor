@@ -59,7 +59,7 @@ public class AclApp extends AbstractAclSubject {
     private User owner;
 
     @OneToMany(mappedBy = "app", fetch = FetchType.LAZY)    
-    private List<Group> groups = new ArrayList();
+    private List<Role> groups = new ArrayList();
 
     public AclApp() {
     }
@@ -110,11 +110,11 @@ public class AclApp extends AbstractAclSubject {
         return String.format("App[uuid=%s]", uuid);
     }
 
-    public List<Group> getGroups() {
+    public List<Role> getGroups() {
         return groups;
     }
 
-    public void setGroups(List<Group> groups) {
+    public void setGroups(List<Role> groups) {
         this.groups = groups;
     }
 
