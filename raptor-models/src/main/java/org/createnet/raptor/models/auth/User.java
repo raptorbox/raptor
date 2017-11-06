@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.persistence.Cacheable;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -200,7 +201,16 @@ public class User implements Serializable, Owneable {
     public List<Role> getRoles() {
         return roles;
     }
-
+    
+    @JsonProperty("roles")
+    public void setRolesList(List<String> roles) {
+        this.roles.clear();
+        this.roles.addAll(
+            roles.stream().map(r -> new Role(r)).collect(Collectors.toList())
+        );
+    }
+    
+    @JsonIgnore
     public void setRoles(List<Role> roles) {
         this.roles.clear();
         this.roles.addAll(roles);

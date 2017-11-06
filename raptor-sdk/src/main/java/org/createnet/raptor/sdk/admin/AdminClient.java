@@ -29,7 +29,7 @@ public class AdminClient extends AbstractClient {
 
     protected UserClient User;
     protected TokenClient Token;
-    protected GroupClient Group;
+    protected RoleClient Role;
 
     public UserClient User() {
         if (User == null) {
@@ -38,11 +38,11 @@ public class AdminClient extends AbstractClient {
         return User;
     }
 
-    public GroupClient Group() {
-        if (Group == null) {
-            Group = new GroupClient(getContainer());
+    public RoleClient Role() {
+        if (Role == null) {
+            Role = new RoleClient(getContainer());
         }
-        return Group;
+        return Role;
     }
 
     public TokenClient Token() {

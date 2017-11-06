@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.sdk.AbstractClient;
+import org.createnet.raptor.sdk.PageResponse;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.Routes;
@@ -32,13 +33,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class GroupClient extends AbstractClient {
+public class RoleClient extends AbstractClient {
 
-    public GroupClient(Raptor container) {
+    public RoleClient(Raptor container) {
         super(container);
     }
 
-    final static Logger logger = LoggerFactory.getLogger(GroupClient.class);
+    final static Logger logger = LoggerFactory.getLogger(RoleClient.class);
 
     /**
      * Get user groups
@@ -46,9 +47,9 @@ public class GroupClient extends AbstractClient {
      * @param userUuid group owner
      * @return
      */
-    public List<Role> list(String userUuid) {
-        JsonNode node = getClient().get(String.format(Routes.GROUP_LIST, userUuid));
-        return getMapper().convertValue(node, new TypeReference<List<Role>>() {
+    public PageResponse<Role> list(String userUuid) {
+        JsonNode node = getClient().get(String.format(Routes.ROLE_LIST, userUuid));
+        return getMapper().convertValue(node, new TypeReference<PageResponse<Role>>() {
         });
     }
 
@@ -57,7 +58,7 @@ public class GroupClient extends AbstractClient {
      *
      * @return
      */
-    public List<Role> list() {
+    public PageResponse<Role> list() {
         return list(getContainer().Auth().getUser().getUuid());
     }
 
@@ -67,8 +68,8 @@ public class GroupClient extends AbstractClient {
      * @param groupId
      * @return
      */
-    public Role read(long groupId) {
-        JsonNode node = getClient().get(String.format(Routes.GROUP_READ, groupId));
+    public Role read(String groupId) {
+        JsonNode node = getClient().get(String.format(Routes.ROLE_READ, groupId));
         Role t1 = getMapper().convertValue(node, Role.class);
         return t1;
     }
@@ -97,7 +98,7 @@ public class GroupClient extends AbstractClient {
 
     public Role create(Role group, RequestOptions opts) {
 
-        JsonNode node = getClient().post(Routes.GROUP_CREATE, toJsonNode(group), opts);
+        JsonNode node = getClient().post(Routes.ROLE_CREATE, toJsonNode(group), opts);
         Role t1 = getMapper().convertValue(node, Role.class);
 
         group.merge(t1);
@@ -120,8 +121,8 @@ public class GroupClient extends AbstractClient {
      *
      * @param groupId
      */
-    public void delete(Long groupId) {
-        getClient().delete(String.format(Routes.GROUP_DELETE, groupId.toString()));
+    public void delete(String groupId) {
+        getClient().delete(String.format(Routes.ROLE_DELETE, groupId.toString()));
     }
 
     /**
@@ -132,7 +133,7 @@ public class GroupClient extends AbstractClient {
      */
     public Role update(Role group) {
 
-        JsonNode node = getClient().put(String.format(Routes.GROUP_UPDATE, group.getId()), toJsonNode(group));
+        JsonNode node = getClient().put(String.format(Routes.ROLE_UPDATE, group.getId()), toJsonNode(group));
         Role t1 = getMapper().convertValue(node, Role.class);
 
         group.merge(t1);

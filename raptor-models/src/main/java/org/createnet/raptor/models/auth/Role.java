@@ -7,7 +7,7 @@
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
+ * Unless required by domainlicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -35,7 +35,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.app.AppGroup;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -50,14 +49,14 @@ public class Role implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private String id;
 
     @NotEmpty
     private String name;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    private AclApp app;
+    private String domain;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "groups_permissions", joinColumns = {
@@ -72,9 +71,9 @@ public class Role implements Serializable {
         this.name = name;
     }
     
-    public Role(AppGroup ag, App app) {
+    public Role(AppGroup ag, String domain) {
         this.name = ag.getName();
-        this.app = new AclApp(app);
+        this.domain = domain;
         this.permissions.clear();
         this.permissions.addAll(ag.getPermissions().stream().map((p) -> new Permission(p)).collect(Collectors.toList()));
     }
@@ -84,9 +83,9 @@ public class Role implements Serializable {
         this.permissions.addAll(permissions);
     }
 
-    public Role(String name, AclApp app) {
+    public Role(String name, String domain) {
         this(name);
-        this.app = app;
+        this.domain = domain;
     }
 
     public Role(StaticGroup g) {
@@ -97,11 +96,11 @@ public class Role implements Serializable {
         this(g.name(), permissions);
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -113,35 +112,28 @@ public class Role implements Serializable {
         this.name = name;
     }
 
-    @JsonProperty
-    public String getAppId() {
-        return getApp() != null ? getApp().getUuid() : null;
-    }
-
-    @JsonProperty
-    public void setAppId(String appId) {
-
-        if (getApp() == null) {
-            setApp(null);
-            return;
-        }
-
-        AclApp newapp = new AclApp();
-        newapp.setUuid(appId);
-        setApp(newapp);
-    }
-
     @JsonIgnore
-    public AclApp getApp() {
-        return app;
+    public String getDomain() {
+        return domain;
     }
 
-    public void setApp(AclApp app) {
-        this.app = app;
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
-
+    
+    @JsonIgnore
     public List<Permission> getPermissions() {
         return permissions;
+    }
+    
+    @JsonProperty("permissions")
+    public List<String> getPermissionsList() {
+        return permissions.stream().map((m) -> m.getName()).collect(Collectors.toList());
+    }
+    
+    @JsonProperty("permissions")
+    public void setPermissionsList(List<String> permissions) {
+        setPermissions(permissions.stream().map((name) -> new Permission(name)).collect(Collectors.toList()));
     }
 
     public void setPermissions(List<Permission> permissions) {
@@ -152,7 +144,7 @@ public class Role implements Serializable {
         if (raw.getName() != null && !raw.getName().isEmpty()) {
             this.setName(raw.getName());
         }
-        setApp(raw.getApp());
+        setDomain(raw.getDomain());
         setPermissions(raw.getPermissions());
     }
 

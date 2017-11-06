@@ -26,6 +26,7 @@ import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.sdk.PageResponse;
 import org.createnet.raptor.sdk.Utils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -40,9 +41,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Luca Capra <luca.capra@fbk.eu>
  */
-public class GroupTest {
+public class RoleTest {
 
-    final Logger log = LoggerFactory.getLogger(GroupTest.class);
+    final Logger log = LoggerFactory.getLogger(RoleTest.class);
 
     @BeforeClass
     public static void setUpClass() {
@@ -73,41 +74,42 @@ public class GroupTest {
     }
 
     @Test
-    public void listGroups() {
+    public void listRoles() {
 
         Raptor adm1 = Utils.createNewAdminInstance();
-        List<Role> list = adm1.Admin().Group().list();
+        PageResponse<Role> list = adm1.Admin().Role().list();
 
         assertNotNull(list);
-        assertTrue(!list.isEmpty());
-        assertTrue(list.size() >= 2);
+        assertTrue(!list.getContent().isEmpty());
+        assertTrue(list.getContent().size() >= 2);
     }
 
     @Test
-    public void createGroup() {
+    public void createRole() {
 
         Raptor adm1 = Utils.createNewAdminInstance();
         String groupName = "g" + adm1.Auth().getUser().getUsername();
+        Permission p1 = new Permission(EntityType.device, Operation.read);
         Role group = new Role(groupName, Arrays.asList(
                 new Permission(EntityType.app, Operation.admin),
-                new Permission(EntityType.device, Operation.read),
+                p1,
                 new Permission(EntityType.action, Operation.execute)
         ));
-        adm1.Admin().Group().create(group);
+        adm1.Admin().Role().create(group);
 
-        List<Role> list = adm1.Admin().Group().list();
+        PageResponse<Role> list = adm1.Admin().Role().list();
         assertNotNull(list);
-        assertTrue(list.size() >= 3);
+        assertTrue(list.getContent().size() >= 3);
 
-        Optional<Role> optGroup = list.stream().filter((g) -> g.getName().equals(groupName)).findFirst();
+        Optional<Role> optRole = list.getContent().stream().filter((g) -> g.getName().equals(groupName)).findFirst();
 
-        assertTrue(optGroup.isPresent());
-        assertTrue(optGroup.get().getPermissions().contains(new Permission("device_read")));
+        assertTrue(optRole.isPresent());
+        assertTrue(optRole.get().getPermissions().contains(p1));
 
     }
 
     @Test
-    public void updateGroup() {
+    public void updateRole() {
 
         Raptor adm1 = Utils.createNewAdminInstance();
         String groupName = "g" + adm1.Auth().getUser().getUsername();
@@ -117,9 +119,9 @@ public class GroupTest {
         Permission action_exec = new Permission(EntityType.action, Operation.execute);
 
         Role group = new Role(groupName, Arrays.asList(app_admin));
-        adm1.Admin().Group().create(group);
+        adm1.Admin().Role().create(group);
 
-        Role g1 = adm1.Admin().Group().read(group.getId());
+        Role g1 = adm1.Admin().Role().read(group.getId());
         assertTrue(g1.getPermissions().size() == 1);
         assertTrue(g1.getPermissions().contains(app_admin));
 
@@ -127,9 +129,9 @@ public class GroupTest {
         g1.getPermissions().add(app_read);
         g1.getPermissions().add(action_exec);
 
-        adm1.Admin().Group().update(g1);
+        adm1.Admin().Role().update(g1);
 
-        Role g2 = adm1.Admin().Group().read(g1.getId());
+        Role g2 = adm1.Admin().Role().read(g1.getId());
 
         assertTrue(g2.getPermissions().size() == 2);
         assertTrue(g2.getPermissions().contains(action_exec));
@@ -139,7 +141,7 @@ public class GroupTest {
     }
 
     @Test
-    public void deleteGroup() {
+    public void deleteRole() {
 
         Raptor adm1 = Utils.createNewAdminInstance();
         String groupName = "g" + adm1.Auth().getUser().getUsername();
@@ -147,17 +149,17 @@ public class GroupTest {
         Permission app_read = new Permission(EntityType.app, Operation.read);
 
         Role group = new Role(groupName, Arrays.asList(app_read));
-        adm1.Admin().Group().create(group);
+        adm1.Admin().Role().create(group);
 
-        Role g1 = adm1.Admin().Group().read(group.getId());
+        Role g1 = adm1.Admin().Role().read(group.getId());
         assertTrue(g1.getPermissions().size() == 1);
         assertTrue(g1.getPermissions().contains(app_read));
 
-        adm1.Admin().Group().delete(g1);
+        adm1.Admin().Role().delete(g1);
         
         try {
-            Role g3 = adm1.Admin().Group().read(g1.getId());
-            fail("Group has not been deleted");
+            Role g3 = adm1.Admin().Role().read(g1.getId());
+            fail("Role has not been deleted");
         }
         catch(RequestException ex) {
             assertEquals(ex.getStatus(), 404);
@@ -166,7 +168,7 @@ public class GroupTest {
     }
 
     @Test
-    public void testGroupEnforcement() {
+    public void testRoleEnforcement() {
 
         Raptor adm1 = Utils.createNewAdminInstance();
         Raptor usr1 = Utils.createNewUserInstance();
@@ -181,7 +183,7 @@ public class GroupTest {
         
         String groupName = "g" + adm1.Auth().getUser().getUsername();
         Role group = new Role(groupName, Arrays.asList(user_read, device_admin_own));
-        adm1.Admin().Group().create(group);
+        adm1.Admin().Role().create(group);
        
         user.addRole(group);
         adm1.Admin().User().update(user);

@@ -64,8 +64,7 @@ public class UserTest {
     }
 
     private String rndUsername() {
-        int rnd = ((int) (Math.random() * 100000000)) + (int) System.currentTimeMillis();
-        return (rnd % 2 == 0 ? "test_fil_" : "user_ippo_") + rnd;
+        return Utils.rndName("user");
     }
 
     @Test
@@ -75,7 +74,8 @@ public class UserTest {
 
         String username = rndUsername();
         log.debug("Create user {}", username);
-        final User user = raptor.Admin().User().create(username, "pass_" + rndUsername(), "test@test.raptor.local");
+        Raptor r1 = Utils.createNewUserInstance(username);
+        final User user = r1.Auth().getUser();
 
         raptor.Admin().User().subscribe(user, (u, message) -> {
 
@@ -96,48 +96,26 @@ public class UserTest {
 
         String username = rndUsername();
         log.debug("Create user {}", username);
-        User user = raptor.Admin().User().create(username, "pass_" + rndUsername(), "test@test.raptor.local");
+        Raptor r1 = Utils.createNewUserInstance(username);
+        final User user = r1.Auth().getUser();
 
         assertEquals(username, user.getUsername());
         assertNotNull(user.getUuid());
     }
 
     @Test
-    public void createAnotherUser() {
-
-        String username = rndUsername();
-        log.debug("Create user {}", username);
-
-        User user = new User();
-
-        user.setUsername(username);
-        user.setPassword("secret_" + rndUsername());
-        user.setEmail("foobar+" + username + "@test.raptor.local");
-        user.setId(123456L);
-
-        String uuid = UUID.randomUUID().toString();
-        user.setUuid(uuid);
-
-        User newUser = raptor.Admin().User().create(user);
-
-        assertEquals(username, newUser.getUsername());
-
-        assertNull(newUser.getId());
-
-        assertNotNull(newUser.getUuid());
-        assertNotEquals(uuid, newUser.getUuid());
-
-    }
-
-    @Test
     public void updateUser() {
 
-        String email = "test@test.raptor.local";
+        
         String username = rndUsername();
         log.debug("Create user {}", username);
-        User user = raptor.Admin().User().create(username, "pass_" + rndUsername(), email);
+        
+        Raptor r1 = Utils.createNewUserInstance(username);
 
-        user.setEmail(username + "_newemail@example.com");
+        final User user = r1.Auth().getUser();
+        String email = user.getEmail();
+        
+        user.setEmail(username + "_new_cool_email@example.com");
         user.setEnabled(false);
 
         User updatedUser = raptor.Admin().User().update(user);
@@ -148,19 +126,21 @@ public class UserTest {
     }
 
     @Test
-    public void failUpdateUserDuplicateEmail() {
+    public void failDuplicateEmail() {
+
 
         String username1 = rndUsername();
-        String email1 = username1 + "@test.raptor.local";
-        log.debug("Create user {}", username1);
-        User user1 = raptor.Admin().User().create(username1, "pass_" + rndUsername(), email1);
+        log.debug("Create user1 {}", username1);
+        Raptor r1 = Utils.createNewUserInstance(username1);
+        User user1 = r1.Auth().getUser();
 
         String username2 = rndUsername();
-        String email2 = username2 + "@test.raptor.local";
-        log.debug("Create user {}", username2);
-        User user2 = raptor.Admin().User().create(username2, "pass_" + rndUsername(), email2);
+        log.debug("Create user2 {}", username2);
+        Raptor r2 = Utils.createNewUserInstance(username2);
+        User user2 = r1.Auth().getUser();
 
-        user1.setEmail(email2);
+        user1.setUsername(username2);
+        user1.setEmail(user2.getEmail());
 
         try {
             User updatedUser1 = raptor.Admin().User().update(user1);
@@ -174,15 +154,17 @@ public class UserTest {
     }
 
     @Test
-    public void changeDuplicatedUsername() {
+    public void failDuplicatedUsername() {
 
         String username1 = rndUsername();
         log.debug("Create user1 {}", username1);
-        User user1 = raptor.Admin().User().create(username1, "pass_" + rndUsername(), "test@test.raptor.local");
+        Raptor r1 = Utils.createNewUserInstance(username1);
+        User user1 = r1.Auth().getUser();
 
         String username2 = rndUsername();
         log.debug("Create user2 {}", username2);
-        User user2 = raptor.Admin().User().create(username2, "pass_" + rndUsername(), "test@test.raptor.local");
+        Raptor r2 = Utils.createNewUserInstance(username2);
+        User user2 = r1.Auth().getUser();
 
         user1.setUsername(username2);
 
@@ -199,9 +181,10 @@ public class UserTest {
     @Test
     public void deleteUser() {
 
-        String username1 = rndUsername();
-        log.debug("Create user1 {}", username1);
-        User user1 = raptor.Admin().User().create(username1, "pass_" + rndUsername(), "test@test.raptor.local");
+        String username = rndUsername();
+        log.debug("Create user1 {}", username);
+        Raptor r1 = Utils.createNewUserInstance(username);
+        final User user1 = r1.Auth().getUser();
 
         raptor.Admin().User().delete(user1);
 
@@ -217,18 +200,19 @@ public class UserTest {
     @Test
     public void impersonateUser() {
 
-        String username1 = rndUsername();
-        log.debug("Create user1 {}", username1);
-        User user1 = raptor.Admin().User().create(username1, "pass_" + rndUsername(), "test@test.raptor.local");
+        String username = rndUsername();
+        log.debug("Create user1 {}", username);
+        Raptor r1 = Utils.createNewUserInstance(username);
+        User user1 = r1.Auth().getUser();
 
         AuthClient.LoginState state = raptor.Admin().User().impersonate(user1.getUuid());
 
         Raptor r2 = new Raptor(raptor.getConfig().getUrl(), state.token);
-        User user = r2.Admin().User().get();
+        User user2 = r2.Admin().User().get();
 
-        assertNotNull(user);
-        assertEquals(user.getUuid(), user1.getUuid());
-        assertEquals(user.getUsername(), user1.getUsername());
+        assertNotNull(user2);
+        assertEquals(user2.getUuid(), user1.getUuid());
+        assertEquals(user2.getUsername(), user1.getUsername());
 
     }
 

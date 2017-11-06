@@ -46,7 +46,7 @@ public class Permission implements GrantedAuthority {
 
     @NotEmpty
     private String name;
-
+    
     public Permission() {
     }
 
@@ -67,10 +67,11 @@ public class Permission implements GrantedAuthority {
     }
 
     public void buildName(EntityType entity, Operation operation, boolean own) {
-        this.name = entity.name() + "_" + operation.name();
+        this.name = operation.name();
         if (own) {
             this.name += "_own";
         }
+        this.name += "_" + entity.name();
     }
 
     @JsonIgnore
