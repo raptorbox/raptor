@@ -57,7 +57,7 @@ public class InventoryTest {
 
     @Test
     public void list() {
-        Raptor raptor = Utils.getRaptor();
+        Raptor raptor = Utils.createNewAdminInstance();
         log.debug("List devices");
         List<Device> list = raptor.Inventory().list();
         log.debug("found {} devices", list.size());
@@ -67,7 +67,7 @@ public class InventoryTest {
     @Test
     public void create() {
 
-        Raptor raptor = Utils.getRaptor();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         Device dev = new Device();
         dev.name("test create")
@@ -86,7 +86,7 @@ public class InventoryTest {
     @Test
     public void updateStream() {
 
-        Raptor raptor = Utils.getRaptor();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         Device dev = new Device();
         dev.name("test update");
@@ -120,7 +120,7 @@ public class InventoryTest {
 
     @Test
     public void update() {
-        Raptor raptor = Utils.getRaptor();
+        Raptor raptor = Utils.createNewAdminInstance();
         Device dev = new Device();
         dev.name("modified device");
         dev.validate();
@@ -139,7 +139,7 @@ public class InventoryTest {
 
     @Test
     public void load() {
-        Raptor raptor = Utils.getRaptor();
+        Raptor raptor = Utils.createNewAdminInstance();
         Device dev = new Device();
         dev.name("test load");
         dev.validate();
@@ -151,7 +151,7 @@ public class InventoryTest {
     @Test
     public void searchByName() {
 
-        Raptor raptor = Utils.getRaptor();
+        Raptor raptor = Utils.createNewAdminInstance();
         for (int i = 0; i < 3; i++) {
             log.debug("Create device {}", i);
             Device dev1 = new Device();
@@ -176,7 +176,7 @@ public class InventoryTest {
     @Test
     public void searchByProperties() {
 
-        Raptor raptor = Utils.getRaptor();
+        Raptor raptor = Utils.createNewAdminInstance();
         for (int i = 0; i < 3; i++) {
             log.debug("Create device d{}", i);
             Device dev1 = new Device();
@@ -203,7 +203,7 @@ public class InventoryTest {
     @Test
     public void searchByUserId() {
 
-        Raptor raptor = Utils.getRaptor();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         Raptor r = Utils.createNewAdminInstance();
 
@@ -229,7 +229,7 @@ public class InventoryTest {
     @Test
     public void searchByUserIdAndProperties() {
 
-        Raptor raptor = Utils.getRaptor();
+        Raptor raptor = Utils.createNewAdminInstance();
         Raptor r = Utils.createNewAdminInstance();
 
         log.debug("Create device by user {}", r.Auth().getUser().getUsername());
@@ -257,7 +257,7 @@ public class InventoryTest {
     @Test
     public void changeUserIdForDevice() {
 
-        Raptor raptor = Utils.getRaptor();
+        Raptor raptor = Utils.createNewAdminInstance();
         Raptor r = Utils.createNewAdminInstance();
         Raptor r2 = Utils.createNewAdminInstance();
 

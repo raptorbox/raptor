@@ -45,35 +45,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/tree")
 @ApiResponses(value = {
-    @ApiResponse(
-            code = 200,
-            message = "Ok"
-    )
-    ,
-    @ApiResponse(
-            code = 204,
-            message = "No content"
-    )
-    ,
-    @ApiResponse(
-            code = 202,
-            message = "Accepted"
-    )
-    ,
-    @ApiResponse(
-            code = 401,
-            message = "Not authorized"
-    )
-    ,
-    @ApiResponse(
-            code = 403,
-            message = "Forbidden"
-    )
-    ,
-    @ApiResponse(
-            code = 500,
-            message = "Internal error"
-    )
+    @ApiResponse(code = 200,message = "Ok"),
+    @ApiResponse(code = 204,message = "No content"),
+    @ApiResponse(code = 202,message = "Accepted"),
+    @ApiResponse(code = 401,message = "Not authorized"),
+    @ApiResponse(code = 403,message = "Forbidden"),
+    @ApiResponse(code = 500,message = "Internal error")
 })
 @Api(tags = {"Inventory", "Tree"})
 public class TreeController {
