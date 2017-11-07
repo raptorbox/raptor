@@ -66,7 +66,7 @@ public class AppTest {
 
         log.debug("found {} apps", list.size());
         assertNotNull(list);
-        assertEquals(0, list.size());
+        assertTrue(!list.isEmpty());
     }
 
     @Test

@@ -88,7 +88,7 @@ public class UserTest {
         user.setEnabled(false);
         raptor.Admin().User().update(user);
 
-        Utils.waitUntil(5, () -> !done.get());
+        Utils.waitUntil(10, () -> !done.get());
     }
 
     @Test

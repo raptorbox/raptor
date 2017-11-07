@@ -157,6 +157,7 @@ public class TokenTest {
         assertFalse(updatedToken.isEnabled());
 
         Utils.waitFor(1000); // wait for expiration
+        log.debug("Expired {}: {}", updatedToken.isExpired(), updatedToken.getExpiresInstant().toString());
         assertTrue(updatedToken.isExpired());
 
     }

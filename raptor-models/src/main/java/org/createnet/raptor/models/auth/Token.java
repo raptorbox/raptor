@@ -204,7 +204,7 @@ public class Token {
         if (expires == null) {
             return null;
         }
-        return getCreated().toInstant().plusSeconds(expires);
+        return Instant.ofEpochSecond(expires);
     }
 
     public Long getExpires() {
