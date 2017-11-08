@@ -51,7 +51,7 @@ public class InternalApiClientService extends RaptorSdk {
     }
 
     public Raptor impersonate(User user) {
-        return impersonate(user.getUuid());
+        return impersonate(user.getId());
     }
 
     @PostConstruct

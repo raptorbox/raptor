@@ -148,7 +148,7 @@ public class Utils {
 
         String password = username + Math.random();
         User user = getRaptor().Admin().User().createAdmin(username, password, username + "@test.raptor.local");
-        log.debug("Created user {} : {} with uuid {}", username, password, user.getUuid());
+        log.debug("Created user {} : {} with uuid {}", username, password, user.getId());
         assert user != null;
 
         Raptor r = new Raptor(new Config(instance.getConfig().getUrl(), username, password));
@@ -169,7 +169,7 @@ public class Utils {
         String password = username + Math.random();
 
         User user = getRaptor().Admin().User().createAdmin(username, password, username + "@test.raptor.local");
-        log.debug("Created user {} : {} with uuid {}", username, password, user.getUuid());
+        log.debug("Created user {} : {} with uuid {}", username, password, user.getId());
 
         assert user != null;
 
@@ -189,7 +189,7 @@ public class Utils {
         String password = username + Math.random();
 
         User user = getRaptor().Admin().User().create(username, password, username + "@test.raptor.local", g);
-        log.debug("Created user {} : {} with uuid {}", username, password, user.getUuid());
+        log.debug("Created user {} : {} with uuid {}", username, password, user.getId());
 
         assert user != null;
 

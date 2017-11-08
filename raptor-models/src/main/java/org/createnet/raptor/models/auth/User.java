@@ -64,11 +64,8 @@ public class User implements Serializable, Owneable {
 
     @JsonIgnore
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    protected Long id;
-
     @NotEmpty
-    protected String uuid = UUID.randomUUID().toString();
+    protected String id = UUID.randomUUID().toString();
 
     @NotEmpty
     @Column(unique = true, nullable = false, length = 128)
@@ -129,7 +126,7 @@ public class User implements Serializable, Owneable {
     }
     
     public User(String userId) {
-        this.uuid = userId;
+        this.id = userId;
     }
 
     public User(User user) {
@@ -150,7 +147,6 @@ public class User implements Serializable, Owneable {
 
         if (!newUser) {
             this.id = user.getId();
-            this.uuid = user.getUuid();
         }
 
     }
@@ -166,14 +162,6 @@ public class User implements Serializable, Owneable {
 
     public boolean hasRole(StaticGroup g) {
         return hasRole(g.name());
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getUsername() {
@@ -240,12 +228,12 @@ public class User implements Serializable, Owneable {
         }
     }
 
-    public String getUuid() {
-        return uuid;
+    public String getId() {
+        return id;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public List<Token> getTokens() {
@@ -327,7 +315,7 @@ public class User implements Serializable, Owneable {
 
     @Override
     public String toString() {
-        return "User{" + "uuid=" + uuid + '}';
+        return "User{" + "uuid=" + id + '}';
     }
 
     public boolean hasPermission(Permission p) {
@@ -342,7 +330,7 @@ public class User implements Serializable, Owneable {
 
     @Override
     public String getOwnerId() {
-        return getUuid();
+        return getId();
     }
 
 }

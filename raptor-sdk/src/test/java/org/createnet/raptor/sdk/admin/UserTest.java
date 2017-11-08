@@ -80,7 +80,7 @@ public class UserTest {
         raptor.Admin().User().subscribe(user, (u, message) -> {
 
             assertEquals(false, message.getUser().getEnabled());
-            assertEquals(user.getUuid(), u.getUuid());
+            assertEquals(user.getId(), u.getId());
 
             done.set(true);
         });
@@ -100,7 +100,7 @@ public class UserTest {
         final User user = r1.Auth().getUser();
 
         assertEquals(username, user.getUsername());
-        assertNotNull(user.getUuid());
+        assertNotNull(user.getId());
     }
 
     @Test
@@ -189,7 +189,7 @@ public class UserTest {
         raptor.Admin().User().delete(user1);
 
         try {
-            raptor.Admin().User().get(user1.getUuid());
+            raptor.Admin().User().get(user1.getId());
             throw new RuntimeException("User should not exists");
         } catch (RequestException ex) {
             assertEquals(404, ex.status);
@@ -205,13 +205,13 @@ public class UserTest {
         Raptor r1 = Utils.createNewUserInstance(username);
         User user1 = r1.Auth().getUser();
 
-        AuthClient.LoginState state = raptor.Admin().User().impersonate(user1.getUuid());
+        AuthClient.LoginState state = raptor.Admin().User().impersonate(user1.getId());
 
         Raptor r2 = new Raptor(raptor.getConfig().getUrl(), state.token);
         User user2 = r2.Admin().User().get();
 
         assertNotNull(user2);
-        assertEquals(user2.getUuid(), user1.getUuid());
+        assertEquals(user2.getId(), user1.getId());
         assertEquals(user2.getUsername(), user1.getUsername());
 
     }
@@ -222,7 +222,7 @@ public class UserTest {
         Raptor r1 = Utils.createNewUserInstance();
 
         Raptor r2 = Utils.createNewUserInstance();
-        String userId2 = r2.Auth().getUser().getUuid();
+        String userId2 = r2.Auth().getUser().getId();
 
         Device dev1 = new Device();
         dev1.name("auth_test");

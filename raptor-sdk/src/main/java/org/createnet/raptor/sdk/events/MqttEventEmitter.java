@@ -80,7 +80,7 @@ public class MqttEventEmitter extends AbstractClient {
     }
 
     protected String getUserTopic(User obj) {
-        return String.format(Topics.USER, obj.getUuid());
+        return String.format(Topics.USER, obj.getId());
     }
 
     protected String getTokenTopic(Token obj) {

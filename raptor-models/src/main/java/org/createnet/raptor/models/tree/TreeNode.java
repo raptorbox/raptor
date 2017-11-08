@@ -212,7 +212,7 @@ public class TreeNode extends RaptorContainer implements Owneable {
     }
 
     public TreeNode user(User user) {
-        this.userId = user.getUuid();
+        this.userId = user.getId();
         return this;
     }
 

@@ -111,7 +111,7 @@ public class TokenClient extends AbstractClient {
      * @return
      */
     public PageResponse<Token> list() {
-        return list(getContainer().Auth().getUser().getUuid());
+        return list(getContainer().Auth().getUser().getId());
     }
     
     /**

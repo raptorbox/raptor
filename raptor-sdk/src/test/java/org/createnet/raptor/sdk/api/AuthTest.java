@@ -88,24 +88,24 @@ public class AuthTest {
         Utils.getRaptor().Auth().login();
 
         Raptor r1 = Utils.createNewUserInstance();
-        log.debug("test1 {}", r1.Auth().getUser().getUuid());
+        log.debug("test1 {}", r1.Auth().getUser().getId());
 
         Raptor r2 = Utils.createNewUserInstance();
-        log.debug("test2 {}", r2.Auth().getUser().getUuid());
+        log.debug("test2 {}", r2.Auth().getUser().getId());
 
-        Assert.assertNotEquals(r1.Auth().getUser().getUuid(), r2.Auth().getUser().getUuid());
+        Assert.assertNotEquals(r1.Auth().getUser().getId(), r2.Auth().getUser().getId());
 
         log.debug("Try to login again test1");
         AuthClient.LoginState s1 = r1.Auth().login();
         log.debug("Try to login again test2");
         AuthClient.LoginState s2 = r2.Auth().login();
 
-        log.debug("{} vs {}", r1.Auth().getUser().getUuid(), r2.Auth().getUser().getUuid());
+        log.debug("{} vs {}", r1.Auth().getUser().getId(), r2.Auth().getUser().getId());
 
-        Assert.assertNotEquals(r1.Auth().getUser().getUuid(), r2.Auth().getUser().getUuid());
+        Assert.assertNotEquals(r1.Auth().getUser().getId(), r2.Auth().getUser().getId());
 
         Assert.assertNotEquals(s1.token, s2.token);
-        Assert.assertNotEquals(s1.user.getUuid(), s2.user.getUuid());
+        Assert.assertNotEquals(s1.user.getId(), s2.user.getId());
 
     }
 

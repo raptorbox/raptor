@@ -39,7 +39,7 @@ public class AppUser {
     }
     
     public AppUser(User user) {
-        this(user.getUuid());
+        this(user.getId());
     }
     
     public String getId() {

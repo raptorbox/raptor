@@ -45,10 +45,12 @@ public class RoleClient extends AbstractClient {
      * Get user groups
      *
      * @param userUuid group owner
+     * @param page
+     * @param size
      * @return
      */
-    public PageResponse<Role> list(String userUuid) {
-        JsonNode node = getClient().get(String.format(Routes.ROLE_LIST, userUuid));
+    public PageResponse<Role> list(String userUuid, int page, int size) {
+        JsonNode node = getClient().get(String.format(Routes.ROLE_LIST, userUuid) + String.format("?page=%s&size=%s", page, size));
         return getMapper().convertValue(node, new TypeReference<PageResponse<Role>>() {
         });
     }
@@ -59,7 +61,7 @@ public class RoleClient extends AbstractClient {
      * @return
      */
     public PageResponse<Role> list() {
-        return list(getContainer().Auth().getUser().getUuid());
+        return list(getContainer().Auth().getUser().getId(), 0, 100);
     }
 
     /**

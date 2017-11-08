@@ -118,7 +118,7 @@ public class AppController {
 
         AppQuery query = new AppQuery();
         if (!currentUser.isAdmin()) {
-            query.users.in(currentUser.getUuid());
+            query.users.in(currentUser.getId());
         }
 
         AppQueryBuilder qb = new AppQueryBuilder(query);
@@ -142,7 +142,7 @@ public class AppController {
     ) {
 
         if (!currentUser.isAdmin()) {
-            query.users.in(currentUser.getUuid());
+            query.users.in(currentUser.getId());
         }
 
         AppQueryBuilder qb = new AppQueryBuilder(query);
@@ -165,7 +165,7 @@ public class AppController {
     ) {
         
         if (app.getUserId() == null) {
-            app.setUserId(currentUser.getUuid());
+            app.setUserId(currentUser.getId());
         }
 
         normalizeApp(app);
@@ -228,7 +228,7 @@ public class AppController {
             return JsonErrorResponse.notFound();
         }
 
-        if (!currentUser.isAdmin() && !currentUser.getUuid().equals(app.getUserId()) && !app.isAdmin(currentUser)) {
+        if (!currentUser.isAdmin() && !currentUser.getId().equals(app.getUserId()) && !app.isAdmin(currentUser)) {
             return JsonErrorResponse.unauthorized();
         }
 
@@ -254,7 +254,7 @@ public class AppController {
         eventPublisher.update(app);
 
 
-        log.debug("Updated app {} ({}) by {}", app.getName(), app.getId(), currentUser.getUuid());
+        log.debug("Updated app {} ({}) by {}", app.getName(), app.getId(), currentUser.getId());
         return ResponseEntity.ok(saved);
     }
 
@@ -276,7 +276,7 @@ public class AppController {
             return JsonErrorResponse.notFound();
         }
 
-        if (!currentUser.isAdmin() && !currentUser.getUuid().equals(app.getUserId()) && !app.isAdmin(currentUser)) {
+        if (!currentUser.isAdmin() && !currentUser.getId().equals(app.getUserId()) && !app.isAdmin(currentUser)) {
             return JsonErrorResponse.unauthorized();
         }
 

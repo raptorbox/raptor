@@ -74,10 +74,10 @@ public class AppPermissionTest {
         
         r.App().create(app);
         
-        assertEquals(r.Auth().getUser().getUuid(), app.getUserId());
+        assertEquals(r.Auth().getUser().getId(), app.getUserId());
         assertEquals(2, app.getGroups().size());
         assertEquals(1, app.getDevices().size());
-        assertEquals(r.Auth().getUser().getUuid(), app.getOwnerId());
+        assertEquals(r.Auth().getUser().getId(), app.getOwnerId());
         
         log.debug("Created app {}", app.getName());
         

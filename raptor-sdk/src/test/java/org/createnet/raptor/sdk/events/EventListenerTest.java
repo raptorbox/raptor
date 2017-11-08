@@ -314,7 +314,7 @@ public class EventListenerTest {
         Action action = dev.action("switch");
         raptor.Action().invoke(action, "on");
 
-        Utils.waitUntil(5, () -> !done.get());
+        Utils.waitUntil(10, () -> !done.get());
     }
 
     @Test

@@ -66,7 +66,7 @@ public class RaptorSecurity {
      */
     public boolean can(User u, EntityType entity, Operation operation, Object obj) {
         String objectId = obj == null ? null : (String)obj;
-        AuthorizationResponse r = api.Admin().User().isAuthorized(u.getUuid(), entity, operation, objectId);
+        AuthorizationResponse r = api.Admin().User().isAuthorized(u.getId(), entity, operation, objectId);
         return r.result;
     }
 

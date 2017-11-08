@@ -200,7 +200,7 @@ public class InventoryClient extends AbstractClient {
             if (user == null) {
                 throw new MissingAuthenticationException("User is not available");
             }
-            query.userId(user.getUuid());
+            query.userId(user.getId());
         }
         JsonNode json = getClient().post(
                 Routes.INVENTORY_SEARCH,

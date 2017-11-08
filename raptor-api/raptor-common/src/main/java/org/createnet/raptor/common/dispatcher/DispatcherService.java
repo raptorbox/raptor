@@ -129,7 +129,7 @@ public class DispatcherService {
     }
 
     protected String getUserEventsTopic(User u) {
-        return String.format(Topics.USER, u.getUuid());
+        return String.format(Topics.USER, u.getId());
     }
 
     protected String getTokenEventsTopic(Token t) {

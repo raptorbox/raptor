@@ -27,7 +27,7 @@ public class UserSid extends PrincipalSid {
   final private User user;
 
   public UserSid(User user) {
-    super(user.getUuid());
+    super(user.getId());
     this.user = user;
   }
 
@@ -40,7 +40,7 @@ public class UserSid extends PrincipalSid {
     if(object instanceof User) {
       return ((User)object).getId().equals(getUser().getId());
     }
-    return object.toString().equals(getUser().getUuid());
+    return object.toString().equals(getUser().getId());
   }
 
 }

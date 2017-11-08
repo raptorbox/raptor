@@ -106,11 +106,11 @@ public class StreamController {
         record.setStream(stream);
 
         if (record.userId() == null) {
-            record.userId(currentUser.getUuid());
+            record.userId(currentUser.getId());
         }
 
-        if (!currentUser.isAdmin() && !record.userId().equals(currentUser.getUuid())) {
-            record.userId(currentUser.getUuid());
+        if (!currentUser.isAdmin() && !record.userId().equals(currentUser.getId())) {
+            record.userId(currentUser.getId());
         }
 
         try {

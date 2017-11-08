@@ -100,7 +100,7 @@ public class InventoryController {
     @PreAuthorize("@raptorSecurity.list(principal, 'device')")
     public ResponseEntity<?> getDevices(@AuthenticationPrincipal User currentUser) {
 
-        String deviceId = currentUser.getUuid();
+        String deviceId = currentUser.getId();
         if (currentUser.isAdmin()) {
             deviceId = null;
         }
@@ -127,11 +127,11 @@ public class InventoryController {
         String devUserId = device.userId();
         // set current user if empty
         if (devUserId == null || devUserId.isEmpty()) {
-            devUserId = currentUser.getUuid();
+            devUserId = currentUser.getId();
         }
 
         // set ownership to current user
-        device.userId(currentUser.getUuid());
+        device.userId(currentUser.getId());
 
         // super_admin can set ownership
         if (currentUser.isAdmin()) {
@@ -139,7 +139,7 @@ public class InventoryController {
             device.userId(devUserId);
         } else {
             // std user is the owner
-            device.userId(currentUser.getUuid());
+            device.userId(currentUser.getId());
         }
 
         deviceService.save(device);
@@ -212,7 +212,7 @@ public class InventoryController {
 
         // ensure a default is always set (cover legacy cases where userId may be null)
         if (device.userId() == null && device.userId().isEmpty()) {
-            device.userId(currentUser.getUuid());
+            device.userId(currentUser.getId());
         }
 
         device.validate();
@@ -263,7 +263,7 @@ public class InventoryController {
         }
 
         if (!currentUser.isAdmin()) {
-            query.userId(currentUser.getUuid());
+            query.userId(currentUser.getId());
         }
 
         DeviceQueryBuilder qb = new DeviceQueryBuilder(query);

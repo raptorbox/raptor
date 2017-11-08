@@ -72,7 +72,7 @@ abstract public class AbstractAclSubject implements AclSubject {
         }
         String u = "";
         if (sid != null) {
-            u = getSid().getUser().getUuid();
+            u = getSid().getUser().getId();
         }
         String p = "";
         if (parent != null) {

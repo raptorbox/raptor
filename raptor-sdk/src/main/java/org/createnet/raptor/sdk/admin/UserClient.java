@@ -119,7 +119,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public AuthorizationResponse isAuthorized(Device device, User user, Operation operation) {
-        return isAuthorized(getContainer().Auth().getUser().getUuid(), EntityType.device, operation, device.id());
+        return isAuthorized(getContainer().Auth().getUser().getId(), EntityType.device, operation, device.id());
     }
 
     /**
@@ -130,7 +130,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public AuthorizationResponse isAuthorized(Device device, Operation operation) {
-        return isAuthorized(getContainer().Auth().getUser().getUuid(), EntityType.device, operation, device.id());
+        return isAuthorized(getContainer().Auth().getUser().getId(), EntityType.device, operation, device.id());
     }
 
     /**
@@ -272,9 +272,9 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public User update(User user) {
-        assert user.getUuid() != null;
+        assert user.getId() != null;
         JsonUser jsonUser = new JsonUser(user);
-        JsonNode node = getClient().put(String.format(Routes.USER_UPDATE, user.getUuid()), toJsonNode(jsonUser));
+        JsonNode node = getClient().put(String.format(Routes.USER_UPDATE, user.getId()), toJsonNode(jsonUser));
         return getMapper().convertValue(node, User.class);
     }
 
@@ -285,8 +285,8 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public void delete(User user) {
-        assert user.getUuid() != null;
-        delete(user.getUuid());
+        assert user.getId() != null;
+        delete(user.getId());
     }
 
     /**

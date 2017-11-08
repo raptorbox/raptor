@@ -212,7 +212,7 @@ public class InventoryTest {
         dev1.name("test dev with prop");
         r.Inventory().create(dev1);
 
-        String userId = r.Auth().getUser().getUuid();
+        String userId = r.Auth().getUser().getId();
 
         DeviceQuery q = new DeviceQuery();
         q.userId(userId);
@@ -239,7 +239,7 @@ public class InventoryTest {
 
         r.Inventory().create(dev1);
 
-        String userId = r.Auth().getUser().getUuid();
+        String userId = r.Auth().getUser().getId();
 
         DeviceQuery q = new DeviceQuery();
         q.userId(userId);
@@ -268,8 +268,8 @@ public class InventoryTest {
 
         r.Inventory().create(dev1);
 
-        String userId = r.Auth().getUser().getUuid();
-        String newUser = r2.Auth().getUser().getUuid();
+        String userId = r.Auth().getUser().getId();
+        String newUser = r2.Auth().getUser().getId();
 
         DeviceQuery q = new DeviceQuery();
         q.userId(userId);

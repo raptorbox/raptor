@@ -89,6 +89,9 @@ public class RoleTest {
 
         Raptor adm1 = Utils.createNewAdminInstance();
         String groupName = "g" + adm1.Auth().getUser().getUsername();
+
+        log.debug("NEW group name {}", groupName);
+        
         Permission p1 = new Permission(EntityType.device, Operation.read);
         Role group = new Role(groupName, Arrays.asList(
                 new Permission(EntityType.app, Operation.admin),
@@ -101,7 +104,10 @@ public class RoleTest {
         assertNotNull(list);
         assertTrue(list.getContent().size() >= 3);
 
-        Optional<Role> optRole = list.getContent().stream().filter((g) -> g.getName().equals(groupName)).findFirst();
+        Optional<Role> optRole = list.getContent().stream().filter((g) -> {
+            log.debug("group nanme {}", g.getName());
+            return g.getName().equals(groupName);
+        }).findFirst();
 
         assertTrue(optRole.isPresent());
         assertTrue(optRole.get().getPermissions().contains(p1));
@@ -192,12 +198,12 @@ public class RoleTest {
         assertTrue(user.hasPermission(device_admin_own));
 
         // read own profile
-        User u1 = usr1.Admin().User().get(user.getUuid());
-        assertEquals(user.getUuid(), u1.getUuid());
+        User u1 = usr1.Admin().User().get(user.getId());
+        assertEquals(user.getId(), u1.getId());
         
         // should be allowed to read other user info
-        User a1 = usr1.Admin().User().get(admin.getUuid());
-        assertEquals(admin.getUuid(), a1.getUuid());
+        User a1 = usr1.Admin().User().get(admin.getId());
+        assertEquals(admin.getId(), a1.getId());
         
         Device dev = usr1.Inventory().create(new Device().name("test"));
         dev.name("test updated");

@@ -78,7 +78,7 @@ public class AppTest {
 
         App app = new App();
         app.setName("test_" + System.currentTimeMillis());
-        app.setUserId(raptor.Auth().getUser().getUuid());
+        app.setUserId(raptor.Auth().getUser().getId());
 
         raptor.App().create(app);
 
@@ -100,7 +100,7 @@ public class AppTest {
 
         App app = new App();
         app.setName("test_" + System.currentTimeMillis());
-        app.setUserId(raptor.Auth().getUser().getUuid());
+        app.setUserId(raptor.Auth().getUser().getId());
 
         PageResponse<App> pager = raptor.App().list();
         List<App> list = pager.getContent();

@@ -65,7 +65,7 @@ public class App implements Serializable, Owneable {
     }
 
     public App(String name, User owner) {
-        this(name, owner.getUuid());
+        this(name, owner.getId());
     }
 
     public void merge(App raw) {
@@ -175,7 +175,7 @@ public class App implements Serializable, Owneable {
     }
 
     public void setOwner(User user) {
-        this.userId = user.getUuid();
+        this.userId = user.getId();
     }
 
     public void addUser(User user, String group) {
@@ -185,7 +185,7 @@ public class App implements Serializable, Owneable {
     public void addUser(User user, List<String> groups) {
 
         AppUser appUser = new AppUser();
-        appUser.setId(user.getUuid());
+        appUser.setId(user.getId());
         appUser.addGroups(groups);
 
         this.getUsers().add(appUser);
@@ -256,7 +256,7 @@ public class App implements Serializable, Owneable {
     }
 
     public boolean hasGroup(User user, StaticGroup group) {
-        return getUsers().stream().anyMatch((u) -> u.getId().equals(user.getUuid()) && u.hasGroup(group));
+        return getUsers().stream().anyMatch((u) -> u.getId().equals(user.getId()) && u.hasGroup(group));
     }
 
     public boolean isAdmin(User user) {
@@ -291,7 +291,7 @@ public class App implements Serializable, Owneable {
 
     public AppUser getUser(User user) {
         for (AppUser u : users) {
-            if(u.getId().equals(user.getUuid())) return u;
+            if(u.getId().equals(user.getId())) return u;
         }
         return null;
     }
