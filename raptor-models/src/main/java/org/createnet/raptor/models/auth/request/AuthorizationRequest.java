@@ -27,7 +27,7 @@ public class AuthorizationRequest {
   public AuthorizationRequest() {}
   
   public Operation permission;
-  public String objectId;
+  public String subjectId;
   public EntityType type;
   public String userId;
 

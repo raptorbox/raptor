@@ -62,10 +62,9 @@ public class User implements Serializable, Owneable {
 
     static final long serialVersionUID = 1000000000000001L;
 
-    @JsonIgnore
     @Id
     @NotEmpty
-    protected String id = UUID.randomUUID().toString();
+    protected String id;
 
     @NotEmpty
     @Column(unique = true, nullable = false, length = 128)

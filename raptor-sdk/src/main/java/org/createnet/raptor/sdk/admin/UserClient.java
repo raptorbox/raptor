@@ -145,7 +145,7 @@ public class UserClient extends AbstractClient {
     public AuthorizationResponse isAuthorized(String userId, EntityType type, Operation operation, String objectId) {
 
         AuthorizationRequest auth = new AuthorizationRequest();
-        auth.objectId = objectId;
+        auth.subjectId = objectId;
         auth.permission = operation;
         auth.userId = userId;
         auth.type = type;
