@@ -69,3 +69,9 @@ services:
     command: nginx -g 'daemon off;'
     networks:
       - raptor_net
+
+
+  redis:
+    image: redis
+    networks:
+      - raptor_net
