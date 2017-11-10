@@ -32,6 +32,18 @@ services:
       options:
         max-size: 1024m
 
+  auth:
+    image: raptorbox/auth:v5
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - raptor_net
+    logging:
+      driver: json-file
+      options:
+        max-size: 1024m
+
   mariadb:
     image: mariadb:latest
     volumes:

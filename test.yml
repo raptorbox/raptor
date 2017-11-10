@@ -13,7 +13,7 @@ services:
 
   api:
     command: ["java","-jar","/raptor.jar", "--dev"]
-    build: ./raptor-api/raptor-standalone
+    build: ./raptor-api/raptor-standalone:v5
     ports:
       - 10090:80
     volumes:
@@ -25,7 +25,7 @@ services:
       - "raptor.local:172.16.238.1"
 
   broker:
-    image: raptorbox/broker:latest
+    image: raptorbox/broker:v5
     ports:
       - 1883:1883
       - 8880:8880
@@ -33,6 +33,23 @@ services:
       - mongo
     environment:
         DEBUG: r*
+    networks:
+      - raptor_test
+    logging:
+      driver: json-file
+      options:
+        max-size: 1024m
+
+  auth:
+    image: raptorbox/auth:v5
+    ports:
+      - 10094:10094
+    depends_on:
+      - mongo
+      - redis
+    environment:
+        DEBUG: r*
+        LOG_LEVEL=debug
     networks:
       - raptor_test
     logging:
