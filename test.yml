@@ -13,7 +13,7 @@ services:
 
   api:
     command: ["java","-jar","/raptor.jar", "--dev"]
-    build: ./raptor-api/raptor-standalone:v5
+    build: ./raptor-api/raptor-standalone
     ports:
       - 10090:80
     volumes:
@@ -39,6 +39,8 @@ services:
       driver: json-file
       options:
         max-size: 1024m
+    extra_hosts:
+      - "raptor.local:172.16.238.1"
 
   auth:
     image: raptorbox/auth:v5
@@ -49,13 +51,15 @@ services:
       - redis
     environment:
         DEBUG: r*
-        LOG_LEVEL=debug
+        LOG_LEVEL: debug
     networks:
       - raptor_test
     logging:
       driver: json-file
       options:
         max-size: 1024m
+    extra_hosts:
+      - "raptor.local:172.16.238.1"
 
   mariadb:
     image: mariadb:latest
