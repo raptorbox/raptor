@@ -7,7 +7,7 @@ networks:
 services:
 
   api:
-    image: raptorbox/standalone:v4
+    image: raptorbox/standalone:v5
     volumes:
       - ./config:/etc/raptor
       - ./data:/data
@@ -19,7 +19,7 @@ services:
         max-size: 1024m
 
   broker:
-    image: raptorbox/broker:latest
+    image: raptorbox/broker:v5
     ports:
       - 1883:1883
       - 8880:8880
