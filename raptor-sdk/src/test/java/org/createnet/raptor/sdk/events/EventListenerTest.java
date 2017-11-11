@@ -216,7 +216,7 @@ public class EventListenerTest {
             raptor.Stream().push(record);
         });
 
-        Utils.waitUntil(10, () -> done.get() != len);
+        Utils.waitUntil(15, () -> done.get() != len);
     }
 
     @Test
@@ -314,7 +314,7 @@ public class EventListenerTest {
         Action action = dev.action("switch");
         raptor.Action().invoke(action, "on");
 
-        Utils.waitUntil(10, () -> !done.get());
+        Utils.waitUntil(15, () -> !done.get());
     }
 
     @Test
@@ -352,7 +352,7 @@ public class EventListenerTest {
         Action action = dev.action("switch");
         raptor.Action().invoke(action, "on");
 
-        Utils.waitUntil(5, () -> !done.get());
+        Utils.waitUntil(15, () -> !done.get());
     }
 
     @Test

@@ -12,8 +12,7 @@ networks:
 services:
 
   api:
-    command: ["java","-jar","/raptor.jar", "--dev"]
-    build: ./raptor-api/raptor-standalone
+    image: raptorbox/standalone:v5
     ports:
       - 10090:80
     volumes:
@@ -33,6 +32,7 @@ services:
       - mongo
     environment:
         DEBUG: r*
+        LOG_LEVEL: debug
     networks:
       - raptor_test
     logging:
