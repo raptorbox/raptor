@@ -21,7 +21,6 @@
         <module>raptor-tree</module>
         <module>raptor-gateway</module>
         <module>raptor-standalone</module>
-        <module>raptor-app</module>
     </modules>
     
     <dependencyManagement>
