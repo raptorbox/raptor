@@ -36,6 +36,7 @@ import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.payload.ActionPayload;
 import org.createnet.raptor.models.payload.StreamPayload;
 import org.createnet.raptor.models.query.DeviceQuery;
+import org.createnet.raptor.sdk.PageResponse;
 import org.createnet.raptor.sdk.admin.DevicePermissionClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -194,7 +195,7 @@ public class InventoryClient extends AbstractClient {
      * @param query the query to match the device definitions
      * @return a list of Devices matching the query
      */
-    public List<Device> search(DeviceQuery query) {
+    public PageResponse<Device> search(DeviceQuery query) {
         if (query.getUserId() == null) {
             User user = getContainer().Auth().getUser();
             if (user == null) {
@@ -206,7 +207,7 @@ public class InventoryClient extends AbstractClient {
                 Routes.INVENTORY_SEARCH,
                 query.toJSON()
         );
-        List<Device> results = Device.getMapper().convertValue(json, new TypeReference<List<Device>>() {
+        PageResponse<Device> results = Device.getMapper().convertValue(json, new TypeReference<PageResponse<Device>>() {
         });
         return results;
     }
@@ -228,9 +229,9 @@ public class InventoryClient extends AbstractClient {
      *
      * @return the Device instance
      */
-    public List<Device> list() {
+    public PageResponse<Device> list() {
         JsonNode json = getClient().get(Routes.INVENTORY_LIST);
-        List<Device> list = Device.getMapper().convertValue(json, new TypeReference<List<Device>>() {
+        PageResponse<Device> list = Device.getMapper().convertValue(json, new TypeReference<PageResponse<Device>>() {
         });
         return list;
     }

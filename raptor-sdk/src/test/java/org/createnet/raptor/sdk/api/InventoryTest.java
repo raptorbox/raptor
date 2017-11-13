@@ -22,6 +22,7 @@ import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.query.DeviceQuery;
+import org.createnet.raptor.sdk.PageResponse;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -59,8 +60,8 @@ public class InventoryTest {
     public void list() {
         Raptor raptor = Utils.createNewAdminInstance();
         log.debug("List devices");
-        List<Device> list = raptor.Inventory().list();
-        log.debug("found {} devices", list.size());
+        PageResponse<Device> list = raptor.Inventory().list();
+        log.debug("found {} devices", list.getContent().size());
         assertNotNull(list);
     }
 
@@ -129,7 +130,7 @@ public class InventoryTest {
         Utils.waitFor(500);
         raptor.Inventory().update(dev);
 
-        List<Device> list = raptor.Inventory().list();
+        List<Device> list = raptor.Inventory().list().getContent();
 
         Device dev1 = list.stream().filter(d -> d.id().equals(dev.id())).findFirst().get();
         assertNotNull(dev1);
@@ -164,7 +165,7 @@ public class InventoryTest {
         DeviceQuery q = new DeviceQuery();
         q.name.contains("test-search");
         log.debug("Searching for {}", q.toJSON().toString());
-        List<Device> results = raptor.Inventory().search(q);
+        List<Device> results = raptor.Inventory().search(q).getContent();
 
         log.debug("Results found {}", results.stream().map(d -> d.name()).collect(Collectors.toList()));
         assertNotNull(results);
@@ -193,7 +194,7 @@ public class InventoryTest {
         q.properties.has("version", testVersion);
         log.debug("Searching for {}", q.toJSON().toString());
 
-        List<Device> results = raptor.Inventory().search(q);
+        List<Device> results = raptor.Inventory().search(q).getContent();
 
         log.debug("Results found {}", results.stream().map(d -> d.name()).collect(Collectors.toList()));
         assertNotNull(results);
@@ -219,7 +220,7 @@ public class InventoryTest {
 
         log.debug("Searching for {}", q.toJSON().toString());
 
-        List<Device> results = raptor.Inventory().search(q);
+        List<Device> results = raptor.Inventory().search(q).getContent();
 
         log.debug("Results found {}", results.stream().map(d -> d.name()).collect(Collectors.toList()));
         assertEquals(1, results.size());
@@ -247,7 +248,7 @@ public class InventoryTest {
 
         log.debug("Searching for {}", q.toJSON().toString());
 
-        List<Device> results = raptor.Inventory().search(q);
+        List<Device> results = raptor.Inventory().search(q).getContent();
 
         log.debug("Results found {}", results.stream().map(d -> d.name()).collect(Collectors.toList()));
         assertEquals(1, results.size());
@@ -277,7 +278,7 @@ public class InventoryTest {
 
         log.debug("Searching for {}", q.toJSON().toString());
 
-        List<Device> results = raptor.Inventory().search(q);
+        List<Device> results = raptor.Inventory().search(q).getContent();
 
         log.debug("Results found {}", results.stream().map(d -> d.name()).collect(Collectors.toList()));
 
@@ -294,7 +295,7 @@ public class InventoryTest {
 
         log.debug("Searching for {}", q1.toJSON().toString());
 
-        List<Device> newResults = raptor.Inventory().search(q1);
+        List<Device> newResults = raptor.Inventory().search(q1).getContent();
 
         log.debug("Results found {}", newResults.stream().map(d1 -> d1.toString()).collect(Collectors.toList()));
         assertEquals(1, newResults.size());

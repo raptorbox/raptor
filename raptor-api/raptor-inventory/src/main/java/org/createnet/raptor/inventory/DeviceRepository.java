@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.querydsl.QueryDslPredicateExecutor;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
@@ -31,7 +32,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 @Component
-public interface DeviceRepository extends MongoRepository<Device, String>, QueryDslPredicateExecutor<Device> {
+public interface DeviceRepository extends MongoRepository<Device, String>, QueryDslPredicateExecutor<Device>, PagingAndSortingRepository<Device, String> {
 
     public List<Device> findByUserId(String userId);
     public List<Device> findByNameAndUserId(String name, String userId);

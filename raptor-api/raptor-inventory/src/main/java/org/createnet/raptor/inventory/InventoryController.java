@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.inventory;
 
+import com.querydsl.core.BooleanBuilder;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -48,8 +49,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.createnet.raptor.models.acl.Operation;
-import org.createnet.raptor.models.exception.RequestException;
+import org.createnet.raptor.models.objects.QDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,36 +78,31 @@ public class InventoryController {
     @Autowired
     private ApiClientService raptor;
 
-    /**
-     * Register device ACL on Auth API
-     *
-     * @param op
-     * @param device
-     * @return
-     */
-    protected boolean syncACL(Operation op, Device device) {
-        try {
-            raptor.Admin().User().sync(op, device);
-        } catch (RequestException ex) {
-            log.error("Failed to sync ACL", ex.getMessage());
-            return false;
-        }
-        return true;
-    }
 
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(value = "Return the user devices", notes = "", response = Device.class, nickname = "getDevices")
     @PreAuthorize("@raptorSecurity.list(principal, 'device')")
-    public ResponseEntity<?> getDevices(@AuthenticationPrincipal User currentUser) {
+    
+    public ResponseEntity<?> getDevices(
+            @AuthenticationPrincipal User currentUser,
+            Pageable pageable
+    ) {
 
-        String deviceId = currentUser.getId();
+        String userId = currentUser.getId();
         if (currentUser.isAdmin()) {
-            deviceId = null;
+            userId = null;
         }
 
-        List<Device> devices = deviceService.list(deviceId);
+        QDevice device = new QDevice("device");
+        BooleanBuilder predicate = new BooleanBuilder();
 
-        return ResponseEntity.ok(devices);
+        if (userId != null) {
+            predicate.and(device.userId.eq(userId));
+        }
+        
+        Page<Device> result = deviceService.search(predicate, pageable);
+        
+        return ResponseEntity.ok(result);
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -143,12 +138,6 @@ public class InventoryController {
         }
 
         deviceService.save(device);
-
-        if (!syncACL(Operation.create, device)) {
-            log.debug("Dropping device record from database..");
-            deviceService.delete(device);
-            return JsonErrorResponse.internalError("Failed to sync acl");
-        }
 
         eventPublisher.create(device);
 
@@ -219,10 +208,6 @@ public class InventoryController {
 
         deviceService.save(device);
 
-        if (!syncACL(Operation.update, device)) {
-            return JsonErrorResponse.internalError("Failed to sync acl");
-        }
-
         eventPublisher.update(device);
 
         log.info("Updated device {} for user {}", device.id(), device.userId());
@@ -244,10 +229,6 @@ public class InventoryController {
 
         eventPublisher.delete(device);
 
-        if (!syncACL(Operation.delete, device)) {
-            return JsonErrorResponse.internalError("Failed to sync acl");
-        }
-
         return ResponseEntity.accepted().build();
     }
 
@@ -255,8 +236,11 @@ public class InventoryController {
     @ApiOperation(value = "Search for device instances", notes = "", response = Device.class, nickname = "searchDevices")
     @PreAuthorize("@raptorSecurity.can(principal, 'device', 'read')")
     // shared access
-    public ResponseEntity<?> searchDevices(@AuthenticationPrincipal User currentUser,
-            @RequestParam MultiValueMap<String, String> parameters, @RequestBody DeviceQuery query) {
+    public ResponseEntity<?> searchDevices(
+            @AuthenticationPrincipal User currentUser,
+            @RequestParam MultiValueMap<String, String> parameters, 
+            @RequestBody DeviceQuery query
+    ) {
 
         if (query.isEmpty()) {
             return JsonErrorResponse.badRequest();
@@ -272,7 +256,7 @@ public class InventoryController {
 
         Page<Device> pagedList = deviceService.search(predicate, paging);
 
-        return ResponseEntity.ok(pagedList.getContent());
+        return ResponseEntity.ok(pagedList);
     }
 
 }
