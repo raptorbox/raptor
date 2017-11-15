@@ -75,7 +75,9 @@ public class Device extends DeviceContainer implements Owneable {
 
     @Indexed
     private Long updatedAt = createdAt;
-
+    
+    private String domain;
+        
     @Indexed
     final private Map<String, Object> properties = new HashMap();
 
@@ -143,6 +145,7 @@ public class Device extends DeviceContainer implements Owneable {
 
         this.name(raw.name());
         this.description(raw.description());
+        this.domain(raw.domain());
 
         this.settings().eventsEnabled = raw.settings().eventsEnabled;
         this.settings().storeData = raw.settings().storeData;
@@ -229,6 +232,7 @@ public class Device extends DeviceContainer implements Owneable {
 
         id = device.id();
         userId = device.userId();
+        domain = device.domain();
 
         name = device.name();
         description = device.description();
@@ -340,6 +344,11 @@ public class Device extends DeviceContainer implements Owneable {
     public String description() {
         return description;
     }
+    
+    @JsonProperty
+    public String domain() {
+        return domain;
+    }
 
     @JsonIgnore
     public Instant createdAt() {
@@ -433,6 +442,11 @@ public class Device extends DeviceContainer implements Owneable {
 
     public Device name(String name) {
         this.name = name;
+        return this;
+    }
+    
+    public Device domain(String domain) {
+        this.domain = domain;
         return this;
     }
 

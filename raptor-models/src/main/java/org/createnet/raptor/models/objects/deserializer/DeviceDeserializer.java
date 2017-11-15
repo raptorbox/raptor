@@ -62,6 +62,10 @@ public class DeviceDeserializer extends JsonDeserializer<Device> {
         if (tree.has("description")) {
             device.description(getText("description", tree));
         }
+        
+        if (tree.has("domain")) {
+            device.domain(getText("domain", tree));
+        }
 
         if (tree.has("properties") && tree.get("properties").size() > 0) {
             device.properties().putAll(Device.getMapper().convertValue(tree.get("properties"), new TypeReference<Map<String, Object>>() {}));

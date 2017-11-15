@@ -86,6 +86,9 @@ public class TreeNode extends RaptorContainer implements Owneable {
 
     @Indexed
     protected String name = "";
+    
+    @Indexed
+    protected String domain;
 
     @Indexed
     protected EntityType type;
@@ -177,6 +180,10 @@ public class TreeNode extends RaptorContainer implements Owneable {
         return order;
     }
 
+    public String getDomain() {
+        return domain;
+    }
+    
     public TreeNode id(String id) {
         this.id = id;
         return this;
@@ -184,6 +191,11 @@ public class TreeNode extends RaptorContainer implements Owneable {
 
     public TreeNode name(String name) {
         this.name = name;
+        return this;
+    }
+    
+    public TreeNode domain(String domain) {
+        this.domain = domain;
         return this;
     }
 
