@@ -89,12 +89,6 @@ public class AppQueryBuilder {
             predicate.and(users);
         }
 
-        //devices (id)
-        Predicate devices = buildListQuery(query.devices, app.devices);
-        if (devices != null) {
-            predicate.and(devices);
-        }
-
         return predicate;
     }
 
@@ -153,7 +147,7 @@ public class AppQueryBuilder {
         BooleanBuilder predicate = new BooleanBuilder();
 
         if (query.getIn() != null) {
-            predicate.and(list.any().uuid.in(query.getIn()));
+            predicate.and(list.any().id.in(query.getIn()));
         }
 
         return predicate;

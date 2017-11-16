@@ -27,33 +27,33 @@ import org.createnet.raptor.models.auth.Role;
  *
  * @author Luca Capra <luca.capra@gmail.com>
  */
-public class AppGroup {
+public class AppRole {
 
-    public static AppGroup from(Role group) {
-        AppGroup g = new AppGroup(group);
+    public static AppRole from(Role group) {
+        AppRole g = new AppRole(group);
         return g;
     }
 
     protected String name;
     protected final List<String> permissions = new ArrayList();
 
-    public AppGroup() {
+    public AppRole() {
     }
 
-    public AppGroup(String name) {
+    public AppRole(String name) {
         this.name = name;
     }
 
-    public AppGroup(StaticGroup group) {
+    public AppRole(StaticGroup group) {
         this.name = group.name();
     }
 
-    public AppGroup(String name, List<String> permissions) {
+    public AppRole(String name, List<String> permissions) {
         this(name);
         this.permissions.addAll(permissions);
     }
 
-    public AppGroup(Role group) {
+    public AppRole(Role group) {
         this.name = group.getName();
         this.permissions.addAll(group.getPermissions().stream().map((p) -> p.getName()).collect(Collectors.toList()));
     }
@@ -123,7 +123,7 @@ public class AppGroup {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final AppGroup other = (AppGroup) obj;
+        final AppRole other = (AppRole) obj;
         if (!Objects.equals(this.name, other.name)) {
             return false;
         }
