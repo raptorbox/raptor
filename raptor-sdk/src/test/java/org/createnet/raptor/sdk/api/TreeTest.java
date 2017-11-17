@@ -25,9 +25,11 @@ import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.models.query.TreeQuery;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.models.tree.TreeNode;
+import org.createnet.raptor.sdk.PageResponse;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -84,6 +86,28 @@ public class TreeTest {
         assertNotNull(list);
         assertTrue(2 == list.size());
 
+    }
+    
+    @Test
+    public void search() {
+
+        Raptor raptor = Utils.createNewAdminInstance();
+
+        log.debug("List trees");
+        
+        TreeNode node1 = TreeNode.create("Root1");
+        TreeNode node2 = TreeNode.create("Root2");
+        raptor.Tree().create(node1);
+        raptor.Tree().create(node2);
+        
+        TreeQuery query = new TreeQuery();
+        query.id.in(node1.getId());
+        
+        PageResponse<TreeNode> result = raptor.Tree().search(query);
+        
+        assertEquals(1, result.getContent().size());
+        
+        
     }
 
     @Test

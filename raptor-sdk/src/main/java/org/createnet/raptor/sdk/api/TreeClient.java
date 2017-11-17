@@ -27,7 +27,9 @@ import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.payload.StreamPayload;
 import org.createnet.raptor.models.payload.TreeNodePayload;
+import org.createnet.raptor.models.query.TreeQuery;
 import org.createnet.raptor.models.tree.TreeNode;
+import org.createnet.raptor.sdk.PageResponse;
 import org.createnet.raptor.sdk.events.callback.DataCallback;
 import org.createnet.raptor.sdk.events.callback.DeviceCallback;
 import org.createnet.raptor.sdk.events.callback.TreeNodeCallback;
@@ -67,14 +69,14 @@ public class TreeClient extends AbstractClient {
      */
     public void subscribe(TreeNode node, DataCallback ev) {
         getEmitter().subscribe(node, (payload) -> {
-            if(payload instanceof StreamPayload) {
+            if (payload instanceof StreamPayload) {
                 StreamPayload p = (StreamPayload) payload;
                 ev.callback(p.device.stream(p.streamId), p.record);
             }
         });
     }
 
-   /**
+    /**
      * Subscribe only to device related events like update or delete
      *
      * @param node
@@ -89,8 +91,8 @@ public class TreeClient extends AbstractClient {
                     break;
             }
         });
-    }    
-    
+    }
+
     /**
      * Return the current tree structure for an user
      *
@@ -106,11 +108,31 @@ public class TreeClient extends AbstractClient {
     /**
      * Return the whole tree structure for a node
      *
+     * @param nodeId
+     * @return
+     */
+    public TreeNode tree(String nodeId) {
+        return read(nodeId);
+    }
+
+    /**
+     * Return the whole tree structure for a node
+     *
      * @param node
      * @return
      */
     public TreeNode tree(TreeNode node) {
-        return tree(node.getId());
+        return read(node.getId());
+    }
+
+    /**
+     * Return the whole tree structure for a node
+     *
+     * @param node
+     * @return
+     */
+    public TreeNode read(TreeNode node) {
+        return read(node.getId());
     }
 
     /**
@@ -119,10 +141,23 @@ public class TreeClient extends AbstractClient {
      * @param nodeId
      * @return
      */
-    public TreeNode tree(String nodeId) {
+    public TreeNode read(String nodeId) {
         JsonNode json = getClient().get(String.format(Routes.TREE_GET, nodeId));
         TreeNode tree = Device.getMapper().convertValue(json, TreeNode.class);
         return tree;
+    }
+
+    /**
+     * Search for tree nodes
+     *
+     * @param query
+     * @return
+     */
+    public PageResponse<TreeNode> search(TreeQuery query) {
+        JsonNode json = getClient().post(Routes.TREE_SEARCH, query.toJSON());
+        PageResponse<TreeNode> result = getMapper().convertValue(json, new TypeReference<PageResponse<TreeNode>>() {
+        });
+        return result;
     }
 
     /**
@@ -173,8 +208,8 @@ public class TreeClient extends AbstractClient {
      */
     public List<TreeNode> add(Device... devices) {
         List<TreeNode> nodes = Arrays.asList(devices).stream()
-                        .map((d) -> TreeNode.create(d))
-                        .collect(Collectors.toList());
+                .map((d) -> TreeNode.create(d))
+                .collect(Collectors.toList());
         add(null, nodes);
         return nodes;
     }

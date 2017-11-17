@@ -16,10 +16,13 @@
 package org.createnet.raptor.tree;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 import java.util.List;
 import org.createnet.raptor.models.tree.QTreeNode;
 import org.createnet.raptor.models.tree.TreeNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -288,5 +291,9 @@ public class TreeService {
 
         repository.delete(node);
     }
-
+    
+    public Page<TreeNode> search(Predicate predicate, Pageable pageable) {
+        return repository.findAll(predicate, pageable);
+    }
+    
 }

@@ -26,41 +26,42 @@ import org.createnet.raptor.models.query.deserializer.DeviceQueryDeserializer;
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonDeserialize(using = DeviceQueryDeserializer.class)
-public class DeviceQuery extends BaseQuery {
+public class TreeQuery extends BaseQuery {
 
     public final TextQuery id = new TextQuery();
     public final TextQuery name = new TextQuery();
     public final TextQuery domain = new TextQuery();
     public final TextQuery description = new TextQuery();
+    public final TextQuery parentId = new TextQuery();
     public final MapQuery properties = new MapQuery();
     
-    public DeviceQuery() {
+    public TreeQuery() {
     }
 
-    public DeviceQuery(String userId) {
+    public TreeQuery(String userId) {
         super.userId = userId;
     }
     
-    public static DeviceQuery queryByDeviceId(String... ids) {
-        DeviceQuery q = new DeviceQuery();
+    public static TreeQuery queryByDeviceId(String... ids) {
+        TreeQuery q = new TreeQuery();
         q.id.in(ids);
         return q;
     }
     
-    public static DeviceQuery queryByDomainId(String... ids) {
-        DeviceQuery q = new DeviceQuery();
+    public static TreeQuery queryByDomainId(String... ids) {
+        TreeQuery q = new TreeQuery();
         q.domain.in(ids);
         return q;
     }
     
-    public static DeviceQuery queryByDeviceId(List<String> deviceId) {
-        DeviceQuery q = new DeviceQuery();
+    public static TreeQuery queryByDeviceId(List<String> deviceId) {
+        TreeQuery q = new TreeQuery();
         q.id.in(deviceId.toArray(new String[deviceId.size()]));
         return q;
     }
     
-    public static DeviceQuery queryByDomainId(List<String> ids) {
-        DeviceQuery q = new DeviceQuery();
+    public static TreeQuery queryByDomainId(List<String> ids) {
+        TreeQuery q = new TreeQuery();
         q.domain.in(ids.toArray(new String[ids.size()]));
         return q;
     }

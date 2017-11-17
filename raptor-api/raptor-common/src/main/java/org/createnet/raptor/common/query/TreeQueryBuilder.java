@@ -21,10 +21,10 @@ import com.querydsl.core.types.dsl.MapPath;
 import com.querydsl.core.types.dsl.SimplePath;
 import com.querydsl.core.types.dsl.StringPath;
 import java.util.Iterator;
-import org.createnet.raptor.models.objects.QDevice;
-import org.createnet.raptor.models.query.DeviceQuery;
 import org.createnet.raptor.models.query.MapQuery;
 import org.createnet.raptor.models.query.TextQuery;
+import org.createnet.raptor.models.query.TreeQuery;
+import org.createnet.raptor.models.tree.QTreeNode;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -33,11 +33,11 @@ import org.springframework.data.domain.Sort;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-public class DeviceQueryBuilder {
+public class TreeQueryBuilder {
 
-    private final DeviceQuery query;
+    private final TreeQuery query;
 
-    public DeviceQueryBuilder(DeviceQuery query) {
+    public TreeQueryBuilder(TreeQuery query) {
         this.query = query;
     }
 
@@ -57,40 +57,40 @@ public class DeviceQueryBuilder {
 
     public Predicate getPredicate() {
 
-        QDevice device = new QDevice("device");
+        QTreeNode treeNode = new QTreeNode("treenode");
 
         BooleanBuilder predicate = new BooleanBuilder();
 
         if (query.getUserId() != null) {
-            predicate.and(device.userId.eq(query.getUserId()));
+            predicate.and(treeNode.userId.eq(query.getUserId()));
         }
 
         // id
-        Predicate pid = buildTextQuery(query.id, device.id);
+        Predicate pid = buildTextQuery(query.id, treeNode.id);
         if (pid != null) {
             predicate.and(pid);
         }
 
         // name
-        Predicate pname = buildTextQuery(query.name, device.name);
+        Predicate pname = buildTextQuery(query.name, treeNode.name);
         if (pname != null) {
             predicate.and(pname);
         }
 
-        // description
-        Predicate pdesc = buildTextQuery(query.description, device.description);
-        if (pdesc != null) {
-            predicate.and(pdesc);
-        }
-
         // domain
-        Predicate pdomain = buildTextQuery(query.domain, device.domain);
+        Predicate pdomain = buildTextQuery(query.domain, treeNode.domain);
         if (pdomain != null) {
             predicate.and(pdomain);
         }
+        
+        // type
+        Predicate pparentId = buildTextQuery(query.parentId, treeNode.parentId);
+        if (pparentId != null) {
+            predicate.and(pparentId);
+        }
 
         // properties
-        Predicate pprops = buildMapQuery(query.properties, device.properties);
+        Predicate pprops = buildMapQuery(query.properties, treeNode.properties);
         if (pprops != null) {
             predicate.and(pprops);
         }
