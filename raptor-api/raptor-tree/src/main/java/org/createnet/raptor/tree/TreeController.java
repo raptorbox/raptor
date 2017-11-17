@@ -166,7 +166,7 @@ public class TreeController {
 
     @RequestMapping(
             method = RequestMethod.PUT,
-            value = {"/{parentId}", "/"}
+            value = {"/{parentId}/children"}
     )
     @ApiOperation(
             value = "Add items to the tree node",
@@ -176,17 +176,13 @@ public class TreeController {
     @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'create', #parentId)")
     public ResponseEntity<?> add(
             @AuthenticationPrincipal User currentUser,
-            @PathVariable("parentId") Optional<String> optionalParentId,
+            @PathVariable("parentId") String parentId,
             @RequestBody List<TreeNode> nodes
     ) {
 
-        TreeNode parent = new TreeNode();
-        if (optionalParentId.isPresent()) {
-            TreeNode storedParent = treeService.get(optionalParentId.get());
-            if (storedParent == null) {
-                return JsonErrorResponse.notFound("Node not found");
-            }
-            parent.merge(storedParent);
+        TreeNode parent = treeService.get(parentId);
+        if (parent == null) {
+            return JsonErrorResponse.notFound("Node not found");
         }
 
         nodes.stream().forEach((raw) -> {
@@ -211,6 +207,36 @@ public class TreeController {
         });
 
         return ResponseEntity.accepted().build();
+    }
+
+    @RequestMapping(
+            method = RequestMethod.PUT,
+            value = {"/{id}"}
+    )
+    @ApiOperation(
+            value = "Update a tree node",
+            notes = "",
+            nickname = "update"
+    )
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'update', #id)")
+    public ResponseEntity<?> update(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable("id") String id,
+            @RequestBody TreeNode raw
+    ) {
+        
+        TreeNode node = treeService.get(id);
+        if (node == null) {
+            return JsonErrorResponse.notFound("Node not found");
+        }
+
+        raw.id(id);
+        node.merge(raw);
+        
+        treeService.save(node);
+        log.debug("Updated node {}", node.getId());
+
+        return ResponseEntity.ok(node);
     }
 
     @RequestMapping(
@@ -239,14 +265,12 @@ public class TreeController {
 
         return ResponseEntity.accepted().build();
     }
-
     
     @RequestMapping(method = RequestMethod.POST, value = "/search")
     @ApiOperation(value = "Search for tree nodes instances", notes = "", response = Page.class, nickname = "searchTreeNodes")
     @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'read')")
     public ResponseEntity<?> searchTreeNodes(
             @AuthenticationPrincipal User currentUser,
-            @RequestParam MultiValueMap<String, String> parameters, 
             @RequestBody TreeQuery query
     ) {
 
