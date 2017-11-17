@@ -119,7 +119,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public AuthorizationResponse isAuthorized(Device device, User user, Operation operation) {
-        return isAuthorized(getContainer().Auth().getUser().getId(), EntityType.device, operation, device.id());
+        return isAuthorized(getContainer().Auth().getUser().getId(), EntityType.device, operation, device.id(), device.getDomain());
     }
 
     /**
@@ -130,7 +130,29 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public AuthorizationResponse isAuthorized(Device device, Operation operation) {
-        return isAuthorized(getContainer().Auth().getUser().getId(), EntityType.device, operation, device.id());
+        return isAuthorized(getContainer().Auth().getUser().getId(), EntityType.device, operation, device.id(), device.getDomain());
+    }
+
+    /**
+     * Check if an user is authorized to operate on a device
+     *
+     * @param userId
+     * @param type
+     * @param operation
+     * @param objectId
+     * @param domain
+     * @return
+     */
+    public AuthorizationResponse isAuthorized(String userId, EntityType type, Operation operation, String objectId, String domain) {
+
+        AuthorizationRequest auth = new AuthorizationRequest();
+        auth.subjectId = objectId;
+        auth.permission = operation;
+        auth.userId = userId;
+        auth.type = type;
+        auth.domain = domain;
+
+        return can(auth);
     }
 
     /**
@@ -143,13 +165,16 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public AuthorizationResponse isAuthorized(String userId, EntityType type, Operation operation, String objectId) {
-
-        AuthorizationRequest auth = new AuthorizationRequest();
-        auth.subjectId = objectId;
-        auth.permission = operation;
-        auth.userId = userId;
-        auth.type = type;
-
+        return isAuthorized(userId, type, operation, objectId, null);
+    }
+    
+    /**
+     * Check if an user is authorized to operate on a device
+     *
+     * @param auth
+     * @return
+     */
+    public AuthorizationResponse can(AuthorizationRequest auth) {
         JsonNode node = getClient().post(Routes.PERMISSION_CHECK, toJsonNode(auth), RequestOptions.retriable());
         return getMapper().convertValue(node, AuthorizationResponse.class);
     }

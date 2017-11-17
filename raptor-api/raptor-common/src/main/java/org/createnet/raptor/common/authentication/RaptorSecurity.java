@@ -16,6 +16,7 @@
 package org.createnet.raptor.common.authentication;
 
 import org.createnet.raptor.common.client.InternalApiClientService;
+import org.createnet.raptor.models.acl.AclDomain;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.auth.Permission;
@@ -66,7 +67,8 @@ public class RaptorSecurity {
      */
     public boolean can(User u, EntityType entity, Operation operation, Object obj) {
         String objectId = obj == null ? null : (String)obj;
-        AuthorizationResponse r = api.Admin().User().isAuthorized(u.getId(), entity, operation, objectId);
+        String domain = (obj != null && obj instanceof AclDomain) ? ((AclDomain)obj).getDomain() : null;
+        AuthorizationResponse r = api.Admin().User().isAuthorized(u.getId(), entity, operation, objectId, domain);
         return r.result;
     }
 

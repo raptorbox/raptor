@@ -13,23 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.createnet.raptor.models.auth.request;
-
-import org.createnet.raptor.models.acl.EntityType;
-import org.createnet.raptor.models.acl.Operation;
+package org.createnet.raptor.models.acl;
 
 /**
  *
- * @author Luca Capra <lcapra@fbk.eu>
+ * @author Luca Capra <luca.capra@gmail.com>
  */
-public class AuthorizationRequest {
-  
-  public AuthorizationRequest() {}
-  
-  public Operation permission;
-  public String subjectId;
-  public EntityType type;
-  public String userId;
-  public String domain;
-
+public interface AclDomain {
+    public String getDomain();
 }
