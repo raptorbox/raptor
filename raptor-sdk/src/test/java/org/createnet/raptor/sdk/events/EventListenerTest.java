@@ -287,7 +287,7 @@ public class EventListenerTest {
 
         pushData(dev);
 
-        Utils.waitUntil(5, () -> done.get() > 0);
+        Utils.waitUntil(10, () -> done.get() > 0);
     }
 
     @Test

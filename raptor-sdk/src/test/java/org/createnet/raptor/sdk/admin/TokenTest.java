@@ -167,8 +167,8 @@ public class TokenTest {
 
         Raptor raptor = Utils.createNewAdminInstance();
 
-        String secret = "secret_" + System.currentTimeMillis() * Math.random();
-        String name = "token_" + System.currentTimeMillis() * Math.random();
+        String secret = "foobar1";
+        String name = Utils.rndName("token");
 
         Token newToken = raptor.Admin().Token().create(new Token(name, secret));
         String token = newToken.getToken();
