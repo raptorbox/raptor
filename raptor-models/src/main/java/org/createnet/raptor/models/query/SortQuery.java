@@ -31,7 +31,7 @@ public class SortQuery {
     final List<String> fields = new ArrayList();
 
     public SortQuery() {
-        this.fields.add("createdAt");
+//        this.fields.add("createdAt");
     }
     
     public SortQuery addField(String... fields) {

@@ -25,7 +25,10 @@ import org.createnet.raptor.models.query.BoolQuery;
 import org.createnet.raptor.models.query.DataQuery;
 import org.createnet.raptor.models.query.IQuery;
 import org.createnet.raptor.models.query.NumberQuery;
+import org.createnet.raptor.models.query.SortQuery;
+import org.createnet.raptor.models.query.SortQuery.Direction;
 import org.createnet.raptor.models.query.TextQuery;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.geo.Metrics;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
@@ -49,6 +52,28 @@ public class DataQueryDeserializer extends AbstractQueryDeserializer<DataQuery> 
 
         if (node.has("userId")) {
             query.userId(node.get("userId").asText());
+        }
+        
+        if(node.has("size")) {
+        	JsonNode size = node.get("size");
+        	query.limit(size.asInt());
+        }
+        if(node.has("page")) {
+        	JsonNode page = node.get("page");
+        	query.offset(page.asInt());
+        }
+        if(node.has("sort")) {
+        	JsonNode sortBy = node.get("sort");
+        	String sortByText = sortBy.asText();
+        	String[] sort = null;
+        	if(sortByText.contains(",")) {
+        		sort = sortBy.asText().split(",");
+        	} else {
+        		sort[0] = sortByText;
+        		sort[1] = "desc";
+        	}
+        	query.sortBy.direction((sort[1].equalsIgnoreCase("desc")) ? Direction.DESC : Direction.ASC);
+        	query.sortBy.addField(sort[0]);
         }
 
         if (node.has("channels")) {

@@ -186,6 +186,10 @@ public class Stream extends StreamContainer {
             dynamic = json.get("dynamic").asBoolean(false);
         }
         
+        if (!dynamic && json.size() == 0) {
+            dynamic = true;
+        }
+        
         if (!dynamic && !json.has("channels")) {
                 parseChannels(json);            
                 return;
