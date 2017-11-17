@@ -35,7 +35,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import org.createnet.raptor.models.app.AppGroup;
+import org.createnet.raptor.models.app.AppRole;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -71,7 +71,7 @@ public class Role implements Serializable {
         this.name = name;
     }
     
-    public Role(AppGroup ag, String domain) {
+    public Role(AppRole ag, String domain) {
         this.name = ag.getName();
         this.domain = domain;
         this.permissions.clear();

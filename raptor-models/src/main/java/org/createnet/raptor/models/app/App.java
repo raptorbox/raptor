@@ -20,14 +20,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.createnet.raptor.models.acl.Owneable;
 import org.createnet.raptor.models.auth.Permission;
-import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.User;
-import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -48,8 +45,7 @@ public class App implements Serializable, Owneable {
     protected String name;
     protected String description;
 
-    final protected List<AppGroup> groups = new ArrayList();
-    final protected List<String> devices = new ArrayList();
+    final protected List<AppRole> roles = new ArrayList();
     final protected List<AppUser> users = new ArrayList();
 
     public App() {
@@ -79,14 +75,11 @@ public class App implements Serializable, Owneable {
         if (raw.getUserId() != null && !raw.getUserId().isEmpty()) {
             setUserId(raw.getUserId());
         }
-        if (raw.getGroups() != null && !raw.getGroups().isEmpty()) {
-            setGroups(raw.getGroups());
+        if (raw.getRoles() != null && !raw.getRoles().isEmpty()) {
+            setRoles(raw.getRoles());
         }
         if (raw.getUsers() != null && !raw.getUsers().isEmpty()) {
             setUsers(raw.getUsers());
-        }
-        if (raw.getDevices() != null && !raw.getDevices().isEmpty()) {
-            setDevices(raw.getDevices());
         }
 
     }
@@ -106,9 +99,9 @@ public class App implements Serializable, Owneable {
         }
 
         getUsers().forEach((u) -> {
-            u.getGroups().forEach((groupname) -> {
-                if (!getGroups().contains(new AppGroup(groupname))) {
-                    throw new RaptorComponent.ValidationException(String.format("User `%s` has an unknown app group `%s`. Add to the app list to allow it", u.getId(), groupname));
+            u.getRoles().forEach((rolename) -> {
+                if (!getRoles().contains(new AppRole(rolename))) {
+                    throw new RaptorComponent.ValidationException(String.format("User `%s` has an unknown app role `%s`. Add to the app list to allow it", u.getId(), rolename));
                 }
             });
 
@@ -156,111 +149,67 @@ public class App implements Serializable, Owneable {
         this.users.addAll(users);
     }
 
-    public List<String> getDevices() {
-        return devices;
+    public List<AppRole> getRoles() {
+        return roles;
     }
 
-    public void setDevices(List<String> devices) {
-        this.devices.clear();
-        this.devices.addAll(devices);
-    }
-
-    public List<AppGroup> getGroups() {
-        return groups;
-    }
-
-    public void setGroups(List<AppGroup> groups) {
-        this.groups.clear();
-        this.groups.addAll(groups);
+    public void setRoles(List<AppRole> roles) {
+        this.roles.clear();
+        this.roles.addAll(roles);
     }
 
     public void setOwner(User user) {
         this.userId = user.getId();
     }
 
-    public void addUser(User user, String group) {
-        addUser(user, Arrays.asList(group));
+    public void addUser(User user, String role) {
+        addUser(user, Arrays.asList(role));
     }
     
-    public void addUser(User user, List<String> groups) {
+    public void addUser(User user, List<String> roles) {
 
         AppUser appUser = new AppUser();
         appUser.setId(user.getId());
-        appUser.addGroups(groups);
+        appUser.addRoles(roles);
 
         this.getUsers().add(appUser);
     }
-
-    public void addGroups(List<AppGroup> groups) {
-        groups.forEach((r) -> {
-            if (getGroups().contains(r)) {
-                getGroups().remove(r);
+    
+    public void addRoles(List<AppRole> roles) {
+        roles.forEach((r) -> {
+            if (getRoles().contains(r)) {
+                getRoles().remove(r);
             }
-            getGroups().add(r);
+            getRoles().add(r);
         });
     }
 
-    public void addGroup(AppGroup r) {
-        addGroups(Arrays.asList(r));
+    public void addRole(AppRole r) {
+        addRoles(Arrays.asList(r));
     }
 
-    public void addGroup(String r, List<String> permissions) {
-        addGroup(new AppGroup(name, permissions));
+    public void addRole(String r, List<String> permissions) {
+        addRole(new AppRole(name, permissions));
     }
 
-    public void removeGroup(String group) {
-        getGroups().forEach((r) -> {
-            if (r.getName().equals(group)) {
-                getGroups().remove(r);
-            }
-        });
-    }
-
-    public void addDevices(List<Device> devices) {
-        devices.forEach((d) -> {
-            if (!getDevices().contains(d.getId())) {
-                getDevices().add(d.getId());
+    public void removeRole(String role) {
+        getRoles().forEach((r) -> {
+            if (r.getName().equals(role)) {
+                getRoles().remove(r);
             }
         });
     }
 
-    public void addDevice(Device d) {
-        addDevices(Arrays.asList(d));
-    }
-
-    public void addDevice(String d) {
-        addDevice(new Device(d));
-    }
-
-    public void removeDevice(String d) {
-        if (getDevices().contains(d)) {
-            getDevices().remove(d);
-        }
-    }
-
-    public AppGroup getGroup(StaticGroup searchedGroup) {
-        Optional<AppGroup> group = getGroups().stream().filter((r) -> {
-            return r.getName().equals(searchedGroup.name());
-        }).findFirst();
-        return group.isPresent() ? group.get() : null;
-    }
-
-    @JsonIgnore
-    public AppGroup getAdminGroup() {
-        return getGroup(StaticGroup.admin);
-    }
-
-    @JsonIgnore
-    public Object getUserGroup() {
-        return getGroup(StaticGroup.user);
-    }
-
-    public boolean hasGroup(User user, StaticGroup group) {
-        return getUsers().stream().anyMatch((u) -> u.getId().equals(user.getId()) && u.hasGroup(group));
+    public boolean hasRole(User user, String role) {
+        return getUsers().stream().anyMatch((u) -> u.getId().equals(user.getId()) && u.hasRole(role));
     }
 
     public boolean isAdmin(User user) {
-        return hasGroup(user, StaticGroup.admin);
+        return hasRole(user, "admin");
+    }
+    
+    public boolean isService(User user) {
+        return hasRole(user, "service");
     }
 
     @JsonIgnore
@@ -270,7 +219,7 @@ public class App implements Serializable, Owneable {
     }
 
     public boolean hasPermission(String p) {
-        return getGroups()
+        return getRoles()
                 .stream()
                 .anyMatch((g) -> g.getPermissions().contains(p));
     }
@@ -279,8 +228,8 @@ public class App implements Serializable, Owneable {
         return hasPermission(p.toString());
     }
     
-    public List<AppGroup> getGroupsByPermission(String p) {
-        return getGroups()
+    public List<AppRole> getRolesByPermission(String p) {
+        return getRoles()
                 .stream()
                 .filter((g) -> {
                     return g.getPermissions().contains(p);

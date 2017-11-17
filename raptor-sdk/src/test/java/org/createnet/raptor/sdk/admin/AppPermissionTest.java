@@ -68,15 +68,15 @@ public class AppPermissionTest {
         Raptor r1 = Utils.createNewUserInstance();
         app.addUser(r1.Auth().getUser(), DefaultGroups.user.getName());
 
-        Device dev = Utils.createDevice(r, new Device().name(Utils.rndName(EntityType.device)));
-
-        app.addDevice(dev);
+        r.App().create(app);        
         
-        r.App().create(app);
+        Device dev = Utils.createDevice(r, new Device()
+                .name(Utils.rndName(EntityType.device))
+                .domain(app.getId())
+        );
         
         assertEquals(r.Auth().getUser().getId(), app.getUserId());
-        assertEquals(2, app.getGroups().size());
-        assertEquals(1, app.getDevices().size());
+        assertEquals(2, app.getRoles().size());
         assertEquals(r.Auth().getUser().getId(), app.getOwnerId());
         
         log.debug("Created app {}", app.getName());
@@ -98,13 +98,11 @@ public class AppPermissionTest {
         
         Raptor r1 = Utils.createNewUserInstance();
         
-        app.addUser(r1.Auth().getUser(), Arrays.asList(StaticGroup.user.name()));
+        app.addUser(r1.Auth().getUser(), Arrays.asList("user"));
         r.App().update(app);
         
         //2 user +1 admin (owner)
         assertEquals(3, app.getUsers().size());
-        
-        Device dev = r1.Inventory().load(app.getDevices().get(0));
         
         log.debug("Created device {} by app user {}", app.getName(), r1.Auth().getUser().getUsername());
         

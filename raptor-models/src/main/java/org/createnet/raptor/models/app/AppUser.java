@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.User;
 
 /**
@@ -28,14 +27,15 @@ import org.createnet.raptor.models.auth.User;
  */
 public class AppUser {
 
-    protected String uuid;
-    protected List<String> groups = new ArrayList();
+    protected String id;
+    protected boolean enabled;
+    protected List<String> roles = new ArrayList();
 
     public AppUser() {
     }
     
     public AppUser(String userId) {
-        this.uuid = userId;
+        this.id = userId;
     }
     
     public AppUser(User user) {
@@ -43,51 +43,47 @@ public class AppUser {
     }
     
     public String getId() {
-        return uuid;
+        return id;
     }
 
     public void setId(String id) {
-        this.uuid = id;
+        this.id = id;
     }
 
-    public List<String> getGroups() {
-        return groups;
+    public List<String> getRoles() {
+        return roles;
     }
 
-    public void setGroups(List<String> groups) {
-        this.groups = groups;
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 
-    public void addGroups(List<String> groups) {
-        groups.forEach((group) -> {
-            if (!getGroups().contains(group)) {
-                getGroups().add(group);
+    public void addRoles(List<String> roles) {
+        roles.forEach((role) -> {
+            if (!getRoles().contains(role)) {
+                getRoles().add(role);
             }
         });
     }
 
-    public void removeGroup(AppGroup group) {
-        if (getGroups().contains(group.getName())) {
-            getGroups().remove(group.getName());
+    public void removeRole(AppRole role) {
+        if (getRoles().contains(role.getName())) {
+            getRoles().remove(role.getName());
         }
     }
 
-    public void addGroup(AppGroup group) {
-        addGroups(Arrays.asList(group.getName()));
+    public void addRole(AppRole role) {
+        addRoles(Arrays.asList(role.getName()));
     }
     
-    public boolean hasGroup(StaticGroup group) {
-        return hasGroup(group.name());
-    }
-    
-    public boolean hasGroup(String group) {
-        return getGroups().contains(group);
+    public boolean hasRole(String role) {
+        return getRoles().contains(role);
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 41 * hash + Objects.hashCode(this.uuid);
+        hash = 41 * hash + Objects.hashCode(this.id);
         return hash;
     }
 
@@ -103,10 +99,18 @@ public class AppUser {
             return false;
         }
         final AppUser other = (AppUser) obj;
-        if (!Objects.equals(this.uuid, other.uuid)) {
+        if (!Objects.equals(this.id, other.id)) {
             return false;
         }
         return true;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
     
 }

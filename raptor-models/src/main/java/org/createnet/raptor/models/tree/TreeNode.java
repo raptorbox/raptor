@@ -146,6 +146,7 @@ public class TreeNode extends RaptorContainer implements Owneable, AclDomain {
                 .parentId(node.getParentId())
                 .userId(node.getUserId())
                 .type(node.getType())
+                .domain(node.getDomain())
                 .order(node.getOrder());
 
         this.children().addAll(node.children());
