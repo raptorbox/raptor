@@ -206,7 +206,10 @@ public class TreeController {
             log.debug("Added children {}", node.getId());
         });
 
-        return ResponseEntity.accepted().build();
+        parent.children().clear();
+        parent.children().addAll(nodes);
+        
+        return ResponseEntity.ok(parent);
     }
 
     @RequestMapping(

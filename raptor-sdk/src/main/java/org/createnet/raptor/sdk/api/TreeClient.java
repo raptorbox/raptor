@@ -180,7 +180,7 @@ public class TreeClient extends AbstractClient {
      * @param devices
      * @return
      */
-    public List<TreeNode> add(TreeNode parent, Device... devices) {
+    public TreeNode add(TreeNode parent, Device... devices) {
         return add(parent,
                 Arrays.asList(devices).stream()
                         .map((d) -> TreeNode.create(d))
@@ -233,10 +233,10 @@ public class TreeClient extends AbstractClient {
      * @param nodes
      * @return
      */
-    public List<TreeNode> add(TreeNode parent, List<TreeNode> nodes) {
+    public TreeNode add(TreeNode parent, List<TreeNode> nodes) {
         String url = String.format(Routes.TREE_ADD, parent == null ? "" : parent.getId());
         JsonNode json = getClient().put(url, toJsonNode(nodes));
-        return nodes;
+        return getMapper().convertValue(json, TreeNode.class);
     }
 
     /**

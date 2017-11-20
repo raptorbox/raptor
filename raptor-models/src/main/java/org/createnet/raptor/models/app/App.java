@@ -44,6 +44,7 @@ public class App implements Serializable, Owneable {
     protected String userId;
     protected String name;
     protected String description;
+    protected boolean enabled;
 
     final protected List<AppRole> roles = new ArrayList();
     final protected List<AppUser> users = new ArrayList();
@@ -243,6 +244,14 @@ public class App implements Serializable, Owneable {
             if(u.getId().equals(user.getId())) return u;
         }
         return null;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
     
 }
