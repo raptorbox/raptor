@@ -307,7 +307,6 @@ public class UserClient extends AbstractClient {
      * Delete a user
      *
      * @param user
-     * @return
      */
     public void delete(User user) {
         assert user.getId() != null;
