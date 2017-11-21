@@ -16,6 +16,7 @@
 package org.createnet.raptor.sdk.api;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
@@ -121,21 +122,32 @@ public class InventoryTest {
 
     @Test
     public void update() {
+        
         Raptor raptor = Utils.createNewAdminInstance();
+        
         Device dev = new Device();
-        dev.name("modified device");
+        dev.name("new device");
         dev.validate();
+
         raptor.Inventory().create(dev);
 
-        Utils.waitFor(500);
+        dev.name("updated device");
+        dev.properties().put("foo", "bar");
+
         raptor.Inventory().update(dev);
 
         List<Device> list = raptor.Inventory().list().getContent();
-
-        Device dev1 = list.stream().filter(d -> d.id().equals(dev.id())).findFirst().get();
-        assertNotNull(dev1);
-
+        
+        // first by sorting asc
+        assertEquals(list.get(0).name(), dev.name());
+        
+        Optional<Device> odev1 = list.stream().filter(d -> d.id().equals(dev.id())).findFirst();
+        
+        assertTrue(odev1.isPresent());
+        
+        Device dev1 = odev1.get();
         assertEquals(dev1.name(), dev.name());
+        assertEquals(dev1.properties().get("foo"), dev.properties().get("foo"));
     }
 
     @Test

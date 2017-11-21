@@ -19,6 +19,7 @@ import org.createnet.raptor.sdk.Routes;
 import org.createnet.raptor.sdk.AbstractClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Iterator;
 import java.util.List;
 import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.sdk.Raptor;
@@ -40,6 +41,7 @@ import org.createnet.raptor.sdk.PageResponse;
 import org.createnet.raptor.sdk.admin.DevicePermissionClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 
 /**
  * Methods to interact with Raptor API
@@ -227,13 +229,29 @@ public class InventoryClient extends AbstractClient {
     /**
      * List accessible devices
      *
+     * @param page
+     * @param size
+     * @param sort
+     * @return a pager of Devices
+     */
+    public PageResponse<Device> list(int page, int size, Sort sort) {
+        
+        String url = Routes.INVENTORY_LIST + String.format("?page=%s&size=%s&sort=", page, size);
+        for (Sort.Order next : sort) {
+            url += next.getProperty() + "," + next.getDirection().name();
+        }
+        JsonNode json = getClient().get(url);
+        PageResponse<Device> list = Device.getMapper().convertValue(json, new TypeReference<PageResponse<Device>>() {});
+        return list;
+    }
+    
+    /**
+     * List accessible devices
+     *
      * @return the Device instance
      */
     public PageResponse<Device> list() {
-        JsonNode json = getClient().get(Routes.INVENTORY_LIST);
-        PageResponse<Device> list = Device.getMapper().convertValue(json, new TypeReference<PageResponse<Device>>() {
-        });
-        return list;
+        return list(0, 20, new Sort(Sort.Direction.DESC, "createdAt"));
     }
 
 }
