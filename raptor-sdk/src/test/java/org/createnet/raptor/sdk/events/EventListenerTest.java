@@ -296,7 +296,7 @@ public class EventListenerTest {
     @Test
     public void watchDeviceDataWithDyncPropsEvents() {
 
-        final AtomicInteger done = new AtomicInteger(2);
+        final AtomicInteger done = new AtomicInteger(1);
 
         Raptor raptor = Utils.createNewInstance();
 
