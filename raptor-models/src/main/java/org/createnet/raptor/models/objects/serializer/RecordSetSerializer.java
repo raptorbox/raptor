@@ -50,7 +50,7 @@ public class RecordSetSerializer extends JsonSerializer<RecordSet> {
             String channelName = item.getKey();           
 
             // enforce stream schema if available
-            if (r.stream() != null) {
+            if (r.stream() != null && !r.stream().isDynamic()) {
                 if (!r.stream().channels().containsKey(channelName)) {
                     // skip unmanaged field
                     continue;

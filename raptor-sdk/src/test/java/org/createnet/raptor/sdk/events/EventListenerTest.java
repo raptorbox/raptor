@@ -79,9 +79,14 @@ public class EventListenerTest {
 
         d.addStream("test", "string", "string");
         d.addStream("test2", "foo", "boolean");
+        
+        Stream stream = Stream.create("testdyn");
+        stream.setDynamic(true);
+        stream.setDevice(d);
+        d.streams().put(stream.name(), stream);
 
         Assert.assertEquals(3, d.actions().size());
-        Assert.assertEquals(2, d.streams().size());
+        Assert.assertEquals(3, d.streams().size());
 
         log.debug("Creating {} device", d.name());
 
@@ -286,6 +291,43 @@ public class EventListenerTest {
         pushData(dev);
 
         Utils.waitUntil(5, () -> done.get() > 0);
+    }
+
+    @Test
+    public void watchDeviceDataWithDyncPropsEvents() {
+
+        final AtomicInteger done = new AtomicInteger(2);
+
+        Raptor raptor = Utils.createNewInstance();
+
+        log.debug("watch data events");
+
+        Device dev = Utils.createDevice(raptor, newDevice("dev"));
+        
+        raptor.Inventory().subscribe(dev, new DataCallback() {
+            @Override
+            public void callback(Stream stream, RecordSet record) {
+                
+                log.debug("dev: Data received {}", record.toJson());
+                Assert.assertTrue(record.deviceId().equals(dev.getDevice().id()));
+                Assert.assertTrue(stream.name().equals("testdyn"));
+                
+                Assert.assertTrue(record.channel("foo").getBoolean());
+                Assert.assertTrue(record.channel("bar").getNumber().intValue() == 42);
+
+                done.decrementAndGet();
+            }
+        });
+
+        
+        Stream stream = dev.stream("testdyn");
+        RecordSet record = new RecordSet(stream);
+        record.channel("foo", true);
+        record.channel("bar", 42);
+
+        raptor.Stream().push(stream, record);
+        
+        Utils.waitUntil(10, () -> done.get() > 0);
     }
 
     @Test
