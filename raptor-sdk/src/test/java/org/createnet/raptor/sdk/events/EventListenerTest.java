@@ -298,12 +298,12 @@ public class EventListenerTest {
 
         final AtomicInteger done = new AtomicInteger(1);
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.getRaptor();
 
         log.debug("watch data events");
 
         Device dev = Utils.createDevice(raptor, newDevice("dev"));
-        
+
         raptor.Inventory().subscribe(dev, new DataCallback() {
             @Override
             public void callback(Stream stream, RecordSet record) {
