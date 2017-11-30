@@ -61,6 +61,25 @@ services:
     extra_hosts:
       - "raptor.local:172.16.238.1"
 
+  app:
+    image: raptorbox/app:v5
+    ports:
+      - 10095:10095
+    depends_on:
+      - mongo
+      - redis
+    environment:
+        DEBUG: r*
+        LOG_LEVEL: debug
+    networks:
+      - raptor_test
+    logging:
+      driver: json-file
+      options:
+        max-size: 1024m
+    extra_hosts:
+      - "raptor.local:172.16.238.1"
+
   mariadb:
     image: mariadb:latest
     volumes:

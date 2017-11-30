@@ -44,6 +44,18 @@ services:
       options:
         max-size: 1024m
 
+  app:
+    image: raptorbox/app:v5
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - raptor_net
+    logging:
+      driver: json-file
+      options:
+        max-size: 1024m
+
   ui:
     image: raptorbox/raptor-ui:v5
     networks:
