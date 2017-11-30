@@ -44,6 +44,11 @@ services:
       options:
         max-size: 1024m
 
+  ui:
+    image: raptorbox/raptor-ui:v5
+    networks:
+      - raptor_net
+
   mariadb:
     image: mariadb:latest
     volumes:
@@ -65,11 +70,6 @@ services:
 
   redis:
     image: redis
-    networks:
-      - raptor_net
-
-  ui:
-    image: raptorbox/raptor-ui
     networks:
       - raptor_net
 
