@@ -30,7 +30,7 @@ sudo apt-get install python-pip -y && sudo  pip install docker-com
 # Getting Started
 1. Clone the [repository](https://github.com/raptorbox/raptor) 
 2. run *docker-compose up* in the root folder
-3. open **http://localhost:8089/** on your browser.
+3. open **http://localhost:80/** on your browser.
 
 Some useful commands to see more about the platform docker instance
 ```
