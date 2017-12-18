@@ -80,32 +80,6 @@ services:
     extra_hosts:
       - "raptor.local:172.16.238.1"
 
-  mariadb:
-    image: mariadb:latest
-    volumes:
-      - ./data/mariadb:/var/lib/mysql
-    environment:
-      MYSQL_USERNAME: root
-      MYSQL_ROOT_PASSWORD: raptor
-    networks:
-      - raptor_test
-    ports:
-        - 3306:3306
-
-  dbadmin:
-    image: phpmyadmin/phpmyadmin
-    environment:
-      MYSQL_ROOT_PASSWORD: raptor
-    restart: always
-    volumes:
-     - ./data/phpmyadmin:/sessions
-    links:
-      - mariadb:db
-    networks:
-      - raptor_test
-    ports:
-        - 8081:80
-
   mongoadmin:
     image: adicom/admin-mongo
     # environment:

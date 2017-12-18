@@ -61,17 +61,6 @@ services:
     networks:
       - raptor_net
 
-  mariadb:
-    image: mariadb:latest
-    volumes:
-      - ./data/mariadb:/var/lib/mysql
-    environment:
-      MYSQL_USERNAME: root
-      MYSQL_ROOT_PASSWORD: raptor
-      MYSQL_DATABASE: raptor
-    networks:
-      - raptor_net
-
   mongo:
     image: mongo:3
     volumes:
