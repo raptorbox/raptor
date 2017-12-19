@@ -45,6 +45,7 @@ public class App implements Serializable, Owneable {
     protected String name;
     protected String description;
     protected boolean enabled;
+    protected String domain;
 
     final protected List<AppRole> roles = new ArrayList();
     final protected List<AppUser> users = new ArrayList();
@@ -72,6 +73,9 @@ public class App implements Serializable, Owneable {
         }
         if (raw.getDescription() != null && !raw.getDescription().isEmpty()) {
             setDescription(raw.getDescription());
+        }
+        if (raw.getDomain()!= null && !raw.getDomain().isEmpty()) {
+            setDomain(raw.getDomain());
         }
         if (raw.getUserId() != null && !raw.getUserId().isEmpty()) {
             setUserId(raw.getUserId());
@@ -117,6 +121,14 @@ public class App implements Serializable, Owneable {
         this.id = id;
     }
 
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+    
     public String getUserId() {
         return userId;
     }
