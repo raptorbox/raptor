@@ -90,6 +90,11 @@ public class Device extends DeviceContainer implements Owneable, AclDomain {
     public String getOwnerId() {
         return getUserId();
     }
+
+    @Override
+    public String getId() {
+        return id;
+    }
     
     @Override
     public String getDomain() {
@@ -635,10 +640,6 @@ public class Device extends DeviceContainer implements Owneable, AclDomain {
     @Override
     public Device getDevice() {
         return this;
-    }
-
-    public String getId() {
-        return id;
     }
 
     public String getUserId() {

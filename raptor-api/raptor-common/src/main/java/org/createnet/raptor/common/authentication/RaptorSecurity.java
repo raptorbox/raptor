@@ -19,6 +19,7 @@ import org.createnet.raptor.common.client.InternalApiClientService;
 import org.createnet.raptor.models.acl.AclDomain;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
+import org.createnet.raptor.models.acl.Owneable;
 import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.auth.request.AuthorizationResponse;
@@ -66,8 +67,26 @@ public class RaptorSecurity {
      * @return
      */
     public boolean can(User u, EntityType entity, Operation operation, Object obj) {
-        String objectId = obj == null ? null : (String)obj;
-        String domain = (obj != null && obj instanceof AclDomain) ? ((AclDomain)obj).getDomain() : null;
+
+        String objectId = null;
+        String domain = null;
+        if (obj != null) {
+            if (obj instanceof String) {
+                objectId = (String) obj;
+            }
+            if (obj instanceof Owneable) {
+                objectId = ((Owneable) obj).getId();
+            }
+            if (obj instanceof AclDomain) {
+                domain = ((AclDomain) obj).getDomain();
+            }
+        }
+
+        if (operation == Operation.create) {
+            //do not set an id  on creation
+            objectId = null;
+        }
+
         AuthorizationResponse r = api.Admin().User().isAuthorized(u.getId(), entity, operation, objectId, domain);
         return r.result;
     }

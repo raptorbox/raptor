@@ -21,13 +21,21 @@ package org.createnet.raptor.models.acl;
  */
 public class OwneableImpl implements Owneable {
 
+    protected final String Id;
     protected final String ownerId;
 
-    public OwneableImpl(String ownerId) {
+    public OwneableImpl(String Id, String ownerId) {
+        this.Id = Id;
         this.ownerId = ownerId;
     }
 
+    @Override
     public String getOwnerId() {
         return ownerId;
+    }
+
+    @Override
+    public String getId() {
+        return Id;
     }
 }

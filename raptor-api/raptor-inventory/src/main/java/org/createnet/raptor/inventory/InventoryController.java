@@ -17,7 +17,6 @@ package org.createnet.raptor.inventory;
 
 import com.querydsl.core.BooleanBuilder;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 
 import org.createnet.raptor.common.client.ApiClientService;
@@ -107,7 +106,7 @@ public class InventoryController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(value = "Create a device instance", notes = "", response = Device.class, nickname = "createDevice")
-    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'create')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'create', #device)")
     public ResponseEntity<?> createDevice(@AuthenticationPrincipal User currentUser, @RequestBody Device device) {
 
         device.setDefaults();
@@ -235,7 +234,6 @@ public class InventoryController {
     @RequestMapping(method = RequestMethod.POST, value = "/search")
     @ApiOperation(value = "Search for device instances", notes = "", response = Device.class, nickname = "searchDevices")
     @PreAuthorize("@raptorSecurity.can(principal, 'device', 'read')")
-    // shared access
     public ResponseEntity<?> searchDevices(
             @AuthenticationPrincipal User currentUser,
             @RequestParam MultiValueMap<String, String> parameters, 

@@ -21,4 +21,5 @@ package org.createnet.raptor.models.acl;
  */
 public interface Owneable {
     public String getOwnerId();
+    public String getId();
 }
