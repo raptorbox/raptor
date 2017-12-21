@@ -117,11 +117,3 @@ services:
     command: nginx -g 'daemon off;'
     networks:
       - raptor_test
-
-
-  redis:
-    image: redis
-    networks:
-      - raptor_test
-    ports:
-        - 6379:6379
