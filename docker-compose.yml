@@ -49,6 +49,7 @@ services:
     depends_on:
       - mongo
       - redis
+      - auth
     networks:
       - raptor_net
     logging:
