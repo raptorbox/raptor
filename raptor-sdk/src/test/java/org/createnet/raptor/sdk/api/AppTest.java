@@ -17,7 +17,6 @@ package org.createnet.raptor.sdk.api;
 
 import java.util.List;
 import org.createnet.raptor.models.app.App;
-import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.sdk.PageResponse;
