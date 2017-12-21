@@ -19,15 +19,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.Role;
-import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
 
