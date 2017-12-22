@@ -22,6 +22,7 @@ import java.util.List;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.PageResponse;
+import org.createnet.raptor.sdk.QueryString;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.Routes;
@@ -46,13 +47,15 @@ public class RoleClient extends AbstractClient {
      *
      * @param userUuid group owner
      * @param page
-     * @param size
+     * @param limit
      * @return
      */
-    public PageResponse<Role> list(String userUuid, int page, int size) {
-        JsonNode node = getClient().get(String.format(Routes.ROLE_LIST, userUuid) + String.format("?page=%s&size=%s", page, size));
-        return getMapper().convertValue(node, new TypeReference<PageResponse<Role>>() {
-        });
+    public PageResponse<Role> list(String userUuid, int page, int limit) {
+        QueryString qs = new QueryString();
+        qs.query.add("userId", userUuid);
+        qs.pager.page = page;
+        qs.pager.limit = limit;
+        return list(qs);
     }
 
     /**
@@ -62,6 +65,18 @@ public class RoleClient extends AbstractClient {
      */
     public PageResponse<Role> list() {
         return list(getContainer().Auth().getUser().getId(), 0, 100);
+    }
+
+    /**
+     * Get current user group
+     *
+     * @param qs
+     * @return
+     */
+    public PageResponse<Role> list(QueryString qs) {
+        JsonNode node = getClient().get(Routes.ROLE_LIST + qs.toString());
+        return getMapper().convertValue(node, new TypeReference<PageResponse<Role>>() {
+        });
     }
 
     /**

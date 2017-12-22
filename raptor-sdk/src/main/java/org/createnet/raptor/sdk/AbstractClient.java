@@ -18,6 +18,7 @@ package org.createnet.raptor.sdk;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
 import org.createnet.raptor.sdk.config.Config;
 import org.createnet.raptor.sdk.events.MqttEventEmitter;
 import org.createnet.raptor.sdk.exception.ClientException;
@@ -34,7 +35,13 @@ abstract public class AbstractClient implements IClient {
     public AbstractClient(Raptor container) {
         this.container = container;
     }
-
+    
+    /**
+     * @param offset
+     * @param limit
+     * @return 
+     */
+    @Deprecated
     protected String buildQueryString(Integer offset, Integer limit) {
         String qs = null;
         if (offset != null) {
@@ -77,6 +84,7 @@ abstract public class AbstractClient implements IClient {
 
     /**
      * Convert an object to JSON
+     *
      * @param o
      * @return
      */
@@ -87,9 +95,10 @@ abstract public class AbstractClient implements IClient {
             throw new ClientException(ex);
         }
     }
-    
+
     /**
      * Convert an object to JsonNode
+     *
      * @param o
      * @return
      */

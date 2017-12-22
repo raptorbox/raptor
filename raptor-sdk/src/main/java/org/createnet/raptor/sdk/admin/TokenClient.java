@@ -18,12 +18,12 @@ package org.createnet.raptor.sdk.admin;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.List;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.TokenPayload;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.PageResponse;
+import org.createnet.raptor.sdk.QueryString;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.Routes;
@@ -98,10 +98,29 @@ public class TokenClient extends AbstractClient {
      * Get user tokens
      *
      * @param userUuid token owner
+     * @param page
+     * @param limit
+     * @return
+     */
+    public PageResponse<Token> list(String userUuid, int page, int limit) {
+        QueryString qs = new QueryString();
+        qs.query.add("userId", userUuid);
+        qs.pager.page = page;
+        qs.pager.limit = limit;
+        JsonNode node = getClient().get(Routes.TOKEN_LIST + qs.toString());
+        return getMapper().convertValue(node, new TypeReference<PageResponse<Token>>() {});
+    }
+    
+    /**
+     * Get user tokens
+     *
+     * @param userUuid token owner
      * @return
      */
     public PageResponse<Token> list(String userUuid) {
-        JsonNode node = getClient().get(String.format(Routes.TOKEN_LIST, userUuid));
+        QueryString qs = new QueryString();
+        qs.query.add("userId", userUuid);
+        JsonNode node = getClient().get(Routes.TOKEN_LIST + qs.toString());
         return getMapper().convertValue(node, new TypeReference<PageResponse<Token>>() {});
     }
 

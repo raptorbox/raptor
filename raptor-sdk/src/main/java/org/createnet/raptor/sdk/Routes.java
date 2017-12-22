@@ -56,7 +56,7 @@ final public class Routes {
     public static final String TOKEN_UPDATE = TOKEN_CREATE + "/%s";
     public static final String TOKEN_GET = TOKEN_UPDATE;
     public static final String TOKEN_DELETE = TOKEN_UPDATE;
-    public static final String TOKEN_LIST = TOKEN_CREATE + "?userId=%s";
+    public static final String TOKEN_LIST = TOKEN_CREATE;
     public static final String TOKEN_CURRENT = TOKEN_CREATE + "/current";
     
     public static final String PROFILE_GET_ALL = "/profile/%s";
@@ -92,7 +92,7 @@ final public class Routes {
     public static final String APP_DELETE = APP_READ;
     
     public static final String ROLE_CREATE = "/auth/role";
-    public static final String ROLE_LIST = ROLE_CREATE + "?id=%s";
+    public static final String ROLE_LIST = ROLE_CREATE;
     public static final String ROLE_READ = ROLE_CREATE + "/%s";
     public static final String ROLE_UPDATE = ROLE_READ;
     public static final String ROLE_DELETE = ROLE_READ;
