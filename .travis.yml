@@ -29,20 +29,16 @@ before_install:
 before_script:
   # workaround for 3306 used, see https://github.com/travis-ci/travis-ci/issues/7008#issuecomment-269126128
   - sudo /etc/init.d/mysql stop
-  - ./scripts/mvn-build.sh
-  - ./scripts/docker-build.sh
   - docker-compose pull
-  - docker-compose up -d mariadb mongo
-  - sleep 30
-  - docker-compose up -d broker apigateway
-  - sleep 20
+  - make docker/build
+  - docker-compose up -d
 
 after_script:
   - docker-compose kill
 
 after_success:
-  - if [ "$TRAVIS_BRANCH" == "master" ]; then docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"; ./scripts/docker-push.sh; fi
-  - mvn clean cobertura:cobertura coveralls:report -DrepoToken=$COVERALLS_TOKEN
+  # - if [ "$TRAVIS_BRANCH" == "master" ]; then docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"; make docker/push; fi
+  # - mvn clean cobertura:cobertura coveralls:report -DrepoToken=$COVERALLS_TOKEN
 
 after_failure:
-    - docker-compose logs broker apigateway
+    - docker-compose logs 
