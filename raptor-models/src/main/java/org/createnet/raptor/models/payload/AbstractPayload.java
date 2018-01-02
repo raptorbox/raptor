@@ -15,7 +15,8 @@
  */
 package org.createnet.raptor.models.payload;
 
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.EntityType;
+import org.createnet.raptor.models.acl.Operation;
 
 /**
  *
@@ -23,16 +24,16 @@ import org.createnet.raptor.models.acl.Permissions;
  */
 public class AbstractPayload implements DispatcherPayload {
     
-    public MessageType type;
-    public Permissions op;
+    public EntityType type;
+    public Operation op;
     
     @Override
-    public MessageType getType() {
+    public EntityType getType() {
         return type;
     }
 
     @Override
-    public Permissions getOp() {
+    public Operation getOp() {
         return op;
     }
     

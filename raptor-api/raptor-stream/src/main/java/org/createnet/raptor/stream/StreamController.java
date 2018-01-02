@@ -53,35 +53,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/stream")
 @ApiResponses(value = {
-    @ApiResponse(
-            code = 200,
-            message = "Ok"
-    )
-    ,
-    @ApiResponse(
-            code = 204,
-            message = "No content"
-    )
-    ,
-    @ApiResponse(
-            code = 202,
-            message = "Accepted"
-    )
-    ,
-    @ApiResponse(
-            code = 401,
-            message = "Not authorized"
-    )
-    ,
-    @ApiResponse(
-            code = 403,
-            message = "Forbidden"
-    )
-    ,
-    @ApiResponse(
-            code = 500,
-            message = "Internal error"
-    )
+    @ApiResponse(code = 200, message = "Ok")
+    ,@ApiResponse(code = 204, message = "No content")
+    ,@ApiResponse(code = 202, message = "Accepted")
+    ,@ApiResponse(code = 401, message = "Not authorized")
+    ,@ApiResponse(code = 403, message = "Forbidden")
+    ,@ApiResponse(code = 500, message = "Internal error")
 })
 @Api(tags = {"Data"})
 public class StreamController {
@@ -112,7 +89,7 @@ public class StreamController {
             notes = "",
             nickname = "push"
     )
-    @PreAuthorize("hasPermission(#deviceId, 'push')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'push', #deviceId)")
     public ResponseEntity<?> push(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
@@ -129,28 +106,27 @@ public class StreamController {
         record.setStream(stream);
 
         if (record.userId() == null) {
-            record.userId(currentUser.getUuid());
+            record.userId(currentUser.getId());
         }
 
-        if (!currentUser.isAdmin() && !record.userId().equals(currentUser.getUuid())) {
-            record.userId(currentUser.getUuid());
+        if (!currentUser.isAdmin() && !record.userId().equals(currentUser.getId())) {
+            record.userId(currentUser.getId());
         }
-        
+
         try {
             record.validate();
-        }
-        catch(RaptorComponent.ValidationException ex) {
+        } catch (RaptorComponent.ValidationException ex) {
             return JsonErrorResponse.badRequest(ex.getMessage());
         }
-        
+
         // save data!
         streamService.save(record);
 
         // notify of invocation       
         streamPublisher.push(record);
-        
+
         log.info("Stored record [stream={} deviceId={}]", record.getStreamId(), record.getDeviceId());
-        
+
         return ResponseEntity.accepted().build();
     }
 
@@ -163,7 +139,7 @@ public class StreamController {
             notes = "",
             nickname = "delete"
     )
-    @PreAuthorize("hasPermission(#deviceId, 'push')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'push', #deviceId)")
     public ResponseEntity<?> delete(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
@@ -192,7 +168,7 @@ public class StreamController {
             notes = "",
             nickname = "list"
     )
-    @PreAuthorize("hasPermission(#deviceId, 'pull')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'pull', #deviceId)")
     public ResponseEntity<?> list(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
@@ -221,7 +197,7 @@ public class StreamController {
             notes = "",
             nickname = "lastUpdate"
     )
-    @PreAuthorize("hasPermission(#deviceId, 'pull')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'pull', #deviceId)")
     public ResponseEntity<?> lastUpdate(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
@@ -253,7 +229,7 @@ public class StreamController {
             notes = "",
             nickname = "search"
     )
-    @PreAuthorize("hasPermission(#deviceId, 'pull')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'pull', #deviceId)")
     public ResponseEntity<?> search(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,

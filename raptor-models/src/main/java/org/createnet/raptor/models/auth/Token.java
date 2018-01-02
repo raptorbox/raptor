@@ -25,20 +25,17 @@ import javax.persistence.Id;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.Date;
 import javax.persistence.Cacheable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import org.createnet.raptor.models.acl.AclSubject;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -52,10 +49,10 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Cacheable(value = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(name = "tokens")
-public class Token implements Serializable, AclSubject {
+public class Token {
 
-    static final long serialVersionUID = 1000000000000011L;
-    
+    static final long serialVersionUID = 1000000000000002L;
+
     public static enum Type {
         LOGIN, DEFAULT
     }
@@ -66,7 +63,7 @@ public class Token implements Serializable, AclSubject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private String id;
 
     @NotNull
     @Size(min = 1)
@@ -99,7 +96,7 @@ public class Token implements Serializable, AclSubject {
     private Date created = new Date();
 
     @Column(name = "expires")
-    private Long expires = 1000L * 60 * 60; // default to 60min
+    private Long expires;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
@@ -108,10 +105,6 @@ public class Token implements Serializable, AclSubject {
     @Enumerated(EnumType.STRING)
     @Column(name = "token_type")
     private TokenType tokenType = TokenType.DEFAULT;
-
-    @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY)
-    private Token parent;
 
     public Token() {
     }
@@ -158,11 +151,11 @@ public class Token implements Serializable, AclSubject {
 
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -211,7 +204,7 @@ public class Token implements Serializable, AclSubject {
         if (expires == null) {
             return null;
         }
-        return getCreated().toInstant().plusSeconds(expires);
+        return Instant.ofEpochSecond(expires);
     }
 
     public Long getExpires() {
@@ -219,13 +212,14 @@ public class Token implements Serializable, AclSubject {
     }
 
     public void setExpires(Long expires) {
-        if (expires == 0) {
-            expires = 622080000L; //20 years, should be enough for our retirement
-        }
         this.expires = expires;
     }
 
+    @JsonIgnore
     public boolean isExpired() {
+        if (this.expires == 0) {
+            return false;
+        }
         if (getExpiresInstant() == null) {
             return true;
         }
@@ -235,7 +229,8 @@ public class Token implements Serializable, AclSubject {
     public boolean isEnabled() {
         return enabled;
     }
-
+    
+    @JsonIgnore
     public boolean isValid() {
         return isEnabled() && !isExpired() && (getUser() != null && getUser().isEnabled());
     }
@@ -279,32 +274,6 @@ public class Token implements Serializable, AclSubject {
 
     public void setTokenType(String tokenType) {
         this.tokenType = TokenType.valueOf(tokenType);
-    }
-
-    public Token getParent() {
-        return parent;
-    }
-
-    public void setParent(Token parent) {
-        this.parent = parent;
-    }
-
-    @Override
-    public Long getSubjectId() {
-        return getId();
-    }
-
-    @Override
-    public Long getSubjectParentId() {
-        if (getParent() == null) {
-            return null;
-        }
-        return getParent().getId();
-    }
-
-    @Override
-    public User getOwner() {
-        return getUser();
     }
 
 }

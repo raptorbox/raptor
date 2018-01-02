@@ -18,7 +18,7 @@ package org.createnet.raptor.common.dispatcher.events.listener;
 import org.createnet.raptor.common.dispatcher.DispatcherService;
 import org.createnet.raptor.common.dispatcher.events.TokenApplicationEvent;
 import org.createnet.raptor.events.type.TokenEvent;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -36,6 +36,6 @@ public class TokenApplicationEventListener implements ApplicationListener<TokenA
     @Override
     public void onApplicationEvent(TokenApplicationEvent event) {
         TokenEvent ev = event.getTokenEvent();
-        dispatcher.notifyTokenEvent(Permissions.valueOf(ev.getParentEvent()), ev.getToken());
+        dispatcher.notifyTokenEvent(Operation.valueOf(ev.getParentEvent()), ev.getToken());
     }
 }

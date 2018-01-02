@@ -15,7 +15,8 @@
  */
 package org.createnet.raptor.common.dispatcher;
 
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.Operation;
+import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.configuration.DispatcherConfiguration;
@@ -27,6 +28,7 @@ import org.createnet.raptor.models.objects.DeviceContainer;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.payload.ActionPayload;
+import org.createnet.raptor.models.payload.AppPayload;
 import org.createnet.raptor.models.payload.DevicePayload;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.StreamPayload;
@@ -37,8 +39,6 @@ import org.createnet.raptor.sdk.Topics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -50,10 +50,9 @@ public class DispatcherService {
 
     final private Logger logger = LoggerFactory.getLogger(DispatcherService.class);
 
-
     @Autowired
     RaptorConfiguration config;
-    
+
     @Autowired
     BrokerClient brokerClient;
 
@@ -110,6 +109,10 @@ public class DispatcherService {
         return String.format(Topics.ACTION, id, a.name());
     }
 
+    protected String getAppTopic(App a) {
+        return String.format(Topics.APP, a.getId());
+    }
+
     protected String getUserEventsTopic(DeviceContainer c) {
 
         Device obj = c.getDevice();
@@ -126,7 +129,7 @@ public class DispatcherService {
     }
 
     protected String getUserEventsTopic(User u) {
-        return String.format(Topics.USER, u.getUuid());
+        return String.format(Topics.USER, u.getId());
     }
 
     protected String getTokenEventsTopic(Token t) {
@@ -149,7 +152,7 @@ public class DispatcherService {
      * @param payload
      */
     public void notifyTreeEvent(TreeNode node, DispatcherPayload payload) {
-        String topic = String.format(Topics.TREE, node.getId());
+        String topic = String.format(Topics.TREE, node.getId(), node.getType().name());
         notifyEvent(topic, payload);
     }
 
@@ -159,7 +162,7 @@ public class DispatcherService {
      * @param obj
      * @param payload
      */
-    protected void notifyUserEvent(Permissions op, Device obj, DispatcherPayload payload) {
+    protected void notifyUserEvent(Operation op, Device obj, DispatcherPayload payload) {
         String topic = getUserEventsTopic(obj);
         notifyEvent(topic, payload);
     }
@@ -169,7 +172,7 @@ public class DispatcherService {
      * @param op
      * @param obj
      */
-    public void notifyDeviceEvent(Permissions op, Device obj) {
+    public void notifyDeviceEvent(Operation op, Device obj) {
         String topic = getEventsTopic(obj);
         DevicePayload payload = new DevicePayload(obj, op);
         notifyEvent(topic, payload);
@@ -180,7 +183,7 @@ public class DispatcherService {
      * @param op
      * @param user
      */
-    public void notifyUserEvent(Permissions op, User user) {
+    public void notifyUserEvent(Operation op, User user) {
         String topic = getUserEventsTopic(user);
         UserPayload payload = new UserPayload(user, op);
         notifyEvent(topic, payload);
@@ -191,7 +194,7 @@ public class DispatcherService {
      * @param op
      * @param token
      */
-    public void notifyTokenEvent(Permissions op, Token token) {
+    public void notifyTokenEvent(Operation op, Token token) {
         String topic = getTokenEventsTopic(token);
         TokenPayload payload = new TokenPayload(token, op);
         notifyEvent(topic, payload);
@@ -204,7 +207,7 @@ public class DispatcherService {
      */
     public void notifyDataEvent(Stream stream, RecordSet record) {
 
-        StreamPayload payload = new StreamPayload(stream, Permissions.data, record);
+        StreamPayload payload = new StreamPayload(stream, Operation.push, record);
 
         notifyEvent(getStreamTopic(stream), payload);
         notifyEvent(getEventsTopic(stream), payload);
@@ -217,7 +220,7 @@ public class DispatcherService {
      * @param action
      * @param status
      */
-    public void notifyActionEvent(Permissions op, Action action, String status) {
+    public void notifyActionEvent(Operation op, Action action, String status) {
 
         String data = null;
         if (status != null) {
@@ -228,6 +231,16 @@ public class DispatcherService {
 
         notifyEvent(getActionTopic(action), payload);
         notifyEvent(getEventsTopic(action), payload);
+    }
+
+    /**
+     *
+     * @param op
+     * @param app
+     */
+    public void notifyAppEvent(Operation op, App app) {
+        AppPayload payload = new AppPayload(app, op);
+        notifyEvent(getAppTopic(app), payload);
     }
 
 }

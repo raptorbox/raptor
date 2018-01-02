@@ -17,10 +17,13 @@ package org.createnet.raptor.sdk.admin;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import org.createnet.raptor.models.acl.Permissions;
+import java.util.List;
+import org.createnet.raptor.models.acl.EntityType;
+import org.createnet.raptor.models.acl.Operation;
+import org.createnet.raptor.models.app.App;
+import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.sdk.AbstractClient;
 import org.createnet.raptor.sdk.Raptor;
@@ -32,6 +35,7 @@ import org.createnet.raptor.models.auth.request.SyncRequest;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.UserPayload;
+import org.createnet.raptor.models.tree.TreeNode;
 import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.Routes;
 import org.createnet.raptor.sdk.api.AuthClient;
@@ -77,7 +81,6 @@ public class UserClient extends AbstractClient {
 
     final static Logger logger = LoggerFactory.getLogger(UserClient.class);
 
-
     /**
      * Register for user events
      *
@@ -89,7 +92,7 @@ public class UserClient extends AbstractClient {
     }
 
     /**
-     * Subscribe to user related events 
+     * Subscribe to user related events
      *
      * @param user
      * @param ev
@@ -103,45 +106,72 @@ public class UserClient extends AbstractClient {
             }
         });
     }
-    
+
     /**
      * Check if an user is authorized to operate on a device
      *
      * @param device
      * @param user
-     * @param permission
+     * @param operation
      * @return
      */
-    public AuthorizationResponse isAuthorized(Device device, User user, Permissions permission) {
-        return isAuthorized(device.id(), user.getUuid(), permission);
+    public AuthorizationResponse isAuthorized(Device device, User user, Operation operation) {
+        return isAuthorized(getContainer().Auth().getUser().getId(), EntityType.device, operation, device.id(), device.getDomain());
     }
 
     /**
      * Check if the current user is authorized to operate on a device
      *
      * @param device
-     * @param permission
+     * @param operation
      * @return
      */
-    public AuthorizationResponse isAuthorized(Device device, Permissions permission) {
-        return isAuthorized(device.id(), getContainer().Auth().getUser().getUuid(), permission);
+    public AuthorizationResponse isAuthorized(Device device, Operation operation) {
+        return isAuthorized(getContainer().Auth().getUser().getId(), EntityType.device, operation, device.id(), device.getDomain());
     }
 
     /**
      * Check if an user is authorized to operate on a device
      *
-     * @param deviceId
      * @param userId
-     * @param permission
+     * @param type
+     * @param operation
+     * @param objectId
+     * @param domain
      * @return
      */
-    public AuthorizationResponse isAuthorized(String deviceId, String userId, Permissions permission) {
+    public AuthorizationResponse isAuthorized(String userId, EntityType type, Operation operation, String objectId, String domain) {
 
         AuthorizationRequest auth = new AuthorizationRequest();
-        auth.objectId = deviceId;
-        auth.permission = permission.name();
+        auth.subjectId = objectId;
+        auth.permission = operation;
         auth.userId = userId;
+        auth.type = type;
+        auth.domain = domain;
 
+        return can(auth);
+    }
+
+    /**
+     * Check if an user is authorized to operate on a device
+     *
+     * @param userId
+     * @param type
+     * @param operation
+     * @param objectId
+     * @return
+     */
+    public AuthorizationResponse isAuthorized(String userId, EntityType type, Operation operation, String objectId) {
+        return isAuthorized(userId, type, operation, objectId, null);
+    }
+    
+    /**
+     * Check if an user is authorized to operate on a device
+     *
+     * @param auth
+     * @return
+     */
+    public AuthorizationResponse can(AuthorizationRequest auth) {
         JsonNode node = getClient().post(Routes.PERMISSION_CHECK, toJsonNode(auth), RequestOptions.retriable());
         return getMapper().convertValue(node, AuthorizationResponse.class);
     }
@@ -155,7 +185,7 @@ public class UserClient extends AbstractClient {
     public void sync(SyncRequest req, RequestOptions opts) {
         getClient().post(Routes.PERMISSION_SYNC, toJsonNode(req), opts);
     }
-    
+
     /**
      * Register a device for an user in ACL system
      *
@@ -164,22 +194,55 @@ public class UserClient extends AbstractClient {
     public void sync(SyncRequest req) {
         getClient().post(Routes.PERMISSION_SYNC, toJsonNode(req), RequestOptions.retriable().maxRetries(5).waitFor(100));
     }
-    
+
     /**
-     * Register a device for an user in ACL system
+     * Register a device in the ACL system
      *
      * @param op
-     * @param device
+     * @param subj
      */
-    public void sync(Permissions op, Device device) {
+    public void sync(Operation op, Device subj) {
+        sync(EntityType.device, op, subj.getId(), subj.getUserId());
+    }
+    
+    /**
+     * Register a node in the ACL system
+     *
+     * @param op
+     * @param subj
+     */
+    public void sync(Operation op, TreeNode subj) {
+        sync(EntityType.tree, op, subj.getId(), subj.getOwnerId());
+    }
+    
+    /**
+     * Register an app in the ACL system
+     *
+     * @param op
+     * @param subj
+     */
+    public void sync(Operation op, App subj) {
+        sync(EntityType.app, op, subj.getId(), subj.getOwnerId());
+    }
+    
+    /**
+     * Register an entity in the ACL system
+     *
+     * @param type
+     * @param userId
+     * @param op
+     * @param subjectId
+     */
+    public void sync(EntityType type, Operation op, String subjectId, String userId) {
         SyncRequest req = new SyncRequest();
-        req.objectId = device.id();
-        req.userId = device.userId();
-        req.created = device.getCreatedAt();
-        req.operation = op;
+        req.subjectId = subjectId;
+        req.userId = userId;
+        req.permission = op;
+        req.type = type;
         sync(req);
     }
-
+    
+    
     /**
      * Get an user
      *
@@ -231,9 +294,9 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public User update(User user) {
-        assert user.getUuid() != null;
+        assert user.getId() != null;
         JsonUser jsonUser = new JsonUser(user);
-        JsonNode node = getClient().put(String.format(Routes.USER_UPDATE, user.getUuid()), toJsonNode(jsonUser));
+        JsonNode node = getClient().put(String.format(Routes.USER_UPDATE, user.getId()), toJsonNode(jsonUser));
         return getMapper().convertValue(node, User.class);
     }
 
@@ -241,11 +304,10 @@ public class UserClient extends AbstractClient {
      * Delete a user
      *
      * @param user
-     * @return
      */
     public void delete(User user) {
-        assert user.getUuid() != null;
-        delete(user.getUuid());
+        assert user.getId() != null;
+        delete(user.getId());
     }
 
     /**
@@ -266,7 +328,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public User create(String username, String password, String email) {
-        return create(username, password, email, new HashSet(Arrays.asList(new Role(Role.Roles.user))));
+        return create(username, password, email, new ArrayList());
     }
 
     /**
@@ -278,7 +340,7 @@ public class UserClient extends AbstractClient {
      * @return
      */
     public User createAdmin(String username, String password, String email) {
-        return create(username, password, email, new HashSet(Arrays.asList(new Role(Role.Roles.admin))));
+        return create(username, password, email, Arrays.asList(new Role(StaticGroup.admin)));
     }
 
     /**
@@ -287,15 +349,15 @@ public class UserClient extends AbstractClient {
      * @param username
      * @param password
      * @param email
-     * @param roles
+     * @param groups
      * @return
      */
-    public User create(String username, String password, String email, Set<Role> roles) {
+    public User create(String username, String password, String email, List<Role> groups) {
         User user = new User();
         user.setUsername(username);
         user.setPassword(password);
         user.setEmail(email);
-        user.setRoles(roles);
+        user.setRoles(groups);
         return create(user);
     }
 

@@ -44,7 +44,7 @@ public class ProfileClient extends AbstractClient {
      * @return
      */
     public JsonNode set(String name, Object data) {
-        return getClient().put(String.format(Routes.PROFILE_SET, getContainer().Auth().getUser().getUuid(), name), toJsonNode(data));
+        return getClient().put(String.format(Routes.PROFILE_SET, getContainer().Auth().getUser().getId(), name), toJsonNode(data));
     }
     
     /**
@@ -54,7 +54,7 @@ public class ProfileClient extends AbstractClient {
      * @return
      */
     public JsonNode get(String name) {
-        return getClient().get(String.format(Routes.PROFILE_GET, getContainer().Auth().getUser().getUuid(), name));
+        return getClient().get(String.format(Routes.PROFILE_GET, getContainer().Auth().getUser().getId(), name));
     }
     
     /**
@@ -63,7 +63,7 @@ public class ProfileClient extends AbstractClient {
      * @return
      */
     public JsonNode get() {
-        return getClient().get(String.format(Routes.PROFILE_GET_ALL, getContainer().Auth().getUser().getUuid()));
+        return getClient().get(String.format(Routes.PROFILE_GET_ALL, getContainer().Auth().getUser().getId()));
     }
 
     public ObjectNode newObjectNode() {

@@ -15,7 +15,6 @@
  */
 package org.createnet.raptor.models.auth;
 
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -35,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.persistence.Cacheable;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -42,6 +42,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import org.createnet.raptor.models.acl.Owneable;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Cascade;
@@ -52,23 +53,18 @@ import org.hibernate.validator.constraints.Email;
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
-
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"}, ignoreUnknown = true)
 @Entity
 @Cacheable(value = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(name = "users")
-public class User implements Serializable {
-    
-    static final long serialVersionUID = 1000000000000001L;
-    
-    @JsonIgnore
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    protected Long id;
+public class User implements Serializable, Owneable {
 
+    static final long serialVersionUID = 1000000000000001L;
+
+    @Id
     @NotEmpty
-    protected String uuid = UUID.randomUUID().toString();
+    protected String id;
 
     @NotEmpty
     @Column(unique = true, nullable = false, length = 128)
@@ -92,9 +88,9 @@ public class User implements Serializable {
     final protected List<Token> tokens = new ArrayList();
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_roles", joinColumns = {
+    @JoinTable(name = "users_groups", joinColumns = {
         @JoinColumn(name = "user_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "role_id")})
+        @JoinColumn(name = "group_id")})
     final protected List<Role> roles = new ArrayList();
 
     @Column(length = 64)
@@ -127,6 +123,10 @@ public class User implements Serializable {
 
     public User() {
     }
+    
+    public User(String userId) {
+        this.id = userId;
+    }
 
     public User(User user) {
         this(user, false);
@@ -142,39 +142,25 @@ public class User implements Serializable {
         this.enabled = user.getEnabled();
 
         user.getTokens().stream().forEach((token) -> this.addToken(token));
-        user.getRoles().stream().forEach((role) -> this.addRole(role));
+        user.getRoles().stream().forEach((g) -> this.addRole(g));
 
         if (!newUser) {
             this.id = user.getId();
-            this.uuid = user.getUuid();
         }
 
     }
 
     @JsonIgnore
     public boolean isAdmin() {
-        return isSuperAdmin() || this.hasRole(Role.Roles.admin);
-    }
-
-    @JsonIgnore
-    public boolean isSuperAdmin() {
-        return this.hasRole(Role.Roles.super_admin);
-    }
-
-    public boolean hasRole(Role.Roles name) {
-        return hasRole(name.name());
+        return this.hasRole(StaticGroup.admin);
     }
 
     public boolean hasRole(String name) {
         return this.getRoles().stream().filter(r -> r.getName().equals(name)).count() >= 1;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public boolean hasRole(StaticGroup g) {
+        return hasRole(g.name());
     }
 
     public String getUsername() {
@@ -195,19 +181,24 @@ public class User implements Serializable {
 
     @JsonProperty("roles")
     public Object[] listRoles() {
-        return roles.stream().map(r -> r.getName()).toArray();
+        return roles.stream().map(g -> g.getName()).toArray();
     }
-
-    @JsonProperty("roles")
-    public void setListRoles(List<String> list) {
-        list.forEach(r -> addRole(new Role(r)));
-    }
-
+    
+    @JsonIgnore
     public List<Role> getRoles() {
         return roles;
     }
-
-    public void setRoles(Set<Role> roles) {
+    
+    @JsonProperty("roles")
+    public void setRolesList(List<String> roles) {
+        this.roles.clear();
+        this.roles.addAll(
+            roles.stream().map(r -> new Role(r)).collect(Collectors.toList())
+        );
+    }
+    
+    @JsonIgnore
+    public void setRoles(List<Role> roles) {
         this.roles.clear();
         this.roles.addAll(roles);
     }
@@ -218,9 +209,9 @@ public class User implements Serializable {
         }
     }
 
-    public void addRole(Role.Roles role) {
-        if (!this.hasRole(role)) {
-            this.roles.add(new Role(role));
+    public void addRole(StaticGroup g) {
+        if (!this.hasRole(g)) {
+            this.roles.add(new Role(g));
         }
     }
 
@@ -230,18 +221,18 @@ public class User implements Serializable {
         }
     }
 
-    public void removeRole(Role.Roles role) {
-        if (this.hasRole(role)) {
-            this.roles.remove(new Role(role));
+    public void removeRole(StaticGroup g) {
+        if (this.hasRole(g)) {
+            this.roles.remove(new Role(g));
         }
     }
 
-    public String getUuid() {
-        return uuid;
+    public String getId() {
+        return id;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public List<Token> getTokens() {
@@ -300,7 +291,7 @@ public class User implements Serializable {
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
-    
+
     public Date getLastPasswordResetDate() {
         return lastPasswordResetDate;
     }
@@ -323,7 +314,22 @@ public class User implements Serializable {
 
     @Override
     public String toString() {
-        return "User{" + "uuid=" + uuid + '}';
+        return "User{" + "uuid=" + id + '}';
+    }
+
+    public boolean hasPermission(Permission p) {
+        return getRoles().stream().filter((g) -> {
+            return g.getPermissions().contains(p);
+        }).count() > 0;
+    }
+    
+    public boolean hasPermission(String p) {
+        return hasPermission(new Permission(p));
+    }
+
+    @Override
+    public String getOwnerId() {
+        return getId();
     }
 
 }

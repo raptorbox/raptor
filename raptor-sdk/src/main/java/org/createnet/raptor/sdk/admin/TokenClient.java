@@ -18,12 +18,14 @@ package org.createnet.raptor.sdk.admin;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.List;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.payload.TokenPayload;
 import org.createnet.raptor.sdk.AbstractClient;
+import org.createnet.raptor.sdk.PageResponse;
+import org.createnet.raptor.sdk.QueryString;
 import org.createnet.raptor.sdk.Raptor;
+import org.createnet.raptor.sdk.RequestOptions;
 import org.createnet.raptor.sdk.Routes;
 import org.createnet.raptor.sdk.events.callback.TokenCallback;
 import org.createnet.raptor.sdk.events.callback.TokenEventCallback;
@@ -96,12 +98,30 @@ public class TokenClient extends AbstractClient {
      * Get user tokens
      *
      * @param userUuid token owner
+     * @param page
+     * @param limit
      * @return
      */
-    public List<Token> list(String userUuid) {
-        JsonNode node = getClient().get(String.format(Routes.TOKEN_LIST, userUuid));
-        return getMapper().convertValue(node, new TypeReference<List<Token>>() {
-        });
+    public PageResponse<Token> list(String userUuid, int page, int limit) {
+        QueryString qs = new QueryString();
+        qs.query.add("userId", userUuid);
+        qs.pager.page = page;
+        qs.pager.limit = limit;
+        JsonNode node = getClient().get(Routes.TOKEN_LIST + qs.toString());
+        return getMapper().convertValue(node, new TypeReference<PageResponse<Token>>() {});
+    }
+    
+    /**
+     * Get user tokens
+     *
+     * @param userUuid token owner
+     * @return
+     */
+    public PageResponse<Token> list(String userUuid) {
+        QueryString qs = new QueryString();
+        qs.query.add("userId", userUuid);
+        JsonNode node = getClient().get(Routes.TOKEN_LIST + qs.toString());
+        return getMapper().convertValue(node, new TypeReference<PageResponse<Token>>() {});
     }
 
     /**
@@ -109,8 +129,8 @@ public class TokenClient extends AbstractClient {
      *
      * @return
      */
-    public List<Token> list() {
-        return list(getContainer().Auth().getUser().getUuid());
+    public PageResponse<Token> list() {
+        return list(getContainer().Auth().getUser().getId());
     }
     
     /**
@@ -119,7 +139,7 @@ public class TokenClient extends AbstractClient {
      * @param tokenId
      * @return
      */
-    public Token read(long tokenId) {
+    public Token read(String tokenId) {
         JsonNode node = getClient().get(String.format(Routes.TOKEN_GET, tokenId));
         Token t1 = getMapper().convertValue(node, Token.class);
         return t1;
@@ -143,8 +163,12 @@ public class TokenClient extends AbstractClient {
      * @return
      */
     public Token create(Token token) {
+        return create(token, null);
+    }
+    
+    public Token create(Token token, RequestOptions opts) {
         JsonToken jsonToken = new JsonToken(token);
-        JsonNode node = getClient().post(Routes.TOKEN_CREATE, toJsonNode(jsonToken));
+        JsonNode node = getClient().post(Routes.TOKEN_CREATE, toJsonNode(jsonToken), opts);
         Token t1 = getMapper().convertValue(node, Token.class);
         return mergeToken(token, t1);
     }

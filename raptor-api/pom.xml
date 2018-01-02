@@ -14,14 +14,11 @@
 
     <modules>
         <module>raptor-common</module>        
-        <module>raptor-broker</module>        
         <module>raptor-profile</module>
         <module>raptor-inventory</module>
-        <module>raptor-auth</module>
         <module>raptor-action</module>
         <module>raptor-stream</module>
         <module>raptor-tree</module>
-        <module>raptor-gateway</module>
         <module>raptor-standalone</module>
     </modules>
     

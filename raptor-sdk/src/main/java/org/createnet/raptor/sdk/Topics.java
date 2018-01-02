@@ -15,20 +15,17 @@
  */
 package org.createnet.raptor.sdk;
 
+import org.createnet.raptor.models.acl.EntityType;
+
 /**
  * List of topics for Raptor API
  */
 final public class Topics {
-    
-    public enum Types {
-        action, stream, device, user, tree, token
-    }
-    
-    public static final String ACTION = Types.action.name() + "/%s/%s";
-    public static final String STREAM = Types.stream.name() + "/%s/%s";
-    public static final String DEVICE = Types.device.name() + "/%s";
-    public static final String USER = Types.user.name() + "/%s";
-    public static final String TOKEN = Types.token.name() + "/%s";
-    public static final String TREE = Types.tree.name() + "/%s";
-    
+    public static final String ACTION = EntityType.action.name() + "/%s/%s";
+    public static final String STREAM = EntityType.stream.name() + "/%s/%s";
+    public static final String DEVICE = EntityType.device.name() + "/%s";
+    public static final String USER = EntityType.user.name() + "/%s";
+    public static final String TOKEN = EntityType.token.name() + "/%s";
+    public static final String TREE = EntityType.tree.name() + "/%s/%s";
+    public static final String APP = EntityType.app.name() + "/%s";
 }

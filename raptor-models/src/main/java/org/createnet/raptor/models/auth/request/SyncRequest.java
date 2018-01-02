@@ -15,16 +15,19 @@
  */
 package org.createnet.raptor.models.auth.request;
 
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.EntityType;
+import org.createnet.raptor.models.acl.Operation;
 
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
  */
 public class SyncRequest {
-  public String objectId;
-  public String userId;
-  public String parentId;  
-  public Long created;
-  public Permissions operation;
+
+    public String subjectId;
+    public String userId;
+    public String parentId;
+    public Long created;
+    public EntityType type;
+    public Operation permission;
 }

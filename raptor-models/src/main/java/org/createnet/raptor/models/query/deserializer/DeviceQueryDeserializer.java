@@ -41,6 +41,7 @@ public class DeviceQueryDeserializer extends AbstractQueryDeserializer<DeviceQue
         
         handleTextQuery("name", query.name, node);
         handleTextQuery("description", query.description, node);
+        handleTextQuery("domain", query.domain, node);
         handleTextQuery("id", query.id, node);
 
         handleMapQuery("properties", query.properties, node);

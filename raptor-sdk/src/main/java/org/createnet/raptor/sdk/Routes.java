@@ -56,7 +56,7 @@ final public class Routes {
     public static final String TOKEN_UPDATE = TOKEN_CREATE + "/%s";
     public static final String TOKEN_GET = TOKEN_UPDATE;
     public static final String TOKEN_DELETE = TOKEN_UPDATE;
-    public static final String TOKEN_LIST = TOKEN_CREATE + "?uuid=%s";
+    public static final String TOKEN_LIST = TOKEN_CREATE;
     public static final String TOKEN_CURRENT = TOKEN_CREATE + "/current";
     
     public static final String PROFILE_GET_ALL = "/profile/%s";
@@ -75,11 +75,26 @@ final public class Routes {
     public static final String INVENTORY_LOAD = INVENTORY_UPDATE;
     public static final String INVENTORY_DELETE = INVENTORY_UPDATE;
     
-    public static final String TREE_LIST = "/tree/";
+    public static final String TREE_LIST = "/tree/";    
+    public static final String TREE_SEARCH = TREE_LIST + "search";
     public static final String TREE_CREATE = TREE_LIST;
     public static final String TREE_GET = TREE_LIST + "%s";
     public static final String TREE_CHILDREN = TREE_GET + "/children";
-    public static final String TREE_ADD = TREE_GET;
+    public static final String TREE_ADD = TREE_CHILDREN;
     public static final String TREE_REMOVE = TREE_GET;
     public static final String TREE_REMOVE_TREE = TREE_GET + "tree";
+    
+    public static final String APP_CREATE = "/app";
+    public static final String APP_LIST = APP_CREATE;
+    public static final String APP_SEARCH = APP_CREATE + "/search";
+    public static final String APP_READ = APP_CREATE + "/%s";
+    public static final String APP_UPDATE = APP_READ;
+    public static final String APP_DELETE = APP_READ;
+    
+    public static final String ROLE_CREATE = "/auth/role";
+    public static final String ROLE_LIST = ROLE_CREATE;
+    public static final String ROLE_READ = ROLE_CREATE + "/%s";
+    public static final String ROLE_UPDATE = ROLE_READ;
+    public static final String ROLE_DELETE = ROLE_READ;
+    
 }

@@ -28,10 +28,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import org.createnet.raptor.models.acl.AclSubject;
+import org.createnet.raptor.models.acl.AbstractAclSubject;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Cascade;
@@ -46,8 +45,10 @@ import org.hibernate.annotations.CascadeType;
 @Cacheable(value = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(name = "devices")
-public class AclDevice implements AclSubject {
+public class AclDevice extends AbstractAclSubject {
 
+    static final long serialVersionUID = 1000000000000006L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -58,10 +59,6 @@ public class AclDevice implements AclSubject {
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     private User owner;
-
-    @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY)
-    private AclDevice parent;
 
     @JsonIgnore
     @OneToMany(mappedBy = "device", fetch = FetchType.LAZY)
@@ -76,6 +73,7 @@ public class AclDevice implements AclSubject {
         this.uuid = uuid;
     }
 
+    @Override
     public Long getId() {
         return id;
     }
@@ -95,45 +93,23 @@ public class AclDevice implements AclSubject {
     public User getOwner() {
         return owner;
     }
+    
+    @Override
+    public User getUser() {
+        return getOwner();
+    }
 
     public void setOwner(User owner) {
         this.owner = owner;
-    }
-
-    public AclDevice getParent() {
-        return parent;
-    }
-
-    @JsonIgnore
-    public Long getParentId() {
-        return hasParent() ? getParent().getId() : null;
-    }
-
-    public void setParent(AclDevice parent) {
-        this.parent = parent;
     }
 
     public List<Token> getTokens() {
         return tokens;
     }
 
-    public boolean hasParent() {
-        return this.getParent() != null;
-    }
-
     @Override
     public String toString() {
-        return "Device{" + "uuid=" + uuid + '}';
+        return String.format("Device[uuid=%s]", uuid);
     }
-
-    @Override
-    public Long getSubjectId() {
-        return getId();
-    }
-
-    @Override
-    public Long getSubjectParentId() {
-        return getParentId();
-    }
-
+    
 }

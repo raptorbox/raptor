@@ -12,52 +12,6 @@
     <packaging>jar</packaging>
     <dependencies>
     
-        <!--
-            Artemis dependencies: 
-            duplicated otherwise seems deps loaded from classpath are not available
-        -->
-
-<!--        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>artemis-journal</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>artemis-commons</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>artemis-server</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>artemis-core-client</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>artemis-jms-client</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>artemis-jms-server</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>artemis-mqtt-protocol</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>artemis-amqp-protocol</artifactId>
-            <version>2.1.0</version>
-        </dependency>-->
-
         <dependency>
             <groupId>net.sf.ehcache</groupId>
             <artifactId>ehcache</artifactId>
@@ -65,21 +19,9 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>raptor-auth</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>raptor-common</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
-<!--        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>raptor-broker</artifactId>
-            <version>${project.version}</version>
-        </dependency>-->
  
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -106,7 +48,6 @@
             <artifactId>raptor-tree</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
         
     </dependencies>
     
@@ -152,8 +93,6 @@
                     <showDeprecation>false</showDeprecation>
                 </configuration>
             </plugin>
-            
-            
             
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

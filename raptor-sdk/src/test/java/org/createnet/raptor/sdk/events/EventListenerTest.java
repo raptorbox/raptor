@@ -17,12 +17,14 @@ package org.createnet.raptor.sdk.events;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.createnet.raptor.models.acl.PermissionUtil;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.EntityType;
+import org.createnet.raptor.models.acl.Operation;
+import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
@@ -219,7 +221,7 @@ public class EventListenerTest {
             raptor.Stream().push(record);
         });
 
-        Utils.waitUntil(10, () -> done.get() != len);
+        Utils.waitUntil(15, () -> done.get() != len);
     }
 
     @Test
@@ -272,7 +274,7 @@ public class EventListenerTest {
 
         final AtomicInteger done = new AtomicInteger(2);
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("watch data events");
 
@@ -290,7 +292,7 @@ public class EventListenerTest {
 
         pushData(dev);
 
-        Utils.waitUntil(5, () -> done.get() > 0);
+        Utils.waitUntil(10, () -> done.get() > 0);
     }
 
     @Test
@@ -335,7 +337,7 @@ public class EventListenerTest {
 
         final AtomicBoolean done = new AtomicBoolean(false);
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("watch action events");
 
@@ -354,7 +356,7 @@ public class EventListenerTest {
         Action action = dev.action("switch");
         raptor.Action().invoke(action, "on");
 
-        Utils.waitUntil(5, () -> !done.get());
+        Utils.waitUntil(15, () -> !done.get());
     }
 
     @Test
@@ -366,12 +368,14 @@ public class EventListenerTest {
 
         log.debug("subscribe with permission token");
 
-        Raptor r = Utils.createNewInstance();
+        Raptor r = Utils.createNewAdminInstance();
         r.Auth().login();
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
 
-        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.admin));
+        r.Admin().Token().Permission().set(t, Arrays.asList(
+                new Permission(EntityType.device, Operation.execute, true)
+        ));
 
         Device dev = r.Inventory().create(newDevice("dev"));
 
@@ -390,7 +394,7 @@ public class EventListenerTest {
         Action action = dev.action("switch");
         raptor.Action().invoke(action, "on");
 
-        Utils.waitUntil(5, () -> !done.get());
+        Utils.waitUntil(15, () -> !done.get());
     }
 
     @Test
@@ -400,11 +404,13 @@ public class EventListenerTest {
 
         log.debug("subscribe with failing permissions");
 
-        Raptor r = Utils.createNewInstance();
+        Raptor r = Utils.createNewUserInstance();
         r.Auth().login();
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
-        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.execute));
+        r.Admin().Token().Permission().set(t, Arrays.asList(
+                new Permission(EntityType.device, Operation.execute, true)
+        ));
 
         List<String> perms = r.Admin().Token().Permission().get(t);
         Assert.assertEquals(1, perms.size());
@@ -443,11 +449,13 @@ public class EventListenerTest {
 
         log.debug("subscribe to stream topic with permissions (subscribe, pull)");
 
-        Raptor r = Utils.createNewInstance();
+        Raptor r = Utils.createNewAdminInstance();
         r.Auth().login();
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
-        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.pull));
+        r.Admin().Token().Permission().set(t, Arrays.asList(
+                new Permission(EntityType.device, Operation.pull, true)
+        ));
 
         Device dev = r.Inventory().create(newDevice("dev"));
 
@@ -477,11 +485,13 @@ public class EventListenerTest {
 
         log.debug("subscribe to action topic with permissions (subscribe, execute)");
 
-        Raptor r = Utils.createNewInstance();
+        Raptor r = Utils.createNewAdminInstance();
         r.Auth().login();
 
         Token t = r.Admin().Token().create(new Token("test", "test"));
-        r.Admin().Token().Permission().set(t, PermissionUtil.asList(Permissions.execute));
+        r.Admin().Token().Permission().set(t, Arrays.asList(
+                new Permission(EntityType.device, Operation.execute, true)
+        ));
 
         Device dev = r.Inventory().create(newDevice("dev"));
 

@@ -30,7 +30,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import org.createnet.raptor.models.acl.AclDomain;
+import org.createnet.raptor.models.acl.Owneable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
@@ -44,10 +47,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @JsonDeserialize(using = DeviceDeserializer.class)
 @Document
 @QueryEntity
-public class Device extends DeviceContainer {
-    
+public class Device extends DeviceContainer implements Owneable, AclDomain {
+
     static final long serialVersionUID = 1000000000000051L;
-    
+
     @JsonIgnore
     @Transient
     private final Logger logger = LoggerFactory.getLogger(Device.class);
@@ -73,7 +76,9 @@ public class Device extends DeviceContainer {
 
     @Indexed
     private Long updatedAt = createdAt;
-
+    
+    private String domain;
+        
     @Indexed
     final private Map<String, Object> properties = new HashMap();
 
@@ -81,13 +86,28 @@ public class Device extends DeviceContainer {
     final private Map<String, Stream> streams = new HashMap();
     final private Map<String, Action> actions = new HashMap();
 
+    @Override
+    public String getOwnerId() {
+        return getUserId();
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+    
+    @Override
+    public String getDomain() {
+        return domain();
+    }
+
     /**
      * A serializable class containing the settings for a Device
      */
     static public class Settings implements Serializable {
-        
+
         static final long serialVersionUID = 1000000000000055L;
-        
+
         public boolean storeData = true;
         public boolean eventsEnabled = true;
 
@@ -136,6 +156,7 @@ public class Device extends DeviceContainer {
 
         this.name(raw.name());
         this.description(raw.description());
+        this.domain(raw.domain());
 
         this.settings().eventsEnabled = raw.settings().eventsEnabled;
         this.settings().storeData = raw.settings().storeData;
@@ -184,7 +205,7 @@ public class Device extends DeviceContainer {
         if (this.name == null) {
             throw new ValidationException("name field missing");
         }
-        
+
         if (!this.isNew() && (this.id == null || this.id.isEmpty())) {
             throw new ValidationException("id field missing");
         }
@@ -222,6 +243,7 @@ public class Device extends DeviceContainer {
 
         id = device.id();
         userId = device.userId();
+        domain = device.domain();
 
         name = device.name();
         description = device.description();
@@ -317,6 +339,13 @@ public class Device extends DeviceContainer {
         return super.equals(obj);
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 67 * hash + Objects.hashCode(this.id);
+        return hash;
+    }
+
     @JsonProperty
     public String name() {
         return name;
@@ -325,6 +354,11 @@ public class Device extends DeviceContainer {
     @JsonProperty
     public String description() {
         return description;
+    }
+    
+    @JsonProperty
+    public String domain() {
+        return domain;
     }
 
     @JsonIgnore
@@ -419,6 +453,11 @@ public class Device extends DeviceContainer {
 
     public Device name(String name) {
         this.name = name;
+        return this;
+    }
+    
+    public Device domain(String domain) {
+        this.domain = domain;
         return this;
     }
 
@@ -601,10 +640,6 @@ public class Device extends DeviceContainer {
     @Override
     public Device getDevice() {
         return this;
-    }
-
-    public String getId() {
-        return id;
     }
 
     public String getUserId() {

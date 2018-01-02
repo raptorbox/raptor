@@ -30,6 +30,7 @@ public class DeviceQuery extends BaseQuery {
 
     public final TextQuery id = new TextQuery();
     public final TextQuery name = new TextQuery();
+    public final TextQuery domain = new TextQuery();
     public final TextQuery description = new TextQuery();
     public final MapQuery properties = new MapQuery();
     
@@ -40,15 +41,27 @@ public class DeviceQuery extends BaseQuery {
         super.userId = userId;
     }
     
-    public static DeviceQuery queryByDeviceId(String... deviceId) {
+    public static DeviceQuery queryByDeviceId(String... ids) {
         DeviceQuery q = new DeviceQuery();
-        q.id.in(deviceId);
+        q.id.in(ids);
+        return q;
+    }
+    
+    public static DeviceQuery queryByDomainId(String... ids) {
+        DeviceQuery q = new DeviceQuery();
+        q.domain.in(ids);
         return q;
     }
     
     public static DeviceQuery queryByDeviceId(List<String> deviceId) {
         DeviceQuery q = new DeviceQuery();
         q.id.in(deviceId.toArray(new String[deviceId.size()]));
+        return q;
+    }
+    
+    public static DeviceQuery queryByDomainId(List<String> ids) {
+        DeviceQuery q = new DeviceQuery();
+        q.domain.in(ids.toArray(new String[ids.size()]));
         return q;
     }
     

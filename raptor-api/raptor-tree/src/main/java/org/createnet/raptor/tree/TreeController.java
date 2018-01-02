@@ -15,6 +15,7 @@
  */
 package org.createnet.raptor.tree;
 
+import com.querydsl.core.types.Predicate;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -23,12 +24,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.createnet.raptor.common.client.ApiClientService;
+import org.createnet.raptor.common.query.TreeQueryBuilder;
 import org.createnet.raptor.models.auth.User;
+import org.createnet.raptor.models.query.TreeQuery;
 import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.createnet.raptor.models.tree.TreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,35 +50,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/tree")
 @ApiResponses(value = {
-    @ApiResponse(
-            code = 200,
-            message = "Ok"
-    )
-    ,
-    @ApiResponse(
-            code = 204,
-            message = "No content"
-    )
-    ,
-    @ApiResponse(
-            code = 202,
-            message = "Accepted"
-    )
-    ,
-    @ApiResponse(
-            code = 401,
-            message = "Not authorized"
-    )
-    ,
-    @ApiResponse(
-            code = 403,
-            message = "Forbidden"
-    )
-    ,
-    @ApiResponse(
-            code = 500,
-            message = "Internal error"
-    )
+    @ApiResponse(code = 200,message = "Ok"),
+    @ApiResponse(code = 204,message = "No content"),
+    @ApiResponse(code = 202,message = "Accepted"),
+    @ApiResponse(code = 401,message = "Not authorized"),
+    @ApiResponse(code = 403,message = "Forbidden"),
+    @ApiResponse(code = 500,message = "Internal error")
 })
 @Api(tags = {"Inventory", "Tree"})
 public class TreeController {
@@ -86,7 +68,6 @@ public class TreeController {
     @Autowired
     private TreeService treeService;
 
-
     @RequestMapping(
             method = RequestMethod.POST
     )
@@ -95,29 +76,29 @@ public class TreeController {
             notes = "",
             nickname = "create"
     )
-    @PreAuthorize("hasPermission(null, 'tree')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'create', #raw)")
     public ResponseEntity<?> create(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("parentId") Optional<String> optionalParentId,
             @RequestBody TreeNode raw
     ) {
-               
+
         TreeNode node = new TreeNode();
         node.merge(raw);
 
-        if(node.getUserId() == null) {
+        if (node.getUserId() == null) {
             node.user(currentUser);
         }
-        if (!currentUser.isAdmin() && !node.getUserId().equals(currentUser.getUuid())) {
+        if (!currentUser.isAdmin() && !node.getUserId().equals(currentUser.getId())) {
             node.user(currentUser);
         }
-        
+
         treeService.save(node);
         log.debug("Added node {}", node.getId());
 
         return ResponseEntity.ok(node);
-    }    
-    
+    }
+
     @RequestMapping(
             method = RequestMethod.GET
     )
@@ -128,7 +109,7 @@ public class TreeController {
             responseContainer = "List",
             nickname = "list"
     )
-    @PreAuthorize("hasPermission(null, 'tree')")
+    @PreAuthorize("@raptorSecurity.list(principal, 'tree')")
     public ResponseEntity<?> list(
             @AuthenticationPrincipal User currentUser
     ) {
@@ -149,7 +130,7 @@ public class TreeController {
             responseContainer = "List",
             nickname = "tree"
     )
-    @PreAuthorize("hasPermission(null, 'tree')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'read', #nodeId)")
     public ResponseEntity<?> tree(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("nodeId") String nodeId
@@ -169,13 +150,13 @@ public class TreeController {
             responseContainer = "List",
             nickname = "children"
     )
-    @PreAuthorize("hasPermission(null, 'tree')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'read', #nodeId)")
     public ResponseEntity<?> children(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("nodeId") String nodeId
     ) {
         List<TreeNode> children = treeService.children(nodeId);
-        if(children == null) {
+        if (children == null) {
             return ResponseEntity.ok(new TreeNode[0]);
         }
         return ResponseEntity.ok(children);
@@ -183,27 +164,23 @@ public class TreeController {
 
     @RequestMapping(
             method = RequestMethod.PUT,
-            value = { "/{parentId}", "/" }
+            value = {"/{parentId}/children"}
     )
     @ApiOperation(
             value = "Add items to the tree node",
             notes = "",
             nickname = "add"
     )
-    @PreAuthorize("hasPermission(null, 'tree')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'create', #parentId)")
     public ResponseEntity<?> add(
             @AuthenticationPrincipal User currentUser,
-            @PathVariable("parentId") Optional<String> optionalParentId,
+            @PathVariable("parentId") String parentId,
             @RequestBody List<TreeNode> nodes
     ) {
 
-        TreeNode parent = new TreeNode();
-        if(optionalParentId.isPresent()) {
-            TreeNode storedParent = treeService.get(optionalParentId.get());
-            if (storedParent == null) {
-                return JsonErrorResponse.notFound("Node not found");
-            }
-            parent.merge(storedParent);
+        TreeNode parent = treeService.get(parentId);
+        if (parent == null) {
+            return JsonErrorResponse.notFound("Node not found");
         }
 
         nodes.stream().forEach((raw) -> {
@@ -215,11 +192,11 @@ public class TreeController {
 
             node.merge(raw);
             node.parent(parent);
-            
-            if(node.getUserId() == null) {
+
+            if (node.getUserId() == null) {
                 node.user(currentUser);
             }
-            if (!currentUser.isAdmin() && !node.getUserId().equals(currentUser.getUuid())) {
+            if (!currentUser.isAdmin() && !node.getUserId().equals(currentUser.getId())) {
                 node.user(currentUser);
             }
 
@@ -227,27 +204,60 @@ public class TreeController {
             log.debug("Added children {}", node.getId());
         });
 
-        return ResponseEntity.accepted().build();
+        parent.children().clear();
+        parent.children().addAll(nodes);
+        
+        return ResponseEntity.ok(parent);
+    }
+
+    @RequestMapping(
+            method = RequestMethod.PUT,
+            value = {"/{id}"}
+    )
+    @ApiOperation(
+            value = "Update a tree node",
+            notes = "",
+            nickname = "update"
+    )
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'update', #id)")
+    public ResponseEntity<?> update(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable("id") String id,
+            @RequestBody TreeNode raw
+    ) {
+        
+        TreeNode node = treeService.get(id);
+        if (node == null) {
+            return JsonErrorResponse.notFound("Node not found");
+        }
+
+        raw.id(id);
+        node.merge(raw);
+        
+        treeService.save(node);
+        log.debug("Updated node {}", node.getId());
+
+        return ResponseEntity.ok(node);
     }
 
     @RequestMapping(
             method = RequestMethod.DELETE,
-            value = { "/{nodeId}" }
+            value = {"/{nodeId}"}
     )
     @ApiOperation(
             value = "Delete a node from a tree",
             notes = "",
             nickname = "delete"
     )
-    @PreAuthorize("hasPermission(null, 'tree')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'delete', #nodeId)")
     public ResponseEntity<?> delete(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("nodeId") String nodeId
     ) {
 
         TreeNode node = treeService.get(nodeId);
-        
-        if(node == null) {
+
+        if (node == null) {
             return JsonErrorResponse.notFound();
         }
 
@@ -256,5 +266,31 @@ public class TreeController {
 
         return ResponseEntity.accepted().build();
     }
+    
+    @RequestMapping(method = RequestMethod.POST, value = "/search")
+    @ApiOperation(value = "Search for tree nodes instances", notes = "", response = Page.class, nickname = "searchTreeNodes")
+    @PreAuthorize("@raptorSecurity.can(principal, 'tree', 'read')")
+    public ResponseEntity<?> searchTreeNodes(
+            @AuthenticationPrincipal User currentUser,
+            @RequestBody TreeQuery query
+    ) {
 
+        if (query.isEmpty()) {
+            return JsonErrorResponse.badRequest();
+        }
+
+        if (!currentUser.isAdmin()) {
+            query.userId(currentUser.getId());
+        }
+
+        TreeQueryBuilder qb = new TreeQueryBuilder(query);
+        Predicate predicate = qb.getPredicate();
+        Pageable paging = qb.getPaging();
+
+        Page<TreeNode> pagedList = treeService.search(predicate, paging);
+
+        return ResponseEntity.ok(pagedList);
+    }
+
+    
 }

@@ -44,3 +44,4 @@ package-lock.json
 data/*
 data.tgz
 datamine.tgz
+/raptor-api/raptor-app/target/

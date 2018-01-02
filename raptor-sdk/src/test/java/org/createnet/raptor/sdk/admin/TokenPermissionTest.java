@@ -18,10 +18,10 @@ package org.createnet.raptor.sdk.admin;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import org.createnet.raptor.models.acl.PermissionUtil;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.EntityType;
+import org.createnet.raptor.models.acl.Operation;
+import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.Token;
-import org.createnet.raptor.models.auth.request.AuthorizationResponse;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.models.objects.Device;
@@ -31,7 +31,6 @@ import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.sdk.config.Config;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -69,7 +68,7 @@ public class TokenPermissionTest {
     @Test
     public void testGet() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("Test get token permission");
 
@@ -94,7 +93,11 @@ public class TokenPermissionTest {
         assertNotNull(token);
         assertNotNull(token.getId());
 
-        List<String> permissions = PermissionUtil.asList(Permissions.create, Permissions.pull, Permissions.push);
+        List<Permission> permissions = Arrays.asList(
+                new Permission(EntityType.device, Operation.create),
+                new Permission(EntityType.device, Operation.pull),
+                new Permission(EntityType.device, Operation.push)
+        );
         List<String> result = raptor.Admin().Token().Permission().set(token, permissions);
 
         log.debug("Added permissions {}", permissions);
@@ -109,7 +112,7 @@ public class TokenPermissionTest {
     @Test
     public void testSet() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         createToken(raptor);
 
@@ -120,13 +123,13 @@ public class TokenPermissionTest {
     @Test
     public void testACLenforcement() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("Test ACL check on token permission");
 
         createToken(raptor);
 
-        List<Token> tokens = raptor.Admin().Token().list();
+        List<Token> tokens = raptor.Admin().Token().list().getContent();
 
         assertFalse(tokens.isEmpty());
 
@@ -162,7 +165,7 @@ public class TokenPermissionTest {
 
         Raptor admin = Utils.getRaptor();
 
-        Raptor r1 = Utils.createNewInstance();
+        Raptor r1 = Utils.createNewAdminInstance();
 
         log.debug("Test ACL token permission");
 

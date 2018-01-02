@@ -47,6 +47,10 @@ public class DeviceSerializer extends JsonSerializer<Device> {
         if (t.description() != null) {
             jg.writeStringField("description", t.description());
         }
+        
+        if (t.domain() != null) {
+            jg.writeStringField("domain", t.domain());
+        }
 
         jg.writeObjectField("streams", t.streams());
         jg.writeObjectField("actions", t.actions());

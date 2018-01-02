@@ -15,8 +15,8 @@
  */
 package org.createnet.raptor.inventory;
 
+import com.querydsl.core.BooleanBuilder;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 
 import org.createnet.raptor.common.client.ApiClientService;
@@ -32,7 +32,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.MultiValueMap;
@@ -49,8 +48,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.createnet.raptor.models.acl.Permissions;
-import org.createnet.raptor.models.exception.RequestException;
+import org.createnet.raptor.models.objects.QDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,8 +61,7 @@ import org.slf4j.LoggerFactory;
 @ApiResponses(value = {
     @ApiResponse(code = 200, message = "Ok")
     , @ApiResponse(code = 401, message = "Not authorized")
-    ,
-		@ApiResponse(code = 403, message = "Forbidden")
+    , @ApiResponse(code = 403, message = "Forbidden")
     , @ApiResponse(code = 500, message = "Internal error")})
 @Api(tags = {"Inventory"})
 public class InventoryController {
@@ -80,41 +77,36 @@ public class InventoryController {
     @Autowired
     private ApiClientService raptor;
 
-    /**
-     * Register device ACL on Auth API
-     * 
-     * @param op
-     * @param device
-     * @return 
-     */
-    protected boolean syncACL(Permissions op, Device device) {
-        try {
-            raptor.Admin().User().sync(op, device);
-        } catch (RequestException ex) {
-            log.error("Failed to sync ACL", ex.getMessage());                        
-            return false;
-        }
-        return true;
-    }
-    
-    
+
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(value = "Return the user devices", notes = "", response = Device.class, nickname = "getDevices")
-    public ResponseEntity<?> getDevices(@AuthenticationPrincipal User currentUser) {
+    @PreAuthorize("@raptorSecurity.list(principal, 'device')")
+    
+    public ResponseEntity<?> getDevices(
+            @AuthenticationPrincipal User currentUser,
+            Pageable pageable
+    ) {
 
-        String deviceId = currentUser.getUuid();
-        if (currentUser.isSuperAdmin()) {
-            deviceId = null;
+        String userId = currentUser.getId();
+        if (currentUser.isAdmin()) {
+            userId = null;
         }
 
-        List<Device> devices = deviceService.list(deviceId);
+        QDevice device = new QDevice("device");
+        BooleanBuilder predicate = new BooleanBuilder();
 
-        return ResponseEntity.ok(devices);
+        if (userId != null) {
+            predicate.and(device.userId.eq(userId));
+        }
+        
+        Page<Device> result = deviceService.search(predicate, pageable);
+        
+        return ResponseEntity.ok(result);
     }
 
     @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(value = "Create a device instance", notes = "", response = Device.class, nickname = "createDevice")
-    @PreAuthorize("hasPermission(null, 'create')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'create', #device)")
     public ResponseEntity<?> createDevice(@AuthenticationPrincipal User currentUser, @RequestBody Device device) {
 
         device.setDefaults();
@@ -129,29 +121,23 @@ public class InventoryController {
         String devUserId = device.userId();
         // set current user if empty
         if (devUserId == null || devUserId.isEmpty()) {
-            devUserId = currentUser.getUuid();
+            devUserId = currentUser.getId();
         }
 
         // set ownership to current user
-        device.userId(currentUser.getUuid());
+        device.userId(currentUser.getId());
 
         // super_admin can set ownership
-        if (currentUser.isSuperAdmin()) {
+        if (currentUser.isAdmin()) {
             // set ownership as per request, fallback to current user if empty
             device.userId(devUserId);
         } else {
             // std user is the owner
-            device.userId(currentUser.getUuid());
+            device.userId(currentUser.getId());
         }
 
         deviceService.save(device);
 
-        if (!syncACL(Permissions.create, device)) {
-            log.debug("Dropping device record from database..");
-            deviceService.delete(device);
-            return JsonErrorResponse.internalError("Failed to sync acl");
-        }
-                
         eventPublisher.create(device);
 
         log.info("Created device {} for user {}", device.id(), device.userId());
@@ -161,7 +147,7 @@ public class InventoryController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/{deviceId}")
     @ApiOperation(value = "Return a device instance definition", notes = "", response = Device.class, nickname = "getDevice")
-    @PostAuthorize("hasPermission(returnObject, 'read')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'read', #deviceId)")
     public ResponseEntity<?> getDevice(@AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId) {
 
@@ -175,7 +161,7 @@ public class InventoryController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{deviceId}")
     @ApiOperation(value = "Update a device instance", notes = "", response = Device.class, nickname = "updateDevice")
-    @PreAuthorize("hasPermission(#deviceId, 'update')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'update', #deviceId)")
     public ResponseEntity<?> updateDevice(@AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId, @RequestBody Device body) {
 
@@ -203,7 +189,7 @@ public class InventoryController {
 
         // A std user can NOT change ownership even if has `update` permission
         // Admin users can change ownership
-        if (currentUser.isSuperAdmin()) {
+        if (currentUser.isAdmin()) {
 
             // set ownership as per request if not empty
             if (body.userId() != null && !body.userId().isEmpty()) {
@@ -214,17 +200,13 @@ public class InventoryController {
 
         // ensure a default is always set (cover legacy cases where userId may be null)
         if (device.userId() == null && device.userId().isEmpty()) {
-            device.userId(currentUser.getUuid());
+            device.userId(currentUser.getId());
         }
 
         device.validate();
 
         deviceService.save(device);
-        
-        if (!syncACL(Permissions.update, device)) {
-            return JsonErrorResponse.internalError("Failed to sync acl");
-        }
-        
+
         eventPublisher.update(device);
 
         log.info("Updated device {} for user {}", device.id(), device.userId());
@@ -233,7 +215,7 @@ public class InventoryController {
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/{deviceId}")
     @ApiOperation(value = "Delete a device instance", notes = "", response = Device.class, nickname = "deleteDevice")
-    @PreAuthorize("hasPermission(#deviceId, 'delete')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'delete', #deviceId)")
     public ResponseEntity<?> deleteDevice(@AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId) {
 
@@ -243,30 +225,27 @@ public class InventoryController {
         }
 
         deviceService.delete(device);
-        
+
         eventPublisher.delete(device);
 
-        if (!syncACL(Permissions.delete, device)) {
-            return JsonErrorResponse.internalError("Failed to sync acl");
-        }        
-        
         return ResponseEntity.accepted().build();
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/search")
     @ApiOperation(value = "Search for device instances", notes = "", response = Device.class, nickname = "searchDevices")
-    @PreAuthorize("hasPermission(null, 'list')")
-    // @PostAuthorize("hasPermission(returnObject.body, 'read')") // TODO: enable
-    // shared access
-    public ResponseEntity<?> searchDevices(@AuthenticationPrincipal User currentUser,
-            @RequestParam MultiValueMap<String, String> parameters, @RequestBody DeviceQuery query) {
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'read')")
+    public ResponseEntity<?> searchDevices(
+            @AuthenticationPrincipal User currentUser,
+            @RequestParam MultiValueMap<String, String> parameters, 
+            @RequestBody DeviceQuery query
+    ) {
 
         if (query.isEmpty()) {
             return JsonErrorResponse.badRequest();
         }
 
-        if (!currentUser.isSuperAdmin()) {
-            query.userId(currentUser.getUuid());
+        if (!currentUser.isAdmin()) {
+            query.userId(currentUser.getId());
         }
 
         DeviceQueryBuilder qb = new DeviceQueryBuilder(query);
@@ -275,7 +254,7 @@ public class InventoryController {
 
         Page<Device> pagedList = deviceService.search(predicate, paging);
 
-        return ResponseEntity.ok(pagedList.getContent());
+        return ResponseEntity.ok(pagedList);
     }
 
 }

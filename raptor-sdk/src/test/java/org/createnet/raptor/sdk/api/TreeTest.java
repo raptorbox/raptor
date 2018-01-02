@@ -18,13 +18,18 @@ package org.createnet.raptor.sdk.api;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.createnet.raptor.models.acl.EntityType;
+import org.createnet.raptor.models.acl.Operation;
+import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
+import org.createnet.raptor.models.query.TreeQuery;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.models.tree.TreeNode;
+import org.createnet.raptor.sdk.PageResponse;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -61,7 +66,7 @@ public class TreeTest {
     @Test
     public void list() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("List trees");
 
@@ -82,11 +87,33 @@ public class TreeTest {
         assertTrue(2 == list.size());
 
     }
+    
+    @Test
+    public void search() {
+
+        Raptor raptor = Utils.createNewAdminInstance();
+
+        log.debug("List trees");
+        
+        TreeNode node1 = TreeNode.create("Root1");
+        TreeNode node2 = TreeNode.create("Root2");
+        raptor.Tree().create(node1);
+        raptor.Tree().create(node2);
+        
+        TreeQuery query = new TreeQuery();
+        query.id.in(node1.getId());
+        
+        PageResponse<TreeNode> result = raptor.Tree().search(query);
+        
+        assertEquals(1, result.getContent().size());
+        
+        
+    }
 
     @Test
     public void create() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("create tree");
 
@@ -115,7 +142,7 @@ public class TreeTest {
     @Test
     public void delete() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("create tree");
 
@@ -145,7 +172,7 @@ public class TreeTest {
     @Test
     public void createDeviceNode() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("create tree");
 
@@ -168,7 +195,7 @@ public class TreeTest {
     @Test
     public void createDeviceAccessWithToken() {
 
-        Raptor raptor = Utils.createNewInstance();
+        Raptor raptor = Utils.createNewAdminInstance();
 
         log.debug("create tree");
 
@@ -185,7 +212,11 @@ public class TreeTest {
         TreeNode node = raptor.Tree().tree(root.getId());
         
         Token token = raptor.Admin().Token().create(new Token("n", "sec"));
-        raptor.Admin().Token().Permission().set(token, Arrays.asList("tree"));
+
+        raptor.Admin().Token().Permission().set(token, Arrays.asList(
+                new Permission(EntityType.tree, Operation.read, true),
+                new Permission(EntityType.device, Operation.pull, true)
+        ));
         
         Raptor r = new Raptor(raptor.getConfig().getUrl(), token);
         r.Auth().login();

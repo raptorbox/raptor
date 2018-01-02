@@ -39,9 +39,8 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @Order(10)
-@ConditionalOnExpression("!({'auth', 'standalone'}.contains('${spring.config.name}'))")
+@ConditionalOnExpression("!({'auth'}.contains('${spring.config.name}'))")
 public class TokenSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
-
 
     @Autowired
     AuthenticationEntryPoint authenticationEntryPoint;   

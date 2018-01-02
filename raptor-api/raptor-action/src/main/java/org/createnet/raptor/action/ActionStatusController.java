@@ -43,25 +43,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/action")
 @ApiResponses(value = {
-    @ApiResponse(
-            code = 200,
-            message = "Ok"
-    )
-    ,
-    @ApiResponse(
-            code = 401,
-            message = "Not authorized"
-    )
-    ,
-    @ApiResponse(
-            code = 403,
-            message = "Forbidden"
-    )
-    ,
-    @ApiResponse(
-            code = 500,
-            message = "Internal error"
-    )
+    @ApiResponse(code = 200, message = "Ok")
+    ,@ApiResponse(code = 401, message = "Not authorized")
+    ,@ApiResponse(code = 403, message = "Forbidden")
+    ,@ApiResponse(code = 500, message = "Internal error")
 })
 @Api(tags = {"Action"})
 public class ActionStatusController {
@@ -87,7 +72,7 @@ public class ActionStatusController {
             notes = "The whole body is stored as a text value",
             nickname = "execute"
     )
-    @PreAuthorize("hasPermission(#deviceId, 'execute')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'execute', #deviceId)")
     public ResponseEntity<?> execute(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
@@ -97,7 +82,7 @@ public class ActionStatusController {
 
         Device device = raptor.Inventory().load(deviceId);
 
-        Action action = device.getAction(actionId);
+        Action action = device.action(actionId);
         if (action == null) {
             return JsonErrorResponse.notFound("Action not found");
         }
@@ -133,7 +118,7 @@ public class ActionStatusController {
             response = ActionStatus.class,
             nickname = "setActionStatus"
     )
-    @PreAuthorize("hasPermission(#deviceId, 'execute')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'execute', #deviceId)")
     public ResponseEntity<?> setActionStatus(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
@@ -170,7 +155,7 @@ public class ActionStatusController {
             response = ActionStatus.class,
             nickname = "getActionStatus"
     )
-    @PreAuthorize("hasPermission(#deviceId, 'execute')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'execute', #deviceId)")
     public ResponseEntity<?> getActionStatus(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
@@ -202,7 +187,7 @@ public class ActionStatusController {
             response = String.class,
             nickname = "getActionStatusValue"
     )
-    @PreAuthorize("hasPermission(#deviceId, 'execute')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'execute', #deviceId)")
     public ResponseEntity<?> getActionStatusValue(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
@@ -231,17 +216,10 @@ public class ActionStatusController {
             nickname = "delete"
     )
     @ApiResponses(value = {
-        @ApiResponse(
-                code = 204,
-                message = "No content"
-        )
-        ,
-    @ApiResponse(
-                code = 202,
-                message = "Accepted"
-        )
+        @ApiResponse(code = 204, message = "No content")
+        ,@ApiResponse(code = 202, message = "Accepted")
     })
-    @PreAuthorize("hasPermission(#deviceId, 'execute')")
+    @PreAuthorize("@raptorSecurity.can(principal, 'device', 'execute', #deviceId)")
     public ResponseEntity<?> delete(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
@@ -259,9 +237,9 @@ public class ActionStatusController {
         if (status == null) {
             return ResponseEntity.noContent().build();
         }
-        
+
         actionStatusService.delete(status);
-        
+
         return ResponseEntity.accepted().build();
     }
 

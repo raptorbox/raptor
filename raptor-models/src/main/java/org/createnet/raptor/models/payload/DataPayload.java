@@ -15,6 +15,8 @@
  */
 package org.createnet.raptor.models.payload;
 
+import org.createnet.raptor.models.acl.EntityType;
+
 /**
  *
  * @author Luca Capra <luca.capra@fbk.eu>
@@ -28,7 +30,7 @@ public class DataPayload extends AbstractPayload {
     
     public DataPayload(String c) {
         this.c = c;
-        this.type = MessageType.data;
+        this.type = EntityType.data;
     }
 
     @Override

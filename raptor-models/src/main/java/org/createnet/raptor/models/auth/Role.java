@@ -7,7 +7,7 @@
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
+ * Unless required by domainlicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -15,94 +15,137 @@
  */
 package org.createnet.raptor.models.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 
 import org.hibernate.validator.constraints.NotEmpty;
-import org.springframework.security.core.GrantedAuthority;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.Cacheable;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import org.createnet.raptor.models.app.AppRole;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
 @Cacheable(value = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@Table(name = "roles")
-public class Role implements GrantedAuthority {
+@Table(name = "groups")
+public class Role implements Serializable {
 
-  public static enum Roles {
-    super_admin, admin, user, guest
-  }
+    private static final long serialVersionUID = 1000000000000004L;
 
-  private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private String id;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
+    @NotEmpty
+    private String name;
 
-  @NotEmpty
-  private String name;
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    private String domain;
 
-  @JsonIgnore
-  @ManyToMany(fetch = FetchType.LAZY, mappedBy = "roles")
-  private List<User> users = new ArrayList();
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "groups_permissions", joinColumns = {
+        @JoinColumn(name = "group_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "permission_id")})
+    private List<Permission> permissions = new ArrayList();
 
-  public Role() {
-  }
-
-  public Role(String name) {
-    this.name = name;
-  }
-
-  public Role(Roles role) {
-    this.name = role.name();
-  }
-
-  @JsonIgnore
-  @Override
-  public String getAuthority() {
-    return name;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj instanceof Roles) {
-      return ((Roles) obj).equals(this.name);
+    public Role() {
     }
-    return super.equals(obj);
-  }
 
-  public Long getId() {
-    return id;
-  }
+    public Role(String name) {
+        this.name = name;
+    }
+    
+    public Role(AppRole ag, String domain) {
+        this.name = ag.getName();
+        this.domain = domain;
+        this.permissions.clear();
+        this.permissions.addAll(ag.getPermissions().stream().map((p) -> new Permission(p)).collect(Collectors.toList()));
+    }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    public Role(String name, List<Permission> permissions) {
+        this.name = name;
+        this.permissions.addAll(permissions);
+    }
 
-  public String getName() {
-    return name;
-  }
+    public Role(String name, String domain) {
+        this(name);
+        this.domain = domain;
+    }
 
-  public void setName(String name) {
-    this.name = name;
-  }
+    public Role(StaticGroup g) {
+        this.name = g.name();
+    }
 
-  public List<User> getUsers() {
-    return users;
-  }
+    public Role(StaticGroup g, List<Permission> permissions) {
+        this(g.name(), permissions);
+    }
 
-  public void setUsers(List<User> users) {
-    this.users = users;
-  }
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @JsonIgnore
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+    
+    @JsonIgnore
+    public List<Permission> getPermissions() {
+        return permissions;
+    }
+    
+    @JsonProperty("permissions")
+    public List<String> getPermissionsList() {
+        return permissions.stream().map((m) -> m.getName()).collect(Collectors.toList());
+    }
+    
+    @JsonProperty("permissions")
+    public void setPermissionsList(List<String> permissions) {
+        setPermissions(permissions.stream().map((name) -> new Permission(name)).collect(Collectors.toList()));
+    }
+
+    public void setPermissions(List<Permission> permissions) {
+        this.permissions = permissions;
+    }
+
+    public void merge(Role raw) {
+        if (raw.getName() != null && !raw.getName().isEmpty()) {
+            this.setName(raw.getName());
+        }
+        setDomain(raw.getDomain());
+        setPermissions(raw.getPermissions());
+    }
 
 }

@@ -12,8 +12,7 @@ networks:
 services:
 
   api:
-    command: ["java","-jar","/raptor.jar", "--dev"]
-    build: ./raptor-api/raptor-standalone
+    image: raptorbox/standalone:v5
     ports:
       - 10090:80
     volumes:
@@ -25,7 +24,7 @@ services:
       - "raptor.local:172.16.238.1"
 
   broker:
-    image: raptorbox/broker:latest
+    image: raptorbox/broker:v5
     ports:
       - 1883:1883
       - 8880:8880
@@ -33,38 +32,53 @@ services:
       - mongo
     environment:
         DEBUG: r*
+        LOG_LEVEL: debug
     networks:
       - raptor_test
     logging:
       driver: json-file
       options:
         max-size: 1024m
+    extra_hosts:
+      - "raptor.local:172.16.238.1"
 
-  mariadb:
-    image: mariadb:latest
-    volumes:
-      - ./data/mariadb:/var/lib/mysql
+  auth:
+    image: raptorbox/auth:v5
+    ports:
+      - 10094:10094
+    depends_on:
+      - mongo
+      - redis
     environment:
-      MYSQL_USERNAME: root
-      MYSQL_ROOT_PASSWORD: raptor
+        DEBUG: r*
+        LOG_LEVEL: debug
     networks:
       - raptor_test
-    ports:
-        - 3306:3306
+    logging:
+      driver: json-file
+      options:
+        max-size: 1024m
+    extra_hosts:
+      - "raptor.local:172.16.238.1"
 
-  dbadmin:
-    image: phpmyadmin/phpmyadmin
+  app:
+    image: raptorbox/app:v5
+    ports:
+      - 10095:10095
+    depends_on:
+      - mongo
+      - redis
     environment:
-      MYSQL_ROOT_PASSWORD: raptor
-    restart: always
-    volumes:
-     - ./data/phpmyadmin:/sessions
-    links:
-      - mariadb:db
+        DEBUG: r*
+        LOG_LEVEL: debug
     networks:
       - raptor_test
-    ports:
-        - 8081:80
+    logging:
+      driver: json-file
+      options:
+        max-size: 1024m
+    extra_hosts:
+      - "raptor.local:172.16.238.1"
 
   mongoadmin:
     image: adicom/admin-mongo
@@ -87,6 +101,13 @@ services:
     ports:
         - 27017:27017
 
+  redis:
+    image: redis
+    networks:
+      - raptor_test
+    ports:
+        - 6379:6379
+
   apigateway:
     image: nginx
     volumes:
@@ -96,11 +117,3 @@ services:
     command: nginx -g 'daemon off;'
     networks:
       - raptor_test
-
-
-  redis:
-    image: redis
-    networks:
-      - raptor_test
-    ports:
-        - 6379:6379

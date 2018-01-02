@@ -7,7 +7,7 @@ networks:
 services:
 
   api:
-    image: raptorbox/standalone:v4
+    image: raptorbox/standalone:v5
     volumes:
       - ./config:/etc/raptor
       - ./data:/data
@@ -19,7 +19,7 @@ services:
         max-size: 1024m
 
   broker:
-    image: raptorbox/broker:latest
+    image: raptorbox/broker:v5
     ports:
       - 1883:1883
       - 8880:8880
@@ -32,14 +32,33 @@ services:
       options:
         max-size: 1024m
 
-  mariadb:
-    image: mariadb:latest
-    volumes:
-      - ./data/mariadb:/var/lib/mysql
-    environment:
-      MYSQL_USERNAME: root
-      MYSQL_ROOT_PASSWORD: raptor
-      MYSQL_DATABASE: raptor
+  auth:
+    image: raptorbox/auth:v5
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - raptor_net
+    logging:
+      driver: json-file
+      options:
+        max-size: 1024m
+
+  app:
+    image: raptorbox/app:v5
+    depends_on:
+      - mongo
+      - redis
+      - auth
+    networks:
+      - raptor_net
+    logging:
+      driver: json-file
+      options:
+        max-size: 1024m
+
+  ui:
+    image: raptorbox/raptor-ui:v5
     networks:
       - raptor_net
 
@@ -51,8 +70,8 @@ services:
     networks:
       - raptor_net
 
-  ui:
-    image: raptorbox/raptor-ui
+  redis:
+    image: redis
     networks:
       - raptor_net
 
@@ -67,11 +86,5 @@ services:
         - broker
         - api
     command: nginx -g 'daemon off;'
-    networks:
-      - raptor_net
-
-
-  redis:
-    image: redis
     networks:
       - raptor_net

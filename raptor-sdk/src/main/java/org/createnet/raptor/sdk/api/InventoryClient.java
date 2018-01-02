@@ -19,8 +19,9 @@ import org.createnet.raptor.sdk.Routes;
 import org.createnet.raptor.sdk.AbstractClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Iterator;
 import java.util.List;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.events.callback.ActionCallback;
 import org.createnet.raptor.sdk.events.callback.DataCallback;
@@ -36,9 +37,11 @@ import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.payload.ActionPayload;
 import org.createnet.raptor.models.payload.StreamPayload;
 import org.createnet.raptor.models.query.DeviceQuery;
+import org.createnet.raptor.sdk.PageResponse;
 import org.createnet.raptor.sdk.admin.DevicePermissionClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 
 /**
  * Methods to interact with Raptor API
@@ -48,7 +51,7 @@ import org.slf4j.LoggerFactory;
 public class InventoryClient extends AbstractClient {
 
     protected DevicePermissionClient Permission;
-    
+
     public DevicePermissionClient Permission() {
         if (Permission == null) {
             Permission = new DevicePermissionClient(getContainer());
@@ -134,7 +137,7 @@ public class InventoryClient extends AbstractClient {
             public void trigger(DispatcherPayload payload) {
                 switch (payload.getType()) {
                     case stream:
-                        if(!payload.getOp().equals(Permissions.data)) {
+                        if (!payload.getOp().equals(Operation.push)) {
                             return;
                         }
                         StreamPayload dpayload = (StreamPayload) payload;
@@ -194,19 +197,19 @@ public class InventoryClient extends AbstractClient {
      * @param query the query to match the device definitions
      * @return a list of Devices matching the query
      */
-    public List<Device> search(DeviceQuery query) {
+    public PageResponse<Device> search(DeviceQuery query) {
         if (query.getUserId() == null) {
             User user = getContainer().Auth().getUser();
             if (user == null) {
                 throw new MissingAuthenticationException("User is not available");
             }
-            query.userId(user.getUuid());
+            query.userId(user.getId());
         }
         JsonNode json = getClient().post(
                 Routes.INVENTORY_SEARCH,
                 query.toJSON()
         );
-        List<Device> results = Device.getMapper().convertValue(json, new TypeReference<List<Device>>() {
+        PageResponse<Device> results = Device.getMapper().convertValue(json, new TypeReference<PageResponse<Device>>() {
         });
         return results;
     }
@@ -226,13 +229,29 @@ public class InventoryClient extends AbstractClient {
     /**
      * List accessible devices
      *
+     * @param page
+     * @param size
+     * @param sort
+     * @return a pager of Devices
+     */
+    public PageResponse<Device> list(int page, int size, Sort sort) {
+        
+        String url = Routes.INVENTORY_LIST + String.format("?page=%s&size=%s&sort=", page, size);
+        for (Sort.Order next : sort) {
+            url += next.getProperty() + "," + next.getDirection().name();
+        }
+        JsonNode json = getClient().get(url);
+        PageResponse<Device> list = Device.getMapper().convertValue(json, new TypeReference<PageResponse<Device>>() {});
+        return list;
+    }
+    
+    /**
+     * List accessible devices
+     *
      * @return the Device instance
      */
-    public List<Device> list() {
-        JsonNode json = getClient().get(Routes.INVENTORY_LIST);
-        List<Device> list = Device.getMapper().convertValue(json, new TypeReference<List<Device>>() {
-        });
-        return list;
+    public PageResponse<Device> list() {
+        return list(0, 20, new Sort(Sort.Direction.DESC, "createdAt"));
     }
 
 }

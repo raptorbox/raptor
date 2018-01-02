@@ -18,6 +18,8 @@ package org.createnet.raptor.sdk.admin;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.createnet.raptor.models.auth.Permission;
 import org.createnet.raptor.models.auth.Token;
 import org.createnet.raptor.models.auth.request.PermissionRequestBatch;
 import org.createnet.raptor.sdk.AbstractClient;
@@ -45,7 +47,7 @@ public class TokenPermissionClient extends AbstractClient {
      * @param tokenId token ID
      * @return
      */
-    public List<String> get(Long tokenId) {
+    public List<String> get(String tokenId) {
         JsonNode node = getClient().get(String.format(Routes.PERMISSION_GET, "token", tokenId));
         return getMapper().convertValue(node, new TypeReference<List<String>>() {
         });
@@ -66,8 +68,9 @@ public class TokenPermissionClient extends AbstractClient {
      *
      * @param token
      * @param permissions
+     * @return 
      */
-    public List<String> set(Token token, List<String> permissions) {
+    public List<String> set(Token token, List<Permission> permissions) {
         return set(token.getId(), permissions);
     }
 
@@ -78,10 +81,12 @@ public class TokenPermissionClient extends AbstractClient {
      * @param permissions
      * @return
      */
-    public List<String> set(Long tokenId, List<String> permissions) {
+    public List<String> set(String tokenId, List<Permission> permissions) {
         
         PermissionRequestBatch req = new PermissionRequestBatch();
-        req.permissions = permissions;
+        req.permissions = permissions.stream()
+                .map((p) -> p.getName())
+                .collect(Collectors.toList());
         
         JsonNode node = getClient().put(String.format(Routes.PERMISSION_SET, "token", tokenId), toJsonNode(req));
         return getMapper().convertValue(node, new TypeReference<List<String>>() {

@@ -18,7 +18,7 @@ package org.createnet.raptor.models.configuration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.createnet.raptor.models.auth.Role;
+import org.createnet.raptor.models.auth.StaticGroup;
 
 /**
  *
@@ -26,11 +26,12 @@ import org.createnet.raptor.models.auth.Role;
  */
 public class AuthConfiguration {
     
-    private String serviceUserType = "service";
+    private final String serviceUserType = "service";
     
     private List<AdminUser> users = new ArrayList();
     private String header = "authorization";
     private String headerPrefix = "Bearer ";
+    private String defaultToken = "service-default";
     private String secret;
     private int expiration = 1800;
 
@@ -51,14 +52,10 @@ public class AuthConfiguration {
         private String email;
         private String type;
         private boolean lock;
-        private List<Role.Roles> roles = new ArrayList();
+        private List<StaticGroup> groups = new ArrayList();
         
         public boolean isAdmin() {
-            return isSuperAdmin() || getRoles().contains(Role.Roles.admin);
-        }
-        
-        public boolean isSuperAdmin() {
-            return getRoles().contains(Role.Roles.super_admin);
+            return getRoles().contains(StaticGroup.admin);
         }
         
         public String getType() {
@@ -81,12 +78,12 @@ public class AuthConfiguration {
             this.lock = lock;
         }
         
-        public List<Role.Roles> getRoles() {
-            return roles;
+        public List<StaticGroup> getRoles() {
+            return groups;
         }
 
-        public void setRoles(List<Role.Roles> roles) {
-            this.roles = roles;
+        public void setRoles(List<StaticGroup> groups) {
+            this.groups = groups;
         }
         
         public String getUsername() {
@@ -163,4 +160,12 @@ public class AuthConfiguration {
         this.users = users;
     }
 
+    public String getDefaultToken() {
+        return defaultToken;
+    }
+
+    public void setDefaultToken(String defaultToken) {
+        this.defaultToken = defaultToken;
+    }
+    
 }

@@ -44,32 +44,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/profile")
 @RestController
 @ApiResponses(value = {
-    @ApiResponse(
-            code = 200,
-            message = "Ok"
-    )
-    ,
-    @ApiResponse(
-            code = 401,
-            message = "Not authorized"
-    )
-    ,
-    @ApiResponse(
-            code = 403,
-            message = "Forbidden"
-    )
-    ,
-    @ApiResponse(
-            code = 500,
-            message = "Internal error"
-    )
+    @ApiResponse(code = 200, message = "Ok")
+    ,@ApiResponse(code = 401, message = "Not authorized")
+    ,@ApiResponse(code = 403, message = "Forbidden")
+    ,@ApiResponse(code = 500, message = "Internal error")
 })
 @Api(tags = {"Profile"})
 public class ProfileController {
 
     @Autowired
     private ProfileService profileService;
-    
+
     @RequestMapping(method = RequestMethod.GET, value = "/{userId}")
     @ApiOperation(
             value = "Return a profile value by key",
@@ -77,7 +62,7 @@ public class ProfileController {
             response = org.createnet.raptor.models.profile.Profile.class,
             nickname = "getUserProfile"
     )
-    @PreAuthorize("hasAnyRole('super_admin', 'admin') or #userId == principal.uuid")
+    @PreAuthorize("@raptorSecurity.can(principal, 'profile', 'read', #userId)")
     public ResponseEntity<?> getUserProfile(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("userId") String userId
@@ -98,7 +83,7 @@ public class ProfileController {
             response = org.createnet.raptor.models.profile.Profile.class,
             nickname = "getProfile"
     )
-    @PreAuthorize("hasAnyRole('super_admin', 'admin') or #userId == principal.uuid")
+    @PreAuthorize("@raptorSecurity.can(principal, 'profile', 'read', #userId)")
     public ResponseEntity<?> getProfile(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("userId") String userId,
@@ -123,7 +108,7 @@ public class ProfileController {
             response = org.createnet.raptor.models.profile.Profile.class,
             nickname = "setProfile"
     )
-    @PreAuthorize("hasAnyRole('super_admin', 'admin') or #userId == principal.uuid")
+    @PreAuthorize("@raptorSecurity.can(principal, 'profile', 'create', #userId) or @raptorSecurity.can(principal, 'profile', 'update', #userId)")
     public ResponseEntity<?> setProfile(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("userId") String userId,
@@ -147,7 +132,7 @@ public class ProfileController {
             response = org.createnet.raptor.models.profile.Profile.class,
             nickname = "deleteProfile"
     )
-    @PreAuthorize("hasAnyRole('super_admin', 'admin') or #userId == principal.uuid")
+    @PreAuthorize("@raptorSecurity.can(principal, 'profile', 'delete', #userId)")
     public ResponseEntity<?> deleteProfile(
             @AuthenticationPrincipal User currentUser,
             @PathVariable("userId") String userId,

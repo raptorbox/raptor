@@ -22,7 +22,6 @@ import org.createnet.raptor.sdk.Utils;
 import org.createnet.raptor.sdk.exception.AuthenticationFailedException;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Assert;
@@ -64,7 +63,7 @@ public class AuthTest {
         Raptor raptor = Utils.getRaptor();
         log.debug("Try to fake login");
         AuthClient.LoginState loginInfo = raptor.Auth().login("admin", "apple");
-        log.error("Shoud have failied..");
+        log.error("Shoud have failed..");
     }
 
     @Test(expected = AuthenticationFailedException.class)
@@ -88,25 +87,25 @@ public class AuthTest {
         // ensure we have a token
         Utils.getRaptor().Auth().login();
 
-        Raptor r1 = Utils.createNewInstance();
-        log.debug("test1 {}", r1.Auth().getUser().getUuid());
+        Raptor r1 = Utils.createNewUserInstance();
+        log.debug("test1 {}", r1.Auth().getUser().getId());
 
-        Raptor r2 = Utils.createNewInstance();
-        log.debug("test2 {}", r2.Auth().getUser().getUuid());
+        Raptor r2 = Utils.createNewUserInstance();
+        log.debug("test2 {}", r2.Auth().getUser().getId());
 
-        Assert.assertNotEquals(r1.Auth().getUser().getUuid(), r2.Auth().getUser().getUuid());
+        Assert.assertNotEquals(r1.Auth().getUser().getId(), r2.Auth().getUser().getId());
 
         log.debug("Try to login again test1");
         AuthClient.LoginState s1 = r1.Auth().login();
         log.debug("Try to login again test2");
         AuthClient.LoginState s2 = r2.Auth().login();
 
-        log.debug("{} vs {}", r1.Auth().getUser().getUuid(), r2.Auth().getUser().getUuid());
+        log.debug("{} vs {}", r1.Auth().getUser().getId(), r2.Auth().getUser().getId());
 
-        Assert.assertNotEquals(r1.Auth().getUser().getUuid(), r2.Auth().getUser().getUuid());
+        Assert.assertNotEquals(r1.Auth().getUser().getId(), r2.Auth().getUser().getId());
 
         Assert.assertNotEquals(s1.token, s2.token);
-        Assert.assertNotEquals(s1.user.getUuid(), s2.user.getUuid());
+        Assert.assertNotEquals(s1.user.getId(), s2.user.getId());
 
     }
 
@@ -123,14 +122,14 @@ public class AuthTest {
 
         Assert.assertNotNull(refreshInfo.token);
         Assert.assertNotEquals(refreshInfo.token, loginInfo.token);
-        Assert.assertTrue(now < refreshInfo.expires);
+        Assert.assertTrue(now < refreshInfo.expires*1000);
 
         log.debug("Refresh token, again");
         AuthClient.LoginState refreshInfo2 = raptor.Auth().refreshToken();
 
         Assert.assertNotNull(refreshInfo2.token);
         Assert.assertNotEquals(refreshInfo.token, refreshInfo2.token);
-        Assert.assertTrue(now < refreshInfo2.expires);
+        Assert.assertTrue(now < refreshInfo2.expires*1000);
 
     }
 

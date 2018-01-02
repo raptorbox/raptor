@@ -16,7 +16,8 @@
 package org.createnet.raptor.models.payload;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.createnet.raptor.models.acl.Permissions;
+import org.createnet.raptor.models.acl.EntityType;
+import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.RaptorComponent;
@@ -32,9 +33,9 @@ public class UserPayload extends AbstractPayload {
     public UserPayload() {
     }
 
-    public UserPayload(User obj, Permissions op) {
+    public UserPayload(User obj, Operation op) {
         user = obj;
-        type = MessageType.user;
+        type = EntityType.user;
         this.op = op;
     }
 

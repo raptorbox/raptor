@@ -83,6 +83,12 @@ public class DeviceQueryBuilder {
             predicate.and(pdesc);
         }
 
+        // domain
+        Predicate pdomain = buildTextQuery(query.domain, device.domain);
+        if (pdomain != null) {
+            predicate.and(pdomain);
+        }
+
         // properties
         Predicate pprops = buildMapQuery(query.properties, device.properties);
         if (pprops != null) {

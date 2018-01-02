@@ -15,6 +15,9 @@
  */
 package org.createnet.raptor.models.auth.request;
 
+import org.createnet.raptor.models.acl.EntityType;
+import org.createnet.raptor.models.acl.Operation;
+
 /**
  *
  * @author Luca Capra <lcapra@fbk.eu>
@@ -23,8 +26,10 @@ public class AuthorizationRequest {
   
   public AuthorizationRequest() {}
   
-  public String permission;
-  public String objectId;
+  public Operation permission;
+  public String subjectId;
+  public EntityType type;
   public String userId;
+  public String domain;
 
 }

@@ -26,6 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.createnet.raptor.models.acl.AclDomain;
+import org.createnet.raptor.models.acl.EntityType;
+import org.createnet.raptor.models.acl.Owneable;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.RaptorContainer;
@@ -40,10 +43,17 @@ import org.springframework.data.mongodb.core.mapping.Document;
  */
 @Document
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class TreeNode extends RaptorContainer {
+public class TreeNode extends RaptorContainer implements Owneable, AclDomain {
     
     public static final String separator = "/";
 
+    public TreeNode() {
+    }
+
+    public TreeNode(String id) {
+        this.id = id;
+    }
+    
     @Override
     public void validate() throws ValidationException {
         
@@ -66,18 +76,23 @@ public class TreeNode extends RaptorContainer {
         }
     }
     
-    public enum NodeType {
-        group, user, device, application
+    @JsonIgnore
+    @Override
+    public String getOwnerId() {
+        return getUserId();
     }
-
+    
     @Id
     protected String id = UUID.randomUUID().toString();
 
     @Indexed
     protected String name = "";
+    
+    @Indexed
+    protected String domain;
 
     @Indexed
-    protected NodeType type;
+    protected EntityType type;
 
     @Indexed
     protected String userId;
@@ -108,7 +123,7 @@ public class TreeNode extends RaptorContainer {
                 .id(device.id())
                 .parentId(null)
                 .userId(device.userId())
-                .type(NodeType.device)
+                .type(EntityType.device)
                 .order(0);
     }
 
@@ -120,7 +135,7 @@ public class TreeNode extends RaptorContainer {
      */
     static public TreeNode create(String name) {
         return new TreeNode()
-                .type(NodeType.group)
+                .type(EntityType.tree)
                 .name(name);
     }
 
@@ -131,6 +146,7 @@ public class TreeNode extends RaptorContainer {
                 .parentId(node.getParentId())
                 .userId(node.getUserId())
                 .type(node.getType())
+                .domain(node.getDomain())
                 .order(node.getOrder());
 
         this.children().addAll(node.children());
@@ -138,6 +154,7 @@ public class TreeNode extends RaptorContainer {
         return this;
     }
 
+    @Override
     public String getId() {
         return id;
     }
@@ -146,7 +163,7 @@ public class TreeNode extends RaptorContainer {
         return name;
     }
 
-    public NodeType getType() {
+    public EntityType getType() {
         return type;
     }
 
@@ -166,6 +183,11 @@ public class TreeNode extends RaptorContainer {
         return order;
     }
 
+    @Override
+    public String getDomain() {
+        return domain;
+    }
+    
     public TreeNode id(String id) {
         this.id = id;
         return this;
@@ -175,8 +197,13 @@ public class TreeNode extends RaptorContainer {
         this.name = name;
         return this;
     }
+    
+    public TreeNode domain(String domain) {
+        this.domain = domain;
+        return this;
+    }
 
-    public TreeNode type(NodeType type) {
+    public TreeNode type(EntityType type) {
         this.type = type;
         return this;
     }
@@ -201,7 +228,7 @@ public class TreeNode extends RaptorContainer {
     }
 
     public TreeNode user(User user) {
-        this.userId = user.getUuid();
+        this.userId = user.getId();
         return this;
     }
 
@@ -223,17 +250,17 @@ public class TreeNode extends RaptorContainer {
     
     @JsonIgnore
     public boolean isDevice() {
-        return getType().equals(NodeType.device);
+        return getType().equals(EntityType.device);
     }
 
     @JsonIgnore
     public boolean isGroup() {
-        return getType().equals(NodeType.group);
+        return getType().equals(EntityType.group);
     }
 
     @JsonIgnore
     public boolean isUser() {
-        return getType().equals(NodeType.user);
+        return getType().equals(EntityType.user);
     }
     
     /**

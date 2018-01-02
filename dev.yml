@@ -1,29 +1,6 @@
 version: "2"
 services:
 
-  mariadb:
-    image: mariadb:latest
-    container_name: mariadb
-    ports:
-      - 3306:3306
-    volumes:
-      - ./data/mariadb:/var/lib/mysql
-    environment:
-      MYSQL_USERNAME: root
-      MYSQL_ROOT_PASSWORD: raptor
-
-  dbadmin:
-    image: phpmyadmin/phpmyadmin
-    environment:
-      MYSQL_ROOT_PASSWORD: raptor
-    restart: always
-    ports:
-     - 8081:80
-    volumes:
-     - ./data/phpmyadmin:/sessions
-    links:
-      - mariadb:db
-
   mongoadmin:
     image: adicom/admin-mongo
     # environment:
@@ -42,5 +19,3 @@ services:
     ports:
       - 27017:27017
     command: --smallfiles --setParameter failIndexKeyTooLong=false
-
-  
