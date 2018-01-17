@@ -58,7 +58,7 @@ import org.hibernate.validator.constraints.Email;
 @Cacheable(value = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Table(name = "users")
-public class User implements Serializable, Owneable {
+public class User implements Serializable {
 
     static final long serialVersionUID = 1000000000000001L;
 
@@ -109,6 +109,8 @@ public class User implements Serializable, Owneable {
     @Column()
     @NotNull
     protected boolean enabled = true;
+    
+    protected String ownerId;
 
     @JsonIgnore
     @Column(name = "last_password_reset")
@@ -312,6 +314,10 @@ public class User implements Serializable, Owneable {
         return devices;
     }
 
+	public void setOwnerId(String ownerId) {
+		this.ownerId = ownerId;
+	}
+
     @Override
     public String toString() {
         return "User{" + "uuid=" + id + '}';
@@ -327,7 +333,6 @@ public class User implements Serializable, Owneable {
         return hasPermission(new Permission(p));
     }
 
-    @Override
     public String getOwnerId() {
         return getId();
     }
