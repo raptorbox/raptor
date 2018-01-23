@@ -160,6 +160,32 @@ public class InventoryTest {
         Device dev1 = raptor.Inventory().load(dev.id());
         assertTrue(dev1.name().equals(dev.name()));
     }
+    
+    @Test
+    public void searchByDomainId() {
+    	String domainID = "ff3eaeae-6227-4aec-a09a-0cacf35c03c4";
+        Raptor raptor = Utils.createNewAdminInstance();
+        for (int i = 0; i < 3; i++) {
+            log.debug("Create device {}", i);
+            Device dev1 = new Device();
+            dev1.name("test-search " + i);
+            dev1.domain(domainID);
+            dev1.properties().put("version", i);
+            dev1.properties().put("active", i % 2 == 0);
+            raptor.Inventory().create(dev1);
+        }
+
+        DeviceQuery q = new DeviceQuery();
+        q.domain.equals(domainID);
+        log.debug("Searching for {}", q.toJSON().toString());
+        List<Device> results = raptor.Inventory().search(q).getContent();
+
+        log.debug("Results found {}", results.stream().map(d -> d.name()).collect(Collectors.toList()));
+        assertNotNull(results);
+        assertTrue(results.size() > 0);
+        assertTrue(results.get(0).domain().equals(domainID));
+
+    }
 
     @Test
     public void searchByName() {

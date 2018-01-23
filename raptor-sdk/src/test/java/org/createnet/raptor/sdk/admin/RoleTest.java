@@ -27,6 +27,7 @@ import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.models.exception.RequestException;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.sdk.PageResponse;
+import org.createnet.raptor.sdk.QueryString;
 import org.createnet.raptor.sdk.Utils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -100,9 +101,12 @@ public class RoleTest {
         ));
         adm1.Admin().Role().create(group);
 
-        PageResponse<Role> list = adm1.Admin().Role().list();
+        QueryString qs = new QueryString();
+        qs.query.add("name", "name="+groupName);
+        
+        PageResponse<Role> list = adm1.Admin().Role().list(qs);
         assertNotNull(list);
-        assertTrue(list.getContent().size() >= 3);
+        assertTrue(list.getContent().size() > 0);
 
         Optional<Role> optRole = list.getContent().stream().filter((g) -> {
             log.debug("group nanme {}", g.getName());

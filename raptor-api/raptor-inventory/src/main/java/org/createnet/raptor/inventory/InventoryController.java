@@ -15,18 +15,24 @@
  */
 package org.createnet.raptor.inventory;
 
-import com.querydsl.core.BooleanBuilder;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.createnet.raptor.common.client.ApiClientService;
+import org.createnet.raptor.common.client.InternalApiClientService;
 import org.createnet.raptor.common.query.DeviceQueryBuilder;
+import org.createnet.raptor.models.app.App;
+import org.createnet.raptor.models.app.AppUser;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
+import org.createnet.raptor.models.objects.QDevice;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.query.DeviceQuery;
 import org.createnet.raptor.models.response.JsonErrorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,15 +48,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.createnet.raptor.models.objects.QDevice;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -76,6 +80,9 @@ public class InventoryController {
 
     @Autowired
     private ApiClientService raptor;
+    
+    @Autowired
+    InternalApiClientService api;
 
 
     @RequestMapping(method = RequestMethod.GET)
@@ -86,7 +93,6 @@ public class InventoryController {
             @AuthenticationPrincipal User currentUser,
             Pageable pageable
     ) {
-
         String userId = currentUser.getId();
         if (currentUser.isAdmin()) {
             userId = null;
@@ -98,7 +104,7 @@ public class InventoryController {
         if (userId != null) {
             predicate.and(device.userId.eq(userId));
         }
-        
+ 
         Page<Device> result = deviceService.search(predicate, pageable);
         
         return ResponseEntity.ok(result);
@@ -243,9 +249,20 @@ public class InventoryController {
         if (query.isEmpty()) {
             return JsonErrorResponse.badRequest();
         }
-
+        
         if (!currentUser.isAdmin()) {
             query.userId(currentUser.getId());
+        }
+        
+        if(query.domain.getEquals() != null) {
+        	App app = api.App().load(query.domain.getEquals());
+        	AppUser user = app.getUsers().stream().filter(d -> d.getId().equals(currentUser.getId())).findFirst().get();
+        	if(user != null) {
+        		List<String> roles = user.getRoles();
+        		if(roles.stream().filter(r -> r.equals("admin_user") || r.equals("admin") || r.equals("admin_app") || r.equals("read_user")).findFirst() != null) {
+        			query.userId(null);
+        		}
+        	}
         }
 
         DeviceQueryBuilder qb = new DeviceQueryBuilder(query);

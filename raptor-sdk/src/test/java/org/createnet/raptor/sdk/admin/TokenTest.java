@@ -61,16 +61,19 @@ public class TokenTest {
         List<Token> tokens = raptor.Admin().Token().list().getContent();
 
         assertNotNull(tokens);
-        assertEquals(0, tokens.size());
+        assertTrue(tokens.size() > 0);
         
         log.debug("Create new token for user {}", raptor.Auth().getUser().getId());
 
-        raptor.Admin().Token().create(new Token("test", "secret" + System.currentTimeMillis() * Math.random()));
+        Token newToken = raptor.Admin().Token().create(new Token("test", "secret" + System.currentTimeMillis() * Math.random()));
 
         tokens = raptor.Admin().Token().list().getContent();
 
         assertNotNull(tokens);
-        assertEquals(1, tokens.size());
+        assertTrue(tokens.size() > 0);
+        
+        Token savedToken = raptor.Admin().Token().read(newToken.getId());
+        assertEquals(newToken.getToken(), savedToken.getToken());
 
     }
 
