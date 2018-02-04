@@ -2,11 +2,14 @@
 
 The Raptor Java SDK is part of the raptor platform and used extensively in the codebase.
 
-It can be reused as a standalone library in external application for a direct integration to the exposed API
+It can be reused as a standalone library in external application for a direct integration to the exposed API. 
+
+Raptorbox v5 introduce application concept. The owner of platform can create and manage applications or can allow other users to admin the application and manage the users or devices within the application. 
 
 - [Requirements](#requirements)
 - [Setup](#Setup)
 - [Authentication](#authentication)
+- [Application](#application)
 - [Inventory](#inventory)
   - [List devices](#list-devices)
   - [Create a device](#create-a-device)
@@ -74,6 +77,100 @@ raptor.Auth().logout();
 
 ```
 
+## Application
+
+The application API stores the data regarding users with their roles in the application and information about devices.
+
+### List applications
+
+List application owned by user and belongs to
+
+```java
+PageResponse<App> pager = raptor.App().list();
+List<App> list = pager.getContent();
+log.debug("found {} apps", list.size());
+```
+
+### Create application
+
+Create an application
+
+```java
+App app = new App();
+app.setName("test_" + System.currentTimeMillis());
+app.setUserId(raptor.Auth().getUser().getId());
+App a = raptor.App().create(app);
+```
+
+Add roles and users to app
+
+```java
+List<String> permissions = new ArrayList<>();
+permissions.add("admin_device");
+permissions.add("read_stream");
+AppRole role1 = new AppRole();
+role1.setName("role1");
+role1.addPermissions(permissions);
+
+List<String> permissions2 = new ArrayList<>();
+permissions2.add("read_user");
+AppRole role2 = new AppRole();
+role2.setName("role2");
+role2.addPermissions(permissions2);
+a.addRole(role1);
+a.addRole(role2);
+
+// Create User
+User user = raptor.Admin().User().create("test_user1", "test_user1", "test_user1" + "@test.raptor.local");
+System.out.println("Created user test_user1 : test_user1 with uuid " + user.getId());
+a.addUser(user, role1.getName());
+
+raptor.App().update(a);
+```
+
+### Update an application
+
+Update an application
+To remove a role or application, just remove that user or role from the application. 
+
+```java
+App app = raptor.App().read(a.getId())
+List<String> permissions = new ArrayList<>();
+permissions.add("admin_device");
+permissions.add("read_stream");
+AppRole role1 = new AppRole();
+role1.setName("role1");
+role1.addPermissions(permissions);
+
+app.addRole(role1);
+
+// Create User
+User user = raptor.Admin().User().create("test_user1", "test_user1", "test_user1" + "@test.raptor.local");
+System.out.println("Created user test_user1 : test_user1 with uuid " + user.getId());
+app.addUser(user, role1.getName());
+
+raptor.App().update(app);
+```
+
+### Load an application
+
+Load an application
+
+```java
+App application = raptor.App().load(app.getId());
+log.debug("Application loaded: \n {}", application.name());
+```
+
+### Delete an application
+
+Delete an application
+
+```java
+raptor.App().delete(application);
+log.debug("Application deleted");
+```
+
+
 ## Inventory
 
 The inventory API store device definitions
@@ -83,8 +180,8 @@ The inventory API store device definitions
 List devices owned by a user
 
 ```java
-List<Device> list = raptor.Inventory().list();
-log.debug("found {} devices", list.size());
+PageResponse<Device> list = raptor.Inventory().list();
+log.debug("found {} devices", list.getTotalElements());
 ```
 
 ### Create a device
@@ -153,9 +250,9 @@ q.name.contains("test");
 q.properties.has("version", "4.0.0");
 
 log.debug("Searching for {}", q.toJSON().toString());
-List<Device> results = raptor.Inventory().search(q);
+PageResponse<Device> results = raptor.Inventory().search(q);
 
-log.debug("Results found {}", results.stream().map(d -> d.name()).collect(Collectors.toList()));
+log.debug("Results found {}", results.getContent().stream().map(d -> d.name()).collect(Collectors.toList()));
 ```
 
 ### Event notifications
