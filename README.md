@@ -24,7 +24,7 @@ For example on an Ubuntu or Debian box as root you can install with:
 ```
 curl -sSL https://get.docker.com/ | sh
 adduser `whoami` docker
-sudo apt-get install python-pip -y && sudo  pip install docker-com
+sudo apt-get install python-pip -y && sudo  pip install docker-compose
 ```
 
 # Getting Started
