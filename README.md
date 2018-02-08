@@ -34,8 +34,8 @@ sudo apt-get install python-pip -y && sudo  pip install docker-compose
 
 Some useful commands to see more about the platform docker instance
 ```
-docker-compoes ps to          //view the process status
-docker-compoes logs -f        //to view the logs
+docker-compose ps to          //view the process status
+docker-compose logs -f        //to view the logs
 ```
 
 
