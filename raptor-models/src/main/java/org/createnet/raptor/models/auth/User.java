@@ -142,6 +142,9 @@ public class User implements Serializable {
         this.password = user.getPassword();
         this.email = user.getEmail();
         this.enabled = user.getEnabled();
+        if(user.getOwnerId() != null) {
+        	this.ownerId = user.getOwnerId();
+        }
 
         user.getTokens().stream().forEach((token) -> this.addToken(token));
         user.getRoles().stream().forEach((g) -> this.addRole(g));
@@ -334,7 +337,7 @@ public class User implements Serializable {
     }
 
     public String getOwnerId() {
-        return getId();
+        return ownerId;
     }
 
 }

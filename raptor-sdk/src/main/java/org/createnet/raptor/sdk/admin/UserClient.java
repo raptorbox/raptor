@@ -309,6 +309,17 @@ public class UserClient extends AbstractClient {
         assert user.getId() != null;
         delete(user.getId());
     }
+    
+    /**
+     * Delete a user
+     *
+     * @param user
+     */
+    public void delete(User user, String ownerId) {
+        assert user.getId() != null;
+        assert user.getOwnerId() != null && user.getOwnerId() == ownerId;
+        delete(user.getId(), ownerId);
+    }
 
     /**
      * Delete a user
@@ -317,6 +328,15 @@ public class UserClient extends AbstractClient {
      */
     public void delete(String userUuid) {
         getClient().delete(String.format(Routes.USER_DELETE, userUuid));
+    }
+    
+    /**
+     * Delete a user with ownerId
+     *
+     * @param userUuid
+     */
+    public void delete(String userUuid, String ownerId) {
+        getClient().delete(String.format(Routes.USER_DELETE_OWNERID, userUuid, ownerId));
     }
 
     /**
