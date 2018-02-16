@@ -26,6 +26,7 @@ import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.query.DataQuery;
+import org.createnet.raptor.sdk.PageResponse;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.Utils;
 import org.junit.After;
@@ -144,9 +145,9 @@ public class DataStreamTest {
 
 		raptor.Stream().delete(s);
 
-		ResultSet results = raptor.Stream().pull(s);
+		PageResponse<RecordSet> results = raptor.Stream().pull(s);
 
-		Assert.assertTrue(results.isEmpty());
+		Assert.assertTrue(results.getContent().isEmpty());
 
 	}
 
@@ -163,8 +164,8 @@ public class DataStreamTest {
 		int qt = 5;
 		pushRecords(raptor, s, qt);
 
-		ResultSet results = raptor.Stream().pull(s);
-		Assert.assertEquals(qt, results.size());
+		PageResponse<RecordSet> results = raptor.Stream().pull(s);
+		Assert.assertEquals(qt, results.getContent().size());
 	}
 
 	@Test
@@ -262,7 +263,7 @@ public class DataStreamTest {
 		// log.debug("Searching........ \n\n" + q.toJSON().toString());
 
 		ResultSet results = raptor.Stream().search(s, q);
-		log.debug("Results \n" + results.toJson().toString());
+		log.debug("Results \n" + results.size());
 
 		Assert.assertEquals(cnt - offset, results.size());
 	}

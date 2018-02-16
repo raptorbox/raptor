@@ -163,7 +163,7 @@ public class InventoryTest {
     
     @Test
     public void searchByDomainId() {
-    	String domainID = "ff3eaeae-6227-4aec-a09a-0cacf35c03c4";
+    	String domainID = "4166aec1-e491-484b-a217-e6cf5bf497b9";
         Raptor raptor = Utils.createNewAdminInstance();
         for (int i = 0; i < 3; i++) {
             log.debug("Create device {}", i);

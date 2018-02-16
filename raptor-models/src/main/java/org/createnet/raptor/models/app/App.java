@@ -19,7 +19,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.createnet.raptor.models.acl.Owneable;
@@ -49,6 +51,7 @@ public class App implements Serializable, Owneable {
 
     final protected List<AppRole> roles = new ArrayList();
     final protected List<AppUser> users = new ArrayList();
+    final protected Map<String, Object> properties = new HashMap<>();
 
     public App() {
     }
@@ -264,6 +267,14 @@ public class App implements Serializable, Owneable {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+    
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+    
+    public Map<String, Object> properties() {
+        return properties;
     }
     
 }

@@ -40,20 +40,20 @@ public class StreamService {
         repository.save(record);
     }
 
-    public List<RecordSet> list(Stream stream, Pageable page) {
+    public Page<RecordSet> list(Stream stream, Pageable page) {
         return repository.findByDeviceIdAndStreamId(stream.getDevice().id(), stream.name(), page);
     }
 
     public RecordSet lastUpdate(Stream stream) {
         
         Pageable page = new PageRequest(0, 1, new Sort(Sort.Direction.DESC, "timestamp"));
-        List<RecordSet> records = list(stream, page);
+        Page<RecordSet> records = list(stream, page);
 
-        if (records.isEmpty()) {
+        if (records.getContent().isEmpty()) {
             return null;
         }
 
-        return records.get(0);
+        return records.getContent().get(0);
     }
 
     public void deleteAll(Stream stream) {

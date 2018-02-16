@@ -15,11 +15,8 @@
  */
 package org.createnet.raptor.stream;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import java.util.List;
+
 import org.createnet.raptor.common.client.ApiClientService;
 import org.createnet.raptor.common.client.InternalApiClientService;
 import org.createnet.raptor.common.query.DataQueryBuilder;
@@ -34,9 +31,9 @@ import org.createnet.raptor.models.response.JsonErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,6 +42,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.mongodb.core.query.Query;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  *
@@ -183,7 +186,7 @@ public class StreamController {
             return JsonErrorResponse.notFound("Stream not found");
         }
 
-        List<RecordSet> records = streamService.list(stream, pager);
+        Page<RecordSet> records = streamService.list(stream, pager);
 
         return ResponseEntity.ok(records);
     }
@@ -250,16 +253,16 @@ public class StreamController {
         DataQueryBuilder qb = new DataQueryBuilder(query);
 //        Pageable paging = qb.getPaging();
 //        Predicate predicate = qb.getPredicate();
+        
         Query q = qb.getQuery();
-
         ResultSet result = new ResultSet(stream);
-
         List<RecordSet> records = mongoTemplate.find(q, RecordSet.class);
         result.addAll(records);
-
-//        Page<RecordSet> page = streamService.search(q, paging);
 //        result.addAll(page.getContent());
         return ResponseEntity.ok(result);
+        
+//        Page<RecordSet> page = streamService.search(predicate, paging);
+//        return ResponseEntity.ok(page);
     }
 
 }

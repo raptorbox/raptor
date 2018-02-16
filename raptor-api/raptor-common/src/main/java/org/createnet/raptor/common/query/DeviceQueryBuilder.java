@@ -100,6 +100,52 @@ public class DeviceQueryBuilder {
         //settings
         return predicate;
     }
+    
+    public Predicate getORPredicate() {
+
+        QDevice device = new QDevice("device");
+
+        BooleanBuilder predicate = new BooleanBuilder();
+
+        if (query.getUserId() != null) {
+            predicate.and(device.userId.eq(query.getUserId()));
+        }
+
+        // id
+        Predicate pid = buildTextQuery(query.id, device.id);
+        if (pid != null) {
+            predicate.or(pid);
+        }
+
+        // name
+        Predicate pname = buildTextQuery(query.name, device.name);
+        if (pname != null) {
+            predicate.or(pname);
+        }
+
+        // description
+        Predicate pdesc = buildTextQuery(query.description, device.description);
+        if (pdesc != null) {
+            predicate.or(pdesc);
+        }
+
+        // domain
+        Predicate pdomain = buildTextQuery(query.domain, device.domain);
+        if (pdomain != null) {
+            predicate.or(pdomain);
+        }
+
+        // properties
+        Predicate pprops = buildMapQuery(query.properties, device.properties);
+        if (pprops != null) {
+            predicate.or(pprops);
+        }
+
+        //stream
+        //actions
+        //settings
+        return predicate;
+    }
 
     private Predicate buildTextQuery(TextQuery txt, StringPath txtfield) {
 

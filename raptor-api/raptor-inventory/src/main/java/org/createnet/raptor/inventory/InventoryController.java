@@ -15,9 +15,13 @@
  */
 package org.createnet.raptor.inventory;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.createnet.raptor.common.client.ApiClientService;
 import org.createnet.raptor.common.client.InternalApiClientService;
@@ -26,7 +30,6 @@ import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.app.AppUser;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.objects.Device;
-import org.createnet.raptor.models.objects.QDevice;
 import org.createnet.raptor.models.objects.RaptorComponent;
 import org.createnet.raptor.models.objects.Stream;
 import org.createnet.raptor.models.query.DeviceQuery;
@@ -48,7 +51,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 
 import io.swagger.annotations.Api;
@@ -88,22 +90,31 @@ public class InventoryController {
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(value = "Return the user devices", notes = "", response = Device.class, nickname = "getDevices")
     @PreAuthorize("@raptorSecurity.list(principal, 'device')")
-    
     public ResponseEntity<?> getDevices(
             @AuthenticationPrincipal User currentUser,
-            Pageable pageable
+            Pageable pageable,
+            HttpServletRequest request
     ) {
         String userId = currentUser.getId();
         if (currentUser.isAdmin()) {
             userId = null;
         }
-
-        QDevice device = new QDevice("device");
-        BooleanBuilder predicate = new BooleanBuilder();
-
-        if (userId != null) {
-            predicate.and(device.userId.eq(userId));
+        
+        Map<String,	String> queryParams = new HashMap<>();
+        
+        String queryString = request.getQueryString();
+        if(userId != null) {
+        	queryParams.put("userId", userId);
+    	}
+        String[] params = queryString.split("&");
+        for(String p: params) {
+        	String[] q = p.split("=");
+        	queryParams.put(q[0], q[1]);
         }
+
+        DeviceQuery query = DeviceQuery.query(queryParams);
+        DeviceQueryBuilder qb = new DeviceQueryBuilder(query);
+        Predicate predicate = qb.getORPredicate();
  
         Page<Device> result = deviceService.search(predicate, pageable);
         

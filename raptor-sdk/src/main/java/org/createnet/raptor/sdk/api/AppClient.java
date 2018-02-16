@@ -26,6 +26,7 @@ import org.createnet.raptor.sdk.exception.ClientException;
 import org.createnet.raptor.models.payload.DispatcherPayload;
 import org.createnet.raptor.models.query.AppQuery;
 import org.createnet.raptor.sdk.PageResponse;
+import org.createnet.raptor.sdk.QueryString;
 import org.createnet.raptor.sdk.events.callback.AppCallback;
 import org.createnet.raptor.sdk.events.callback.AppEventCallback;
 import org.slf4j.Logger;
@@ -134,6 +135,21 @@ public class AppClient extends AbstractClient {
      */
     public PageResponse<App> list() {
         JsonNode json = getClient().get(Routes.APP_LIST);
+        PageResponse<App> list = getMapper().convertValue(json, new TypeReference<PageResponse<App>>() {});
+        return list;
+//        return list(1, 25);
+    }
+    
+    /**
+     * List accessible app
+     *
+     * @return the App instance
+     */
+    public PageResponse<App> list(int page, int limit) {
+    	QueryString qs = new QueryString();
+        qs.pager.page = page;
+        qs.pager.limit = limit;
+        JsonNode json = getClient().get(Routes.APP_LIST + qs.toString());
         PageResponse<App> list = getMapper().convertValue(json, new TypeReference<PageResponse<App>>() {});
         return list;
     }

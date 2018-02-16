@@ -33,7 +33,7 @@ import org.springframework.stereotype.Repository;
 @Component
 public interface StreamRepository extends MongoRepository<RecordSet, String>, QueryDslPredicateExecutor<RecordSet> {
     
-    public List<RecordSet> findByDeviceIdAndStreamId(String deviceId, String streamId, Pageable page);
+    public Page<RecordSet> findByDeviceIdAndStreamId(String deviceId, String streamId, Pageable page);
     public Page<RecordSet> findOneByDeviceIdAndStreamId(String deviceId, String streamId, Pageable page);
     public void deleteByDeviceIdAndStreamId(String deviceId, String streamId);
     

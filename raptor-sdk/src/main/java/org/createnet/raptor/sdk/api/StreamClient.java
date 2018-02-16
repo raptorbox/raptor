@@ -17,10 +17,14 @@ package org.createnet.raptor.sdk.api;
 
 import org.createnet.raptor.sdk.Routes;
 import org.createnet.raptor.sdk.AbstractClient;
+import org.createnet.raptor.sdk.PageResponse;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.createnet.raptor.sdk.Raptor;
 import org.createnet.raptor.sdk.events.callback.DataCallback;
 import org.createnet.raptor.sdk.events.callback.StreamEventCallback;
+import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.data.RecordSet;
 import org.createnet.raptor.models.data.ResultSet;
 import org.createnet.raptor.models.objects.Stream;
@@ -115,7 +119,7 @@ public class StreamClient extends AbstractClient {
      * @param stream the stream to read from
      * @return the data resultset
      */
-    public ResultSet pull(Stream stream) {
+    public PageResponse<RecordSet> pull(Stream stream) {
         return pull(stream, 0, null);
     }
 
@@ -127,9 +131,11 @@ public class StreamClient extends AbstractClient {
      * @param limit limit the total size of result
      * @return the data resultset
      */
-    public ResultSet pull(Stream stream, Integer offset, Integer limit) {
+    public PageResponse<RecordSet> pull(Stream stream, Integer offset, Integer limit) {
         String qs = buildQueryString(offset, limit);
-        return ResultSet.fromJSON(stream, getClient().get(String.format(Routes.STREAM_PULL, stream.getDevice().id(), stream.name()) + qs));
+        JsonNode json = getClient().get(String.format(Routes.STREAM_PULL, stream.getDevice().id(), stream.name()) + qs);
+        PageResponse<RecordSet> list = getMapper().convertValue(json, new TypeReference<PageResponse<RecordSet>>() {});
+        return list;
     }
 
     /**
@@ -184,6 +190,8 @@ public class StreamClient extends AbstractClient {
                 query.toJSON(),
                 RequestOptions.retriable().maxRetries(3).waitFor(500)
         );
+//        PageResponse<RecordSet> list = getMapper().convertValue(results, new TypeReference<PageResponse<RecordSet>>() {});
+//        return list;
         return ResultSet.fromJSON(stream, results);
     }
 

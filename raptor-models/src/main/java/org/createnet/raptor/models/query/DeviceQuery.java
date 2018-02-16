@@ -17,7 +17,11 @@ package org.createnet.raptor.models.query;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.createnet.raptor.models.query.deserializer.DeviceQueryDeserializer;
 
 /**
@@ -63,6 +67,27 @@ public class DeviceQuery extends BaseQuery {
         DeviceQuery q = new DeviceQuery();
         q.domain.in(ids.toArray(new String[ids.size()]));
         return q;
+    }
+    
+    public static DeviceQuery query(Map<String, String> params) {
+    	DeviceQuery q = new DeviceQuery();
+    	
+    	for(Entry<String, String> p: params.entrySet()) {
+    		if(p.getKey().equals("name")) {	
+        		q.name.contains(p.getValue());
+        	}
+        	if(p.getKey().equals("domain")) {
+        		q.domain.contains(p.getValue());
+        	}
+        	if(p.getKey().equals("id")) {
+        		q.id.contains(p.getValue());
+        	}
+        	if(p.getKey().equals("userId")) {
+        		q.userId = p.getValue();
+        	}
+    	}
+    	
+    	return q;
     }
     
 }
