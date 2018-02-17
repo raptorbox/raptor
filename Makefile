@@ -1,6 +1,6 @@
 .PHONY: docker/build docker/push build
 
-name := raptorbox/raptor-ui
+name := raptorbox/standalone
 
 gittag := $(shell git describe --tag --always)
 tag := $(shell echo ${gittag} | cut -d'-' -f 1)

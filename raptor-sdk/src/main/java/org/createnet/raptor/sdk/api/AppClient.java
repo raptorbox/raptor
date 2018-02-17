@@ -148,7 +148,7 @@ public class AppClient extends AbstractClient {
     public PageResponse<App> list(int page, int limit) {
     	QueryString qs = new QueryString();
         qs.pager.page = page;
-        qs.pager.limit = limit;
+        qs.pager.size = limit;
         JsonNode json = getClient().get(Routes.APP_LIST + qs.toString());
         PageResponse<App> list = getMapper().convertValue(json, new TypeReference<PageResponse<App>>() {});
         return list;

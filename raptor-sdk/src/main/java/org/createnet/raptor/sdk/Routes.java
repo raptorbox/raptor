@@ -45,6 +45,7 @@ final public class Routes {
     public static final String REFRESH_TOKEN = "/auth/refresh";
     
     public static final String USER_CREATE = "/auth/user";
+    public static final String USER_LIST = USER_CREATE;
     public static final String USER_GET = USER_CREATE + "/%s";
     public static final String USER_IMPERSONATE = USER_GET + "/impersonate";
     public static final String USER_UPDATE = USER_GET;

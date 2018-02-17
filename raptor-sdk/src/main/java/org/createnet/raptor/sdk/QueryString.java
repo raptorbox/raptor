@@ -27,7 +27,7 @@ public class QueryString {
     public class Pager {
         
         public Integer page;
-        public Integer limit;
+        public Integer size;
         public String sort;
         public String sortDir = "DESC";
         
@@ -36,8 +36,8 @@ public class QueryString {
             if (page != null) {
                 m.put("page", page);
             }
-            if (limit != null) {
-                m.put("limit", limit);
+            if (size != null) {
+                m.put("size", size);
             }
             if (sort != null) {
                 m.put("sort", sort + "," + sortDir);

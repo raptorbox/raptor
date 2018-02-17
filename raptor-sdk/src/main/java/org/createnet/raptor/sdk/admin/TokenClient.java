@@ -106,7 +106,7 @@ public class TokenClient extends AbstractClient {
         QueryString qs = new QueryString();
         qs.query.add("userId", userUuid);
         qs.pager.page = page;
-        qs.pager.limit = limit;
+        qs.pager.size = limit;
         JsonNode node = getClient().get(Routes.TOKEN_LIST + qs.toString());
         return getMapper().convertValue(node, new TypeReference<PageResponse<Token>>() {});
     }

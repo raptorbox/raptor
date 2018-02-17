@@ -54,7 +54,7 @@ public class RoleClient extends AbstractClient {
         QueryString qs = new QueryString();
         qs.query.add("userId", userUuid);
         qs.pager.page = page;
-        qs.pager.limit = limit;
+        qs.pager.size = limit;
         return list(qs);
     }
 

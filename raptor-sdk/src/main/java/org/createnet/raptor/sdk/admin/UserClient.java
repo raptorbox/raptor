@@ -16,16 +16,22 @@
 package org.createnet.raptor.sdk.admin;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.createnet.raptor.models.acl.EntityType;
 import org.createnet.raptor.models.acl.Operation;
 import org.createnet.raptor.models.app.App;
 import org.createnet.raptor.models.auth.StaticGroup;
 import org.createnet.raptor.models.auth.Role;
 import org.createnet.raptor.sdk.AbstractClient;
+import org.createnet.raptor.sdk.PageResponse;
+import org.createnet.raptor.sdk.QueryString;
 import org.createnet.raptor.sdk.Raptor;
 
 import org.createnet.raptor.models.auth.User;
@@ -379,6 +385,25 @@ public class UserClient extends AbstractClient {
         user.setEmail(email);
         user.setRoles(groups);
         return create(user);
+    }
+    
+    /**
+     * Returns a list of user in paging.
+     * If search criteria passed, it will return the user that fullfil the search criteria
+     *
+     * @param username
+     * @return
+     */
+    public PageResponse<User> list(Map<String, Object> searchQuery, Map<String, Object> page) {
+    	QueryString qs = new QueryString();
+        qs.pager.page = (Integer) page.get("page");
+        qs.pager.size = (Integer) page.get("size");
+        for(Entry<String, Object> entry: searchQuery.entrySet()) {
+        	qs.query.add(entry.getKey(), entry.getValue());
+        }
+    	JsonNode node = getClient().get(String.format(Routes.USER_LIST) + qs.toString());
+    	PageResponse<User> pageResponse = getMapper().convertValue(node, new TypeReference<PageResponse<User>>() {});
+    	return pageResponse;
     }
 
 }
