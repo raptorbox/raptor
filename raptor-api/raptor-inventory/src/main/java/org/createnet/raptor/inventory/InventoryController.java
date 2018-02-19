@@ -106,10 +106,12 @@ public class InventoryController {
         if(userId != null) {
         	queryParams.put("userId", userId);
     	}
-        String[] params = queryString.split("&");
-        for(String p: params) {
-        	String[] q = p.split("=");
-        	queryParams.put(q[0], q[1]);
+        if(queryString != null && queryString != "") {
+	        String[] params = queryString.split("&");
+	        for(String p: params) {
+	        	String[] q = p.split("=");
+	        	queryParams.put(q[0], q[1]);
+	        }
         }
 
         DeviceQuery query = DeviceQuery.query(queryParams);
