@@ -256,7 +256,8 @@ public class InventoryController {
     public ResponseEntity<?> searchDevices(
             @AuthenticationPrincipal User currentUser,
             @RequestParam MultiValueMap<String, String> parameters, 
-            @RequestBody DeviceQuery query
+            @RequestBody DeviceQuery query,
+            Pageable page
     ) {
 
         if (query.isEmpty()) {
@@ -269,20 +270,21 @@ public class InventoryController {
         
         if(query.domain.getEquals() != null) {
         	App app = api.App().load(query.domain.getEquals());
-        	AppUser user = app.getUsers().stream().filter(d -> d.getId().equals(currentUser.getId())).findFirst().get();
-        	if(user != null) {
-        		List<String> roles = user.getRoles();
-        		if(roles.stream().filter(r -> r.equals("admin_user") || r.equals("admin") || r.equals("admin_app") || r.equals("read_user")).findFirst() != null) {
-        			query.userId(null);
-        		}
+        	if(!currentUser.isAdmin()) {
+        		AppUser user = app.getUsers().stream().filter(d -> d.getId().equals(currentUser.getId())).findFirst().get();
+            	if(user != null) {
+            		List<String> roles = user.getRoles();
+            		if(roles.stream().filter(r -> r.equals("admin_user") || r.equals("admin") || r.equals("admin_app") || r.equals("read_user")).findFirst() != null) {
+            			query.userId(null);
+            		}
+            	}
         	}
         }
 
         DeviceQueryBuilder qb = new DeviceQueryBuilder(query);
         Predicate predicate = qb.getPredicate();
-        Pageable paging = qb.getPaging();
 
-        Page<Device> pagedList = deviceService.search(predicate, paging);
+        Page<Device> pagedList = deviceService.search(predicate, page);
 
         return ResponseEntity.ok(pagedList);
     }
