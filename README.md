@@ -14,11 +14,11 @@ It uses `node-red` to enable rapid decision logic based on data and effective ac
 
 ## Setup
 
-Learn here how it is easy and fast to [setup a local instance](https://raptorbox.github.io/documentation/)
+Learn here how it is easy and fast to [setup a local instance](https://docs.raptorbox.eu/pages/documentation/getting-started.html)
 
 ## 5 minute tutorial
 
-See our tutorials to [kick-start your project](https://raptorbox.github.io/documentation/tutorials/getting-started) to control and stream data from your devices
+See our tutorials to [kick-start your project](https://docs.raptorbox.eu/) to control and stream data from your devices
 
 ## Documentation
 
