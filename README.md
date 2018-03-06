@@ -22,7 +22,7 @@ See our tutorials to [kick-start your project](https://raptorbox.github.io/docum
 
 ## Documentation
 
-You can have a look to the [documentation hub](http://raptorbox.github.io)
+You can have a look to the [documentation hub](https://docs.raptorbox.eu/)
 
 ## Credits
 
