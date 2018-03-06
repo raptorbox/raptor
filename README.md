@@ -50,7 +50,7 @@ For public-facing services, ensure to update the default passwords in config/rap
 A quick tutorial can be downloaded from [here](https://github.com/raptorbox/raptor-tutorial) to control and stream data from your devices.
 
 # Documentation
-You can have a look to the [documentation hub](http://raptorbox.github.io)
+You can have a look to the [documentation hub](https://docs.raptorbox.eu/)
 
 # Credits
 Raptor is a project by the OpenIoT area of FBK/CREATE-NET in the wonderful Trentino, Italy.
