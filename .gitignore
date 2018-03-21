@@ -5,6 +5,7 @@
 nb*
 /tmp
 /data
+/data.*
 /*/target
 /target
 *.log

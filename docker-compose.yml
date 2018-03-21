@@ -57,6 +57,17 @@ services:
       options:
         max-size: 1024m
 
+  workflow:
+    image: raptorbox/workflow:v5
+    depends_on:
+      - auth
+    networks:
+      - raptor_net
+    logging:
+      driver: json-file
+      options:
+        max-size: 1024m
+
   ui:
     image: raptorbox/raptor-ui:v5
     networks:
