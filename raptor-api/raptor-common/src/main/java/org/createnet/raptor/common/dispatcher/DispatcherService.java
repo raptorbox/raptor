@@ -207,7 +207,12 @@ public class DispatcherService {
      */
     public void notifyDataEvent(Stream stream, RecordSet record) {
 
-        StreamPayload payload = new StreamPayload(stream, Operation.push, record);
+    	RecordSet r = new RecordSet(record.getChannels());
+    	r.userId(record.userId());
+    	r.deviceId(record.deviceId());
+    	r.streamId(record.streamId());
+    	r.timestamp(record.getTimestamp());
+        StreamPayload payload = new StreamPayload(stream, Operation.push, r);
 
         notifyEvent(getStreamTopic(stream), payload);
         notifyEvent(getEventsTopic(stream), payload);

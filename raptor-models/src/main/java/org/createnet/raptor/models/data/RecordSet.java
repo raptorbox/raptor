@@ -64,7 +64,7 @@ public class RecordSet {
 
     @Indexed
     @JsonProperty
-    final protected Map<String, Object> channels = new HashMap();
+    final protected Map<String, Object> channels = new HashMap<>();
 
     @Indexed
     @JsonProperty

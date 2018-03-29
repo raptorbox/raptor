@@ -19,6 +19,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+
+import java.util.List;
+import java.util.Map;
+
+import org.createnet.raptor.action.invokeaction.InvokeAction;
 import org.createnet.raptor.common.client.ApiClientService;
 import org.createnet.raptor.models.auth.User;
 import org.createnet.raptor.models.data.ActionStatus;
@@ -131,6 +136,12 @@ public class ActionStatusController {
         Action action = device.action(actionId);
         if (action == null) {
             return JsonErrorResponse.notFound("Action not found");
+        }
+        
+        Map<String, Object> properties = device.getProperties();
+        if(properties.get("lwEUI") != null) {
+        	String lwEUI = properties.get("lwEUI").toString();
+        	InvokeAction.invoke(lwEUI, actionId, status);
         }
 
         ActionStatus actionStatus = new ActionStatus(action, status);
