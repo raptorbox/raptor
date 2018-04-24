@@ -23,6 +23,8 @@ import io.swagger.annotations.ApiResponses;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.createnet.raptor.action.invokeaction.InvokeAction;
 import org.createnet.raptor.common.client.ApiClientService;
 import org.createnet.raptor.models.auth.User;
@@ -30,6 +32,8 @@ import org.createnet.raptor.models.data.ActionStatus;
 import org.createnet.raptor.models.objects.Action;
 import org.createnet.raptor.models.objects.Device;
 import org.createnet.raptor.models.response.JsonErrorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +59,8 @@ import org.springframework.web.bind.annotation.RestController;
 })
 @Api(tags = {"Action"})
 public class ActionStatusController {
+	
+	protected final Logger log = LoggerFactory.getLogger(ActionStatusController.class);
 
     @Autowired
     private ActionStatusService actionStatusService;
@@ -82,15 +88,18 @@ public class ActionStatusController {
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
             @PathVariable("actionId") String actionId,
-            @RequestBody String status
+            @RequestBody String status, HttpServletRequest request
     ) {
 
         Device device = raptor.Inventory().load(deviceId);
-
+        
         Action action = device.action(actionId);
         if (action == null) {
             return JsonErrorResponse.notFound("Action not found");
         }
+        
+        String url = request.getScheme() + "://" + request.getServerName();
+        sendAction(url, device, actionId, status);
 
         ActionStatus actionStatus;
         if (status != null && !status.isEmpty()) {
@@ -128,7 +137,7 @@ public class ActionStatusController {
             @AuthenticationPrincipal User currentUser,
             @PathVariable("deviceId") String deviceId,
             @PathVariable("actionId") String actionId,
-            @RequestBody String status
+            @RequestBody String status, HttpServletRequest request
     ) {
 
         Device device = raptor.Inventory().load(deviceId);
@@ -138,11 +147,8 @@ public class ActionStatusController {
             return JsonErrorResponse.notFound("Action not found");
         }
         
-        Map<String, Object> properties = device.getProperties();
-        if(properties.get("lwEUI") != null) {
-        	String lwEUI = properties.get("lwEUI").toString();
-        	InvokeAction.invoke(lwEUI, actionId, status);
-        }
+        String url = request.getScheme() + "://" + request.getServerName();
+        sendAction(url, device, actionId, status);
 
         ActionStatus actionStatus = new ActionStatus(action, status);
         actionStatusService.save(actionStatus);
@@ -252,6 +258,18 @@ public class ActionStatusController {
         actionStatusService.delete(status);
 
         return ResponseEntity.accepted().build();
+    }
+    
+    private void sendAction(String url, Device device, String actionId, String status) {
+    	log.debug("Invoke action {} request url", url);
+        
+        Map<String, Object> properties = device.getProperties();
+        log.debug("Invoke action {}", properties.get("lwEUI"));
+        if(properties.get("lwEUI") != null) {
+        	String lwEUI = properties.get("lwEUI").toString();
+        	log.debug("Invoke action {}, {}, {}", lwEUI, actionId, status);
+        	InvokeAction.invoke(url, lwEUI, actionId, status);
+        }
     }
 
 }
