@@ -14,7 +14,7 @@ fi
 if hash git 2>/dev/null; then
   echo "GIT found"
 else
-  echo "GIT is missing, exiting. Install with eg. `apt-get install git`"
+  echo "GIT is missing, exiting. Install with eg. `sudo apt-get install git -y`"
   exit 1
 fi
 
@@ -66,6 +66,8 @@ if [ ! -e "/opt/raptor" ]; then
   git clone https://github.com/raptorbox/raptor /opt/raptor
 fi
 
+echo "127.0.0.1  raptor.local" | sudo tee -a /etc/hosts
+
 cd /opt/raptor
 git pull origin master
 
@@ -79,5 +81,7 @@ ln -s `pwd`/scripts/raptor-cli.sh /usr/bin/raptor
 
 echo "Install completed!"
 echo "run `sudo raptor up -d` to start Raptor"
+
+# x-www-browser http://raptor.local
 
 exit 0
