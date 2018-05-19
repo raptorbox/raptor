@@ -79,8 +79,12 @@ fi
 chmod +x scripts/raptor-cli.sh
 ln -s `pwd`/scripts/raptor-cli.sh /usr/bin/raptor
 
+sudo raptor up -d mongo
+
 echo "Install completed!"
 echo "run `sudo raptor up -d` to start Raptor"
+
+sudo raptor kill app && sudo raptor up -d
 
 # x-www-browser http://raptor.local
 
