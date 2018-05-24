@@ -1,0 +1,133 @@
+version: "2"
+
+networks:
+  raptor_net:
+    driver: bridge
+  redzilla:
+    driver: bridg
+
+services:
+
+  api:
+    image: raptorbox/standalone:v5
+    volumes:
+      - ./config:/etc/raptor
+      - ./data:/data
+    networks:
+      - raptor_net
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  broker:
+    image: raptorbox/broker:v5
+    ports:
+      - 1883:1883
+      - 8880:8880
+    depends_on:
+      - mongo
+    networks:
+      - raptor_net
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  auth:
+    image: raptorbox/auth:v5
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - raptor_net
+    logging:
+      driver: json-file
+      options:
+        max-size: 1024m
+
+  app:
+    image: raptorbox/app:v5
+    depends_on:
+      - mongo
+      - redis
+      - auth
+    networks:
+      - raptor_net
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+
+  ui:
+    image: raptorbox/raptor-ui:v5-no-actuation
+    networks:
+      - raptor_net
+
+  mongo:
+    image: mongo:3
+    volumes:
+      - ./data/mongodb:/data/db
+    command: --smallfiles --setParameter failIndexKeyTooLong=false
+    networks:
+      - raptor_net
+
+  redis:
+    image: redis
+    networks:
+      - raptor_net
+    # restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    hostname: redis
+
+  workflow:
+    image: raptorbox/workflow:latest
+    networks:
+      - raptor_net
+    depends_on:
+      - auth
+    volumes:
+      - ./config/workflow.json:/app/config/workflow.json
+    environment:
+      LOG_LEVEL: debug
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+
+  redzilla:
+    image: opny/redzilla:latest
+    networks:
+      - redzilla
+      - raptor_net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/app/data
+      - ./config:/app/config
+    ports:
+      - 3000:3000
+    environment:
+      REDZILLA_IMAGENAME: raptorbox/node-red
+      REDZILLA_NETWORK: raptorworkflowmanager_redzilla
+      REDZILLA_DOMAIN: workflow.raptor
+      REDZILLA_ENVPREFIX: NODERED
+      NODERED_CONFIG: ./config/nodered.json
+      NODERED_RAPTOR_URL: http://raptor.local
+      NODERED_RAPTOR_USER: service
+      NODERED_RAPTOR_PASS: s3rvice
+      REDZILLA_LOGLEVEL: debug
+
+  apigateway:
+    image: nginx
+    volumes:
+      - ./config/nginx.standalone.workflow.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 8080:8080
+      - 80:80
+    depends_on:
+        - ui
+        - broker
+        - api
+    command: nginx -g 'daemon off;'
+    networks:
+      - raptor_net

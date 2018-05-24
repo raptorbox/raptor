@@ -1,0 +1,11 @@
+{
+    "listen": "1880",
+    "logLevel": "debug",
+    "tokenTTL": 2000,
+    "datadir": "./data",
+    "raptor": {
+        "url": "http://apigateway",
+        "username": "service",
+        "password": "s3rvice"
+    }
+}

@@ -74,8 +74,13 @@ if [ -L "/usr/bin/raptor" ]; then
   rm /usr/bin/raptor
 fi
 
-chmod +x scripts/raptor-cli.sh
-ln -s `pwd`/scripts/raptor-cli.sh /usr/bin/raptor
+if [ $# -eq 0 ]; then
+  chmod +x scripts/raptor-cli.sh
+  ln -s `pwd`/scripts/raptor-cli.sh /usr/bin/raptor
+elif [ "$1" = "workflow" ]; then
+  chmod +x scripts/raptor-cli-workflow.sh
+  ln -s `pwd`/scripts/raptor-cli-workflow.sh /usr/bin/raptor
+fi
 
 echo "Install completed!"
 echo "run `sudo raptor up -d` to start Raptor"

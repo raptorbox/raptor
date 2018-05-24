@@ -1,0 +1,13 @@
+{
+    "logLevel": "debug",
+    "raptor": {
+        "url": "http://apigateway",
+        "tokenName": "service-default",
+        "username": "service",
+        "password": "s3rvice"
+    },
+    "redzilla": {
+        "url": "http://workflow.raptor:8080"
+    },
+    "port": 7475
+}
