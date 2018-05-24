@@ -68,6 +68,7 @@ fi
 
 cd /opt/raptor
 git pull origin master
+git checkout v5
 
 # fetch and install raptor-cli
 if [ -L "/usr/bin/raptor" ]; then
