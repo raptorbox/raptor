@@ -4,7 +4,7 @@ networks:
   raptor_net:
     driver: bridge
   redzilla:
-    driver: bridg
+    driver: bridge
 
 services:
 
